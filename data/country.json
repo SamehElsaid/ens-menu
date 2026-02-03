@@ -1,0 +1,1724 @@
+[
+	{
+		"id": "1",
+		"sortname": "AF",
+		"name_en": "Afghanistan",
+		"name_ar": "أفغانستان",
+		"phonecode": "93"
+	},
+	{
+		"id": "2",
+		"sortname": "AL",
+		"name_en": "Albania",
+		"name_ar": "ألبانيا",
+		"phonecode": "355"
+	},
+	{
+		"id": "3",
+		"sortname": "DZ",
+		"name_en": "Algeria",
+		"name_ar": "الجزائر",
+		"phonecode": "213"
+	},
+	{
+		"id": "4",
+		"sortname": "AS",
+		"name_en": "American Samoa",
+		"name_ar": "ساموا الأمريكية",
+		"phonecode": "1684"
+	},
+	{
+		"id": "5",
+		"sortname": "AD",
+		"name_en": "Andorra",
+		"name_ar": "أندورا",
+		"phonecode": "376"
+	},
+	{
+		"id": "6",
+		"sortname": "AO",
+		"name_en": "Angola",
+		"name_ar": "أنغولا",
+		"phonecode": "244"
+	},
+	{
+		"id": "7",
+		"sortname": "AI",
+		"name_en": "Anguilla",
+		"name_ar": "أنغويلا",
+		"phonecode": "1264"
+	},
+	{
+		"id": "8",
+		"sortname": "AQ",
+		"name_en": "Antarctica",
+		"name_ar": "أنتاركتيكا",
+		"phonecode": "0"
+	},
+	{
+		"id": "9",
+		"sortname": "AG",
+		"name_en": "Antigua And Barbuda",
+		"name_ar": "أنتيغوا وبربودا",
+		"phonecode": "1268"
+	},
+	{
+		"id": "10",
+		"sortname": "AR",
+		"name_en": "Argentina",
+		"name_ar": "الأرجنتين",
+		"phonecode": "54"
+	},
+	{
+		"id": "11",
+		"sortname": "AM",
+		"name_en": "Armenia",
+		"name_ar": "أرمينيا",
+		"phonecode": "374"
+	},
+	{
+		"id": "12",
+		"sortname": "AW",
+		"name_en": "Aruba",
+		"name_ar": "أروبا",
+		"phonecode": "297"
+	},
+	{
+		"id": "13",
+		"sortname": "AU",
+		"name_en": "Australia",
+		"name_ar": "أستراليا",
+		"phonecode": "61"
+	},
+	{
+		"id": "14",
+		"sortname": "AT",
+		"name_en": "Austria",
+		"name_ar": "النمسا",
+		"phonecode": "43"
+	},
+	{
+		"id": "15",
+		"sortname": "AZ",
+		"name_en": "Azerbaijan",
+		"name_ar": "أذربيجان",
+		"phonecode": "994"
+	},
+	{
+		"id": "16",
+		"sortname": "BS",
+		"name_en": "Bahamas The",
+		"name_ar": "جزر البهاما",
+		"phonecode": "1242"
+	},
+	{
+		"id": "17",
+		"sortname": "BH",
+		"name_en": "Bahrain",
+		"name_ar": "البحرين",
+		"phonecode": "973"
+	},
+	{
+		"id": "18",
+		"sortname": "BD",
+		"name_en": "Bangladesh",
+		"name_ar": "بنغلاديش",
+		"phonecode": "880"
+	},
+	{
+		"id": "19",
+		"sortname": "BB",
+		"name_en": "Barbados",
+		"name_ar": "بربادوس",
+		"phonecode": "1246"
+	},
+	{
+		"id": "20",
+		"sortname": "BY",
+		"name_en": "Belarus",
+		"name_ar": "بيلاروسيا",
+		"phonecode": "375"
+	},
+	{
+		"id": "21",
+		"sortname": "BE",
+		"name_en": "Belgium",
+		"name_ar": "بلجيكا",
+		"phonecode": "32"
+	},
+	{
+		"id": "22",
+		"sortname": "BZ",
+		"name_en": "Belize",
+		"name_ar": "بليز",
+		"phonecode": "501"
+	},
+	{
+		"id": "23",
+		"sortname": "BJ",
+		"name_en": "Benin",
+		"name_ar": "بنين",
+		"phonecode": "229"
+	},
+	{
+		"id": "24",
+		"sortname": "BM",
+		"name_en": "Bermuda",
+		"name_ar": "برمودا",
+		"phonecode": "1441"
+	},
+	{
+		"id": "25",
+		"sortname": "BT",
+		"name_en": "Bhutan",
+		"name_ar": "بوتان",
+		"phonecode": "975"
+	},
+	{
+		"id": "26",
+		"sortname": "BO",
+		"name_en": "Bolivia",
+		"name_ar": "بوليفيا",
+		"phonecode": "591"
+	},
+	{
+		"id": "27",
+		"sortname": "BA",
+		"name_en": "Bosnia and Herzegovina",
+		"name_ar": "البوسنة والهرسك",
+		"phonecode": "387"
+	},
+	{
+		"id": "28",
+		"sortname": "BW",
+		"name_en": "Botswana",
+		"name_ar": "بوتسوانا",
+		"phonecode": "267"
+	},
+	{
+		"id": "29",
+		"sortname": "BV",
+		"name_en": "Bouvet Island",
+		"name_ar": "جزيرة بوفيت",
+		"phonecode": "0"
+	},
+	{
+		"id": "30",
+		"sortname": "BR",
+		"name_en": "Brazil",
+		"name_ar": "البرازيل",
+		"phonecode": "55"
+	},
+	{
+		"id": "31",
+		"sortname": "IO",
+		"name_en": "British Indian Ocean Territory",
+		"name_ar": "إقليم المحيط الهندي البريطاني",
+		"phonecode": "246"
+	},
+	{
+		"id": "32",
+		"sortname": "BN",
+		"name_en": "Brunei",
+		"name_ar": "بروناي",
+		"phonecode": "673"
+	},
+	{
+		"id": "33",
+		"sortname": "BG",
+		"name_en": "Bulgaria",
+		"name_ar": "بلغاريا",
+		"phonecode": "359"
+	},
+	{
+		"id": "34",
+		"sortname": "BF",
+		"name_en": "Burkina Faso",
+		"name_ar": "بوركينا فاسو",
+		"phonecode": "226"
+	},
+	{
+		"id": "35",
+		"sortname": "BI",
+		"name_en": "Burundi",
+		"name_ar": "بوروندي",
+		"phonecode": "257"
+	},
+	{
+		"id": "36",
+		"sortname": "KH",
+		"name_en": "Cambodia",
+		"name_ar": "كمبوديا",
+		"phonecode": "855"
+	},
+	{
+		"id": "37",
+		"sortname": "CM",
+		"name_en": "Cameroon",
+		"name_ar": "الكاميرون",
+		"phonecode": "237"
+	},
+	{
+		"id": "38",
+		"sortname": "CA",
+		"name_en": "Canada",
+		"name_ar": "كندا",
+		"phonecode": "1"
+	},
+	{
+		"id": "39",
+		"sortname": "CV",
+		"name_en": "Cape Verde",
+		"name_ar": "الرأس الأخضر",
+		"phonecode": "238"
+	},
+	{
+		"id": "40",
+		"sortname": "KY",
+		"name_en": "Cayman Islands",
+		"name_ar": "جزر كايمان",
+		"phonecode": "1345"
+	},
+	{
+		"id": "41",
+		"sortname": "CF",
+		"name_en": "Central African Republic",
+		"name_ar": "جمهورية أفريقيا الوسطى",
+		"phonecode": "236"
+	},
+	{
+		"id": "42",
+		"sortname": "TD",
+		"name_en": "Chad",
+		"name_ar": "تشاد",
+		"phonecode": "235"
+	},
+	{
+		"id": "43",
+		"sortname": "CL",
+		"name_en": "Chile",
+		"name_ar": "تشيلي",
+		"phonecode": "56"
+	},
+	{
+		"id": "44",
+		"sortname": "CN",
+		"name_en": "China",
+		"name_ar": "الصين",
+		"phonecode": "86"
+	},
+	{
+		"id": "45",
+		"sortname": "CX",
+		"name_en": "Christmas Island",
+		"name_ar": "جزيرة الكريسماس",
+		"phonecode": "61"
+	},
+	{
+		"id": "46",
+		"sortname": "CC",
+		"name_en": "Cocos (Keeling) Islands",
+		"name_ar": "جزر كوكوس (كيلينغ)",
+		"phonecode": "672"
+	},
+	{
+		"id": "47",
+		"sortname": "CO",
+		"name_en": "Colombia",
+		"name_ar": "كولومبيا",
+		"phonecode": "57"
+	},
+	{
+		"id": "48",
+		"sortname": "KM",
+		"name_en": "Comoros",
+		"name_ar": "جزر القمر",
+		"phonecode": "269"
+	},
+	{
+		"id": "49",
+		"sortname": "CG",
+		"name_en": "Congo",
+		"name_ar": "الكونغو",
+		"phonecode": "242"
+	},
+	{
+		"id": "50",
+		"sortname": "CD",
+		"name_en": "Congo The Democratic Republic Of The",
+		"name_ar": "جمهورية الكونغو الديمقراطية",
+		"phonecode": "242"
+	},
+	{
+		"id": "51",
+		"sortname": "CK",
+		"name_en": "Cook Islands",
+		"name_ar": "جزر كوك",
+		"phonecode": "682"
+	},
+	{
+		"id": "52",
+		"sortname": "CR",
+		"name_en": "Costa Rica",
+		"name_ar": "كوستاريكا",
+		"phonecode": "506"
+	},
+	{
+		"id": "53",
+		"sortname": "CI",
+		"name_en": "Cote D''Ivoire (Ivory Coast)",
+		"name_ar": "ساحل العاج",
+		"phonecode": "225"
+	},
+	{
+		"id": "54",
+		"sortname": "HR",
+		"name_en": "Croatia (Hrvatska)",
+		"name_ar": "كرواتيا",
+		"phonecode": "385"
+	},
+	{
+		"id": "55",
+		"sortname": "CU",
+		"name_en": "Cuba",
+		"name_ar": "كوبا",
+		"phonecode": "53"
+	},
+	{
+		"id": "56",
+		"sortname": "CY",
+		"name_en": "Cyprus",
+		"name_ar": "قبرص",
+		"phonecode": "357"
+	},
+	{
+		"id": "57",
+		"sortname": "CZ",
+		"name_en": "Czech Republic",
+		"name_ar": "جمهورية التشيك",
+		"phonecode": "420"
+	},
+	{
+		"id": "58",
+		"sortname": "DK",
+		"name_en": "Denmark",
+		"name_ar": "الدنمارك",
+		"phonecode": "45"
+	},
+	{
+		"id": "59",
+		"sortname": "DJ",
+		"name_en": "Djibouti",
+		"name_ar": "جيبوتي",
+		"phonecode": "253"
+	},
+	{
+		"id": "60",
+		"sortname": "DM",
+		"name_en": "Dominica",
+		"name_ar": "دومينيكا",
+		"phonecode": "1767"
+	},
+	{
+		"id": "61",
+		"sortname": "DO",
+		"name_en": "Dominican Republic",
+		"name_ar": "جمهورية الدومينيكان",
+		"phonecode": "1809"
+	},
+	{
+		"id": "62",
+		"sortname": "TP",
+		"name_en": "East Timor",
+		"name_ar": "تيمور الشرقية",
+		"phonecode": "670"
+	},
+	{
+		"id": "63",
+		"sortname": "EC",
+		"name_en": "Ecuador",
+		"name_ar": "الإكوادور",
+		"phonecode": "593"
+	},
+	{
+		"id": "64",
+		"sortname": "EG",
+		"name_en": "Egypt",
+		"name_ar": "مصر",
+		"phonecode": "20"
+	},
+	{
+		"id": "65",
+		"sortname": "SV",
+		"name_en": "El Salvador",
+		"name_ar": "السلفادور",
+		"phonecode": "503"
+	},
+	{
+		"id": "66",
+		"sortname": "GQ",
+		"name_en": "Equatorial Guinea",
+		"name_ar": "غينيا الاستوائية",
+		"phonecode": "240"
+	},
+	{
+		"id": "67",
+		"sortname": "ER",
+		"name_en": "Eritrea",
+		"name_ar": "إريتريا",
+		"phonecode": "291"
+	},
+	{
+		"id": "68",
+		"sortname": "EE",
+		"name_en": "Estonia",
+		"name_ar": "إستونيا",
+		"phonecode": "372"
+	},
+	{
+		"id": "69",
+		"sortname": "ET",
+		"name_en": "Ethiopia",
+		"name_ar": "إثيوبيا",
+		"phonecode": "251"
+	},
+	{
+		"id": "70",
+		"sortname": "XA",
+		"name_en": "External Territories of Australia",
+		"name_ar": "الأقاليم الخارجية لأستراليا",
+		"phonecode": "61"
+	},
+	{
+		"id": "71",
+		"sortname": "FK",
+		"name_en": "Falkland Islands",
+		"name_ar": "جزر فوكلاند",
+		"phonecode": "500"
+	},
+	{
+		"id": "72",
+		"sortname": "FO",
+		"name_en": "Faroe Islands",
+		"name_ar": "جزر فارو",
+		"phonecode": "298"
+	},
+	{
+		"id": "73",
+		"sortname": "FJ",
+		"name_en": "Fiji Islands",
+		"name_ar": "جزر فيجي",
+		"phonecode": "679"
+	},
+	{
+		"id": "74",
+		"sortname": "FI",
+		"name_en": "Finland",
+		"name_ar": "فنلندا",
+		"phonecode": "358"
+	},
+	{
+		"id": "75",
+		"sortname": "FR",
+		"name_en": "France",
+		"name_ar": "فرنسا",
+		"phonecode": "33"
+	},
+	{
+		"id": "76",
+		"sortname": "GF",
+		"name_en": "French Guiana",
+		"name_ar": "غويانا الفرنسية",
+		"phonecode": "594"
+	},
+	{
+		"id": "77",
+		"sortname": "PF",
+		"name_en": "French Polynesia",
+		"name_ar": "بولينيزيا الفرنسية",
+		"phonecode": "689"
+	},
+	{
+		"id": "78",
+		"sortname": "TF",
+		"name_en": "French Southern Territories",
+		"name_ar": "المقاطعات الجنوبية الفرنسية",
+		"phonecode": "0"
+	},
+	{
+		"id": "79",
+		"sortname": "GA",
+		"name_en": "Gabon",
+		"name_ar": "الغابون",
+		"phonecode": "241"
+	},
+	{
+		"id": "80",
+		"sortname": "GM",
+		"name_en": "Gambia The",
+		"name_ar": "غامبيا",
+		"phonecode": "220"
+	},
+	{
+		"id": "81",
+		"sortname": "GE",
+		"name_en": "Georgia",
+		"name_ar": "جورجيا",
+		"phonecode": "995"
+	},
+	{
+		"id": "82",
+		"sortname": "DE",
+		"name_en": "Germany",
+		"name_ar": "ألمانيا",
+		"phonecode": "49"
+	},
+	{
+		"id": "83",
+		"sortname": "GH",
+		"name_en": "Ghana",
+		"name_ar": "غانا",
+		"phonecode": "233"
+	},
+	{
+		"id": "84",
+		"sortname": "GI",
+		"name_en": "Gibraltar",
+		"name_ar": "جبل طارق",
+		"phonecode": "350"
+	},
+	{
+		"id": "85",
+		"sortname": "GR",
+		"name_en": "Greece",
+		"name_ar": "اليونان",
+		"phonecode": "30"
+	},
+	{
+		"id": "86",
+		"sortname": "GL",
+		"name_en": "Greenland",
+		"name_ar": "جرينلاند",
+		"phonecode": "299"
+	},
+	{
+		"id": "87",
+		"sortname": "GD",
+		"name_en": "Grenada",
+		"name_ar": "غرينادا",
+		"phonecode": "1473"
+	},
+	{
+		"id": "88",
+		"sortname": "GP",
+		"name_en": "Guadeloupe",
+		"name_ar": "جوادلوب",
+		"phonecode": "590"
+	},
+	{
+		"id": "89",
+		"sortname": "GU",
+		"name_en": "Guam",
+		"name_ar": "غوام",
+		"phonecode": "1671"
+	},
+	{
+		"id": "90",
+		"sortname": "GT",
+		"name_en": "Guatemala",
+		"name_ar": "غواتيمالا",
+		"phonecode": "502"
+	},
+	{
+		"id": "91",
+		"sortname": "XU",
+		"name_en": "Guernsey and Alderney",
+		"name_ar": "غيرنزي وألدرني",
+		"phonecode": "44"
+	},
+	{
+		"id": "92",
+		"sortname": "GN",
+		"name_en": "Guinea",
+		"name_ar": "غينيا",
+		"phonecode": "224"
+	},
+	{
+		"id": "93",
+		"sortname": "GW",
+		"name_en": "Guinea-Bissau",
+		"name_ar": "غينيا بيساو",
+		"phonecode": "245"
+	},
+	{
+		"id": "94",
+		"sortname": "GY",
+		"name_en": "Guyana",
+		"name_ar": "غيانا",
+		"phonecode": "592"
+	},
+	{
+		"id": "95",
+		"sortname": "HT",
+		"name_en": "Haiti",
+		"name_ar": "هايتي",
+		"phonecode": "509"
+	},
+	{
+		"id": "96",
+		"sortname": "HM",
+		"name_en": "Heard and McDonald Islands",
+		"name_ar": "جزيرة هيرد وجزر ماكدونالد",
+		"phonecode": "0"
+	},
+	{
+		"id": "97",
+		"sortname": "HN",
+		"name_en": "Honduras",
+		"name_ar": "هندوراس",
+		"phonecode": "504"
+	},
+	{
+		"id": "98",
+		"sortname": "HK",
+		"name_en": "Hong Kong S.A.R.",
+		"name_ar": "هونغ كونغ",
+		"phonecode": "852"
+	},
+	{
+		"id": "99",
+		"sortname": "HU",
+		"name_en": "Hungary",
+		"name_ar": "المجر",
+		"phonecode": "36"
+	},
+	{
+		"id": "100",
+		"sortname": "IS",
+		"name_en": "Iceland",
+		"name_ar": "آيسلندا",
+		"phonecode": "354"
+	},
+	{
+		"id": "101",
+		"sortname": "IN",
+		"name_en": "India",
+		"name_ar": "الهند",
+		"phonecode": "91"
+	},
+	{
+		"id": "102",
+		"sortname": "ID",
+		"name_en": "Indonesia",
+		"name_ar": "إندونيسيا",
+		"phonecode": "62"
+	},
+	{
+		"id": "103",
+		"sortname": "IR",
+		"name_en": "Iran",
+		"name_ar": "إيران",
+		"phonecode": "98"
+	},
+	{
+		"id": "104",
+		"sortname": "IQ",
+		"name_en": "Iraq",
+		"name_ar": "العراق",
+		"phonecode": "964"
+	},
+	{
+		"id": "105",
+		"sortname": "IE",
+		"name_en": "Ireland",
+		"name_ar": "أيرلندا",
+		"phonecode": "353"
+	},
+	{
+		"id": "106",
+		"sortname": "IL",
+		"name_en": "Israel",
+		"name_ar": "إسرائيل",
+		"phonecode": "972"
+	},
+	{
+		"id": "107",
+		"sortname": "IT",
+		"name_en": "Italy",
+		"name_ar": "إيطاليا",
+		"phonecode": "39"
+	},
+	{
+		"id": "108",
+		"sortname": "JM",
+		"name_en": "Jamaica",
+		"name_ar": "جامايكا",
+		"phonecode": "1876"
+	},
+	{
+		"id": "109",
+		"sortname": "JP",
+		"name_en": "Japan",
+		"name_ar": "اليابان",
+		"phonecode": "81"
+	},
+	{
+		"id": "110",
+		"sortname": "XJ",
+		"name_en": "Jersey",
+		"name_ar": "جيرسي",
+		"phonecode": "44"
+	},
+	{
+		"id": "111",
+		"sortname": "JO",
+		"name_en": "Jordan",
+		"name_ar": "الأردن",
+		"phonecode": "962"
+	},
+	{
+		"id": "112",
+		"sortname": "KZ",
+		"name_en": "Kazakhstan",
+		"name_ar": "كازاخستان",
+		"phonecode": "7"
+	},
+	{
+		"id": "113",
+		"sortname": "KE",
+		"name_en": "Kenya",
+		"name_ar": "كينيا",
+		"phonecode": "254"
+	},
+	{
+		"id": "114",
+		"sortname": "KI",
+		"name_en": "Kiribati",
+		"name_ar": "كيريباتي",
+		"phonecode": "686"
+	},
+	{
+		"id": "115",
+		"sortname": "KP",
+		"name_en": "Korea North",
+		"name_ar": "كوريا الشمالية",
+		"phonecode": "850"
+	},
+	{
+		"id": "116",
+		"sortname": "KR",
+		"name_en": "Korea South",
+		"name_ar": "كوريا الجنوبية",
+		"phonecode": "82"
+	},
+	{
+		"id": "117",
+		"sortname": "KW",
+		"name_en": "Kuwait",
+		"name_ar": "الكويت",
+		"phonecode": "965"
+	},
+	{
+		"id": "118",
+		"sortname": "KG",
+		"name_en": "Kyrgyzstan",
+		"name_ar": "قيرغيزستان",
+		"phonecode": "996"
+	},
+	{
+		"id": "119",
+		"sortname": "LA",
+		"name_en": "Laos",
+		"name_ar": "لاوس",
+		"phonecode": "856"
+	},
+	{
+		"id": "120",
+		"sortname": "LV",
+		"name_en": "Latvia",
+		"name_ar": "لاتفيا",
+		"phonecode": "371"
+	},
+	{
+		"id": "121",
+		"sortname": "LB",
+		"name_en": "Lebanon",
+		"name_ar": "لبنان",
+		"phonecode": "961"
+	},
+	{
+		"id": "122",
+		"sortname": "LS",
+		"name_en": "Lesotho",
+		"name_ar": "ليسوتو",
+		"phonecode": "266"
+	},
+	{
+		"id": "123",
+		"sortname": "LR",
+		"name_en": "Liberia",
+		"name_ar": "ليبيريا",
+		"phonecode": "231"
+	},
+	{
+		"id": "124",
+		"sortname": "LY",
+		"name_en": "Libya",
+		"name_ar": "ليبيا",
+		"phonecode": "218"
+	},
+	{
+		"id": "125",
+		"sortname": "LI",
+		"name_en": "Liechtenstein",
+		"name_ar": "ليختنشتاين",
+		"phonecode": "423"
+	},
+	{
+		"id": "126",
+		"sortname": "LT",
+		"name_en": "Lithuania",
+		"name_ar": "ليتوانيا",
+		"phonecode": "370"
+	},
+	{
+		"id": "127",
+		"sortname": "LU",
+		"name_en": "Luxembourg",
+		"name_ar": "لوكسمبورغ",
+		"phonecode": "352"
+	},
+	{
+		"id": "128",
+		"sortname": "MO",
+		"name_en": "Macau S.A.R.",
+		"name_ar": "ماكاو",
+		"phonecode": "853"
+	},
+	{
+		"id": "129",
+		"sortname": "MK",
+		"name_en": "Macedonia",
+		"name_ar": "مقدونيا",
+		"phonecode": "389"
+	},
+	{
+		"id": "130",
+		"sortname": "MG",
+		"name_en": "Madagascar",
+		"name_ar": "مدغشقر",
+		"phonecode": "261"
+	},
+	{
+		"id": "131",
+		"sortname": "MW",
+		"name_en": "Malawi",
+		"name_ar": "ملاوي",
+		"phonecode": "265"
+	},
+	{
+		"id": "132",
+		"sortname": "MY",
+		"name_en": "Malaysia",
+		"name_ar": "ماليزيا",
+		"phonecode": "60"
+	},
+	{
+		"id": "133",
+		"sortname": "MV",
+		"name_en": "Maldives",
+		"name_ar": "جزر المالديف",
+		"phonecode": "960"
+	},
+	{
+		"id": "134",
+		"sortname": "ML",
+		"name_en": "Mali",
+		"name_ar": "مالي",
+		"phonecode": "223"
+	},
+	{
+		"id": "135",
+		"sortname": "MT",
+		"name_en": "Malta",
+		"name_ar": "مالطا",
+		"phonecode": "356"
+	},
+	{
+		"id": "136",
+		"sortname": "XM",
+		"name_en": "Man (Isle of)",
+		"name_ar": "جزيرة مان",
+		"phonecode": "44"
+	},
+	{
+		"id": "137",
+		"sortname": "MH",
+		"name_en": "Marshall Islands",
+		"name_ar": "جزر مارشال",
+		"phonecode": "692"
+	},
+	{
+		"id": "138",
+		"sortname": "MQ",
+		"name_en": "Martinique",
+		"name_ar": "مارتينيك",
+		"phonecode": "596"
+	},
+	{
+		"id": "139",
+		"sortname": "MR",
+		"name_en": "Mauritania",
+		"name_ar": "موريتانيا",
+		"phonecode": "222"
+	},
+	{
+		"id": "140",
+		"sortname": "MU",
+		"name_en": "Mauritius",
+		"name_ar": "موريشيوس",
+		"phonecode": "230"
+	},
+	{
+		"id": "141",
+		"sortname": "YT",
+		"name_en": "Mayotte",
+		"name_ar": "مايوت",
+		"phonecode": "269"
+	},
+	{
+		"id": "142",
+		"sortname": "MX",
+		"name_en": "Mexico",
+		"name_ar": "المكسيك",
+		"phonecode": "52"
+	},
+	{
+		"id": "143",
+		"sortname": "FM",
+		"name_en": "Micronesia",
+		"name_ar": "ميكرونيزيا",
+		"phonecode": "691"
+	},
+	{
+		"id": "144",
+		"sortname": "MD",
+		"name_en": "Moldova",
+		"name_ar": "مولدوفا",
+		"phonecode": "373"
+	},
+	{
+		"id": "145",
+		"sortname": "MC",
+		"name_en": "Monaco",
+		"name_ar": "موناكو",
+		"phonecode": "377"
+	},
+	{
+		"id": "146",
+		"sortname": "MN",
+		"name_en": "Mongolia",
+		"name_ar": "منغوليا",
+		"phonecode": "976"
+	},
+	{
+		"id": "147",
+		"sortname": "MS",
+		"name_en": "Montserrat",
+		"name_ar": "مونتسرات",
+		"phonecode": "1664"
+	},
+	{
+		"id": "148",
+		"sortname": "MA",
+		"name_en": "Morocco",
+		"name_ar": "المغرب",
+		"phonecode": "212"
+	},
+	{
+		"id": "149",
+		"sortname": "MZ",
+		"name_en": "Mozambique",
+		"name_ar": "موزمبيق",
+		"phonecode": "258"
+	},
+	{
+		"id": "150",
+		"sortname": "MM",
+		"name_en": "Myanmar",
+		"name_ar": "ميانمار",
+		"phonecode": "95"
+	},
+	{
+		"id": "151",
+		"sortname": "NA",
+		"name_en": "Namibia",
+		"name_ar": "ناميبيا",
+		"phonecode": "264"
+	},
+	{
+		"id": "152",
+		"sortname": "NR",
+		"name_en": "Nauru",
+		"name_ar": "ناورو",
+		"phonecode": "674"
+	},
+	{
+		"id": "153",
+		"sortname": "NP",
+		"name_en": "Nepal",
+		"name_ar": "نيبال",
+		"phonecode": "977"
+	},
+	{
+		"id": "154",
+		"sortname": "AN",
+		"name_en": "Netherlands Antilles",
+		"name_ar": "جزر الأنتيل الهولندية",
+		"phonecode": "599"
+	},
+	{
+		"id": "155",
+		"sortname": "NL",
+		"name_en": "Netherlands The",
+		"name_ar": "هولندا",
+		"phonecode": "31"
+	},
+	{
+		"id": "156",
+		"sortname": "NC",
+		"name_en": "New Caledonia",
+		"name_ar": "كاليدونيا الجديدة",
+		"phonecode": "687"
+	},
+	{
+		"id": "157",
+		"sortname": "NZ",
+		"name_en": "New Zealand",
+		"name_ar": "نيوزيلندا",
+		"phonecode": "64"
+	},
+	{
+		"id": "158",
+		"sortname": "NI",
+		"name_en": "Nicaragua",
+		"name_ar": "نيكاراغوا",
+		"phonecode": "505"
+	},
+	{
+		"id": "159",
+		"sortname": "NE",
+		"name_en": "Niger",
+		"name_ar": "النيجر",
+		"phonecode": "227"
+	},
+	{
+		"id": "160",
+		"sortname": "NG",
+		"name_en": "Nigeria",
+		"name_ar": "نيجيريا",
+		"phonecode": "234"
+	},
+	{
+		"id": "161",
+		"sortname": "NU",
+		"name_en": "Niue",
+		"name_ar": "نيوي",
+		"phonecode": "683"
+	},
+	{
+		"id": "162",
+		"sortname": "NF",
+		"name_en": "Norfolk Island",
+		"name_ar": "جزيرة نورفولك",
+		"phonecode": "672"
+	},
+	{
+		"id": "163",
+		"sortname": "MP",
+		"name_en": "Northern Mariana Islands",
+		"name_ar": "جزر ماريانا الشمالية",
+		"phonecode": "1670"
+	},
+	{
+		"id": "164",
+		"sortname": "NO",
+		"name_en": "Norway",
+		"name_ar": "النرويج",
+		"phonecode": "47"
+	},
+	{
+		"id": "165",
+		"sortname": "OM",
+		"name_en": "Oman",
+		"name_ar": "عمان",
+		"phonecode": "968"
+	},
+	{
+		"id": "166",
+		"sortname": "PK",
+		"name_en": "Pakistan",
+		"name_ar": "باكستان",
+		"phonecode": "92"
+	},
+	{
+		"id": "167",
+		"sortname": "PW",
+		"name_en": "Palau",
+		"name_ar": "بالاو",
+		"phonecode": "680"
+	},
+	{
+		"id": "168",
+		"sortname": "PS",
+		"name_en": "Palestinian Territory Occupied",
+		"name_ar": "الأراضي الفلسطينية المحتلة",
+		"phonecode": "970"
+	},
+	{
+		"id": "169",
+		"sortname": "PA",
+		"name_en": "Panama",
+		"name_ar": "بنما",
+		"phonecode": "507"
+	},
+	{
+		"id": "170",
+		"sortname": "PG",
+		"name_en": "Papua new Guinea",
+		"name_ar": "بابوا غينيا الجديدة",
+		"phonecode": "675"
+	},
+	{
+		"id": "171",
+		"sortname": "PY",
+		"name_en": "Paraguay",
+		"name_ar": "باراغواي",
+		"phonecode": "595"
+	},
+	{
+		"id": "172",
+		"sortname": "PE",
+		"name_en": "Peru",
+		"name_ar": "بيرو",
+		"phonecode": "51"
+	},
+	{
+		"id": "173",
+		"sortname": "PH",
+		"name_en": "Philippines",
+		"name_ar": "الفلبين",
+		"phonecode": "63"
+	},
+	{
+		"id": "174",
+		"sortname": "PN",
+		"name_en": "Pitcairn Island",
+		"name_ar": "جزيرة بيتكيرن",
+		"phonecode": "0"
+	},
+	{
+		"id": "175",
+		"sortname": "PL",
+		"name_en": "Poland",
+		"name_ar": "بولندا",
+		"phonecode": "48"
+	},
+	{
+		"id": "176",
+		"sortname": "PT",
+		"name_en": "Portugal",
+		"name_ar": "البرتغال",
+		"phonecode": "351"
+	},
+	{
+		"id": "177",
+		"sortname": "PR",
+		"name_en": "Puerto Rico",
+		"name_ar": "بورتوريكو",
+		"phonecode": "1787"
+	},
+	{
+		"id": "178",
+		"sortname": "QA",
+		"name_en": "Qatar",
+		"name_ar": "قطر",
+		"phonecode": "974"
+	},
+	{
+		"id": "179",
+		"sortname": "RE",
+		"name_en": "Reunion",
+		"name_ar": "ريونيون",
+		"phonecode": "262"
+	},
+	{
+		"id": "180",
+		"sortname": "RO",
+		"name_en": "Romania",
+		"name_ar": "رومانيا",
+		"phonecode": "40"
+	},
+	{
+		"id": "181",
+		"sortname": "RU",
+		"name_en": "Russia",
+		"name_ar": "روسيا",
+		"phonecode": "70"
+	},
+	{
+		"id": "182",
+		"sortname": "RW",
+		"name_en": "Rwanda",
+		"name_ar": "رواندا",
+		"phonecode": "250"
+	},
+	{
+		"id": "183",
+		"sortname": "SH",
+		"name_en": "Saint Helena",
+		"name_ar": "سانت هيلينا",
+		"phonecode": "290"
+	},
+	{
+		"id": "184",
+		"sortname": "KN",
+		"name_en": "Saint Kitts And Nevis",
+		"name_ar": "سانت كيتس ونيفيس",
+		"phonecode": "1869"
+	},
+	{
+		"id": "185",
+		"sortname": "LC",
+		"name_en": "Saint Lucia",
+		"name_ar": "سانت لوسيا",
+		"phonecode": "1758"
+	},
+	{
+		"id": "186",
+		"sortname": "PM",
+		"name_en": "Saint Pierre and Miquelon",
+		"name_ar": "سان بيير وميكلون",
+		"phonecode": "508"
+	},
+	{
+		"id": "187",
+		"sortname": "VC",
+		"name_en": "Saint Vincent And The Grenadines",
+		"name_ar": "سانت فنسنت والغرينادين",
+		"phonecode": "1784"
+	},
+	{
+		"id": "188",
+		"sortname": "WS",
+		"name_en": "Samoa",
+		"name_ar": "ساموا",
+		"phonecode": "684"
+	},
+	{
+		"id": "189",
+		"sortname": "SM",
+		"name_en": "San Marino",
+		"name_ar": "سان مارينو",
+		"phonecode": "378"
+	},
+	{
+		"id": "190",
+		"sortname": "ST",
+		"name_en": "Sao Tome and Principe",
+		"name_ar": "ساو تومي وبرينسيبي",
+		"phonecode": "239"
+	},
+	{
+		"id": "191",
+		"sortname": "SA",
+		"name_en": "Saudi Arabia",
+		"name_ar": "المملكة العربية السعودية",
+		"phonecode": "966"
+	},
+	{
+		"id": "192",
+		"sortname": "SN",
+		"name_en": "Senegal",
+		"name_ar": "السنغال",
+		"phonecode": "221"
+	},
+	{
+		"id": "193",
+		"sortname": "RS",
+		"name_en": "Serbia",
+		"name_ar": "صربيا",
+		"phonecode": "381"
+	},
+	{
+		"id": "194",
+		"sortname": "SC",
+		"name_en": "Seychelles",
+		"name_ar": "سيشل",
+		"phonecode": "248"
+	},
+	{
+		"id": "195",
+		"sortname": "SL",
+		"name_en": "Sierra Leone",
+		"name_ar": "سيراليون",
+		"phonecode": "232"
+	},
+	{
+		"id": "196",
+		"sortname": "SG",
+		"name_en": "Singapore",
+		"name_ar": "سنغافورة",
+		"phonecode": "65"
+	},
+	{
+		"id": "197",
+		"sortname": "SK",
+		"name_en": "Slovakia",
+		"name_ar": "سلوفاكيا",
+		"phonecode": "421"
+	},
+	{
+		"id": "198",
+		"sortname": "SI",
+		"name_en": "Slovenia",
+		"name_ar": "سلوفينيا",
+		"phonecode": "386"
+	},
+	{
+		"id": "199",
+		"sortname": "XG",
+		"name_en": "Smaller Territories of the UK",
+		"name_ar": "الأقاليم الصغرى التابعة للمملكة المتحدة",
+		"phonecode": "44"
+	},
+	{
+		"id": "200",
+		"sortname": "SB",
+		"name_en": "Solomon Islands",
+		"name_ar": "جزر سليمان",
+		"phonecode": "677"
+	},
+	{
+		"id": "201",
+		"sortname": "SO",
+		"name_en": "Somalia",
+		"name_ar": "الصومال",
+		"phonecode": "252"
+	},
+	{
+		"id": "202",
+		"sortname": "ZA",
+		"name_en": "South Africa",
+		"name_ar": "جنوب أفريقيا",
+		"phonecode": "27"
+	},
+	{
+		"id": "203",
+		"sortname": "GS",
+		"name_en": "South Georgia",
+		"name_ar": "جورجيا الجنوبية",
+		"phonecode": "0"
+	},
+	{
+		"id": "204",
+		"sortname": "SS",
+		"name_en": "South Sudan",
+		"name_ar": "جنوب السودان",
+		"phonecode": "211"
+	},
+	{
+		"id": "205",
+		"sortname": "ES",
+		"name_en": "Spain",
+		"name_ar": "إسبانيا",
+		"phonecode": "34"
+	},
+	{
+		"id": "206",
+		"sortname": "LK",
+		"name_en": "Sri Lanka",
+		"name_ar": "سريلانكا",
+		"phonecode": "94"
+	},
+	{
+		"id": "207",
+		"sortname": "SD",
+		"name_en": "Sudan",
+		"name_ar": "السودان",
+		"phonecode": "249"
+	},
+	{
+		"id": "208",
+		"sortname": "SR",
+		"name_en": "Suriname",
+		"name_ar": "سورينام",
+		"phonecode": "597"
+	},
+	{
+		"id": "209",
+		"sortname": "SJ",
+		"name_en": "Svalbard And Jan Mayen Islands",
+		"name_ar": "سفالبارد وجان ماين",
+		"phonecode": "47"
+	},
+	{
+		"id": "210",
+		"sortname": "SZ",
+		"name_en": "Swaziland",
+		"name_ar": "سوازيلاند",
+		"phonecode": "268"
+	},
+	{
+		"id": "211",
+		"sortname": "SE",
+		"name_en": "Sweden",
+		"name_ar": "السويد",
+		"phonecode": "46"
+	},
+	{
+		"id": "212",
+		"sortname": "CH",
+		"name_en": "Switzerland",
+		"name_ar": "سويسرا",
+		"phonecode": "41"
+	},
+	{
+		"id": "213",
+		"sortname": "SY",
+		"name_en": "Syria",
+		"name_ar": "سوريا",
+		"phonecode": "963"
+	},
+	{
+		"id": "214",
+		"sortname": "TW",
+		"name_en": "Taiwan",
+		"name_ar": "تايوان",
+		"phonecode": "886"
+	},
+	{
+		"id": "215",
+		"sortname": "TJ",
+		"name_en": "Tajikistan",
+		"name_ar": "طاجيكستان",
+		"phonecode": "992"
+	},
+	{
+		"id": "216",
+		"sortname": "TZ",
+		"name_en": "Tanzania",
+		"name_ar": "تنزانيا",
+		"phonecode": "255"
+	},
+	{
+		"id": "217",
+		"sortname": "TH",
+		"name_en": "Thailand",
+		"name_ar": "تايلاند",
+		"phonecode": "66"
+	},
+	{
+		"id": "218",
+		"sortname": "TG",
+		"name_en": "Togo",
+		"name_ar": "توغو",
+		"phonecode": "228"
+	},
+	{
+		"id": "219",
+		"sortname": "TK",
+		"name_en": "Tokelau",
+		"name_ar": "توكيلاو",
+		"phonecode": "690"
+	},
+	{
+		"id": "220",
+		"sortname": "TO",
+		"name_en": "Tonga",
+		"name_ar": "تونغا",
+		"phonecode": "676"
+	},
+	{
+		"id": "221",
+		"sortname": "TT",
+		"name_en": "Trinidad And Tobago",
+		"name_ar": "ترينيداد وتوباغو",
+		"phonecode": "1868"
+	},
+	{
+		"id": "222",
+		"sortname": "TN",
+		"name_en": "Tunisia",
+		"name_ar": "تونس",
+		"phonecode": "216"
+	},
+	{
+		"id": "223",
+		"sortname": "TR",
+		"name_en": "Turkey",
+		"name_ar": "تركيا",
+		"phonecode": "90"
+	},
+	{
+		"id": "224",
+		"sortname": "TM",
+		"name_en": "Turkmenistan",
+		"name_ar": "تركمانستان",
+		"phonecode": "7370"
+	},
+	{
+		"id": "225",
+		"sortname": "TC",
+		"name_en": "Turks And Caicos Islands",
+		"name_ar": "جزر تركس وكايكوس",
+		"phonecode": "1649"
+	},
+	{
+		"id": "226",
+		"sortname": "TV",
+		"name_en": "Tuvalu",
+		"name_ar": "توفالو",
+		"phonecode": "688"
+	},
+	{
+		"id": "227",
+		"sortname": "UG",
+		"name_en": "Uganda",
+		"name_ar": "أوغندا",
+		"phonecode": "256"
+	},
+	{
+		"id": "228",
+		"sortname": "UA",
+		"name_en": "Ukraine",
+		"name_ar": "أوكرانيا",
+		"phonecode": "380"
+	},
+	{
+		"id": "229",
+		"sortname": "AE",
+		"name_en": "United Arab Emirates",
+		"name_ar": "الإمارات العربية المتحدة",
+		"phonecode": "971"
+	},
+	{
+		"id": "230",
+		"sortname": "GB",
+		"name_en": "United Kingdom",
+		"name_ar": "المملكة المتحدة",
+		"phonecode": "44"
+	},
+	{
+		"id": "231",
+		"sortname": "US",
+		"name_en": "United States",
+		"name_ar": "الولايات المتحدة الأمريكية",
+		"phonecode": "1"
+	},
+	{
+		"id": "232",
+		"sortname": "UM",
+		"name_en": "United States Minor Outlying Islands",
+		"name_ar": "جزر الولايات المتحدة الصغيرة النائية",
+		"phonecode": "1"
+	},
+	{
+		"id": "233",
+		"sortname": "UY",
+		"name_en": "Uruguay",
+		"name_ar": "أوروغواي",
+		"phonecode": "598"
+	},
+	{
+		"id": "234",
+		"sortname": "UZ",
+		"name_en": "Uzbekistan",
+		"name_ar": "أوزبكستان",
+		"phonecode": "998"
+	},
+	{
+		"id": "235",
+		"sortname": "VU",
+		"name_en": "Vanuatu",
+		"name_ar": "فانواتو",
+		"phonecode": "678"
+	},
+	{
+		"id": "236",
+		"sortname": "VA",
+		"name_en": "Vatican City State (Holy See)",
+		"name_ar": "دولة مدينة الفاتيكان (الكرسي الرسولي)",
+		"phonecode": "39"
+	},
+	{
+		"id": "237",
+		"sortname": "VE",
+		"name_en": "Venezuela",
+		"name_ar": "فنزويلا",
+		"phonecode": "58"
+	},
+	{
+		"id": "238",
+		"sortname": "VN",
+		"name_en": "Vietnam",
+		"name_ar": "فيتنام",
+		"phonecode": "84"
+	},
+	{
+		"id": "239",
+		"sortname": "VG",
+		"name_en": "Virgin Islands (British)",
+		"name_ar": "جزر العذراء (البريطانية)",
+		"phonecode": "1284"
+	},
+	{
+		"id": "240",
+		"sortname": "VI",
+		"name_en": "Virgin Islands (US)",
+		"name_ar": "جزر العذراء (الأمريكية)",
+		"phonecode": "1340"
+	},
+	{
+		"id": "241",
+		"sortname": "WF",
+		"name_en": "Wallis And Futuna Islands",
+		"name_ar": "جزر واليس وفوتونا",
+		"phonecode": "681"
+	},
+	{
+		"id": "242",
+		"sortname": "EH",
+		"name_en": "Western Sahara",
+		"name_ar": "الصحراء الغربية",
+		"phonecode": "212"
+	},
+	{
+		"id": "243",
+		"sortname": "YE",
+		"name_en": "Yemen",
+		"name_ar": "اليمن",
+		"phonecode": "967"
+	},
+	{
+		"id": "244",
+		"sortname": "YU",
+		"name_en": "Yugoslavia",
+		"name_ar": "يوغوسلافيا",
+		"phonecode": "38"
+	},
+	{
+		"id": "245",
+		"sortname": "ZM",
+		"name_en": "Zambia",
+		"name_ar": "زامبيا",
+		"phonecode": "260"
+	},
+	{
+		"id": "246",
+		"sortname": "ZW",
+		"name_en": "Zimbabwe",
+		"name_ar": "زيمبابوي",
+		"phonecode": "263"
+	}
+]

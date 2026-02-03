@@ -1,0 +1,418 @@
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap");
+@import "tailwindcss";
+
+:root {
+  /* Modern palette */
+  /* --primary: #06bed6; */
+  --primary: #0bb7b4;
+  --secondary: #f8954e;
+  --accent: #94bc73;
+  --text-primary: #114268;
+}
+
+button {
+  @apply cursor-pointer;
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-text-primary: var(--text-primary);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+.container {
+  @apply px-[10px] lg:px-[30px] max-w-[80rem] mx-auto;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+body {
+  color: var(--text-primary);
+  font-family: "JetBrains Mono", monospace, "Cairo", sans-serif;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* App gradient background helper */
+.bg-gradient-app {
+  background-image: radial-gradient(
+      1200px 600px at 10% 10%,
+      color-mix(in oklab, var(--primary) 15%, transparent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      1000px 500px at 90% 20%,
+      color-mix(in oklab, var(--secondary) 16%, transparent) 0%,
+      transparent 60%
+    ),
+    linear-gradient(180deg, #ffffff, #f6f8fc);
+}
+
+/* Card gradient ring container */
+.card-gradient {
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--primary) 25%, transparent),
+    color-mix(in oklab, var(--secondary) 25%, transparent)
+  );
+  padding: 1px; /* gradient border thickness */
+  @apply rounded-md;
+}
+
+.btn-gradient-primary {
+  background-image: linear-gradient(to left, var(--primary), var(--secondary));
+  color: white;
+}
+.btn-gradient-primary:hover {
+  filter: brightness(1.03);
+  box-shadow: 0 10px 22px 0 color-mix(in oklab, var(--primary) 22%, transparent);
+}
+
+/* From Uiverse.io by mrhyddenn */
+.btn-container {
+  position: relative;
+  padding: 10px 20px;
+  font-size: 14px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 2px;
+  background: transparent;
+  color: #fff;
+  overflow: hidden;
+  box-shadow: 0 0 0 0 transparent;
+  -webkit-transition: all 0.2s ease-in;
+  -moz-transition: all 0.2s ease-in;
+  transition: all 0.2s ease-in;
+  @apply rounded-md;
+}
+
+.btn-container:hover {
+  -webkit-transition: all 0.2s ease-out;
+  -moz-transition: all 0.2s ease-out;
+  transition: all 0.2s ease-out;
+}
+
+.btn-container:hover::before {
+  -webkit-animation: sh02 0.5s 0s linear;
+  -moz-animation: sh02 0.5s 0s linear;
+  animation: sh02 0.5s 0s linear;
+}
+
+.btn-container::before {
+  content: "";
+  display: block;
+  width: 0px;
+  height: 86%;
+  position: absolute;
+  top: 7%;
+  left: 0%;
+  opacity: 0;
+  background: #fff;
+  box-shadow: 0 0 50px 30px #fff;
+  -webkit-transform: skewX(-20deg);
+  -moz-transform: skewX(-20deg);
+  -ms-transform: skewX(-20deg);
+  -o-transform: skewX(-20deg);
+  transform: skewX(-20deg);
+}
+
+@keyframes sh02 {
+  from {
+    opacity: 0;
+    left: 0%;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+    left: 100%;
+  }
+}
+
+.btn-container:active {
+  box-shadow: 0 0 0 0 transparent;
+  -webkit-transition: box-shadow 0.2s ease-in;
+  -moz-transition: box-shadow 0.2s ease-in;
+  transition: box-shadow 0.2s ease-in;
+}
+
+.glass-effect {
+  /* From https://css.glass */
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.ReactCollapse--collapse {
+  transition: height 300ms;
+}
+
+.phoneNumber {
+  @apply bg-primary/5 border border-primary/20 rounded-md ps-4 duration-200;
+}
+.phoneNumber input {
+  @apply py-3.5;
+}
+.phoneNumber input:focus {
+  @apply outline-none;
+}
+
+.phoneNumber:has(input:focus) {
+  @apply border-primary focus:border-primary focus:ring-2 focus:ring-primary/20;
+}
+.phoneNumber.error {
+  @apply !border-red-500 focus:border-red-500 focus:ring-red-200 bg-red-50;
+}
+.PhoneInputCountry {
+  @apply !m-0 !me-1;
+}
+.PhoneInputCountryIcon {
+  @apply !bg-primary !shadow-none !m-0;
+}
+.PhoneInputCountrySelectArrow {
+  @apply !m-0 !ms-2 !border-primary;
+}
+
+.rtl .PhoneInputInput,
+.rtl .date-input {
+  text-align: right;
+}
+.PhoneInputInput {
+  @apply ps-4;
+}
+input {
+  direction: auto;
+  unicode-bidi: plaintext;
+}
+.select__control {
+  @apply !bg-primary/5 border !border-primary/20 rounded-md ps-4 duration-200 ps-12 py-2;
+}
+
+.select__control--is-focused {
+  @apply !border-primary focus:!border-primary focus:ring-2 focus:ring-primary/20 !shadow-none;
+}
+.small {
+  @apply !py-0.5;
+}
+.select__menu {
+  @apply !z-50;
+}
+.select__indicator svg {
+  @apply !text-primary;
+}
+.select__indicator-separator {
+  @apply !bg-primary/20;
+}
+.select__option {
+  @apply !cursor-pointer;
+}
+.select__option--is-focused {
+  @apply !bg-primary/50;
+}
+.select__option--is-selected {
+  @apply !bg-primary;
+}
+.select__control.error {
+  @apply !border-red-500 focus:border-red-500 focus:ring-red-200 !bg-red-50;
+}
+
+.react-datepicker-wrapper {
+  @apply w-full;
+}
+
+.react-datepicker {
+  font-family: "JetBrains Mono", monospace !important;
+  color: rgba(47, 43, 61, 0.78) !important;
+  border-radius: 6px;
+  background-color: rgb(255, 255, 255) !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(47, 43, 61, 0.16) !important;
+}
+.react-datepicker__header {
+  background: transparent !important;
+  border-bottom: 0 !important;
+}
+.react-datepicker__current-month {
+  @apply !py-4;
+}
+.react-datepicker__navigation.react-datepicker__navigation--next {
+  width: 26px;
+  height: 26px;
+  border: none;
+  right: 15px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' style='width:24px;height:24px' viewBox='0 0 24 24'%3E%3Cpath fill='rgba(47, 43, 61, 0.68)' d='M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z' /%3E%3C/svg%3E");
+}
+
+.react-datepicker__navigation-icon {
+  display: none;
+}
+.react-datepicker > .react-datepicker__navigation {
+  top: 18px;
+  border-radius: 50%;
+  background-color: rgba(47, 43, 61, 0.06) !important;
+}
+.react-datepicker__navigation.react-datepicker__navigation--previous {
+  width: 26px;
+  height: 26px;
+  border: none;
+  left: 15px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' style='width:24px;height:24px' viewBox='0 0 24 24'%3E%3Cpath fill='rgba(47, 43, 61, 0.68)' d='M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z' /%3E%3C/svg%3E");
+}
+
+.react-datepicker
+  .react-datepicker__header__dropdown
+  .react-datepicker__month-dropdown,
+.react-datepicker
+  .react-datepicker__header__dropdown
+  .react-datepicker__year-dropdown {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-color: rgba(47, 43, 61, 0.16);
+  border-radius: 6px;
+  background-color: rgb(255, 255, 255);
+  box-shadow: rgba(47, 43, 61, 0.18) 0px 4px 13px 0px;
+}
+
+.react-datepicker
+  .react-datepicker__header__dropdown
+  .react-datepicker__month-option,
+.react-datepicker
+  .react-datepicker__header__dropdown
+  .react-datepicker__year-option {
+  width: auto;
+  margin: 0rem 0.875rem;
+  padding-top: 0.3125rem;
+  padding-bottom: 0.3125rem;
+  border-radius: 6px !important;
+}
+.react-datepicker
+  .react-datepicker__header__dropdown
+  .react-datepicker__month-option.react-datepicker__month-option--selected_month {
+  color: rgb(255, 255, 255);
+  background-color: var(--primary) !important;
+}
+
+.react-datepicker
+  .react-datepicker__header__dropdown
+  .react-datepicker__month-option:hover,
+.react-datepicker
+  .react-datepicker__header__dropdown
+  .react-datepicker__year-option:hover {
+  @apply !text-primary !bg-primary/16;
+}
+.react-datepicker__month-option--selected {
+  display: none;
+}
+
+.react-datepicker
+  .react-datepicker__header__dropdown
+  .react-datepicker__month-option,
+.react-datepicker
+  .react-datepicker__header__dropdown
+  .react-datepicker__year-option {
+  width: auto;
+  margin: 0rem 0.875rem;
+  padding-top: 0.3125rem;
+  padding-bottom: 0.3125rem;
+  border-radius: 6px !important;
+}
+
+.react-datepicker
+  .react-datepicker__header__dropdown
+  .react-datepicker__year-option
+  .react-datepicker__navigation--years-upcoming {
+  width: 9px;
+  height: 9px;
+  border-style: solid;
+  border-width: 3px 3px 0px 0px;
+  transform: rotate(-45deg);
+  border-top-color: rgba(47, 43, 61, 0.42);
+  border-right-color: rgba(47, 43, 61, 0.42);
+  margin: 0.6875rem auto 0rem;
+}
+.react-datepicker
+  .react-datepicker__header__dropdown
+  .react-datepicker__year-option
+  .react-datepicker__navigation--years-previous {
+  width: 9px;
+  height: 9px;
+  border-style: solid;
+  border-width: 0px 0px 3px 3px;
+  transform: rotate(-45deg);
+  border-left-color: rgba(47, 43, 61, 0.42);
+  border-bottom-color: rgba(47, 43, 61, 0.42);
+  margin: 0rem auto 0.6875rem;
+}
+.react-datepicker .react-datepicker__day {
+  margin: 0px;
+  width: 2.125rem;
+  border-radius: 50% !important;
+  line-height: 2.125rem;
+  color: rgba(47, 43, 61, 0.78);
+  font-size: 0.9375rem !important;
+}
+.react-datepicker .react-datepicker__day--selected,
+.react-datepicker .react-datepicker__month--selected,
+.react-datepicker .react-datepicker__year-text--selected,
+.react-datepicker .react-datepicker__quarter--selected {
+  box-shadow: rgba(47, 43, 61, 0.14) 0px 2px 6px 0px;
+  color: #fff !important;
+  background-color: var(--primary) !important;
+}
+.react-datepicker__day:hover,
+.react-datepicker .react-datepicker__month-text:hover,
+.react-datepicker .react-datepicker__quarter-text:hover,
+.react-datepicker .react-datepicker__year-text:hover {
+  background-color: rgba(47, 43, 61, 0.08);
+}
+
+.react-datepicker__triangle {
+  display: none;
+}
+.react-datepicker__year-read-view--selected-year,
+.react-datepicker__month-read-view--selected-month {
+  @apply px-4;
+}
+
+.react-datepicker__year-read-view--down-arrow,
+.react-datepicker__month-read-view--down-arrow,
+.react-datepicker__month-year-read-view--down-arrow {
+  @apply !right-0;
+}
+
+.react-datepicker__day--keyboard-selected,
+.react-datepicker__month-text--keyboard-selected,
+.react-datepicker__quarter-text--keyboard-selected,
+.react-datepicker__year-text--keyboard-selected {
+  @apply !bg-primary !text-white;
+}
+.select__indicator {
+  cursor: pointer !important;
+}
+.glass-effect-search {
+  background: rgba(255, 255, 255, 0);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(11.6px);
+  -webkit-backdrop-filter: blur(11.6px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
