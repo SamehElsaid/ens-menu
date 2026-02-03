@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import SearchForm from "./homePage/SearchForm";
+import SearchForm from "./HomePage/SearchForm";
 import { hero } from "@/svg/hero";
 
 const TABS = ["Book Online", "Book Offline", "Consultation"] as const;
@@ -22,7 +22,7 @@ function HeroSection() {
           </div>
           <div className="relative grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="space-y-8">
-              <div className="space-y-5 text-[#1a1f36]">
+              <div className="space-y-5 ">
                 <h1 className="text-4xl font-extrabold leading-[1.1] text-text-primary sm:text-5xl lg:text-6xl">
                   DISCOVER NEXT .
                 </h1>
@@ -46,9 +46,9 @@ function HeroSection() {
                     key={tab}
                     type="button"
                     onClick={() => setSelectedTab(tab)}
-                    className={`flex-1 rounded-md px-4 py-2 text-sm duration-200 font-semibold transition ${
+                    className={`flex-1 rounded-md px-4 py-3 text-sm duration-200 font-semibold transition ${
                       isActive
-                        ? "bg-primary text-white shadow-lg shadow-primary/30"
+                        ? "bg-secondary text-white shadow-lg shadow-secondary/30"
                         : "bg-white text-text-primary hover:bg-gray-100"
                     }`}
                   >
