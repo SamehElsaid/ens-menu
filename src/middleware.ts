@@ -29,6 +29,13 @@ export default function middleware(request: NextRequest) {
     }
   }
 
+  if (url.pathname.startsWith("/parent")) {
+    if (!token || tokenDecrypted?.kind !== "parent") {
+      url.pathname = "/unauthorized";
+      return NextResponse.redirect(url);
+    }
+  }
+
   return createMiddleware(routing)(request);
 }
 

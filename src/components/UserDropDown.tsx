@@ -15,10 +15,17 @@ function UserDropDown() {
   const userName = profile.data?.name ?? "John Doe";
   const userRole = profile.data?.kind ?? "Admin";
   const profileMenuItems = [
-    { label: "Dashboard", href: "/specialist/", icon: <MdOutlineDashboard  /> },
+    {
+      label: "Dashboard",
+      href: profile.data?.kind === "specialist" ? "/specialist/" : "/parent/",
+      icon: <MdOutlineDashboard />,
+    },
     {
       label: "Settings",
-      href: "/specialist/personal/settings",
+      href:
+        profile.data?.kind === "specialist"
+          ? "/specialist/personal/settings"
+          : "/parent/personal/settings",
       icon: <FiSettings />,
     },
   ];

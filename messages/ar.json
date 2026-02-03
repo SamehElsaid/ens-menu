@@ -340,5 +340,39 @@
     "selectLocation": "اختر الموقع",
     "allLocations": "جميع المواقع"
   },
+  "overview": {
+    "title": "نظرة عامة",
+    "description": "عرض جميع الجلسات مع معدلات التحسن",
+    "sectionName": "اسم القسم",
+    "date": "التاريخ",
+    "improvement": "التحسن",
+    "time": "الوقت",
+    "status": "الحالة",
+    "statusAttended": "حاضر",
+    "statusPending": "قيد الانتظار",
+    "statusCanceled": "ملغي",
+    "actions": "الإجراءات",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "confirmDelete": "هل أنت متأكد أنك تريد حذف هذه الجلسة؟",
+    "timeline": {
+      "title": "الجدول الزمني للجلسات",
+      "description": "جميع الجلسات مع حالة الحضور",
+      "today": "اليوم",
+      "yesterday": "أمس",
+      "daysAgo": "أيام مضت",
+      "sessionAt": "جلسة في",
+      "attended": "حاضر"
+    },
+    "messages": {
+      "title": "الرسائل",
+      "description": "التواصل مع الوالد/الأخصائي",
+      "noMessages": "لا توجد رسائل بعد",
+      "parent": "الوالد",
+      "specialist": "الأخصائي",
+      "placeholder": "اكتب رسالتك هنا...",
+      "send": "إرسال"
+    }
+  },
   "hello": "Hello"
 }

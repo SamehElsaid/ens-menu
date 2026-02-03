@@ -4,10 +4,6 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, FreeMode } from "swiper/modules";
 import { usePathname } from "@/i18n/navigation";
 import { useCallback, useEffect, useRef } from "react";
-
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/free-mode";
 import { Swiper as SwiperType } from "swiper/types";
 import { clientNavigationItems, ClientNavigationItem } from "@/modules/client";
 import LinkTo from "./Global/LinkTo";

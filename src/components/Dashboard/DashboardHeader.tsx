@@ -18,9 +18,9 @@ export function DashboardHeader({
           >
             <FiMenu className="text-lg" />
           </button>
-          <button className="rounded-full flex items-center justify-center w-10 h-10 border border-slate-200 bg-white  text-slate-500 transition hover:text-primary hover:border-secondary">
+          <LinkTo href="/chat" className="rounded-full flex items-center justify-center w-10 h-10 border border-slate-200 bg-white  text-slate-500 transition hover:text-primary hover:border-secondary">
             <IoChatbubblesOutline className="text-lg" />
-          </button>
+          </LinkTo>
         </div>
         <div className="flex items-center gap-1">
           <LinkTo href="/" className=" text-lg font-bold text-primary">Logo</LinkTo>

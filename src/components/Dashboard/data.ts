@@ -3,8 +3,8 @@ import {
   FaAward,
   FaBriefcase,
   FaCalendar,
+  FaClipboardList,
   FaEnvelope,
-  FaStar,
   FaUserAlt,
   FaUsers,
   FaWifi,
@@ -69,7 +69,7 @@ export const navSections: NavSection[] = [
   {
     title: "Bookings",
     items: [
-      { label: "All", icon: BiCategory, key: "all" },
+      { label: "All", icon: BiCategory, key: "allBookings", link: "bookings/all" },
       {
         label: "Online",
         icon: FaWifi,
@@ -88,6 +88,52 @@ export const navSections: NavSection[] = [
     title: "ًWork",
     items: [
       { label: "Clients", icon: FaUsers, key: "clients", link: "clients" },
+    ],
+  },
+];
+
+export const parentNavSections: NavSection[] = [
+  {
+    title: "Profile",
+    items: [
+      {
+        label: "Personal",
+        icon: FaUserAlt,
+        key: "personalInformation",
+        link: "personal/information",
+        parentLink: "personal",
+        dependentParent: true,
+      },
+      {
+        label: "Patients",
+        icon: FaUsers,
+        key: "patients",
+        link: "patients",
+      },
+    ],
+  },
+  {
+    title: "Bookings",
+    items: [
+      { label: "All", icon: BiCategory, key: "allBookings", link: "bookings/all" },
+      {
+        label: "Online",
+        icon: FaWifi,
+        key: "onlineBookings",
+        link: "bookings/online",
+      },
+      {
+        label: "Offline",
+        icon: RiWifiOffLine,
+        key: "offlineBookings",
+        link: "bookings/offline",
+      },
+    ],
+  },
+  {
+    title: "Specialists/Centers",
+    items: [  
+      { label: "Reports", icon: FaClipboardList, key: "reports", link: "reports" },
     ],
   },
 ];

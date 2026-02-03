@@ -33,3 +33,18 @@ export const navigationItems: PersonalNavigationItem[] = [
     icon: FaUser,
   },
 ];
+
+export const parentNavigationItems: PersonalNavigationItem[] = [
+  {
+    label: "Information",
+    href: "/parent/personal/information",
+    key: "information",
+    icon: FaUser,
+  },
+  {
+    label: "Settings",
+    href: "/parent/personal/settings",
+    key: "settings",
+    icon: FaUser,
+  },
+];

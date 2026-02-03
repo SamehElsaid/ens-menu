@@ -6,19 +6,18 @@ import { usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef } from "react";
 
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/free-mode";
 import { Swiper as SwiperType } from "swiper/types";
-import { navigationItems, PersonalNavigationItem } from "@/modules/personal";
+import { navigationItems, parentNavigationItems, PersonalNavigationItem } from "@/modules/personal";
 import LinkTo from "./Global/LinkTo";
 
 export default function PersonalNavigationSwiper({
   setLoading,
   loading,
+  type = "specialist",
   }: {
   setLoading: (loading: React.SetStateAction<boolean>) => void;
   loading: boolean;
+  type?: "specialist" | "parent";
 }) {
   const t = useTranslations("");
   const pathname = usePathname();
@@ -41,6 +40,8 @@ export default function PersonalNavigationSwiper({
     }
   }, [isActive]);
 
+  const navigationItemsData = type === "specialist" ? navigationItems : parentNavigationItems;  
+
   return (
     <div className="relative mb-6">
       <div className="relative">
@@ -58,7 +59,7 @@ export default function PersonalNavigationSwiper({
           }}
           className="personal-navigation-swiper"
         >
-          {navigationItems.map((item) => (
+          {navigationItemsData.map((item) => (
             <SwiperSlide key={item.href} style={{ width: "auto" }}>
               <LinkTo
                 disabled={loading}

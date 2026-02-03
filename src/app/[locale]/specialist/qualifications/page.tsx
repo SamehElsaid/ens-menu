@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import QualificationFormModal from "@/components/Custom/QualificationFormModal";
 import CustomInput from "@/components/Custom/CustomInput";
@@ -13,14 +13,21 @@ export type QualificationStatus = "pending" | "active";
 
 export interface Qualification {
   id: string;
-  title: string;
-  files: File[];
+  school: string;
   type: QualificationType;
+  degree: string;
+  fieldOfStudy: string;
+  startDate: Date | null;
+  endDate: Date | null;
+  activitiesAndSocieties: string;
+  description: string;
+  files: File[];
   status: QualificationStatus;
 }
 
 export default function QualificationsPage() {
   const t = useTranslations("");
+  const locale = useLocale();
   const [qualifications, setQualifications] = useState<Qualification[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -70,7 +77,9 @@ export default function QualificationsPage() {
 
     if (searchTerm.trim()) {
       results = results.filter((qualification) =>
-        qualification.title.toLowerCase().includes(searchTerm.toLowerCase())
+        qualification.school.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        qualification.degree.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        qualification.fieldOfStudy.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -103,7 +112,7 @@ export default function QualificationsPage() {
               type="text"
               id="searchQualifications"
               placeholder={
-                t("personal.searchQualifications") || "Search by title..."
+                t("personal.searchQualifications") || "Search by school, degree, or field of study..."
               }
               icon={<FaSearch />}
               value={searchTerm}
@@ -168,17 +177,61 @@ export default function QualificationsPage() {
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2 flex-1">
                     <FaAward className="text-primary" />
-                    <div>
+                    <div className="flex-1">
                       <h3 className="font-semibold text-gray-900">
-                        {qualification.title}
+                        {qualification.school}
                       </h3>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {qualification.type === "academic"
-                          ? t("personal.qualificationTypeAcademic") ||
-                            "Academic qualification"
-                          : t("personal.qualificationTypeCourses") ||
-                            "Courses & certificates"}
-                      </p>
+                      <div className="text-xs text-gray-500 mt-0.5 space-y-1">
+                        <p>
+                          {qualification.type === "academic"
+                            ? t("personal.qualificationTypeAcademic") ||
+                              "Academic qualification"
+                            : t("personal.qualificationTypeCourses") ||
+                              "Courses & certificates"}
+                        </p>
+                        {qualification.degree && (
+                          <p>
+                            <span className="font-medium">Degree:</span> {qualification.degree}
+                          </p>
+                        )}
+                        {qualification.fieldOfStudy && (
+                          <p>
+                            <span className="font-medium">Field:</span> {qualification.fieldOfStudy}
+                          </p>
+                        )}
+                        {qualification.startDate && qualification.endDate && (
+                          <p>
+                            <span className="font-medium">Period:</span>{" "}
+                            {new Date(qualification.startDate).toLocaleDateString(
+                              locale === "ar" ? "ar-SA" : "en-US",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              }
+                            )}{" "}
+                            -{" "}
+                            {new Date(qualification.endDate).toLocaleDateString(
+                              locale === "ar" ? "ar-SA" : "en-US",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              }
+                            )}
+                          </p>
+                        )}
+                        {qualification.description && (
+                          <p className="mt-2 text-gray-600">
+                            {qualification.description}
+                          </p>
+                        )}
+                        {qualification.activitiesAndSocieties && (
+                          <p className="mt-1 text-gray-600">
+                            <span className="font-medium">Activities:</span> {qualification.activitiesAndSocieties}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                   {qualification.type === "academic" && (
@@ -256,9 +309,9 @@ export default function QualificationsPage() {
         message={
           qualificationToDelete
             ? t("personal.deleteQualificationConfirm", {
-                title: qualificationToDelete.title,
+                school: qualificationToDelete.school,
               }) ||
-              `Are you sure you want to delete the qualification: ${qualificationToDelete.title}?`
+              `Are you sure you want to delete the qualification: ${qualificationToDelete.school}?`
             : t("personal.deleteQualificationConfirmMessage") ||
               "Are you sure you want to delete this qualification?"
         }

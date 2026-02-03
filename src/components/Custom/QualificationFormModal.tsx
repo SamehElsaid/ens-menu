@@ -6,7 +6,7 @@ import { Controller, Resolver, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useTranslations } from "next-intl";
-import { FaTimes, FaAward, FaGraduationCap } from "react-icons/fa";
+import { FaTimes, FaAward, FaGraduationCap, FaUniversity, FaCalendar, FaBook, FaFileAlt } from "react-icons/fa";
 import CustomInput from "./CustomInput";
 import UploadFile from "./UploadFile";
 import { _checkFileSize, _checkFileType } from "@/shared/_shared";
@@ -22,22 +22,28 @@ interface QualificationFormModalProps {
 }
 
 type QualificationFormData = {
-  title: string;
-  files: File[];
+  school: string;
   type: Qualification["type"];
+  degree: string;
+  fieldOfStudy: string;
+  startDate: Date | null;
+  endDate: Date | null;
+  activitiesAndSocieties: string;
+  description: string;
+  files: File[];
 };
 
 const createQualificationSchema = (
   t: ReturnType<typeof useTranslations<"">>
 ) => {
   return yup.object().shape({
-    title: yup
+    school: yup
       .string()
-      .required(t("personal.qualificationTitleRequired") || "Title is required")
+      .required(t("personal.qualificationSchoolRequired") || "School name is required")
       .min(
         2,
-        t("personal.qualificationTitleMinLength") ||
-          "Title must be at least 2 characters"
+        t("personal.qualificationSchoolMinLength") ||
+          "School name must be at least 2 characters"
       ),
     type: yup
       .mixed<Qualification["type"]>()
@@ -45,6 +51,31 @@ const createQualificationSchema = (
         t("personal.qualificationTypeRequired") ||
           "Qualification type is required"
       ),
+    degree: yup
+      .string()
+      .required(t("personal.qualificationDegreeRequired") || "Degree is required"),
+    fieldOfStudy: yup
+      .string()
+      .required(t("personal.qualificationFieldOfStudyRequired") || "Field of study is required"),
+    startDate: yup
+      .date()
+      .nullable()
+      .required(t("personal.qualificationStartDateRequired") || "Start date is required"),
+    endDate: yup
+      .date()
+      .nullable()
+      .required(t("personal.qualificationEndDateRequired") || "End date is required")
+      .test(
+        "is-after-start",
+        t("personal.qualificationEndDateAfterStart") || "End date must be after start date",
+        function (value) {
+          const { startDate } = this.parent;
+          if (!value || !startDate) return true;
+          return new Date(value) >= new Date(startDate);
+        }
+      ),
+    activitiesAndSocieties: yup.string(),
+    description: yup.string(),
     files: yup
       .array()
       .of(yup.mixed<File>())
@@ -73,9 +104,15 @@ export default function QualificationFormModal({
     watch,
   } = useForm<QualificationFormData>({
     defaultValues: {
-      title: "",
+      school: "",
       files: [],
       type: "academic",
+      degree: "",
+      fieldOfStudy: "",
+      startDate: null,
+      endDate: null,
+      activitiesAndSocieties: "",
+      description: "",
     },
     resolver: yupResolver(
       createQualificationSchema(t)
@@ -184,18 +221,18 @@ export default function QualificationFormModal({
           <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
             <Controller
               control={control}
-              name="title"
+              name="school"
               render={({ field: { value, onChange } }) => (
                 <CustomInput
                   type="text"
-                  id="title"
-                  label={t("personal.qualificationTitle") || "Title"}
+                  id="school"
+                  label={t("personal.qualificationSchool") || "School Name *"}
                   placeholder={
-                    t("personal.qualificationTitlePlaceholder") ||
-                    "Enter qualification title"
+                    t("personal.qualificationSchoolPlaceholder") ||
+                    "Enter school name"
                   }
-                  icon={<FaAward />}
-                  error={errors.title?.message}
+                  icon={<FaUniversity />}
+                  error={errors.school?.message}
                   value={value}
                   onChange={(e) => onChange(e.target.value)}
                 />
@@ -242,6 +279,136 @@ export default function QualificationFormModal({
                   />
                 );
               }}
+            />
+
+            <Controller
+              control={control}
+              name="degree"
+              render={({ field: { value, onChange } }) => (
+                <CustomInput
+                  type="text"
+                  id="degree"
+                  label={t("personal.qualificationDegree") || "Degree"}
+                  placeholder={
+                    t("personal.qualificationDegreePlaceholder") ||
+                    "Enter degree"
+                  }
+                  icon={<FaAward />}
+                  error={errors.degree?.message}
+                  value={value}
+                  onChange={(e) => onChange(e.target.value)}
+                />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="fieldOfStudy"
+              render={({ field: { value, onChange } }) => (
+                <CustomInput
+                  type="text"
+                  id="fieldOfStudy"
+                  label={t("personal.qualificationFieldOfStudy") || "Field of Study"}
+                  placeholder={
+                    t("personal.qualificationFieldOfStudyPlaceholder") ||
+                    "Enter field of study"
+                  }
+                  icon={<FaBook />}
+                  error={errors.fieldOfStudy?.message}
+                  value={value}
+                  onChange={(e) => onChange(e.target.value)}
+                />
+              )}
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Controller
+                control={control}
+                name="startDate"
+                render={({ field: { value, onChange } }) => (
+                  <CustomInput
+                    type="date"
+                    id="startDate"
+                    label={t("personal.qualificationStartDate") || "Start Date"}
+                    placeholder={
+                      t("personal.qualificationStartDatePlaceholder") ||
+                      "Select start date"
+                    }
+                    icon={<FaCalendar />}
+                    error={errors.startDate?.message}
+                    value={value}
+                    onChange={(e) => {
+                      const date = e as unknown as Date | null;
+                      onChange(date);
+                    }}
+                  />
+                )}
+              />
+
+              <Controller
+                control={control}
+                name="endDate"
+                render={({ field: { value, onChange } }) => (
+                  <CustomInput
+                    type="date"
+                    id="endDate"
+                    label={t("personal.qualificationEndDate") || "End Date"}
+                    placeholder={
+                      t("personal.qualificationEndDatePlaceholder") ||
+                      "Select end date"
+                    }
+                    icon={<FaCalendar />}
+                    error={errors.endDate?.message}
+                    value={value}
+                    onChange={(e) => {
+                      const date = e as unknown as Date | null;
+                      onChange(date);
+                    }}
+                  />
+                )}
+              />
+            </div>
+
+            <Controller
+              control={control}
+              name="activitiesAndSocieties"
+              render={({ field: { value, onChange } }) => (
+                <CustomInput
+                  type="textarea"
+                  id="activitiesAndSocieties"
+                  label={t("personal.qualificationActivitiesAndSocieties") || "Activities and Societies"}
+                  placeholder={
+                    t("personal.qualificationActivitiesAndSocietiesPlaceholder") ||
+                    "Enter activities and societies"
+                  }
+                  icon={<FaAward />}
+                  error={errors.activitiesAndSocieties?.message}
+                  value={value}
+                  onChange={(e) => onChange(e.target.value)}
+                  rows={3}
+                />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="description"
+              render={({ field: { value, onChange } }) => (
+                <CustomInput
+                  type="textarea"
+                  id="description"
+                  label={t("personal.qualificationDescription") || "Description"}
+                  placeholder={
+                    t("personal.qualificationDescriptionPlaceholder") ||
+                    "Enter description"
+                  }
+                  icon={<FaFileAlt />}
+                  error={errors.description?.message}
+                  value={value}
+                  onChange={(e) => onChange(e.target.value)}
+                  rows={4}
+                />
+              )}
             />
 
             <div>

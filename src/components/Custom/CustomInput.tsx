@@ -264,7 +264,6 @@ export default function CustomInput({
               }}
               onChange={(newValue, actionMeta) => {
                 if (actionMeta.action === "clear") {
-                  console.log("clear");
                   reset?.();
                 }
                 props.onChange?.(

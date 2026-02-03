@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import CustomInput from "./CustomInput";
 import {
+  FaBook,
   FaCalendarAlt,
   FaMapMarkerAlt,
   FaUser,
@@ -14,19 +15,25 @@ export interface BookingSearchFiltersState {
   reservationDate: Date | null;
   location: { label: string; value: string } | null;
   parentName: { data: string; name: string };
-  patientName: { data: string; name: string };
+  patientName?: { data: string; name: string } | null;
+  specialistName?: { data: string; name: string } | null;
+  type?: { label: string; value: "online" | "offline" | "all" } | null;
 }
 
 export interface BookingSearchFiltersProps {
   searchState: BookingSearchFiltersState;
   onSearchChange: (updates: Partial<BookingSearchFiltersState>) => void;
   locationOptions: { label: string; value: string }[];
+  userType: "specialist" | "parent";
+  type: "online" | "offline" | "all";
 }
 
 export default function BookingSearchFilters({
   searchState,
   onSearchChange,
   locationOptions,
+  userType,
+  type,
 }: BookingSearchFiltersProps) {
   const t = useTranslations("");
 
@@ -37,6 +44,40 @@ export default function BookingSearchFilters({
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Date Search */}
+        {type === "all" && (
+          <CustomInput
+            type="select"
+            id="search-type"
+            size="small"
+            label={t("bookings.searchByType")}
+            placeholder={t("bookings.type-booking")}
+            icon={<FaBook />}
+            value={
+              searchState.type || { label: t("bookings.all"), value: "all" }
+            }
+            options={[
+              { label: t("bookings.all"), value: "all" },
+              { label: t("bookings.online"), value: "online" },
+              { label: t("bookings.offline"), value: "offline" },
+            ]}
+            onChange={(select) => {
+              if (!select) {
+                onSearchChange({ type: { label: t("bookings.all"), value: "all" } });
+                return;
+              }
+              const selectValue = select as unknown as {
+                label: string;
+                value: "online" | "offline" | "all";
+              };
+              onSearchChange({
+                type: {
+                  label: selectValue.label,
+                  value: selectValue.value,
+                },
+              });
+            }}
+          />
+        )}
         <CustomInput
           type="date"
           id="search-date"
@@ -94,23 +135,43 @@ export default function BookingSearchFilters({
         />
 
         {/* Parent Name Search */}
-        <CustomInput
-          type="text"
-          id="search-parent-name"
-          size="small"
-          label={t("bookings.searchByParentName")}
-          placeholder={t("bookings.parentName")}
-          icon={<FaUser />}
-          value={searchState.parentName.data}
-          onChange={(e) => {
-            onSearchChange({
-              parentName: {
-                data: e.target.value,
-                name: searchState.parentName.name,
-              },
-            });
-          }}
-        />
+        {userType === "specialist" ? (
+          <CustomInput
+            type="text"
+            id="search-parent-name"
+            size="small"
+            label={t("bookings.searchByParentName")}
+            placeholder={t("bookings.parentName")}
+            icon={<FaUser />}
+            value={searchState.parentName.data}
+            onChange={(e) => {
+              onSearchChange({
+                parentName: {
+                  data: e.target.value,
+                  name: searchState.parentName.name,
+                },
+              });
+            }}
+          />
+        ) : (
+          <CustomInput
+            type="text"
+            id="search-specialist-name"
+            size="small"
+            label={t("bookings.searchBySpecialistName")}
+            placeholder={t("bookings.specialistName")}
+            icon={<FaUserMd />}
+            value={searchState.specialistName?.data || ""}
+            onChange={(e) => {
+              onSearchChange({
+                specialistName: {
+                  data: e.target.value,
+                  name: searchState.specialistName?.name || "",
+                },
+              });
+            }}
+          />
+        )}
 
         {/* Patient Name Search */}
         <CustomInput
@@ -120,12 +181,12 @@ export default function BookingSearchFilters({
           label={t("bookings.searchByPatientName")}
           placeholder={t("bookings.patientName")}
           icon={<FaUserMd />}
-          value={searchState.patientName.data}
+          value={searchState.patientName?.data || ""}
           onChange={(e) => {
             onSearchChange({
               patientName: {
                 data: e.target.value,
-                name: searchState.patientName.name,
+                name: searchState.patientName?.name || "",
               },
             });
           }}

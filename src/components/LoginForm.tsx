@@ -40,7 +40,6 @@ export default function LoginForm() {
     console.log(data);
 
     if (data.email === "admin@admin.com" && data.password === "123456Ss") {
-      console.log(process.env.NEXT_PUBLIC_JWT_SECRET);
       const sendData = {
         email: data.email,
         kind: "specialist",
@@ -61,6 +60,31 @@ export default function LoginForm() {
         path: "/",
       });
       router.push("/specialist");
+      dispatch(SET_ACTIVE_USER({ ...decryptData(encryptedData) }));
+    } else if (
+      data.email === "parent@parent.com" &&
+      data.password === "123456Ss"
+    ) {
+      const sendData = {
+        email: data.email,
+        kind: "parent",
+        completedData: true,
+        phone: "+201010101010",
+        country: { label: "Egypt", value: "EG" },
+        state: { label: "Cairo", value: "CA" },
+        city: { label: "Cairo", value: "CA" },
+        birthDate: new Date(),
+        gender: { label: "Male", value: "male" },
+      };
+      const encryptedData = encryptData(sendData);
+
+      Cookies.set("sub", encryptedData, {
+        expires: 3,
+        sameSite: "Strict",
+        secure: true,
+        path: "/",
+      });
+      router.push("/parent");
       dispatch(SET_ACTIVE_USER({ ...decryptData(encryptedData) }));
     } else {
       toast.error(t("auth.invalidCredentials"));
