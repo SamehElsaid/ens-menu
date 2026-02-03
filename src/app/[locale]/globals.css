@@ -1,12 +1,13 @@
 @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap");
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 :root {
   /* Modern palette */
   /* --primary: #06bed6; */
   --primary: #0bb7b4;
-  --secondary: #f8954e;
+  --secondary: #0bb7b4;
   --accent: #94bc73;
   --text-primary: #114268;
 }
@@ -17,7 +18,7 @@ button {
 
 @theme inline {
   --color-primary: var(--primary);
-  --color-secondary: var(--secondary);
+  --color-secondary: var(--primary);
   --color-accent: var(--accent);
   --color-text-primary: var(--text-primary);
   --font-sans: var(--font-geist-sans);
@@ -25,7 +26,7 @@ button {
 }
 
 .container {
-  @apply px-[10px] lg:px-[30px] max-w-[80rem] mx-auto;
+  @apply px-[10px] lg:px-[30px] max-w-7xl mx-auto;
 }
 
 @keyframes fadeIn {
@@ -41,7 +42,11 @@ button {
 
 body {
   color: var(--text-primary);
-  font-family: "JetBrains Mono", monospace, "Cairo", sans-serif;
+  font-family: "Source Sans 3", sans-serif;
+}
+.sun-editor,
+.sun-editor-editable {
+  font-family: "Source Sans 3", sans-serif !important;
 }
 
 .animate-fadeIn {
@@ -212,10 +217,10 @@ input {
   @apply !border-primary focus:!border-primary focus:ring-2 focus:ring-primary/20 !shadow-none;
 }
 .small {
-  @apply !py-0.5;
+  @apply !py-[0.2rem];
 }
 .select__menu {
-  @apply !z-50;
+  @apply !z-[1000] !mt-1;
 }
 .select__indicator svg {
   @apply !text-primary;
@@ -415,4 +420,221 @@ input {
   backdrop-filter: blur(11.6px);
   -webkit-backdrop-filter: blur(11.6px);
   border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.select__multi-value {
+  @apply !bg-primary/5 !border !border-primary/20 rounded-md duration-200;
+}
+.select__multi-value__remove:hover {
+  @apply !bg-red-200;
+}
+
+/* FullCalendar Styles */
+.calendar-container {
+  @apply w-full;
+}
+
+.fc {
+  @apply font-sans;
+}
+
+.fc-header-toolbar {
+  @apply flex flex-wrap items-center justify-between gap-4 mb-4;
+}
+
+.fc-button {
+  @apply bg-primary border-primary text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-primary/90;
+}
+
+.fc-button:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.fc-button-active {
+  @apply bg-primary/80;
+}
+
+.fc-button-primary:not(:disabled):active,
+.fc-button-primary:not(:disabled).fc-button-active {
+  @apply bg-primary/80;
+}
+
+.fc-event {
+  @apply cursor-pointer border-none rounded-md px-2 py-1;
+}
+
+.fc-event:hover {
+  @apply opacity-90;
+}
+
+.fc-daygrid-event {
+  @apply rounded-md;
+}
+
+.fc-timegrid-event {
+  @apply rounded-md;
+}
+
+.fc-day-today {
+  @apply bg-primary/5;
+}
+
+.fc-col-header-cell {
+  @apply bg-gray-50 font-semibold;
+}
+
+.fc-daygrid-day-frame {
+  @apply hover:bg-gray-50 transition-colors;
+}
+
+.fc-scrollgrid {
+  @apply border-gray-200;
+}
+
+.fc-daygrid-day-top {
+  @apply font-medium;
+}
+
+.fc-toolbar-title {
+  @apply text-xl font-bold text-gray-900;
+}
+
+.fc-daygrid-day-number {
+  @apply text-gray-700;
+}
+
+.fc-daygrid-day-number:hover {
+  @apply text-primary;
+}
+.fc-event-time {
+  display: none !important;
+}
+.fc-event {
+  background-color: var(--primary) !important;
+}
+.fc-col-header-cell {
+  background-color: var(--primary) !important;
+  color: #fff !important;
+  @apply p-0.5 md:p-2!;
+}
+.fc-button {
+  background-color: var(--primary) !important;
+  color: #fff !important;
+  padding: 0.5rem !important;
+  border: 1px solid var(--primary) !important;
+  text-transform: uppercase !important;
+}
+.fc-button:hover {
+  background-color: var(--primary) !important;
+  color: #fff !important;
+  padding: 0.5rem !important;
+}
+.fc-button:active {
+  background-color: var(--primary) !important;
+  color: #fff !important;
+}
+.fc-button-active {
+  background-color: white !important;
+  color: var(--primary) !important;
+}
+.fc .fc-button-primary:not(:disabled).fc-button-active:focus,
+.fc .fc-button-primary:not(:disabled):active:focus {
+  box-shadow: none !important;
+}
+.react-datepicker-popper {
+  z-index: 1100 !important;
+}
+.react-datepicker.react-datepicker--time-only {
+  width: 7rem !important;
+}
+.react-datepicker__time-list-item {
+  line-height: 1.75;
+  margin-left: 0.8rem;
+  margin-right: 0.3rem;
+  color: rgba(47, 43, 61, 0.78);
+  border-radius: 6px;
+  height: auto !important;
+}
+.react-datepicker__time-container {
+  width: 100% !important;
+}
+.react-datepicker__time-container
+  .react-datepicker__time
+  .react-datepicker__time-box {
+  width: 100% !important;
+}
+.react-datepicker__time-container
+  .react-datepicker__time
+  .react-datepicker__time-box
+  ul.react-datepicker__time-list
+  li.react-datepicker__time-list-item--selected {
+  background-color: var(--primary) !important;
+  color: #fff !important;
+}
+.react-datepicker__time-container
+  .react-datepicker__time
+  .react-datepicker__time-box
+  ul.react-datepicker__time-list
+  li.react-datepicker__time-list-item--selected:hover {
+  background-color: var(--primary) !important;
+  color: #fff !important;
+}
+.react-datepicker__time-container
+  .react-datepicker__time
+  .react-datepicker__time-box
+  ul.react-datepicker__time-list
+  li.react-datepicker__time-list-item--selected:active {
+  background-color: var(--primary) !important;
+  color: #fff !important;
+}
+.glass-bg {
+  background: rgba(3, 186, 179, 0.18);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(3, 186, 179, 0.3);
+}
+.fc .fc-toolbar.fc-header-toolbar {
+  @apply justify-center md:justify-between!;
+}
+.react-datepicker__day--disabled,
+.react-datepicker__month-text--disabled,
+.react-datepicker__quarter-text--disabled,
+.react-datepicker__year-text--disabled {
+  @apply !opacity-50 !cursor-not-allowed;
+}
+.ag-cell-wrapper {
+  @apply w-full!;
+}
+.blob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-image: linear-gradient(180deg, var(--primary), #e4f8f7);
+  opacity: 1;
+  filter: blur(12px);
+  animation: blob-bounce 2s infinite ease;
+}
+
+@keyframes blob-bounce {
+  0% {
+    transform: translate(-100%, -100%) translate3d(0, 0, 0);
+  }
+
+  25% {
+    transform: translate(-100%, -100%) translate3d(100%, 0, 0);
+  }
+
+  50% {
+    transform: translate(-100%, -100%) translate3d(100%, 100%, 0);
+  }
+
+  75% {
+    transform: translate(-100%, -100%) translate3d(0, 100%, 0);
+  }
+
+  100% {
+    transform: translate(-100%, -100%) translate3d(0, 0, 0);
+  }
 }

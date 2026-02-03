@@ -1,20 +1,22 @@
 import { useEffect, useState } from "react";
+import Loader from "./Loader";
+import useIsLogin from "@/hooks/useIsLogin";
 
 function HomeApp({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
-
+  const isLogin = useIsLogin();
+  console.log(isLogin);
   useEffect(() => {
     setTimeout(() => {
       setLoading(false);
-    }, 1000);
+    }, 0);
   }, []);
 
   return (
     <>
-      {loading && (
+      {(loading || isLogin) && (
         <div className="fixed top-0 left-0 right-0 bottom-0 bg-white z-111111 flex items-center justify-center">
-          <div className="w-10 h-10 border-t-2 border-b-2 border-primary rounded-full animate-spin"></div>
-          <p className="text-primary text-2xl font-bold">Loading...</p>
+          <Loader />
         </div>
       )}
       {children}

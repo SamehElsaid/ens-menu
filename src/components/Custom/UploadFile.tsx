@@ -11,6 +11,7 @@ interface UploadFileProps {
   label: string;
   size: number;
   accept: string;
+  fileTypesMessage?: string;
 }
 
 function UploadFile({
@@ -23,6 +24,7 @@ function UploadFile({
   label,
   size,
   accept,
+  fileTypesMessage,
 }: UploadFileProps) {
   return (
     <div>
@@ -46,7 +48,9 @@ function UploadFile({
             {t("form.clickToUploadOrDragAndDrop")}
           </span>
           <span className="text-xs text-gray-500 mt-1">
-            {t("form.pngWebpJpgUpTo{size}mb", { size: size.toString() })}
+            {fileTypesMessage
+              ? t(fileTypesMessage, { size: size.toString() })
+              : t("form.pngWebpJpgUpTo{size}mb", { size: size.toString() })}
           </span>
         </label>
       </div>

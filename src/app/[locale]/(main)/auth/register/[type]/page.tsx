@@ -24,16 +24,32 @@ const ParentRegisterFormComponent = ({
   const t = useTranslations("");
 
   return (
-    <div className=" bg-gradient-app py-12 px-4 sm:px-6 lg:px-8 relative  flex items-center justify-center">
+    <div className=" bg-gradient-app py-12 overflow-hidden px-4 sm:px-6 lg:px-8 relative  flex items-center justify-center">
       {/* Decorative blobs */}
 
       <div className="container flex items-center justify-center ">
         <div className="mt-16 rounded-md!  min-h-[calc(100dvh-140px)] w-full flex items-center justify-center">
-          <div
-            className={`flex w-full gap-10 ${
-              type === "parent" ? "flex-row-reverse" : ""
-            }`}
-          >
+          <div className={`flex w-full gap-10 flex-col lg:flex-row! `}>
+            {" "}
+            {/* Right: Welcome / illustration */}
+            <div className=" w-full ">
+              <div className="h-full w-full relative rounded-md!">
+                <div className="relative  z-10 h-full flex flex-col items-center justify-center text-center">
+                  <div className="w-full max-w-[70%] lg:max-w-none  mx-auto ">
+                    <span
+                      className="w-full"
+                      dangerouslySetInnerHTML={{
+                        __html: type === "parent" ? parent : doctor,
+                      }}
+                    ></span>
+                  </div>
+
+                  {/* glow accents */}
+                  <span className="absolute -top-6 -left-6 h-40 w-40 rounded-full bg-primary/40 blur-3xl" />
+                  <span className="absolute -bottom-6 -right-10 h-48 w-48 rounded-full bg-secondary/20 blur-3xl" />
+                </div>
+              </div>
+            </div>
             {/* Left: Header + Form in card */}
             <div className="w-full">
               <Card className="max-w-none!">
@@ -78,25 +94,6 @@ const ParentRegisterFormComponent = ({
                   )}
                 </div>
               </Card>
-            </div>
-
-            {/* Right: Welcome / illustration */}
-            <div className=" w-full ">
-              <div className="h-full w-full relative rounded-md!">
-                <div className="relative  z-10 h-full flex flex-col items-center justify-center text-center">
-                  <div className="w-full ">
-                    <span
-                      dangerouslySetInnerHTML={{
-                        __html: type === "parent" ? parent : doctor,
-                      }}
-                    ></span>
-                  </div>
-
-                  {/* glow accents */}
-                  <span className="absolute -top-6 -left-6 h-40 w-40 rounded-full bg-primary/40 blur-3xl" />
-                  <span className="absolute -bottom-6 -right-10 h-48 w-48 rounded-full bg-secondary/20 blur-3xl" />
-                </div>
-              </div>
             </div>
           </div>
         </div>

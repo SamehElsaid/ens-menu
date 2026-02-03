@@ -1,11 +1,37 @@
-import createMiddleware from 'next-intl/middleware';
-import {routing} from './i18n/routing';
- 
-export default createMiddleware(routing);
- 
+import createMiddleware from "next-intl/middleware";
+import { routing } from "./i18n/routing";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { decryptData } from "./shared/encryption";
+interface DecryptedToken {
+  kind: string;
+  [key: string]: unknown;
+}
+export default function middleware(request: NextRequest) {
+  const url = request.nextUrl.clone();
+
+  const token = request.cookies.get("sub");
+  const tokenDecrypted = decryptData(token?.value ?? "") as DecryptedToken;
+
+
+  // Stop Login , Register , Forgot Password , Reset Password , Verify Email , Verify Phone
+  if (url.pathname.startsWith("/auth")) {
+    if (token) {
+      url.pathname = "/";
+      return NextResponse.redirect(url);
+    }
+  }
+
+  if (url.pathname.startsWith("/specialist")) {
+    if (!token || tokenDecrypted?.kind !== "specialist") {
+      url.pathname = "/unauthorized";
+      return NextResponse.redirect(url);
+    }
+  }
+
+  return createMiddleware(routing)(request);
+}
+
 export const config = {
-  // Match all pathnames except for
-  // - … if they start with `/api`, `/trpc`, `/_next` or `/_vercel`
-  // - … the ones containing a dot (e.g. `favicon.ico`)
-  matcher: '/((?!api|trpc|_next|_vercel|.*\\..*).*)'
+  matcher: "/((?!api|trpc|_next|_vercel|.*\\..*).*)",
 };

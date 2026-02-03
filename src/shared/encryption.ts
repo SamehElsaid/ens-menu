@@ -1,23 +1,37 @@
-export const encryptData = (data: unknown): string => {
-  const jsonString = JSON.stringify(data);
-  const utf8String = unescape(encodeURIComponent(jsonString));
-  const encodedString = btoa(utf8String);
-  const textBefore = encodedString.substr(0, 15);
-  const textAfter = encodedString.substr(15);
+import CryptoJS from "crypto-js";
 
-  return textBefore + "2w2rds23dash34sd5dsd65tf51hj20hj1874" + textAfter;
+export const encryptData = (data: unknown): string => {
+  console.log(process.env.NEXT_PUBLIC_ENCRYPTION_KEY);
+  const jsonString = JSON.stringify(data);
+  const encrypted = CryptoJS.AES.encrypt(
+    jsonString,
+    process.env.NEXT_PUBLIC_ENCRYPTION_KEY as string
+  );
+  return encrypted.toString() || "";
 };
 
 export const decryptData = (encodedData: string): object => {
-  try {
-    const endCode = encodedData.replace(
-      "2w2rds23dash34sd5dsd65tf51hj20hj1874",
-      ""
-    );
-    const utf8String = atob(endCode);
-    const jsonString = decodeURIComponent(escape(utf8String));
+  const key = process.env.NEXT_PUBLIC_ENCRYPTION_KEY as string;
 
-    return JSON.parse(jsonString);
+  if (!key) {
+    throw new Error("Encryption key missing");
+  }
+
+  try {
+    const decrypted = CryptoJS.AES.decrypt(encodedData, key);
+
+    let decoded: string;
+    try {
+      decoded = decrypted.toString(CryptoJS.enc.Utf8);
+    } catch {
+      return {};
+    }
+
+    if (!decoded) {
+      return {};
+    }
+
+    return JSON.parse(decoded);
   } catch {
     return {};
   }

@@ -22,3 +22,21 @@ export const _checkFileType = (
   }
   return true;
 };
+
+export const timeStringToDate = (time: string) => {
+  if (!time) return null;
+  const [hours, minutes] = time.split(":").map(Number);
+
+  const date = new Date();
+  date.setHours(hours);
+  date.setMinutes(minutes);
+  date.setSeconds(0);
+  date.setMilliseconds(0);
+
+  return date;
+};
+
+
+export const convetDateToTimeString = (date: Date) => {
+  return date.toTimeString().slice(0, 5);
+};

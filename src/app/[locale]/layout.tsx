@@ -10,6 +10,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "swiper/css";
+import 'suneditor/dist/css/suneditor.min.css'
 
 export const metadata: Metadata = {
   title: "Create Next App",

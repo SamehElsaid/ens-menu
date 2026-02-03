@@ -39,12 +39,16 @@ interface CustomInputProps {
   size?: string;
   setOpen?: (open: boolean) => void;
   open?: boolean;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void;
   disabled?: boolean;
   apiUrl?: string;
   querySearch?: string;
   triggerApiUrl?: string;
   reset?: () => void;
+  rows?: number;
+  disabledPreviousDates?: boolean;
   [key: string]: unknown;
 }
 type OptionType = {
@@ -67,9 +71,11 @@ export default function CustomInput({
   querySearch,
   triggerApiUrl = "",
   reset,
+  disabledPreviousDates = false,
   ...props
 }: CustomInputProps) {
   const [focus, setFocus] = useState<boolean>(false);
+  const [openDate, setOpenDate] = useState<boolean>(false);
   const [active, setActive] = useState<boolean>(false);
   const phoneRef = useRef(null);
   const t = useTranslations();
@@ -95,6 +101,21 @@ export default function CustomInput({
     isNext: false,
   });
   void _color;
+
+  const formatDate = (date?: Date | null) => {
+    if (!date) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const formatTime = (time?: Date | null) => {
+    if (!time) return "";
+    const hours = String(time.getHours()).padStart(2, "0");
+    const minutes = String(time.getMinutes()).padStart(2, "0");
+    return `${hours}:${minutes}`;
+  };
 
   useEffect(() => {
     if (apiUrl && querySearch) {
@@ -146,13 +167,6 @@ export default function CustomInput({
     triggerApiUrl,
   ]);
 
-
-  console.log(
-    options.concat(
-      config.isNext ? [{ label: t("auth.seeMore"), value: "seeMore" }] : []
-    )
-  );
-
   return (
     <>
       <div className="w-full relative">
@@ -162,7 +176,42 @@ export default function CustomInput({
           </label>
         )}
 
-        {type === "select" ? (
+        {type === "choice" ? (
+          <div className="w-full">
+            <div
+              className={`rounded-lg ${
+                error
+                  ? "border border-red-300 bg-red-50/30"
+                  : "border border-gray-200 bg-gray-50/80"
+              } shadow-sm`}
+            >
+              <div className="flex items-center gap-2">
+                {(props.options as OptionType[])?.map((option) => {
+                  const isSelected = (props.value as OptionType)?.value === option.value;
+                  console.log(props.value , option.value);
+                  
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => {
+                        console.log(option.value);
+                        props.onChange?.(option as unknown as ChangeEvent<HTMLInputElement>);
+                      }}
+                      className={`flex-1 rounded-md px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
+                        isSelected
+                          ? "bg-primary text-white shadow-md"
+                          : "bg-transparent text-primary hover:text-primary/80"
+                      } ${error && !isSelected ? "text-red-600" : ""}`}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        ) : type === "select" ? (
           <div className="relative ">
             <label
               htmlFor={id}
@@ -180,7 +229,9 @@ export default function CustomInput({
               instanceId={id}
               {...props}
               className="basic-single "
-              classNamePrefix={`cursor-text ${size == "small" ? "small" : ""} ${error ? "error" : ""} select`}
+              classNamePrefix={`cursor-text ${size == "small" ? "small" : ""} ${
+                error ? "error" : ""
+              } select`}
               isSearchable={
                 isSearching || (props?.isSearchable as boolean) || false
               }
@@ -196,11 +247,11 @@ export default function CustomInput({
               )}
               placeholder={t("auth.selectPlaceholder")}
               options={
-               
                 (props.options as OptionsOrGroups<
                   OptionType,
                   GroupBase<OptionType>
-                >) || options.concat(
+                >) ||
+                options.concat(
                   config.isNext
                     ? [{ label: t("auth.seeMore"), value: "seeMore" }]
                     : []
@@ -270,14 +321,22 @@ export default function CustomInput({
               }
             />
           </div>
-        ) : type === "date" ? (
+        ) : type === "date" || type === "time" ? (
           <div className="relative w-full">
             <DatePicker
               {...props}
+              minDate={disabledPreviousDates ? new Date() : undefined}
               showYearDropdown
               showMonthDropdown
+              showTimeSelectOnly={type === "time"}
+              showTimeSelect={type === "time"}
               locale={locale}
-              dateFormat="yyyy-MM-dd"
+              timeCaption={t("workSchedule.timeCaption")}
+              timeFormat="HH:mm"
+              dateFormat={type === "date" ? "yyyy-MM-dd" : "HH:mm"}
+              open={openDate}
+              onCalendarOpen={() => setOpenDate(true)}
+              onCalendarClose={() => setOpenDate(false)}
               selected={props.value as Date | null | undefined}
               onChange={(date) =>
                 props.onChange?.(
@@ -300,7 +359,10 @@ export default function CustomInput({
                       {icon}
                     </label>
                   )}
-
+                  <div
+                    className="absolute inset-0  z-50"
+                    onClick={() => setOpenDate((prev) => !prev)}
+                  ></div>
                   <input
                     id={id?.replace(" ", "-")}
                     type="text"
@@ -321,8 +383,11 @@ export default function CustomInput({
                     } `}
                     {...props}
                     value={
-                      (props.value as Date)?.toISOString()?.split("T")?.[0] ||
-                      ""
+                      type === "date"
+                        ? formatDate(props.value as Date | null | undefined)
+                        : type === "time"
+                        ? formatTime(props.value as Date | null | undefined)
+                        : ""
                     }
                   />
                 </div>
@@ -330,11 +395,17 @@ export default function CustomInput({
             />
           </div>
         ) : (
-          <div className="flex items-center flex-col rounded-md w-full relative overflow-hidden">
+          <div
+            className={`flex ${
+              type === "textarea" ? "items-start" : "items-center"
+            } flex-col rounded-md w-full relative overflow-hidden`}
+          >
             {icon && (
               <label
                 htmlFor={id}
-                className={`duration-200 absolute start-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-md border ${
+                className={`duration-200 absolute bv start-3 ${
+                  type === "textarea" ? "top-3" : "top-1/2 -translate-y-1/2"
+                } flex items-center justify-center w-9 h-9 rounded-md border ${
                   error
                     ? "bg-red-50 text-red-500 border-red-200"
                     : focus
@@ -346,47 +417,78 @@ export default function CustomInput({
               </label>
             )}
 
-            <input
-              id={id?.replace(" ", "-")}
-              type={active ? "text" : type}
-              placeholder={placeholder}
-              onFocus={() => (setOpen ? setOpen(true) : setFocus(true))}
-              onBlur={() => (setOpen ? setOpen(false) : setFocus(false))}
-              {...props}
-              className={`w-full ${type === "color" ? "opacity-0!" : ""} ${
-                type === "password" ? "pe-12" : "pe-4"
-              } duration-200 ${size == "small" ? "py-2.5" : "py-3.5"} ${
-                icon ? "ps-14" : "ps-4"
-              } outline-none rounded-md border ${
-                type === "color" ? "bg-background-two" : "bg-primary/5"
-              } border-primary/20  focus:border-primary focus:ring-2 focus:ring-primary/20  disabled:opacity-80 ${
-                className || ""
-              } ${
-                error
-                  ? "border-red-500 focus:border-red-500 focus:ring-red-200 bg-red-50 "
-                  : ""
-              } ${type === "color" ? "h-[54.18px]" : ""}`}
-              {...props}
-            />
-
-            {type === "password" && (
-              <button
-                type="button"
-                className="absolute h-full flex items-center pe-3! end-3 transform text-xl text-primary/70 hover:text-primary duration-200"
-                onClick={() => setActive(!active)}
-              >
-                {active ? <FaRegEye /> : <FaRegEyeSlash />}
-              </button>
-            )}
-
-            {setOpen && (
-              <button
-                type="button"
-                onClick={() => setOpen(true)}
-                className="absolute h-full flex items-center end-3 transform text-xl text-primary/70 hover:text-primary duration-200"
-              >
-                <IoIosArrowDown />
-              </button>
+            {type === "textarea" ? (
+              <textarea
+                id={id?.replace(" ", "-")}
+                placeholder={placeholder}
+                onFocus={() => (setOpen ? setOpen(true) : setFocus(true))}
+                onBlur={() => (setOpen ? setOpen(false) : setFocus(false))}
+                rows={props.rows || 4}
+                onChange={(e) => {
+                  props.onChange?.(
+                    e as React.ChangeEvent<
+                      HTMLInputElement | HTMLTextAreaElement
+                    >
+                  );
+                }}
+                value={props.value as string | undefined}
+                disabled={props.disabled}
+                className={`w-full resize-y duration-200 ${
+                  size == "small" ? "py-2.5" : "py-3.5"
+                } ${
+                  icon ? "ps-14" : "ps-4"
+                } pe-4 outline-none rounded-md border bg-primary/5 border-primary/20  focus:border-primary focus:ring-2 focus:ring-primary/20  disabled:opacity-80 ${
+                  className || ""
+                } ${
+                  error
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-200 bg-red-50 "
+                    : ""
+                } `}
+              />
+            ) : (
+              <>
+                {" "}
+                <input
+                  id={id?.replace(" ", "-")}
+                  type={active ? "text" : type}
+                  placeholder={placeholder}
+                  onFocus={() => (setOpen ? setOpen(true) : setFocus(true))}
+                  onBlur={() => (setOpen ? setOpen(false) : setFocus(false))}
+                  {...props}
+                  className={`w-full ${type === "color" ? "opacity-0!" : ""} ${
+                    type === "password" ? "pe-12" : "pe-4"
+                  } duration-200 ${size == "small" ? "py-2.5" : "py-3.5"} ${
+                    icon ? "ps-14" : "ps-4"
+                  } outline-none rounded-md border ${
+                    type === "color" ? "bg-background-two" : "bg-primary/5"
+                  } border-primary/20  focus:border-primary focus:ring-2 focus:ring-primary/20  disabled:opacity-80 ${
+                    className || ""
+                  } ${
+                    error
+                      ? "border-red-500 focus:border-red-500 focus:ring-red-200 bg-red-50 "
+                      : ""
+                  } ${type === "color" ? "h-[54.18px]" : ""}`}
+                  {...props}
+                />
+                {type === "password" && (
+                  <button
+                    type="button"
+                    className="absolute h-full flex items-center pe-3! end-3 transform text-xl text-primary/70 hover:text-primary duration-200"
+                    onClick={() => setActive(!active)}
+                  >
+                    {active ? <FaRegEye /> : <FaRegEyeSlash />}
+                  </button>
+                )}
+                {setOpen && (
+                  <button
+                    type="button"
+                    onClick={() => setOpen(true)}
+                    className="absolute h-full flex items-center end-3 transform text-xl text-primary/70 hover:text-primary duration-200"
+                  >
+                    <IoIosArrowDown />
+                  </button>
+                )}
+              </>
             )}
           </div>
         )}
