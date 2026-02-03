@@ -12,13 +12,15 @@ interface DecryptedToken {
   [key: string]: unknown;
 }
 
-
 const getApiKey = async () => {
   try {
     const response = await fetch(`/api/utc-time`);
     const dataTime = await response.json();
     const utcTimestamp = dataTime.fx_dyn;
-    const fx_dyn = decryptDataApi(utcTimestamp, process.env.NEXT_PUBLIC_SECRET_KEY as string);
+    const fx_dyn = decryptDataApi(
+      utcTimestamp,
+      process.env.NEXT_PUBLIC_SECRET_KEY as string
+    );
     return fx_dyn;
   } catch {
     return Date.now() / 1000;
@@ -42,12 +44,15 @@ export const axiosGet = async <T>(
   const utcTime = await getApiKey();
   const apiKey = `${process.env.NEXT_PUBLIC_SECRET_KEY}///${utcTime}`;
 
-  const apiKeyEncrypt = encryptDataApi(apiKey, process.env.NEXT_PUBLIC_SECRET_KEY as string);
+  const apiKeyEncrypt = encryptDataApi(
+    apiKey,
+    process.env.NEXT_PUBLIC_SECRET_KEY as string
+  );
 
   try {
     const header: AxiosRequestConfig = {
       headers: {
-        Authorization: `Bearer  ${token || tokenDecrypted?.token}`,
+        Authorization: `Bearer ${token || tokenDecrypted?.token}`,
         "Accept-Language": locale,
         "X-API-KEY": apiKeyEncrypt,
       },
@@ -60,7 +65,6 @@ export const axiosGet = async <T>(
       `${process.env.NEXT_PUBLIC_BASE_URL}${url}`,
       header
     );
-
 
     return { data: fetchData.data, status: true };
   } catch (err) {
@@ -95,7 +99,10 @@ export const axiosPost = async <T, U>(
   const utcTime = await getApiKey();
   const apiKey = `${process.env.NEXT_PUBLIC_SECRET_KEY}///${utcTime}`;
 
-  const apiKeyEncrypt = encryptDataApi(apiKey, process.env.NEXT_PUBLIC_SECRET_KEY as string);
+  const apiKeyEncrypt = encryptDataApi(
+    apiKey,
+    process.env.NEXT_PUBLIC_SECRET_KEY as string
+  );
 
   console.log(apiKeyEncrypt);
 
@@ -118,7 +125,7 @@ export const axiosPost = async <T, U>(
     );
 
     return { data: fetchData.data as unknown as U, status: true };
-  } catch (err) { 
+  } catch (err) {
     return {
       data: (err as AxiosError)?.response?.data as U,
       status: false,
@@ -135,9 +142,12 @@ export const getFromGetServerSideProps = async <T>(
   const headers = { ...newHeaders.headers, "Accept-Language": locale };
 
   try {
-    const fetchData = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/${url}`, {
-      headers,
-    });
+    const fetchData = await axios.get(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/${url}`,
+      {
+        headers,
+      }
+    );
 
     return { data: fetchData.data, status: true };
   } catch (err) {
