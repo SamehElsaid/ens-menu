@@ -144,8 +144,13 @@
     "displayNameAr": "Display Name (Arabic)",
     "displayNameRequired": "Display name is required",
     "displayNameMinLength": "Display name must be at least 2 characters",
-    "profileImage": "Profile Image"
-  },
+    "profileImage": "Profile Image",
+    "welcomeBack": "Welcome Back",
+    "welcomeBackDescription": "Enter your details to login",
+    "dontHaveAccount": "Don't have an account?",
+    "forgotPassword": "Forgot your password?",
+    "orLoginWith": "Or login with"
+    },
   "form": {
     "personalInformation": "Personal Information",
     "next": "Next",

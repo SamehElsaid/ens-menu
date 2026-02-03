@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import Loader from "./Loader";
 import useIsLogin from "@/hooks/useIsLogin";
+import useCatchError from "@/hooks/useCatchError";
 
 function HomeApp({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const isLogin = useIsLogin();
-  console.log(isLogin);
+  useCatchError();
   useEffect(() => {
     setTimeout(() => {
       setLoading(false);

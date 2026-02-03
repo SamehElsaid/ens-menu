@@ -8,9 +8,7 @@ import FeaturedSection from "@/components/HomePage/FeaturedSection";
 function Page() {
   return (
     <>
-      <HeroSection />
-      <CenterSectionView />
-      <FeaturedSection />
+    
     </>
   );
 }

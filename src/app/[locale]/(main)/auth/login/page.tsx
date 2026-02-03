@@ -1,7 +1,9 @@
-import Card from "@/components/ui/Card";
-import { register } from "@/svg/register";
+import CustomLogo from "@/components/Custom/CustomLogo";
 import LoginForm from "@/components/LoginForm";
-export default function LoginIndexPage() {
+import Card from "@/components/ui/Card";
+import { useTranslations } from "next-intl";
+export default function RegisterIndexPage() {
+  const t = useTranslations("");
 
 
   return (
@@ -9,42 +11,29 @@ export default function LoginIndexPage() {
       <div className="container flex items-center justify-center ">
         <div className="rounded-md!   mt-10 min-h-[calc(100dvh-140px)] w-full flex items-center justify-center">
           <div className="flex gap-10  w-full flex-col lg:flex-row ">
-            {/* Right: welcome + decorative illustration */}
-            <div className="relative w-full">
-              <div className="h-full w-full relative rounded-md!">
-                <div className="relative z-10 h-full flex flex-col items-center justify-center text-center">
-                  <div className="w-full max-w-[70%] lg:max-w-none  mx-auto ">
-                    <span dangerouslySetInnerHTML={{ __html: register }}></span>
-                  </div>
-                </div>
 
-                {/* glow accents */}
-                <span className="absolute -top-6 -left-6 h-40 w-40 rounded-full bg-primary/40 blur-3xl" />
-                <span className="absolute -bottom-6 -right-10 h-48 w-48 rounded-full bg-secondary/20 blur-3xl" />
-              </div>
-            </div>
+
             {/* Left: selection card area */}
-            <div className="w-full">
-              <Card className="max-w-none!">
-                <div className="flex items-center gap-6 border-b border-gray-100 pb-6 mb-6">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <span className="text-primary font-bold text-lg">U</span>
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-semibold text-gray-900">
-                      Login
-                    </h2>
-                    <p className="text-sm text-gray-500">
-                      Welcome to our system
-                    </p>
+            <div className="fixed inset-0 overflow-hidden bg-white pointer-events-none">
+              <div className="particle particle-drift-slow w-64 h-64 bg-accent-purple rounded-full top-[-5%] right-[-10%]" style={{ opacity: '0.08' }} />
+              <div className="particle particle-drift-medium w-48 h-48 bg-deep-indigo rounded-full top-[60%] left-[-5%]" style={{ opacity: '0.05' }} />
+              <div className="particle particle-drift-slow w-32 h-32 bg-accent-purple rounded-full top-[25%] left-[15%]" style={{ opacity: '0.06' }} />
+              <div className="particle particle-drift-medium w-72 h-72 bg-royal-purple rounded-[3rem] bottom-[-10%] right-[5%] -rotate-12" style={{ opacity: '0.07' }} />
+              <div className="particle particle-drift-slow w-40 h-40 bg-accent-purple rounded-4xl top-[40%] right-[20%]" style={{ opacity: '0.04' }} />
+              <div className="particle particle-drift-medium w-24 h-24 bg-deep-indigo rounded-3xl top-[10%] left-[30%]" style={{ opacity: '0.09' }} />
+            </div>
+            <div className=" max-w-[500px]  mx-auto relative">
+              <Card className="max-w-none! bg-transparent! md:bg-white!  shadow-none! md:shadow-md! ">
+                <div className="relative z-10 flex flex-col h-full  w-full px-6 py-8">
+                  <CustomLogo />
+                  <div className="flex-1 flex flex-col max-w-[400px] mx-auto w-full">
+                    <div className="mb-10 text-center">
+                      <h2 className="text-2xl  text-royal-purple mb-2">{t("auth.welcomeBack")}</h2>
+                      <p className="text-slate-500 ">{t("auth.welcomeBackDescription")}</p>
+                    </div>
+                    <LoginForm />
                   </div>
                 </div>
-
-                <div className="space-y-4">
-                  <LoginForm />
-                </div>
-
-              
               </Card>
             </div>
           </div>
@@ -53,3 +42,4 @@ export default function LoginIndexPage() {
     </div>
   );
 }
+

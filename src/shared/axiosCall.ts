@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import Cookies from "js-cookie";
-import { decryptData } from "./encryption";
+import { decryptData, decryptDataApi, encryptDataApi } from "./encryption";
 
 interface ApiResponse<T> {
   data?: T;
@@ -11,6 +11,19 @@ interface DecryptedToken {
   token?: string;
   [key: string]: unknown;
 }
+
+
+const getApiKey = async () => {
+  try {
+    const response = await fetch(`/api/utc-time`);
+    const dataTime = await response.json();
+    const utcTimestamp = dataTime.fx_dyn;
+    const fx_dyn = decryptDataApi(utcTimestamp, process.env.NEXT_PUBLIC_SECRET_KEY as string);
+    return fx_dyn;
+  } catch {
+    return Date.now() / 1000;
+  }
+};
 
 //!  GET request API
 // Function to make a GET request
@@ -24,11 +37,19 @@ export const axiosGet = async <T>(
   const authToken = Cookies.get("sub") ?? "";
   const tokenDecrypted = decryptData(authToken) as DecryptedToken;
 
+  console.log(tokenDecrypted);
+
+  const utcTime = await getApiKey();
+  const apiKey = `${process.env.NEXT_PUBLIC_SECRET_KEY}///${utcTime}`;
+
+  const apiKeyEncrypt = encryptDataApi(apiKey, process.env.NEXT_PUBLIC_SECRET_KEY as string);
+
   try {
     const header: AxiosRequestConfig = {
       headers: {
         Authorization: `Bearer  ${token || tokenDecrypted?.token}`,
         "Accept-Language": locale,
+        "X-API-KEY": apiKeyEncrypt,
       },
       params,
     };
@@ -36,7 +57,7 @@ export const axiosGet = async <T>(
       delete header.headers?.Authorization;
     }
     const fetchData = await axios.get<T>(
-      `${url}`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}${url}`,
       header
     );
 
@@ -57,7 +78,7 @@ interface HeadersPost {
   "Content-Type"?: string;
 }
 // Function to make a POST request
-export const axiosPost = async <T>(
+export const axiosPost = async <T, U>(
   url: string,
   locale: string,
   data: T,
@@ -71,27 +92,35 @@ export const axiosPost = async <T>(
   const headerToken: HeadersPost = file ? { ...HeaderImg } : {};
   headerToken.Authorization = `Bearer ${tokenDecrypted?.token}`;
 
+  const utcTime = await getApiKey();
+  const apiKey = `${process.env.NEXT_PUBLIC_SECRET_KEY}///${utcTime}`;
+
+  const apiKeyEncrypt = encryptDataApi(apiKey, process.env.NEXT_PUBLIC_SECRET_KEY as string);
+
+  console.log(apiKeyEncrypt);
+
   if (close) {
     delete headerToken.Authorization;
   }
 
   try {
     const fetchData = await axios.post<T>(
-      `${process.env.BASE_URL}/${url}`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}${url}`,
       data,
       {
         withCredentials: true,
         headers: {
           ...headerToken,
           "Accept-Language": locale,
+          "X-API-KEY": apiKeyEncrypt,
         },
       }
     );
 
-    return { data: fetchData.data, status: true };
-  } catch (err) {
+    return { data: fetchData.data as unknown as U, status: true };
+  } catch (err) { 
     return {
-      data: (err as AxiosError)?.response?.data as T,
+      data: (err as AxiosError)?.response?.data as U,
       status: false,
     };
   }
@@ -106,7 +135,7 @@ export const getFromGetServerSideProps = async <T>(
   const headers = { ...newHeaders.headers, "Accept-Language": locale };
 
   try {
-    const fetchData = await axios.get(`${process.env.BASE_URL}/${url}`, {
+    const fetchData = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/${url}`, {
       headers,
     });
 

@@ -36,3 +36,25 @@ export const decryptData = (encodedData: string): object => {
     return {};
   }
 };
+
+
+
+
+export function encryptDataApi(data: unknown, passphrase: string) {
+  const jsonString = JSON.stringify(data);
+  const encrypted = CryptoJS.AES.encrypt(jsonString, passphrase);
+  
+  return encrypted.toString();
+}
+
+export function decryptDataApi(encryptedData: string, passphrase: string) {
+
+  const bytes = CryptoJS.AES.decrypt(encryptedData, passphrase);
+  const decryptedString = bytes.toString(CryptoJS.enc.Utf8); 
+
+  try {
+    return JSON.parse(decryptedString);
+  } catch {
+    return decryptedString;
+  }
+}

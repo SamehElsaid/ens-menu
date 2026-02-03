@@ -1,5 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap");
+/* @import url("https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap"); */
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap');
+
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
@@ -8,6 +10,11 @@
   /* --primary: #06bed6; */
   --primary: #0bb7b4;
   --secondary: #0bb7b4;
+  --royal-purple: #1a0b2e;
+  --deep-indigo: #2d1b4d;
+  --accent-purple: #7c3aed;
+  --glow-purple: #a78bfa;
+  --soft-purple: #f5f3ff;
   --accent: #94bc73;
   --text-primary: #114268;
 }
@@ -23,6 +30,11 @@ button {
   --color-text-primary: var(--text-primary);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-royal-purple: var(--royal-purple);
+  --color-deep-indigo: var(--deep-indigo);
+  --color-accent-purple: var(--accent-purple);
+  --color-glow-purple: var(--glow-purple);
+  --color-soft-purple: var(--soft-purple);
 }
 
 .container {
@@ -41,12 +53,11 @@ button {
 }
 
 body {
-  color: var(--text-primary);
-  font-family: "Source Sans 3", sans-serif;
+  font-family: "Tajawal", "Cairo", sans-serif;
 }
 .sun-editor,
 .sun-editor-editable {
-  font-family: "Source Sans 3", sans-serif !important;
+  font-family: "Tajawal", "Cairo", sans-serif !important;
 }
 
 .animate-fadeIn {
@@ -638,3 +649,51 @@ input {
     transform: translate(-100%, -100%) translate3d(0, 0, 0);
   }
 }
+/* Auth Styles */
+@keyframes scan {
+  0%, 100% { top: 0%; }
+  50% { top: 100%; }
+}
+@keyframes drift-1 {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(30px, -50px) rotate(120deg); }
+  66% { transform: translate(-20px, 20px) rotate(240deg); }
+  100% { transform: translate(0, 0) rotate(360deg); }
+}
+@keyframes drift-2 {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-40px, 60px) rotate(-180deg); }
+  100% { transform: translate(0, 0) rotate(-360deg); }
+}
+.scanning-line {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #7c3aed, transparent);
+  box-shadow: 0 0 12px #7c3aed;
+  animation: scan 3s linear infinite;
+}
+.particle {
+  position: absolute;
+  opacity: 0.15;
+  filter: blur(1px);
+  z-index: 0;
+  pointer-events: none;
+}
+.particle-drift-slow {
+  animation: drift-1 25s ease-in-out infinite;
+}
+.particle-drift-medium {
+  animation: drift-2 18s ease-in-out infinite;
+}
+.glass-input {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(124, 58, 237, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass-input:focus-within {
+  border-color: #7c3aed;
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.15);
+  background: rgba(255, 255, 255, 0.9);
+}
+/* Auth Styles */
