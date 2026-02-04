@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { StateRaw } from "@/modules/Header/types";
+import { StateRaw } from "@/types/types";
 
 interface State {
   id: string;
