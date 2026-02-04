@@ -2,6 +2,9 @@
   "header": {
     "home": "Home",
     "about": "About",
+    "features": "Features",
+    "team": "How It Works",
+    "faq": "FAQ",
     "contact": "Contact"
   },
   "home": {
@@ -150,7 +153,7 @@
     "dontHaveAccount": "Don't have an account?",
     "forgotPassword": "Forgot your password?",
     "orLoginWith": "Or login with"
-    },
+  },
   "form": {
     "personalInformation": "Personal Information",
     "next": "Next",
@@ -659,5 +662,104 @@
     "errorsInvalidDocumentType": "Document must be a PDF or XLSX file only.",
     "errorsImagesOnly": "Only image files are allowed."
   },
-  "hello": "Hello"
+  "hello": "Hello",
+  "heroSection": {
+    "badge": "Start Now for Free",
+    "title1": "Transform your restaurant into a",
+    "title2": "Smart Menu",
+    "description": "An interactive digital menu with modern design, enables your customers to browse the food menu easily and clearly by scanning a QR code only",
+    "cta": "Start Now for Free",
+    "watchDemo": "Watch Demo"
+  },
+  "Landing": {
+    "features": {
+      "title": "Why Choose Smart Menu?",
+      "description": "We provide everything you need to create a professional digital menu for your restaurant or cafe",
+      "items": {
+        "0": {
+          "title": "Lightning Fast",
+          "description": "Create a professional digital menu for your restaurant in minutes, with instant updates anytime"
+        },
+        "1": {
+          "title": "Advanced Analytics",
+          "description": "Track your products performance and see the most ordered items to improve your decisions and increase sales"
+        },
+        "2": {
+          "title": "Mobile Responsive",
+          "description": "Responsive design that works perfectly on all devices - phones, tablets, and computers"
+        },
+        "3": {
+          "title": "Secure & Protected",
+          "description": "Advanced data protection with automatic backups and world-class security standards"
+        },
+        "4": {
+          "title": "Multiple Designs",
+          "description": "Choose from a wide range of ready-made templates or customize the design to match your restaurant identity"
+        },
+        "5": {
+          "title": "Multi-language Support",
+          "description": "Offer menus in multiple languages to customers from different nationalities to expand your customer base"
+        }
+      }
+    },
+    "howItWorks": {
+      "title": "Three Simple Steps to Get Started",
+      "description": "We make it easy for you to transition from your old paper menu to the digital era in minutes.",
+      "steps": {
+        "0": {
+          "number": "01",
+          "title": "Register Now",
+          "description": "Create your account for free in just a few simple steps or sign in directly and quickly using a Google account."
+        },
+        "1": {
+          "number": "02",
+          "title": "Customize Your Design",
+          "description": "Choose the colors, logo, and QR style and menu that matches your restaurant's brand identity."
+        },
+        "2": {
+          "number": "03",
+          "title": "Publish the QR Code",
+          "description": "Upload the QR code in high quality and print it on the tables or at the entrance of your restaurant."
+        }
+      }
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "description": "Everything you need to know about ENS platform in one place.",
+      "items": [
+        {
+          "question": "How do I update my menu?",
+          "answer": "Through your dashboard, you can modify items, prices, and images with a click of a button, and the change will appear instantly to your customers without needing to change the printed QR code."
+        },
+        {
+          "question": "Do I need a crypto wallet to use the service?",
+          "answer": "No, you can register via email or Google account and start directly. We provide traditional payment options in addition to crypto options."
+        },
+        {
+          "question": "What is a smart menu?",
+          "answer": "It is an interactive menu that allows your customers to browse meals, view item ratings, and even order directly from the table via their phone."
+        },
+        {
+          "question": "Can I link the QR to an external website?",
+          "answer": "Absolutely! You can direct the QR to any external link, or use our integrated and professional menu system."
+        }
+      ]
+    },
+
+    "cta": {
+      "title": "Ready to Transform Your Restaurant?",
+      "description": "Join hundreds of restaurants that switched to smart menus. Start your free trial today.",
+      "button": "Start Now for Free"
+    },
+    "footer": {
+      "description": "ENS provides you with the best digital menu solutions for restaurants and cafes through QR codes to receive orders and payments from your customers for a seamless and convenient experience, contributing to increasing customer satisfaction and boosting sales.",
+      "quickLinks": "Quick Links",
+      "contactUs": "Contact Us",
+      "location": "Egypt",
+      "UnitedArabEmirates": "United Arab Emirates",
+      "copyright": "All rights reserved.",
+      "privacy": "Privacy Policy",
+      "terms": "Terms and Conditions"
+    }
+  }
 }

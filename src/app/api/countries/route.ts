@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { CountryRaw } from "@/modules/Header/types";
+import { CountryRaw } from "@/types/types";
 
 interface Country {
   id: string;
@@ -10,8 +10,6 @@ interface Country {
   name_ar: string;
   phonecode: string;
 }
-
-
 
 interface PaginatedResponse {
   data: Country[];
@@ -64,7 +62,7 @@ export async function GET(request: NextRequest) {
     let allCountries: Country[] = countriesData.map((country: CountryRaw) => ({
       id: country.id,
       sortname: country.sortname,
-      name_en: country.name_en ,
+      name_en: country.name_en,
       name_ar: country.name_ar,
       phonecode: country.phonecode,
     }));

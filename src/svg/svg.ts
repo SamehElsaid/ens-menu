@@ -1,4 +1,4 @@
-import { register } from "./register"
-import { parent } from "./parent"
-import { doctor } from "./doctor"
-export { register, parent, doctor }
+import { parent } from "./parent";
+import { doctor } from "./doctor";
+import { flagIcons } from "./flags";
+export { parent, doctor, flagIcons };
