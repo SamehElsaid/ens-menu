@@ -8,11 +8,11 @@ import { useLocale } from "next-intl";
 export function DashboardSidebar({
   isMenuOpen,
   setIsMenuOpen,
-  type = "specialist",
+  type = "dashboard",
 }: {
   isMenuOpen: boolean;
   setIsMenuOpen: (isMenuOpen: boolean) => void;
-  type?: "specialist" | "parent";
+  type?: "dashboard" | "select-menu";
 }) {
   const pathname = usePathname();
   const locale = useLocale();
@@ -52,12 +52,12 @@ export function DashboardSidebar({
                   key={item.label}
                   onClick={() => setIsMenuOpen(false)}
                   className={`flex w-full items-center justify-between rounded-2xl px-3 py-2 text-sm font-semibold transition ${pathname.includes(
-                    (type === "specialist" ? "/specialist/" : "/parent/") +
+                    "/dashboard/" +
                     item.link || ""
                   ) ||
                       (item.dependentParent &&
                         pathname.includes(
-                          (type === "specialist" ? "/specialist/" : "/parent/") +
+                          "/dashboard/" +
                           item.parentLink || ""
                         ))
                       ? "bg-primary/10 text-primary shadow-inner"
