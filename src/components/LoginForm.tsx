@@ -67,7 +67,7 @@ export default function LoginForm() {
         secure: true,
         path: "/",
       });
-      router.push("/");
+      router.push("/dashboard");
       if (user) {
         dispatch(SET_ACTIVE_USER(user));
       }

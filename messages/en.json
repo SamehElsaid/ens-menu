@@ -58,6 +58,7 @@
     "ownsCenter": "I own a center",
     "centerName": "Center Name",
     "address": "Address",
+    "registerSuccess": "Account created successfully",
     "centerPhone": "Center Phone",
     "centerEmail": "Center Email",
     "centerImages": "Center Images",
@@ -152,7 +153,10 @@
     "welcomeBackDescription": "Enter your details to login",
     "dontHaveAccount": "Don't have an account?",
     "forgotPassword": "Forgot your password?",
-    "orLoginWith": "Or login with"
+    "orLoginWith": "Or login with",
+    "haveAccount": "Already have an account?",
+    "createAccount": "Create Account",
+    "registerDescription": "Create your account to get started"
   },
   "form": {
     "personalInformation": "Personal Information",
@@ -288,7 +292,6 @@
     "qualificationSchoolMinLength": "School name must be at least 2 characters",
     "qualificationType": "Qualification type",
     "qualificationTypeRequired": "Qualification type is required",
-    "qualificationTypePlaceholder": "Select qualification type",
     "qualificationTypeAcademic": "Academic qualification",
     "qualificationTypeCourses": "Courses & Certificates",
     "qualificationDegree": "Degree",

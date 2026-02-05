@@ -1,7 +1,7 @@
 "use client";
 import { usePathname } from "@/i18n/navigation";
 import LinkTo from "../Global/LinkTo";
-import { navSections, parentNavSections } from "./data";
+import { navSections } from "./data";
 import Drawer from "../Global/Drawer";
 import { useLocale } from "next-intl";
 
@@ -17,14 +17,12 @@ export function DashboardSidebar({
   const pathname = usePathname();
   const locale = useLocale();
 
-  const navSectionsData =
-    type === "specialist" ? navSections : parentNavSections;
+  const navSectionsData = navSections;
 
   const sidebarSections = (hidden = false) => (
     <aside
-      className={`${
-        hidden ? "hidden w-[270px]" : " w-full"
-      }  flex flex-col border-e border-slate-100 bg-white lg:flex h-dvh fixed top-0 start-0`}
+      className={`${hidden ? "hidden w-[270px]" : " w-full"
+        }  flex flex-col border-e border-slate-100 bg-white lg:flex h-dvh fixed top-0 start-0`}
     >
       <LinkTo
         href="/"
@@ -48,24 +46,23 @@ export function DashboardSidebar({
               {section.items.map((item) => (
                 <LinkTo
                   href={
-                    (type === "specialist" ? "/specialist/" : "/parent/") +
-                      item.link || ""
+                    "/dashboard/" +
+                    item.link || ""
                   }
                   key={item.label}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`flex w-full items-center justify-between rounded-2xl px-3 py-2 text-sm font-semibold transition ${
-                    pathname.includes(
-                      (type === "specialist" ? "/specialist/" : "/parent/") +
-                        item.link || ""
-                    ) ||
-                    (item.dependentParent &&
-                      pathname.includes(
-                        (type === "specialist" ? "/specialist/" : "/parent/") +
+                  className={`flex w-full items-center justify-between rounded-2xl px-3 py-2 text-sm font-semibold transition ${pathname.includes(
+                    (type === "specialist" ? "/specialist/" : "/parent/") +
+                    item.link || ""
+                  ) ||
+                      (item.dependentParent &&
+                        pathname.includes(
+                          (type === "specialist" ? "/specialist/" : "/parent/") +
                           item.parentLink || ""
-                      ))
+                        ))
                       ? "bg-primary/10 text-primary shadow-inner"
                       : "text-slate-500 hover:bg-slate-50"
-                  }`}
+                    }`}
                 >
                   <span className="flex items-center gap-3">
                     <item.icon />

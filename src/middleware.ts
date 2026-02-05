@@ -2,16 +2,11 @@ import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { decryptData } from "./shared/encryption";
-interface DecryptedToken {
-  kind: string;
-  [key: string]: unknown;
-}
+
 export default function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
 
   const token = request.cookies.get("sub");
-  const tokenDecrypted = decryptData(token?.value ?? "") as DecryptedToken;
 
 
   // Stop Login , Register , Forgot Password , Reset Password , Verify Email , Verify Phone
@@ -22,19 +17,13 @@ export default function middleware(request: NextRequest) {
     }
   }
 
-  if (url.pathname.startsWith("/specialist")) {
-    if (!token || tokenDecrypted?.kind !== "specialist") {
+  if (url.pathname.startsWith("/dashboard")) {
+    if (!token) {
       url.pathname = "/unauthorized";
       return NextResponse.redirect(url);
     }
   }
 
-  if (url.pathname.startsWith("/parent")) {
-    if (!token || tokenDecrypted?.kind !== "parent") {
-      url.pathname = "/unauthorized";
-      return NextResponse.redirect(url);
-    }
-  }
 
   return createMiddleware(routing)(request);
 }

@@ -9,7 +9,7 @@ export default function RegisterIndexPage() {
   return (
     <div className=" bg-gradient-app overflow-hidden py-12 px-4 sm:px-6 lg:px-8 relative  flex items-center justify-center">
       <div className="container flex items-center justify-center ">
-        <div className="rounded-md!   mt-10 min-h-[calc(100dvh-140px)] w-full flex items-center justify-center">
+        <div className="rounded-md!   mt-16 min-h-[calc(100dvh-140px)] w-full flex items-center justify-center">
           <div className="flex gap-10  w-full flex-col lg:flex-row ">
 
 

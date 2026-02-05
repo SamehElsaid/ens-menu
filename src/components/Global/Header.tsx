@@ -101,7 +101,7 @@ function Header() {
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         isScrolled
           ? "backdrop-blur-xl bg-white/70 dark:bg-[#0d1117]/70 py-3 shadow-sm border-b border-purple-100 dark:border-purple-900"
-          : "bg-transparent py-6"
+          : "bg-transparent py-6 border-transparent"
       }`}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
@@ -170,7 +170,7 @@ function Header() {
               <div className="hidden lg:block">
                 <Link
                   href={`/${locale}/auth/register`}
-                  className="px-7 py-2.5 rounded-full bg-gradient-to-r from-purple-600 to-purple-700 dark:from-purple-500 dark:to-purple-600 text-white font-bold text-[14px] shadow-lg shadow-purple-200 dark:shadow-purple-900/50 transition-all hover:shadow-xl"
+                  className="px-7 py-2.5 rounded-full bg-linear-to-r from-purple-600 to-purple-700 dark:from-purple-500 dark:to-purple-600 text-white font-bold text-[14px] shadow-lg shadow-purple-200 dark:shadow-purple-900/50 transition-all hover:shadow-xl"
                 >
                   {locale === "ar" ? "ابدأ الآن" : "Start Now"}
                 </Link>
@@ -217,7 +217,7 @@ function Header() {
               <Link
                 href={`/${locale}/auth/register`}
                 onClick={handleNavClick}
-                className="block w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-purple-700 dark:from-purple-500 dark:to-purple-600 text-white font-bold text-base"
+                className="block w-full py-4 rounded-2xl bg-linear-to-r from-purple-600 to-purple-700 dark:from-purple-500 dark:to-purple-600 text-white font-bold text-base"
               >
                 {locale === "ar" ? "ابدأ الآن" : "Start Now"}
               </Link>

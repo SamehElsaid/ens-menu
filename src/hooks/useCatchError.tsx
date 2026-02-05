@@ -1,8 +1,6 @@
-import { REMOVE_USER } from "@/store/authSlice/authSlice";
 import axios, { AxiosResponse } from "axios";
 import { useCallback, useEffect } from "react";
 import { toast } from "react-toastify";
-import Cookies from "js-cookie";
 import { useAppDispatch } from "@/store/hooks";
 
 interface ErrorResponse {
@@ -55,6 +53,7 @@ export default function useCatchError() {
                 }
             }
         },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         [dispatch]
     );
 

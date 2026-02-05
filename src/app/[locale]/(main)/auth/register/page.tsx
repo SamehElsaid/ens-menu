@@ -1,5 +1,5 @@
 import CustomLogo from "@/components/Custom/CustomLogo";
-import LoginForm from "@/components/LoginForm";
+import RegisterForm from "@/components/RegisterForm";
 import Card from "@/components/ui/Card";
 import { useTranslations } from "next-intl";
 export default function RegisterIndexPage() {
@@ -9,7 +9,7 @@ export default function RegisterIndexPage() {
   return (
     <div className=" bg-gradient-app overflow-hidden py-12 px-4 sm:px-6 lg:px-8 relative  flex items-center justify-center">
       <div className="container flex items-center justify-center ">
-        <div className="rounded-md!   mt-10 min-h-[calc(100dvh-140px)] w-full flex items-center justify-center">
+        <div className="rounded-md!   mt-16 min-h-[calc(100dvh-140px)] w-full flex items-center justify-center">
           <div className="flex gap-10  w-full flex-col lg:flex-row ">
 
 
@@ -28,10 +28,10 @@ export default function RegisterIndexPage() {
                   <CustomLogo />
                   <div className="flex-1 flex flex-col max-w-[400px] mx-auto w-full">
                     <div className="mb-10 text-center">
-                      <h2 className="text-2xl  text-royal-purple mb-2">{t("auth.welcomeBack")}</h2>
-                      <p className="text-slate-500 ">{t("auth.welcomeBackDescription")}</p>
+                      <h2 className="text-2xl  text-royal-purple mb-2">{t("auth.createAccount")}</h2>
+                      <p className="text-slate-500 ">{t("auth.registerDescription")}</p>
                     </div>
-                    <LoginForm />
+                    <RegisterForm />
                   </div>
                 </div>
               </Card>

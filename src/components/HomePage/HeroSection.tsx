@@ -12,8 +12,8 @@ import {
 import { BsQrCode } from "react-icons/bs";
 import { menuItemsData } from "@/modules/menuItems";
 import { MenuItem } from "@/types/types";
-import Image from "next/image";
 import Background from "../Global/Background";
+import LoadImage from "../ImageLoad";
 
 // Interactive Phone Component
 const InteractivePhone = () => {
@@ -96,11 +96,10 @@ const InteractivePhone = () => {
                 {categories.map((cat, i) => (
                   <div
                     key={i}
-                    className={`px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap ${
-                      i === 0
-                        ? "bg-purple-600 text-white shadow-md"
-                        : "bg-slate-50 text-slate-500 border border-slate-100"
-                    }`}
+                    className={`px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap ${i === 0
+                      ? "bg-purple-600 text-white shadow-md"
+                      : "bg-slate-50 text-slate-500 border border-slate-100"
+                      }`}
                   >
                     {cat}
                   </div>
@@ -112,15 +111,17 @@ const InteractivePhone = () => {
                     key={i}
                     className="flex items-center gap-4 p-3 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-white hover:border-purple-100 transition-all cursor-pointer"
                   >
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      width={56}
-                      height={56}
-                      loading="lazy"
-                      className="w-14 h-14 rounded-xl object-cover shadow-sm"
-                      style={{ aspectRatio: "1/1" }}
-                    />
+                    <div className="w-[56px] h-[56px]">
+                      <LoadImage
+                        src={item.image}
+                        alt={item.name}
+                        disableLazy={true}
+                        className="w-full h-full object-cover rounded-xl shadow-sm"
+                      />
+                    </div>
+
+
+
                     <div className="flex-1">
                       <h4 className="text-md font-black text-slate-800">
                         {item.name}
@@ -154,9 +155,8 @@ const HeroSection = () => {
       <Background />
       <div className="container mx-auto px-6 relative z-10">
         <div
-          className={`flex flex-col lg:flex-row items-center gap-16 lg:gap-24 ${
-            isRTL ? "lg:flex-row-reverse" : ""
-          }`}
+          className={`flex flex-col lg:flex-row items-center gap-16 lg:gap-24 ${isRTL ? "lg:flex-row-reverse" : ""
+            }`}
         >
           <div className={`lg:w-1/2  order-2 `}>
             <div className="inline-block px-5 py-2 rounded-full bg-purple-50 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 font-bold text-sm mb-8 border border-purple-100 dark:border-purple-500/30 shadow-sm">
@@ -169,16 +169,14 @@ const HeroSection = () => {
               </span>
             </h1>
             <p
-              className={`text-lg  text-slate-600 dark:text-slate-300 mb-10 leading-relaxed max-w-xl font-medium ${
-                isRTL ? "ml-auto" : ""
-              }`}
+              className={`text-lg  text-slate-600 dark:text-slate-300 mb-10 leading-relaxed max-w-xl font-medium ${isRTL ? "ml-auto" : ""
+                }`}
             >
               {t("description")}
             </p>
             <div
-              className={`flex flex-wrap items-center gap-5 ${
-                isRTL ? "justify-end" : "justify-start"
-              }`}
+              className={`flex flex-wrap items-center gap-5 ${isRTL ? "justify-end" : "justify-start"
+                }`}
             >
               <div>
                 <Link
