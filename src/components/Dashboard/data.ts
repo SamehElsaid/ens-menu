@@ -1,10 +1,7 @@
 import type { IconType } from "react-icons";
 import {
-  FaAward,
-  FaBriefcase,
-  FaCalendar,
+  FaChartLine,
   FaClipboardList,
-  FaEnvelope,
   FaUserAlt,
   FaUsers,
   FaWifi,
@@ -12,6 +9,9 @@ import {
 
 import { BiCategory } from "react-icons/bi";
 import { RiWifiOffLine } from "react-icons/ri";
+import { FiSettings } from "react-icons/fi";
+import { HiSpeakerphone } from "react-icons/hi";
+import { MdOutlineFastfood } from "react-icons/md";
 export type NavItem = {
   label: string;
   icon: IconType;
@@ -30,64 +30,45 @@ export type NavSection = {
 
 export const navSections: NavSection[] = [
   {
+    title: "Overview",
+    items: [
+      {
+        label: "Overview",
+        icon: FaChartLine ,
+        key: "overview",
+        link: "",
+      },
+    ],
+  },
+  {
     title: "Profile",
     items: [
       {
         label: "Personal",
         icon: FaUserAlt,
-        key: "personalInformation",
-        link: "personal/information",
-        parentLink: "personal",
-        dependentParent: true,
-      },
-      {
-        label: "Work Schedule",
-        icon: FaCalendar,
-        key: "workSchedule",
-        link: "work-schedule",
-      },
-      {
-        label: "Qualifications",
-        icon: FaAward,
-        key: "qualifications",
-        link: "qualifications",
-      },
-      {
-        label: "Worked At",
-        icon: FaBriefcase,
-        key: "workedAt",
-        link: "worked-at",
-      },
-      {
-        label: "Application",
-        icon: FaEnvelope,
-        key: "application",
-        link: "application",
+        key: "personal",
+        link: "personal",
       },
     ],
   },
   {
-    title: "Bookings",
+    title: "Menu Control",
     items: [
-      { label: "All", icon: BiCategory, key: "allBookings", link: "bookings/all" },
+      { label: "Categories", icon: BiCategory, key: "categories", link: "categories" },
       {
-        label: "Online",
-        icon: FaWifi,
-        key: "onlineBookings",
-        link: "bookings/online",
+        label: "Items",
+        icon: MdOutlineFastfood ,
+        key: "items",
+        link: "items",
       },
-      {
-        label: "Offline",
-        icon: RiWifiOffLine,
-        key: "offlineBookings",
-        link: "bookings/offline",
-      },
+
     ],
   },
   {
-    title: "ًWork",
+    title: "Settings",
     items: [
-      { label: "Clients", icon: FaUsers, key: "clients", link: "clients" },
+      { label: "Advertisements", icon: HiSpeakerphone, key: "advertisements", link: "advertisements" },
+      { label: "Settings", icon: FiSettings, key: "settings", link: "settings" },
     ],
   },
 ];
@@ -132,7 +113,7 @@ export const parentNavSections: NavSection[] = [
   },
   {
     title: "Specialists/Centers",
-    items: [  
+    items: [
       { label: "Reports", icon: FaClipboardList, key: "reports", link: "reports" },
     ],
   },

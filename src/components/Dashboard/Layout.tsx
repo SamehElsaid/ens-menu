@@ -12,7 +12,6 @@ export default function Layout({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
 
-  console.log(!segment);
   return (
     <div className="min-h-screen bg-[#f6f8fb] text-slate-800 w-full">
       <div className="flex min-h-screen bg-[#f6f8fb] ">
@@ -21,6 +20,7 @@ export default function Layout({
             isMenuOpen={isMenuOpen}
             setIsMenuOpen={setIsMenuOpen}
             type={type}
+            segment={segment}
           />
         )}
         <main className={` flex-1 ms-auto ${segment ? 'lg:max-w-[calc(100%-270px)]' : 'lg:max-w-full'} w-full`}>

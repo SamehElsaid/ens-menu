@@ -485,5 +485,19 @@
       "privacy": "سياسة الخصوصية",
       "terms": "الشروط والأحكام"
     }
+  },
+  "Dashboard": {
+    "Overview": "نظرة عامة",
+    "Profile": "الملف الشخصي",
+    "Menu Control": "تحكم في القائمة",
+    "Settings": "الإعدادات",
+    "Categories": "الفئات",
+    "Items": "العناصر",
+    "Advertisements": "الإعلانات",
+    "Personal": "الملف الشخصي",
+    "Work Schedule": "جدول العمل",
+    "Qualifications": "المؤهلات",
+    "Worked At": "عمل في",
+    "Application": "الطلبات"
   }
 }
