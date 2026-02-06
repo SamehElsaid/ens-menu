@@ -133,6 +133,44 @@ export const axiosPost = async <T, U>(
   }
 };
 
+//!  DELETE request API
+// Function to make a DELETE request
+export const axiosDelete = async <T>(
+  url: string,
+  locale: string
+): Promise<ApiResponse<T>> => {
+  const authToken = Cookies.get("sub") ?? "";
+  const tokenDecrypted = decryptData(authToken) as DecryptedToken;
+
+  const utcTime = await getApiKey();
+  const apiKey = `${process.env.NEXT_PUBLIC_SECRET_KEY}///${utcTime}`;
+
+  const apiKeyEncrypt = encryptDataApi(
+    apiKey,
+    process.env.NEXT_PUBLIC_SECRET_KEY as string
+  );
+
+  try {
+    const fetchData = await axios.delete<T>(
+      `${process.env.NEXT_PUBLIC_BASE_URL}${url}`,
+      {
+        headers: {
+          Authorization: `Bearer ${tokenDecrypted?.token}`,
+          "Accept-Language": locale,
+          "X-API-KEY": apiKeyEncrypt,
+        },
+      }
+    );
+
+    return { data: fetchData.data, status: true };
+  } catch (err) {
+    return {
+      data: (err as AxiosError)?.response?.data as T,
+      status: false,
+    };
+  }
+};
+
 // ! Get from getServerSideProps
 export const getFromGetServerSideProps = async <T>(
   url: string,
