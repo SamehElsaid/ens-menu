@@ -24,7 +24,7 @@ export const Logo = ({ variant = "default" }: LogoProps) => {
       </div>
       <div className="relative flex flex-col items-center">
         <div
-          className={`text-2xl lg:text-xl xl:text-3xl font-black tracking-tighter bg-clip-text text-transparent ${gradientClasses} bg-[length:200%_auto]`}
+          className={`text-2xl lg:text-xl xl:text-3xl font-black tracking-tighter bg-clip-text text-transparent ${gradientClasses} bg-size-[200%_auto]`}
         >
           ENSMENU
         </div>
