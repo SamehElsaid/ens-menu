@@ -15,7 +15,7 @@ function LoadImage({
   className: string;
   width?: number;
   height?: number;
-  disableLazy: boolean;
+  disableLazy?: boolean;
   [key: string]: unknown;
 }): React.ReactNode {
   // function to resize image using canvas and return Blob URL

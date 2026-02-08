@@ -1,10 +1,14 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "@/i18n/navigation";
+import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { useLocale, useTranslations } from "next-intl";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import CurrencySelector from "@/components/Global/CurrencySelector";
+import CustomInput from "@/components/Custom/CustomInput";
+import { createMenuSchema, CreateMenuSchema } from "@/schemas/createMenuSchema";
 import { toast } from "react-toastify";
 import { Menu, SlugCheckResponse, UploadResponse } from "@/types/Menu";
 import {
@@ -21,28 +25,43 @@ import {
   IoAddCircleOutline,
   IoCloudUploadOutline,
 } from "react-icons/io5";
+import CustomBtn from "../Custom/CustomBtn";
 
 interface CreateMenuModalProps {
   onClose: () => void;
   onMenuCreated?: (newMenu?: Menu) => void;
+  onRefresh?: () => void;
 }
 
 export default function CreateMenuModal({
   onClose,
   onMenuCreated,
+  onRefresh,
 }: CreateMenuModalProps) {
   const t = useTranslations("Menus.createModal");
   const locale = useLocale();
-  const router = useRouter();
-  const [formData, setFormData] = useState({
-    name: "",
-    nameAr: "",
-    description: "",
-    descriptionAr: "",
-    slug: "",
-    logo: null as File | null,
-    currency: "AED",
+
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<CreateMenuSchema>({
+    defaultValues: {
+      name: "",
+      nameAr: "",
+      description: "",
+      descriptionAr: "",
+      slug: "",
+      currency: "AED",
+    },
+    resolver: yupResolver(createMenuSchema(t)) as unknown as Resolver<CreateMenuSchema>,
+    mode: "onChange",
   });
+
+  const slugValue = useWatch({ control, name: "slug" });
+
+  const [logo, setLogo] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [slugStatus, setSlugStatus] = useState<{
     checking: boolean;
@@ -53,12 +72,11 @@ export default function CreateMenuModal({
     available: null,
     suggestions: [],
   });
-
   const [isCreating, setIsCreating] = useState(false);
 
   // Debounced slug check
   useEffect(() => {
-    if (!formData.slug || formData.slug.length < 3) {
+    if (!slugValue || slugValue.length < 3) {
       setSlugStatus({ checking: false, available: null, suggestions: [] });
       return;
     }
@@ -70,7 +88,7 @@ export default function CreateMenuModal({
           "/menus/check-slug",
           locale,
           undefined,
-          { slug: formData.slug },
+          { slug: slugValue },
         );
         if (result.status && result.data) {
           setSlugStatus({
@@ -79,7 +97,6 @@ export default function CreateMenuModal({
             suggestions: result.data.suggestions ?? [],
           });
         } else {
-          // API returned error (e.g. invalid slug format)
           const errorData = result.data as SlugCheckResponse | undefined;
           setSlugStatus({
             checking: false,
@@ -94,12 +111,10 @@ export default function CreateMenuModal({
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [formData.slug, locale]);
+  }, [slugValue, locale]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (formData.slug && slugStatus.available === false) {
+  const onSubmit = async (data: CreateMenuSchema) => {
+    if (data.slug && slugStatus.available === false) {
       toast.error(t("slugTakenError"));
       return;
     }
@@ -107,11 +122,10 @@ export default function CreateMenuModal({
     try {
       setIsCreating(true);
 
-      // Upload logo first if exists
       let logoUrl: string | null = null;
-      if (formData.logo) {
+      if (logo) {
         const logoFormData = new FormData();
-        logoFormData.append("file", formData.logo);
+        logoFormData.append("file", logo);
         logoFormData.append("type", "logos");
 
         const uploadResult = await axiosPost<FormData, UploadResponse>(
@@ -131,14 +145,13 @@ export default function CreateMenuModal({
         logoUrl = uploadResult.data.url;
       }
 
-      // Create menu with logo URL
       const menuData = {
-        nameEn: formData.name,
-        nameAr: formData.nameAr,
-        descriptionEn: formData.description,
-        descriptionAr: formData.descriptionAr,
-        slug: formData.slug,
-        currency: formData.currency,
+        nameEn: data.name,
+        nameAr: data.nameAr,
+        descriptionEn: data.description,
+        descriptionAr: data.descriptionAr,
+        slug: data.slug,
+        currency: data.currency,
         ...(logoUrl && { logo: logoUrl }),
       };
 
@@ -153,27 +166,23 @@ export default function CreateMenuModal({
 
         if (onMenuCreated) {
           onMenuCreated(result.data);
+          console.log(result.data);
+          if (onRefresh) {
+            onRefresh();
+          }
         }
 
         onClose();
-
-        // Redirect to menu dashboard after creation
-        if (result.data?.id) {
-          router.push(`/dashboard/${result.data.id}`);
-        }
       } else {
         toast.error(t("createError"));
       }
-    } catch (error) {
-      console.error("Error creating menu:", error);
-      toast.error(t("createError"));
     } finally {
       setIsCreating(false);
     }
   };
 
   const handleSuggestionClick = (suggestion: string) => {
-    setFormData({ ...formData, slug: suggestion });
+    setValue("slug", suggestion);
   };
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -197,7 +206,7 @@ export default function CreateMenuModal({
       return;
     }
 
-    setFormData({ ...formData, logo: file });
+    setLogo(file);
 
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -207,7 +216,7 @@ export default function CreateMenuModal({
   };
 
   const handleRemoveLogo = () => {
-    setFormData({ ...formData, logo: null });
+    setLogo(null);
     setLogoPreview(null);
   };
 
@@ -232,7 +241,7 @@ export default function CreateMenuModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Names Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-3">
@@ -247,15 +256,20 @@ export default function CreateMenuModal({
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {t("nameEn")} *
                 </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white transition-all"
-                  placeholder="e.g., My Restaurant Menu"
-                  required
+                <Controller
+                  name="name"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomInput
+                      type="text"
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
+                      placeholder="e.g., My Restaurant Menu"
+                      error={errors.name?.message}
+                    />
+                  )}
                 />
               </div>
 
@@ -263,16 +277,21 @@ export default function CreateMenuModal({
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {t("nameAr")} *
                 </label>
-                <input
-                  type="text"
-                  value={formData.nameAr}
-                  onChange={(e) =>
-                    setFormData({ ...formData, nameAr: e.target.value })
-                  }
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white transition-all"
-                  placeholder="مثال: قائمة مطعمي"
-                  dir="rtl"
-                  required
+                <Controller
+                  name="nameAr"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomInput
+                      type="text"
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
+                      placeholder="مثال: قائمة مطعمي"
+                      dir="rtl"
+                      error={errors.nameAr?.message}
+                    />
+                  )}
                 />
               </div>
             </div>
@@ -292,14 +311,20 @@ export default function CreateMenuModal({
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {t("descriptionEn")}
                 </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white transition-all resize-none"
-                  placeholder="Describe your menu in English..."
+                <Controller
+                  name="description"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomInput
+                      type="textarea"
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      rows={3}
+                      className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary resize-none"
+                      placeholder="Describe your menu in English..."
+                    />
+                  )}
                 />
               </div>
 
@@ -307,18 +332,21 @@ export default function CreateMenuModal({
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {t("descriptionAr")}
                 </label>
-                <textarea
-                  value={formData.descriptionAr}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      descriptionAr: e.target.value,
-                    })
-                  }
-                  rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white transition-all resize-none"
-                  placeholder="اكتب وصف القائمة بالعربية..."
-                  dir="rtl"
+                <Controller
+                  name="descriptionAr"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomInput
+                      type="textarea"
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      rows={3}
+                      className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary resize-none"
+                      placeholder="اكتب وصف القائمة بالعربية..."
+                      dir="rtl"
+                    />
+                  )}
                 />
               </div>
             </div>
@@ -395,10 +423,16 @@ export default function CreateMenuModal({
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t("currencyLabel")} *
               </label>
-              <CurrencySelector
-                value={formData.currency}
-                onChange={(currency) => setFormData({ ...formData, currency })}
-                showArabOnly={locale === "ar"}
+              <Controller
+                name="currency"
+                control={control}
+                render={({ field }) => (
+                  <CurrencySelector
+                    value={field.value}
+                    onChange={field.onChange}
+                    showArabOnly={locale === "ar"}
+                  />
+                )}
               />
             </div>
           </div>
@@ -417,42 +451,41 @@ export default function CreateMenuModal({
                 {t("slug")} *
               </label>
               <div className="relative">
-                <input
-                  type="text"
-                  value={formData.slug}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      slug: e.target.value
-                        .toLowerCase()
-                        .replace(/[^a-z0-9-]/g, "-"),
-                    })
-                  }
-                  className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all font-mono ${
-                    slugStatus.available === false
-                      ? "border-red-300 dark:border-red-600 focus:ring-red-500"
-                      : slugStatus.available === true
-                        ? "border-green-300 dark:border-green-600 focus:ring-green-500"
-                        : "border-gray-300 dark:border-gray-600 focus:ring-primary"
-                  }`}
-                  placeholder="my-restaurant-menu"
-                  required
+                <Controller
+                  name="slug"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomInput
+                      type="text"
+                      value={field.value}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value
+                            .toLowerCase()
+                            .replace(/[^a-z0-9-]/g, "-")
+                        )
+                      }
+                      onBlur={field.onBlur}
+                      className={`px-4 py-3 font-mono dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:border-transparent ${slugStatus.available === false
+                        ? "border-red-300 dark:border-red-600 focus:ring-red-500"
+                        : slugStatus.available === true
+                          ? "border-green-300 dark:border-green-600 focus:ring-green-500"
+                          : "border-gray-300 dark:border-gray-600 focus:ring-primary"
+                        }`}
+                      placeholder="my-restaurant-menu"
+                      error={errors.slug?.message}
+                      icon={
+                        slugStatus.checking ? (
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
+                        ) : slugStatus.available === true ? (
+                          <IoCheckmarkCircle className="text-green-500 text-xl" />
+                        ) : slugStatus.available === false ? (
+                          <IoCloseCircle className="text-red-500 text-xl" />
+                        ) : undefined
+                      }
+                    />
+                  )}
                 />
-                {slugStatus.checking && (
-                  <div className="absolute start-3 top-1/2 -translate-y-1/2">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
-                  </div>
-                )}
-                {!slugStatus.checking && slugStatus.available === true && (
-                  <div className="absolute start-3 top-1/2 -translate-y-1/2">
-                    <IoCheckmarkCircle className="text-green-500 text-xl" />
-                  </div>
-                )}
-                {!slugStatus.checking && slugStatus.available === false && (
-                  <div className="absolute start-3 top-1/2 -translate-y-1/2">
-                    <IoCloseCircle className="text-red-500 text-xl" />
-                  </div>
-                )}
               </div>
 
               {/* Status Message */}
@@ -507,8 +540,8 @@ export default function CreateMenuModal({
                       {t("slugHint")}
                     </p>
                     <p className="text-xs text-blue-600 dark:text-blue-400 font-mono">
-                      {formData.slug
-                        ? `${formData.slug}.ensmenu.com`
+                      {slugValue
+                        ? `${slugValue}.ensmenu.com`
                         : "your-slug.ensmenu.com"}
                     </p>
                   </div>
@@ -518,32 +551,26 @@ export default function CreateMenuModal({
           </div>
 
           {/* Buttons */}
-          <div className="flex gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isCreating}
-            >
-              {t("cancel")}
-            </button>
-            <button
-              type="submit"
-              className="flex-1 px-6 py-3 bg-linear-to-r from-primary to-primary/80 text-white rounded-xl hover:from-primary/90 hover:to-primary/70 transition-all font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              disabled={isCreating}
-            >
-              {isCreating ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  {t("creating")}
-                </>
-              ) : (
-                <>
-                  <IoAddCircleOutline className="text-xl" />
-                  {t("create")}
-                </>
-              )}
-            </button>
+          <div className="flex gap-3 pt-6 border-t border-gray-200 dark:border-gray-700 justify-end">
+            <div className="w-fit!">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isCreating}
+              >
+                {t("cancel")}
+              </button>
+            </div>
+            <div className="w-fit!">
+              <CustomBtn
+                loading={isCreating}
+                disabled={isCreating || !slugStatus.available}
+
+              >
+                <div className="flex items-center justify-center gap-2"><IoAddCircleOutline className="text-xl" /> {t("create")}</div>
+              </CustomBtn>
+            </div>
           </div>
         </form>
       </div>

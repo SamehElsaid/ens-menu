@@ -1,6 +1,7 @@
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import Cookies from "js-cookie";
-import { decryptData, decryptDataApi, encryptDataApi } from "./encryption";
+import { decryptData, decryptDataApi, encryptData, encryptDataApi } from "./encryption";
+import { LoginResponse } from "@/types/LoginResponse";
 
 interface ApiResponse<T> {
   data?: T;
@@ -11,6 +12,9 @@ interface DecryptedToken {
   token?: string;
   [key: string]: unknown;
 }
+
+// قفل مشترك: لو الـ refresh شغال، أي طلب تاني يستنى على نفس الـ promise
+let refreshPromise: Promise<string | null> | null = null;
 
 const getApiKey = async () => {
   try {
@@ -27,6 +31,65 @@ const getApiKey = async () => {
   }
 };
 
+// تنفيذ الـ refresh مرة واحدة؛ الباقي يستنى على نفس الـ promise
+const doRefreshAccessToken = async (): Promise<string | null> => {
+  try {
+    const authToken = Cookies.get("sub");
+    if (!authToken) return null;
+
+    const utcTime = await getApiKey();
+    const apiKey = `${process.env.NEXT_PUBLIC_SECRET_KEY}///${utcTime}`;
+    const apiKeyEncrypt = encryptDataApi(
+      apiKey,
+      process.env.NEXT_PUBLIC_SECRET_KEY as string
+    );
+
+    const tokenDecrypted = decryptData(authToken) as {
+      token: string;
+      refreshToken: string;
+    };
+
+    const response = await axios.post<{ token?: string } | string>(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/auth/refresh/`,
+      { refreshToken: tokenDecrypted.refreshToken },
+      {
+        headers: {
+          "X-API-KEY": apiKeyEncrypt,
+        },
+      }
+    );
+
+
+    console.log(response.data);
+
+    const { accessToken, refreshToken } = response.data as LoginResponse;
+
+
+    const newCookies = {
+      token: accessToken,
+      refreshToken: refreshToken,
+    };
+    Cookies.set("sub", encryptData(newCookies), { path: "/" });
+    return accessToken;
+  } catch (err) {
+    console.error("Refresh token failed:", err);
+    if ((err as AxiosError).response?.status === 405) {
+      Cookies.remove("sub", { path: "/" });
+      window.location.href = "/";
+    }
+    return null;
+  } finally {
+    refreshPromise = null;
+  }
+};
+
+// لو الـ refresh شغال يرجع نفس الـ promise عشان الباقي يستنى
+const getRefreshTokenPromise = (): Promise<string | null> => {
+  if (refreshPromise) return refreshPromise;
+  refreshPromise = doRefreshAccessToken();
+  return refreshPromise;
+};
+
 //!  GET request API
 // Function to make a GET request
 export const axiosGet = async <T>(
@@ -39,11 +102,8 @@ export const axiosGet = async <T>(
   const authToken = Cookies.get("sub") ?? "";
   const tokenDecrypted = decryptData(authToken) as DecryptedToken;
 
-  console.log(tokenDecrypted);
-
   const utcTime = await getApiKey();
   const apiKey = `${process.env.NEXT_PUBLIC_SECRET_KEY}///${utcTime}`;
-
   const apiKeyEncrypt = encryptDataApi(
     apiKey,
     process.env.NEXT_PUBLIC_SECRET_KEY as string
@@ -68,6 +128,13 @@ export const axiosGet = async <T>(
 
     return { data: fetchData.data, status: true };
   } catch (err) {
+    if ((err as AxiosError).response?.status === 405) {
+      // كل الطلبات اللي تجي 405 تستنى على نفس الـ refresh
+      const newToken = await getRefreshTokenPromise();
+      if (newToken) {
+        return axiosGet(url, locale, token, params, close);
+      }
+    }
     return {
       data: (err as AxiosError)?.response?.data as T,
       status: false,
@@ -133,6 +200,63 @@ export const axiosPost = async <T, U>(
   }
 };
 
+export const axiosPatch = async <T, U>(
+  url: string,
+  locale: string,
+  data: T,
+  file?: boolean,
+  close?: boolean
+): Promise<ApiResponse<U>> => {
+  const authToken = Cookies.get("sub") ?? "";
+  const tokenDecrypted = decryptData(authToken) as DecryptedToken;
+  const HeaderImg = { "Content-Type": "multipart/form-data" };
+
+  const headerToken: HeadersPost = file ? { ...HeaderImg } : {};
+  headerToken.Authorization = `Bearer ${tokenDecrypted?.token}`;
+
+  const utcTime = await getApiKey();
+  const apiKey = `${process.env.NEXT_PUBLIC_SECRET_KEY}///${utcTime}`;
+
+  const apiKeyEncrypt = encryptDataApi(
+    apiKey,
+    process.env.NEXT_PUBLIC_SECRET_KEY as string
+  );
+
+  console.log(apiKeyEncrypt);
+
+  if (close) {
+    delete headerToken.Authorization;
+  }
+
+  try {
+    const fetchData = await axios.put<T>(
+      `${process.env.NEXT_PUBLIC_BASE_URL}${url}`,
+      data,
+      {
+        withCredentials: true,
+        headers: {
+          ...headerToken,
+          "Accept-Language": locale,
+          "X-API-KEY": apiKeyEncrypt,
+        },
+      }
+    );
+
+    return { data: fetchData.data as unknown as U, status: true };
+  } catch (err) {
+    if ((err as AxiosError).response?.status === 405) {
+      const newToken = await getRefreshTokenPromise();
+      if (newToken) {
+        return axiosPatch(url, locale, data, file, close);
+      }
+    }
+    return {
+      data: (err as AxiosError)?.response?.data as U,
+      status: false,
+    };
+  }
+};
+
 //!  DELETE request API
 // Function to make a DELETE request
 export const axiosDelete = async <T>(
@@ -170,6 +294,9 @@ export const axiosDelete = async <T>(
     };
   }
 };
+
+//!  PATCH request API
+
 
 // ! Get from getServerSideProps
 export const getFromGetServerSideProps = async <T>(

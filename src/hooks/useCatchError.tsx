@@ -22,6 +22,9 @@ export default function useCatchError() {
                 return;
             }
 
+            if (status === 405) {
+                return;
+            }
             // Handle 401 unauthorized errors
             if (status === 401) {
                 // Cookies.remove("sub", { path: "/" });

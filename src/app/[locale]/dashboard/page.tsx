@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { axiosGet, axiosDelete } from "@/shared/axiosCall";
+import { axiosGet, axiosDelete, axiosPatch } from "@/shared/axiosCall";
 import LinkTo from "@/components/Global/LinkTo";
 import CreateMenuModal from "@/components/Dashboard/CreateMenuModal";
 import { toast } from "react-toastify";
@@ -21,7 +21,11 @@ import {
   IoWarningOutline,
   IoCloseOutline,
   IoRocketOutline,
+  IoPauseOutline,
+  IoPlayOutline,
+  IoCalendarOutline,
 } from "react-icons/io5";
+import LoadImage from "@/components/ImageLoad";
 
 export default function DashboardPage() {
   const t = useTranslations("Menus");
@@ -32,7 +36,10 @@ export default function DashboardPage() {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Menu | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [togglingId, setTogglingId] = useState<number | null>(null);
+  const [refreshing, setRefreshing] = useState(0);
 
   const fetchMenus = useCallback(async () => {
     try {
@@ -49,16 +56,11 @@ export default function DashboardPage() {
           ? result.data
           : (result.data.menus ?? []);
         setMenus(menusList);
-      } else {
-        toast.error(t("fetchError"));
       }
-    } catch (error) {
-      console.error("Error fetching menus:", error);
-      toast.error(t("fetchError"));
     } finally {
       setLoading(false);
     }
-  }, [locale, t]);
+  }, [locale]);
 
   const fetchSubscription = useCallback(async () => {
     try {
@@ -76,8 +78,15 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchMenus();
+  }, [fetchMenus, refreshing]);
+
+  useEffect(() => {
     fetchSubscription();
-  }, [fetchMenus, fetchSubscription]);
+  }, [fetchSubscription]);
+
+  useEffect(() => {
+    if (!deleteTarget) setDeleteConfirmText("");
+  }, [deleteTarget]);
 
   const handleCreateClick = () => {
     const maxMenus = subscription?.maxMenus ?? 1;
@@ -131,6 +140,43 @@ export default function DashboardPage() {
     return locale === "ar"
       ? menu.descriptionAr || menu.descriptionEn
       : menu.descriptionEn || menu.descriptionAr;
+  };
+
+  const formatDate = (dateStr: string) => {
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString(locale === "ar" ? "ar-EG" : "en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const handleToggleActive = async (menu: Menu) => {
+    try {
+      setTogglingId(menu.id);
+      const result = await axiosPatch<{ isActive: boolean }, Menu>(
+        `/menus/${menu.id}`,
+        locale,
+        { isActive: !menu.isActive as boolean },
+      );
+      if (result.status && result.data) {
+        setMenus((prev) =>
+          prev.map((m) => (m.id === menu.id ? { ...m, isActive: !m.isActive } : m))
+        );
+        toast.success(t("toggleSuccess"));
+      } else {
+        toast.error(t("toggleError"));
+      }
+    } catch (error) {
+      console.error("Error toggling menu:", error);
+      toast.error(t("toggleError"));
+    } finally {
+      setTogglingId(null);
+    }
   };
 
   // Loading State
@@ -207,21 +253,26 @@ export default function DashboardPage() {
 
       {/* Menus Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {menus.map((menu) => (
+        {menus.map((menu, index) => (
           <div
-            key={menu.id}
-            className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:border-primary/20 overflow-hidden"
+            key={`menu-${menu.id}-${index}`}
+            className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-all duration-300 hover:shadow-xl ${menu.isActive
+              ? "border-slate-100 hover:border-primary/20"
+              : "border-amber-100/80 bg-slate-50/30"
+              }`}
           >
             {/* Card Header with Logo */}
-            <div className="p-6 pb-4">
+            <div className="p-6 pb-3">
               <div className="flex items-start gap-4">
                 {/* Logo */}
-                <div className="w-16 h-16 rounded-xl bg-primary/5 border border-primary/10 flex items-center justify-center overflow-hidden shrink-0">
+                <div className="w-16 h-16 rounded-xl bg-primary/5 border border-primary/10 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-white shadow-sm">
                   {menu.logo ? (
-                    <img
+                    <LoadImage
                       src={menu.logo}
                       alt={getMenuName(menu)}
                       className="w-full h-full object-contain"
+                      width={64}
+                      height={64}
                     />
                   ) : (
                     <IoRestaurant className="text-primary text-3xl" />
@@ -233,34 +284,56 @@ export default function DashboardPage() {
                   <h3 className="text-lg font-bold text-slate-800 truncate mb-1">
                     {getMenuName(menu)}
                   </h3>
-
-                  {/* Status Badge */}
-                  <div className="flex items-center gap-1.5">
-                    <IoEllipseSharp
-                      className={`text-[8px] ${
-                        menu.isActive ? "text-green-500" : "text-slate-300"
-                      }`}
-                    />
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span
-                      className={`text-xs font-medium ${
-                        menu.isActive ? "text-green-600" : "text-slate-400"
-                      }`}
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${menu.isActive
+                        ? "bg-green-100 text-green-700"
+                        : "bg-amber-100 text-amber-700"
+                        }`}
                     >
+                      <IoEllipseSharp
+                        className={`text-[8px] ${menu.isActive ? "text-green-500" : "text-amber-500"}`}
+                      />
                       {menu.isActive
                         ? t("menuCard.active")
-                        : t("menuCard.inactive")}
+                        : t("menuCard.paused")}
                     </span>
                   </div>
                 </div>
 
-                {/* Delete Button */}
-                <button
-                  onClick={() => setDeleteTarget(menu)}
-                  className="w-8 h-8 rounded-full bg-slate-50 hover:bg-red-50 flex items-center justify-center transition-colors shrink-0 group/del"
-                  title={t("deleteMenu")}
-                >
-                  <IoTrashOutline className="text-slate-400 group-hover/del:text-red-500 transition-colors text-sm" />
-                </button>
+                {/* Actions: Pause/Play + Delete */}
+                <div className="flex gap-2 shrink-0">
+                  <button
+                    onClick={() => handleToggleActive(menu)}
+                    disabled={togglingId === menu.id}
+                    title={menu.isActive ? t("menuCard.pause") : t("menuCard.play")}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition-colors disabled:opacity-50 disabled:pointer-events-none ${menu.isActive
+                      ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
+                      : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                      }`}
+                  >
+                    {togglingId === menu.id ? (
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    ) : menu.isActive ? (
+                      <>
+                        <IoPauseOutline className="text-lg" />
+                        <span className="hidden sm:inline">{t("menuCard.pause")}</span>
+                      </>
+                    ) : (
+                      <>
+                        <IoPlayOutline className="text-lg" />
+                        <span className="hidden sm:inline">{t("menuCard.play")}</span>
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setDeleteTarget(menu)}
+                    title={t("deleteMenu")}
+                    className="flex items-center justify-center w-10 h-[38px] rounded-lg border border-slate-200 bg-slate-50 text-slate-500 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
+                  >
+                    <IoTrashOutline className="text-lg" />
+                  </button>
+                </div>
               </div>
 
               {/* Description */}
@@ -270,10 +343,26 @@ export default function DashboardPage() {
                 </p>
               )}
 
+              {/* Created & Updated dates */}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400 mt-3">
+                {menu.createdAt && (
+                  <span className="flex items-center gap-1.5">
+                    <IoCalendarOutline className="text-sm shrink-0" />
+                    {t("menuCard.createdAt")}: {formatDate(menu.createdAt)}
+                  </span>
+                )}
+                {menu.updatedAt && (
+                  <span className="flex items-center gap-1.5">
+                    <IoCalendarOutline className="text-sm shrink-0 opacity-70" />
+                    {t("menuCard.updatedAt")}: {formatDate(menu.updatedAt)}
+                  </span>
+                )}
+              </div>
+
               {/* Slug URL */}
-              <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-3">
-                <IoGlobeOutline className="text-sm" />
-                <span className="font-mono">
+              <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-2">
+                <IoGlobeOutline className="text-sm shrink-0" />
+                <span className="font-mono truncate">
                   {menu.slug}
                   {process.env.NEXT_PUBLIC_MENU_URL}
                 </span>
@@ -309,6 +398,7 @@ export default function DashboardPage() {
         <CreateMenuModal
           onClose={() => setShowCreateModal(false)}
           onMenuCreated={handleMenuCreated}
+          onRefresh={() => setRefreshing(refreshing + 1)}
         />
       )}
 
@@ -341,10 +431,25 @@ export default function DashboardPage() {
                   </span>
                 </p>
                 <p className="text-slate-500 text-sm">{t("deleteConfirm")}</p>
+                <p className="text-sm font-medium text-slate-700 mt-3 mb-1">
+                  {t("typeMenuNameToConfirm")}
+                </p>
+                <input
+                  id="delete-confirm-input"
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  placeholder={getMenuName(deleteTarget)}
+                  className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl text-slate-800 placeholder:text-slate-400 focus:border-red-300 focus:ring-2 focus:ring-red-100 focus:outline-none"
+                  dir={locale === "ar" ? "rtl" : "ltr"}
+                />
               </div>
               <div className="flex gap-3 w-full mt-2">
                 <button
-                  onClick={() => setDeleteTarget(null)}
+                  onClick={() => {
+                    setDeleteTarget(null);
+                    setDeleteConfirmText("");
+                  }}
                   disabled={isDeleting}
                   className="flex-1 px-4 py-2.5 border-2 border-slate-200 text-slate-600 rounded-xl font-semibold hover:bg-slate-50 transition-all disabled:opacity-50"
                 >
@@ -352,7 +457,7 @@ export default function DashboardPage() {
                 </button>
                 <button
                   onClick={handleDeleteMenu}
-                  disabled={isDeleting}
+                  disabled={isDeleting || deleteConfirmText.trim() !== getMenuName(deleteTarget)}
                   className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl font-semibold hover:bg-red-600 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isDeleting ? (

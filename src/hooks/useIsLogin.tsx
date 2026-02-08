@@ -2,9 +2,15 @@ import { REMOVE_USER, SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import Cookies from "js-cookie";
-import { decryptData } from "@/shared/encryption";
 import { axiosGet } from "@/shared/axiosCall";
 import { useLocale } from "next-intl";
+
+
+type UserProfile = {
+  email: string;
+  name: string;
+  kind: string;
+};
 
 function useIsLogin() {
   const cookies = Cookies.get("sub");
@@ -24,12 +30,9 @@ function useIsLogin() {
   useEffect(() => {
     const checkLogin = async () => {
       if (cookies) {
-        const decryptedData = decryptData(cookies);
         const user = await getUser();
-        console.log(user);
 
-        console.log(decryptedData);
-        dispatch(SET_ACTIVE_USER({ ...decryptedData }));
+        dispatch(SET_ACTIVE_USER(user as UserProfile));
         const time = setTimeout(() => {
           setLogin(false);
         }, 500);
@@ -45,7 +48,7 @@ function useIsLogin() {
       }
     }
     checkLogin();
-  }, [cookies, dispatch,getUser]);
+  }, [cookies, dispatch, getUser]);
 
   return login;
 }

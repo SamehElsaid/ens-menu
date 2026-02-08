@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { AgGridReact } from "ag-grid-react";
 import {
   ColDef,
@@ -16,11 +16,14 @@ import {
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import Loader from "../Global/Loader";
+import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 
 // Register AG Grid modules
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 export interface DataTableProps<T extends object> {
+  page?: number;
+  totalPages?: number;
   rowData: T[];
   columnDefs: ColDef<T>[];
   height?: string | number | "auto";
@@ -36,12 +39,15 @@ export interface DataTableProps<T extends object> {
   locale?: string;
   loading?: boolean;
   installLoading?: boolean;
+  onPageChange?: (page: number) => void;
 }
 
 export default function DataTable<T extends object>({
   loading = false,
+  page = 1,
   rowData,
   columnDefs,
+  totalPages = 0,
   height = "auto",
   mobileHeight,
   pagination = true,
@@ -54,12 +60,15 @@ export default function DataTable<T extends object>({
   className = "",
   installLoading = true,
   locale: propLocale,
+  onPageChange,
 }: DataTableProps<T>) {
   const nextIntlLocale = useLocale();
+  const t = useTranslations("DataTable");
   const [installLoadingState, setInstallLoadingState] =
     useState(installLoading);
   const locale = propLocale || nextIntlLocale || "en";
   const isRTL = locale === "ar";
+  const isServerPagination = Boolean(onPageChange);
 
   // Add row number column if enabled
   const finalColumnDefs = useMemo(() => {
@@ -71,7 +80,9 @@ export default function DataTable<T extends object>({
         if (!params.node) return "";
         const pageSize =
           params.api?.paginationGetPageSize() || paginationPageSize;
-        const currentPage = params.api?.paginationGetCurrentPage() || 0;
+        const currentPage = isServerPagination
+          ? page - 1
+          : (params.api?.paginationGetCurrentPage() ?? 0);
         const displayedRowIndex = params.node.rowIndex ?? 0;
         return currentPage * pageSize + displayedRowIndex + 1;
       },
@@ -91,7 +102,7 @@ export default function DataTable<T extends object>({
     return isRTL
       ? [...columnDefs, rowNumberColumn]
       : [rowNumberColumn, ...columnDefs];
-  }, [columnDefs, showRowNumbers, paginationPageSize, isRTL]);
+  }, [columnDefs, showRowNumbers, paginationPageSize, isRTL, isServerPagination, page]);
 
   const finalDefaultColDef: ColDef = useMemo(
     () => ({
@@ -180,6 +191,11 @@ export default function DataTable<T extends object>({
           box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
           direction: ${isRTL ? "rtl" : "ltr"};
           min-width: 100%;
+        }
+        .ag-theme-alpine.server-pagination {
+          border-bottom-left-radius: 0;
+          border-bottom-right-radius: 0;
+          border-bottom: none;
         }
           .ag-theme-alpine .ag-paging-button{
           margin: 0 !important;
@@ -273,19 +289,17 @@ export default function DataTable<T extends object>({
             font-size: 11px;
           }
           
-          ${
-            mobileHeight
+          ${mobileHeight
               ? `
           .ag-theme-alpine {
-            height: ${
-              typeof mobileHeight === "number"
+            height: ${typeof mobileHeight === "number"
                 ? `${mobileHeight}px`
                 : mobileHeight
-            } !important;
+              } !important;
           }
           `
               : ""
-          }
+            }
         }
         
         .ag-theme-alpine .ag-header {
@@ -316,6 +330,8 @@ export default function DataTable<T extends object>({
           word-wrap: break-word;
           overflow: visible;
           line-height: 1.5;
+            align-items: center !important;
+
         }
         
         .ag-theme-alpine .ag-cell:last-child {
@@ -390,9 +406,8 @@ export default function DataTable<T extends object>({
           color: #3b82f6;
         }
         
-        ${
-          isRTL
-            ? `
+        ${isRTL
+              ? `
         .ag-theme-alpine .ag-header-cell-text {
           text-align: right;
         }
@@ -403,12 +418,11 @@ export default function DataTable<T extends object>({
           flex-direction: row-reverse;
         }
         `
-            : ""
-        }
+              : ""
+            }
         
         @media (max-width: 640px) {
-          ${
-            isRTL
+          ${isRTL
               ? `
           .ag-theme-alpine .ag-paging-panel {
             flex-direction: column-reverse;
@@ -419,25 +433,25 @@ export default function DataTable<T extends object>({
             flex-direction: column;
           }
           `
-          }
+            }
         }
       `,
         }}
       />
       <div className="data-table-wrapper">
         <div
-          className="ag-theme-alpine"
+          className={`ag-theme-alpine ${isServerPagination ? "server-pagination" : ""}`}
           style={{
             ...(height === "auto" || !height
               ? {
-                  // Calculate height for paginationPageSize rows
-                  // Header (48px) + (paginationPageSize rows * ~52px per row) + Pagination (~60px)
-                  height: `${48 + paginationPageSize * 52 + 60}px`,
-                  minHeight: "400px",
-                }
+                // Calculate height for paginationPageSize rows
+                // Header (48px) + (paginationPageSize rows * ~52px per row) + Pagination (~60px)
+                height: `${48 + paginationPageSize * 52 + 60}px`,
+                minHeight: "400px",
+              }
               : {
-                  height: typeof height === "number" ? `${height}px` : height,
-                }),
+                height: typeof height === "number" ? `${height}px` : height,
+              }),
             minWidth: "100%",
           }}
         >
@@ -446,7 +460,7 @@ export default function DataTable<T extends object>({
             rowData={rowData}
             columnDefs={finalColumnDefs}
             defaultColDef={finalDefaultColDef}
-            pagination={pagination}
+            pagination={pagination && !isServerPagination}
             paginationPageSize={paginationPageSize}
             paginationPageSizeSelector={paginationPageSizeSelector}
             animateRows={true}
@@ -470,6 +484,71 @@ export default function DataTable<T extends object>({
             domLayout="normal"
           />
         </div>
+
+        {isServerPagination && pagination && totalPages > 0 && (
+          <div
+            className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border border-gray-200 border-t-0 dark:border-gray-700 dark:bg-gray-800/50 bg-gray-50/80 text-gray-700 dark:text-gray-300 rounded-b-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.1)]"
+            dir={isRTL ? "rtl" : "ltr"}
+          >
+            <div className="flex items-center gap-2 text-sm">
+              <span className="font-medium">
+                {t("page")} {page} {t("pageOf")} {totalPages}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+
+              {page !== 1 &&
+                <>
+                  <button
+                    type="button"
+                    onClick={() => onPageChange?.(1)}
+                    disabled={page <= 1}
+                    className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    aria-label={t("first")}
+                  >
+                    <IoChevronBack className="text-lg rtl:rotate-180" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onPageChange?.(page - 1)}
+                    disabled={page <= 1}
+                    className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    aria-label={t("prev")}
+                  >
+                    <IoChevronBack className="text-lg" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onPageChange?.(page - 1)}
+                    disabled={page <= 1}
+                    className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    aria-label={t("prev")}
+                  >
+                    <IoChevronBack className="text-lg" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onPageChange?.(page + 1)}
+                    disabled={page >= totalPages}
+                    className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    aria-label={t("next")}
+                  >
+                    <IoChevronForward className="text-lg" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onPageChange?.(totalPages)}
+                    disabled={page >= totalPages}
+                    className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    aria-label={t("last")}
+                  >
+                    <IoChevronForward className="text-lg rtl:rotate-180" />
+                  </button>
+                </>
+              }
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
