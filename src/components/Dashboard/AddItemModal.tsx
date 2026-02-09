@@ -64,7 +64,7 @@ export default function AddItemModal({
     const modalRef = useRef<HTMLDivElement>(null);
     const userData = useAppSelector((state) => state.auth.data);
     const planId = (userData as { user?: { subscription?: { planId?: number } } })?.user?.subscription?.planId;
-    const isFreePlan = planId !== 1;
+    const isFreePlan = planId === 1;
 
     const tItems = useTranslations("Items");
 

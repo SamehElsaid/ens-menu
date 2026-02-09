@@ -966,6 +966,60 @@
     "deleteError": "Failed to delete item",
     "confirmDelete": "Delete"
   },
+  "Advertisements": {
+    "addModal": {
+      "title": "Add Advertisement",
+      "editTitle": "Edit Advertisement",
+      "headerSubtitle": "Title / العنوان – Content / المحتوى",
+      "sectionTitles": "Titles",
+      "sectionContent": "Content",
+      "sectionMedia": "Media",
+      "titleEn": "Title (English)",
+      "titleAr": "Title (Arabic)",
+      "contentEn": "Content (English)",
+      "contentAr": "Content (Arabic)",
+      "image": "Image",
+      "imageHint": "PNG, JPG, WebP - Max 2MB",
+      "linkUrl": "Link URL (optional)",
+      "titleEnRequired": "Title (English) is required",
+      "titleArRequired": "Title (Arabic) is required",
+      "contentEnRequired": "Content (English) is required",
+      "contentArRequired": "Content (Arabic) is required",
+      "linkUrlInvalid": "Link must be a valid URL",
+      "imageRequired": "Image is required",
+      "imageFormatError": "Please select PNG, JPG or WebP image",
+      "imageSizeError": "Image must be less than 2MB",
+      "imageUploadError": "Failed to upload image",
+      "create": "Create",
+      "save": "Save",
+      "cancel": "Cancel",
+      "createSuccess": "Advertisement created successfully",
+      "createError": "Failed to create advertisement",
+      "editSuccess": "Advertisement updated successfully",
+      "editError": "Failed to update advertisement"
+    },
+    "page": {
+      "title": "Advertisements",
+      "description": "Manage promotional advertisements for this menu.",
+      "addButton": "Add advertisement",
+      "noMenuId": "Please open this page from a specific menu.",
+      "columns": {
+        "image": "Image",
+        "title": "Title",
+        "content": "Content",
+        "link": "Link",
+        "actions": "Actions"
+      },
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "deleteConfirmTitle": "Delete Advertisement",
+    "deleteConfirm": "Are you sure you want to delete this advertisement? This action cannot be undone.",
+    "typeNameToConfirm": "To confirm, type the advertisement title below",
+    "deleteSuccess": "Advertisement deleted successfully",
+    "deleteError": "Failed to delete advertisement",
+    "confirmDelete": "Delete"
+  },
   "DataTable": {
     "page": "Page",
     "prev": "Previous",
@@ -987,5 +1041,10 @@
     "Qualifications": "Qualifications",
     "Worked At": "Worked At",
     "Application": "Application"
+  },
+  "settings": {
+    "setting": "Setting",
+    "design": "Design",
+    "media": "Media"
   }
 }

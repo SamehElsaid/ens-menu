@@ -4,22 +4,24 @@ import LinkTo from "../Global/LinkTo";
 import { navSections } from "./data";
 import Drawer from "../Global/Drawer";
 import { useLocale, useTranslations } from "next-intl";
+import LoadImage from "../ImageLoad";
+import { useAppSelector } from "@/store/hooks";
 
 export function DashboardSidebar({
   isMenuOpen,
   segment,
   setIsMenuOpen,
-  type = "dashboard",
 }: {
   isMenuOpen: boolean;
   segment: string | null;
   setIsMenuOpen: (isMenuOpen: boolean) => void;
-  type?: "dashboard" | "select-menu";
 }) {
   const pathname = usePathname();
   const locale = useLocale();
   const t = useTranslations("Dashboard");
   const navSectionsData = navSections;
+
+  const { menu, loading } = useAppSelector((state) => state.menuData);
 
 
   const activeLink = (link: string) => {
@@ -31,6 +33,8 @@ export function DashboardSidebar({
     return pathname.includes(link);
   }
 
+  console.log(menu);
+
   const sidebarSections = (hidden = false) => (
     <aside
       className={`${hidden ? "hidden w-[270px]" : " w-full"
@@ -40,13 +44,38 @@ export function DashboardSidebar({
         href="/"
         className="flex items-center gap-3 px-6 py-6 max-w-[200px]!"
       >
-        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-lg font-semibold text-primary">
-          E
-        </span>
-        <div>
-          <p className="text-lg font-semibold">Ecme</p>
-          <p className="text-xs uppercase text-slate-400">{type}</p>
-        </div>
+        {loading || !menu ? (
+          <div className="flex items-center gap-3 w-full">
+            <div className="h-11 w-11 rounded-2xl bg-slate-200 animate-pulse" />
+            <div className="flex flex-col gap-1 flex-1">
+              <div className="h-3 w-24 rounded-full bg-slate-200 animate-pulse" />
+              <div className="h-3 w-16 rounded-full bg-slate-100 animate-pulse" />
+            </div>
+          </div>
+        ) : (
+          <>
+            {menu.logo ? (
+              <LoadImage
+                src={menu.logo}
+                alt={locale === "ar" ? menu.nameAr ?? "" : menu.nameEn ?? ""}
+                className="w-11 h-11 rounded-2xl"
+                width={44}
+                height={44}
+              />
+            ) : (
+              <span className="flex capitalize h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-lg font-semibold text-primary">
+                {locale === "ar"
+                  ? menu.nameAr?.charAt(0) ?? ""
+                  : menu.nameEn?.charAt(0) ?? ""}
+              </span>
+            )}
+            <div className="flex flex-col">
+              <p className="text-lg font-semibold capitalize truncate">
+                {locale === "ar" ? menu.nameAr : menu.nameEn}
+              </p>
+            </div>
+          </>
+        )}
       </LinkTo>
       <nav className="flex-1 space-y-8 overflow-y-auto px-4 pb-10">
         {navSectionsData.map((section) => (

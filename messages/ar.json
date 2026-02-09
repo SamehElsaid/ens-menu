@@ -687,6 +687,60 @@
     "deleteError": "فشل حذف العنصر",
     "confirmDelete": "حذف"
   },
+  "Advertisements": {
+    "addModal": {
+      "title": "إضافة إعلان",
+      "editTitle": "تعديل الإعلان",
+      "headerSubtitle": "العنوان / Title – المحتوى / Content",
+      "sectionTitles": "العناوين",
+      "sectionContent": "المحتوى",
+      "sectionMedia": "الوسائط",
+      "titleEn": "العنوان (إنجليزي)",
+      "titleAr": "العنوان (عربي)",
+      "contentEn": "المحتوى (إنجليزي)",
+      "contentAr": "المحتوى (عربي)",
+      "image": "الصورة",
+      "imageHint": "PNG, JPG, WebP - الحد 2 ميجابايت",
+      "linkUrl": "رابط (اختياري)",
+      "titleEnRequired": "العنوان (إنجليزي) مطلوب",
+      "titleArRequired": "العنوان (عربي) مطلوب",
+      "contentEnRequired": "المحتوى (إنجليزي) مطلوب",
+      "contentArRequired": "المحتوى (عربي) مطلوب",
+      "linkUrlInvalid": "الرابط يجب أن يكون رابطاً صحيحاً",
+      "imageRequired": "يجب اختيار صورة",
+      "imageFormatError": "يرجى اختيار صورة PNG أو JPG أو WebP",
+      "imageSizeError": "حجم الصورة يجب أن يكون أقل من 2 ميجابايت",
+      "imageUploadError": "فشل رفع الصورة",
+      "create": "إنشاء",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "createSuccess": "تم إنشاء الإعلان بنجاح",
+      "createError": "فشل إنشاء الإعلان",
+      "editSuccess": "تم تحديث الإعلان بنجاح",
+      "editError": "فشل تحديث الإعلان"
+    },
+    "page": {
+      "title": "الإعلانات",
+      "description": "إدارة الإعلانات الترويجية لهذه القائمة.",
+      "addButton": "إضافة إعلان",
+      "noMenuId": "يرجى فتح هذه الصفحة من قائمة محددة.",
+      "columns": {
+        "image": "الصورة",
+        "title": "العنوان",
+        "content": "المحتوى",
+        "link": "الرابط",
+        "actions": "الإجراءات"
+      },
+      "edit": "تعديل",
+      "delete": "حذف"
+    },
+    "deleteConfirmTitle": "حذف الإعلان",
+    "deleteConfirm": "هل أنت متأكد من حذف هذا الإعلان؟ لا يمكن التراجع عن هذا الإجراء.",
+    "typeNameToConfirm": "للتأكيد، اكتب اسم الإعلان أدناه",
+    "deleteSuccess": "تم حذف الإعلان بنجاح",
+    "deleteError": "فشل حذف الإعلان",
+    "confirmDelete": "حذف"
+  },
   "DataTable": {
     "page": "صفحة",
     "prev": "السابق",
@@ -708,5 +762,10 @@
     "Qualifications": "المؤهلات",
     "Worked At": "عمل في",
     "Application": "الطلبات"
+  },
+  "settings": {
+    "setting": "الإعدادات",
+    "design": "التصميم",
+    "media": "الوسائط"
   }
 }

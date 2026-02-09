@@ -283,7 +283,7 @@ body {
 .PhoneInputInput {
   @apply ps-4;
 }
-input {
+input, textarea {
   direction: auto;
   unicode-bidi: plaintext;
 }

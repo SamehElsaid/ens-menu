@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode, useEffect, useState } from "react";
-import PersonalNavigationSwiper from "@/components/PersonalNavigationSwiper";
+import PersonalNavigationSwiper from "@/components/SettingNavigationSwiper";
 import Loader from "@/components/Global/Loader";
 import { usePathname } from "next/navigation";
 import CardDashBoard from "@/components/Card/CardDashBoard";

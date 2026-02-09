@@ -7,8 +7,7 @@ import { DashboardSidebar } from "@/components/Dashboard/DashboardSidebar";
 export default function Layout({
   children,
   segment,
-  type = "dashboard",
-}: Readonly<{ children: ReactNode, segment: string | null, type?: "dashboard" | "select-menu" }>) {
+}: Readonly<{ children: ReactNode, segment: string | null }>) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
 
@@ -19,7 +18,6 @@ export default function Layout({
           <DashboardSidebar
             isMenuOpen={isMenuOpen}
             setIsMenuOpen={setIsMenuOpen}
-            type={type}
             segment={segment}
           />
         )}

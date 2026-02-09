@@ -82,3 +82,18 @@ export interface Item {
   updatedAt?: string;
   [key: string]: unknown;
 }
+
+export interface Advertisement {
+  id?: number;
+  title?: string;
+  titleAr?: string;
+  content?: string;
+  contentAr?: string;
+  imageUrl?: string;
+  linkUrl?: string;
+  isActive?: boolean;
+  menuId?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  [key: string]: unknown;
+}
