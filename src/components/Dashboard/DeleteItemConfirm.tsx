@@ -34,7 +34,7 @@ export default function DeleteItemConfirm({
             setIsDeleting(true);
             const result = await axiosDelete<unknown>(
                 `/menus/${menuId}/items/${item.id}`,
-                locale
+                localeName
             );
             if (result.status) {
                 toast.success(t("deleteSuccess"));
