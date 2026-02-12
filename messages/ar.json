@@ -148,7 +148,17 @@
     "orLoginWith": "أو تسجيل الدخول بواسطة",
     "haveAccount": "لديك حساب بالفعل؟",
     "createAccount": "إنشاء حساب جديد",
-    "registerDescription": "أنشئ حسابك للبدء في استخدام المنصة"
+    "registerDescription": "أنشئ حسابك للبدء في استخدام المنصة",
+    "resetPasswordTitle": "إعادة تعيين كلمة المرور",
+    "resetPasswordDescription": "أدخل بريدك الإلكتروني لإرسال رابط إعادة التعيين، أو أدخل كلمة مرور جديدة إذا فتحت الرابط من البريد.",
+    "sendResetLink": "إرسال رابط إعادة التعيين",
+    "backToLogin": "العودة لتسجيل الدخول",
+    "newPassword": "كلمة المرور الجديدة",
+    "confirmNewPassword": "تأكيد كلمة المرور الجديدة",
+    "resetPasswordSubmit": "تحديث كلمة المرور",
+    "resetLinkSent": "تم إرسال رابط إعادة التعيين. يرجى التحقق من بريدك الإلكتروني.",
+    "resetPasswordSuccess": "تم تحديث كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن.",
+    "invalidResetToken": "رابط إعادة التعيين غير صالح. اطلب رابطًا جديدًا."
   },
   "form": {
     "personalInformation": "المعلومات الشخصية",

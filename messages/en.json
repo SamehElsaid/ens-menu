@@ -156,7 +156,17 @@
     "orLoginWith": "Or login with",
     "haveAccount": "Already have an account?",
     "createAccount": "Create Account",
-    "registerDescription": "Create your account to get started"
+    "registerDescription": "Create your account to get started",
+    "resetPasswordTitle": "Reset Password",
+    "resetPasswordDescription": "Enter your email to receive a reset link, or set a new password if you opened the email link.",
+    "sendResetLink": "Send Reset Link",
+    "backToLogin": "Back to Login",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "resetPasswordSubmit": "Reset Password",
+    "resetLinkSent": "If the email exists, a reset link has been sent.",
+    "resetPasswordSuccess": "Password reset successfully. You can now log in.",
+    "invalidResetToken": "Invalid reset token. Please request a new reset link."
   },
   "form": {
     "personalInformation": "Personal Information",
