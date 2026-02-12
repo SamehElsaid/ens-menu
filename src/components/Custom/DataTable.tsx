@@ -90,19 +90,25 @@ export default function DataTable<T extends object>({
       width: 70,
       pinned: isRTL ? "right" : "left",
       cellStyle: {
-        backgroundColor: "#f8fafc",
         fontWeight: "500",
-        color: "#64748b",
         textAlign: "center",
         justifyContent: "center",
       },
+      cellClass: "ag-row-number-cell",
       headerClass: "ag-header-cell-number",
     };
 
     return isRTL
       ? [...columnDefs, rowNumberColumn]
       : [rowNumberColumn, ...columnDefs];
-  }, [columnDefs, showRowNumbers, paginationPageSize, isRTL, isServerPagination, page]);
+  }, [
+    columnDefs,
+    showRowNumbers,
+    paginationPageSize,
+    isRTL,
+    isServerPagination,
+    page,
+  ]);
 
   const finalDefaultColDef: ColDef = useMemo(
     () => ({
@@ -120,7 +126,7 @@ export default function DataTable<T extends object>({
       headerClass: "ag-header-cell-custom",
       ...defaultColDef,
     }),
-    [defaultColDef]
+    [defaultColDef],
   );
 
   const borderDirection = isRTL ? "left" : "right";
@@ -134,8 +140,8 @@ export default function DataTable<T extends object>({
   return (
     <div className={`w-full relative ${className}`} dir={isRTL ? "rtl" : "ltr"}>
       {installLoadingState && (
-        <div className="absolute inset-0 bg-white overflow-hidden z-10 flex items-center justify-center loading-overlay">
-          <div className="w-[calc(100%-3px)] z-10 h-[calc(100%-3px)] bg-white absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]"></div>
+        <div className="absolute inset-0 bg-white dark:bg-[#0d1117]/70 overflow-hidden z-10 flex items-center justify-center loading-overlay">
+          <div className="w-[calc(100%-3px)] z-10 h-[calc(100%-3px)] bg-white dark:bg-slate-900 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]"></div>
           <div className="blob"></div>
           <div className="z-20">
             <Loader />
@@ -161,14 +167,23 @@ export default function DataTable<T extends object>({
           background: #f1f5f9;
           border-radius: 4px;
         }
+        .dark .data-table-wrapper::-webkit-scrollbar-track {
+          background: #1e293b;
+        }
         
         .data-table-wrapper::-webkit-scrollbar-thumb {
           background: #cbd5e1;
           border-radius: 4px;
         }
+        .dark .data-table-wrapper::-webkit-scrollbar-thumb {
+          background: #475569;
+        }
         
         .data-table-wrapper::-webkit-scrollbar-thumb:hover {
           background: #94a3b8;
+        }
+        .dark .data-table-wrapper::-webkit-scrollbar-thumb:hover {
+          background: #64748b;
         }
         
         .ag-theme-alpine {
@@ -191,6 +206,38 @@ export default function DataTable<T extends object>({
           box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
           direction: ${isRTL ? "rtl" : "ltr"};
           min-width: 100%;
+        }
+        .dark .ag-theme-alpine {
+          --ag-background-color: #0b1220;
+          --ag-foreground-color: #cbd5e1;
+          --ag-data-color: #cbd5e1;
+          --ag-header-background-color: #0f172a;
+          --ag-header-foreground-color: #e2e8f0;
+          --ag-border-color: #334155;
+          --ag-row-border-color: #1e293b;
+          --ag-odd-row-background-color: #0b1220;
+          --ag-even-row-background-color: #111827;
+          --ag-row-hover-color: #1e293b;
+          --ag-selected-row-background-color: #172554;
+          --ag-header-cell-hover-background-color: #1e293b;
+          --ag-header-cell-moving-background-color: #334155;
+          border: 1px solid #334155;
+          box-shadow: 0 1px 3px 0 rgba(2, 6, 23, 0.5), 0 1px 2px 0 rgba(2, 6, 23, 0.4);
+        }
+        .dark .ag-theme-alpine .ag-root-wrapper,
+        .dark .ag-theme-alpine .ag-root-wrapper-body,
+        .dark .ag-theme-alpine .ag-root,
+        .dark .ag-theme-alpine .ag-body-viewport,
+        .dark .ag-theme-alpine .ag-center-cols-viewport,
+        .dark .ag-theme-alpine .ag-center-cols-container,
+        .dark .ag-theme-alpine .ag-pinned-left-cols-container,
+        .dark .ag-theme-alpine .ag-pinned-right-cols-container,
+        .dark .ag-theme-alpine .ag-header-viewport,
+        .dark .ag-theme-alpine .ag-header-container {
+          background-color: #0b1220 !important;
+        }
+        .dark .ag-theme-alpine .ag-root-wrapper {
+          border: 1px solid #334155 !important;
         }
         .ag-theme-alpine.server-pagination {
           border-bottom-left-radius: 0;
@@ -289,17 +336,19 @@ export default function DataTable<T extends object>({
             font-size: 11px;
           }
           
-          ${mobileHeight
+          ${
+            mobileHeight
               ? `
           .ag-theme-alpine {
-            height: ${typeof mobileHeight === "number"
+            height: ${
+              typeof mobileHeight === "number"
                 ? `${mobileHeight}px`
                 : mobileHeight
-              } !important;
+            } !important;
           }
           `
               : ""
-            }
+          }
         }
         
         .ag-theme-alpine .ag-header {
@@ -308,10 +357,16 @@ export default function DataTable<T extends object>({
           text-transform: none;
           letter-spacing: 0.01em;
         }
+        .dark .ag-theme-alpine .ag-header {
+          border-bottom: 2px solid #334155;
+        }
         
         .ag-theme-alpine .ag-header-cell {
           padding: 0 16px;
           border-${borderDirection}: 1px solid #e2e8f0;
+        }
+        .dark .ag-theme-alpine .ag-header-cell {
+          border-${borderDirection}: 1px solid #334155;
         }
         
         .ag-theme-alpine .ag-header-cell:last-child {
@@ -333,23 +388,45 @@ export default function DataTable<T extends object>({
             align-items: center !important;
 
         }
+        .dark .ag-theme-alpine .ag-cell {
+          background-color: transparent !important;
+          border-${borderDirection}: 1px solid #1e293b;
+          color: #cbd5e1;
+        }
+        .dark .ag-theme-alpine .ag-cell.ag-cell-first-right-pinned,
+        .dark .ag-theme-alpine .ag-cell.ag-cell-last-left-pinned {
+          background-color: #0b1220 !important;
+        }
         
         .ag-theme-alpine .ag-cell:last-child {
           border-${borderDirection}: none;
+        }
+        .dark .ag-theme-alpine .ag-cell-value,
+        .dark .ag-theme-alpine .ag-group-value {
+          color: #cbd5e1;
         }
         
         .ag-theme-alpine .ag-row {
           border-bottom: 1px solid #f1f5f9;
           transition: background-color 0.2s ease;
         }
+        .dark .ag-theme-alpine .ag-row {
+          border-bottom: 1px solid #1e293b;
+        }
         
         .ag-theme-alpine .ag-row:hover {
           background-color: #f0f9ff !important;
           cursor: ${onRowClicked ? "pointer" : "default"};
         }
+        .dark .ag-theme-alpine .ag-row:hover {
+          background-color: #1e293b !important;
+        }
         
         .ag-theme-alpine .ag-row-selected {
           background-color: #e0f2fe !important;
+        }
+        .dark .ag-theme-alpine .ag-row-selected {
+          background-color: #172554 !important;
         }
         
         .ag-theme-alpine .ag-paging-panel {
@@ -358,6 +435,11 @@ export default function DataTable<T extends object>({
           background-color: #fafbfc;
           color: #475569;
           direction: ${isRTL ? "rtl" : "ltr"};
+        }
+        .dark .ag-theme-alpine .ag-paging-panel {
+          border-top: 1px solid #334155;
+          background-color: #0f172a;
+          color: #cbd5e1;
         }
           .ag-paging-panel > *{
           margin: 0;
@@ -371,10 +453,19 @@ export default function DataTable<T extends object>({
           color: #475569;
           transition: all 0.2s ease;
         }
+        .dark .ag-theme-alpine .ag-paging-button {
+          border: 1px solid #475569;
+          background-color: #1e293b;
+          color: #e2e8f0;
+        }
         
         .ag-theme-alpine .ag-paging-button:hover:not(.ag-disabled) {
           background-color: #f1f5f9;
           border-color: #94a3b8;
+        }
+        .dark .ag-theme-alpine .ag-paging-button:hover:not(.ag-disabled) {
+          background-color: #334155;
+          border-color: #64748b;
         }
         
         .ag-theme-alpine .ag-paging-button.ag-disabled {
@@ -392,22 +483,69 @@ export default function DataTable<T extends object>({
           padding: 4px 8px;
           background-color: white;
         }
+        .dark .ag-theme-alpine .ag-select {
+          border: 1px solid #475569;
+          background-color: #1e293b;
+          color: #e2e8f0;
+        }
         
         .ag-theme-alpine .ag-icon {
           color: #64748b;
         }
+        .dark .ag-theme-alpine .ag-icon {
+          color: #94a3b8;
+        }
         
         .ag-theme-alpine .ag-icon-menu {
           color: #94a3b8;
+        }
+        .dark .ag-theme-alpine .ag-icon-menu {
+          color: #cbd5e1;
+        }
+        .dark .ag-theme-alpine .ag-input-field-input,
+        .dark .ag-theme-alpine .ag-picker-field-wrapper,
+        .dark .ag-theme-alpine .ag-text-field-input {
+          background-color: #1e293b;
+          border-color: #475569;
+          color: #e2e8f0;
+        }
+        .dark .ag-theme-alpine .ag-input-field-input::placeholder,
+        .dark .ag-theme-alpine .ag-text-field-input::placeholder {
+          color: #94a3b8;
+        }
+        .dark .ag-theme-alpine .ag-menu,
+        .dark .ag-theme-alpine .ag-popup,
+        .dark .ag-theme-alpine .ag-filter-toolpanel,
+        .dark .ag-theme-alpine .ag-column-select,
+        .dark .ag-theme-alpine .ag-dialog {
+          background-color: #0f172a;
+          color: #e2e8f0;
+          border-color: #334155;
+        }
+        .dark .ag-theme-alpine .ag-menu-option:hover,
+        .dark .ag-theme-alpine .ag-set-filter-item:hover {
+          background-color: #1e293b;
         }
         
         .ag-theme-alpine .ag-icon-asc,
         .ag-theme-alpine .ag-icon-desc {
           color: #3b82f6;
         }
+        .ag-theme-alpine .ag-row-number-cell,
+        .ag-theme-alpine .ag-header-cell-number {
+          background-color: #f8fafc;
+          color: #64748b;
+          font-weight: 600;
+        }
+        .dark .ag-theme-alpine .ag-row-number-cell,
+        .dark .ag-theme-alpine .ag-header-cell-number {
+          background-color: #0f172a;
+          color: #94a3b8;
+        }
         
-        ${isRTL
-              ? `
+        ${
+          isRTL
+            ? `
         .ag-theme-alpine .ag-header-cell-text {
           text-align: right;
         }
@@ -418,11 +556,12 @@ export default function DataTable<T extends object>({
           flex-direction: row-reverse;
         }
         `
-              : ""
-            }
+            : ""
+        }
         
         @media (max-width: 640px) {
-          ${isRTL
+          ${
+            isRTL
               ? `
           .ag-theme-alpine .ag-paging-panel {
             flex-direction: column-reverse;
@@ -433,7 +572,7 @@ export default function DataTable<T extends object>({
             flex-direction: column;
           }
           `
-            }
+          }
         }
       `,
         }}
@@ -444,14 +583,14 @@ export default function DataTable<T extends object>({
           style={{
             ...(height === "auto" || !height
               ? {
-                // Calculate height for paginationPageSize rows
-                // Header (48px) + (paginationPageSize rows * ~52px per row) + Pagination (~60px)
-                height: `${48 + paginationPageSize * 52 + 60}px`,
-                minHeight: "400px",
-              }
+                  // Calculate height for paginationPageSize rows
+                  // Header (48px) + (paginationPageSize rows * ~52px per row) + Pagination (~60px)
+                  height: `${48 + paginationPageSize * 52 + 60}px`,
+                  minHeight: "400px",
+                }
               : {
-                height: typeof height === "number" ? `${height}px` : height,
-              }),
+                  height: typeof height === "number" ? `${height}px` : height,
+                }),
             minWidth: "100%",
           }}
         >
@@ -496,8 +635,7 @@ export default function DataTable<T extends object>({
               </span>
             </div>
             <div className="flex items-center gap-1">
-
-              {page !== 1 &&
+              {page !== 1 && (
                 <>
                   <button
                     type="button"
@@ -545,7 +683,7 @@ export default function DataTable<T extends object>({
                     <IoChevronForward className="text-lg rtl:rotate-180" />
                   </button>
                 </>
-              }
+              )}
             </div>
           </div>
         )}

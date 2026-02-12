@@ -35,7 +35,7 @@ const ChatUI: React.FC<Props> = ({ locale }) => {
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [documentPreviewUrl, setDocumentPreviewUrl] = useState<string | null>(
-    null
+    null,
   );
   const [showAttachMenu, setShowAttachMenu] = useState(false);
   const [viewImageUrl, setViewImageUrl] = useState<string | null>(null);
@@ -63,7 +63,7 @@ const ChatUI: React.FC<Props> = ({ locale }) => {
   const discardRecordingRef = useRef(false);
   const sendRecordingImmediatelyRef = useRef(false);
   const [waveHeights, setWaveHeights] = useState<number[]>(() =>
-    Array.from({ length: 14 }, () => 4)
+    Array.from({ length: 14 }, () => 4),
   );
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -169,7 +169,7 @@ const ChatUI: React.FC<Props> = ({ locale }) => {
   };
 
   const handleTextareaKeyDown = (
-    e: React.KeyboardEvent<HTMLTextAreaElement>
+    e: React.KeyboardEvent<HTMLTextAreaElement>,
   ) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -214,7 +214,7 @@ const ChatUI: React.FC<Props> = ({ locale }) => {
           const base = 4;
           const maxExtra = 18;
           return base + maxExtra * normalized * randomness;
-        })
+        }),
       );
 
       waveAnimationFrameRef.current = window.requestAnimationFrame(animate);
@@ -559,7 +559,6 @@ const ChatUI: React.FC<Props> = ({ locale }) => {
       <div className="flex h-full w-full  gap-0 overflow-hidden rounded-2xl ">
         {/* Sidebar users */}
         <aside className="hidden w-72 flex-col border-r border-black/10 bg-gray-50 md:flex">
-      
           <div className="space-y-0.5 overflow-auto pe-1 bg-white">
             {users.map((u) => {
               const isActive = u.id === activeUserId;
@@ -580,6 +579,7 @@ const ChatUI: React.FC<Props> = ({ locale }) => {
                       alt={u.name}
                       width={36}
                       height={36}
+                      loading="lazy"
                       className="rounded-full border border-white object-cover shadow-sm"
                     />
                     <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border border-white bg-emerald-500" />
@@ -609,6 +609,7 @@ const ChatUI: React.FC<Props> = ({ locale }) => {
                     src={getUserById(users, activeUserId).avatar}
                     alt={getUserById(users, activeUserId).name}
                     sizes="40px"
+                    loading="lazy"
                     className="rounded-full border border-white object-cover shadow"
                   />
                 </div>

@@ -23,7 +23,6 @@ export function DashboardSidebar({
 
   const { menu, loading } = useAppSelector((state) => state.menuData);
 
-
   const activeLink = (link: string) => {
     console.log(pathname, link);
 
@@ -31,14 +30,15 @@ export function DashboardSidebar({
       return pathname === "/dashboard/" + segment;
     }
     return pathname.includes(link);
-  }
+  };
 
   console.log(menu);
 
   const sidebarSections = (hidden = false) => (
     <aside
-      className={`${hidden ? "hidden w-[270px]" : " w-full"
-        }  flex flex-col border-e border-slate-100 bg-white lg:flex h-dvh fixed top-0 start-0`}
+      className={`${
+        hidden ? "hidden w-[270px]" : " w-full"
+      }  flex flex-col border-e border-slate-100 dark:border-purple-900 bg-white dark:bg-[#0d1117]/70 lg:flex h-dvh fixed top-0 start-0`}
     >
       <LinkTo
         href="/"
@@ -46,10 +46,10 @@ export function DashboardSidebar({
       >
         {loading || !menu ? (
           <div className="flex items-center gap-3 w-full">
-            <div className="h-11 w-11 rounded-2xl bg-slate-200 animate-pulse" />
+            <div className="h-11 w-11 rounded-2xl bg-slate-200 dark:bg-[#0d1117]/70 animate-pulse" />
             <div className="flex flex-col gap-1 flex-1">
-              <div className="h-3 w-24 rounded-full bg-slate-200 animate-pulse" />
-              <div className="h-3 w-16 rounded-full bg-slate-100 animate-pulse" />
+              <div className="h-3 w-24 rounded-full bg-slate-200 dark:bg-[#0d1117]/70 animate-pulse" />
+              <div className="h-3 w-16 rounded-full bg-slate-100 dark:bg-[#0d1117]/70 animate-pulse" />
             </div>
           </div>
         ) : (
@@ -57,48 +57,46 @@ export function DashboardSidebar({
             {menu.logo ? (
               <LoadImage
                 src={menu.logo}
-                alt={locale === "ar" ? menu.nameAr ?? "" : menu.nameEn ?? ""}
+                alt={
+                  locale === "ar" ? (menu.nameAr ?? "") : (menu.nameEn ?? "")
+                }
                 className="w-11 h-11 rounded-2xl"
                 width={44}
                 height={44}
               />
             ) : (
-              <span className="flex capitalize h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-lg font-semibold text-primary">
+              <span className="flex capitalize h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-lg font-semibold text-primary ">
                 {locale === "ar"
-                  ? menu.nameAr?.charAt(0) ?? ""
-                  : menu.nameEn?.charAt(0) ?? ""}
+                  ? (menu.nameAr?.charAt(0) ?? "")
+                  : (menu.nameEn?.charAt(0) ?? "")}
               </span>
             )}
             <div className="flex flex-col">
-              <p className="text-lg font-semibold capitalize truncate">
+              <p className="text-lg font-semibold capitalize truncate dark:text-slate-100">
                 {locale === "ar" ? menu.nameAr : menu.nameEn}
               </p>
             </div>
           </>
         )}
       </LinkTo>
-      <nav className="flex-1 space-y-8 overflow-y-auto px-4 pb-10">
+      <nav className="flex-1 space-y-8 overflow-y-auto px-4 pb-10 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {navSectionsData.map((section) => (
           <div key={section.title}>
-            <p className="px-2 text-xs uppercase tracking-[0.3em] text-slate-400">
+            <p className="px-2 text-xs uppercase tracking-[0.3em] text-slate-400 dark:text-slate-300">
               {t(section.title)}
             </p>
             <div className="mt-3 space-y-1">
               {section.items.map((item) => (
                 <LinkTo
-                  href={
-                    "/dashboard/" +
-                    segment + "/" +
-                    item.link || ""
-                  }
+                  href={"/dashboard/" + segment + "/" + item.link || ""}
                   key={item.label}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`flex w-full items-center  justify-between rounded-xl px-3 py-3 text-sm font-semibold transition 
+                  className={`flex w-full items-center  justify-between rounded-xl px-3 py-3 text-sm font-semibold transition hover:text-slate-100 
                     
-                    ${activeLink(item.link || "") ? "bg-accent-purple text-white shadow" : "text-slate-500  hover:bg-slate-50"}
+                    ${activeLink(item.link || "") ? "bg-accent-purple text-white shadow" : "text-slate-500  hover:bg-purple-900"}
                     }`}
                 >
-                  <span className="flex items-center gap-3">
+                  <span className="flex items-center gap-3   dark:text-slate-100">
                     <item.icon className="text-xl" />
                     {t(item.label)}
                   </span>
@@ -114,8 +112,12 @@ export function DashboardSidebar({
         ))}
       </nav>
       <div className="m-4 rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-4 text-sm">
-        <p className="font-semibold text-primary">Need more features?</p>
-        <p className="text-slate-500">Upgrade your workspace in one click.</p>
+        <p className="font-semibold text-primary dark:text-slate-100">
+          Need more features?
+        </p>
+        <p className="text-slate-500 dark:text-slate-300">
+          Upgrade your workspace in one click.
+        </p>
       </div>
     </aside>
   );

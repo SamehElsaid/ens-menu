@@ -124,7 +124,7 @@ export default function AdvertisementsPage() {
           if (!ad) return null;
           const src = ad.imageUrl ?? (ad as { image?: string }).image ?? "";
           return (
-            <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden flex items-center justify-center">
+            <div className="w-12 h-12 rounded-lg bg-slate-100 dark:bg-slate-800 overflow-hidden flex items-center justify-center">
               {src ? (
                 <LoadImage
                   src={src}
@@ -134,7 +134,7 @@ export default function AdvertisementsPage() {
                   height={48}
                 />
               ) : (
-                <span className="text-slate-400 text-lg">—</span>
+                <span className="text-slate-400 dark:text-slate-500 text-lg">—</span>
               )}
             </div>
           );
@@ -150,7 +150,7 @@ export default function AdvertisementsPage() {
           if (!ad) return null;
           return (
             <span
-              className="font-medium text-slate-800"
+              className="font-medium text-slate-800 dark:text-slate-100"
               dir={locale === "ar" ? "rtl" : "ltr"}
             >
               {getTitle(ad)}
@@ -168,7 +168,7 @@ export default function AdvertisementsPage() {
           if (!ad) return null;
           return (
             <span
-              className="text-slate-600"
+              className="text-slate-600 dark:text-slate-400"
               dir={locale === "ar" ? "rtl" : "ltr"}
             >
               {getContent(ad)}
@@ -183,7 +183,7 @@ export default function AdvertisementsPage() {
         cellRenderer: (params: ICellRendererParams<Advertisement>) => {
           const ad = params.data;
           const link = ad?.linkUrl;
-          if (!link) return <span className="text-slate-400">—</span>;
+          if (!link) return <span className="text-slate-400 dark:text-slate-500">—</span>;
           const label = link.length > 40 ? `${link.slice(0, 37)}...` : link;
           return (
             <a
@@ -215,7 +215,7 @@ export default function AdvertisementsPage() {
                   setEditingAd(ad);
                   setShowModal(true);
                 }}
-                className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 hover:border-primary/30 hover:text-primary transition-colors"
+                className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-primary/30 dark:hover:border-primary/50 hover:text-primary transition-colors"
               >
                 <IoCreateOutline className="text-lg" />
               </button>
@@ -226,7 +226,7 @@ export default function AdvertisementsPage() {
                   e.stopPropagation();
                   setDeletingAd(ad);
                 }}
-                className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-colors"
+                className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-red-50 dark:hover:bg-red-900/30 hover:border-red-200 dark:hover:border-red-800 hover:text-red-600 dark:hover:text-red-300 transition-colors"
               >
                 <IoTrashOutline className="text-lg" />
               </button>
@@ -251,10 +251,10 @@ export default function AdvertisementsPage() {
 
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100">
           {title}
         </h1>
-        <p className="max-w-md text-slate-500">{description}</p>
+        <p className="max-w-md text-slate-500 dark:text-slate-400">{description}</p>
         <LinkTo
           href="/pricing"
           className="mt-4 inline-flex items-center justify-center gap-2 px-8 py-3 bg-linear-to-r from-primary to-primary/80 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -267,7 +267,7 @@ export default function AdvertisementsPage() {
 
   if (!menuId) {
     return (
-      <div className="py-20 text-center text-slate-500">
+      <div className="py-20 text-center text-slate-500 dark:text-slate-400">
         <p>{t("noMenuId")}</p>
       </div>
     );
@@ -277,8 +277,8 @@ export default function AdvertisementsPage() {
     <>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800">{t("title")}</h1>
-          <p className="text-slate-500 mt-1">
+          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">{t("title")}</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">
             {t("description")}
           </p>
         </div>

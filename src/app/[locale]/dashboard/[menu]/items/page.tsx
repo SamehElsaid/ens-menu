@@ -154,7 +154,7 @@ export default function ItemsPage() {
                     if (!item) return null;
                     const src = getImageUrl(item);
                     return (
-                        <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-lg bg-slate-100 dark:bg-slate-800 overflow-hidden flex items-center justify-center">
                             {src ? (
                                 <LoadImage
                                     src={src}
@@ -164,7 +164,7 @@ export default function ItemsPage() {
                                     height={48}
                                 />
                             ) : (
-                                <span className="text-slate-400 text-lg">—</span>
+                                <span className="text-slate-400 dark:text-slate-500 text-lg">—</span>
                             )}
                         </div>
                     );
@@ -180,7 +180,7 @@ export default function ItemsPage() {
                     const name = getName(item);
                     return (
                         <span
-                            className="font-medium text-slate-800"
+                            className="font-medium text-slate-800 dark:text-slate-100"
                             dir={locale === "ar" ? "rtl" : "ltr"}
                         >
                             {name}
@@ -192,7 +192,7 @@ export default function ItemsPage() {
                 headerName: t("category"),
                 width: 120,
                 cellRenderer: (params: ICellRendererParams<Item>) => (
-                    <span className="text-slate-700">{params.data ? getCategoryName(params.data) : "—"}</span>
+                    <span className="text-slate-700 dark:text-slate-300">{params.data ? getCategoryName(params.data) : "—"}</span>
                 ),
             },
             {
@@ -200,7 +200,7 @@ export default function ItemsPage() {
                 width: 90,
                 field: "price",
                 cellRenderer: (params: ICellRendererParams<Item>) => (
-                    <span className="font-medium text-slate-800">{params.data?.price ?? "—"}</span>
+                    <span className="font-medium text-slate-800 dark:text-slate-100">{params.data?.price ?? "—"}</span>
                 ),
             },
             {
@@ -208,7 +208,7 @@ export default function ItemsPage() {
                 width: 100,
                 field: "originalPrice",
                 cellRenderer: (params: ICellRendererParams<Item>) => (
-                    <span className="text-slate-600">{params.data?.originalPrice ?? "—"}</span>
+                    <span className="text-slate-600 dark:text-slate-400">{params.data?.originalPrice ?? "—"}</span>
                 ),
             },
             {
@@ -230,11 +230,11 @@ export default function ItemsPage() {
                     const available = item.available ;
                     return (
                         <span
-                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${available ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${available ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300" : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
                                 }`}
                         >
                             <IoEllipseSharp
-                                className={`text-[8px] ${available ? "text-green-500" : "text-amber-500"}`}
+                                className={`text-[8px] ${available ? "text-green-500 dark:text-green-400" : "text-amber-500 dark:text-amber-400"}`}
                             />
                             {available ? t("available") : t("unavailable")}
                         </span>
@@ -258,7 +258,7 @@ export default function ItemsPage() {
                                     e.stopPropagation();
                                     handleEdit(item);
                                 }}
-                                className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 hover:border-primary/30 hover:text-primary transition-colors"
+                                className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-primary/30 dark:hover:border-primary/50 hover:text-primary transition-colors"
                             >
                                 <IoCreateOutline className="text-lg" />
                             </button>
@@ -269,7 +269,7 @@ export default function ItemsPage() {
                                     e.stopPropagation();
                                     handleDelete(item);
                                 }}
-                                className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-colors"
+                                className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-red-50 dark:hover:bg-red-900/30 hover:border-red-200 dark:hover:border-red-800 hover:text-red-600 dark:hover:text-red-300 transition-colors"
                             >
                                 <IoTrashOutline className="text-lg" />
                             </button>
@@ -285,8 +285,8 @@ export default function ItemsPage() {
         <>
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-800">{t("title")}</h1>
-                    <p className="text-slate-500 mt-1">{t("subtitle")}</p>
+                    <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">{t("title")}</h1>
+                    <p className="text-slate-500 dark:text-slate-400 mt-1">{t("subtitle")}</p>
                 </div>
                 <button
                     onClick={() => {
@@ -332,7 +332,7 @@ export default function ItemsPage() {
                             ))}
                         </select>
                     </div>
-                    <div className="min-w-[160px]">
+                    <div className="min-w-40">
                         <label className="block text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2">{t("availability")}</label>
                         <select
                             value={availableFilter}

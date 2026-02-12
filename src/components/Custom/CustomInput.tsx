@@ -40,7 +40,7 @@ interface CustomInputProps {
   setOpen?: (open: boolean) => void;
   open?: boolean;
   onChange?: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => void;
   disabled?: boolean;
   apiUrl?: string;
@@ -128,7 +128,7 @@ export default function CustomInput({
           `?${querySearch}=${value}&page=${page}${
             triggerApiUrl ? `&${triggerApiUrl}` : ""
           }`,
-        locale
+        locale,
       )
         .then((res) => {
           if (res.status && res.data) {
@@ -169,7 +169,7 @@ export default function CustomInput({
 
   return (
     <>
-      <div className="w-full relative">
+      <div className="w-full relative text-slate-500 dark:text-slate-200">
         {type === "choice" ? (
           <div className="w-full">
             <div
@@ -192,7 +192,7 @@ export default function CustomInput({
                       onClick={() => {
                         console.log(option.value);
                         props.onChange?.(
-                          option as unknown as ChangeEvent<HTMLInputElement>
+                          option as unknown as ChangeEvent<HTMLInputElement>,
                         );
                       }}
                       className={`flex-1 rounded-2xl  px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
@@ -216,8 +216,8 @@ export default function CustomInput({
                 error
                   ? "bg-red-50 text-red-500 border-red-200"
                   : focus
-                  ? "text-accent-purple border-accent-purple/20"
-                  : " text-accent-purple border-accent-purple/20"
+                    ? "text-accent-purple border-accent-purple/20"
+                    : " text-accent-purple border-accent-purple/20"
               }`}
             >
               {icon}
@@ -251,7 +251,7 @@ export default function CustomInput({
                 options.concat(
                   config.isNext
                     ? [{ label: t("auth.seeMore"), value: "seeMore" }]
-                    : []
+                    : [],
                 )
               }
               value={props?.value as SingleValue<OptionType>}
@@ -264,7 +264,7 @@ export default function CustomInput({
                   reset?.();
                 }
                 props.onChange?.(
-                  newValue as unknown as ChangeEvent<HTMLInputElement>
+                  newValue as unknown as ChangeEvent<HTMLInputElement>,
                 );
               }}
               components={{
@@ -312,7 +312,7 @@ export default function CustomInput({
               value={props?.value as string | undefined}
               onChange={
                 props.onChange as unknown as (
-                  value?: string | undefined
+                  value?: string | undefined,
                 ) => void
               }
             />
@@ -336,7 +336,7 @@ export default function CustomInput({
               selected={props.value as Date | null | undefined}
               onChange={(date) =>
                 props.onChange?.(
-                  date as unknown as ChangeEvent<HTMLInputElement>
+                  date as unknown as ChangeEvent<HTMLInputElement>,
                 )
               }
               customInput={
@@ -348,8 +348,8 @@ export default function CustomInput({
                         error
                           ? "bg-red-50 text-red-500 border-red-200"
                           : focus
-                          ? "text-accent-purple border-accent-purple/20"
-                          : " text-accent-purple border-accent-purple/20"
+                            ? "text-accent-purple border-accent-purple/20"
+                            : " text-accent-purple border-accent-purple/20"
                       }`}
                     >
                       {icon}
@@ -382,8 +382,8 @@ export default function CustomInput({
                       type === "date"
                         ? formatDate(props.value as Date | null | undefined)
                         : type === "time"
-                        ? formatTime(props.value as Date | null | undefined)
-                        : ""
+                          ? formatTime(props.value as Date | null | undefined)
+                          : ""
                     }
                   />
                 </div>
@@ -405,8 +405,8 @@ export default function CustomInput({
                   error
                     ? "bg-red-50 text-red-500 border-red-200"
                     : focus
-                    ? " text-accent-purple border-accent-purple/20"
-                    : " text-accent-purple/60 border-accent-purple/20"
+                      ? " text-accent-purple border-accent-purple/20"
+                      : " text-accent-purple/60 border-accent-purple/20"
                 }`}
               >
                 {icon}
@@ -424,7 +424,7 @@ export default function CustomInput({
                   props.onChange?.(
                     e as React.ChangeEvent<
                       HTMLInputElement | HTMLTextAreaElement
-                    >
+                    >,
                   );
                 }}
                 value={props.value as string | undefined}
