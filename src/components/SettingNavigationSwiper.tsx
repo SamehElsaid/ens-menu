@@ -77,8 +77,8 @@ export default function SettingNavigationSwiper({
                   inline-flex  items-center gap-2 px-4 md:px-6 py-2.5 rounded-lg font-medium text-sm md:text-base
                   transition-all duration-200 whitespace-nowrap
                   ${isActive(item.href)
-                    ? "bg-primary text-white shadow-md"
-                    : "bg-primary/10 text-primary"
+                    ? "bg-primary text-white shadow-md dark:shadow-primary/25"
+                    : "bg-primary/10 text-primary dark:bg-slate-800 dark:text-slate-200"
                   }
                 `}
               >

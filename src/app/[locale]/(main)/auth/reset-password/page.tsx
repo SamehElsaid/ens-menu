@@ -1,8 +1,9 @@
 import CustomLogo from "@/components/Custom/CustomLogo";
-import LoginForm from "@/components/LoginForm";
+import ResetPasswordForm from "@/components/ResetPasswordForm";
 import Card from "@/components/ui/Card";
 import { useTranslations } from "next-intl";
-export default function RegisterIndexPage() {
+
+export default function ResetPasswordPage() {
   const t = useTranslations("");
 
   return (
@@ -10,8 +11,7 @@ export default function RegisterIndexPage() {
       <div className="container flex items-center justify-center ">
         <div className="rounded-md!   mt-16 min-h-[calc(100dvh-140px)] w-full flex items-center justify-center">
           <div className="flex gap-10  w-full flex-col lg:flex-row ">
-            {/* Left: selection card area */}
-            <div className="fixed inset-0 overflow-hidden bg-white pointer-events-none dark:bg-[#0d1117]   ">
+            <div className="fixed inset-0 overflow-hidden bg-white pointer-events-none dark:bg-[#0d1117]">
               <div
                 className="particle particle-drift-slow w-64 h-64 bg-accent-purple rounded-full top-[-5%] right-[-10%]"
                 style={{ opacity: "0.08" }}
@@ -44,13 +44,13 @@ export default function RegisterIndexPage() {
                   <div className="flex-1 flex flex-col max-w-[400px] mx-auto w-full">
                     <div className="mb-10 text-center">
                       <h2 className="text-2xl text-royal-purple dark:text-purple-300 mb-2">
-                        {t("auth.welcomeBack")}
+                        {t("auth.resetPasswordTitle")}
                       </h2>
                       <p className="text-slate-500 dark:text-slate-400">
-                        {t("auth.welcomeBackDescription")}
+                        {t("auth.resetPasswordDescription")}
                       </p>
                     </div>
-                    <LoginForm />
+                    <ResetPasswordForm />
                   </div>
                 </div>
               </Card>

@@ -1,35 +1,16 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useAppSelector } from "@/store/hooks";
 import UserDropDown from "../UserDropDown";
-import { flagIcons } from "@/svg/flags";
-import { FiMenu, FiX, FiMoon, FiSun } from "react-icons/fi";
+import { FiMenu, FiX } from "react-icons/fi";
 import Logo from "../Global/Logo";
 import { homeLinks } from "@/modules/Header";
-
-// Custom hook to track dark mode state
-function useDarkMode() {
-  const subscribe = (callback: () => void) => {
-    const observer = new MutationObserver(callback);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-    return () => observer.disconnect();
-  };
-
-  const getSnapshot = () => {
-    return document.documentElement.classList.contains("dark");
-  };
-
-  const getServerSnapshot = () => false;
-
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-}
+import LanguageToggle from "./LanguageTogle";
+import DarkModeToggle from "./DarkModeToggle";
 
 // NavLink Component
 interface NavLinkProps {
@@ -69,24 +50,12 @@ function Header() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const isDarkMode = useDarkMode();
-
-  const toggleDarkMode = () => {
-    const newTheme = !isDarkMode;
-    document.documentElement.classList.toggle("dark", newTheme);
-    localStorage.setItem("theme", newTheme ? "dark" : "light");
-  };
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const toggleLanguage = () => {
-    const cleanPath = pathname.replace(/^\/(ar|en)/, "") || "/";
-    window.location.href = `/${locale === "ar" ? "en" : "ar"}${cleanPath}`;
-  };
 
   const handleNavClick = () => setIsOpen(false);
 
@@ -131,27 +100,10 @@ function Header() {
         {/* Right Side Actions */}
         <div className="flex items-center ms-auto lg:ms-0 gap-1 lg:gap-2 xl:gap-4">
           {/* Language Toggle */}
-          <button
-            onClick={toggleLanguage}
-            aria-label="Toggle language"
-            className="w-9 h-9 flex items-center justify-center rounded-full font-bold text-[14px] text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-500/20 transition-all"
-          >
-            <span
-              className="w-5 h-5"
-              dangerouslySetInnerHTML={{
-                __html: locale !== "ar" ? flagIcons.UAE : flagIcons.USA,
-              }}
-            />
-          </button>
+          <LanguageToggle locale={locale} pathname={pathname} />
 
           {/* Dark Mode Toggle */}
-          <button
-            onClick={toggleDarkMode}
-            aria-label="Toggle theme"
-            className="w-9 h-9 flex items-center justify-center rounded-full font-bold text-[14px] text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-500/20 transition-all"
-          >
-            {isDarkMode ? <FiSun size={20} /> : <FiMoon size={20} />}
-          </button>
+          <DarkModeToggle />
 
           {/* Auth Buttons */}
           {profile.loading === "yes" ? (
