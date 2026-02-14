@@ -80,6 +80,7 @@ export const templatesInfo: TemplateInfo[] = [
     canEdit: false,
     descriptionAr: "قائمة عصرية ثنائية اللغة مع قسم بطولي ورسوم متحركة سلسة",
     slug: "default",
+    colors:["#0ea5e9","#6366f1"],
   },
   {
     id: "neon",
@@ -91,6 +92,7 @@ export const templatesInfo: TemplateInfo[] = [
     canEdit: true,
     descriptionAr: "قالب قائمة نيون مع تصميم عصري",
     slug: "neon",
+    colors:["#14b8a6","#06b6d4"],
     defaultColors:["#14b8a6","#06b6d4"]
 
   },
@@ -104,6 +106,7 @@ export const templatesInfo: TemplateInfo[] = [
     isNew: false,
     canEdit: false,
     slug: "coffee",
+    colors:["#f97316","#facc15"]
   },
   {
     id: "sky",
@@ -115,6 +118,7 @@ export const templatesInfo: TemplateInfo[] = [
     isNew: true,
     canEdit: true,
     slug: "sky",
+    colors:["#3b82f6"],
     defaultColors:["#3b82f6"]
   },
 
