@@ -1,3 +1,9 @@
+export interface WorkHours {
+  [key: string]: {
+    open: string;
+    close: string;
+  };
+}
 export interface Menu {
   id: number;
   nameAr: string;
@@ -5,9 +11,14 @@ export interface Menu {
   descriptionAr?: string;
   descriptionEn?: string;
   slug: string;
+  activeItemsCount: number;
+  categoriesCount: number;
+  itemsCount: number;
+  views: number;
   logo?: string;
   currency: string;
   isActive: boolean;
+  workingHours: WorkHours;
   createdAt: string;
   updatedAt: string;
   _count?: {

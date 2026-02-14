@@ -783,3 +783,23 @@ input, textarea {
   background: rgba(255, 255, 255, 0.9);
 }
 /* Auth Styles */
+
+/* Template preview auto-scroll animation */@keyframes template-scroll {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-35%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.auto-scroll-image {
+  animation: template-scroll 10s linear infinite;
+}
+
+.react-datepicker__day-name{
+  font-size: 8px !important;
+}

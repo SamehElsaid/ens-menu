@@ -416,6 +416,73 @@
     "selectChoice": "Select an option",
     "locationDetailsRequired": "Location Details is required"
   },
+  "personalProfile": {
+    "title": "My Profile",
+    "subtitle": "View your account information",
+    "editProfile": "Edit Personal Profile",
+    "editPageTitle": "Edit Personal Profile",
+    "editSubtitle": "Update your account settings",
+    "backToProfile": "Return to Personal Profile",
+    "personalInfo": "Personal Information",
+    "profilePicture": "Profile Picture",
+    "dragDropOrClick": "Drag and drop image here or click to upload",
+    "uploadImage": "Upload Image",
+    "recommendedImage": "Recommended: square image 400x400 pixels minimum, max 5MB",
+    "fullName": "Full Name",
+    "email": "Email",
+    "emailCannotChange": "Email cannot be changed",
+    "phone": "Phone Number",
+    "country": "Country",
+    "countryPlaceholder": "e.g. Saudi Arabia",
+    "address": "Address",
+    "addressPlaceholder": "e.g. Riyadh, Saudi Arabia",
+    "dateOfBirth": "Date of Birth",
+    "gender": "Gender",
+    "chooseGender": "Choose Gender",
+    "genderMale": "Male",
+    "genderFemale": "Female",
+    "genderOther": "Other",
+    "saveChanges": "Save Changes",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "atLeast8Chars": "At least 8 characters",
+    "changePasswordButton": "Change Password",
+    "subscriptionManagement": "Subscription Management",
+    "planFree": "Free",
+    "planProfessional": "Professional",
+    "planCustom": "Custom",
+    "mostPopular": "Most Popular",
+    "comingSoon": "Coming Soon",
+    "oneMenu": "One menu",
+    "threeMenus": "3 menus",
+    "products50": "50 products",
+    "products200": "200 products per menu",
+    "ads": "Advertisements",
+    "noModifications": "No modifications",
+    "controlAds": "Control over advertisements",
+    "fullModifications": "Full modifications",
+    "contactForDetails": "Contact us for more details",
+    "youAreOnFreePlan": "You are on the Free Plan",
+    "upgradePlan": "Upgrade Plan",
+    "paymentNote": "Note: Payment gateway integration is pending. This is a trial feature.",
+    "notEntered": "Not entered",
+    "emailVerification": "Email Verification",
+    "accountStatus": "Account Status",
+    "memberSince": "Member Since",
+    "verified": "Verified",
+    "active": "Active",
+    "subscription": "Subscription",
+    "manageSubscription": "Manage Subscription",
+    "currentPlan": "Current Plan",
+    "status": "Status",
+    "billingCycle": "Billing Cycle",
+    "startDate": "Start Date",
+    "renewalDate": "Renewal Date",
+    "monthly": "Monthly",
+    "yearly": "Yearly"
+  },
   "homePage": {
     "centerSection": {
       "subtitle": "Centers offering the best services",
@@ -1042,9 +1109,169 @@
     "Worked At": "Worked At",
     "Application": "Application"
   },
+  "menuOverview": {
+    "fullMenuManagement": "Full Menu Management",
+    "overview": "Overview",
+    "categories": "Categories",
+    "products": "Products",
+    "settings": "Settings",
+    "viewMenu": "View Menu",
+    "categoriesCount": "Categories",
+    "activeItems": "Active Items",
+    "totalItems": "Total Items",
+    "totalViews": "Total Views",
+    "qrTitle": "Menu QR Code",
+    "qrDescription": "Share this code with your customers for quick access to the menu.",
+    "downloadAsImage": "Download as image",
+    "generalPreview": "General Preview",
+    "generalPreviewDescription": "View the menu as customers see it",
+    "menuSettings": "Menu Settings",
+    "menuSettingsDescription": "Customize appearance and settings",
+    "menuItems": "Menu Items",
+    "menuItemsDescription": "Add, modify, and delete items",
+    "latestActivity": "Latest Activity",
+    "view": "View",
+    "product": "Product",
+    "category": "Category",
+    "addedOn": "Added on {date}"
+  },
   "settings": {
     "setting": "Setting",
     "design": "Design",
     "media": "Media"
+  },
+  "settingsDesignPage": {
+    "title": "Menu design",
+    "subtitle": "Choose the template that best fits how you want your menu to look. You can change it at any time.",
+    "badges": {
+      "activeNow": "Active now",
+      "currentTemplate": "Current template",
+      "new": "New",
+      "default": "Default"
+    },
+    "cards": {
+      "defaultHelper": "Recommended default template for most users",
+      "templateHelper": "Ready-made template with a professional design",
+      "buttonActive": "Template active",
+      "buttonUse": "Use this template",
+      "preview": "Preview",
+      "customize": "Customize",
+      "templateNotActive": "This template is not active. Please activate it to customize it."
+
+    },
+    "tips": {
+      "title": "Helpful tips",
+      "tip1": "You can change the template at any time without affecting your items or prices.",
+      "tip2": "Some templates include different layouts for images, headings, and sections.",
+      "tip3": "Try multiple templates to see which one best matches your restaurant’s branding."
+    }
+  },
+  "settingsDesignTemplatePage": {
+    "badge": "Template customization",
+    "title": "Customize template {name}",
+    "description": "Fine-tune this template’s colors and hero texts so your digital menu perfectly matches your restaurant’s visual identity.",
+    "notEditable": {
+      "title": "This template cannot be customized",
+      "description": "You can go back to the design page and choose another template that supports advanced customization."
+    },
+  
+    "preview": {
+      "livePreview": "LIVE PREVIEW",
+      "previewMenu": "Preview menu",
+      "currentColorsTitle": "Current brand colors",
+      "currentColorsDescription": "These colors are applied to key buttons, gradients, and highlight elements across your menu.",
+      "footerNote": "This preview reflects how your main menu page will look after applying the new colors and texts."
+    },
+    "sections": {
+      "readyColors": {
+        "pill": "Ready-made palettes",
+        "title": "Start from a curated color palette",
+        "description": "Pick a ready-made palette that fits your brand, then adjust the exact shades in the custom colors section.",
+        "inUse": "In use"
+      },
+      "customColors": {
+        "pill": "Custom colors",
+        "title": "Match the template to your brand colors",
+        "description": "Set your main brand and accent colors. They’ll be used for gradients, CTAs, and important UI elements.",
+        "primaryLabel": "Primary color",
+        "accentLabel": "Accent color",
+        "pickerLabel": "Use the color picker to choose an exact shade."
+      },
+      "texts": {
+        "pill": "Texts",
+        "title": "Edit the hero texts that appear in the template",
+        "description": "These titles and descriptions can be used in the hero section and highlight cards inside your live menu.",
+        "heroTitleAr": "Main title (Arabic)",
+        "heroTitleEn": "Main title (English)",
+        "shortDescriptionAr": "Short description (Arabic)",
+        "shortDescriptionEn": "Short description (English)",
+        "helperShortAr": "Keep it short and clear for Arabic visitors.",
+        "helperShortEn": "This text will appear for visitors using English.",
+        "badgeLabel": "Badge text",
+        "badgePlaceholderAr": "Example: Today’s special offer",
+        "badgePlaceholderEn": "Example: Today’s Special Offer"
+      }
+    },
+    "palettes": {
+      "default": "Default colors",
+      "warm": "Warm & friendly",
+      "fresh": "Fresh & modern",
+      "elegant": "Calm & elegant",
+      "custom": "Custom"
+    },
+    "buttons": {
+      "save": "Save customization",
+      "back": "Back to design page",
+      "reset": "Reset"
+    },
+    "toast": {
+      "fakeSave": "Template customization will be connected to your live menu soon. For now, this page lets you explore and preview different designs."
+    }
+  },
+  "settingsMediaPage": {
+    "title": "Media Settings",
+    "badge": "Media & contact",
+    "socialLinks": {
+      "title": "Social media links",
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "twitter": "Twitter",
+      "whatsapp": "WhatsApp",
+      "note": "These links will be displayed on your site. You can remove any row at any time to control what is shown to customers."
+    },
+    "contact": {
+      "title": "Contact information",
+      "addressAr": "Address (Arabic)",
+      "addressEn": "Address (English)",
+      "phone": "Phone number",
+      "phonePlaceholder": "Default: UAE +971"
+    },
+    "businessHours": {
+      "title": "Business hours",
+      "to": "to",
+      "closed": "Closed",
+      "note": "Set your business hours. Check «Closed» if the store is closed on that day.",
+      "days": {
+        "sunday": "Sunday",
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday"
+      }
+    },
+    "buttons": {
+      "save": "Save changes",
+      "cancel": "Cancel"
+    }
+  },
+  "userProfile": {
+    "singOut": "Sign out",
+    "dashboard": "Dashboard"
+  },
+  "roles": {
+    "admin": "Admin",
+    "user": "User"
   }
 }

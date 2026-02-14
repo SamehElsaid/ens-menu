@@ -41,6 +41,7 @@ export default function LoginForm() {
 
   const locale = useLocale();
   const [loading, setLoading] = useState(false);
+  
   const onSubmit = async (data: LoginSchema) => {
     console.log(data);
     setLoading(true);
@@ -69,7 +70,7 @@ export default function LoginForm() {
       });
       router.push("/dashboard");
       if (user) {
-        dispatch(SET_ACTIVE_USER(user));
+        dispatch(SET_ACTIVE_USER({ user }));
       }
 
     } else {

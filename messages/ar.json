@@ -289,6 +289,73 @@
     "fieldRequired": "مطلوب",
     "choicesMinRequired": "يجب إضافة خيارين على الأقل"
   },
+  "personalProfile": {
+    "title": "ملفي الشخصي",
+    "subtitle": "عرض معلومات حسابك",
+    "editProfile": "تعديل الملف الشخصي",
+    "editPageTitle": "تعديل الملف الشخصي",
+    "editSubtitle": "تحديث إعدادات حسابك",
+    "backToProfile": "العودة للملف الشخصي",
+    "personalInfo": "المعلومات الشخصية",
+    "profilePicture": "صورة الملف الشخصي",
+    "dragDropOrClick": "اسحب وأفلت الصورة هنا أو انقر للرفع",
+    "uploadImage": "رفع صورة",
+    "recommendedImage": "ينصح: صورة مربعة 400x400 بكسل على الأقل الحد الأقصى: 5MB",
+    "fullName": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "emailCannotChange": "لا يمكن تغيير البريد الإلكتروني",
+    "phone": "رقم الهاتف",
+    "country": "الدولة",
+    "countryPlaceholder": "مثال: المملكة العربية السعودية",
+    "address": "العنوان",
+    "addressPlaceholder": "مثال: الرياض, المملكة العربية السعودية",
+    "dateOfBirth": "تاريخ الميلاد",
+    "gender": "الجنس",
+    "chooseGender": "اختر الجنس",
+    "genderMale": "ذكر",
+    "genderFemale": "أنثى",
+    "genderOther": "أخرى",
+    "saveChanges": "حفظ التغييرات",
+    "changePassword": "تغيير كلمة المرور",
+    "currentPassword": "كلمة المرور الحالية",
+    "newPassword": "كلمة المرور الجديدة",
+    "confirmNewPassword": "تأكيد كلمة المرور الجديدة",
+    "atLeast8Chars": "8 أحرف على الأقل",
+    "changePasswordButton": "تغيير كلمة المرور",
+    "subscriptionManagement": "إدارة الاشتراك",
+    "planFree": "مجاني",
+    "planProfessional": "احترافي",
+    "planCustom": "مخصص",
+    "mostPopular": "الأكثر شعبية",
+    "comingSoon": "قريباً",
+    "oneMenu": "منيو واحد",
+    "threeMenus": "3 منيو",
+    "products50": "50 منتج",
+    "products200": "200 منتج لكل قائمة",
+    "ads": "اعلانات",
+    "noModifications": "بدون تعديلات",
+    "controlAds": "تحكم في الإعلانات",
+    "fullModifications": "شامل التعديلات",
+    "contactForDetails": "اتصل بنا للمزيد من التفاصيل",
+    "youAreOnFreePlan": "أنت على الخطة المجانية",
+    "upgradePlan": "ترقية الخطة",
+    "paymentNote": "ملاحظة: تكامل بوابة الدفع قيد الانتظار. هذه ميزة تجريبية.",
+    "notEntered": "غير مدخل",
+    "emailVerification": "التحقق من البريد",
+    "accountStatus": "حالة الحساب",
+    "memberSince": "عضو منذ",
+    "verified": "موثق",
+    "active": "نشط",
+    "subscription": "الاشتراك",
+    "manageSubscription": "إدارة الاشتراك",
+    "currentPlan": "الخطة الحالية",
+    "status": "الحالة",
+    "billingCycle": "دورة الفواتير",
+    "startDate": "تاريخ البداية",
+    "renewalDate": "تاريخ التجديد",
+    "monthly": "شهرياً",
+    "yearly": "سنوي"
+  },
   "homePage": {
     "centerSection": {
       "subtitle": "مراكز تقدم أفضل الخدمات",
@@ -351,6 +418,9 @@
     "searchByPatientName": "البحث حسب اسم المريض",
     "selectLocation": "اختر الموقع",
     "allLocations": "جميع المواقع"
+  },
+  "workSchedule": {
+    "timeCaption": "الوقت"
   },
   "overview": {
     "title": "نظرة عامة",
@@ -763,9 +833,167 @@
     "Worked At": "عمل في",
     "Application": "الطلبات"
   },
+  "menuOverview": {
+    "fullMenuManagement": "إدارة القائمة بالكامل",
+    "overview": "نظرة عامة",
+    "categories": "التصنيفات",
+    "products": "المنتجات",
+    "settings": "الإعدادات",
+    "viewMenu": "عرض المنيو",
+    "categoriesCount": "الفئات",
+    "activeItems": "العناصر النشطة",
+    "totalItems": "إجمالي العناصر",
+    "totalViews": "إجمالي المشاهدات",
+    "qrTitle": "رمز QR للمنيو",
+    "qrDescription": "شارك هذا الرمز مع عملائك للوصول السريع إلى المنيو",
+    "downloadAsImage": "تحميل كصورة",
+    "generalPreview": "معاينة عامة",
+    "generalPreviewDescription": "عرض القائمة كما يراها العملاء",
+    "menuSettings": "إعدادات القائمة",
+    "menuSettingsDescription": "تخصيص المظهر والإعدادات",
+    "menuItems": "عناصر القائمة",
+    "menuItemsDescription": "إضافة وتعديل وحذف العناصر",
+    "latestActivity": "النشاط الأخير",
+    "view": "عرض",
+    "product": "منتج",
+    "category": "تصنيف",
+    "addedOn": "تمت الإضافة في {date}"
+  },
   "settings": {
     "setting": "الإعدادات",
     "design": "التصميم",
     "media": "الوسائط"
+  },
+  "settingsDesignPage": {
+    "title": "تصميم المنيو",
+    "subtitle": "اختر القالب المناسب لطريقة عرض منيو مطعمك، يمكنك تغييره في أي وقت.",
+    "badges": {
+      "activeNow": "مفعل حاليًا",
+      "currentTemplate": "القالب المستخدم",
+      "new": "جديد",
+      "default": "افتراضي"
+    },
+    "cards": {
+      "defaultHelper": "القالب الافتراضي المقترح لمعظم المستخدمين",
+      "templateHelper": "قالب جاهز بتصميم احترافي",
+      "buttonActive": "القالب مفعل",
+      "buttonUse": "تفعيل هذا القالب",
+      "preview": "معاينة",
+       "customize": "تخصيص",
+      "templateNotActive": "هذا القالب غير مفعل. يرجى تفعيله لتخصيصه."
+    },
+    "tips": {
+      "title": "نصائح مفيدة",
+      "tip1": "يمكنك تغيير القالب في أي وقت ولن تتأثر بيانات الأصناف أو الأسعار.",
+      "tip2": "بعض القوالب تحتوي على أنماط عرض مختلفة للصور والعناوين.",
+      "tip3": "جرب أكثر من قالب لمعرفة ما يناسب هوية مطعمك البصرية."
+    }
+  },
+  "settingsDesignTemplatePage": {
+    "badge": "تخصيص القالب",
+    "title": "تخصيص قالب {name}",
+    "description": "قم بضبط ألوان هذا القالب والنصوص الرئيسية ليعكس منيوك الرقمي هوية مطعمك البصرية بدقة.",
+    "notEditable": {
+      "title": "لا يمكن تخصيص هذا القالب",
+      "description": "يمكنك الرجوع لاختيار قالب آخر يدعم خيارات تخصيص متقدمة من صفحة التصميم."
+    },
+    "preview": {
+      "livePreview": "معاينة فورية",
+      "previewMenu": "معاينة المنيو",
+      "currentColorsTitle": "ألوان الهوية الحالية",
+      "currentColorsDescription": "سيتم استخدام هذه الألوان في الأزرار والتدرجات والعناصر البارزة في المنيو.",
+      "footerNote": "تعكس هذه المعاينة شكل صفحة المنيو الرئيسية بعد تطبيق الألوان والنصوص الجديدة."
+    },
+    "sections": {
+      "readyColors": {
+        "pill": "الألوان الجاهزة",
+        "title": "ابدأ من مجموعة ألوان جاهزة",
+        "description": "اختر مجموعة ألوان تناسب هوية مطعمك، ثم قم بتعديل الدرجات بدقة من خلال قسم الألوان المخصصة.",
+        "inUse": "مستخدم الآن"
+      },
+      "customColors": {
+        "pill": "الألوان المخصصة",
+        "title": "طابق القالب مع ألوان البراند",
+        "description": "حدد اللون الأساسي ولون التأكيد، وسيتم استخدامهما في التدرجات وأزرار الدعوة لاتخاذ إجراء والعناصر المهمة.",
+        "primaryLabel": "اللون الأساسي",
+        "accentLabel": "لون التأكيد",
+        "pickerLabel": "استخدم أداة اختيار الألوان لاختيار الدرجة المناسبة بدقة."
+      },
+      "texts": {
+        "pill": "النصوص",
+        "title": "عدّل العناوين والنصوص الظاهرة داخل القالب",
+        "description": "يمكن استخدام هذه العناوين والأوصاف في قسم الهيرو والبطاقات البارزة داخل منيوك المباشر.",
+        "heroTitleAr": "العنوان الرئيسي (عربي)",
+        "heroTitleEn": "العنوان الرئيسي (إنجليزي)",
+        "shortDescriptionAr": "الوصف المختصر (عربي)",
+        "shortDescriptionEn": "الوصف المختصر (إنجليزي)",
+        "helperShortAr": "يُنصح أن يكون العنوان قصيراً وواضحاً للزوار العرب.",
+        "helperShortEn": "هذا النص سيظهر للزوار باللغة الإنجليزية.",
+        "badgeLabel": "نص الشارة / البادج",
+        "badgePlaceholderAr": "مثال: عرض خاص اليوم",
+        "badgePlaceholderEn": "مثال: Today's Special Offer"
+      }
+    },
+    "palettes": {
+      "default": "الألوان الافتراضية",
+      "warm": "دفء وترحاب",
+      "fresh": "منعش وحديث",
+      "elegant": "أناقة وهدوء",
+      "custom": "مخصص"
+    },
+    "buttons": {
+      "save": "حفظ إعدادات التخصيص",
+      "back": "الرجوع لصفحة التصميم",
+      "reset": "إعادة تعيين"
+    },
+    "toast": {
+      "fakeSave": "سيتم ربط إعدادات التخصيص بالمنيو المباشر قريبًا. حالياً يمكنك استخدام هذه الصفحة لاستكشاف التصاميم ومعاينتها."
+    }
+  },
+  "settingsMediaPage": {
+    "title": "إعدادات الميديا",
+    "badge": "الوسائط والاتصال",
+    "socialLinks": {
+      "title": "روابط التواصل الاجتماعي",
+      "facebook": "فيسبوك",
+      "instagram": "انستقرام",
+      "twitter": "تويتر",
+      "whatsapp": "واتساب",
+      "note": "سيتم عرض هذه الروابط في موقعك الخاص، يمكنك حذف اي سطر في اي وقت للتحكم في ما يتم عرضه للعملاء."
+    },
+    "contact": {
+      "title": "معلومات التواصل",
+      "addressAr": "العنوان (عربي)",
+      "addressEn": "العنوان (إنجليزي)",
+      "phone": "رقم الهاتف",
+      "phonePlaceholder": "رقم افتراضي: الإمارات +971"
+    },
+    "businessHours": {
+      "title": "مواعيد العمل",
+      "to": "إلى",
+      "closed": "مغلق",
+      "note": "حدد مواعيد عملك لزبائنك. فعّل «مغلق» إذا كان المتجر مغلقاً في هذا اليوم.",
+      "days": {
+        "sunday": "الأحد",
+        "monday": "الاثنين",
+        "tuesday": "الثلاثاء",
+        "wednesday": "الأربعاء",
+        "thursday": "الخميس",
+        "friday": "الجمعة",
+        "saturday": "السبت"
+      }
+    },
+    "buttons": {
+      "save": "حفظ التغييرات",
+      "cancel": "إلغاء"
+    }
+  },
+  "userProfile": {
+    "singOut": "تسجيل الخروج",
+    "dashboard": "لوحة التحكم"
+  },
+  "roles": {
+    "admin": "مدير",
+    "user": "مستخدم"
   }
 }

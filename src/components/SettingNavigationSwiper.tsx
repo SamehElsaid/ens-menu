@@ -25,11 +25,18 @@ export default function SettingNavigationSwiper({
 
   const isActive = useCallback(
     (href: string) => {
-      console.log(pathname, `/dashboard/${menu}/settings` + href, pathname?.startsWith(`/dashboard/${menu}/settings` + href));
-      return pathname + "/" === `/dashboard/${menu}/settings` + href || pathname?.startsWith(`/dashboard/${menu}/settings` + href);
+      const basePath = `/dashboard/${menu}/settings`;
+
+      if (href === "/") {
+        return pathname === basePath || pathname === basePath + "/";
+      }
+
+      return pathname === basePath + href ||
+        pathname.startsWith(basePath + href + "/");
     },
     [pathname, menu]
   );
+
 
   useEffect(() => {
     // Find active slide index and scroll to it
@@ -60,11 +67,11 @@ export default function SettingNavigationSwiper({
           }}
           className="personal-navigation-swiper"
         >
-          {navigationItemsData.map((item) => (
-            <SwiperSlide key={item.href} style={{ width: "auto" }}>
+          {navigationItemsData.map((item, index) => (
+            <SwiperSlide key={`settings-nav-${item.label}-${index}`} style={{ width: "auto" }}>
               <LinkTo
                 disabled={loading}
-                href={"/dashboard/settings" + item.href}
+                href={"/dashboard/" + menu + "/settings" + item.href}
                 onClick={() => (!isActive(item.href) ? setLoading(true) : null)}
                 className={`
                   inline-flex  items-center gap-2 px-4 md:px-6 py-2.5 rounded-lg font-medium text-sm md:text-base

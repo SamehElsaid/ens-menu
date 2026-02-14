@@ -160,7 +160,7 @@ export default function AddItemModal({
             if (image) {
                 const formData = new FormData();
                 formData.append("file", image);
-                formData.append("type", "items");
+                formData.append("type", "categories");
 
                 const uploadResult = await axiosPost<FormData, UploadResponse>(
                     "/upload",

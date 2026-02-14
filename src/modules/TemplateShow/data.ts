@@ -1,7 +1,7 @@
 import { BiCoffee, BiUser } from "react-icons/bi";
 import { FaMoneyBillWave } from "react-icons/fa";
 import { HiOutlineChartBar } from "react-icons/hi";
-import { Template } from "@/types/types";
+import { Template, TemplateInfo } from "@/types/types";
 
 export const templates: Template[] = [
   {
@@ -65,4 +65,57 @@ export const templates: Template[] = [
     textAltAr: "تمنحك مرونة كاملة للتحكم في المنيو",
     textAltEn: "Full control of the menu",
   },
+];
+
+
+export const templatesInfo: TemplateInfo[] = [
+  {
+    id: "default",
+    name: "Default Template",
+    nameAr: "القالب الافتراضي",
+    image: "/images/temp/def.jpg",
+    description:
+      "Modern bilingual menu with hero section and smooth animations",
+    isNew: false,
+    canEdit: false,
+    descriptionAr: "قائمة عصرية ثنائية اللغة مع قسم بطولي ورسوم متحركة سلسة",
+    slug: "default",
+  },
+  {
+    id: "neon",
+    name: "Neon Template",
+    nameAr: "قالب النيون",
+    image: "/images/temp/neon.jpg",
+    description: "Neon menu template with a modern design",
+    isNew: true,
+    canEdit: true,
+    descriptionAr: "قالب قائمة نيون مع تصميم عصري",
+    slug: "neon",
+    defaultColors:["#14b8a6","#06b6d4"]
+
+  },
+  {
+    id: "coffee",
+    name: "Coffee Template",
+    nameAr: "قالب القهوة",
+    image: "/images/temp/coffee.jpg",
+    description: "Coffee menu template with a modern design",
+    descriptionAr: "قالب قائمة القهوة عصري  ",
+    isNew: false,
+    canEdit: false,
+    slug: "coffee",
+  },
+  {
+    id: "sky",
+    name: "Sky Template",
+    nameAr: "قالب السماء",
+    image: "/images/temp/sky.jpg",
+    description: "Sky menu template with a modern design and blue color",
+    descriptionAr: "قالب قائمة السماء عصري ولون أزرق  ",
+    isNew: true,
+    canEdit: true,
+    slug: "sky",
+    defaultColors:["#3b82f6"]
+  },
+
 ];

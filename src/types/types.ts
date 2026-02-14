@@ -72,6 +72,20 @@ export interface Template {
   textAltEn?: string;
 }
 
+
+export interface TemplateInfo {
+  colors: string[];
+  id: string;
+  name: string;
+  nameAr: string;
+  image: string;
+  description: string;
+  descriptionAr: string;
+  isNew: boolean;
+  canEdit: boolean;
+  slug: string;
+  defaultColors?: string[];
+}
 export interface FeatureCardProps {
   icon: IconType;
   title: string;

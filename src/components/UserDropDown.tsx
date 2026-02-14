@@ -1,4 +1,4 @@
-import { FiLogOut, FiSettings } from "react-icons/fi";
+import { FiLogOut } from "react-icons/fi";
 import LinkTo from "./Global/LinkTo";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useEffect, useRef, useState } from "react";
@@ -6,30 +6,24 @@ import Cookies from "js-cookie";
 import { REMOVE_USER } from "@/store/authSlice/authSlice";
 import { MdOutlineDashboard } from "react-icons/md";
 import { useRouter } from "@/i18n/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import LoadImage from "./ImageLoad";
 function UserDropDown() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const locale = useLocale();
-  const profile = useAppSelector((state) => state.auth);
+  const profile = useAppSelector((state) => state.auth) as unknown as { data: { user: { email: string; name: string; role: string; profileImage: string } } };
+  const t = useTranslations();
   const profileMenuRef = useRef<HTMLDivElement>(null);
-  const userInitial = profile.data?.email?.charAt(0).toUpperCase() ?? "U";
-  const userName = profile.data?.name ?? "John Doe";
-  const userRole = profile.data?.kind ?? "Admin";
+  const userInitial = profile.data?.user?.email?.charAt(0).toUpperCase() ?? "U";
+  const userName = profile.data?.user?.name ?? "John Doe";
+  const userRole = profile.data?.user?.role ? t("roles." + profile.data?.user?.role) : t("roles.admin");
   const profileMenuItems = [
     {
-      label: "Dashboard",
-      href: profile.data?.kind === "specialist" ? "/specialist/" : "/parent/",
+      label: t("userProfile.dashboard"),
+      href: profile.data?.user?.role === "admin" ? "/dashboard/" : "/dashboard/",
       icon: <MdOutlineDashboard />,
-    },
-    {
-      label: "Settings",
-      href:
-        profile.data?.kind === "specialist"
-          ? "/specialist/personal/settings"
-          : "/parent/personal/settings",
-      icon: <FiSettings />,
-    },
+    }
   ];
 
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -58,34 +52,23 @@ function UserDropDown() {
       <button
         type="button"
         onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-        className=" flex items-center justify-center w-10 h-10 rounded-full border border-transparent bg-purple-50 dark:bg-purple-500/20 px-2 py-1 text-sm font-medium text-purple-600 dark:text-purple-400 transition-all duration-300 hover:bg-purple-100 dark:hover:bg-purple-500/30 hover:border-purple-200 dark:hover:border-purple-500/40"
+        className=" flex uppercase items-center justify-center w-10 h-10 overflow-hidden rounded-full border border-transparent bg-purple-50 dark:bg-purple-500/20  text-sm font-medium text-purple-600 dark:text-purple-400 transition-all duration-300 hover:bg-purple-100 dark:hover:bg-purple-500/30 hover:border-purple-200 dark:hover:border-purple-500/40"
       >
-        {userInitial.split("").map((char) => (
-          <span
-            key={char}
-            className="text-sm font-bold text-purple-600 dark:text-purple-400"
-          >
-            {char}
-          </span>
-        ))}
-        <span
-          className={`absolute right-0 bottom-0  h-3 w-3 rounded-full border-2 border-white dark:border-slate-900 bg-emerald-500 `}
-        />
+        {profile.data?.user?.profileImage ? <LoadImage src={profile.data?.user?.profileImage as string} alt="Profile Image" width={150} height={150} className="w-10 h-10 object-cover" /> : userInitial}
+
       </button>
 
       <div
-        className={`absolute ${
-          locale === "ar" ? "left-0" : "right-0"
-        } mt-2 w-64 rounded-2xl border border-purple-100 dark:border-purple-500/30 bg-white dark:bg-slate-800 shadow-2xl backdrop-blur-xl duration-200 z-[60] ${
-          isProfileMenuOpen
+        className={`absolute ${locale === "ar" ? "left-0" : "right-0"
+          } mt-2 w-64 rounded-2xl border border-purple-100 dark:border-purple-500/30 bg-white dark:bg-slate-800 shadow-2xl backdrop-blur-xl duration-200 z-60 ${isProfileMenuOpen
             ? "visible translate-y-0 opacity-100"
             : "invisible -translate-y-2 opacity-0"
-        }`}
+          }`}
       >
         <div className="flex items-center gap-3 border-b border-purple-100 dark:border-purple-500/30 px-4 py-3">
           <div className="relative">
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-500/20 text-base font-bold text-purple-600 dark:text-purple-400">
-              {userInitial}
+            <span className="flex h-12 w-12 overflow-hidden items-center justify-center rounded-full bg-purple-100 dark:bg-purple-500/20 text-base font-bold text-purple-600 dark:text-purple-400">
+              {profile.data?.user?.profileImage ? <LoadImage src={profile.data?.user?.profileImage as string} alt="Profile Image" width={150} height={150} className="w-12 h-12 object-cover" /> : userInitial}
             </span>
             <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white dark:border-slate-800 bg-emerald-500" />
           </div>
@@ -124,7 +107,7 @@ function UserDropDown() {
             <span className="text-base">
               <FiLogOut />
             </span>
-            <span>Sign Out</span>
+            <span>{t("userProfile.singOut")}</span>
           </button>
         </div>
       </div>

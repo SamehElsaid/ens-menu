@@ -15,6 +15,10 @@ interface ParentLayoutProps {
 
 interface MenusResponse {
   menu: Menu;
+  activeItemsCount: number;
+  categoriesCount: number;
+  itemsCount: number;
+  views: number;
 }
 export default function ParentLayout({ children }: ParentLayoutProps) {
   const segment = useSelectedLayoutSegment();
@@ -26,7 +30,13 @@ export default function ParentLayout({ children }: ParentLayoutProps) {
       dispatch(SET_LOADING());
       axiosGet<MenusResponse>(`/menus/${segment}`, locale).then((res) => {
         if (res.status) {
-          dispatch(SET_ACTIVE_USER(res.data?.menu as Menu));
+          console.log(res.data);
+          dispatch(SET_ACTIVE_USER({
+            ...res.data?.menu, activeItemsCount: res.data?.activeItemsCount,
+            categoriesCount: res.data?.categoriesCount,
+            itemsCount: res.data?.itemsCount,
+            views: res.data?.views,
+          } as unknown as Menu));
         }
       });
     } else {

@@ -6,7 +6,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
   const [loading, setLoading] = useState<boolean>(false);
   return (
     <div>
-      <SettingNavigationSwiper setLoading={setLoading} loading={loading} />
+      <SettingNavigationSwiper setLoading={setLoading} loading={loading}  />
       {children}
     </div>
   )
