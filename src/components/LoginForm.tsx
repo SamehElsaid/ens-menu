@@ -41,7 +41,7 @@ export default function LoginForm() {
 
   const locale = useLocale();
   const [loading, setLoading] = useState(false);
-  
+
   const onSubmit = async (data: LoginSchema) => {
     console.log(data);
     setLoading(true);

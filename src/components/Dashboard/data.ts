@@ -34,7 +34,7 @@ export const navSections: NavSection[] = [
     items: [
       {
         label: "Overview",
-        icon: FaChartLine ,
+        icon: FaChartLine,
         key: "overview",
         link: "",
       },
@@ -54,21 +54,35 @@ export const navSections: NavSection[] = [
   {
     title: "Menu Control",
     items: [
-      { label: "Categories", icon: BiCategory, key: "categories", link: "categories" },
+      {
+        label: "Categories",
+        icon: BiCategory,
+        key: "categories",
+        link: "categories",
+      },
       {
         label: "Items",
-        icon: MdOutlineFastfood ,
+        icon: MdOutlineFastfood,
         key: "items",
         link: "items",
       },
-
     ],
   },
   {
     title: "Settings",
     items: [
-      { label: "Advertisements", icon: HiSpeakerphone, key: "advertisements", link: "advertisements" },
-      { label: "Settings", icon: FiSettings, key: "settings", link: "settings" },
+      {
+        label: "Advertisements",
+        icon: HiSpeakerphone,
+        key: "advertisements",
+        link: "advertisements",
+      },
+      {
+        label: "Settings",
+        icon: FiSettings,
+        key: "settings",
+        link: "settings",
+      },
     ],
   },
 ];
@@ -96,7 +110,12 @@ export const parentNavSections: NavSection[] = [
   {
     title: "Bookings",
     items: [
-      { label: "All", icon: BiCategory, key: "allBookings", link: "bookings/all" },
+      {
+        label: "All",
+        icon: BiCategory,
+        key: "allBookings",
+        link: "bookings/all",
+      },
       {
         label: "Online",
         icon: FaWifi,
@@ -114,7 +133,12 @@ export const parentNavSections: NavSection[] = [
   {
     title: "Specialists/Centers",
     items: [
-      { label: "Reports", icon: FaClipboardList, key: "reports", link: "reports" },
+      {
+        label: "Reports",
+        icon: FaClipboardList,
+        key: "reports",
+        link: "reports",
+      },
     ],
   },
 ];
