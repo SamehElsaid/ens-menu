@@ -1,7 +1,5 @@
-import { FiBell, FiMenu } from "react-icons/fi";
-import { IoChatbubblesOutline } from "react-icons/io5";
+import { FiMenu } from "react-icons/fi";
 import UserDropDown from "../UserDropDown";
-import LinkTo from "../Global/LinkTo";
 import { Logo } from "../Global/Logo";
 import LanguageToggle from "../Global/LanguageTogle";
 import { useLocale } from "next-intl";

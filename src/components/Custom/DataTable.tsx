@@ -635,7 +635,7 @@ export default function DataTable<T extends object>({
               </span>
             </div>
             <div className="flex items-center gap-1">
-              {page !== 1 && (
+              {totalPages !== 1 && (
                 <>
                   <button
                     type="button"

@@ -46,6 +46,7 @@ const doRefreshAccessToken = async (): Promise<string | null> => {
 
     const tokenDecrypted = decryptData(authToken) as {
       token: string;
+      role: string;
       refreshToken: string;
     };
 
@@ -68,6 +69,7 @@ const doRefreshAccessToken = async (): Promise<string | null> => {
     const newCookies = {
       token: accessToken,
       refreshToken: refreshToken,
+      role: tokenDecrypted.role ?? "",
     };
     Cookies.set("sub", encryptData(newCookies), { path: "/" });
     return accessToken;

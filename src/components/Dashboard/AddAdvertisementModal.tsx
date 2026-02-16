@@ -24,8 +24,12 @@ import { UnmountClosed } from "react-collapse";
 type AddAdvertisementFormData = AdvertisementFormSchema;
 
 interface AddAdvertisementModalProps {
-  menuId: string;
+  /** Menu-based ads (dashboard) */
+  menuId?: string;
+  /** Existing ad when editing */
   ad?: Advertisement | null;
+  /** Use admin endpoints (/admin/ads) instead of menu endpoints */
+  adminMode?: boolean;
   onClose: () => void;
   onRefresh?: () => void;
 }
@@ -33,6 +37,7 @@ interface AddAdvertisementModalProps {
 export default function AddAdvertisementModal({
   menuId,
   ad = null,
+  adminMode = false,
   onClose,
   onRefresh,
 }: AddAdvertisementModalProps) {
@@ -204,8 +209,9 @@ export default function AddAdvertisementModal({
       };
 
       if (isEdit && ad?.id != null) {
+        const updateUrl = adminMode ? `/admin/ads/${ad.id}` : `/ads/${ad.id}`;
         const result = await axiosPatch<typeof payload, Advertisement>(
-          `/ads/${ad.id}`,
+          updateUrl,
           locale,
           payload
         );
@@ -217,8 +223,11 @@ export default function AddAdvertisementModal({
           toast.error(t("editError"));
         }
       } else {
+        const createUrl = adminMode
+          ? `/admin/ads`
+          : `/menus/${menuId as string}/ads`;
         const result = await axiosPost<typeof payload, Advertisement>(
-          `/menus/${menuId}/ads`,
+          createUrl,
           locale,
           payload
         );

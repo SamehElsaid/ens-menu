@@ -1,16 +1,14 @@
 "use client";
 
-import { useAppSelector } from "@/store/hooks";
 import PersonalProfile from "@/components/Dashboard/PersonalProfile";
 import { useTranslations } from "next-intl";
 
-export default function PersonalProfilePage() {
-    const menuId = useAppSelector((state) => state.menuData.menu?.id);
+export default function AdminPersonalPage() {
     const t = useTranslations("personalProfile");
 
     return (
         <PersonalProfile
-            backLink={`/dashboard/${menuId ?? ""}/settings`}
+            backLink="/admin"
             backLinkText={t("backToProfile")}
         />
     );

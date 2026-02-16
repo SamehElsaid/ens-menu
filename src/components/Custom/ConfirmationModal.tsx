@@ -11,6 +11,8 @@ interface ConfirmationModalProps {
   message?: string;
   confirmText?: string;
   cancelText?: string;
+  isLoading?: boolean;
+  loadingText?: string;
 }
 
 export default function ConfirmationModal({
@@ -21,6 +23,8 @@ export default function ConfirmationModal({
   message = "Are you sure you want to save these changes?",
   confirmText = "Confirm",
   cancelText = "Cancel",
+  isLoading = false,
+  loadingText = "Loading...",
 }: ConfirmationModalProps) {
   useEffect(() => {
     if (isOpen) {
@@ -57,15 +61,24 @@ export default function ConfirmationModal({
           <div className="flex items-center gap-3 justify-end">
             <button
               onClick={onClose}
-              className="px-6 py-2.5 rounded-lg font-medium transition-all duration-200 bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+              disabled={isLoading}
+              className="px-6 py-2.5 rounded-lg font-medium transition-all duration-200 bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {cancelText}
             </button>
             <button
               onClick={onConfirm}
-              className="px-6 py-2.5 rounded-lg font-medium transition-all duration-200 bg-primary text-white hover:bg-primary/90"
+              disabled={isLoading}
+              className="px-6 py-2.5 rounded-lg font-medium transition-all duration-200 bg-primary text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[100px] justify-center"
             >
-              {confirmText}
+              {isLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>{loadingText}</span>
+                </>
+              ) : (
+                confirmText
+              )}
             </button>
           </div>
         </div>

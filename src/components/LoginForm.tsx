@@ -62,6 +62,7 @@ export default function LoginForm() {
       const saveTokens = {
         token: accessToken ?? "",
         refreshToken: refreshToken ?? "",
+        role: user?.role ?? "",
       };
 
       const encryptedData = encryptData(saveTokens);
@@ -72,7 +73,7 @@ export default function LoginForm() {
         secure: true,
         path: "/",
       });
-      router.push("/dashboard");
+      router.push(user?.role === "admin" ? "/admin" : "/dashboard");
       if (user) {
         dispatch(SET_ACTIVE_USER({ user }));
       }

@@ -21,7 +21,7 @@ function UserDropDown() {
   const profileMenuItems = [
     {
       label: t("userProfile.dashboard"),
-      href: profile.data?.user?.role === "admin" ? "/dashboard/" : "/dashboard/",
+      href: profile.data?.user?.role === "admin" ? "/admin" : "/dashboard/",
       icon: <MdOutlineDashboard />,
     }
   ];
