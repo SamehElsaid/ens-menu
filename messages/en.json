@@ -1118,6 +1118,7 @@
   "Dashboard": {
     "control Panel": "Control Panel",
     "users": "Users",
+    "plans": "Plans",
     "administrators": "Administrators",
     "roles": "Roles",
     "permissions": "Permissions",
@@ -1207,7 +1208,23 @@
         "startDate": "Start Date",
         "endDate": "End Date",
         "changeSubscription": "Change Subscription",
-        "applyFreeRestrictions": "Apply Free Restrictions"
+        "applyFreeRestrictions": "Apply Free Restrictions",
+        "plan": "Plan",
+        "selectPlan": "Select plan",
+        "selectBilling": "Select billing (monthly/yearly)",
+        "billingCycle": "Billing cycle",
+        "endDateOptional": "End date (optional)",
+        "endDateHint": "Leave empty to calculate from billing cycle",
+        "save": "Save",
+        "saving": "Saving...",
+        "changeSuccess": "Subscription changed successfully",
+        "changeError": "Failed to change subscription",
+        "plansLoadError": "Failed to load plans",
+        "applyFreeSuccess": "Free plan limits applied successfully",
+        "applyFreeError": "Failed to apply free limits",
+        "applyFreeConfirmTitle": "Apply Free Restrictions",
+        "applyFreeConfirmMessage": "Are you sure you want to apply free plan limits to this user? Excess menus will be deactivated and features restricted.",
+        "applyFreeLoading": "Applying..."
       },
       "basicInfo": {
         "title": "Basic Information",
@@ -1341,6 +1358,44 @@
       "cancel": "Cancel",
       "createSuccess": "Administrator created successfully",
       "createError": "Failed to create administrator"
+    }
+  },
+    "adminPlans": {
+    "title": "Plans Management",
+    "subtitle": "View and edit subscription plans",
+    "back": "Back",
+    "error": "Failed to load plans",
+    "edit": "Edit",
+    "updateSuccess": "Plan updated successfully",
+    "updateError": "Failed to update plan",
+    "yes": "Yes",
+    "no": "No",
+    "active": "Active",
+    "inactive": "Inactive",
+    "columns": {
+      "name": "Name",
+      "priceYearly": "Price (Yearly)",
+      "maxMenus": "Max Menus",
+      "maxProducts": "Max Products",
+      "hasAds": "Has Ads",
+      "isActive": "Status",
+      "allowFullDesignControl": "Full Design Control",
+      "activeSubscriptions": "Active Subs",
+      "actions": "Actions"
+    },
+    "editModal": {
+      "title": "Edit Plan",
+      "name": "Name",
+      "priceYearly": "Price (Yearly)",
+      "maxMenus": "Max Menus",
+      "maxProducts": "Max Products per Menu",
+      "maxProductsHint": "Use -1 for unlimited",
+      "hasAds": "Has Ads",
+      "isActive": "Active",
+      "allowFullDesignControl": "Allow full design control",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving..."
     }
   },
   "menuOverview": {

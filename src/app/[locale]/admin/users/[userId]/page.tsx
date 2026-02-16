@@ -1,15 +1,22 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
 import { IoArrowBack } from "react-icons/io5";
-import { FaTimesCircle } from "react-icons/fa";
+import { FaTimesCircle, FaTimes } from "react-icons/fa";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import ConfirmationModal from "@/components/Custom/ConfirmationModal";
-import { axiosGet, axiosPatch } from "@/shared/axiosCall";
+import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
+
+interface Plan {
+    id: number;
+    name: string;
+    priceMonthly?: number;
+    priceYearly?: number;
+}
 
 interface User {
     id: number;
@@ -76,33 +83,45 @@ export default function UserDetailsPage() {
     const [loading, setLoading] = useState(true);
     const [confirmingMenu, setConfirmingMenu] = useState<Menu | null>(null);
     const [updatingMenuId, setUpdatingMenuId] = useState<number | null>(null);
+    const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
+    const [plans, setPlans] = useState<Plan[]>([]);
+    const [plansLoading, setPlansLoading] = useState(false);
+    const [subscriptionForm, setSubscriptionForm] = useState<{
+        planId: number;
+        billingCycle: string;
+        startDate: string;
+        endDate: string;
+    }>({ planId: 0, billingCycle: "free", startDate: "", endDate: "" });
+    const [subscriptionSubmitting, setSubscriptionSubmitting] = useState(false);
+    const [applyFreeConfirmOpen, setApplyFreeConfirmOpen] = useState(false);
+    const [applyFreeLoading, setApplyFreeLoading] = useState(false);
+
+    const fetchUserDetails = useCallback(async () => {
+        try {
+            setLoading(true);
+            const result = await axiosGet<UserDetailsResponse>(
+                `/admin/users/${userId}`,
+                locale
+            );
+
+            if (result.status && result.data) {
+                setUserData(result.data);
+            } else {
+                toast.error(t("error"));
+            }
+        } catch (err) {
+            console.error("Error fetching user details:", err);
+            toast.error(t("error"));
+        } finally {
+            setLoading(false);
+        }
+    }, [userId, locale, t]);
 
     useEffect(() => {
-        const fetchUserDetails = async () => {
-            try {
-                setLoading(true);
-                const result = await axiosGet<UserDetailsResponse>(
-                    `/admin/users/${userId}`,
-                    locale
-                );
-
-                if (result.status && result.data) {
-                    setUserData(result.data);
-                } else {
-                    toast.error(t("error"));
-                }
-            } catch (err) {
-                console.error("Error fetching user details:", err);
-                toast.error(t("error"));
-            } finally {
-                setLoading(false);
-            }
-        };
-
         if (userId) {
             fetchUserDetails();
         }
-    }, [userId, locale, t]);
+    }, [userId, fetchUserDetails]);
 
     const formatDate = (dateString: string | null) => {
         if (!dateString) return "-";
@@ -120,6 +139,96 @@ export default function UserDetailsPage() {
         if (cycle.toLowerCase().includes("year")) return t("yearly");
         return cycle;
     };
+
+    const openSubscriptionModal = useCallback(async () => {
+        setSubscriptionModalOpen(true);
+        setPlansLoading(true);
+        try {
+            const result = await axiosGet<{ plans: Plan[] }>("/admin/plans/subscription", locale);
+            if (result.status && result.data?.plans?.length) {
+                setPlans(result.data.plans);
+                const freePlan = result.data.plans.find((p) => p.name?.toLowerCase() === "free");
+                const proPlan = result.data.plans.find((p) => p.name?.toLowerCase() === "pro");
+                const currentPlanName = userData?.user?.planName?.toLowerCase();
+                const defaultPlan = currentPlanName === "pro" && proPlan ? proPlan : freePlan || result.data.plans[0];
+                const today = new Date().toISOString().slice(0, 10);
+                setSubscriptionForm({
+                    planId: defaultPlan?.id ?? result.data.plans[0].id,
+                    billingCycle: defaultPlan?.name?.toLowerCase() === "free" ? "free" : "yearly",
+                    startDate: today,
+                    endDate: "",
+                });
+            }
+        } catch (err) {
+            console.error("Error fetching plans:", err);
+            toast.error(t("subscriptionInfo.plansLoadError"));
+        } finally {
+            setPlansLoading(false);
+        }
+    }, [locale, userData?.user?.planName]);
+
+    const handleChangeSubscription = useCallback(async () => {
+        if (!subscriptionForm.planId) {
+            toast.error(t("subscriptionInfo.selectPlan"));
+            return;
+        }
+        const isFree = plans.find((p) => p.id === subscriptionForm.planId)?.name?.toLowerCase() === "free";
+        const billingCycle = isFree ? "free" : subscriptionForm.billingCycle;
+        if (!isFree && !["monthly", "yearly"].includes(billingCycle)) {
+            toast.error(t("subscriptionInfo.selectBilling"));
+            return;
+        }
+        setSubscriptionSubmitting(true);
+        try {
+            const payload = {
+                planId: subscriptionForm.planId,
+                billingCycle,
+                startDate: subscriptionForm.startDate || undefined,
+                endDate: subscriptionForm.endDate || undefined,
+                status: "active",
+            };
+            const result = await axiosPatch<typeof payload, { message: string; subscription: unknown }>(
+                `/admin/users/${userId}/subscription`,
+                locale,
+                payload
+            );
+            if (result.status) {
+                toast.success(t("subscriptionInfo.changeSuccess"));
+                setSubscriptionModalOpen(false);
+                fetchUserDetails();
+            } else {
+                toast.error(t("subscriptionInfo.changeError"));
+            }
+        } catch (err) {
+            console.error("Error updating subscription:", err);
+            toast.error(t("subscriptionInfo.changeError"));
+        } finally {
+            setSubscriptionSubmitting(false);
+        }
+    }, [subscriptionForm, plans, userId, locale, t, fetchUserDetails]);
+
+    const handleApplyFreeLimits = useCallback(async () => {
+        setApplyFreeLoading(true);
+        try {
+            const result = await axiosPost<Record<string, never>, { message: string }>(
+                `/admin/users/${userId}/apply-free-limits`,
+                locale,
+                {}
+            );
+            if (result.status) {
+                toast.success(t("subscriptionInfo.applyFreeSuccess"));
+                setApplyFreeConfirmOpen(false);
+                fetchUserDetails();
+            } else {
+                toast.error(t("subscriptionInfo.applyFreeError"));
+            }
+        } catch (err) {
+            console.error("Error applying free limits:", err);
+            toast.error(t("subscriptionInfo.applyFreeError"));
+        } finally {
+            setApplyFreeLoading(false);
+        }
+    }, [userId, locale, t, fetchUserDetails]);
 
     const handleToggleMenuStatus = async (menu: Menu) => {
         if (!userData) return;
@@ -253,14 +362,173 @@ export default function UserDetailsPage() {
                     </div>
                 </div>
                 <div className={`flex items-center gap-3 mt-6 ${isRTL ? "flex-row-reverse" : ""}`}>
-                    <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors">
+                    <button
+                        type="button"
+                        onClick={openSubscriptionModal}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors"
+                    >
                         {t("subscriptionInfo.changeSubscription")}
                     </button>
-                    <button className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold rounded-lg transition-colors">
+                    <button
+                        type="button"
+                        onClick={() => setApplyFreeConfirmOpen(true)}
+                        className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold rounded-lg transition-colors"
+                    >
                         {t("subscriptionInfo.applyFreeRestrictions")}
                     </button>
                 </div>
             </CardDashBoard>
+
+            {/* Change Subscription Modal */}
+            {subscriptionModalOpen && (
+                <div
+                    className="fixed m-0 p-4 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+                    style={{ top: 0, left: 0, right: 0, bottom: 0, width: "100vw", minHeight: "100dvh" }}
+                >
+                    <div className={`bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto ${isRTL ? "text-right" : "text-left"}`}>
+                        <div className="p-6">
+                            <div className={`flex items-center justify-between mb-6 ${isRTL ? "flex-row-reverse" : ""}`}>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+                                    {t("subscriptionInfo.changeSubscription")}
+                                </h3>
+                                <button
+                                    type="button"
+                                    onClick={() => !subscriptionSubmitting && setSubscriptionModalOpen(false)}
+                                    disabled={subscriptionSubmitting}
+                                    className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50"
+                                >
+                                    <FaTimes className="text-lg" />
+                                </button>
+                            </div>
+                            {plansLoading ? (
+                                <div className="py-8 text-center text-slate-500 dark:text-slate-400">
+                                    {t("loading")}
+                                </div>
+                            ) : (
+                                <form
+                                    onSubmit={(e) => {
+                                        e.preventDefault();
+                                        handleChangeSubscription();
+                                    }}
+                                    className="space-y-4"
+                                >
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                            {t("subscriptionInfo.plan")}
+                                        </label>
+                                        <select
+                                            value={subscriptionForm.planId || ""}
+                                            onChange={(e) => {
+                                                const id = Number(e.target.value);
+                                                const plan = plans.find((p) => p.id === id);
+                                                setSubscriptionForm((prev) => ({
+                                                    ...prev,
+                                                    planId: id,
+                                                    billingCycle: plan?.name?.toLowerCase() === "free" ? "free" : prev.billingCycle === "free" ? "yearly" : prev.billingCycle,
+                                                }));
+                                            }}
+                                            className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary focus:border-primary"
+                                            required
+                                        >
+                                            <option value="">{t("subscriptionInfo.selectPlan")}</option>
+                                            {plans.map((plan) => (
+                                                <option key={plan.id} value={plan.id}>
+                                                    {plan.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    {plans.find((p) => p.id === subscriptionForm.planId)?.name?.toLowerCase() !== "free" && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                                {t("subscriptionInfo.billingCycle")}
+                                            </label>
+                                            <select
+                                                value={subscriptionForm.billingCycle}
+                                                onChange={(e) =>
+                                                    setSubscriptionForm((prev) => ({ ...prev, billingCycle: e.target.value }))
+                                                }
+                                                className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary focus:border-primary"
+                                            >
+                                                <option value="monthly">{t("monthly")}</option>
+                                                <option value="yearly">{t("yearly")}</option>
+                                            </select>
+                                        </div>
+                                    )}
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                            {t("subscriptionInfo.startDate")}
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={subscriptionForm.startDate}
+                                            onChange={(e) =>
+                                                setSubscriptionForm((prev) => ({ ...prev, startDate: e.target.value }))
+                                            }
+                                            className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary focus:border-primary"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                            {t("subscriptionInfo.endDateOptional")}
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={subscriptionForm.endDate}
+                                            onChange={(e) =>
+                                                setSubscriptionForm((prev) => ({ ...prev, endDate: e.target.value }))
+                                            }
+                                            className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary focus:border-primary"
+                                        />
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                            {t("subscriptionInfo.endDateHint")}
+                                        </p>
+                                    </div>
+                                    <div className={`flex gap-3 pt-2 ${isRTL ? "flex-row-reverse" : ""}`}>
+                                        <button
+                                            type="button"
+                                            onClick={() => !subscriptionSubmitting && setSubscriptionModalOpen(false)}
+                                            disabled={subscriptionSubmitting}
+                                            className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50"
+                                        >
+                                            {t("lists.cancel")}
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={subscriptionSubmitting}
+                                            className="flex-1 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                        >
+                                            {subscriptionSubmitting ? (
+                                                <>
+                                                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                    {t("subscriptionInfo.saving")}
+                                                </>
+                                            ) : (
+                                                t("subscriptionInfo.save")
+                                            )}
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Apply Free Limits Confirmation */}
+            {applyFreeConfirmOpen && (
+                <ConfirmationModal
+                    isOpen={true}
+                    onClose={() => !applyFreeLoading && setApplyFreeConfirmOpen(false)}
+                    onConfirm={handleApplyFreeLimits}
+                    title={t("subscriptionInfo.applyFreeConfirmTitle")}
+                    message={t("subscriptionInfo.applyFreeConfirmMessage")}
+                    confirmText={t("subscriptionInfo.applyFreeRestrictions")}
+                    cancelText={t("lists.cancel")}
+                    isLoading={applyFreeLoading}
+                    loadingText={t("subscriptionInfo.applyFreeLoading")}
+                />
+            )}
 
             {/* Basic Information Card */}
             <CardDashBoard>
