@@ -18,6 +18,9 @@ import "ag-grid-community/styles/ag-theme-alpine.css";
 import Loader from "../Global/Loader";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 
+const IconPaginationPrev = IoChevronBack;
+const IconPaginationNext = IoChevronForward;
+
 // Register AG Grid modules
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -626,7 +629,7 @@ export default function DataTable<T extends object>({
 
         {isServerPagination && pagination && totalPages > 0 && (
           <div
-            className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border border-gray-200 border-t-0 dark:border-gray-700 dark:bg-gray-800/50 bg-gray-50/80 text-gray-700 dark:text-gray-300 rounded-b-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.1)]"
+            className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border border-slate-200 border-t-0 dark:border-slate-700 dark:bg-slate-800/50 bg-slate-50/80 text-slate-700 dark:text-slate-300 rounded-b-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.1)]"
             dir={isRTL ? "rtl" : "ltr"}
           >
             <div className="flex items-center gap-2 text-sm">
@@ -634,53 +637,47 @@ export default function DataTable<T extends object>({
                 {t("page")} {page} {t("pageOf")} {totalPages}
               </span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               {totalPages !== 1 && (
                 <>
                   <button
                     type="button"
                     onClick={() => onPageChange?.(1)}
                     disabled={page <= 1}
-                    className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
                     aria-label={t("first")}
                   >
-                    <IoChevronBack className="text-lg rtl:rotate-180" />
+                    <IconPaginationPrev className="text-xl rtl:rotate-180" />
                   </button>
                   <button
                     type="button"
                     onClick={() => onPageChange?.(page - 1)}
                     disabled={page <= 1}
-                    className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
                     aria-label={t("prev")}
                   >
-                    <IoChevronBack className="text-lg" />
+                    <IconPaginationPrev className="text-xl rtl:rotate-180" />
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => onPageChange?.(page - 1)}
-                    disabled={page <= 1}
-                    className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    aria-label={t("prev")}
-                  >
-                    <IoChevronBack className="text-lg" />
-                  </button>
+                  <span className="inline-flex items-center justify-center min-w-10 h-10 px-2 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary font-semibold text-sm border border-primary/20">
+                    {page}
+                  </span>
                   <button
                     type="button"
                     onClick={() => onPageChange?.(page + 1)}
                     disabled={page >= totalPages}
-                    className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
                     aria-label={t("next")}
                   >
-                    <IoChevronForward className="text-lg" />
+                    <IconPaginationNext className="text-xl rtl:rotate-180" />
                   </button>
                   <button
                     type="button"
                     onClick={() => onPageChange?.(totalPages)}
                     disabled={page >= totalPages}
-                    className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
                     aria-label={t("last")}
                   >
-                    <IoChevronForward className="text-lg rtl:rotate-180" />
+                    <IconPaginationNext className="text-xl rtl:rotate-180" />
                   </button>
                 </>
               )}

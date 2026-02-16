@@ -9,21 +9,26 @@ import DarkModeToggle from "../Global/DarkModeToggle";
 export function DashboardHeader({
   setIsMenuOpen,
   segment,
+  isAdmin,
 }: {
   setIsMenuOpen: (isMenuOpen: boolean | ((prev: boolean) => boolean)) => void;
   segment: string | null;
+  isAdmin?: boolean;
 }) {
   const locale = useLocale();
   const pathname = usePathname();
+  const showSidebarToggle = segment || isAdmin;
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 px-4 py-4 backdrop-blur sm:px-8 dark:bg-[#0d1117]/70 dark:border-purple-900">
       <div className="flex  items-center gap-1 justify-between">
         <div className="flex items-center gap-1">
-          {segment && (
+          {showSidebarToggle && (
             <button
+              type="button"
               onClick={() => setIsMenuOpen((prev: boolean) => !prev)}
               className="rounded-full flex items-center justify-center w-10 h-10 border border-slate-200 dark:border-purple-900 bg-white dark:bg-[#0d1117]/70  text-slate-500 dark:text-slate-300 transition hover:text-primary hover:border-secondary lg:hidden"
+              aria-label={locale === "ar" ? "فتح القائمة" : "Open menu"}
             >
               <FiMenu className="text-lg" />
             </button>

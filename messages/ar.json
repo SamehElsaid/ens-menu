@@ -842,6 +842,7 @@
   "Dashboard": {
     "control Panel": "لوحة التحكم",
     "users": "المستخدمين",
+    "plans": "الخطط",
     "administrators": "المديرين",
     "roles": "الصلاحيات",
     "permissions": "الصلاحيات",
@@ -930,7 +931,23 @@
         "startDate": "تاريخ البدء",
         "endDate": "تاريخ الانتهاء",
         "changeSubscription": "تغيير الاشتراك",
-        "applyFreeRestrictions": "تطبيق قيود Free"
+        "applyFreeRestrictions": "تطبيق قيود Free",
+        "plan": "الخطة",
+        "selectPlan": "اختر الخطة",
+        "selectBilling": "اختر نوع الفترة (شهري/سنوي)",
+        "billingCycle": "نوع الفترة",
+        "endDateOptional": "تاريخ الانتهاء (اختياري)",
+        "endDateHint": "اتركه فارغاً لاحتساب المدة تلقائياً من نوع الفترة",
+        "save": "حفظ",
+        "saving": "جاري الحفظ...",
+        "changeSuccess": "تم تغيير الاشتراك بنجاح",
+        "changeError": "فشل تغيير الاشتراك",
+        "plansLoadError": "فشل تحميل الخطط",
+        "applyFreeSuccess": "تم تطبيق قيود الخطة المجانية بنجاح",
+        "applyFreeError": "فشل تطبيق قيود المجاني",
+        "applyFreeConfirmTitle": "تطبيق قيود Free",
+        "applyFreeConfirmMessage": "هل أنت متأكد من تطبيق قيود الخطة المجانية على هذا المستخدم؟ سيتم إيقاف القوائم الزائدة وتقييد المميزات.",
+        "applyFreeLoading": "جاري التطبيق..."
       },
       "basicInfo": {
         "title": "المعلومات الأساسية",
@@ -1064,6 +1081,44 @@
       "cancel": "إلغاء",
       "createSuccess": "تم إنشاء المشرف بنجاح",
       "createError": "فشل إنشاء المشرف"
+    }
+  },
+  "adminPlans": {
+    "title": "إدارة الخطط",
+    "subtitle": "عرض وتعديل خطط الاشتراك",
+    "back": "رجوع",
+    "error": "فشل تحميل الخطط",
+    "edit": "تعديل",
+    "updateSuccess": "تم تحديث الخطة بنجاح",
+    "updateError": "فشل تحديث الخطة",
+    "yes": "نعم",
+    "no": "لا",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "columns": {
+      "name": "الاسم",
+      "priceYearly": "السعر (سنوي)",
+      "maxMenus": "عدد منيوهات",
+      "maxProducts": "عدد منتجات",
+      "hasAds": "إعلانات",
+      "isActive": "الحالة",
+      "allowFullDesignControl": "تحكم كامل بالتصميم",
+      "activeSubscriptions": "اشتراكات نشطة",
+      "actions": "إجراءات"
+    },
+    "editModal": {
+      "title": "تعديل الخطة",
+      "name": "الاسم",
+      "priceYearly": "السعر (سنوي)",
+      "maxMenus": "أقصى منيو",
+      "maxProducts": "أقصى منتجات لكل منيو",
+      "maxProductsHint": "استخدم -1 لعدد غير محدود",
+      "hasAds": "إعلانات",
+      "isActive": "نشط",
+      "allowFullDesignControl": "السماح بالتحكم الكامل بالتصميم",
+      "cancel": "إلغاء",
+      "save": "حفظ",
+      "saving": "جاري الحفظ..."
     }
   },
   "menuOverview": {

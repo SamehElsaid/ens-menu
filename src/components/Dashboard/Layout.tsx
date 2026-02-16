@@ -25,7 +25,7 @@ export default function Layout({
         <main
           className={` flex-1 ms-auto ${(segment || isAdmin) ? "lg:max-w-[calc(100%-270px)]" : "lg:max-w-full"} w-full`}
         >
-          <DashboardHeader setIsMenuOpen={setIsMenuOpen} segment={segment} />
+          <DashboardHeader setIsMenuOpen={setIsMenuOpen} segment={segment} isAdmin={isAdmin} />
           <div className="max-w-[1500px] px-6 mx-auto mt-6">
             <DashboardContentSection>{children}</DashboardContentSection>
           </div>

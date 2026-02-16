@@ -1,14 +1,11 @@
 import type { IconType } from "react-icons";
-import {
-  FaChartLine,
-  FaUserAlt,
-} from "react-icons/fa";
+import { FaChartLine, FaUserAlt } from "react-icons/fa";
 
 import { BiCategory } from "react-icons/bi";
 import { FiSettings } from "react-icons/fi";
 import { HiSpeakerphone } from "react-icons/hi";
 import { MdOutlineFastfood } from "react-icons/md";
-import { IoSettingsOutline } from "react-icons/io5";
+import { IoDocumentTextOutline, IoSettingsOutline } from "react-icons/io5";
 export type NavItem = {
   label: string;
   icon: IconType;
@@ -84,14 +81,13 @@ export const navSections: NavSection[] = [
   },
 ];
 
-
 export const adminNavSections: NavSection[] = [
   {
     title: "Overview",
     items: [
       {
         label: "Overview",
-        icon: FaChartLine ,
+        icon: FaChartLine,
         key: "overview",
         link: "",
       },
@@ -112,8 +108,24 @@ export const adminNavSections: NavSection[] = [
     title: "control Panel",
     items: [
       { label: "users", icon: FaUserAlt, key: "users", link: "users" },
-      { label: "advertisements", icon: HiSpeakerphone, key: "advertisements", link: "advertisements" },
-      { label: "administrators", icon: IoSettingsOutline , key: "administrators", link: "administrators" },
+      {
+        label: "plans",
+        icon: IoDocumentTextOutline,
+        key: "plans",
+        link: "plans",
+      },
+      {
+        label: "advertisements",
+        icon: HiSpeakerphone,
+        key: "advertisements",
+        link: "advertisements",
+      },
+      {
+        label: "administrators",
+        icon: IoSettingsOutline,
+        key: "administrators",
+        link: "administrators",
+      },
     ],
   },
 ];
