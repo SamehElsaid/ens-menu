@@ -28,7 +28,9 @@ export default function RegisterForm() {
       password: "",
       confirmPassword: "",
     },
-    resolver: yupResolver(registerSchema(t)) as unknown as Resolver<RegisterSchema>,
+    resolver: yupResolver(
+      registerSchema(t),
+    ) as unknown as Resolver<RegisterSchema>,
     mode: "onChange",
   });
 
@@ -60,18 +62,26 @@ export default function RegisterForm() {
       phoneNumber: data.phone,
       password: data.password,
     };
-    const response = await axiosPost<typeof dataSend, unknown>("/auth/signup", locale, dataSend, false, true);
+    const response = await axiosPost<typeof dataSend, unknown>(
+      "/auth/signup",
+      locale,
+      dataSend,
+      false,
+      true,
+    );
     if (response.status) {
       toast.success(t("auth.registerSuccess"));
       router.push("/auth/login");
     } else {
       setLoading(false);
     }
-
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-3 text-slate-800 dark:text-slate-100"
+    >
       <Controller
         control={control}
         name="fullName"
@@ -185,10 +195,12 @@ export default function RegisterForm() {
       <div className="flex items-center justify-center mt-6">
         <LinkTo
           href="/auth/login"
-          className="text-sm font-medium  text-center hover:text-accent-purple/80 transition-all duration-200"
+          className="text-sm font-medium text-center text-slate-700 dark:text-slate-300 hover:text-accent-purple/80 dark:hover:text-purple-400 transition-all duration-200"
         >
           {t("auth.haveAccount")}{" "}
-          <span className="font-bold underline text-accent-purple">{t("auth.login")}</span>
+          <span className="font-bold underline text-accent-purple dark:text-purple-400">
+            {t("auth.login")}
+          </span>
         </LinkTo>
       </div>
     </form>

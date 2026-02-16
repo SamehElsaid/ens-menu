@@ -31,12 +31,15 @@ export default function ParentLayout({ children }: ParentLayoutProps) {
       axiosGet<MenusResponse>(`/menus/${segment}`, locale).then((res) => {
         if (res.status) {
           console.log(res.data);
-          dispatch(SET_ACTIVE_USER({
-            ...res.data?.menu, activeItemsCount: res.data?.activeItemsCount,
-            categoriesCount: res.data?.categoriesCount,
-            itemsCount: res.data?.itemsCount,
-            views: res.data?.views,
-          } as unknown as Menu));
+          dispatch(
+            SET_ACTIVE_USER({
+              ...res.data?.menu,
+              activeItemsCount: res.data?.activeItemsCount,
+              categoriesCount: res.data?.categoriesCount,
+              itemsCount: res.data?.itemsCount,
+              views: res.data?.views,
+            } as unknown as Menu),
+          );
         }
       });
     } else {
@@ -44,5 +47,5 @@ export default function ParentLayout({ children }: ParentLayoutProps) {
     }
   }, [segment, locale, dispatch]);
 
-  return <Layout segment={segment} >{children}</Layout>;
+  return <Layout segment={segment}>{children}</Layout>;
 }

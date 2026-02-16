@@ -476,6 +476,7 @@
     "contactForDetails": "Contact us for more details",
     "youAreOnFreePlan": "You are on the Free Plan",
     "upgradePlan": "Upgrade Plan",
+    "downgradePlan": "Downgrade",
     "paymentNote": "Note: Payment gateway integration is pending. This is a trial feature.",
     "notEntered": "Not entered",
     "emailVerification": "Email Verification",
@@ -491,7 +492,16 @@
     "startDate": "Start Date",
     "renewalDate": "Renewal Date",
     "monthly": "Monthly",
-    "yearly": "Yearly"
+    "yearly": "Yearly",
+    "pricePerMonth": "/month",
+    "pricePerYear": "/year",
+    "freePrice": "Free",
+    "customDomain": "Custom domain",
+    "noAds": "No ads",
+    "withAds": "With ads",
+    "controlOverAds": "Control over advertisements",
+    "fullDesignControl": "Full control over site design",
+    "planFeatures": "Features"
   },
   "homePage": {
     "centerSection": {
@@ -1381,7 +1391,6 @@
       "preview": "Preview",
       "customize": "Customize",
       "templateNotActive": "This template is not active. Please activate it to customize it."
-
     },
     "tips": {
       "title": "Helpful tips",
@@ -1398,7 +1407,7 @@
       "title": "This template cannot be customized",
       "description": "You can go back to the design page and choose another template that supports advanced customization."
     },
-  
+
     "preview": {
       "livePreview": "LIVE PREVIEW",
       "previewMenu": "Preview menu",

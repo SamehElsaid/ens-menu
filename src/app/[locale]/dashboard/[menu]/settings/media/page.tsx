@@ -165,24 +165,24 @@ export default function MediaPage() {
     return (
         <div className="min-h-[calc(100vh-160px)]">
             <header className={isRTL ? "text-right space-y-1" : "text-left space-y-1 mb-8"}>
-                <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1.5 text-xs font-semibold">
+                <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 dark:bg-primary/20 text-primary px-3 py-1.5 text-xs font-semibold">
                     <HiOutlineShare className="text-sm" />
                     <span>{t("badge")}</span>
                 </div>
-                <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mt-2">
+                <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 mt-2">
                     {t("title")}
                 </h1>
             </header>
 
             <div className="space-y-6 ">
                 {/* Social media links */}
-                <section className="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 md:p-6 space-y-4">
+                <section className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 md:p-6 space-y-4">
                     <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
-                            <HiOutlineShare className="text-lg text-blue-600" />
+                        <div className="h-10 w-10 rounded-xl bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center">
+                            <HiOutlineShare className="text-lg text-blue-600 dark:text-blue-400" />
                         </div>
                         <div>
-                            <h2 className="text-base font-semibold text-slate-900">{t("socialLinks.title")}</h2>
+                            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">{t("socialLinks.title")}</h2>
                         </div>
                     </div>
 
@@ -201,7 +201,7 @@ export default function MediaPage() {
                                     >
                                         <Icon className="text-lg" />
                                     </div>
-                                    <span className="text-sm font-medium text-slate-700 w-24 shrink-0">
+                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300 w-24 shrink-0">
                                         {t(labelKey)}
                                     </span>
                                     <div className="flex-1 min-w-[180px]">
@@ -218,26 +218,26 @@ export default function MediaPage() {
                         })}
                     </div>
 
-                    <div className="rounded-xl flex items-center gap-2 bg-blue-50 border border-blue-100 p-3">
-                        <span className="text-blue-600 shrink-0 mt-0.5">ℹ</span>
-                        <p className="text-xs text-blue-800">{t("socialLinks.note")}</p>
+                    <div className="rounded-xl flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800/50 p-3">
+                        <span className="text-blue-600 dark:text-blue-400 shrink-0 mt-0.5">ℹ</span>
+                        <p className="text-xs text-blue-800 dark:text-blue-200">{t("socialLinks.note")}</p>
                     </div>
                 </section>
 
                 {/* Contact information */}
-                <section className="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 md:p-6 space-y-4">
+                <section className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 md:p-6 space-y-4">
                     <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
                             <HiOutlineMail className="text-lg text-primary" />
                         </div>
                         <div>
-                            <h2 className="text-base font-semibold text-slate-900">{t("contact.title")}</h2>
+                            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">{t("contact.title")}</h2>
                         </div>
                     </div>
 
                     <div className="grid gap-4 sm:grid-cols-1">
                         <div className="space-y-1.5">
-                            <label className="text-sm font-medium text-slate-700">{t("contact.addressAr")}</label>
+                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t("contact.addressAr")}</label>
                             <CustomInput
                                 type="text"
                                 value={contact.addressAr}
@@ -246,7 +246,7 @@ export default function MediaPage() {
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-sm font-medium text-slate-700">{t("contact.addressEn")}</label>
+                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t("contact.addressEn")}</label>
                             <CustomInput
                                 type="text"
                                 value={contact.addressEn}
@@ -255,7 +255,7 @@ export default function MediaPage() {
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-sm font-medium text-slate-700">{t("contact.phone")}</label>
+                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t("contact.phone")}</label>
                             <CustomInput
                                 type="tel"
                                 value={contact.phone || undefined}
@@ -272,13 +272,13 @@ export default function MediaPage() {
                 </section>
 
                 {/* Business hours */}
-                <section className="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 md:p-6 space-y-4">
+                <section className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 md:p-6 space-y-4">
                     <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
                             <HiOutlineClock className="text-lg text-primary" />
                         </div>
                         <div>
-                            <h2 className="text-base font-semibold text-slate-900">{t("businessHours.title")}</h2>
+                            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">{t("businessHours.title")}</h2>
                         </div>
                     </div>
 
@@ -291,7 +291,7 @@ export default function MediaPage() {
                                     key={day}
                                     className={`flex flex-wrap items-center gap-2 sm:gap-3 ${isClosed ? "opacity-75" : ""}`}
                                 >
-                                    <span className="text-sm font-medium text-slate-700 w-24 shrink-0">
+                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300 w-24 shrink-0">
                                         {t(`businessHours.days.${day}`)}
                                     </span>
                                     <div className="flex items-center gap-2 flex-1 min-w-[200px]">
@@ -310,7 +310,7 @@ export default function MediaPage() {
                                                 disabled={isClosed}
                                             />
                                         </div>
-                                        <span className="text-slate-500 text-sm shrink-0">{t("businessHours.to")}</span>
+                                        <span className="text-slate-500 dark:text-slate-400 text-sm shrink-0">{t("businessHours.to")}</span>
                                         <div className="flex-1 min-w-0">
                                             <CustomInput
                                                 type="time"
@@ -332,18 +332,18 @@ export default function MediaPage() {
                                             type="checkbox"
                                             checked={isClosed}
                                             onChange={(e) => setDayClosed(day, e.target.checked)}
-                                            className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/20"
+                                            className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-700 text-primary focus:ring-primary/20"
                                         />
-                                        <span className="text-sm text-slate-600">{t("businessHours.closed")}</span>
+                                        <span className="text-sm text-slate-600 dark:text-slate-400">{t("businessHours.closed")}</span>
                                     </label>
                                 </div>
                             );
                         })}
                     </div>
 
-                    <div className="rounded-xl flex items-center gap-2 bg-blue-50 border border-blue-100 p-3">
-                        <span className="text-blue-600 shrink-0 mt-0.5">ℹ</span>
-                        <p className="text-xs text-blue-800">{t("businessHours.note")}</p>
+                    <div className="rounded-xl flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800/50 p-3">
+                        <span className="text-blue-600 dark:text-blue-400 shrink-0 mt-0.5">ℹ</span>
+                        <p className="text-xs text-blue-800 dark:text-blue-200">{t("businessHours.note")}</p>
                     </div>
                 </section>
 

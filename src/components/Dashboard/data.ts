@@ -31,7 +31,7 @@ export const navSections: NavSection[] = [
     items: [
       {
         label: "Overview",
-        icon: FaChartLine ,
+        icon: FaChartLine,
         key: "overview",
         link: "",
       },
@@ -51,21 +51,35 @@ export const navSections: NavSection[] = [
   {
     title: "Menu Control",
     items: [
-      { label: "Categories", icon: BiCategory, key: "categories", link: "categories" },
+      {
+        label: "Categories",
+        icon: BiCategory,
+        key: "categories",
+        link: "categories",
+      },
       {
         label: "Items",
-        icon: MdOutlineFastfood ,
+        icon: MdOutlineFastfood,
         key: "items",
         link: "items",
       },
-
     ],
   },
   {
     title: "Settings",
     items: [
-      { label: "Advertisements", icon: HiSpeakerphone, key: "advertisements", link: "advertisements" },
-      { label: "Settings", icon: FiSettings, key: "settings", link: "settings" },
+      {
+        label: "Advertisements",
+        icon: HiSpeakerphone,
+        key: "advertisements",
+        link: "advertisements",
+      },
+      {
+        label: "Settings",
+        icon: FiSettings,
+        key: "settings",
+        link: "settings",
+      },
     ],
   },
 ];

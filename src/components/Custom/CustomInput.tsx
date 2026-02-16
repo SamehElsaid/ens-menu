@@ -211,11 +211,11 @@ export default function CustomInput({
           <div className="relative ">
             <label
               htmlFor={id}
-              className={`duration-200 z-10 absolute start-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-2xl  border ${error
-                  ? "bg-red-50 text-red-500 border-red-200"
+              className={`duration-200 z-10 absolute start-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-2xl border ${error
+                  ? "bg-red-50 dark:bg-red-950/40 text-red-500 border-red-200 dark:border-red-500/50"
                   : focus
-                    ? "text-accent-purple border-accent-purple/20"
-                    : " text-accent-purple border-accent-purple/20"
+                    ? "text-accent-purple border-accent-purple/20 dark:bg-slate-800 dark:border-slate-600"
+                    : "text-accent-purple border-accent-purple/20 dark:bg-slate-800 dark:border-slate-600"
               }`}
             >
               {icon}
@@ -389,12 +389,12 @@ export default function CustomInput({
             {icon && (
               <label
                 htmlFor={id}
-                className={`duration-200 absolute  start-3 ${type === "textarea" ? "top-3" : "top-1/2 -translate-y-1/2"
-                  } flex items-center justify-center w-9 h-9 text-xl ${error
-                    ? "bg-red-50 text-red-500 border-red-200"
+                className={`duration-200 absolute start-3 ${type === "textarea" ? "top-3" : "top-1/2 -translate-y-1/2"
+                  } flex items-center justify-center w-9 h-9 rounded-2xl border text-xl ${error
+                    ? "bg-red-50 text-red-500 border-red-200 dark:bg-red-950/40 dark:border-red-500/50 dark:text-red-400"
                     : focus
-                      ? " text-accent-purple border-accent-purple/20"
-                      : " text-accent-purple/60 border-accent-purple/20"
+                      ? "text-accent-purple border-accent-purple/20 dark:bg-slate-800 dark:border-slate-600 dark:text-purple-400"
+                      : "text-accent-purple/60 border-accent-purple/20 dark:bg-slate-800 dark:border-slate-600 dark:text-purple-400"
                 }`}
               >
                 {icon}
@@ -419,9 +419,9 @@ export default function CustomInput({
                 disabled={props.disabled}
                 className={`w-full resize-y duration-200 ${size == "small" ? "py-2.5" : "py-3.5"
                   } ${icon ? "ps-14" : "ps-4"
-                  } pe-4 outline-none rounded-2xl  border  border-accent-purple/20  focus:border-accent-purple focus:ring-2 focus:ring-accent-purple/20  disabled:opacity-80 ${className || ""
+                  } pe-4 outline-none rounded-2xl border border-accent-purple/20 focus:border-accent-purple focus:ring-2 focus:ring-accent-purple/20 disabled:opacity-80 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600 dark:placeholder:text-slate-400 dark:focus:border-accent-purple dark:focus:ring-accent-purple/20 ${className || ""
                   } ${error
-                    ? "border-red-500 focus:border-red-500 focus:ring-red-200 bg-red-50 "
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-500/50 dark:focus:border-red-500 dark:focus:ring-red-900/30"
                     : ""
                   } `}
               />
@@ -437,10 +437,10 @@ export default function CustomInput({
                   {...props}
                   className={`w-full ${type === "color" ? "opacity-0!" : ""} ${type === "password" ? "pe-12" : "pe-4"
                     } duration-200 ${size == "small" ? "py-2.5" : "py-3.5"} ${icon ? "ps-14" : "ps-4"
-                    } outline-none rounded-2xl  border ${type === "color" ? "bg-background-two" : ""
-                    } border-accent-purple/20  focus:border-accent-purple focus:ring-2 focus:ring-accent-purple/20  disabled:opacity-80 ${className || ""
+                    } outline-none rounded-2xl border ${type === "color" ? "bg-background-two" : ""
+                    } border-accent-purple/20 focus:border-accent-purple focus:ring-2 focus:ring-accent-purple/20 disabled:opacity-80 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600 dark:placeholder:text-slate-400 dark:focus:border-accent-purple dark:focus:ring-accent-purple/20 ${className || ""
                     } ${error
-                      ? "border-red-500 focus:border-red-500 focus:ring-red-200 bg-red-50 "
+                      ? "border-red-500 focus:border-red-500 focus:ring-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-500/50 dark:focus:border-red-500 dark:focus:ring-red-900/30"
                       : ""
                     } ${type === "color" ? "h-[54.18px]" : ""}`}
                   {...props}
@@ -448,7 +448,7 @@ export default function CustomInput({
                 {type === "password" && (
                   <button
                     type="button"
-                    className="absolute h-full flex items-center pe-3! end-3 transform text-xl text-accent-purple/70 hover:text-accent-purple duration-200"
+                    className="absolute h-full flex items-center pe-3! end-3 transform text-xl text-accent-purple/70 hover:text-accent-purple dark:text-purple-400 dark:hover:text-purple-300 duration-200"
                     onClick={() => setActive(!active)}
                   >
                     {active ? <FaRegEye /> : <FaRegEyeSlash />}
@@ -458,7 +458,7 @@ export default function CustomInput({
                   <button
                     type="button"
                     onClick={() => setOpen(true)}
-                    className="absolute h-full flex items-center end-3 transform text-xl text-accent-purple/70 hover:text-accent-purple duration-200"
+                    className="absolute h-full flex items-center end-3 transform text-xl text-accent-purple/70 hover:text-accent-purple dark:text-purple-400 dark:hover:text-purple-300 duration-200"
                   >
                     <IoIosArrowDown />
                   </button>
@@ -469,7 +469,7 @@ export default function CustomInput({
         )}
 
         <UnmountClosed isOpened={Boolean(error)}>
-          <p className="text-xs text-red-500 mt-1">{error}</p>
+          <p className="text-xs text-red-500 dark:text-red-400 mt-1">{error}</p>
         </UnmountClosed>
       </div>
     </>

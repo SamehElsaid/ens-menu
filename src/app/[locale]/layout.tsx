@@ -16,7 +16,8 @@ import "react-lazy-load-image-component/src/effects/blur.css";
 
 export const metadata: Metadata = {
   title: "ENSmenu",
-  description: "ENSmenu is a platform for creating digital menus for restaurants and cafes",
+  description:
+    "ENSmenu is a platform for creating digital menus for restaurants and cafes",
 };
 
 // Script to prevent flash of wrong theme

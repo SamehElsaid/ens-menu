@@ -349,6 +349,7 @@
     "contactForDetails": "اتصل بنا للمزيد من التفاصيل",
     "youAreOnFreePlan": "أنت على الخطة المجانية",
     "upgradePlan": "ترقية الخطة",
+    "downgradePlan": "تخفيض الخطة",
     "paymentNote": "ملاحظة: تكامل بوابة الدفع قيد الانتظار. هذه ميزة تجريبية.",
     "notEntered": "غير مدخل",
     "emailVerification": "التحقق من البريد",
@@ -364,7 +365,16 @@
     "startDate": "تاريخ البداية",
     "renewalDate": "تاريخ التجديد",
     "monthly": "شهرياً",
-    "yearly": "سنوي"
+    "yearly": "سنوي",
+    "pricePerMonth": "/شهر",
+    "pricePerYear": "/سنة",
+    "freePrice": "مجاني",
+    "customDomain": "نطاق مخصص",
+    "noAds": "بدون إعلانات",
+    "withAds": "مع إعلانات",
+    "controlOverAds": "تحكم في الإعلانات",
+    "fullDesignControl": "تحكم كامل في شكل الموقع",
+    "planFeatures": "المميزات"
   },
   "homePage": {
     "centerSection": {
@@ -1102,7 +1112,7 @@
       "buttonActive": "القالب مفعل",
       "buttonUse": "تفعيل هذا القالب",
       "preview": "معاينة",
-       "customize": "تخصيص",
+      "customize": "تخصيص",
       "templateNotActive": "هذا القالب غير مفعل. يرجى تفعيله لتخصيصه."
     },
     "tips": {
