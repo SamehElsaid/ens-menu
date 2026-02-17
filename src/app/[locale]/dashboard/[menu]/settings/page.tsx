@@ -68,7 +68,6 @@ export default function SettingsPage() {
     ?.user?.subscription?.planId;
   const isFreePlan = planId === 1;
 
-  console.log(menuId);
   const {
     control,
     handleSubmit,

@@ -45,7 +45,6 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async (data: LoginSchema) => {
-    console.log(data);
     setLoading(true);
 
     const response = await axiosPost<LoginSchema, LoginResponse>(
@@ -56,7 +55,6 @@ export default function LoginForm() {
       true,
     );
     if (response.status) {
-      console.log(response.data);
       // toast.success(t("auth.loginSuccess"));
 
       const { accessToken, refreshToken, user } = response.data;

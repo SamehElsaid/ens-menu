@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const pageLimit = parseInt(
       searchParams.get("pageLimit") || searchParams.get("limit") || "10",
-      10
+      10,
     );
     const search = searchParams.get("search") || "";
 
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
           status: false,
           data: { message: "Page must be greater than 0" },
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
           status: false,
           data: { message: "Page limit must be greater than 0" },
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
     // Apply search filter if provided
     if (search.trim()) {
       const searchLower = search.toLowerCase().trim();
-      console.log(searchLower);
+
       allCountries = allCountries.filter((country) => {
         const nameEn = (country.name_en || "").toLowerCase();
         const nameAr = (country.name_ar || "").toLowerCase();
@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
         status: false,
         data: { message: "Failed to fetch countries" },
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

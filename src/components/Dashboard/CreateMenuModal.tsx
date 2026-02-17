@@ -55,7 +55,9 @@ export default function CreateMenuModal({
       slug: "",
       currency: "AED",
     },
-    resolver: yupResolver(createMenuSchema(t)) as unknown as Resolver<CreateMenuSchema>,
+    resolver: yupResolver(
+      createMenuSchema(t),
+    ) as unknown as Resolver<CreateMenuSchema>,
     mode: "onChange",
   });
 
@@ -166,7 +168,6 @@ export default function CreateMenuModal({
 
         if (onMenuCreated) {
           onMenuCreated(result.data);
-          console.log(result.data);
           if (onRefresh) {
             onRefresh();
           }
@@ -462,16 +463,17 @@ export default function CreateMenuModal({
                         field.onChange(
                           e.target.value
                             .toLowerCase()
-                            .replace(/[^a-z0-9-]/g, "-")
+                            .replace(/[^a-z0-9-]/g, "-"),
                         )
                       }
                       onBlur={field.onBlur}
-                      className={`px-4 py-3 font-mono dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:border-transparent ${slugStatus.available === false
-                        ? "border-red-300 dark:border-red-600 focus:ring-red-500"
-                        : slugStatus.available === true
-                          ? "border-green-300 dark:border-green-600 focus:ring-green-500"
-                          : "border-gray-300 dark:border-gray-600 focus:ring-primary"
-                        }`}
+                      className={`px-4 py-3 font-mono dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:border-transparent ${
+                        slugStatus.available === false
+                          ? "border-red-300 dark:border-red-600 focus:ring-red-500"
+                          : slugStatus.available === true
+                            ? "border-green-300 dark:border-green-600 focus:ring-green-500"
+                            : "border-gray-300 dark:border-gray-600 focus:ring-primary"
+                      }`}
                       placeholder="my-restaurant-menu"
                       error={errors.slug?.message}
                       icon={
@@ -566,9 +568,10 @@ export default function CreateMenuModal({
               <CustomBtn
                 loading={isCreating}
                 disabled={isCreating || !slugStatus.available}
-
               >
-                <div className="flex items-center justify-center gap-2"><IoAddCircleOutline className="text-xl" /> {t("create")}</div>
+                <div className="flex items-center justify-center gap-2">
+                  <IoAddCircleOutline className="text-xl" /> {t("create")}
+                </div>
               </CustomBtn>
             </div>
           </div>

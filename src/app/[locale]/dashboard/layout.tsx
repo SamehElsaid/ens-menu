@@ -30,7 +30,6 @@ export default function ParentLayout({ children }: ParentLayoutProps) {
       dispatch(SET_LOADING());
       axiosGet<MenusResponse>(`/menus/${segment}`, locale).then((res) => {
         if (res.status) {
-          console.log(res.data);
           dispatch(
             SET_ACTIVE_USER({
               ...res.data?.menu,

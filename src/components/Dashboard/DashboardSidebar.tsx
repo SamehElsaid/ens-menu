@@ -27,20 +27,17 @@ export function DashboardSidebar({
   const { menu, loading } = useAppSelector((state) => state.menuData);
 
   const activeLink = (link: string) => {
-    console.log(pathname, link);
-
     if (link === "") {
       return pathname === "/dashboard/" + segment || pathname === "/admin";
     }
     return pathname.includes(link);
   };
 
-  console.log(menu);
-
   const sidebarSections = (hidden = false) => (
     <aside
-      className={`${hidden ? "hidden w-[270px]" : " w-full"
-        }  flex flex-col border-e border-slate-100 dark:border-purple-900 bg-white dark:bg-[#0d1117]/70 lg:flex h-dvh fixed top-0 start-0`}
+      className={`${
+        hidden ? "hidden w-[270px]" : " w-full"
+      }  flex flex-col border-e border-slate-100 dark:border-purple-900 bg-white dark:bg-[#0d1117]/70 lg:flex h-dvh fixed top-0 start-0`}
     >
       <LinkTo
         href="/"
@@ -92,7 +89,11 @@ export function DashboardSidebar({
             <div className="mt-3 space-y-1">
               {section.items.map((item) => (
                 <LinkTo
-                  href={isAdmin ? "/admin/" + item.link || "" : "/dashboard/" + segment + "/" + item.link || ""}
+                  href={
+                    isAdmin
+                      ? "/admin/" + item.link || ""
+                      : "/dashboard/" + segment + "/" + item.link || ""
+                  }
                   key={item.label}
                   onClick={() => setIsMenuOpen(false)}
                   className={`flex w-full items-center  justify-between rounded-xl px-3 py-3 text-sm font-semibold transition hover:text-slate-100 

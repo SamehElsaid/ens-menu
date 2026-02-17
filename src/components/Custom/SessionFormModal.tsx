@@ -47,18 +47,18 @@ const createSessionSchema = (t: ReturnType<typeof useTranslations<"">>) =>
           sectionName: yup
             .string()
             .required(
-              t("sessions.sectionNameRequired") || "Section name is required"
+              t("sessions.sectionNameRequired") || "Section name is required",
             )
             .min(
               2,
               t("sessions.sectionNameMinLength") ||
-                "Section name must be at least 2 characters"
+                "Section name must be at least 2 characters",
             ),
           date: yup.date().nullable().required(t("workSchedule.dateRequired")),
           time: yup
             .string()
             .required(t("sessions.timeRequired") || "Time is required"),
-        })
+        }),
       )
       .min(1, t("sessions.sectionNameRequired") || "At least one session"),
   });
@@ -72,7 +72,7 @@ export default function SessionFormModal({
   const t = useTranslations("");
   const [pendingDate, setPendingDate] = useState<Date | null>(null);
   const [defaultTime, setDefaultTime] = useState<string>(() =>
-    convetDateToTimeString(new Date())
+    convetDateToTimeString(new Date()),
   );
 
   const {
@@ -86,7 +86,7 @@ export default function SessionFormModal({
       sessions: [],
     },
     resolver: yupResolver(
-      createSessionSchema(t)
+      createSessionSchema(t),
     ) as unknown as Resolver<SessionFormData>,
     mode: "onChange",
   });
@@ -95,8 +95,6 @@ export default function SessionFormModal({
     control,
     name: "sessions",
   });
-
-  console.log(fields);
 
   const handleAddDate = (date: Date | null) => {
     if (!date) return;
@@ -113,7 +111,6 @@ export default function SessionFormModal({
       return existing.toISOString().split("T")[0] === newDateKey;
     });
 
-    console.log(exists);
     if (exists) {
       setPendingDate(date);
       return;
@@ -319,8 +316,8 @@ export default function SessionFormModal({
                             value instanceof Date
                               ? value
                               : value
-                              ? new Date(value as unknown as string)
-                              : null
+                                ? new Date(value as unknown as string)
+                                : null
                           }
                           onChange={(e) => {
                             const date = e as unknown as Date | null;
@@ -370,7 +367,7 @@ export default function SessionFormModal({
                           value={timeStringToDate(value)}
                           onChange={(e) => {
                             const date = convetDateToTimeString(
-                              e as unknown as Date
+                              e as unknown as Date,
                             );
                             onChange(date);
                           }}
