@@ -13,6 +13,7 @@ import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { axiosPost } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import GoogleSignInButton from "@/components/Auth/GoogleSignInButton";
 
 export default function RegisterForm() {
   const t = useTranslations("");
@@ -190,6 +191,10 @@ export default function RegisterForm() {
           disabled={!recaptchaVerified}
           loading={loading}
         />
+      </div>
+
+      <div className="mt-12 flex flex-col items-center justify-center">
+        <GoogleSignInButton dividerLabel="auth.orRegisterWith" />
       </div>
 
       <div className="flex items-center justify-center mt-6">

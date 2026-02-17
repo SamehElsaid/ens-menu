@@ -1,7 +1,7 @@
 "use client";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import CustomInput from "@/components/Custom/CustomInput";
-import { FaEnvelope, FaGoogle } from "react-icons/fa";
+import { FaEnvelope } from "react-icons/fa";
 import { TbLockPassword } from "react-icons/tb";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLocale, useTranslations } from "next-intl";
@@ -16,6 +16,8 @@ import CustomBtn from "./Custom/CustomBtn";
 import { axiosPost } from "@/shared/axiosCall";
 import { useState } from "react";
 import { LoginResponse } from "@/types/LoginResponse";
+import GoogleSignInButton from "@/components/Auth/GoogleSignInButton";
+
 export default function LoginForm() {
   const t = useTranslations("");
   const router = useRouter();
@@ -133,18 +135,7 @@ export default function LoginForm() {
         <CustomBtn text={t("auth.login")} type="submit" loading={loading} />
       </div>
       <div className="mt-12 flex flex-col items-center">
-        <div className="flex items-center gap-4 w-full mb-4">
-          <div className="h-px flex-1 bg-slate-100 dark:bg-slate-700" />
-          <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-            {t("auth.orLoginWith")}
-          </span>
-          <div className="h-px flex-1 bg-slate-100 dark:bg-slate-700" />
-        </div>
-        <div className="flex gap-6">
-          <button className="w-14 h-14 text-xl hover:bg-accent-purple/10! dark:hover:bg-accent-purple/20! rounded-full glass-input flex items-center justify-center transition-all shadow-sm dark:border dark:border-slate-700">
-            <FaGoogle className="text-accent-purple" />
-          </button>
-        </div>
+        <GoogleSignInButton dividerLabel="auth.orLoginWith" />
       </div>
       <div className="flex items-center justify-center mt-6">
         <LinkTo

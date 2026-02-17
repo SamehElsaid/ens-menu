@@ -40,6 +40,8 @@ export default function DashboardPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [togglingId, setTogglingId] = useState<number | null>(null);
   const [refreshing, setRefreshing] = useState(0);
+  const [switchMenuTarget, setSwitchMenuTarget] = useState<Menu | null>(null);
+  const [isSwitchingMenu, setIsSwitchingMenu] = useState(false);
 
   const fetchMenus = useCallback(async () => {
     try {
@@ -156,6 +158,15 @@ export default function DashboardPage() {
   };
 
   const handleToggleActive = async (menu: Menu) => {
+    const maxMenus = subscription?.maxMenus ?? 1;
+    const activeCount = menus.filter((m) => m.isActive).length;
+
+    // تشغيل منيو بينما عدد النشطة بالفعل = الحد → عرض مودال "المنيو الآخر هيتوقف، جدد الاشتراك"
+    if (!menu.isActive && activeCount >= maxMenus) {
+      setSwitchMenuTarget(menu);
+      return;
+    }
+
     try {
       setTogglingId(menu.id);
       const result = await axiosPatch<{ isActive: boolean }, Menu>(
@@ -178,6 +189,50 @@ export default function DashboardPage() {
       toast.error(t("toggleError"));
     } finally {
       setTogglingId(null);
+    }
+  };
+
+  const handleConfirmSwitchMenu = async () => {
+    if (!switchMenuTarget) return;
+    const otherActive = menus.filter(
+      (m) => m.isActive && m.id !== switchMenuTarget.id,
+    );
+    try {
+      setIsSwitchingMenu(true);
+      for (const m of otherActive) {
+        await axiosPatch<{ isActive: boolean }, { message?: string }>(
+          `/menus/${m.id}`,
+          locale,
+          { isActive: false },
+        );
+      }
+      const result = await axiosPatch<{ isActive: boolean }, Menu>(
+        `/menus/${switchMenuTarget.id}`,
+        locale,
+        { isActive: true },
+      );
+      if (result.status) {
+        setMenus((prev) =>
+          prev.map((m) => ({
+            ...m,
+            isActive:
+              m.id === switchMenuTarget.id
+                ? true
+                : otherActive.some((o) => o.id === m.id)
+                  ? false
+                  : m.isActive,
+          })),
+        );
+        toast.success(t("toggleSuccess"));
+        setSwitchMenuTarget(null);
+      } else {
+        toast.error(t("toggleError"));
+      }
+    } catch (error) {
+      console.error("Error switching active menu:", error);
+      toast.error(t("toggleError"));
+    } finally {
+      setIsSwitchingMenu(false);
     }
   };
 
@@ -426,6 +481,82 @@ export default function DashboardPage() {
           locale={locale}
           onClose={() => setShowLimitModal(false)}
         />
+      )}
+
+      {/* Switch Menu (Free limit) Modal */}
+      {switchMenuTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-slate-200/80 dark:bg-slate-900 dark:ring-slate-700/50">
+            {/* Header with close */}
+            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/40">
+                  <IoWarningOutline className="text-amber-600 dark:text-amber-400 text-xl" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+                  {t("switchMenuLimitTitle")}
+                </h3>
+              </div>
+              <button
+                onClick={() => !isSwitchingMenu && setSwitchMenuTarget(null)}
+                disabled={isSwitchingMenu}
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300 disabled:opacity-50"
+                aria-label={t("close")}
+              >
+                <IoCloseOutline className="text-xl" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="px-6 py-5">
+              <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                {t("switchMenuLimitMessage")}
+              </p>
+              {switchMenuTarget && (
+                <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 dark:border-slate-700 dark:bg-slate-800/50">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                    {t("selectedMenu")}
+                  </p>
+                  <p className="mt-0.5 font-semibold text-slate-800 dark:text-slate-200">
+                    {getMenuName(switchMenuTarget)}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-col-reverse gap-3 border-t border-slate-100 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/30 sm:flex-row sm:justify-end">
+              <button
+                onClick={() => setSwitchMenuTarget(null)}
+                disabled={isSwitchingMenu}
+                className="order-2 sm:order-1 w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 sm:w-auto"
+              >
+                {t("cancel")}
+              </button>
+              <LinkTo
+                href="/pricing"
+                className="order-1 flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-amber-500 to-orange-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-amber-600 hover:to-orange-600 hover:shadow-lg sm:order-2 sm:w-auto"
+              >
+                <IoRocketOutline className="text-lg" />
+                {t("upgradePlan")}
+              </LinkTo>
+              <button
+                onClick={handleConfirmSwitchMenu}
+                disabled={isSwitchingMenu}
+                className="order-0 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-primary/90 disabled:opacity-60 sm:order-3 sm:w-auto"
+              >
+                {isSwitchingMenu ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <span>{t("switching")}</span>
+                  </>
+                ) : (
+                  t("switchMenuConfirm")
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Delete Confirmation Modal */}

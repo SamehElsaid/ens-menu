@@ -17,6 +17,7 @@
     "@fullcalendar/timegrid": "^6.1.19",
     "@hcaptcha/react-hcaptcha": "^2.0.2",
     "@hookform/resolvers": "^5.2.2",
+    "@react-oauth/google": "^0.13.4",
     "@reduxjs/toolkit": "^2.10.1",
     "@siamf/next-progress": "^2.0.0",
     "@types/leaflet": "^1.9.21",

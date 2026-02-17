@@ -154,6 +154,10 @@
     "dontHaveAccount": "Don't have an account?",
     "forgotPassword": "Forgot your password?",
     "orLoginWith": "Or login with",
+    "orRegisterWith": "Or register with",
+    "loginWithGoogle": "Login with Google",
+    "loginFailed": "Login failed",
+    "loginWithGoogleFailed": "Google sign-in failed",
     "haveAccount": "Already have an account?",
     "createAccount": "Create Account",
     "registerDescription": "Create your account to get started",
@@ -501,7 +505,11 @@
     "withAds": "With ads",
     "controlOverAds": "Control over advertisements",
     "fullDesignControl": "Full control over site design",
-    "planFeatures": "Features"
+    "planFeatures": "Features",
+    "contactWhatsApp": "Contact on WhatsApp",
+    "upgrade": "Upgrade",
+    "downgrade": "Downgrade",
+    "currentPlanLabel": "Your current plan"
   },
   "homePage": {
     "centerSection": {
@@ -836,6 +844,30 @@
       ]
     },
 
+    "pricing": {
+      "title": "Choose Your Plan",
+      "description": "Start free and upgrade when you need more. Custom plan for advanced requirements.",
+      "planFree": "Free",
+      "planPro": "Pro",
+      "planCustom": "Custom",
+      "perYear": "/year",
+      "yearlyPrice": "Yearly price",
+      "getStarted": "Get Started",
+      "popular": "Popular",
+      "noPlans": "Plans load from server",
+      "customDescription": "Tailored solution with advanced features for your business.",
+      "customPrice": "Contact us",
+      "contactWhatsApp": "Contact on WhatsApp",
+      "currentPlan": "Your current plan",
+      "customFeatures": {
+        "waiterRequest": "Waiter request",
+        "billRequest": "Bill request",
+        "onlineOrdering": "Online ordering system",
+        "deliveryMaps": "Advanced delivery with maps",
+        "newLanguages": "New languages (German, French, Hindi)",
+        "onlinePayment": "Integrated online payment"
+      }
+    },
     "cta": {
       "title": "Ready to Transform Your Restaurant?",
       "description": "Join hundreds of restaurants that switched to smart menus. Start your free trial today.",
@@ -891,6 +923,11 @@
     "limitReachedDescription": "You have reached the maximum number of menus ({current}/{max}) for your {plan} plan. Upgrade your plan to create more menus.",
     "upgradePlan": "Upgrade Plan",
     "close": "Close",
+    "switchMenuLimitTitle": "Free Plan Limit",
+    "switchMenuLimitMessage": "Activating this menu will pause the other active menu. Your current plan allows only one active menu. Renew your subscription (Pro) to run multiple menus at once.",
+    "switchMenuConfirm": "Activate this menu (and pause the other)",
+    "selectedMenu": "Selected menu",
+    "switching": "Switching...",
     "createModal": {
       "title": "Create New Menu",
       "menuNames": "Menu Names",
