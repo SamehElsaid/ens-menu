@@ -3,11 +3,14 @@
 import { store } from "@/store/store";
 import { Provider } from "react-redux";
 import HomeApp from "./HomeApp";
+import GoogleAuthProvider from "./GoogleAuthProvider";
 
 function RenderInProvider({ children }: { children: React.ReactNode }) {
   return (
     <Provider store={store}>
-      <HomeApp>{children}</HomeApp>
+      <GoogleAuthProvider>
+        <HomeApp>{children}</HomeApp>
+      </GoogleAuthProvider>
     </Provider>
   );
 }

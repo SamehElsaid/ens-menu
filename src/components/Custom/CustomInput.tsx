@@ -111,7 +111,6 @@ export default function CustomInput({
     return `${year}-${month}-${day}`;
   };
 
-
   const formatTime = (time?: Date | null) => {
     if (!time) return "";
     return format(time, "hh:mm aa", {
@@ -122,7 +121,7 @@ export default function CustomInput({
     if (apiUrl && querySearch) {
       setLoadingOptions(true);
       setOptions([]);
-      console.log(triggerApiUrl);
+
       const value = (props?.value as OptionType)?.label || searchValue || "";
       axiosGet<CountryRaw[]>(
         apiUrl +
@@ -143,7 +142,7 @@ export default function CustomInput({
                 value: (item as { id: string }).id,
               })) || [];
             setOptions(options);
-            console.log(data);
+
             setConfig({
               page: data?.data?.page || 1,
               limit: data?.data?.limit || 10,
@@ -174,31 +173,31 @@ export default function CustomInput({
         {type === "choice" ? (
           <div className="w-full">
             <div
-              className={`rounded-lg ${error
+              className={`rounded-lg ${
+                error
                   ? "border border-red-300 bg-red-50/30"
                   : "border border-gray-200 bg-gray-50/80"
-                } shadow-sm`}
+              } shadow-sm`}
             >
               <div className="flex items-center gap-2">
                 {(props.options as OptionType[])?.map((option) => {
                   const isSelected =
                     (props.value as OptionType)?.value === option.value;
-                  console.log(props.value, option.value);
 
                   return (
                     <button
                       key={option.value}
                       type="button"
                       onClick={() => {
-                        console.log(option.value);
                         props.onChange?.(
                           option as unknown as ChangeEvent<HTMLInputElement>,
                         );
                       }}
-                      className={`flex-1 rounded-2xl  px-4 py-2.5 text-sm font-medium transition-all duration-200 ${isSelected
+                      className={`flex-1 rounded-2xl  px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
+                        isSelected
                           ? "bg-accent-purple text-white shadow-md"
                           : "bg-transparent text-accent-purple hover:text-accent-purple/80"
-                        } ${error && !isSelected ? "text-red-600" : ""}`}
+                      } ${error && !isSelected ? "text-red-600" : ""}`}
                     >
                       {option.label}
                     </button>
@@ -211,7 +210,8 @@ export default function CustomInput({
           <div className="relative ">
             <label
               htmlFor={id}
-              className={`duration-200 z-10 absolute start-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-2xl border ${error
+              className={`duration-200 z-10 absolute start-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-2xl border ${
+                error
                   ? "bg-red-50 dark:bg-red-950/40 text-red-500 border-red-200 dark:border-red-500/50"
                   : focus
                     ? "text-accent-purple border-accent-purple/20 dark:bg-slate-800 dark:border-slate-600"
@@ -224,8 +224,9 @@ export default function CustomInput({
               instanceId={id}
               {...props}
               className="basic-single "
-              classNamePrefix={`cursor-text ${size == "small" ? "small" : ""} ${error ? "error" : ""
-                } select`}
+              classNamePrefix={`cursor-text ${size == "small" ? "small" : ""} ${
+                error ? "error" : ""
+              } select`}
               isSearchable={
                 isSearching || (props?.isSearchable as boolean) || false
               }
@@ -301,8 +302,9 @@ export default function CustomInput({
               }}
               ref={phoneRef}
               defaultCountry={"AE"}
-              className={`phoneNumber ${Boolean(error) ? "error" : ""} ${active ? "main" : ""
-                } ${props?.value === undefined ? "error" : ""} `}
+              className={`phoneNumber ${Boolean(error) ? "error" : ""} ${
+                active ? "main" : ""
+              } ${props?.value === undefined ? "error" : ""} `}
               placeholder="123-456-7890"
               {...props}
               value={props?.value as string | undefined}
@@ -324,7 +326,7 @@ export default function CustomInput({
               showTimeSelect={type === "time"}
               locale={locale}
               timeCaption={t("workSchedule.timeCaption")}
-              timeFormat="hh:mm aa"      // 👈 12-hour format
+              timeFormat="hh:mm aa" // 👈 12-hour format
               dateFormat={type === "date" ? "yyyy-MM-dd" : "HH:mm"}
               open={openDate}
               onCalendarOpen={() => setOpenDate(true)}
@@ -340,7 +342,8 @@ export default function CustomInput({
                   {icon && (
                     <label
                       htmlFor={id}
-                      className={`duration-200 absolute start-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-2xl  border ${error
+                      className={`duration-200 absolute start-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-2xl  border ${
+                        error
                           ? "bg-red-50 text-red-500 border-red-200"
                           : focus
                             ? "text-accent-purple border-accent-purple/20"
@@ -361,13 +364,17 @@ export default function CustomInput({
                     onFocus={() => (setOpen ? setOpen(true) : setFocus(true))}
                     onBlur={() => (setOpen ? setOpen(false) : setFocus(false))}
                     {...props}
-                    className={`w-full date-input   duration-200 ${size == "small" ? "py-2.5" : "py-3.5"
-                      } ${icon ? "ps-14" : "ps-4"
-                      } outline-none rounded-2xl  pe-4! border  border-accent-purple/20  focus:border-accent-purple focus:ring-2 focus:ring-accent-purple/20  disabled:opacity-80 ${className || ""
-                      } ${error
+                    className={`w-full date-input   duration-200 ${
+                      size == "small" ? "py-2.5" : "py-3.5"
+                    } ${
+                      icon ? "ps-14" : "ps-4"
+                    } outline-none rounded-2xl  pe-4! border  border-accent-purple/20  focus:border-accent-purple focus:ring-2 focus:ring-accent-purple/20  disabled:opacity-80 ${
+                      className || ""
+                    } ${
+                      error
                         ? "border-red-500 focus:border-red-500 focus:ring-red-200 bg-red-50 "
                         : ""
-                      } `}
+                    } `}
                     {...props}
                     value={
                       type === "date"
@@ -383,14 +390,17 @@ export default function CustomInput({
           </div>
         ) : (
           <div
-            className={`flex ${type === "textarea" ? "items-start" : "items-center"
-              } flex-col rounded-2xl  w-full relative overflow-hidden`}
+            className={`flex ${
+              type === "textarea" ? "items-start" : "items-center"
+            } flex-col rounded-2xl  w-full relative overflow-hidden`}
           >
             {icon && (
               <label
                 htmlFor={id}
-                className={`duration-200 absolute start-3 ${type === "textarea" ? "top-3" : "top-1/2 -translate-y-1/2"
-                  } flex items-center justify-center w-9 h-9 rounded-2xl border text-xl ${error
+                className={`duration-200 absolute start-3 ${
+                  type === "textarea" ? "top-3" : "top-1/2 -translate-y-1/2"
+                } flex items-center justify-center w-9 h-9 rounded-2xl border text-xl ${
+                  error
                     ? "bg-red-50 text-red-500 border-red-200 dark:bg-red-950/40 dark:border-red-500/50 dark:text-red-400"
                     : focus
                       ? "text-accent-purple border-accent-purple/20 dark:bg-slate-800 dark:border-slate-600 dark:text-purple-400"
@@ -417,13 +427,17 @@ export default function CustomInput({
                 }}
                 value={props.value as string | undefined}
                 disabled={props.disabled}
-                className={`w-full resize-y duration-200 ${size == "small" ? "py-2.5" : "py-3.5"
-                  } ${icon ? "ps-14" : "ps-4"
-                  } pe-4 outline-none rounded-2xl border border-accent-purple/20 focus:border-accent-purple focus:ring-2 focus:ring-accent-purple/20 disabled:opacity-80 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600 dark:placeholder:text-slate-400 dark:focus:border-accent-purple dark:focus:ring-accent-purple/20 ${className || ""
-                  } ${error
+                className={`w-full resize-y duration-200 ${
+                  size == "small" ? "py-2.5" : "py-3.5"
+                } ${
+                  icon ? "ps-14" : "ps-4"
+                } pe-4 outline-none rounded-2xl border border-accent-purple/20 focus:border-accent-purple focus:ring-2 focus:ring-accent-purple/20 disabled:opacity-80 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600 dark:placeholder:text-slate-400 dark:focus:border-accent-purple dark:focus:ring-accent-purple/20 ${
+                  className || ""
+                } ${
+                  error
                     ? "border-red-500 focus:border-red-500 focus:ring-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-500/50 dark:focus:border-red-500 dark:focus:ring-red-900/30"
                     : ""
-                  } `}
+                } `}
               />
             ) : (
               <>
@@ -435,14 +449,19 @@ export default function CustomInput({
                   onFocus={() => (setOpen ? setOpen(true) : setFocus(true))}
                   onBlur={() => (setOpen ? setOpen(false) : setFocus(false))}
                   {...props}
-                  className={`w-full ${type === "color" ? "opacity-0!" : ""} ${type === "password" ? "pe-12" : "pe-4"
-                    } duration-200 ${size == "small" ? "py-2.5" : "py-3.5"} ${icon ? "ps-14" : "ps-4"
-                    } outline-none rounded-2xl border ${type === "color" ? "bg-background-two" : ""
-                    } border-accent-purple/20 focus:border-accent-purple focus:ring-2 focus:ring-accent-purple/20 disabled:opacity-80 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600 dark:placeholder:text-slate-400 dark:focus:border-accent-purple dark:focus:ring-accent-purple/20 ${className || ""
-                    } ${error
+                  className={`w-full ${type === "color" ? "opacity-0!" : ""} ${
+                    type === "password" ? "pe-12" : "pe-4"
+                  } duration-200 ${size == "small" ? "py-2.5" : "py-3.5"} ${
+                    icon ? "ps-14" : "ps-4"
+                  } outline-none rounded-2xl border ${
+                    type === "color" ? "bg-background-two" : ""
+                  } border-accent-purple/20 focus:border-accent-purple focus:ring-2 focus:ring-accent-purple/20 disabled:opacity-80 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600 dark:placeholder:text-slate-400 dark:focus:border-accent-purple dark:focus:ring-accent-purple/20 ${
+                    className || ""
+                  } ${
+                    error
                       ? "border-red-500 focus:border-red-500 focus:ring-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-500/50 dark:focus:border-red-500 dark:focus:ring-red-900/30"
                       : ""
-                    } ${type === "color" ? "h-[54.18px]" : ""}`}
+                  } ${type === "color" ? "h-[54.18px]" : ""}`}
                   {...props}
                 />
                 {type === "password" && (

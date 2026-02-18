@@ -146,6 +146,10 @@
     "dontHaveAccount": "ليس لديك حساب؟",
     "forgotPassword": "هل نسيت كلمة المرور؟",
     "orLoginWith": "أو تسجيل الدخول بواسطة",
+    "orRegisterWith": "أو التسجيل بواسطة",
+    "loginWithGoogle": "تسجيل الدخول بجوجل",
+    "loginFailed": "فشل تسجيل الدخول",
+    "loginWithGoogleFailed": "فشل تسجيل الدخول بجوجل",
     "haveAccount": "لديك حساب بالفعل؟",
     "createAccount": "إنشاء حساب جديد",
     "registerDescription": "أنشئ حسابك للبدء في استخدام المنصة",
@@ -350,7 +354,7 @@
     "youAreOnFreePlan": "أنت على الخطة المجانية",
     "upgradePlan": "ترقية الخطة",
     "downgradePlan": "تخفيض الخطة",
-    "paymentNote": "ملاحظة: تكامل بوابة الدفع قيد الانتظار. هذه ميزة تجريبية.",
+    "paymentNote": "ملاحظة: تكامل بوابة الدفع قيد التطوير.",
     "notEntered": "غير مدخل",
     "emailVerification": "التحقق من البريد",
     "accountStatus": "حالة الحساب",
@@ -374,7 +378,11 @@
     "withAds": "مع إعلانات",
     "controlOverAds": "تحكم في الإعلانات",
     "fullDesignControl": "تحكم كامل في شكل الموقع",
-    "planFeatures": "المميزات"
+    "planFeatures": "المميزات",
+    "contactWhatsApp": "تواصل عبر واتساب",
+    "upgrade": "ترقية",
+    "downgrade": "تخفيض",
+    "currentPlanLabel": "خطتك الحالية"
   },
   "homePage": {
     "centerSection": {
@@ -560,6 +568,30 @@
       ]
     },
 
+    "pricing": {
+      "title": "اختر خطتك",
+      "description": "ابدأ مجاناً وترقّى عند الحاجة. خطة مخصصة للمتطلبات المتقدمة.",
+      "planFree": "مجاني",
+      "planPro": "احترافي",
+      "planCustom": "مخصص",
+      "perYear": "/سنة",
+      "yearlyPrice": "السعر السنوي",
+      "getStarted": "ابدأ الآن",
+      "popular": "الأكثر طلباً",
+      "noPlans": "الخطط تُحمّل من السيرفر",
+      "customDescription": "حل مصمم خصيصاً مع مميزات متقدمة لعملك.",
+      "customPrice": "تواصل معنا",
+      "contactWhatsApp": "تواصل عبر واتساب",
+      "currentPlan": "اشتراكك الحالي",
+      "customFeatures": {
+        "waiterRequest": "طلب الويتر (النادل)",
+        "billRequest": "طلب الفاتورة",
+        "onlineOrdering": "نظام الطلب أونلاين",
+        "deliveryMaps": "نظام دليفري بالخرائط المتقدم",
+        "newLanguages": "إضافة لغات جديدة (ألماني، فرنسي، هندي)",
+        "onlinePayment": "الدفع أونلاين المتكامل"
+      }
+    },
     "cta": {
       "title": "جاهز لتطوير مطعمك؟",
       "description": "انضم إلى مئات المطاعم التي تحولت للمنيو الذكي. ابدأ تجربتك المجانية اليوم.",
@@ -615,6 +647,11 @@
     "limitReachedDescription": "لقد وصلت للحد الأقصى من القوائم ({current}/{max}) في خطة {plan}. قم بترقية خطتك لإنشاء المزيد من القوائم.",
     "upgradePlan": "ترقية الخطة",
     "close": "إغلاق",
+    "switchMenuLimitTitle": "حد الخطة المجانية",
+    "switchMenuLimitMessage": "تشغيل هذا المنيو سيوقف المنيو النشط الآخر. خطتك الحالية تسمح بمنيو نشط واحد فقط. جدد الاشتراك (Pro) لتشغيل أكثر من منيو معاً.",
+    "switchMenuConfirm": "شغّل هذا المنيو (وإيقاف الآخر)",
+    "selectedMenu": "المنيو المحدد",
+    "switching": "جاري التبديل...",
     "createModal": {
       "title": "إنشاء قائمة جديدة",
       "menuNames": "أسماء القائمة",

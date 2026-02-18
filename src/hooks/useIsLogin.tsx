@@ -5,7 +5,6 @@ import Cookies from "js-cookie";
 import { axiosGet } from "@/shared/axiosCall";
 import { useLocale } from "next-intl";
 
-
 type UserProfile = {
   email: string;
   name: string;
@@ -21,7 +20,6 @@ function useIsLogin() {
   const getUser = useCallback(async () => {
     const response = await axiosGet("/auth/me", locale);
     if (response.status) {
-      console.log(response.data);
       return response.data;
     }
     return null;
@@ -46,7 +44,7 @@ function useIsLogin() {
 
         return () => clearTimeout(time);
       }
-    }
+    };
     checkLogin();
   }, [cookies, dispatch, getUser]);
 

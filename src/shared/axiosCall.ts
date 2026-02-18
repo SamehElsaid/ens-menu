@@ -1,6 +1,11 @@
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import Cookies from "js-cookie";
-import { decryptData, decryptDataApi, encryptData, encryptDataApi } from "./encryption";
+import {
+  decryptData,
+  decryptDataApi,
+  encryptData,
+  encryptDataApi,
+} from "./encryption";
 import { LoginResponse } from "@/types/LoginResponse";
 
 interface ApiResponse<T> {
@@ -23,7 +28,7 @@ const getApiKey = async () => {
     const utcTimestamp = dataTime.fx_dyn;
     const fx_dyn = decryptDataApi(
       utcTimestamp,
-      process.env.NEXT_PUBLIC_SECRET_KEY as string
+      process.env.NEXT_PUBLIC_SECRET_KEY as string,
     );
     return fx_dyn;
   } catch {
@@ -41,7 +46,7 @@ const doRefreshAccessToken = async (): Promise<string | null> => {
     const apiKey = `${process.env.NEXT_PUBLIC_SECRET_KEY}///${utcTime}`;
     const apiKeyEncrypt = encryptDataApi(
       apiKey,
-      process.env.NEXT_PUBLIC_SECRET_KEY as string
+      process.env.NEXT_PUBLIC_SECRET_KEY as string,
     );
 
     const tokenDecrypted = decryptData(authToken) as {
@@ -57,14 +62,10 @@ const doRefreshAccessToken = async (): Promise<string | null> => {
         headers: {
           "X-API-KEY": apiKeyEncrypt,
         },
-      }
+      },
     );
 
-
-    console.log(response.data);
-
     const { accessToken, refreshToken } = response.data as LoginResponse;
-
 
     const newCookies = {
       token: accessToken,
@@ -99,7 +100,7 @@ export const axiosGet = async <T>(
   locale: string,
   token?: string,
   params?: Record<string, unknown>,
-  close?: boolean
+  close?: boolean,
 ): Promise<ApiResponse<T>> => {
   const authToken = Cookies.get("sub") ?? "";
   const tokenDecrypted = decryptData(authToken) as DecryptedToken;
@@ -108,7 +109,7 @@ export const axiosGet = async <T>(
   const apiKey = `${process.env.NEXT_PUBLIC_SECRET_KEY}///${utcTime}`;
   const apiKeyEncrypt = encryptDataApi(
     apiKey,
-    process.env.NEXT_PUBLIC_SECRET_KEY as string
+    process.env.NEXT_PUBLIC_SECRET_KEY as string,
   );
 
   try {
@@ -125,7 +126,7 @@ export const axiosGet = async <T>(
     }
     const fetchData = await axios.get<T>(
       `${process.env.NEXT_PUBLIC_BASE_URL}${url}`,
-      header
+      header,
     );
 
     return { data: fetchData.data, status: true };
@@ -156,7 +157,7 @@ export const axiosPost = async <T, U>(
   locale: string,
   data: T,
   file?: boolean,
-  close?: boolean
+  close?: boolean,
 ) => {
   const authToken = Cookies.get("sub") ?? "";
   const tokenDecrypted = decryptData(authToken) as DecryptedToken;
@@ -170,10 +171,8 @@ export const axiosPost = async <T, U>(
 
   const apiKeyEncrypt = encryptDataApi(
     apiKey,
-    process.env.NEXT_PUBLIC_SECRET_KEY as string
+    process.env.NEXT_PUBLIC_SECRET_KEY as string,
   );
-
-  console.log(apiKeyEncrypt);
 
   if (close) {
     delete headerToken.Authorization;
@@ -190,7 +189,7 @@ export const axiosPost = async <T, U>(
           "Accept-Language": locale,
           "X-API-KEY": apiKeyEncrypt,
         },
-      }
+      },
     );
 
     return { data: fetchData.data as unknown as U, status: true };
@@ -207,7 +206,7 @@ export const axiosPatch = async <T, U>(
   locale: string,
   data: T,
   file?: boolean,
-  close?: boolean
+  close?: boolean,
 ): Promise<ApiResponse<U>> => {
   const authToken = Cookies.get("sub") ?? "";
   const tokenDecrypted = decryptData(authToken) as DecryptedToken;
@@ -221,10 +220,8 @@ export const axiosPatch = async <T, U>(
 
   const apiKeyEncrypt = encryptDataApi(
     apiKey,
-    process.env.NEXT_PUBLIC_SECRET_KEY as string
+    process.env.NEXT_PUBLIC_SECRET_KEY as string,
   );
-
-  console.log(apiKeyEncrypt);
 
   if (close) {
     delete headerToken.Authorization;
@@ -241,7 +238,7 @@ export const axiosPatch = async <T, U>(
           "Accept-Language": locale,
           "X-API-KEY": apiKeyEncrypt,
         },
-      }
+      },
     );
 
     return { data: fetchData.data as unknown as U, status: true };
@@ -263,7 +260,7 @@ export const axiosPatch = async <T, U>(
 // Function to make a DELETE request
 export const axiosDelete = async <T>(
   url: string,
-  locale: string
+  locale: string,
 ): Promise<ApiResponse<T>> => {
   const authToken = Cookies.get("sub") ?? "";
   const tokenDecrypted = decryptData(authToken) as DecryptedToken;
@@ -273,7 +270,7 @@ export const axiosDelete = async <T>(
 
   const apiKeyEncrypt = encryptDataApi(
     apiKey,
-    process.env.NEXT_PUBLIC_SECRET_KEY as string
+    process.env.NEXT_PUBLIC_SECRET_KEY as string,
   );
 
   try {
@@ -285,7 +282,7 @@ export const axiosDelete = async <T>(
           "Accept-Language": locale,
           "X-API-KEY": apiKeyEncrypt,
         },
-      }
+      },
     );
 
     return { data: fetchData.data, status: true };
@@ -299,12 +296,11 @@ export const axiosDelete = async <T>(
 
 //!  PATCH request API
 
-
 // ! Get from getServerSideProps
 export const getFromGetServerSideProps = async <T>(
   url: string,
   newHeaders: AxiosRequestConfig = {},
-  locale: string
+  locale: string,
 ): Promise<ApiResponse<T>> => {
   const headers = { ...newHeaders.headers, "Accept-Language": locale };
 
@@ -313,7 +309,7 @@ export const getFromGetServerSideProps = async <T>(
       `${process.env.NEXT_PUBLIC_BASE_URL}/${url}`,
       {
         headers,
-      }
+      },
     );
 
     return { data: fetchData.data, status: true };

@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { decryptData } from "./shared/encryption";
 
-
 interface DecryptedToken {
   role: string;
   [key: string]: unknown;
@@ -16,24 +15,17 @@ export default function middleware(request: NextRequest) {
   const token = request.cookies.get("sub");
   const pathname = url.pathname.replace(/^\/(en|ar)/, "");
 
-
-
-
-  const tokenDecrypted = token ? decryptData(token?.value ?? "") as DecryptedToken : null;
-
-
-  console.log(tokenDecrypted);
-
-
+  const tokenDecrypted = token
+    ? (decryptData(token?.value ?? "") as DecryptedToken)
+    : null;
 
   // Stop Login , Register , Forgot Password , Reset Password , Verify Email , Verify Phone
-  if (pathname.startsWith("/auth") ) {
+  if (pathname.startsWith("/auth")) {
     if (tokenDecrypted) {
       url.pathname = "/";
       return NextResponse.redirect(url);
     }
   }
-
 
   if (pathname.startsWith("/admin")) {
     if (tokenDecrypted?.role !== "admin") {
@@ -43,14 +35,11 @@ export default function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith("/dashboard")) {
-    
     if (!tokenDecrypted) {
       url.pathname = "/unauthorized";
       return NextResponse.redirect(url);
     }
   }
-
-
 
   return createMiddleware(routing)(request);
 }
