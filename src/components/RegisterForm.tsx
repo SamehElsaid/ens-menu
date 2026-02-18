@@ -9,11 +9,24 @@ import { registerSchema, RegisterSchema } from "@/schemas/registerSchema";
 import LinkTo from "./Global/LinkTo";
 import CustomBtn from "./Custom/CustomBtn";
 import { useState } from "react";
-import HCaptcha from "@hcaptcha/react-hcaptcha";
+import dynamic from "next/dynamic";
 import { axiosPost } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import GoogleSignInButton from "@/components/Auth/GoogleSignInButton";
+
+interface HCaptchaProps {
+  sitekey: string;
+  onVerify: () => void;
+  onExpire?: () => void;
+  onError?: () => void;
+  languageOverride?: string;
+}
+
+const HCaptcha = dynamic<HCaptchaProps>(
+  () => import("@hcaptcha/react-hcaptcha"),
+  { ssr: false },
+);
 
 export default function RegisterForm() {
   const t = useTranslations("");
