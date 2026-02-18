@@ -18,7 +18,7 @@ export const registerSchema = (t: ReturnType<typeof useTranslations<"">>) =>
       .string()
       .required(t("auth.passwordRequired"))
       .min(8, t("auth.passwordMinLength"))
-      .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, t("auth.passwordInvalid")),
+      .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/, t("auth.passwordInvalid")),
     confirmPassword: yup
       .string()
       .required(t("auth.confirmPasswordRequired"))

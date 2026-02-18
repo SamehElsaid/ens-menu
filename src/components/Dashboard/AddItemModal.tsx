@@ -112,12 +112,31 @@ export default function AddItemModal({
 
     useEffect(() => {
         if (item) {
-            const nameVal = item.name ?? "";
+            // دعم كل من الحقول camelCase (nameAr/nameEn) و snake_case (name_ar/name_en) القادمة من الـ API
+            const snake = item as Item & {
+                name_ar?: string;
+                name_en?: string;
+                description_ar?: string;
+                description_en?: string;
+            };
+
+            const fallbackName = item.name ?? snake.name_en ?? snake.name_ar ?? "";
+
             reset({
-                nameAr: item.nameAr ?? nameVal,
-                nameEn: item.nameEn ?? nameVal,
-                descriptionAr: item.descriptionAr ?? item.description ?? "",
-                descriptionEn: item.descriptionEn ?? item.description ?? "",
+                nameAr: item.nameAr ?? snake.name_ar ?? fallbackName,
+                nameEn: item.nameEn ?? snake.name_en ?? fallbackName,
+                descriptionAr:
+                    item.descriptionAr ??
+                    snake.description_ar ??
+                    item.description ??
+                    snake.description_en ??
+                    "",
+                descriptionEn:
+                    item.descriptionEn ??
+                    snake.description_en ??
+                    item.description ??
+                    snake.description_ar ??
+                    "",
                 categoryId: String(item.categoryId ?? ""),
                 price: item.price != null ? String(item.price) : "",
                 originalPrice: item.originalPrice != null ? String(item.originalPrice) : "",

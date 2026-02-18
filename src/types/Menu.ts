@@ -71,9 +71,14 @@ export interface Item {
   name?: string;
   nameAr?: string;
   nameEn?: string;
+  // الحقول كما تأتي من الـ API بصيغة snake_case (للاستعمال في نماذج التعديل)
+  name_ar?: string;
+  name_en?: string;
   description?: string;
   descriptionAr?: string;
   descriptionEn?: string;
+  description_ar?: string;
+  description_en?: string;
   categoryId: number;
   /** من الـ API قد يكون category نصاً أو كائناً */
   category?: ItemCategoryRef | string;
