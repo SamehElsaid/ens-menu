@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { axiosDelete } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import { Item } from "@/types/Menu";
@@ -26,24 +26,25 @@ export default function DeleteItemConfirm({
     const t = useTranslations("Items");
     const [isDeleting, setIsDeleting] = useState(false);
     const [confirmName, setConfirmName] = useState("");
-
+    const locale = useLocale();
     const isConfirmMatch = confirmName.trim() === localeName.trim();
+    
 
     const handleDelete = async () => {
         try {
             setIsDeleting(true);
             const result = await axiosDelete<unknown>(
                 `/menus/${menuId}/items/${item.id}`,
-                localeName
+                locale
             );
             if (result.status) {
                 toast.success(t("deleteSuccess"));
                 onDeleted?.();
                 onClose();
-            } else {
-                toast.error(t("deleteError"));
             }
-        } catch {
+
+            console.log(result);
+        } catch  {
             toast.error(t("deleteError"));
         } finally {
             setIsDeleting(false);
