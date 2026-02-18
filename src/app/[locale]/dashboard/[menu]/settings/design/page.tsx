@@ -79,7 +79,7 @@ export default function DesignPage() {
           {templatesInfo.map((template) => {
             const isActive = template.id === activeTemplateId;
             const isNew = template.isNew;
-            const linkView = template.slug + process.env.NEXT_PUBLIC_MENU_URL;
+            const linkView = "https://" + template.slug + process.env.NEXT_PUBLIC_MENU_URL;
             const editLink = `/dashboard/${menu?.id}/settings/design/${template.slug}`;
 
             return (
