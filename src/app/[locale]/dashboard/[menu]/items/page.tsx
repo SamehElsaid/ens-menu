@@ -287,7 +287,7 @@ export default function ItemsPage() {
         headerName: t("action"),
         width: 120,
         sortable: false,
-        pinned: "right",
+        pinned: locale === "ar" ? "left" : "right",
         cellRenderer: (params: ICellRendererParams<Item>) => {
           const item = params.data;
           if (!item) return null;

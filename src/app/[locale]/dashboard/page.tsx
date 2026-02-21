@@ -317,14 +317,14 @@ export default function DashboardPage() {
         {menus.map((menu, index) => (
           <div
             key={`menu-${menu.id}-${index}`}
-            className={`bg-white dark:bg-slate-900 rounded-2xl border shadow-sm overflow-hidden transition-all duration-300 hover:shadow-xl dark:hover:shadow-slate-950/40 ${
+            className={`bg-white flex flex-col dark:bg-slate-900 rounded-2xl border shadow-sm overflow-hidden transition-all duration-300 hover:shadow-xl dark:hover:shadow-slate-950/40 ${
               menu.isActive
                 ? "border-slate-100 dark:border-slate-800 hover:border-primary/20 dark:hover:border-primary/40"
                 : "border-amber-100/80 dark:border-amber-900/40 bg-slate-50/30 dark:bg-amber-950/10"
             }`}
           >
             {/* Card Header with Logo */}
-            <div className="p-6 pb-3">
+            <div className="p-6 pb-3 grow flex flex-col">
               <div className="flex items-start gap-4">
                 {/* Logo */}
                 <div className="w-16 h-16 rounded-xl bg-primary/5 dark:bg-primary/15 border border-primary/10 dark:border-primary/25 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-white dark:ring-slate-800 shadow-sm">
@@ -342,11 +342,11 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Menu Info */}
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 grow flex flex-col">
                   <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 truncate mb-1">
                     {getMenuName(menu)}
                   </h3>
-                  <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-2 flex-wrap ">
                     <span
                       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
                         menu.isActive
@@ -414,7 +414,7 @@ export default function DashboardPage() {
               )}
 
               {/* Created & Updated dates */}
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400 dark:text-slate-3  00 mt-3">
+              <div className="flex flex-wrap items-center mt-auto gap-x-4 gap-y-1 text-xs text-slate-400 dark:text-slate-3  00 ">
                 {menu.createdAt && (
                   <span className="flex items-center gap-1.5">
                     <IoCalendarOutline className="text-sm shrink-0" />

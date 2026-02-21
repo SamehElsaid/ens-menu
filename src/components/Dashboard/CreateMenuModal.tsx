@@ -167,7 +167,7 @@ export default function CreateMenuModal({
         toast.success(t("createSuccess"));
 
         if (onMenuCreated) {
-          onMenuCreated(result.data);
+          onMenuCreated(menuData as Menu);
           if (onRefresh) {
             onRefresh();
           }
