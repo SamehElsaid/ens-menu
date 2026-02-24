@@ -318,11 +318,10 @@ export default function DashboardPage() {
         {menus.map((menu, index) => (
           <div
             key={`menu-${menu.id}-${index}`}
-            className={`bg-white flex flex-col dark:bg-slate-900 rounded-2xl border shadow-sm overflow-hidden transition-all duration-300 hover:shadow-xl dark:hover:shadow-slate-950/40 ${
-              menu.isActive
+            className={`bg-white flex flex-col dark:bg-slate-900 rounded-2xl border shadow-sm overflow-hidden transition-all duration-300 hover:shadow-xl dark:hover:shadow-slate-950/40 ${menu.isActive
                 ? "border-slate-100 dark:border-slate-800 hover:border-primary/20 dark:hover:border-primary/40"
                 : "border-amber-100/80 dark:border-amber-900/40 bg-slate-50/30 dark:bg-amber-950/10"
-            }`}
+              }`}
           >
             {/* Card Header with Logo */}
             <div className="p-6 pb-3 grow flex flex-col">
@@ -349,11 +348,10 @@ export default function DashboardPage() {
                   </h3>
                   <div className="flex items-center gap-2 flex-wrap ">
                     <span
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                        menu.isActive
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${menu.isActive
                           ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
                           : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
-                      }`}
+                        }`}
                     >
                       <IoEllipseSharp
                         className={`text-[8px] ${menu.isActive ? "text-green-800 dark:text-green-400" : "text-amber-500 dark:text-amber-400"}`}
@@ -373,11 +371,10 @@ export default function DashboardPage() {
                     title={
                       menu.isActive ? t("menuCard.pause") : t("menuCard.play")
                     }
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition-colors disabled:opacity-50 disabled:pointer-events-none ${
-                      menu.isActive
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition-colors disabled:opacity-50 disabled:pointer-events-none ${menu.isActive
                         ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800 dark:hover:bg-amber-900/35"
                         : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800 dark:hover:bg-emerald-900/35"
-                    }`}
+                      }`}
                   >
                     {togglingId === menu.id ? (
                       <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />

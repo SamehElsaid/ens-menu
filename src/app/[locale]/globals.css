@@ -882,3 +882,7 @@ input, textarea {
 .react-datepicker__day-name{
   font-size: 8px !important;
 }
+
+.youtube-player-container div{
+  height: 100% !important;
+}

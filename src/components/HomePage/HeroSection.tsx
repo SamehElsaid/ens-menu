@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
 import {
@@ -10,6 +10,7 @@ import {
   FiShoppingCart as ShoppingCart,
 } from "react-icons/fi";
 import { BsQrCode } from "react-icons/bs";
+import YouTube, { type YouTubeProps, type YouTubeEvent } from "react-youtube";
 import { menuItemsData } from "@/modules/menuItems";
 import { MenuItem } from "@/types/types";
 import Background from "../Global/Background";
@@ -148,6 +149,31 @@ const HeroSection = () => {
   const isRTL = locale === "ar";
   const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
   const [isVideoOpen, setIsVideoOpen] = useState(false);
+  const playerRef = useRef<YouTubeEvent["target"] | null>(null);
+
+  const videoOpts: YouTubeProps["opts"] = {
+    width: "100%",
+    height: "100%",
+    playerVars: {
+      autoplay: 0,
+    },
+  };
+
+  const handleVideoReady: YouTubeProps["onReady"] = (event) => {
+    playerRef.current = event.target;
+    if (isVideoOpen) {
+      event.target.playVideo();
+    }
+  };
+
+  useEffect(() => {
+    if (!playerRef.current) return;
+    if (isVideoOpen) {
+      playerRef.current.playVideo();
+    } else {
+      playerRef.current.pauseVideo();
+    }
+  }, [isVideoOpen]);
 
   return (
     <section className="relative pt-44 pb-24 overflow-hidden min-h-[95vh] flex items-center bg-white dark:bg-[#0d1117]">
@@ -205,26 +231,27 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {isVideoOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="relative w-full max-w-4xl mx-4 aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
-            <button
-              type="button"
-              onClick={() => setIsVideoOpen(false)}
-              className="absolute top-3 right-3 z-10 rounded-full bg-black/70 text-white px-3 py-1 text-sm hover:bg-black"
-            >
-              ✕
-            </button>
-            <iframe
-              className="w-full h-full"
-              src="https://www.youtube.com/embed/C1Tsud95BTE?si=OWTZGTvYHy8u2-f5"
-              title="YouTube video player"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
-          </div>
+      <div
+        className={`fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm transition-opacity duration-200 ${
+          isVideoOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <div className="relative youtube-player-container w-full max-w-4xl mx-4 aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
+          <button
+            type="button"
+            onClick={() => setIsVideoOpen(false)}
+            className="absolute top-3 right-3 z-10 rounded-full bg-black/70 text-white px-3 py-1 text-sm hover:bg-black"
+          >
+            ✕
+          </button>
+          <YouTube
+            videoId="C1Tsud95BTE"
+            opts={videoOpts}
+            className="w-full h-full"
+            onReady={handleVideoReady}
+          />
         </div>
-      )}
+      </div>
     </section>
   );
 };
