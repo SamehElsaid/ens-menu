@@ -14,6 +14,7 @@ import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import GoogleSignInButton from "@/components/Auth/GoogleSignInButton";
+import Loader from "./Global/Loader";
 
 let emailCheckTimeout: ReturnType<typeof setTimeout> | null = null;
 let lastCheckedAvailableEmail: string | null = null;
@@ -115,6 +116,7 @@ export default function RegisterForm() {
   };
 
   const [loading, setLoading] = useState(false);
+  const [loadingLoader, setLoadingLoader] = useState(true);
   const [recaptchaVerified, setRecaptchaVerified] = useState(false);
   const router = useRouter();
 
@@ -238,20 +240,28 @@ export default function RegisterForm() {
       />
 
       <div className="mt-4">
-        <ReCAPTCHA
-          sitekey="6LcCsnYsAAAAABcvqRj1Rvg5O8KuSrSPSV6vBd1d"
+        <div className="h-[78px] relative">
+          {loadingLoader && <div className="absolute z- inset-0 flex items-center justify-center"><Loader /></div>}
 
-          hl={locale}
-          onChange={(token: string | null) => {
-            setRecaptchaVerified(!!token);
-          }}
-          onExpired={() => {
-            setRecaptchaVerified(false);
-          }}
-          onErrored={() => {
-            setRecaptchaVerified(false);
-          }}
-        />
+          <div className={`${loadingLoader ? "opacity-0" : "opacity-100"} transition-all duration-300`}>
+            <ReCAPTCHA
+              onLoadCapture={() => {
+                setLoadingLoader(false);
+              }}
+              sitekey="6LfZunYsAAAAAChMIIbG-lhkDy6uMnAgm9cfZnrN"
+              hl={locale}
+              onChange={(token: string | null) => {
+                setRecaptchaVerified(!!token);
+              }}
+              onExpired={() => {
+                setRecaptchaVerified(false);
+              }}
+              onErrored={() => {
+                setRecaptchaVerified(false);
+              }}
+            />
+          </div>
+        </div>
       </div>
 
       <div className="flex w-full mt-8">
