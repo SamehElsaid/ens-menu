@@ -96,11 +96,10 @@ const InteractivePhone = () => {
                 {categories.map((cat, i) => (
                   <div
                     key={i}
-                    className={`px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap ${
-                      i === 0
+                    className={`px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap ${i === 0
                         ? "bg-purple-600 text-white shadow-md"
                         : "bg-slate-50 text-slate-500 border border-slate-100"
-                    }`}
+                      }`}
                   >
                     {cat}
                   </div>
@@ -148,15 +147,15 @@ const HeroSection = () => {
   const locale = useLocale();
   const isRTL = locale === "ar";
   const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
 
   return (
     <section className="relative pt-44 pb-24 overflow-hidden min-h-[95vh] flex items-center bg-white dark:bg-[#0d1117]">
       <Background />
       <div className="container mx-auto px-6 relative z-10">
         <div
-          className={`flex flex-col lg:flex-row items-center gap-16 lg:gap-24 ${
-            isRTL ? "lg:flex-row-reverse" : ""
-          }`}
+          className={`flex flex-col lg:flex-row items-center gap-16 lg:gap-24 ${isRTL ? "lg:flex-row-reverse" : ""
+            }`}
         >
           <div className={`lg:w-1/2  order-2 `}>
             <div className="inline-block px-5 py-2 rounded-full bg-purple-50 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 font-bold text-sm mb-8 border border-purple-100 dark:border-purple-500/30 shadow-sm">
@@ -169,16 +168,14 @@ const HeroSection = () => {
               </span>
             </h1>
             <p
-              className={`text-lg  text-slate-600 dark:text-slate-300 mb-10 leading-relaxed max-w-xl font-medium ${
-                isRTL ? "ml-auto" : ""
-              }`}
+              className={`text-lg  text-slate-600 dark:text-slate-300 mb-10 leading-relaxed max-w-xl font-medium ${isRTL ? "ml-auto" : ""
+                }`}
             >
               {t("description")}
             </p>
             <div
-              className={`flex flex-wrap items-center gap-5 ${
-                isRTL ? "justify-end" : "justify-start"
-              }`}
+              className={`flex flex-wrap items-center gap-5 ${isRTL ? "justify-end" : "justify-start"
+                }`}
             >
               <div>
                 <Link
@@ -189,7 +186,11 @@ const HeroSection = () => {
                   <ArrowIcon size={24} />
                 </Link>
               </div>
-              <button className="px-10 py-5 rounded-full border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-md hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+              <button
+                type="button"
+                onClick={() => setIsVideoOpen(true)}
+                className="px-10 py-5 rounded-full border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-md hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+              >
                 {t("watchDemo")}
               </button>
             </div>
@@ -203,6 +204,27 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
+
+      {isVideoOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="relative w-full max-w-4xl mx-4 aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setIsVideoOpen(false)}
+              className="absolute top-3 right-3 z-10 rounded-full bg-black/70 text-white px-3 py-1 text-sm hover:bg-black"
+            >
+              ✕
+            </button>
+            <iframe
+              className="w-full h-full"
+              src="https://www.youtube.com/embed/C1Tsud95BTE?si=OWTZGTvYHy8u2-f5"
+              title="YouTube video player"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      )}
     </section>
   );
 };

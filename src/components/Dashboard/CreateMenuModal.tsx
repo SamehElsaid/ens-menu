@@ -35,7 +35,6 @@ interface CreateMenuModalProps {
 
 export default function CreateMenuModal({
   onClose,
-  onMenuCreated,
   onRefresh,
 }: CreateMenuModalProps) {
   const t = useTranslations("Menus.createModal");
@@ -166,11 +165,8 @@ export default function CreateMenuModal({
       if (result.status && result.data) {
         toast.success(t("createSuccess"));
 
-        if (onMenuCreated) {
-          onMenuCreated(menuData as Menu);
-          if (onRefresh) {
-            onRefresh();
-          }
+        if (onRefresh) {
+          onRefresh();
         }
 
         onClose();

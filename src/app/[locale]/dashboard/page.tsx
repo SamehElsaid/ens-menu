@@ -273,6 +273,7 @@ export default function DashboardPage() {
           <CreateMenuModal
             onClose={() => setShowCreateModal(false)}
             onMenuCreated={handleMenuCreated}
+            onRefresh={() => setRefreshing(refreshing + 1)}
           />
         )}
 
