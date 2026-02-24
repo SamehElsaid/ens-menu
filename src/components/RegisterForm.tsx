@@ -9,7 +9,7 @@ import { registerSchema, RegisterSchema } from "@/schemas/registerSchema";
 import LinkTo from "./Global/LinkTo";
 import CustomBtn from "./Custom/CustomBtn";
 import { useState } from "react";
-import HCaptcha from "@hcaptcha/react-hcaptcha";
+import ReCAPTCHA from "react-google-recaptcha";
 import { axiosPost } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
@@ -169,16 +169,17 @@ export default function RegisterForm() {
       />
 
       <div className="mt-4">
-        <HCaptcha
-          languageOverride={locale}
-          sitekey="29aec278-e602-4efa-8578-f8144344a312"
-          onVerify={() => {
-            setRecaptchaVerified(true);
+        <ReCAPTCHA
+          sitekey="6LcCsnYsAAAAABcvqRj1Rvg5O8KuSrSPSV6vBd1d"
+
+          hl={locale}
+          onChange={(token: string | null) => {
+            setRecaptchaVerified(!!token);
           }}
-          onExpire={() => {
+          onExpired={() => {
             setRecaptchaVerified(false);
           }}
-          onError={() => {
+          onErrored={() => {
             setRecaptchaVerified(false);
           }}
         />
