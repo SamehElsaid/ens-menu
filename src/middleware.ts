@@ -13,7 +13,7 @@ export default function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
 
   const token = request.cookies.get("sub");
-  const pathname = url.pathname.replace(/^\/(en|ar)/, "");
+  const pathname = url.pathname.replace(/^\/(ar|en)/, "");
 
   const tokenDecrypted = token
     ? (decryptData(token?.value ?? "") as DecryptedToken)

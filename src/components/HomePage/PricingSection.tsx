@@ -130,7 +130,7 @@ export default function PricingSection() {
                     0
                   </span>
                   <span className="text-slate-500 dark:text-slate-400 text-sm ml-1">
-                    {t("perYear")}
+                    {t("currency")} {t("perYear")}
                   </span>
                 </div>
                 <ul className="space-y-3 flex-1">
@@ -180,7 +180,7 @@ export default function PricingSection() {
                     {proPlan.priceYearly ?? proPlan.priceMonthly * 12}
                   </span>
                   <span className="text-slate-500 dark:text-slate-400 text-sm ml-1">
-                    {t("perYear")}
+                    {t("currency")} {t("perYear")}
                   </span>
                 </div>
                 <ul className="space-y-3 flex-1">

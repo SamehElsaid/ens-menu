@@ -8,15 +8,82 @@ import { useLocale, useTranslations } from "next-intl";
 import { registerSchema, RegisterSchema } from "@/schemas/registerSchema";
 import LinkTo from "./Global/LinkTo";
 import CustomBtn from "./Custom/CustomBtn";
-import { useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
-import { axiosPost } from "@/shared/axiosCall";
+import { useCallback, useState } from "react";
+import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import GoogleSignInButton from "@/components/Auth/GoogleSignInButton";
 
+let emailCheckTimeout: ReturnType<typeof setTimeout> | null = null;
+let lastCheckedAvailableEmail: string | null = null;
+let phoneCheckTimeout: ReturnType<typeof setTimeout> | null = null;
+let lastCheckedAvailablePhone: string | null = null;
+
 export default function RegisterForm() {
   const t = useTranslations("");
+  const locale = useLocale();
+
+  const checkEmailAvailableDebounced = useCallback(
+    (email: string): Promise<boolean> =>
+      new Promise((resolve) => {
+        if (emailCheckTimeout) clearTimeout(emailCheckTimeout);
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          resolve(true);
+          return;
+        }
+        if (lastCheckedAvailableEmail === email) {
+          resolve(true);
+          return;
+        }
+        emailCheckTimeout = setTimeout(async () => {
+          emailCheckTimeout = null;
+          const res = await axiosGet<{ isAvailable?: boolean }>(
+            "/auth/check-availability",
+            locale,
+            undefined,
+            { email },
+            true
+          );
+          const available =
+            res.status === true && res.data?.isAvailable === true;
+          if (available) lastCheckedAvailableEmail = email;
+          resolve(available);
+        }, 400);
+      }),
+    [locale]
+  );
+
+  const checkPhoneAvailableDebounced = useCallback(
+    (phone: string): Promise<boolean> =>
+      new Promise((resolve) => {
+        if (phoneCheckTimeout) clearTimeout(phoneCheckTimeout);
+        if (!phone || !/^\+?[0-9]{8,15}$/.test(phone)) {
+          resolve(true);
+          return;
+        }
+        if (lastCheckedAvailablePhone === phone) {
+          resolve(true);
+          return;
+        }
+        phoneCheckTimeout = setTimeout(async () => {
+          phoneCheckTimeout = null;
+          const res = await axiosGet<{ isAvailable?: boolean }>(
+            "/auth/check-availability",
+            locale,
+            undefined,
+            { phoneNumber: phone },
+            true
+          );
+          const available =
+            res.status === true && res.data?.isAvailable === true;
+          if (available) lastCheckedAvailablePhone = phone;
+          resolve(available);
+        }, 400);
+      }),
+    [locale]
+  );
+
   const {
     control,
     handleSubmit,
@@ -30,7 +97,10 @@ export default function RegisterForm() {
       confirmPassword: "",
     },
     resolver: yupResolver(
-      registerSchema(t),
+      registerSchema(t, {
+        checkEmailAvailable: checkEmailAvailableDebounced,
+        checkPhoneAvailable: checkPhoneAvailableDebounced,
+      }),
     ) as unknown as Resolver<RegisterSchema>,
     mode: "onChange",
   });
@@ -44,7 +114,6 @@ export default function RegisterForm() {
     register: t("auth.register"),
   };
 
-  const locale = useLocale();
   const [loading, setLoading] = useState(false);
   const [recaptchaVerified, setRecaptchaVerified] = useState(false);
   const router = useRouter();
