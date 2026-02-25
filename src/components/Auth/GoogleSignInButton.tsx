@@ -13,6 +13,7 @@ import { axiosPost } from "@/shared/axiosCall";
 import { encryptData } from "@/shared/encryption";
 import { LoginResponse } from "@/types/LoginResponse";
 
+// Must be set at BUILD time in production (e.g. in Vercel/Netlify env vars).
 const hasGoogleClientId = !!(
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
   process.env.NEXT_PUBLIC_GOOGLE_AUTH_URL

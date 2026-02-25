@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { axiosGet } from "@/shared/axiosCall";
 import { FaSpinner } from "react-icons/fa";
 import { HiCheck, HiOutlineChat } from "react-icons/hi";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 export type ApiPlan = {
   id: number;

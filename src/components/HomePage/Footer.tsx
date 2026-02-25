@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { Logo } from "@/components/Global/Logo";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { getContactInfo, getNavLinks } from "@/modules/Footer";
 
 const FooterSection = () => {

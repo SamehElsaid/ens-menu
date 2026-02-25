@@ -8,6 +8,7 @@ import { axiosGet } from "@/shared/axiosCall";
 import AddCategoryModal from "@/components/Dashboard/AddCategoryModal";
 import DeleteCategoryConfirm from "@/components/Dashboard/DeleteCategoryConfirm";
 import DataTable from "@/components/Custom/DataTable";
+import LinkTo from "@/components/Global/LinkTo";
 import LoadImage from "@/components/ImageLoad";
 import { Category } from "@/types/Menu";
 import {
@@ -110,7 +111,9 @@ export default function CategoriesPage() {
                   height={48}
                 />
               ) : (
-                <span className="text-slate-400 dark:text-slate-500 text-lg">—</span>
+                <span className="text-slate-400 dark:text-slate-500 text-lg">
+                  —
+                </span>
               )}
             </div>
           );
@@ -200,16 +203,24 @@ export default function CategoriesPage() {
             {t("subtitle")}
           </p>
         </div>
-        <button
-          onClick={() => {
-            setEditingCategory(null);
-            setShowAddModal(true);
-          }}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold shadow-lg hover:opacity-90 transition-all hover:scale-[1.02] active:scale-[0.98]"
-        >
-          <IoAddCircleOutline className="text-xl" />
-          {t("addCategory")}
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <LinkTo
+            href={`/dashboard/${menuId}`}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-primary/30 dark:hover:border-primary/50 text-sm font-medium transition-all"
+          >
+            {locale === "ar" ? "الرجوع للصفحة الرئيسية" : "Back to main page"}
+          </LinkTo>
+          <button
+            onClick={() => {
+              setEditingCategory(null);
+              setShowAddModal(true);
+            }}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold shadow-lg hover:opacity-90 transition-all hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <IoAddCircleOutline className="text-xl" />
+            {t("addCategory")}
+          </button>
+        </div>
       </div>
 
       <DataTable<Category>
