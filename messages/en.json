@@ -1,4 +1,23 @@
 {
+  "meta": {
+    "siteName": "ENSmenu",
+    "home": {
+      "title": "ENSmenu - Digital Menus for Restaurants & Cafes",
+      "description": "Create beautiful digital menus for your restaurant or cafe. Easy to use, mobile-friendly menus that your customers will love.",
+      "keywords": "digital menu, restaurant menu, cafe menu, QR code menu, online menu, food menu, table ordering, contactless menu, menu builder, ENSmenu"
+    },
+    "auth": {
+      "loginTitle": "Login | ENSmenu",
+      "loginDescription": "Sign in to your ENSmenu account to manage your digital menus.",
+      "loginKeywords": "login, sign in, ENSmenu account, digital menu login",
+      "registerTitle": "Create Account | ENSmenu",
+      "registerDescription": "Create your ENSmenu account and start building your digital menu.",
+      "registerKeywords": "register, create account, sign up, ENSmenu, digital menu",
+      "resetPasswordTitle": "Reset Password | ENSmenu",
+      "resetPasswordDescription": "Reset your ENSmenu account password.",
+      "resetPasswordKeywords": "reset password, forgot password, recover account, ENSmenu"
+    }
+  },
   "header": {
     "home": "Home",
     "about": "About",

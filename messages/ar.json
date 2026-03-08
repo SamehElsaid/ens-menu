@@ -1,4 +1,23 @@
 {
+  "meta": {
+    "siteName": "ENSmenu",
+    "home": {
+      "title": "ENSmenu - قوائم رقمية للمطاعم والمقاهي",
+      "description": "أنشئ قوائم رقمية جميلة لمطعمك أو مقهاك. سهلة الاستخدام ومتوافقة مع الجوال.",
+      "keywords": "قائمة رقمية، قائمة مطعم، قائمة مقهى، قائمة QR، قائمة طعام، طلب من الطاولة، قائمة بدون تلامس، منشئ قوائم، ENSmenu"
+    },
+    "auth": {
+      "loginTitle": "تسجيل الدخول | ENSmenu",
+      "loginDescription": "سجّل الدخول إلى حساب ENSmenu لإدارة قوائمك الرقمية.",
+      "loginKeywords": "تسجيل الدخول، دخول، حساب ENSmenu، قائمة رقمية",
+      "registerTitle": "إنشاء حساب | ENSmenu",
+      "registerDescription": "أنشئ حساب ENSmenu وابدأ ببناء قائمتك الرقمية.",
+      "registerKeywords": "تسجيل، إنشاء حساب، ENSmenu، قائمة رقمية",
+      "resetPasswordTitle": "إعادة تعيين كلمة المرور | ENSmenu",
+      "resetPasswordDescription": "إعادة تعيين كلمة مرور حساب ENSmenu.",
+      "resetPasswordKeywords": "إعادة تعيين كلمة المرور، استعادة الحساب، ENSmenu"
+    }
+  },
   "header": {
     "home": "الرئيسية",
     "about": "من نحن",

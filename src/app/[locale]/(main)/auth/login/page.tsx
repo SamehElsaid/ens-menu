@@ -1,8 +1,28 @@
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { buildSeoMetadata } from "@/lib/seo";
 import CustomLogo from "@/components/Custom/CustomLogo";
 import LoginForm from "@/components/LoginForm";
 import Card from "@/components/ui/Card";
 import { useTranslations } from "next-intl";
-export default function RegisterIndexPage() {
+
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "meta" });
+  return buildSeoMetadata({
+    locale,
+    path: "auth/login",
+    title: t("auth.loginTitle"),
+    description: t("auth.loginDescription"),
+    keywords: t("auth.loginKeywords"),
+    siteName: t("siteName"),
+    robots: "noindex, nofollow",
+  });
+}
+
+export default function LoginPage() {
   const t = useTranslations("");
 
   return (

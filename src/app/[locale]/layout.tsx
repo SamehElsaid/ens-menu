@@ -14,7 +14,10 @@ import "swiper/css/navigation";
 import "swiper/css/free-mode";
 import "react-lazy-load-image-component/src/effects/blur.css";
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+
 export const metadata: Metadata = {
+  metadataBase: appUrl ? new URL(appUrl) : undefined,
   title: "ENSmenu",
   description:
     "ENSmenu is a platform for creating digital menus for restaurants and cafes",
