@@ -19,6 +19,10 @@ interface MenusResponse {
   categoriesCount: number;
   itemsCount: number;
   views: number;
+  staffCount?: number;
+  tablesCount?: number;
+  menuStaff?: unknown[];
+  menuTables?: unknown[];
 }
 export default function ParentLayout({ children }: ParentLayoutProps) {
   const segment = useSelectedLayoutSegment();
@@ -37,6 +41,10 @@ export default function ParentLayout({ children }: ParentLayoutProps) {
               categoriesCount: res.data?.categoriesCount,
               itemsCount: res.data?.itemsCount,
               views: res.data?.views,
+              staffCount: res.data?.staffCount,
+              tablesCount: res.data?.tablesCount,
+              menuStaff: res.data?.menuStaff,
+              menuTables: res.data?.menuTables,
             } as unknown as Menu),
           );
         }

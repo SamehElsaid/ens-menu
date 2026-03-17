@@ -61,7 +61,7 @@ function Header() {
 
   const navLinks = homeLinks.map((link) => ({
     name: t(link.title),
-    href: `/${locale}${link.href === "/" ? "" : link.href}`,
+    href: `#${link.href}`,
     icon: link.icon,
   }));
 

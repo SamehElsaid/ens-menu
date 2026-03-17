@@ -21,6 +21,7 @@
   "header": {
     "home": "Home",
     "about": "About",
+    "pricing": "Pricing",
     "features": "Features",
     "team": "How It Works",
     "faq": "FAQ",
@@ -1419,7 +1420,7 @@
       "createError": "Failed to create administrator"
     }
   },
-    "adminPlans": {
+  "adminPlans": {
     "title": "Plans Management",
     "subtitle": "View and edit subscription plans",
     "back": "Back",
