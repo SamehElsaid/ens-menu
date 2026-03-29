@@ -4,6 +4,28 @@ export interface WorkHours {
     close: string;
   };
 }
+
+export interface MenuStaffMember {
+  id: number;
+  menuId: number;
+  name: string;
+  role?: string;
+  phone?: string;
+  email?: string;
+  isActive: boolean;
+  createdAt?: string;
+  [key: string]: unknown;
+}
+
+export interface MenuTable {
+  id: number;
+  menuId: number;
+  tableNumber: string;
+  seats?: number;
+  isActive: boolean;
+  createdAt?: string;
+  [key: string]: unknown;
+}
 export interface Menu {
   id: number;
   nameAr: string;
@@ -15,6 +37,10 @@ export interface Menu {
   categoriesCount: number;
   itemsCount: number;
   views: number;
+  staffCount?: number;
+  tablesCount?: number;
+  menuStaff?: MenuStaffMember[];
+  menuTables?: MenuTable[];
   logo?: string;
   currency: string;
   isActive: boolean;

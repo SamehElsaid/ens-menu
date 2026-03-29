@@ -5,6 +5,10 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
+html {
+  scroll-behavior: smooth;
+}
+
 :root {
   /* Modern palette */
   /* --primary: #06bed6; */

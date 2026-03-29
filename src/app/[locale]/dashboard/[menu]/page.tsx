@@ -87,6 +87,12 @@ export default function DashboardMenuPage() {
     : "";
 
   useEffect(() => {
+    if (!menu) return;
+    console.log("menuStaff:", menu.menuStaff);
+    console.log("menuTables:", menu.menuTables);
+  }, [menu]);
+
+  useEffect(() => {
     if (!menuSlugOrId) return;
     const fetchActivity = async () => {
       setActivityLoading(true);
