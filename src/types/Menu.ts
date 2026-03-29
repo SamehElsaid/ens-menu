@@ -99,6 +99,28 @@ export interface Item {
   [key: string]: unknown;
 }
 
+export interface MenuTable {
+  id: number;
+  menuId: number;
+  tableNumber: string;
+  seats?: number;
+  isActive: boolean;
+  createdAt?: string;
+  [key: string]: unknown;
+}
+
+export interface MenuStaff {
+  id: number;
+  menuId: number;
+  name: string;
+  role?: string;
+  phone?: string;
+  email?: string;
+  isActive: boolean;
+  createdAt?: string;
+  [key: string]: unknown;
+}
+
 export interface Advertisement {
   id?: number;
   title?: string;

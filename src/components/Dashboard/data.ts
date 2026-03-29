@@ -4,7 +4,11 @@ import { FaChartLine, FaUserAlt } from "react-icons/fa";
 import { BiCategory } from "react-icons/bi";
 import { FiSettings } from "react-icons/fi";
 import { HiSpeakerphone } from "react-icons/hi";
-import { MdOutlineFastfood } from "react-icons/md";
+import {
+  MdOutlineFastfood,
+  MdOutlineTableBar,
+  MdPeopleOutline,
+} from "react-icons/md";
 import { IoDocumentTextOutline, IoSettingsOutline } from "react-icons/io5";
 export type NavItem = {
   label: string;
@@ -59,6 +63,18 @@ export const navSections: NavSection[] = [
         icon: MdOutlineFastfood,
         key: "items",
         link: "items",
+      },
+      {
+        label: "tables",
+        icon: MdOutlineTableBar,
+        key: "tables",
+        link: "table",
+      },
+      {
+        label: "staff",
+        icon: MdPeopleOutline,
+        key: "staff",
+        link: "staff",
       },
     ],
   },

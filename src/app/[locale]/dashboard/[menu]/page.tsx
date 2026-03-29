@@ -16,7 +16,11 @@ import {
 } from "react-icons/io5";
 import { FaChartLine } from "react-icons/fa";
 import { BiCategory } from "react-icons/bi";
-import { MdOutlineFastfood } from "react-icons/md";
+import {
+  MdOutlineFastfood,
+  MdOutlineTableBar,
+  MdPeopleOutline,
+} from "react-icons/md";
 import { FiSettings } from "react-icons/fi";
 import { BsQrCode } from "react-icons/bs";
 import { useEffect, useMemo, useState } from "react";
@@ -238,6 +242,20 @@ export default function DashboardMenuPage() {
           >
             <MdOutlineFastfood className="text-lg shrink-0" />
             {t("products")}
+          </LinkTo>
+          <LinkTo
+            href={`/dashboard/${menuSlugOrId}/table`}
+            className={`${tabBase} ${tabInactive}`}
+          >
+            <MdOutlineTableBar className="text-lg shrink-0" />
+            {t("tables")}
+          </LinkTo>
+          <LinkTo
+            href={`/dashboard/${menuSlugOrId}/staff`}
+            className={`${tabBase} ${tabInactive}`}
+          >
+            <MdPeopleOutline className="text-lg shrink-0" />
+            {t("staff")}
           </LinkTo>
           <LinkTo
             href={`/dashboard/${menuSlugOrId}/settings`}

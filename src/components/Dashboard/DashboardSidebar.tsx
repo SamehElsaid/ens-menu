@@ -118,10 +118,10 @@ export function DashboardSidebar({
       </nav>
       <div className="m-4 rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-4 text-sm">
         <p className="font-semibold text-primary dark:text-slate-100">
-          Need more features?
+          {t("needMoreFeatures")}
         </p>
         <p className="text-slate-500 dark:text-slate-300">
-          Upgrade your workspace in one click.
+          {t("upgradeWorkspace")}
         </p>
       </div>
     </aside>
@@ -133,7 +133,7 @@ export function DashboardSidebar({
       <Drawer
         open={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
-        title="Menu"
+        title={t("drawerMenuTitle")}
         right={locale === "ar" ? true : false}
       >
         {sidebarSections()}
