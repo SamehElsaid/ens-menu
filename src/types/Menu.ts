@@ -24,8 +24,8 @@ export interface MenuTable {
   seats?: number;
   isActive: boolean;
   createdAt?: string;
-  [key: string]: unknown;
 }
+
 export interface Menu {
   id: number;
   nameAr: string;
