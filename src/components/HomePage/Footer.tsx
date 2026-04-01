@@ -150,14 +150,14 @@ const FooterSection = () => {
             {/* Links */}
             <div className="flex gap-8">
               <Link
-                href={`/${locale}/privacy-policy`}
+                href={`/privacy-policy`}
                 className="text-gray-500 dark:text-gray-600 hover:text-purple-400 dark:hover:text-purple-400 text-sm transition-colors duration-300"
                 suppressHydrationWarning
               >
                 {t("privacy")}
               </Link>
               <Link
-                href={`/${locale}/terms-and-conditions`}
+                href={`/terms-and-conditions`}
                 className="text-gray-500 dark:text-gray-600 hover:text-purple-400 dark:hover:text-purple-400 text-sm transition-colors duration-300"
                 suppressHydrationWarning
               >

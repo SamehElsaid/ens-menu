@@ -11,6 +11,7 @@ import Logo from "../Global/Logo";
 import { homeLinks } from "@/modules/Header";
 import LanguageToggle from "./LanguageTogle";
 import DarkModeToggle from "./DarkModeToggle";
+import { axiosGet, axiosPost } from "@/shared/axiosCall";
 
 // NavLink Component
 interface NavLinkProps {
@@ -67,11 +68,10 @@ function Header() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        isScrolled
-          ? "backdrop-blur-xl bg-white/70 dark:bg-[#0d1117]/70 py-3 shadow-sm border-b border-purple-100 dark:border-purple-900"
-          : "bg-transparent py-6 border-transparent"
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
+        ? "backdrop-blur-xl bg-white/70 dark:bg-[#0d1117]/70 py-3 shadow-sm border-b border-purple-100 dark:border-purple-900"
+        : "bg-transparent py-6 border-transparent"
+        }`}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
         {/* Logo */}
@@ -83,6 +83,12 @@ function Header() {
           <Logo />
         </Link>
 
+        <button onClick={() => {
+          axiosPost("/public/staff-call", locale, {
+            "menuId": 97,
+            "tableNumber": "123"
+          })
+        }}>sadas</button>
         {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center gap-10 lg:gap-5 xl:gap-10">
           {navLinks.map((link) => (
@@ -105,6 +111,7 @@ function Header() {
           {/* Dark Mode Toggle */}
           <DarkModeToggle />
 
+
           {/* Auth Buttons */}
           {profile.loading === "yes" ? (
             <UserDropDown />
@@ -112,7 +119,7 @@ function Header() {
             <>
               {/* Sign In Button */}
               <Link
-                href={`/${locale}/auth/login`}
+                href={`/auth/login`}
                 className="px-5 hidden lg:block py-2 rounded-full font-bold text-[14px] text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-500/20 transition-all"
               >
                 {locale === "ar" ? "دخول" : "Sign In"}
@@ -121,7 +128,7 @@ function Header() {
               {/* Sign Up Button */}
               <div className="hidden lg:block">
                 <Link
-                  href={`/${locale}/auth/register`}
+                  href={`/auth/register`}
                   className="px-7 py-2.5 rounded-full bg-linear-to-r from-purple-600 to-purple-700 dark:from-purple-500 dark:to-purple-600 text-white font-bold text-[14px] shadow-lg shadow-purple-200 dark:shadow-purple-900/50 transition-all hover:shadow-xl"
                 >
                   {locale === "ar" ? "ابدأ الآن" : "Start Now"}
@@ -160,14 +167,14 @@ function Header() {
           {profile.loading !== "yes" && (
             <div className="pt-4 flex flex-col gap-3">
               <Link
-                href={`/${locale}/auth/login`}
+                href={`/auth/login`}
                 onClick={handleNavClick}
                 className="block w-full py-3 rounded-2xl border-2 border-purple-600 dark:border-purple-500 text-purple-600 dark:text-purple-400 font-bold text-base hover:bg-purple-50 dark:hover:bg-purple-500/20 transition-all"
               >
                 {locale === "ar" ? "دخول" : "Sign In"}
               </Link>
               <Link
-                href={`/${locale}/auth/register`}
+                href={`/auth/register`}
                 onClick={handleNavClick}
                 className="block w-full py-4 rounded-2xl bg-linear-to-r from-purple-600 to-purple-700 dark:from-purple-500 dark:to-purple-600 text-white font-bold text-base"
               >

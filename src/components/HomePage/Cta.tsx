@@ -30,7 +30,7 @@ export const CTA = () => {
           >
             <div>
               <Link
-                href={`/${locale}/auth/login`}
+                href={`/auth/login`}
                 className="inline-block px-10 py-5 bg-white text-purple-700 rounded-full font-black text-md shadow-2xl hover:bg-purple-50 transition-all"
               >
                 {t("button")}

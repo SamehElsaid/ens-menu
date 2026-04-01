@@ -145,7 +145,7 @@ export default function PricingSection() {
                   ))}
                 </ul>
                 <Link
-                  href={`/${locale}/auth/register`}
+                  href={`/auth/register`}
                   className="mt-8 w-full py-4 rounded-full font-bold text-center bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
                 >
                   {t("getStarted")}
@@ -195,7 +195,7 @@ export default function PricingSection() {
                   ))}
                 </ul>
                 <Link
-                  href={`/${locale}/auth/register`}
+                  href={`/auth/register`}
                   className="mt-8 w-full py-4 rounded-full font-bold text-center bg-purple-600 text-white hover:bg-purple-700 transition-all"
                 >
                   {t("getStarted")}

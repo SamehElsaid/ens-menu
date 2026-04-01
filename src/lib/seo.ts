@@ -35,7 +35,7 @@ export function buildSeoMetadata({
 }: SeoInput): Metadata {
   const baseUrl = getBaseUrl();
   const canonicalPath =
-    locale === DEFAULT_LOCALE ? (path ? `/${path}` : "/") : path ? `/${locale}/${path}` : `/${locale}`;
+    locale === DEFAULT_LOCALE ? (path ? `/${path}` : "/") : path ? `/${path}` : `/${locale}`;
   const canonicalUrl = baseUrl ? new URL(canonicalPath, baseUrl).href : undefined;
   const arPath = path ? `/${path}` : "/";
   const enPath = path ? `/en/${path}` : "/en";

@@ -616,7 +616,7 @@ export default function SettingsPage() {
           menuTitle={locale === "ar" ? menu.nameAr : menu.nameEn}
           onClose={() => setIsDeleteModalOpen(false)}
           onDeleted={() => {
-            router.push(`/${locale}/dashboard`);
+            router.push(`/dashboard`);
           }}
         />
       )}

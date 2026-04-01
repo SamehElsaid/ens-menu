@@ -205,7 +205,7 @@ const HeroSection = () => {
             >
               <div>
                 <Link
-                  href={`/${locale}/auth/login`}
+                  href={`/auth/login`}
                   className="px-10 py-5 rounded-full bg-linear-to-r from-purple-600 to-purple-700 dark:from-purple-500 dark:to-purple-600 text-white font-bold text-md shadow-2xl shadow-purple-200 dark:shadow-purple-900/50 flex items-center gap-3"
                 >
                   <span>{t("cta")}</span>
