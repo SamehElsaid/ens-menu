@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  type MouseEvent,
+} from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
@@ -10,17 +16,74 @@ import DeleteTableConfirm from "@/components/Dashboard/DeleteTableConfirm";
 import DataTable from "@/components/Custom/DataTable";
 import LinkTo from "@/components/Global/LinkTo";
 import { MenuTable } from "@/types/Menu";
+import { useAppSelector } from "@/store/hooks";
+import { toast } from "react-toastify";
 import {
   IoAddCircleOutline,
+  IoCopyOutline,
+  IoDownloadOutline,
   IoEllipseSharp,
   IoCreateOutline,
   IoTrashOutline,
 } from "react-icons/io5";
 
+function buildPublicMenuBaseUrl(slug: string | undefined | null): string {
+  if (!slug) return "";
+  return `https://${slug}${process.env.NEXT_PUBLIC_MENU_URL || ""}`.replace(
+    /^https:\/\//,
+    "https://",
+  );
+}
+
+function tablePublicMenuUrl(
+  slug: string | undefined | null,
+  tableNumber: string,
+): string {
+  const base = buildPublicMenuBaseUrl(slug);
+  if (!base) return "";
+  const sep = base.includes("?") ? "&" : "?";
+  return `${base}${sep}table=${encodeURIComponent(tableNumber)}`;
+}
+
+function safeTableFilenameSegment(tableNumber: string): string {
+  return String(tableNumber)
+    .replace(/[\\/:*?"<>|]/g, "-")
+    .trim()
+    .slice(0, 80) || "table";
+}
+
+async function downloadQrImageFile(qrSrc: string, filename: string) {
+  try {
+    const res = await fetch(qrSrc, { mode: "cors" });
+    if (!res.ok) throw new Error("fetch failed");
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = objectUrl;
+    link.download = filename;
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(objectUrl);
+  } catch {
+    const link = document.createElement("a");
+    link.href = qrSrc;
+    link.download = filename;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+}
+
 export default function TablesPage() {
   const t = useTranslations("Tables");
   const locale = useLocale();
   const params = useParams();
+  const menuSlug = useAppSelector((s) => s.menuData.menu?.slug);
   const menuId =
     typeof params.menu === "string"
       ? params.menu
@@ -121,6 +184,83 @@ export default function TablesPage() {
         },
       },
       {
+        headerName: t("qrCode"),
+        field: "tableNumber",
+        width: 172,
+        sortable: false,
+        cellRenderer: (params: ICellRendererParams<MenuTable>) => {
+          const row = params.data;
+          if (!row?.tableNumber) return null;
+          const url = tablePublicMenuUrl(menuSlug, row.tableNumber);
+          if (!url) {
+            return (
+              <span
+                className="text-xs text-slate-500 dark:text-slate-400 leading-snug max-w-36"
+                title={t("noMenuUrl")}
+              >
+                —
+              </span>
+            );
+          }
+          const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(url)}`;
+          const copy = () => {
+            void navigator.clipboard.writeText(url).then(() => {
+              toast.success(t("linkCopied"));
+            });
+          };
+          const download = (e: MouseEvent<HTMLButtonElement>) => {
+            e.stopPropagation();
+            const name = `table-${safeTableFilenameSegment(row.tableNumber)}-qr.png`;
+            void downloadQrImageFile(qrSrc, name).then(() => {
+              toast.success(t("qrDownloaded"));
+            });
+          };
+          return (
+            <div className="flex items-center gap-2 py-1">
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0 rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden bg-white"
+                title={t("qrOpensMenu")}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element -- external QR API */}
+                <img
+                  src={qrSrc}
+                  alt={t("qrCode")}
+                  width={64}
+                  height={64}
+                  className="block w-16 h-16"
+                />
+              </a>
+              <div className="flex flex-col gap-1 shrink-0">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    copy();
+                  }}
+                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-primary/30"
+                  title={t("copyMenuLink")}
+                  aria-label={t("copyMenuLink")}
+                >
+                  <IoCopyOutline className="text-lg" />
+                </button>
+                <button
+                  type="button"
+                  onClick={download}
+                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-primary/30"
+                  title={t("downloadQrImage")}
+                  aria-label={t("downloadQrImage")}
+                >
+                  <IoDownloadOutline className="text-lg" />
+                </button>
+              </div>
+            </div>
+          );
+        },
+      },
+      {
         headerName: t("action"),
         width: 120,
         sortable: false,
@@ -156,7 +296,7 @@ export default function TablesPage() {
         },
       },
     ],
-    [t, handleEdit, handleDelete],
+    [t, handleEdit, handleDelete, menuSlug],
   );
 
   return (
