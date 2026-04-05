@@ -83,12 +83,7 @@ function Header() {
           <Logo />
         </Link>
 
-        <button onClick={() => {
-          axiosPost("/public/staff-call", locale, {
-            "menuId": 97,
-            "tableNumber": "123"
-          })
-        }}>sadas</button>
+
         {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center gap-10 lg:gap-5 xl:gap-10">
           {navLinks.map((link) => (
