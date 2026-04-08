@@ -1617,7 +1617,8 @@
       "activeNow": "Active now",
       "currentTemplate": "Current template",
       "new": "New",
-      "default": "Default"
+      "default": "Default",
+      "underConstruction": "Under construction"
     },
     "cards": {
       "defaultHelper": "Recommended default template for most users",

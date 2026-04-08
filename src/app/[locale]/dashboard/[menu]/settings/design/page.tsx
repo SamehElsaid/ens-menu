@@ -22,6 +22,12 @@ export default function DesignPage() {
 
   const dispatch = useAppDispatch();
   const { menu } = useAppSelector((state) => state.menuData);
+  const templatesForMenu = templatesInfo.filter((template) => {
+    if (template.showInPickerOnlyWhenThemeMatches) {
+      return menu?.theme === template.id;
+    }
+    return true;
+  });
   const [isLoading, setIsLoading] = useState<boolean | string>(false);
   const [activeTemplateId, setActiveTemplateId] = useState<string>(
     typeof menu?.theme === "string" && menu.theme !== ""
@@ -76,7 +82,7 @@ export default function DesignPage() {
       {/* Templates grid */}
       <section className="bg-slate-50/60 dark:bg-slate-800/60 rounded-3xl border border-slate-100 dark:border-slate-700 p-4 md:p-6 lg:p-8">
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {templatesInfo.map((template) => {
+          {templatesForMenu.map((template) => {
             const isActive = template.id === activeTemplateId;
             const isNew = template.isNew;
             const linkView = "https://" + template.slug + process.env.NEXT_PUBLIC_MENU_URL;
@@ -95,12 +101,25 @@ export default function DesignPage() {
                 <div className="relative p-4 pb-0">
                   <div className="relative rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-700 aspect-4/3">
                     <div className="relative h-full w-full overflow-hidden">
-                      <LoadImage
-                        src={template.image}
-                        disableLazy
-                        alt={isRTL ? template.nameAr : template.name}
-                        className="w-full auto-scroll-image"
-                      />
+                      {template.hidePreviewImage ? (
+                        <div
+                          className="absolute inset-0 bg-linear-to-br from-emerald-900/35 via-slate-300/60 to-emerald-950/40 dark:from-emerald-950/70 dark:via-slate-600/50 dark:to-emerald-950/60"
+                          aria-hidden
+                        />
+                      ) : (
+                        <LoadImage
+                          src={template.image}
+                          disableLazy
+                          alt={isRTL ? template.nameAr : template.name}
+                          className="w-full auto-scroll-image"
+                        />
+                      )}
+                      {template.hidePreviewImage ? (
+                        <div
+                          className="absolute inset-0 backdrop-blur-xl bg-white/25 dark:bg-slate-900/35"
+                          aria-hidden
+                        />
+                      ) : null}
                     </div>
 
                     {isActive && (
@@ -117,6 +136,11 @@ export default function DesignPage() {
                     {isNew && !isActive && (
                       <span className="absolute top-3 right-3 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 px-2.5 py-0.5 text-[11px] font-semibold shadow-sm border border-amber-200/50 dark:border-amber-500/30">
                         {t("badges.new")}
+                      </span>
+                    )}
+                    {template.id === "emerald" && (
+                      <span className="absolute bottom-3 inset-x-3 text-center rounded-lg bg-amber-500/95 dark:bg-amber-600/95 text-white px-2 py-1.5 text-[11px] font-semibold shadow-md">
+                        {t("badges.underConstruction")}
                       </span>
                     )}
                   </div>

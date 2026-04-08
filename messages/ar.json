@@ -1338,7 +1338,8 @@
       "activeNow": "مفعل حاليًا",
       "currentTemplate": "القالب المستخدم",
       "new": "جديد",
-      "default": "افتراضي"
+      "default": "افتراضي",
+      "underConstruction": "تحت الإنشاء"
     },
     "cards": {
       "defaultHelper": "القالب الافتراضي المقترح لمعظم المستخدمين",

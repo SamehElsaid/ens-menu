@@ -85,6 +85,10 @@ export interface TemplateInfo {
   canEdit: boolean;
   slug: string;
   defaultColors?: string[];
+  /** When true, the template appears in the design picker only if this menu already uses it (slug/id). */
+  showInPickerOnlyWhenThemeMatches?: boolean;
+  /** When true, design picker shows an abstract placeholder instead of `image` (e.g. WIP templates). */
+  hidePreviewImage?: boolean;
 }
 export interface FeatureCardProps {
   icon: IconType;

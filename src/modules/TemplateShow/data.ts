@@ -121,5 +121,20 @@ export const templatesInfo: TemplateInfo[] = [
     colors:["#3b82f6"],
     defaultColors:["#3b82f6"]
   },
+  {
+    id: "emerald",
+    name: "Emerald Template",
+    nameAr: "قالب الزمرد",
+    image: "",
+    description: "Under construction — not selectable for new menus.",
+    descriptionAr: "تحت الإنشاء — غير متاح للاختيار للمنيو الجديدة.",
+    isNew: false,
+    canEdit: true,
+    slug: "emerald",
+    colors: ["#059669", "#10b981"],
+    defaultColors: ["#059669", "#10b981"],
+    showInPickerOnlyWhenThemeMatches: true,
+    hidePreviewImage: true,
+  },
 
 ];
