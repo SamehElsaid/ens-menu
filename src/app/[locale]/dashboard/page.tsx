@@ -284,6 +284,7 @@ export default function DashboardPage() {
             subscription={subscription}
             currentCount={menus.length}
             locale={locale}
+            upgradeMenuId={menus[0]?.id}
             onClose={() => setShowLimitModal(false)}
           />
         )}
@@ -477,6 +478,7 @@ export default function DashboardPage() {
           subscription={subscription}
           currentCount={menus.length}
           locale={locale}
+          upgradeMenuId={menus[0]?.id}
           onClose={() => setShowLimitModal(false)}
         />
       )}
@@ -532,7 +534,7 @@ export default function DashboardPage() {
                 {t("cancel")}
               </button>
               <LinkTo
-                href="/pricing"
+                href={`/dashboard/${switchMenuTarget.id}/personal`}
                 className="order-1 flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-amber-500 to-orange-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-amber-600 hover:to-orange-600 hover:shadow-lg sm:order-2 sm:w-auto"
               >
                 <IoRocketOutline className="text-lg" />
@@ -635,12 +637,14 @@ function LimitReachedModal({
   subscription,
   currentCount,
   locale,
+  upgradeMenuId,
   onClose,
 }: {
   t: ReturnType<typeof useTranslations<"Menus">>;
   subscription: Subscription | null;
   currentCount: number;
   locale: string;
+  upgradeMenuId?: number;
   onClose: () => void;
 }) {
   const maxMenus = subscription?.maxMenus ?? 1;
@@ -692,7 +696,11 @@ function LimitReachedModal({
               {t("close")}
             </button>
             <LinkTo
-              href="/pricing"
+              href={
+                upgradeMenuId != null
+                  ? `/dashboard/${upgradeMenuId}/personal`
+                  : "/pricing"
+              }
               className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-linear-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg"
             >
               <IoRocketOutline className="text-base" />

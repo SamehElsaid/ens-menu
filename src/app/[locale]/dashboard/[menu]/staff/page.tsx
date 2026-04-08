@@ -16,6 +16,8 @@ import {
   IoCreateOutline,
   IoTrashOutline,
 } from "react-icons/io5";
+import { useAppSelector } from "@/store/hooks";
+import { isFreePlanUser } from "@/lib/subscription";
 
 export default function StaffPage() {
   const t = useTranslations("Staff");
@@ -27,6 +29,9 @@ export default function StaffPage() {
       ? params.menu
       : ((params.menu as string[])?.[0] ?? "");
 
+  const userData = useAppSelector((state) => state.auth.data);
+  const isFreePlan = isFreePlanUser(userData);
+
   const [staffList, setStaffList] = useState<MenuStaff[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -36,6 +41,10 @@ export default function StaffPage() {
 
   const fetchStaff = useCallback(async () => {
     if (!menuId) return;
+    if (isFreePlan) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const result = await axiosGet<MenuStaff[] | { staff: MenuStaff[] }>(
@@ -54,7 +63,7 @@ export default function StaffPage() {
     } finally {
       setLoading(false);
     }
-  }, [menuId, locale]);
+  }, [menuId, locale, isFreePlan]);
 
   useEffect(() => {
     fetchStaff();
@@ -159,6 +168,33 @@ export default function StaffPage() {
     ],
     [t, emptyCell, handleEdit, handleDelete],
   );
+
+  if (isFreePlan) {
+    const title =
+      locale === "ar"
+        ? "إدارة الطاقم متاحة لخطط Pro فقط"
+        : "Staff management is available on Pro plans only";
+    const description =
+      locale === "ar"
+        ? "قم بالترقية لإضافة موظفين وتلقي نداءات الطاولات."
+        : "Upgrade to add staff and receive table call notifications.";
+    const buttonLabel = locale === "ar" ? "الترقية" : "Upgrade";
+
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100">
+          {title}
+        </h1>
+        <p className="max-w-md text-slate-500 dark:text-slate-400">{description}</p>
+        <LinkTo
+          href={`/dashboard/${menuId}/personal`}
+          className="mt-4 inline-flex items-center justify-center gap-2 px-8 py-3 bg-linear-to-r from-primary to-primary/80 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+        >
+          {buttonLabel}
+        </LinkTo>
+      </div>
+    );
+  }
 
   return (
     <>

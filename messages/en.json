@@ -487,6 +487,7 @@
     "changePasswordButton": "Change Password",
     "subscriptionManagement": "Subscription Management",
     "planFree": "Free",
+    "planPro": "Pro",
     "planProfessional": "Professional",
     "planCustom": "Custom",
     "mostPopular": "Most Popular",
@@ -519,6 +520,7 @@
     "renewalDate": "Renewal Date",
     "monthly": "Monthly",
     "yearly": "Yearly",
+    "yearlyPriceFormatted": "{price} {currency} {perYear}",
     "pricePerMonth": "/month",
     "pricePerYear": "/year",
     "freePrice": "Free",
@@ -889,6 +891,10 @@
         "deliveryMaps": "Advanced delivery with maps",
         "newLanguages": "New languages (German, French, Hindi)",
         "onlinePayment": "Integrated online payment"
+      },
+      "proExtraFeatures": {
+        "staffSystem": "Staff management — add team members",
+        "tablesSystem": "Tables & per-table QR links"
       }
     },
     "cta": {

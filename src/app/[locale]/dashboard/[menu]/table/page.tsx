@@ -17,6 +17,7 @@ import DataTable from "@/components/Custom/DataTable";
 import LinkTo from "@/components/Global/LinkTo";
 import { MenuTable } from "@/types/Menu";
 import { useAppSelector } from "@/store/hooks";
+import { isFreePlanUser } from "@/lib/subscription";
 import { toast } from "react-toastify";
 import {
   IoAddCircleOutline,
@@ -84,6 +85,8 @@ export default function TablesPage() {
   const locale = useLocale();
   const params = useParams();
   const menuSlug = useAppSelector((s) => s.menuData.menu?.slug);
+  const userData = useAppSelector((s) => s.auth.data);
+  const isFreePlan = isFreePlanUser(userData);
   const menuId =
     typeof params.menu === "string"
       ? params.menu
@@ -98,6 +101,10 @@ export default function TablesPage() {
 
   const fetchTables = useCallback(async () => {
     if (!menuId) return;
+    if (isFreePlan) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const result = await axiosGet<MenuTable[] | { tables: MenuTable[] }>(
@@ -116,7 +123,7 @@ export default function TablesPage() {
     } finally {
       setLoading(false);
     }
-  }, [menuId, locale]);
+  }, [menuId, locale, isFreePlan]);
 
   useEffect(() => {
     fetchTables();
@@ -298,6 +305,33 @@ export default function TablesPage() {
     ],
     [t, handleEdit, handleDelete, menuSlug],
   );
+
+  if (isFreePlan) {
+    const title =
+      locale === "ar"
+        ? "الطاولات وروابط QR متاحة لخطط Pro فقط"
+        : "Tables and QR links are available on Pro plans only";
+    const description =
+      locale === "ar"
+        ? "قم بالترقية من الصفحة الشخصية لإدارة الطاولات ونداء الطاقم."
+        : "Upgrade from your profile to manage tables and staff calls.";
+    const buttonLabel = locale === "ar" ? "الصفحة الشخصية" : "Personal profile";
+
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100">
+          {title}
+        </h1>
+        <p className="max-w-md text-slate-500 dark:text-slate-400">{description}</p>
+        <LinkTo
+          href={`/dashboard/${menuId}/personal`}
+          className="mt-4 inline-flex items-center justify-center gap-2 px-8 py-3 bg-linear-to-r from-primary to-primary/80 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+        >
+          {buttonLabel}
+        </LinkTo>
+      </div>
+    );
+  }
 
   return (
     <>

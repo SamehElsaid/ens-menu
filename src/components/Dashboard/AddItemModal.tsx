@@ -395,7 +395,7 @@ export default function AddItemModal({
                                 <div className="mb-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 flex flex-col sm:flex-row sm:items-center gap-3">
                                     <p className="text-sm text-amber-800 dark:text-amber-200 flex-1">{tItems("freePlanMessage")}</p>
                                     <LinkTo
-                                        href="/pricing"
+                                        href={`/dashboard/${menuId}/personal`}
                                         className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-semibold text-sm transition-colors"
                                     >
                                         <IoLockClosedOutline className="text-base" />
@@ -549,7 +549,7 @@ export default function AddItemModal({
                                 {isFreePlan && (
                                     <div className="md:col-span-2 flex justify-end">
                                         <LinkTo
-                                            href="/pricing"
+                                            href={`/dashboard/${menuId}/personal`}
                                             className="inline-flex items-center gap-2 px-5 py-3 bg-primary hover:bg-primary/90 text-white rounded-xl font-semibold shadow-md transition-colors"
                                         >
                                             <IoLockClosedOutline className="text-lg" />

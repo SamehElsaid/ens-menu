@@ -1,8 +1,9 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { axiosGet } from "@/shared/axiosCall";
+import { translatePlanFeatureLine } from "@/lib/planFeatureI18n";
 import { FaSpinner } from "react-icons/fa";
 import { HiCheck, HiOutlineChat } from "react-icons/hi";
 import { Link } from "@/i18n/navigation";
@@ -38,6 +39,7 @@ const WHATSAPP_URL = "https://wa.me/971586551491";
 
 export default function PricingSection() {
   const t = useTranslations("Landing.pricing");
+  const tProfile = useTranslations("personalProfile");
   const locale = useLocale();
   const isRTL = locale === "ar";
   const [plans, setPlans] = useState<ApiPlan[]>([]);
@@ -80,6 +82,19 @@ export default function PricingSection() {
 
   const freePlan = plans.find((p) => p.name?.toLowerCase() === "free");
   const proPlan = plans.find((p) => p.name?.toLowerCase() === "pro");
+
+  /** API plan features + Pro-only items (staff & tables). */
+  const proPlanFeatureLines = useMemo(() => {
+    if (!proPlan) return [];
+    const fromApi = (proPlan.features || []).map((line) =>
+      translatePlanFeatureLine(line, tProfile),
+    );
+    const extra = [
+      t("proExtraFeatures.staffSystem"),
+      t("proExtraFeatures.tablesSystem"),
+    ];
+    return [...fromApi, ...extra];
+  }, [proPlan, t, tProfile]);
 
   const customFeatures = CUSTOM_PLAN_FEATURE_KEYS.map((key) =>
     t(`customFeatures.${key}`),
@@ -134,7 +149,10 @@ export default function PricingSection() {
                   </span>
                 </div>
                 <ul className="space-y-3 flex-1">
-                  {(freePlan.features || []).slice(0, 5).map((f, i) => (
+                  {(freePlan.features || [])
+                    .slice(0, 5)
+                    .map((line) => translatePlanFeatureLine(line, tProfile))
+                    .map((f, i) => (
                     <li
                       key={i}
                       className="flex items-center gap-2 text-slate-600 dark:text-slate-300 text-sm"
@@ -184,9 +202,9 @@ export default function PricingSection() {
                   </span>
                 </div>
                 <ul className="space-y-3 flex-1">
-                  {(proPlan.features || []).slice(0, 5).map((f, i) => (
+                  {proPlanFeatureLines.map((f, i) => (
                     <li
-                      key={i}
+                      key={`${f}-${i}`}
                       className="flex items-center gap-2 text-slate-600 dark:text-slate-300 text-sm"
                     >
                       <HiCheck className="w-5 h-5 text-green-500 shrink-0" />

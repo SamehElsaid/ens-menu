@@ -360,6 +360,7 @@
     "changePasswordButton": "تغيير كلمة المرور",
     "subscriptionManagement": "إدارة الاشتراك",
     "planFree": "مجاني",
+    "planPro": "احترافي",
     "planProfessional": "احترافي",
     "planCustom": "مخصص",
     "mostPopular": "الأكثر شعبية",
@@ -392,6 +393,7 @@
     "renewalDate": "تاريخ التجديد",
     "monthly": "شهرياً",
     "yearly": "سنوي",
+    "yearlyPriceFormatted": "{price} {currency}{perYear}",
     "pricePerMonth": "/شهر",
     "pricePerYear": "/سنة",
     "freePrice": "مجاني",
@@ -613,6 +615,10 @@
         "deliveryMaps": "نظام دليفري بالخرائط المتقدم",
         "newLanguages": "إضافة لغات جديدة (ألماني، فرنسي، هندي)",
         "onlinePayment": "الدفع أونلاين المتكامل"
+      },
+      "proExtraFeatures": {
+        "staffSystem": "نظام إضافة موظفين (طاقم)",
+        "tablesSystem": "نظام إضافة طاولات وروابط QR"
       }
     },
     "cta": {

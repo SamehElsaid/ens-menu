@@ -256,7 +256,7 @@ export default function AdvertisementsPage() {
         </h1>
         <p className="max-w-md text-slate-500 dark:text-slate-400">{description}</p>
         <LinkTo
-          href="/pricing"
+          href={`/dashboard/${menuId}/personal`}
           className="mt-4 inline-flex items-center justify-center gap-2 px-8 py-3 bg-linear-to-r from-primary to-primary/80 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
         >
           {buttonLabel}

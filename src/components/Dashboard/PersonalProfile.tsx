@@ -33,6 +33,7 @@ import {
 } from "@/schemas/changePasswordSchema";
 import { useRouter } from "@/i18n/navigation";
 import Cookies from "js-cookie";
+import { translatePlanFeatureLine } from "@/lib/planFeatureI18n";
 
 export type Plan = {
   id: number;
@@ -110,6 +111,7 @@ export default function PersonalProfile({
   const isRTL = locale === "ar";
   const t = useTranslations("personalProfile");
   const tRoot = useTranslations("");
+  const tLandingPricing = useTranslations("Landing.pricing");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const authData = useAppSelector((state) => state.auth.data) as unknown as {
@@ -875,25 +877,28 @@ export default function PersonalProfile({
                             </span>
                           )}
                           <p className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-1">
-                            {plan.name}
+                            {(() => {
+                              const n = String(plan.name).toLowerCase();
+                              if (n === "free") return t("planFree");
+                              if (n === "pro") return t("planPro");
+                              return plan.name;
+                            })()}
                           </p>
-                          {!isComingSoon && plan.priceMonthly > 0 && (
-                            <p className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-1">
-                              {plan.priceMonthly}{" "}
-                              <span className="text-sm font-normal text-slate-500 dark:text-slate-400">
-                                {t("monthly")}
-                              </span>
-                            </p>
-                          )}
                           {!isComingSoon &&
                             plan.priceYearly != null &&
                             (plan.priceYearly > 0 ||
                               plan.priceMonthly === 0) && (
-                              <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">
-                                {plan.priceYearly}{" "}
-                                <span className="text-xs font-normal text-slate-500 dark:text-slate-400">
-                                  {t("yearly")}
-                                </span>
+                              <p className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-3">
+                                {plan.priceMonthly === 0 &&
+                                plan.priceYearly === 0 ? (
+                                  t("freePrice")
+                                ) : plan.priceYearly > 0 ? (
+                                  t("yearlyPriceFormatted", {
+                                    price: plan.priceYearly,
+                                    currency: tLandingPricing("currency"),
+                                    perYear: tLandingPricing("perYear"),
+                                  })
+                                ) : null}
                               </p>
                             )}
                           {(isComingSoon || isCustomPlan) &&
@@ -905,8 +910,23 @@ export default function PersonalProfile({
                               </p>
                             )}
                           <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300 mb-4">
-                            {plan.features?.slice(0, 4).map((f, i) => (
-                              <li key={i}>✓ {f}</li>
+                            {(String(plan.name).toLowerCase() === "pro"
+                              ? [
+                                  ...(plan.features || []).map((line) =>
+                                    translatePlanFeatureLine(line, t),
+                                  ),
+                                  tLandingPricing("proExtraFeatures.staffSystem"),
+                                  tLandingPricing(
+                                    "proExtraFeatures.tablesSystem",
+                                  ),
+                                ]
+                              : (plan.features || [])
+                                  .slice(0, 4)
+                                  .map((line) =>
+                                    translatePlanFeatureLine(line, t),
+                                  )
+                            ).map((f, i) => (
+                              <li key={`${plan.id}-f-${i}`}>✓ {f}</li>
                             ))}
                           </ul>
 
