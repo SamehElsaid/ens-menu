@@ -125,12 +125,13 @@ export const templatesInfo: TemplateInfo[] = [
     nameAr: "قالب الزمرد",
     image: "/images/temp/emerald.png",
     description:
-      "Emerald menu template with a fresh green palette and modern layout",
-    descriptionAr: "قالب قائمة زمردي بألوان خضراء عصرية وتخطيط حديث",
+      "Elegant menu with burgundy and rose accents and a modern layout",
+    descriptionAr: "قائمة أنيقة بألوان عنابية ووردية وتخطيط عصري",
     isNew: false,
     canEdit: true,
+    customizeHeroTexts: false,
     slug: "emerald",
-    colors: ["#059669", "#10b981"],
-    defaultColors: ["#059669", "#10b981"],
+    colors: ["#4c1121", "#9b2545"],
+    defaultColors: ["#4c1121", "#9b2545"],
   },
 ];

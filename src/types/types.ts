@@ -83,6 +83,8 @@ export interface TemplateInfo {
   descriptionAr: string;
   isNew: boolean;
   canEdit: boolean;
+  /** When false, design page only customizes colors (no hero text fields). Default: true. */
+  customizeHeroTexts?: boolean;
   slug: string;
   defaultColors?: string[];
   /** When true, the template appears in the design picker only if this menu already uses it (slug/id). */

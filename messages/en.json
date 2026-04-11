@@ -1640,6 +1640,7 @@
     "badge": "Template customization",
     "title": "Customize template {name}",
     "description": "Fine-tune this template’s colors and hero texts so your digital menu perfectly matches your restaurant’s visual identity.",
+    "descriptionColorsOnly": "Fine-tune this template’s colors so your digital menu matches your restaurant’s visual identity.",
     "notEditable": {
       "title": "This template cannot be customized",
       "description": "You can go back to the design page and choose another template that supports advanced customization."
@@ -1650,7 +1651,10 @@
       "previewMenu": "Preview menu",
       "currentColorsTitle": "Current brand colors",
       "currentColorsDescription": "These colors are applied to key buttons, gradients, and highlight elements across your menu.",
-      "footerNote": "This preview reflects how your main menu page will look after applying the new colors and texts."
+      "footerNote": "This preview reflects how your main menu page will look after applying the new colors and texts.",
+      "footerNoteColorsOnly": "This preview reflects how brand colors will appear on your main menu page.",
+      "colorOnlyBadge": "Colors",
+      "colorOnlyCaption": "This template uses your menu name from settings; only colors can be customized here."
     },
     "sections": {
       "readyColors": {

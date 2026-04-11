@@ -199,6 +199,8 @@ export default function TemplateDesignCustomizePage() {
         [handleCustomColorChange]
     );
 
+    const showHeroTexts = template?.customizeHeroTexts !== false;
+
     if (!template || !template.canEdit) {
         return (
             <div className="min-h-[50vh] flex items-center justify-center">
@@ -242,10 +244,14 @@ export default function TemplateDesignCustomizePage() {
             secondaryColor: template?.defaultColors?.length !== 1 ? gradientEnd : gradientStart,
             backgroundColor: "#ffffff",
             textColor: "#0f172a",
-            heroTitleAr: texts.heroTitleAr,
-            heroSubtitleAr: texts.heroSubtitleAr,
-            heroTitleEn: texts.heroTitleEn,
-            heroSubtitleEn: texts.heroSubtitleEn,
+            ...(showHeroTexts
+                ? {
+                      heroTitleAr: texts.heroTitleAr,
+                      heroSubtitleAr: texts.heroSubtitleAr,
+                      heroTitleEn: texts.heroTitleEn,
+                      heroSubtitleEn: texts.heroSubtitleEn,
+                  }
+                : {}),
         };
 
         setIsSaving(true);
@@ -286,7 +292,9 @@ export default function TemplateDesignCustomizePage() {
     const handleReset = () => {
         setSelectedPaletteId(readyPalettes[0]?.id ?? "primary");
         setCustomColors(Array.from({ length: colorSlots }, () => ""));
-        setTexts({ ...INITIAL_TEXTS });
+        if (showHeroTexts) {
+            setTexts({ ...INITIAL_TEXTS });
+        }
         setShowColorPicker(null);
     };
 
@@ -313,7 +321,7 @@ export default function TemplateDesignCustomizePage() {
                         {t("title", { name: displayName || "—" })}
                     </h1>
                     <p className="text-sm md:text-base text-slate-500 max-w-2xl mt-1">
-                        {t("description")}
+                        {showHeroTexts ? t("description") : t("descriptionColorsOnly")}
                     </p>
                 </header>
 
@@ -340,18 +348,36 @@ export default function TemplateDesignCustomizePage() {
                                             background: `linear-gradient(135deg, ${gradientStart}, ${template?.defaultColors?.length !== 1 ? gradientEnd : gradientStart})`,
                                         }}
                                     >
-                                        <div className={isRTL ? "text-right space-y-2" : "text-left space-y-2"}>
-                                            <span className="inline-flex items-center gap-1 rounded-full bg-white/15 backdrop-blur px-2.5 py-1 text-[10px] font-semibold">
-                                                <HiOutlineSparkles className="text-xs" />
-                                                {isRTL ? texts.badgeTextAr : texts.badgeTextEn}
-                                            </span>
-                                            <h3 className="text-base font-semibold leading-snug">
-                                                {isRTL ? texts.heroTitleAr : texts.heroTitleEn}
-                                            </h3>
-                                            <p className="text-[11px] text-white/80 leading-relaxed">
-                                                {isRTL ? texts.heroSubtitleAr : texts.heroSubtitleEn}
-                                            </p>
-                                        </div>
+                                        {showHeroTexts ? (
+                                            <div className={isRTL ? "text-right space-y-2" : "text-left space-y-2"}>
+                                                <span className="inline-flex items-center gap-1 rounded-full bg-white/15 backdrop-blur px-2.5 py-1 text-[10px] font-semibold">
+                                                    <HiOutlineSparkles className="text-xs" />
+                                                    {isRTL ? texts.badgeTextAr : texts.badgeTextEn}
+                                                </span>
+                                                <h3 className="text-base font-semibold leading-snug">
+                                                    {isRTL ? texts.heroTitleAr : texts.heroTitleEn}
+                                                </h3>
+                                                <p className="text-[11px] text-white/80 leading-relaxed">
+                                                    {isRTL ? texts.heroSubtitleAr : texts.heroSubtitleEn}
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <div className={isRTL ? "text-right space-y-2" : "text-left space-y-2"}>
+                                                <span className="inline-flex items-center gap-1 rounded-full bg-white/15 backdrop-blur px-2.5 py-1 text-[10px] font-semibold">
+                                                    {t("preview.colorOnlyBadge")}
+                                                </span>
+                                                <h3 className="text-base font-semibold leading-snug">
+                                                    {menu
+                                                        ? isRTL
+                                                            ? menu.nameAr
+                                                            : menu.nameEn
+                                                        : "—"}
+                                                </h3>
+                                                <p className="text-[11px] text-white/80 leading-relaxed">
+                                                    {t("preview.colorOnlyCaption")}
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="rounded-[24px] border border-slate-100 bg-slate-50/80 p-3.5 space-y-3">
@@ -400,7 +426,9 @@ export default function TemplateDesignCustomizePage() {
 
                             <div className="mt-4 flex items-center justify-between gap-3 text-[11px] text-slate-500">
                                 <p className={isRTL ? "text-right" : "text-left"}>
-                                    {t("preview.footerNote")}
+                                    {showHeroTexts
+                                        ? t("preview.footerNote")
+                                        : t("preview.footerNoteColorsOnly")}
                                 </p>
                             </div>
                         </div>
@@ -587,7 +615,8 @@ export default function TemplateDesignCustomizePage() {
                             </section>
                         )}
 
-                        {/* Texts */}
+                        {/* Texts — only for templates that use hero copy on the live menu */}
+                        {showHeroTexts && (
                         <section className="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 md:p-6 space-y-4">
                             <div className="flex items-center justify-between gap-3">
                                 <div className={isRTL ? "text-right" : "text-left"}>
@@ -660,6 +689,7 @@ export default function TemplateDesignCustomizePage() {
                                 </div>
                             </div>
                         </section>
+                        )}
 
                         {/* Footer actions */}
                         <div className=" justify-between gap-3 pt-2 pb-6">
@@ -688,7 +718,9 @@ export default function TemplateDesignCustomizePage() {
                             </div>
 
                             <p className="text-[11px] text-slate-500 max-w-md">
-                                {t("preview.footerNote")}
+                                {showHeroTexts
+                                    ? t("preview.footerNote")
+                                    : t("preview.footerNoteColorsOnly")}
                             </p>
                         </div>
                     </main>
