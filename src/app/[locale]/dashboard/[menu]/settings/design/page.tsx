@@ -138,11 +138,6 @@ export default function DesignPage() {
                         {t("badges.new")}
                       </span>
                     )}
-                    {template.id === "emerald" && (
-                      <span className="absolute bottom-3 inset-x-3 text-center rounded-lg bg-amber-500/95 dark:bg-amber-600/95 text-white px-2 py-1.5 text-[11px] font-semibold shadow-md">
-                        {t("badges.underConstruction")}
-                      </span>
-                    )}
                   </div>
                 </div>
 

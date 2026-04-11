@@ -85,21 +85,6 @@ export default function TemplateDesignCustomizePage() {
 
     useEffect(() => {
         if (!menu?.id) return;
-        if (
-            tempSlug === "emerald" &&
-            menu.theme !== "emerald"
-        ) {
-            toast.error(
-                isRTL
-                    ? "قالب الزمرد غير متاح للاختيار بعد."
-                    : "The Emerald template is not available to select yet."
-            );
-            router.replace(`/dashboard/${menu.id}/settings/design`);
-        }
-    }, [tempSlug, menu?.id, menu?.theme, router, isRTL]);
-
-    useEffect(() => {
-        if (!menu?.id) return;
 
         axiosGet<CustomizationResponse>(
             `/menus/${menu.id}/customizations`,

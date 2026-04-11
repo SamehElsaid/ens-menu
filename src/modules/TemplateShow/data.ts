@@ -67,7 +67,6 @@ export const templates: Template[] = [
   },
 ];
 
-
 export const templatesInfo: TemplateInfo[] = [
   {
     id: "default",
@@ -80,7 +79,7 @@ export const templatesInfo: TemplateInfo[] = [
     canEdit: false,
     descriptionAr: "قائمة عصرية ثنائية اللغة مع قسم بطولي ورسوم متحركة سلسة",
     slug: "default",
-    colors:["#0ea5e9","#6366f1"],
+    colors: ["#0ea5e9", "#6366f1"],
   },
   {
     id: "neon",
@@ -92,9 +91,8 @@ export const templatesInfo: TemplateInfo[] = [
     canEdit: true,
     descriptionAr: "قالب قائمة نيون مع تصميم عصري",
     slug: "neon",
-    colors:["#14b8a6","#06b6d4"],
-    defaultColors:["#14b8a6","#06b6d4"]
-
+    colors: ["#14b8a6", "#06b6d4"],
+    defaultColors: ["#14b8a6", "#06b6d4"],
   },
   {
     id: "coffee",
@@ -106,7 +104,7 @@ export const templatesInfo: TemplateInfo[] = [
     isNew: false,
     canEdit: false,
     slug: "coffee",
-    colors:["#f97316","#facc15"]
+    colors: ["#f97316", "#facc15"],
   },
   {
     id: "sky",
@@ -118,23 +116,21 @@ export const templatesInfo: TemplateInfo[] = [
     isNew: true,
     canEdit: true,
     slug: "sky",
-    colors:["#3b82f6"],
-    defaultColors:["#3b82f6"]
+    colors: ["#3b82f6"],
+    defaultColors: ["#3b82f6"],
   },
   {
     id: "emerald",
     name: "Emerald Template",
     nameAr: "قالب الزمرد",
-    image: "",
-    description: "Under construction — not selectable for new menus.",
-    descriptionAr: "تحت الإنشاء — غير متاح للاختيار للمنيو الجديدة.",
+    image: "/images/temp/emerald.png",
+    description:
+      "Emerald menu template with a fresh green palette and modern layout",
+    descriptionAr: "قالب قائمة زمردي بألوان خضراء عصرية وتخطيط حديث",
     isNew: false,
     canEdit: true,
     slug: "emerald",
     colors: ["#059669", "#10b981"],
     defaultColors: ["#059669", "#10b981"],
-    showInPickerOnlyWhenThemeMatches: true,
-    hidePreviewImage: true,
   },
-
 ];
