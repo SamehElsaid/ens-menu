@@ -91,6 +91,8 @@ export interface TemplateInfo {
   showInPickerOnlyWhenThemeMatches?: boolean;
   /** When true, design picker shows an abstract placeholder instead of `image` (e.g. WIP templates). */
   hidePreviewImage?: boolean;
+  /** When true, show "under construction" badge on the design card. */
+  isUnderConstruction?: boolean;
 }
 export interface FeatureCardProps {
   icon: IconType;

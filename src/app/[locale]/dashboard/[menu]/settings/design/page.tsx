@@ -85,7 +85,8 @@ export default function DesignPage() {
           {templatesForMenu.map((template) => {
             const isActive = template.id === activeTemplateId;
             const isNew = template.isNew;
-            const linkView = "https://" + template.slug + process.env.NEXT_PUBLIC_MENU_URL;
+            const linkView =
+              "https://" + template.slug + process.env.NEXT_PUBLIC_MENU_URL;
             const editLink = `/dashboard/${menu?.id}/settings/design/${template.slug}`;
 
             return (
@@ -133,7 +134,12 @@ export default function DesignPage() {
                       </div>
                     )}
 
-                    {isNew && !isActive && (
+                    {template.isUnderConstruction && (
+                      <span className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full bg-slate-600/90 dark:bg-slate-700/95 text-white px-2.5 py-0.5 text-[11px] font-semibold shadow-sm border border-slate-500/40">
+                        {t("badges.underConstruction")}
+                      </span>
+                    )}
+                    {isNew && !isActive && !template.isUnderConstruction && (
                       <span className="absolute top-3 right-3 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 px-2.5 py-0.5 text-[11px] font-semibold shadow-sm border border-amber-200/50 dark:border-amber-500/30">
                         {t("badges.new")}
                       </span>
