@@ -361,13 +361,18 @@ export default function DashboardMenuPage() {
           </p>
           {qrImageUrl ? (
             <div className="flex flex-col items-start gap-4">
-              <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 p-2 shadow-inner ring-1 ring-slate-100/50 dark:ring-slate-700/50">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={qrImageUrl}
-                  alt="Menu QR Code"
-                  className="w-[200px] h-[200px] rounded-xl"
-                />
+              <div className="flex flex-col items-center gap-1.5">
+                <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 p-2 shadow-inner ring-1 ring-slate-100/50 dark:ring-slate-700/50">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={qrImageUrl}
+                    alt="Menu QR Code"
+                    className="w-[200px] h-[200px] rounded-xl"
+                  />
+                </div>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500 tracking-wide text-center max-w-[200px] leading-tight">
+                  powered by ensmenu
+                </p>
               </div>
               <button
                 type="button"

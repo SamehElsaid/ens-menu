@@ -224,22 +224,27 @@ export default function TablesPage() {
           };
           return (
             <div className="flex items-center gap-2 py-1">
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="shrink-0 rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden bg-white"
-                title={t("qrOpensMenu")}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element -- external QR API */}
-                <img
-                  src={qrSrc}
-                  alt={t("qrCode")}
-                  width={64}
-                  height={64}
-                  className="block w-16 h-16"
-                />
-              </a>
+              <div className="flex flex-col items-center gap-0.5 shrink-0">
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden bg-white"
+                  title={t("qrOpensMenu")}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element -- external QR API */}
+                  <img
+                    src={qrSrc}
+                    alt={t("qrCode")}
+                    width={64}
+                    height={64}
+                    className="block w-16 h-16"
+                  />
+                </a>
+                <span className="text-[9px] text-slate-400 dark:text-slate-500 leading-none text-center max-w-[72px]">
+                  powered by ensmenu
+                </span>
+              </div>
               <div className="flex flex-col gap-1 shrink-0">
                 <button
                   type="button"
