@@ -16,6 +16,7 @@ import {
 import AddAdvertisementModal from "@/components/Dashboard/AddAdvertisementModal";
 import DeleteAdvertisementConfirm from "@/components/Dashboard/DeleteAdvertisementConfirm";
 import { useAppSelector } from "@/store/hooks";
+import { isFreePlanUser } from "@/lib/subscription";
 import LinkTo from "@/components/Global/LinkTo";
 
 export default function AdvertisementsPage() {
@@ -41,8 +42,7 @@ export default function AdvertisementsPage() {
   const [totalPages, setTotalPages] = useState(0);
 
   const userData = useAppSelector((state) => state.auth.data);
-  const planId = (userData as { user?: { subscription?: { planId?: number } } })?.user?.subscription?.planId;
-  const isFreePlan = planId === 1;
+  const isFreePlan = isFreePlanUser(userData);
 
   const fetchAds = useCallback(async () => {
     if (!menuId || isFreePlan) return;
