@@ -20,6 +20,10 @@ import { useAppSelector } from "@/store/hooks";
 import { isFreePlanUser } from "@/lib/subscription";
 import { toast } from "react-toastify";
 import {
+  StyledQrCode,
+  downloadStyledQrPng,
+} from "@/components/Global/StyledQrCode";
+import {
   IoAddCircleOutline,
   IoCopyOutline,
   IoDownloadOutline,
@@ -51,33 +55,6 @@ function safeTableFilenameSegment(tableNumber: string): string {
     .replace(/[\\/:*?"<>|]/g, "-")
     .trim()
     .slice(0, 80) || "table";
-}
-
-async function downloadQrImageFile(qrSrc: string, filename: string) {
-  try {
-    const res = await fetch(qrSrc, { mode: "cors" });
-    if (!res.ok) throw new Error("fetch failed");
-    const blob = await res.blob();
-    const objectUrl = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = objectUrl;
-    link.download = filename;
-    link.style.display = "none";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(objectUrl);
-  } catch {
-    const link = document.createElement("a");
-    link.href = qrSrc;
-    link.download = filename;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    link.style.display = "none";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
 }
 
 export default function TablesPage() {
@@ -209,7 +186,6 @@ export default function TablesPage() {
               </span>
             );
           }
-          const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(url)}`;
           const copy = () => {
             void navigator.clipboard.writeText(url).then(() => {
               toast.success(t("linkCopied"));
@@ -218,7 +194,11 @@ export default function TablesPage() {
           const download = (e: MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
             const name = `table-${safeTableFilenameSegment(row.tableNumber)}-qr.png`;
-            void downloadQrImageFile(qrSrc, name).then(() => {
+            void downloadStyledQrPng({
+              value: url,
+              filename: name,
+              size: 640,
+            }).then(() => {
               toast.success(t("qrDownloaded"));
             });
           };
@@ -232,13 +212,10 @@ export default function TablesPage() {
                   className="rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden bg-white"
                   title={t("qrOpensMenu")}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element -- external QR API */}
-                  <img
-                    src={qrSrc}
-                    alt={t("qrCode")}
-                    width={64}
-                    height={64}
-                    className="block w-16 h-16"
+                  <StyledQrCode
+                    value={url}
+                    size={128}
+                    displaySize={64}
                   />
                 </a>
                 <span className="text-[9px] text-slate-400 dark:text-slate-500 leading-none text-center max-w-[72px]">

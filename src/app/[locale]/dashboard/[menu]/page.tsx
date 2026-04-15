@@ -23,11 +23,15 @@ import {
 } from "react-icons/md";
 import { FiSettings } from "react-icons/fi";
 import { BsQrCode } from "react-icons/bs";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { axiosGet } from "@/shared/axiosCall";
 import type { Category, Item } from "@/types/Menu";
 import { format } from "date-fns";
 import { ar, enUS } from "date-fns/locale";
+import {
+  StyledQrCode,
+  type StyledQrCodeHandle,
+} from "@/components/Global/StyledQrCode";
 
 type ActivityEntry = {
   id: string;
@@ -82,9 +86,7 @@ export default function DashboardMenuPage() {
         "https://",
       )
     : "";
-  const qrImageUrl = menuUrl
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(menuUrl)}`
-    : "";
+  const menuQrRef = useRef<StyledQrCodeHandle>(null);
 
   useEffect(() => {
     if (!menu) return;
@@ -164,13 +166,8 @@ export default function DashboardMenuPage() {
   }, [recentItems, recentCategories, locale]);
 
   const handleDownloadQr = () => {
-    if (!qrImageUrl) return;
-    const link = document.createElement("a");
-    link.href = qrImageUrl;
-    link.download = `menu-qr-${menu?.slug ?? "menu"}.png`;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    link.click();
+    if (!menuUrl) return;
+    void menuQrRef.current?.download(`menu-qr-${menu?.slug ?? "menu"}.png`);
   };
 
   if (menuLoading || !menu) {
@@ -359,15 +356,16 @@ export default function DashboardMenuPage() {
           <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">
             {t("qrDescription")}
           </p>
-          {qrImageUrl ? (
+          {menuUrl ? (
             <div className="flex flex-col items-start gap-4">
               <div className="flex flex-col items-center gap-1.5">
                 <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 p-2 shadow-inner ring-1 ring-slate-100/50 dark:ring-slate-700/50">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={qrImageUrl}
-                    alt="Menu QR Code"
-                    className="w-[200px] h-[200px] rounded-xl"
+                  <StyledQrCode
+                    ref={menuQrRef}
+                    value={menuUrl}
+                    size={400}
+                    displaySize={200}
+                    className="rounded-xl"
                   />
                 </div>
                 <p className="text-[11px] text-slate-400 dark:text-slate-500 tracking-wide text-center max-w-[200px] leading-tight">
