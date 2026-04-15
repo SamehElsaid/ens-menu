@@ -341,7 +341,7 @@ export default function DashboardMenuPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* QR code section */}
         <section
-          className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 transition-all duration-200 hover:shadow-md hover:border-slate-200 dark:hover:border-slate-600"
+          className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 transition-all duration-200 hover:shadow-md hover:border-slate-200 dark:hover:border-slate-600 flex flex-col items-center justify-center"
           aria-labelledby="qr-title"
         >
           <div className="flex items-center gap-2 mb-2">
@@ -357,7 +357,7 @@ export default function DashboardMenuPage() {
             {t("qrDescription")}
           </p>
           {menuUrl ? (
-            <div className="flex flex-col items-start gap-4">
+            <div className="flex flex-col items-center gap-4 w-full">
               <div className="flex flex-col items-center gap-1.5">
                 <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 p-2 shadow-inner ring-1 ring-slate-100/50 dark:ring-slate-700/50">
                   <StyledQrCode
@@ -375,7 +375,7 @@ export default function DashboardMenuPage() {
               <button
                 type="button"
                 onClick={handleDownloadQr}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl font-medium text-sm hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl font-medium text-sm hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
               >
                 <IoDownloadOutline className="text-lg" />
                 {t("downloadAsImage")}
