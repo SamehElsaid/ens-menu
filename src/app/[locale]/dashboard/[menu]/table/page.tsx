@@ -137,13 +137,6 @@ export default function TablesPage() {
         ),
       },
       {
-        headerName: t("seats"),
-        field: "seats",
-        width: 100,
-        valueFormatter: (p) =>
-          p.value != null && p.value > 0 ? String(p.value) : "—",
-      },
-      {
         headerName: t("status"),
         field: "isActive",
         width: 120,

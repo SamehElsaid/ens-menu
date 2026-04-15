@@ -11,7 +11,8 @@ import CustomBtn from "../Custom/CustomBtn";
 interface DeleteTableConfirmProps {
   menuId: string;
   table: MenuTable;
-  displayLabel: string;
+  /** Table number; API may send string or number */
+  displayLabel: string | number;
   onClose: () => void;
   onDeleted?: () => void;
 }
@@ -27,7 +28,8 @@ export default function DeleteTableConfirm({
   const locale = useLocale();
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmValue, setConfirmValue] = useState("");
-  const canConfirm = confirmValue.trim() === displayLabel.trim();
+  const labelText = String(displayLabel ?? "").trim();
+  const canConfirm = confirmValue.trim() === labelText;
 
   const handleDelete = async () => {
     try {
@@ -86,7 +88,7 @@ export default function DeleteTableConfirm({
         </div>
 
         <p className="text-gray-600 dark:text-gray-300 mb-4">
-          {t("deleteConfirm", { name: displayLabel })}
+          {t("deleteConfirm", { name: labelText })}
         </p>
 
         <label
@@ -95,7 +97,7 @@ export default function DeleteTableConfirm({
         >
           {t("typeToConfirm")}{" "}
           <span className="font-bold text-gray-900 dark:text-white">
-            «{displayLabel}»
+            «{labelText}»
           </span>
         </label>
         <input
@@ -103,7 +105,7 @@ export default function DeleteTableConfirm({
           type="text"
           value={confirmValue}
           onChange={(e) => setConfirmValue(e.target.value)}
-          placeholder={displayLabel}
+          placeholder={labelText}
           disabled={isDeleting}
           className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all mb-6"
           autoComplete="off"

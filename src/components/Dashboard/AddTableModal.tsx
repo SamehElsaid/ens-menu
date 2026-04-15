@@ -20,7 +20,6 @@ import { useParams } from "next/navigation";
 
 export interface AddTableFormData {
   tableNumber: string;
-  seats: string;
   isActive: boolean;
 }
 
@@ -51,7 +50,6 @@ export default function AddTableModal({
   } = useForm<AddTableFormData>({
     defaultValues: {
       tableNumber: "",
-      seats: "",
       isActive: true,
     },
     mode: "onChange",
@@ -61,12 +59,10 @@ export default function AddTableModal({
     if (table) {
       reset({
         tableNumber: table.tableNumber ?? "",
-        seats:
-          table.seats != null && table.seats > 0 ? String(table.seats) : "",
         isActive: table.isActive ?? true,
       });
     } else {
-      reset({ tableNumber: "", seats: "", isActive: true });
+      reset({ tableNumber: "", isActive: true });
     }
   }, [table, reset]);
 
@@ -86,18 +82,9 @@ export default function AddTableModal({
   const onSubmit = async (data: AddTableFormData) => {
     try {
       setIsSaving(true);
-      const seatsTrim = data.seats.trim();
-      const seatsNum =
-        seatsTrim === "" ? undefined : Number.parseInt(seatsTrim, 10);
-      if (seatsTrim !== "" && (Number.isNaN(seatsNum) || (seatsNum ?? 0) < 1)) {
-        toast.error(t("seatsInvalid"));
-        setIsSaving(false);
-        return;
-      }
 
       const payload: {
         tableNumber: string;
-        seats?: number;
         isActive: boolean;
         menuId: number;
       } = {
@@ -105,9 +92,6 @@ export default function AddTableModal({
         isActive: data.isActive,
         menuId: Number(menuIdParam),
       };
-      if (seatsNum != null && seatsNum >= 1) {
-        payload.seats = seatsNum;
-      }
 
       if (isEdit && table) {
         const result = await axiosPatch<typeof payload, { message?: string }>(
@@ -215,27 +199,6 @@ export default function AddTableModal({
                         className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                         placeholder={t("tableNumberPlaceholder")}
                         error={errors.tableNumber?.message}
-                      />
-                    )}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t("seats")}
-                  </label>
-                  <Controller
-                    name="seats"
-                    control={control}
-                    render={({ field }) => (
-                      <CustomInput
-                        type="number"
-                        min={1}
-                        value={field.value}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        onBlur={field.onBlur}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                        placeholder={t("seatsPlaceholder")}
-                        error={errors.seats?.message}
                       />
                     )}
                   />
