@@ -11,14 +11,18 @@ import Logo from "../Global/Logo";
 import { homeLinks } from "@/modules/Header";
 import LanguageToggle from "./LanguageTogle";
 import DarkModeToggle from "./DarkModeToggle";
-import { axiosGet, axiosPost } from "@/shared/axiosCall";
+
+function isHomePathname(pathname: string) {
+  const p = pathname.replace(/\/$/, "") || "/";
+  return p === "/" || p === "/en";
+}
 
 // NavLink Component
 interface NavLinkProps {
   href: string;
   children: React.ReactNode;
   icon: React.FC<{ size?: number; className?: string }>;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 const NavLink: React.FC<NavLinkProps> = ({
@@ -60,9 +64,33 @@ function Header() {
 
   const handleNavClick = () => setIsOpen(false);
 
+  const scrollToHash = (hash: string) => {
+    const element = document.querySelector(hash);
+    if (element) {
+      const navbarHeight = 100;
+      const elementPosition =
+        element.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({
+        top: elementPosition - navbarHeight,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const handleInPageNav = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
+    handleNavClick();
+    if (!href.startsWith("/#")) return;
+    if (!isHomePathname(pathname)) return;
+    e.preventDefault();
+    scrollToHash(href.slice(1));
+  };
+
   const navLinks = homeLinks.map((link) => ({
     name: t(link.title),
-    href: `#${link.href}`,
+    href: link.href,
     icon: link.icon,
   }));
 
@@ -76,7 +104,7 @@ function Header() {
       <div className="container mx-auto px-6 flex items-center justify-between">
         {/* Logo */}
         <Link
-          href={`/${locale}`}
+          href="/"
           onClick={handleNavClick}
           className="flex items-center gap-2 text-xl font-semibold text-slate-900 dark:text-white"
         >
@@ -91,7 +119,7 @@ function Header() {
               key={link.name}
               href={link.href}
               icon={link.icon}
-              onClick={handleNavClick}
+              onClick={(e) => handleInPageNav(e, link.href)}
             >
               {link.name}
             </NavLink>
@@ -151,7 +179,7 @@ function Header() {
             <Link
               key={link.name}
               href={link.href}
-              onClick={handleNavClick}
+              onClick={(e) => handleInPageNav(e, link.href)}
               className="py-4 text-lg font-bold text-slate-800 dark:text-slate-200 hover:text-purple-600 dark:hover:text-purple-400 transition-colors flex items-center justify-center gap-4 cursor-pointer"
             >
               <link.icon size={22} className="text-purple-500" />
