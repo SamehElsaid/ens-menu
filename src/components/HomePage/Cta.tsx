@@ -7,7 +7,7 @@ export const CTA = () => {
   const isRTL = locale === "ar";
 
   return (
-    <section className="py-20 bg-white dark:bg-[#0d1117]">
+    <section id="contact" className="bg-white py-20 dark:bg-[#0d1117]">
       <div className="container mx-auto px-6">
         <div className="bg-linear-to-r from-purple-600 to-purple-700 dark:from-purple-500 dark:to-purple-600 rounded-[60px] p-12 lg:p-20 text-center text-white shadow-[0_30px_60px_-15px_rgba(124,58,237,0.5)] dark:shadow-[0_30px_60px_-15px_rgba(168,85,247,0.4)] relative overflow-hidden">
           {/* Blur circles */}

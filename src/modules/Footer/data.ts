@@ -25,10 +25,10 @@ export const getContactInfo = (t: TranslationFunction): ContactInfo[] => [
 ];
 
 export const getNavLinks = (headerT: TranslationFunction): NavLink[] => [
-  { name: headerT("home"), path: "#hero" },
-  { name: headerT("features"), path: "#features" },
-  { name: headerT("team"), path: "#how-it-works" },
-  { name: headerT("faq"), path: "#faq" },
+  { name: headerT("home"), path: "/#hero" },
+  { name: headerT("features"), path: "/#features" },
+  { name: headerT("team"), path: "/#how-it-works" },
+  { name: headerT("faq"), path: "/faq" },
   {
     name: headerT("contact"),
     path: "https://wa.me/971586551491",
