@@ -100,6 +100,21 @@ button {
   animation: logo-spin 5s ease-in-out infinite;
 }
 
+/** Laser line over QR preview (HeroSection phone mock) */
+@keyframes heroQrScan {
+  0%,
+  100% {
+    top: 0;
+  }
+  50% {
+    top: calc(100% - 0.25rem);
+  }
+}
+
+.animate-hero-qr-scan {
+  animation: heroQrScan 2.4s ease-in-out infinite;
+}
+
 body {
   font-family: "Tajawal", "Cairo", sans-serif;
   background-color: var(--background);

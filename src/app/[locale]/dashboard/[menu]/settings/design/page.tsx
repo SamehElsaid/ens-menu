@@ -104,7 +104,10 @@ export default function DesignPage() {
                     <div className="relative h-full w-full overflow-hidden">
                       {template.hidePreviewImage ? (
                         <div
-                          className="absolute inset-0 bg-linear-to-br from-emerald-900/35 via-slate-300/60 to-emerald-950/40 dark:from-emerald-950/70 dark:via-slate-600/50 dark:to-emerald-950/60"
+                          className="absolute inset-0"
+                          style={{
+                            background: `linear-gradient(135deg, ${template.colors[0]}B8 0%, ${template.colors[1] ?? template.colors[0]}99 42%, rgb(15 23 42 / 0.72) 100%)`,
+                          }}
                           aria-hidden
                         />
                       ) : (

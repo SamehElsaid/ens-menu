@@ -147,4 +147,19 @@ export const templatesInfo: TemplateInfo[] = [
     colors: ["#7c3aed", "#06b6d4"],
     defaultColors: ["#7c3aed", "#06b6d4"],
   },
+  {
+    id: "oceanic",
+    name: "Oceanic Template",
+    nameAr: "قالب المحيط",
+    image: "/images/temp/oceanic.png",
+    description:
+      "Ocean-inspired menu with hero, bubbles, promo banner, and card grid",
+    descriptionAr:
+      "قائمة بطابع محيطي مع هيرو، فقاعات، بانر ترويجي، وشبكة بطاقات",
+    isNew: true,
+    canEdit: false,
+    customizeHeroTexts: false,
+    slug: "oceanic",
+    colors: ["#0ea5e9", "#0891b2"],
+  },
 ];

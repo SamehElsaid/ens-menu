@@ -2,25 +2,32 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, getPathname } from "@/i18n/navigation";
 import {
   FiArrowLeft as ArrowLeft,
   FiArrowRight as ArrowRight,
   FiMenu as Menu,
   FiShoppingCart as ShoppingCart,
 } from "react-icons/fi";
-import { BsQrCode } from "react-icons/bs";
 import YouTube, { type YouTubeProps, type YouTubeEvent } from "react-youtube";
 import { menuItemsData } from "@/modules/menuItems";
 import { MenuItem } from "@/types/types";
 import Background from "../Global/Background";
 import LoadImage from "../ImageLoad";
+import { StyledQrCode } from "@/components/Global/StyledQrCode";
+import { BsQrCode } from "react-icons/bs";
 
 // Interactive Phone Component
 const InteractivePhone = () => {
   const [step, setStep] = useState(0);
   const locale = useLocale();
   const isRTL = locale === "ar";
+  const loginPath = getPathname({ href: "/auth/login", locale });
+  const [loginQrUrl, setLoginQrUrl] = useState("");
+
+  useEffect(() => {
+    setLoginQrUrl(`${window.location.origin}${loginPath}`);
+  }, [loginPath]);
 
   useEffect(() => {
     const timer = setInterval(() => setStep((prev) => (prev + 1) % 3), 4500);
@@ -52,8 +59,20 @@ const InteractivePhone = () => {
               key="qr"
               className="h-full flex flex-col items-center justify-center p-8 bg-purple-50 dark:bg-purple-100"
             >
-              <div className="bg-white p-7 rounded-[40px] shadow-2xl border-2 border-purple-100 mb-8">
-                <BsQrCode size={160} className="text-slate-900" />
+              <div className="bg-white p-5 rounded-[40px] shadow-2xl border-2 border-white/10 mb-8 flex items-center justify-center min-h-[180px]">
+                {loginQrUrl ? (
+                  <StyledQrCode
+                    value={loginQrUrl}
+                    size={280}
+                    displaySize={160}
+                    className="rounded-xl"
+                  />
+                ) : (
+                  <div
+                    className="w-48 h-48 rounded-xl bg-slate-100 animate-pulse"
+                    aria-hidden
+                  />
+                )}
               </div>
               <p className="text-purple-700 font-bold text-lg text-center leading-relaxed">
                 {isRTL
@@ -67,9 +86,9 @@ const InteractivePhone = () => {
               key="scanning"
               className="h-full flex flex-col items-center justify-center p-8 bg-black relative"
             >
-              <div className="w-full aspect-square border-2 border-white/20 rounded-[40px] flex items-center justify-center overflow-hidden relative">
+              <div className="w-full aspect-square border-2 border-white/20 rounded-[40px] flex items-center justify-center overflow-hidden relative bg-black p-3">
                 <BsQrCode size={140} className="text-white/40" />
-                <div className="absolute left-6 right-6 top-0 h-1 bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.9)] z-10" />
+                <div className="absolute left-6 right-6 top-0 h-1 bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.9)] z-10 pointer-events-none animate-hero-qr-scan rounded-full" />
               </div>
               <p className="mt-8 text-white text-lg font-medium tracking-wide">
                 {isRTL
@@ -97,10 +116,11 @@ const InteractivePhone = () => {
                 {categories.map((cat, i) => (
                   <div
                     key={i}
-                    className={`px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap ${i === 0
+                    className={`px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap ${
+                      i === 0
                         ? "bg-purple-600 text-white shadow-md"
                         : "bg-slate-50 text-slate-500 border border-slate-100"
-                      }`}
+                    }`}
                   >
                     {cat}
                   </div>
@@ -112,7 +132,7 @@ const InteractivePhone = () => {
                     key={i}
                     className="flex items-center gap-4 p-3 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-white hover:border-purple-100 transition-all cursor-pointer"
                   >
-                    <div className="w-[56px] h-[56px]">
+                    <div className="w-14 h-14">
                       <LoadImage
                         src={item.image}
                         alt={item.name}
@@ -180,8 +200,9 @@ const HeroSection = () => {
       <Background />
       <div className="container mx-auto px-6 relative z-10">
         <div
-          className={`flex flex-col lg:flex-row items-center gap-16 lg:gap-24 ${isRTL ? "lg:flex-row-reverse" : ""
-            }`}
+          className={`flex flex-col lg:flex-row items-center gap-16 lg:gap-24 ${
+            isRTL ? "lg:flex-row-reverse" : ""
+          }`}
         >
           <div className={`lg:w-1/2  order-2 `}>
             <div className="inline-block px-5 py-2 rounded-full bg-purple-50 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 font-bold text-sm mb-8 border border-purple-100 dark:border-purple-500/30 shadow-sm">
@@ -194,14 +215,16 @@ const HeroSection = () => {
               </span>
             </h1>
             <p
-              className={`text-lg  text-slate-600 dark:text-slate-300 mb-10 leading-relaxed max-w-xl font-medium ${isRTL ? "ml-auto" : ""
-                }`}
+              className={`text-lg  text-slate-600 dark:text-slate-300 mb-10 leading-relaxed max-w-xl font-medium ${
+                isRTL ? "ml-auto" : ""
+              }`}
             >
               {t("description")}
             </p>
             <div
-              className={`flex flex-wrap items-center gap-5 ${isRTL ? "justify-end" : "justify-start"
-                }`}
+              className={`flex flex-wrap items-center gap-5 ${
+                isRTL ? "justify-end" : "justify-start"
+              }`}
             >
               <div>
                 <Link
@@ -233,7 +256,9 @@ const HeroSection = () => {
 
       <div
         className={`fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm transition-opacity duration-200 ${
-          isVideoOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          isVideoOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
         }`}
       >
         <div className="relative youtube-player-container w-full max-w-4xl mx-4 aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
