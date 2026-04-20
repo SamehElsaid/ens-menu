@@ -1,38 +1,47 @@
 "use client";
 
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { usePathname } from "next/navigation";
 import { Logo } from "@/components/Global/Logo";
 import { Link } from "@/i18n/navigation";
 import { getContactInfo, getNavLinks } from "@/modules/Footer";
+
+function isHomePathname(pathname: string) {
+  const p = pathname.replace(/\/$/, "") || "/";
+  return p === "/" || p === "/en";
+}
 
 const FooterSection = () => {
   const t = useTranslations("Landing.footer");
   const headerT = useTranslations("header");
   const currentYear = new Date().getFullYear();
-  const locale = useLocale();
+  const pathname = usePathname();
 
   const navLinks = getNavLinks(headerT);
   const contactInfo = getContactInfo(t);
 
-  const handleNavClick = (
+  const scrollToHash = (hash: string) => {
+    const element = document.querySelector(hash);
+    if (element) {
+      const navbarHeight = 100;
+      const elementPosition =
+        element.getBoundingClientRect().top + window.pageYOffset;
+      const offsetPosition = elementPosition - navbarHeight;
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const handleInternalFooterLink = (
     e: React.MouseEvent<HTMLAnchorElement>,
     path: string
   ) => {
-    if (path.startsWith("#")) {
-      e.preventDefault();
-      const element = document.querySelector(path);
-      if (element) {
-        const navbarHeight = 100;
-        const elementPosition =
-          element.getBoundingClientRect().top + window.pageYOffset;
-        const offsetPosition = elementPosition - navbarHeight;
-
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: "smooth",
-        });
-      }
-    }
+    if (!path.startsWith("/#")) return;
+    if (!isHomePathname(pathname)) return;
+    e.preventDefault();
+    scrollToHash(path.slice(1));
   };
 
   return (
@@ -72,18 +81,26 @@ const FooterSection = () => {
             <ul className="space-y-3">
               {navLinks.map((link) => (
                 <li key={link.path}>
-                  <a
-                    href={link.path}
-                    onClick={(e) =>
-                      !link.external && handleNavClick(e, link.path)
-                    }
-                    target={link.external ? "_blank" : undefined}
-                    rel={link.external ? "noopener noreferrer" : undefined}
-                    className="text-gray-400 dark:text-gray-500 hover:text-purple-400 dark:hover:text-purple-400 transition-all duration-300 hover:translate-x-1 inline-block text-base cursor-pointer"
-                    suppressHydrationWarning
-                  >
-                    {link.name}
-                  </a>
+                  {link.external ? (
+                    <a
+                      href={link.path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block cursor-pointer text-base text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-purple-400 dark:text-gray-500 dark:hover:text-purple-400"
+                      suppressHydrationWarning
+                    >
+                      {link.name}
+                    </a>
+                  ) : (
+                    <Link
+                      href={link.path}
+                      onClick={(e) => handleInternalFooterLink(e, link.path)}
+                      className="inline-block cursor-pointer text-base text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-purple-400 dark:text-gray-500 dark:hover:text-purple-400"
+                      suppressHydrationWarning
+                    >
+                      {link.name}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
@@ -148,7 +165,7 @@ const FooterSection = () => {
             </p>
 
             {/* Links */}
-            <div className="flex gap-8">
+            <div className="flex flex-wrap justify-center gap-6 md:gap-8">
               <Link
                 href={`/privacy-policy`}
                 className="text-gray-500 dark:text-gray-600 hover:text-purple-400 dark:hover:text-purple-400 text-sm transition-colors duration-300"
@@ -157,8 +174,8 @@ const FooterSection = () => {
                 {t("privacy")}
               </Link>
               <Link
-                href={`/terms-and-conditions`}
-                className="text-gray-500 dark:text-gray-600 hover:text-purple-400 dark:hover:text-purple-400 text-sm transition-colors duration-300"
+                href="/terms-and-conditions"
+                className="text-sm text-gray-500 transition-colors duration-300 hover:text-purple-400 dark:text-gray-600 dark:hover:text-purple-400"
                 suppressHydrationWarning
               >
                 {t("terms")}

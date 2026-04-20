@@ -16,6 +16,104 @@
       "resetPasswordTitle": "Reset Password | ENSmenu",
       "resetPasswordDescription": "Reset your ENSmenu account password.",
       "resetPasswordKeywords": "reset password, forgot password, recover account, ENSmenu"
+    },
+    "legalPrivacy": {
+      "title": "Privacy Policy | ENSmenu",
+      "description": "Learn how ENSmenu collects, uses, and protects your data when you use our digital menu platform.",
+      "keywords": "privacy policy, ENSmenu, personal data, digital menu, data protection"
+    },
+    "legalTerms": {
+      "title": "Terms and Conditions | ENSmenu",
+      "description": "Terms of use for the ENSmenu platform for creating and managing digital restaurant and cafe menus.",
+      "keywords": "terms of use, ENSmenu, user agreement, digital menu, SaaS"
+    },
+    "faqPage": {
+      "title": "FAQ | ENSmenu",
+      "description": "Answers about digital menus, plans, languages, and the ENSmenu dashboard.",
+      "keywords": "FAQ, ENSmenu, QR menu, help, support, digital menu"
+    }
+  },
+  "legalPages": {
+    "backToHome": "Back to home",
+    "privacy": {
+      "title": "Privacy Policy",
+      "updated": "Last updated: April 2026",
+      "sections": [
+        {
+          "heading": "Introduction",
+          "body": "ENSmenu (\"we\") respects your privacy. This policy explains how we collect, use, and protect information when you use our website, applications, and digital menu services (the \"Service\"). By using the Service, you acknowledge the practices described here."
+        },
+        {
+          "heading": "Data we collect",
+          "body": "We may collect:\n• Account data: such as your name or business name, email, and phone number when you register or contact us.\n• Usage data: such as browser type, pages visited, timestamps, and session identifiers to improve performance and security.\n• Menu content: text, images, and prices you upload to build your digital menu.\n• Technical data: error logs and device information when needed to diagnose issues."
+        },
+        {
+          "heading": "Legal basis and purposes",
+          "body": "We process data to provide, operate, and improve the Service; authenticate accounts; communicate with you about your account or support; comply with legal obligations; and protect the rights and safety of our users and platform."
+        },
+        {
+          "heading": "Sharing with third parties",
+          "body": "We may use infrastructure, hosting, analytics, or support providers who act under agreements and protect your data. We do not sell your personal information. We may disclose information if required by law or to protect the integrity and security of the Service."
+        },
+        {
+          "heading": "Security and retention",
+          "body": "We apply reasonable technical and organisational measures to protect data. No system is completely secure; please use a strong password and do not share login credentials. We retain data for as long as needed to provide the Service and meet legal requirements, then delete or anonymise it where permitted."
+        },
+        {
+          "heading": "Your rights",
+          "body": "Depending on applicable law, you may have the right to access, rectify, erase, restrict, or object to processing, and to withdraw consent where processing is consent-based. Contact us through the support channels shown on the website for requests."
+        },
+        {
+          "heading": "Cookies and similar technologies",
+          "body": "We may use cookies or local storage for session, language, and theme preferences, and for performance measurement. You can adjust your browser to refuse some cookies; note that parts of the Service may not work as intended."
+        },
+        {
+          "heading": "Changes",
+          "body": "We may update this policy from time to time. We will show a \"Last updated\" date at the top of this page. Continued use of the Service after changes may constitute acceptance where the law allows."
+        }
+      ]
+    },
+    "terms": {
+      "title": "Terms and Conditions",
+      "updated": "Last updated: April 2026",
+      "sections": [
+        {
+          "heading": "Acceptance",
+          "body": "By using ENSmenu you agree to these terms. If you do not agree, please do not use the Service."
+        },
+        {
+          "heading": "Description of the Service",
+          "body": "ENSmenu provides tools to create, manage, and display digital menus for restaurants and cafes, including features such as QR linking, subject to the capabilities available on your plan or subscription."
+        },
+        {
+          "heading": "Account and responsibility",
+          "body": "You are responsible for the accuracy of information you provide and for safeguarding your login credentials. You must notify us promptly of any unauthorised use of your account. You must be of legal age to enter into a contract in your jurisdiction."
+        },
+        {
+          "heading": "Acceptable use",
+          "body": "You must not misuse the Service, attempt to compromise systems or overload infrastructure, publish unlawful or misleading content or content that infringes others' rights, or collect user data without authorisation."
+        },
+        {
+          "heading": "Content and intellectual property",
+          "body": "You retain rights to content you upload (images, text, prices) or you must have permission to use it. You grant us a non-exclusive licence to host and display that content as needed to operate the Service. ENSmenu branding, design, and software remain our property or that of our licensors."
+        },
+        {
+          "heading": "Subscriptions and payment",
+          "body": "If the Service is paid or includes upgrades, billing terms shown at purchase apply. Prices and features may change with reasonable notice where required by law."
+        },
+        {
+          "heading": "Disclaimer",
+          "body": "The Service is provided \"as is\" and \"as available\" to the fullest extent permitted by law. We do not guarantee uninterrupted or error-free operation, and we disclaim indirect, incidental, or consequential damages except where prohibited by law."
+        },
+        {
+          "heading": "Suspension and termination",
+          "body": "We may suspend or terminate access for violations of these terms, security, or legal reasons. You may stop using the Service at any time. Provisions that should survive termination (such as intellectual property and liability limits) remain in effect where applicable."
+        },
+        {
+          "heading": "Governing law and disputes",
+          "body": "These terms are governed by the laws applicable to ENSmenu's operations unless otherwise agreed in writing. Competent courts or forums may be determined according to policies in effect at the time of a dispute."
+        }
+      ]
     }
   },
   "header": {
@@ -847,23 +945,43 @@
     },
     "faq": {
       "title": "Frequently Asked Questions",
-      "description": "Everything you need to know about ENS platform in one place.",
+      "description": "Everything you need to know about ENSmenu in one place.",
       "items": [
         {
-          "question": "How do I update my menu?",
-          "answer": "Through your dashboard, you can modify items, prices, and images with a click of a button, and the change will appear instantly to your customers without needing to change the printed QR code."
+          "question": "Can I create a QR menu for free?",
+          "answer": "Yes. You can create a fully free digital menu for your restaurant or cafe in minutes, add items, prices, and photos, and get a QR code ready to use—no hassle."
         },
         {
-          "question": "Do I need a crypto wallet to use the service?",
-          "answer": "No, you can register via email or Google account and start directly. We provide traditional payment options in addition to crypto options."
+          "question": "What is the difference between the free plan and paid subscription?",
+          "answer": "The free plan covers the essentials to run a professional menu. Paid plans add features such as full design control, brand colours, promotions or ads, and a richer experience for your guests (see current pricing for details)."
         },
         {
-          "question": "What is a smart menu?",
-          "answer": "It is an interactive menu that allows your customers to browse meals, view item ratings, and even order directly from the table via their phone."
+          "question": "Does the menu support Arabic and English?",
+          "answer": "Yes. The platform supports Arabic and English so you can choose what works for your customers—ideal for locals and tourists alike."
         },
         {
-          "question": "Can I link the QR to an external website?",
-          "answer": "Absolutely! You can direct the QR to any external link, or use our integrated and professional menu system."
+          "question": "Is the dashboard easy to use?",
+          "answer": "We built a simple, fast dashboard where you can add or edit items and prices, update your menu anytime, and see changes go live without technical skills."
+        },
+        {
+          "question": "Can I manage more than one menu or branch?",
+          "answer": "It depends on your plan: the free tier often allows one active menu, while higher plans support multiple menus or advanced features. Check pricing or your dashboard for your current limits."
+        },
+        {
+          "question": "How do I share the menu with customers?",
+          "answer": "After you publish your menu you get a direct link and a QR code. Put the code on tables, printed menus, or social media—customers scan or tap the link and browse instantly."
+        },
+        {
+          "question": "Is my restaurant data and menu protected?",
+          "answer": "We work to keep the platform secure and host your data with reasonable safeguards. Read our privacy policy for details on collection and use, and use a strong password—never share login credentials."
+        },
+        {
+          "question": "What if I need help or run into an issue?",
+          "answer": "Contact us via WhatsApp or email as shown on the site—we can help you set up your menu or troubleshoot technical issues."
+        },
+        {
+          "question": "Can I customise the menu look, colours, and logo?",
+          "answer": "Yes. Depending on your plan you can upload a logo and adjust colours and layout to match your brand; higher tiers offer broader design control."
         }
       ]
     },

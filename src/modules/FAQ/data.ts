@@ -1,4 +1,4 @@
-export const FAQ_ITEMS_COUNT = 4;
+export const FAQ_ITEMS_COUNT = 9;
 
 export const FAQ_CONFIG = {
   iconSize: 48,

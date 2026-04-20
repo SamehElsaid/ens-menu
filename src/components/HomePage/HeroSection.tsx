@@ -196,7 +196,10 @@ const HeroSection = () => {
   }, [isVideoOpen]);
 
   return (
-    <section className="relative pt-44 pb-24 overflow-hidden min-h-[95vh] flex items-center bg-white dark:bg-[#0d1117]">
+    <section
+      id="hero"
+      className="relative flex min-h-[95vh] items-center overflow-hidden bg-white pt-44 pb-24 dark:bg-[#0d1117]"
+    >
       <Background />
       <div className="container mx-auto px-6 relative z-10">
         <div
