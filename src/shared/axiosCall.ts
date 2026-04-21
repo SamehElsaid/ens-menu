@@ -167,7 +167,7 @@ export const axiosPost = async <T, U>(
   data: T,
   file?: boolean,
   close?: boolean,
-) => {
+): Promise<ApiResponse<U>> => {
   const authToken = Cookies.get("sub") ?? "";
   const tokenDecrypted = decryptData(authToken) as DecryptedToken;
   const HeaderImg = { "Content-Type": "multipart/form-data" };

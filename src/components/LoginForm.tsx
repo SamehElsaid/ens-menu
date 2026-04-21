@@ -56,7 +56,7 @@ export default function LoginForm() {
       false,
       true,
     );
-    if (response.status) {
+    if (response.status && response.data) {
       // toast.success(t("auth.loginSuccess"));
 
       const { accessToken, refreshToken, user } = response.data;
