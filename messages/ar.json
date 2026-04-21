@@ -1175,7 +1175,60 @@
     "Application": "الطلبات",
     "needMoreFeatures": "تحتاج المزيد من الميزات؟",
     "upgradeWorkspace": "طوّر مساحة عملك بنقرة واحدة.",
-    "drawerMenuTitle": "القائمة"
+    "drawerMenuTitle": "القائمة",
+    "history": "سجل النشاط"
+  },
+  "activityHistory": {
+    "title": "سجل النشاط",
+    "subtitle": "اعرف من أضاف أو عدّل المنتجات والموظفين وإعدادات القائمة وطلبات الطاولات.",
+    "loading": "جاري التحميل…",
+    "empty": "لا يوجد نشاط مسجّل بعد.",
+    "noSearchResults": "لا توجد نتائج بهذا الاسم.",
+    "searchPlaceholder": "ابحث بالاسم…",
+    "changedLabel": "ما الذي تغيّر",
+    "orderStatusLine": "حالة الطلب: {status}",
+    "orderStatus": {
+      "pending": "قيد الانتظار",
+      "confirmed": "مؤكد",
+      "cancelled": "ملغى"
+    },
+    "changeTypes": {
+      "itemsEdited": "تعديل أصناف الطلب أو الكميات"
+    },
+    "fields": {
+      "logo": "الشعار",
+      "theme": "المظهر / التصميم",
+      "currency": "العملة",
+      "isActive": "تفعيل أو إيقاف القائمة",
+      "footerLogo": "شعار التذييل",
+      "footerDescriptionEn": "وصف التذييل (إنجليزي)",
+      "footerDescriptionAr": "وصف التذييل (عربي)",
+      "socialFacebook": "رابط فيسبوك",
+      "socialInstagram": "رابط إنستغرام",
+      "socialTwitter": "رابط X (تويتر)",
+      "socialWhatsapp": "واتساب",
+      "addressEn": "العنوان (إنجليزي)",
+      "addressAr": "العنوان (عربي)",
+      "phone": "الهاتف",
+      "workingHours": "ساعات العمل",
+      "nameAr": "اسم القائمة (عربي)",
+      "descriptionAr": "الوصف (عربي)",
+      "nameEn": "اسم القائمة (إنجليزي)",
+      "descriptionEn": "الوصف (إنجليزي)"
+    },
+    "prev": "السابق",
+    "next": "التالي",
+    "pageInfo": "صفحة {page} من {totalPages} — {total} سجلًا",
+    "staffJobRole": {
+      "cashier": "كاشير",
+      "waiter": "نادل"
+    },
+    "role": {
+      "staff": "موظف",
+      "owner": "المالك",
+      "admin": "مدير",
+      "other": "مستخدم"
+    }
   },
   "adminDashboard": {
     "title": "لوحة تحكم الأدمن",

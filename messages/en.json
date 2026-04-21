@@ -1452,7 +1452,60 @@
     "Application": "Application",
     "needMoreFeatures": "Need more features?",
     "upgradeWorkspace": "Upgrade your workspace in one click.",
-    "drawerMenuTitle": "Menu"
+    "drawerMenuTitle": "Menu",
+    "history": "Activity log"
+  },
+  "activityHistory": {
+    "title": "Activity log",
+    "subtitle": "See who added or changed products, staff, menu settings, and table orders.",
+    "loading": "Loading…",
+    "empty": "No activity recorded yet.",
+    "noSearchResults": "No entries match this name.",
+    "searchPlaceholder": "Search by person name…",
+    "changedLabel": "What changed",
+    "orderStatusLine": "Order status: {status}",
+    "orderStatus": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled"
+    },
+    "changeTypes": {
+      "itemsEdited": "Order lines were updated (items or quantities)"
+    },
+    "fields": {
+      "logo": "Logo",
+      "theme": "Theme / design",
+      "currency": "Currency",
+      "isActive": "Menu active / inactive",
+      "footerLogo": "Footer logo",
+      "footerDescriptionEn": "Footer description (English)",
+      "footerDescriptionAr": "Footer description (Arabic)",
+      "socialFacebook": "Facebook link",
+      "socialInstagram": "Instagram link",
+      "socialTwitter": "X (Twitter) link",
+      "socialWhatsapp": "WhatsApp",
+      "addressEn": "Address (English)",
+      "addressAr": "Address (Arabic)",
+      "phone": "Phone",
+      "workingHours": "Working hours",
+      "nameAr": "Menu name (Arabic)",
+      "descriptionAr": "Description (Arabic)",
+      "nameEn": "Menu name (English)",
+      "descriptionEn": "Description (English)"
+    },
+    "prev": "Previous",
+    "next": "Next",
+    "pageInfo": "Page {page} of {totalPages} — {total} entries",
+    "staffJobRole": {
+      "cashier": "Cashier",
+      "waiter": "Waiter"
+    },
+    "role": {
+      "staff": "Staff",
+      "owner": "Owner",
+      "admin": "Admin",
+      "other": "User"
+    }
   },
   "adminDashboard": {
     "title": "Admin Control Panel",

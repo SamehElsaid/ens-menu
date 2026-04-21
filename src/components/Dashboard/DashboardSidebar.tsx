@@ -122,14 +122,14 @@ export function DashboardSidebar({
           </div>
         ))}
       </nav>
-      <div className="m-4 rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-4 text-sm">
+      {/* <div className="m-4 rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-4 text-sm">
         <p className="font-semibold text-primary dark:text-slate-100">
           {t("needMoreFeatures")}
         </p>
         <p className="text-slate-500 dark:text-slate-300">
           {t("upgradeWorkspace")}
         </p>
-      </div>
+      </div> */}
     </aside>
   );
 
