@@ -1,7 +1,8 @@
 "use client";
 import { usePathname } from "@/i18n/navigation";
 import LinkTo from "../Global/LinkTo";
-import { adminNavSections, navSections } from "./data";
+import { adminNavSections, cashierNavSections, navSections } from "./data";
+import { useDashboardSession } from "@/hooks/useDashboardSession";
 import Drawer from "../Global/Drawer";
 import { useLocale, useTranslations } from "next-intl";
 import LoadImage from "../ImageLoad";
@@ -22,7 +23,12 @@ export function DashboardSidebar({
   const pathname = usePathname();
   const locale = useLocale();
   const t = useTranslations("Dashboard");
-  const navSectionsData = isAdmin ? adminNavSections : navSections;
+  const session = useDashboardSession();
+  const navSectionsData = isAdmin
+    ? adminNavSections
+    : session?.role === "staff" && session?.staffJobRole === "cashier"
+      ? cashierNavSections
+      : navSections;
 
   const { menu, loading } = useAppSelector((state) => state.menuData);
 

@@ -15,7 +15,10 @@
       "registerKeywords": "register, create account, sign up, ENSmenu, digital menu",
       "resetPasswordTitle": "Reset Password | ENSmenu",
       "resetPasswordDescription": "Reset your ENSmenu account password.",
-      "resetPasswordKeywords": "reset password, forgot password, recover account, ENSmenu"
+      "resetPasswordKeywords": "reset password, forgot password, recover account, ENSmenu",
+      "staffLoginTitle": "Staff login | ENSmenu",
+      "staffLoginDescription": "Cashier login to the restaurant dashboard.",
+      "staffLoginKeywords": "staff login, cashier, ENSmenu dashboard"
     },
     "legalPrivacy": {
       "title": "Privacy Policy | ENSmenu",
@@ -271,6 +274,16 @@
     "profileImage": "Profile Image",
     "welcomeBack": "Welcome Back",
     "welcomeBackDescription": "Enter your details to login",
+    "staffLoginLink": "Staff login (cashier)",
+    "staffLoginHeading": "Staff login",
+    "staffLoginSubheading": "Cashiers can use the restaurant dashboard. Enter the menu slug, email, and password.",
+    "menuSlug": "Menu link (slug)",
+    "menuSlugPlaceholder": "e.g. my-restaurant",
+    "menuSlugRequired": "Menu slug is required",
+    "staffLoginFailed": "Could not sign in. Check the slug, email, and password.",
+    "staffOnlyCashierDashboard": "Only cashiers can open the dashboard. Waiters use table-call tools.",
+    "staffLoginSubmit": "Sign in as cashier",
+    "ownerLoginLink": "Restaurant owner login",
     "dontHaveAccount": "Don't have an account?",
     "forgotPassword": "Forgot your password?",
     "orLoginWith": "Or login with",
@@ -1220,6 +1233,8 @@
     "emptyCell": "—",
     "name": "Name",
     "role": "Role",
+    "roleWaiter": "Waiter",
+    "roleCashier": "Cashier",
     "phone": "Phone",
     "email": "Email",
     "status": "Status",
@@ -1240,6 +1255,9 @@
       "title": "Add staff member",
       "editTitle": "Edit staff member",
       "subtitle": "Contact details and optional login password",
+      "roleLabel": "Job role",
+      "roleWaiter": "Waiter",
+      "roleCashier": "Cashier",
       "name": "Name",
       "nameRequired": "Name is required",
       "nameMax": "Max 255 characters",
@@ -1858,12 +1876,23 @@
       "cancel": "Cancel"
     }
   },
+  "Unauthorized": {
+    "title": "Access denied",
+    "body": "You do not have permission to view this page.",
+    "cashierDashboardTitle": "Not allowed",
+    "cashierDashboardBody": "This area is for restaurant owners only. Cashiers should open the dashboard using the direct link to your menu (for example /dashboard/ followed by your menu ID).",
+    "cashierOwnerPagesTitle": "Not allowed",
+    "cashierOwnerPagesBody": "Settings and staff management are only available to the restaurant owner.",
+    "backHome": "Back to home"
+  },
   "userProfile": {
     "singOut": "Sign out",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "restaurantMenu": "Restaurant menu"
   },
   "roles": {
     "admin": "Admin",
-    "user": "User"
+    "user": "User",
+    "staff": "Staff"
   }
 }

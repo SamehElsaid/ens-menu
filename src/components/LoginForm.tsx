@@ -141,6 +141,15 @@ export default function LoginForm() {
         </LinkTo>
       </h2>
 
+      <p className="text-center text-sm text-slate-600 dark:text-slate-400">
+        <LinkTo
+          href="/auth/staff-login"
+          className="font-medium text-primary hover:underline"
+        >
+          {t("auth.staffLoginLink")}
+        </LinkTo>
+      </p>
+
       {apiError && (
         <div
           role="alert"

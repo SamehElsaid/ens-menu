@@ -1,17 +1,33 @@
 import { FiLogOut } from "react-icons/fi";
 import LinkTo from "./Global/LinkTo";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Cookies from "js-cookie";
+import { getAuthHintsFromEncryptedSub } from "@/shared/jwtPayload";
 import { REMOVE_USER } from "@/store/authSlice/authSlice";
 import { MdOutlineDashboard } from "react-icons/md";
-import { useRouter } from "@/i18n/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import LoadImage from "./ImageLoad";
+import { IoRestaurantOutline } from "react-icons/io5";
+import { useDashboardSession } from "@/hooks/useDashboardSession";
+
+function buildPublicMenuUrl(slug: string | undefined | null): string {
+  if (!slug) return "";
+  return `https://${slug}${process.env.NEXT_PUBLIC_MENU_URL || ""}`.replace(
+    /^https:\/\//,
+    "https://",
+  );
+}
+
 function UserDropDown() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const locale = useLocale();
+  const pathname = usePathname();
+  const session = useDashboardSession();
+  const menu = useAppSelector((s) => s.menuData.menu);
+  const menuSlug = menu?.slug;
   const profile = useAppSelector((state) => state.auth) as unknown as {
     data: {
       user: { email: string; name: string; role: string; profileImage: string };
@@ -24,13 +40,75 @@ function UserDropDown() {
   const userRole = profile.data?.user?.role
     ? t("roles." + profile.data?.user?.role)
     : t("roles.admin");
-  const profileMenuItems = [
-    {
-      label: t("userProfile.dashboard"),
-      href: profile.data?.user?.role === "admin" ? "/admin" : "/dashboard/",
-      icon: <MdOutlineDashboard />,
-    },
-  ];
+
+  const isCashier =
+    session?.role === "staff" && session?.staffJobRole === "cashier";
+
+  const publicMenuUrl = buildPublicMenuUrl(menuSlug);
+  const isDashboardMenuRoute = /^\/dashboard\/[^/]+/.test(pathname);
+  const showRestaurantLink = isDashboardMenuRoute && Boolean(publicMenuUrl);
+
+  /** `menuId` stored in encrypted cookie at staff login or patched after /staff-auth/me. */
+  const subCookie = Cookies.get("sub");
+  const cashierMenuIdFromCookie = subCookie
+    ? getAuthHintsFromEncryptedSub(subCookie)?.menuId
+    : undefined;
+
+  const cashierMenuIdFromPath = pathname.match(/^\/dashboard\/([^/]+)/)?.[1];
+  const cashierDashboardHref =
+    menu?.id != null
+      ? `/dashboard/${menu.id}`
+      : cashierMenuIdFromPath
+        ? `/dashboard/${cashierMenuIdFromPath}`
+        : cashierMenuIdFromCookie != null && !Number.isNaN(cashierMenuIdFromCookie)
+          ? `/dashboard/${cashierMenuIdFromCookie}`
+          : session?.menuId != null && !Number.isNaN(session.menuId)
+            ? `/dashboard/${session.menuId}`
+            : null;
+
+  const profileMenuItems = useMemo(() => {
+    const items: {
+      label: string;
+      href: string;
+      icon: ReactNode;
+      external?: boolean;
+    }[] = [];
+
+    if (isCashier) {
+      if (cashierDashboardHref) {
+        items.push({
+          label: t("userProfile.dashboard"),
+          href: cashierDashboardHref,
+          icon: <MdOutlineDashboard />,
+        });
+      }
+    } else {
+      items.push({
+        label: t("userProfile.dashboard"),
+        href:
+          profile.data?.user?.role === "admin" ? "/admin" : "/dashboard/",
+        icon: <MdOutlineDashboard />,
+      });
+    }
+
+    if (showRestaurantLink) {
+      items.push({
+        label: t("userProfile.restaurantMenu"),
+        href: publicMenuUrl,
+        icon: <IoRestaurantOutline />,
+        external: true,
+      });
+    }
+
+    return items;
+  }, [
+    cashierDashboardHref,
+    isCashier,
+    profile.data?.user?.role,
+    publicMenuUrl,
+    showRestaurantLink,
+    t,
+  ]);
 
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const handleLogout = () => {
@@ -110,19 +188,35 @@ function UserDropDown() {
         </div>
 
         <div className="flex flex-col px-2 py-2">
-          {profileMenuItems.map((item) => (
-            <LinkTo
-              key={item.label}
-              href={item.href}
-              onClick={() => setIsProfileMenuOpen(false)}
-              className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 transition-all duration-200 hover:bg-purple-50 dark:hover:bg-purple-500/20 hover:text-purple-600 dark:hover:text-purple-400"
-            >
-              <span className="text-base text-purple-500 dark:text-purple-400">
-                {item.icon}
-              </span>
-              <span className="font-medium">{item.label}</span>
-            </LinkTo>
-          ))}
+          {profileMenuItems.map((item) =>
+            item.external ? (
+              <a
+                key={item.label}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setIsProfileMenuOpen(false)}
+                className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 transition-all duration-200 hover:bg-purple-50 dark:hover:bg-purple-500/20 hover:text-purple-600 dark:hover:text-purple-400"
+              >
+                <span className="text-base text-purple-500 dark:text-purple-400">
+                  {item.icon}
+                </span>
+                <span className="font-medium">{item.label}</span>
+              </a>
+            ) : (
+              <LinkTo
+                key={item.label}
+                href={item.href}
+                onClick={() => setIsProfileMenuOpen(false)}
+                className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 transition-all duration-200 hover:bg-purple-50 dark:hover:bg-purple-500/20 hover:text-purple-600 dark:hover:text-purple-400"
+              >
+                <span className="text-base text-purple-500 dark:text-purple-400">
+                  {item.icon}
+                </span>
+                <span className="font-medium">{item.label}</span>
+              </LinkTo>
+            ),
+          )}
         </div>
 
         <div className="border-t border-purple-100 dark:border-purple-500/30 px-2 py-2">

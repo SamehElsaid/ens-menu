@@ -15,7 +15,10 @@
       "registerKeywords": "تسجيل، إنشاء حساب، ENSmenu، قائمة رقمية",
       "resetPasswordTitle": "إعادة تعيين كلمة المرور | ENSmenu",
       "resetPasswordDescription": "إعادة تعيين كلمة مرور حساب ENSmenu.",
-      "resetPasswordKeywords": "إعادة تعيين كلمة المرور، استعادة الحساب، ENSmenu"
+      "resetPasswordKeywords": "إعادة تعيين كلمة المرور، استعادة الحساب، ENSmenu",
+      "staffLoginTitle": "تسجيل دخول الموظف | ENSmenu",
+      "staffLoginDescription": "دخول الكاشير إلى لوحة تحكم المطعم.",
+      "staffLoginKeywords": "تسجيل دخول موظف، كاشير، لوحة تحكم ENSmenu"
     },
     "legalPrivacy": {
       "title": "سياسة الخصوصية | ENSmenu",
@@ -263,6 +266,16 @@
     "displayNameMinLength": "يجب أن يكون اسم العرض على الأقل حرفين",
     "welcomeBack": "مرحبا بعودتك",
     "welcomeBackDescription": "أدخل تفاصيلك لتسجيل الدخول",
+    "staffLoginLink": "تسجيل دخول موظف ",
+    "staffLoginHeading": "تسجيل دخول الموظف",
+    "staffLoginSubheading": "الكاشير يمكنه استخدام لوحة تحكم المطعم. أدخل رابط القائمة (السلَج) والبريد وكلمة المرور.",
+    "menuSlug": "رابط القائمة (السلَج)",
+    "menuSlugPlaceholder": "مثال: my-restaurant",
+    "menuSlugRequired": "رابط القائمة مطلوب",
+    "staffLoginFailed": "تعذّر تسجيل الدخول. تحقق من اسم المطعم والبريد وكلمة المرور.",
+    "staffOnlyCashierDashboard": "لوحة التحكم متاحة للكاشير فقط. النادل يستخدم أدوات نداء الطاولات.",
+    "staffLoginSubmit": "دخول ككاشير",
+    "ownerLoginLink": "دخول صاحب المطعم",
     "dontHaveAccount": "ليس لديك حساب؟",
     "forgotPassword": "هل نسيت كلمة المرور؟",
     "orLoginWith": "أو تسجيل الدخول بواسطة",
@@ -943,6 +956,9 @@
     "backToOverview": "الرجوع للصفحة الرئيسية",
     "emptyCell": "—",
     "name": "الاسم",
+    "role": "الدور",
+    "roleWaiter": "نادل",
+    "roleCashier": "كاشير",
     "email": "البريد",
     "status": "الحالة",
     "action": "إجراء",
@@ -962,6 +978,9 @@
       "title": "إضافة موظف",
       "editTitle": "تعديل الموظف",
       "subtitle": "بيانات التواصل وكلمة مرور الدخول (اختياري)",
+      "roleLabel": "الدور الوظيفي",
+      "roleWaiter": "نادل",
+      "roleCashier": "كاشير",
       "name": "الاسم",
       "nameRequired": "الاسم مطلوب",
       "nameMax": "حد أقصى 255 حرفًا",
@@ -970,10 +989,10 @@
       "emailPlaceholder": "اختياري",
       "emailInvalid": "أدخل بريدًا إلكترونيًا صالحًا",
       "password": "كلمة المرور",
-      "passwordPlaceholder": "اختياري، 6 أحرف على الأقل",
+      "passwordPlaceholder": " 6 أحرف على الأقل",
       "confirmPassword": "تأكيد كلمة المرور",
       "confirmPasswordPlaceholder": "أعد إدخال كلمة المرور",
-      "passwordHintCreate": "كلمة المرور اختيارية. إن وُضعت يجب أن تكون بين 6 و128 حرفًا وتطابق التأكيد.",
+      "passwordHintCreate": "كلمة المرور .   يجب أن تكون بين 6 و128 حرفًا وتطابق التأكيد.",
       "passwordHintEdit": "اترك كلمة المرور فارغة للإبقاء على الحالية. لتغييرها أدخل كلمة مرور جديدة وتأكيدها.",
       "passwordMin": "كلمة المرور يجب ألا تقل عن 6 أحرف",
       "passwordMax": "كلمة المرور يجب ألا تزيد عن 128 حرفًا",
@@ -1578,12 +1597,23 @@
       "cancel": "إلغاء"
     }
   },
+  "Unauthorized": {
+    "title": "غير مسموح",
+    "body": "ليس لديك صلاحية لعرض هذه الصفحة.",
+    "cashierDashboardTitle": "غير مسموح",
+    "cashierDashboardBody": "هذه الصفحة مخصّصة لصاحب المطعم فقط. يفتح الكاشير لوحة التحكم من الرابط المباشر لقائمته (مثال: /dashboard/ ثم رقم القائمة).",
+    "cashierOwnerPagesTitle": "غير مسموح",
+    "cashierOwnerPagesBody": "صفحات الإعدادات وإدارة الموظفين مخصّصة لصاحب المطعم فقط.",
+    "backHome": "العودة للرئيسية"
+  },
   "userProfile": {
     "singOut": "تسجيل الخروج",
-    "dashboard": "لوحة التحكم"
+    "dashboard": "لوحة التحكم",
+    "restaurantMenu": "قائمة المطعم"
   },
   "roles": {
     "admin": "مدير",
-    "user": "مستخدم"
+    "user": "مستخدم",
+    "staff": "موظف"
   }
 }

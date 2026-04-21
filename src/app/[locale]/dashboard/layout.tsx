@@ -8,6 +8,7 @@ import { useSelectedLayoutSegment } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 import { SET_ACTIVE_USER, SET_LOADING } from "@/store/authSlice/menuDataSlice";
 import { useAppDispatch } from "@/store/hooks";
+import { AuthUserHydrate } from "@/components/Dashboard/AuthUserHydrate";
 
 interface ParentLayoutProps {
   children: ReactNode;
@@ -54,5 +55,10 @@ export default function ParentLayout({ children }: ParentLayoutProps) {
     }
   }, [segment, locale, dispatch]);
 
-  return <Layout segment={segment}>{children}</Layout>;
+  return (
+    <>
+      <AuthUserHydrate />
+      <Layout segment={segment}>{children}</Layout>
+    </>
+  );
 }

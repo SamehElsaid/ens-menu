@@ -32,6 +32,7 @@ import {
   StyledQrCode,
   type StyledQrCodeHandle,
 } from "@/components/Global/StyledQrCode";
+import { useDashboardSession } from "@/hooks/useDashboardSession";
 
 type ActivityEntry = {
   id: string;
@@ -76,6 +77,11 @@ export default function DashboardMenuPage() {
       ? params.menu
       : ((params.menu as string[])?.[0] ?? "");
 
+  const dashboardSession = useDashboardSession();
+  const isCashierStaff =
+    dashboardSession?.role === "staff" &&
+    dashboardSession?.staffJobRole === "cashier";
+
   const [recentItems, setRecentItems] = useState<Item[]>([]);
   const [recentCategories, setRecentCategories] = useState<Category[]>([]);
   const [activityLoading, setActivityLoading] = useState(true);
@@ -87,12 +93,6 @@ export default function DashboardMenuPage() {
       )
     : "";
   const menuQrRef = useRef<StyledQrCodeHandle>(null);
-
-  useEffect(() => {
-    if (!menu) return;
-    console.log("menuStaff:", menu.menuStaff);
-    console.log("menuTables:", menu.menuTables);
-  }, [menu]);
 
   useEffect(() => {
     if (!menuSlugOrId) return;
@@ -253,20 +253,24 @@ export default function DashboardMenuPage() {
             <MdOutlineTableBar className="text-lg shrink-0" />
             {t("tables")}
           </LinkTo>
-          <LinkTo
-            href={`/dashboard/${menuSlugOrId}/staff`}
-            className={`${tabBase} ${tabInactive}`}
-          >
-            <MdPeopleOutline className="text-lg shrink-0" />
-            {t("staff")}
-          </LinkTo>
-          <LinkTo
-            href={`/dashboard/${menuSlugOrId}/settings`}
-            className={`${tabBase} ${tabInactive}`}
-          >
-            <FiSettings className="text-lg shrink-0" />
-            {t("settings")}
-          </LinkTo>
+          {!isCashierStaff && (
+            <>
+              <LinkTo
+                href={`/dashboard/${menuSlugOrId}/staff`}
+                className={`${tabBase} ${tabInactive}`}
+              >
+                <MdPeopleOutline className="text-lg shrink-0" />
+                {t("staff")}
+              </LinkTo>
+              <LinkTo
+                href={`/dashboard/${menuSlugOrId}/settings`}
+                className={`${tabBase} ${tabInactive}`}
+              >
+                <FiSettings className="text-lg shrink-0" />
+                {t("settings")}
+              </LinkTo>
+            </>
+          )}
           <a
             href={menuUrl || "#"}
             target="_blank"
@@ -281,7 +285,7 @@ export default function DashboardMenuPage() {
 
       {/* Stats cards */}
       <section
-        className="grid grid-cols-1 sm:grid-cols-4 gap-4"
+        className="grid grid-cols-1 sm:grid-cols-3 gap-4"
         aria-label="Menu statistics"
       >
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 flex items-center gap-4 transition-all duration-200 hover:shadow-md hover:border-primary/10 dark:hover:border-primary/30 hover:-translate-y-0.5 group">
@@ -323,7 +327,7 @@ export default function DashboardMenuPage() {
             </p>
           </div>
         </div>
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 flex items-center gap-4 transition-all duration-200 hover:shadow-md hover:border-red-500/10 dark:hover:border-red-500/30 hover:-translate-y-0.5 group">
+        {/* <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 flex items-center gap-4 transition-all duration-200 hover:shadow-md hover:border-red-500/10 dark:hover:border-red-500/30 hover:-translate-y-0.5 group">
           <div className="w-12 h-12 rounded-xl bg-red-500/10 dark:bg-red-500/20 text-red-500 dark:text-red-400 flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105">
             <IoEyeOutline className="text-2xl" />
           </div>
@@ -335,7 +339,7 @@ export default function DashboardMenuPage() {
               {menu.views ?? 0}
             </p>
           </div>
-        </div>
+        </div> */}
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -410,23 +414,25 @@ export default function DashboardMenuPage() {
               <IoLinkOutline className="text-xl" />
             </div>
           </LinkTo>
-          <LinkTo
-            href={`/dashboard/${menuSlugOrId}/settings`}
-            role="listitem"
-            className="flex items-center justify-between gap-4 p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:border-primary/20 dark:hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
-          >
-            <div className="min-w-0 flex-1">
-              <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-1 group-hover:text-slate-800 dark:group-hover:text-slate-200">
-                {t("menuSettings")}
-              </h3>
-              <p className="text-slate-500 dark:text-slate-400 text-sm">
-                {t("menuSettingsDescription")}
-              </p>
-            </div>
-            <div className="w-11 h-11 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary/20 dark:group-hover:bg-primary/30 group-hover:scale-105 transition-all duration-200">
-              <IoSettingsOutline className="text-xl" />
-            </div>
-          </LinkTo>
+          {!isCashierStaff && (
+            <LinkTo
+              href={`/dashboard/${menuSlugOrId}/settings`}
+              role="listitem"
+              className="flex items-center justify-between gap-4 p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:border-primary/20 dark:hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+            >
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-1 group-hover:text-slate-800 dark:group-hover:text-slate-200">
+                  {t("menuSettings")}
+                </h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm">
+                  {t("menuSettingsDescription")}
+                </p>
+              </div>
+              <div className="w-11 h-11 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary/20 dark:group-hover:bg-primary/30 group-hover:scale-105 transition-all duration-200">
+                <IoSettingsOutline className="text-xl" />
+              </div>
+            </LinkTo>
+          )}
           <LinkTo
             href={`/dashboard/${menuSlugOrId}/items`}
             role="listitem"

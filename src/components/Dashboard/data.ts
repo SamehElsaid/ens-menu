@@ -26,6 +26,44 @@ export type NavSection = {
   items: NavItem[];
 };
 
+/** Cashier staff: operational pages only — no settings, staff management, profile, or ads. */
+export const cashierNavSections: NavSection[] = [
+  {
+    title: "Overview",
+    items: [
+      {
+        label: "Overview",
+        icon: FaChartLine,
+        key: "overview",
+        link: "",
+      },
+    ],
+  },
+  {
+    title: "Menu Control",
+    items: [
+      {
+        label: "Categories",
+        icon: BiCategory,
+        key: "categories",
+        link: "categories",
+      },
+      {
+        label: "Items",
+        icon: MdOutlineFastfood,
+        key: "items",
+        link: "items",
+      },
+      {
+        label: "tables",
+        icon: MdOutlineTableBar,
+        key: "tables",
+        link: "table",
+      },
+    ],
+  },
+];
+
 export const navSections: NavSection[] = [
   {
     title: "Overview",
