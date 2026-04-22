@@ -9,7 +9,11 @@ import {
   MdOutlineTableBar,
   MdPeopleOutline,
 } from "react-icons/md";
-import { IoDocumentTextOutline, IoSettingsOutline } from "react-icons/io5";
+import {
+  IoDocumentTextOutline,
+  IoSettingsOutline,
+  IoTimeOutline,
+} from "react-icons/io5";
 export type NavItem = {
   label: string;
   icon: IconType;
@@ -25,6 +29,44 @@ export type NavSection = {
   title: string;
   items: NavItem[];
 };
+
+/** Cashier staff: operational pages only — no settings, staff management, profile, or ads. */
+export const cashierNavSections: NavSection[] = [
+  {
+    title: "Overview",
+    items: [
+      {
+        label: "Overview",
+        icon: FaChartLine,
+        key: "overview",
+        link: "",
+      },
+    ],
+  },
+  {
+    title: "Menu Control",
+    items: [
+      {
+        label: "Categories",
+        icon: BiCategory,
+        key: "categories",
+        link: "categories",
+      },
+      {
+        label: "Items",
+        icon: MdOutlineFastfood,
+        key: "items",
+        link: "items",
+      },
+      {
+        label: "tables",
+        icon: MdOutlineTableBar,
+        key: "tables",
+        link: "table",
+      },
+    ],
+  },
+];
 
 export const navSections: NavSection[] = [
   {
@@ -92,6 +134,12 @@ export const navSections: NavSection[] = [
         icon: FiSettings,
         key: "settings",
         link: "settings",
+      },
+      {
+        label: "history",
+        icon: IoTimeOutline,
+        key: "history",
+        link: "history",
       },
     ],
   },

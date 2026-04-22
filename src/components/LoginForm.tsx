@@ -56,7 +56,7 @@ export default function LoginForm() {
       false,
       true,
     );
-    if (response.status) {
+    if (response.status && response.data) {
       // toast.success(t("auth.loginSuccess"));
 
       const { accessToken, refreshToken, user } = response.data;
@@ -140,6 +140,15 @@ export default function LoginForm() {
           {t("auth.forgotPassword")}
         </LinkTo>
       </h2>
+
+      <p className="text-center text-sm text-slate-600 dark:text-slate-400">
+        <LinkTo
+          href="/auth/staff-login"
+          className="font-medium text-primary hover:underline"
+        >
+          {t("auth.staffLoginLink")}
+        </LinkTo>
+      </p>
 
       {apiError && (
         <div

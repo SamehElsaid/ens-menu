@@ -53,7 +53,13 @@ const doRefreshAccessToken = async (): Promise<string | null> => {
       token: string;
       role: string;
       refreshToken: string;
+      staffJobRole?: string;
     };
+
+    if (tokenDecrypted.role === "staff") {
+      refreshPromise = null;
+      return null;
+    }
 
     const response = await axios.post<{ token?: string } | string>(
       `${process.env.NEXT_PUBLIC_BASE_URL}/auth/refresh/`,
@@ -67,11 +73,14 @@ const doRefreshAccessToken = async (): Promise<string | null> => {
 
     const { accessToken, refreshToken } = response.data as LoginResponse;
 
-    const newCookies = {
+    const newCookies: Record<string, unknown> = {
       token: accessToken,
       refreshToken: refreshToken,
       role: tokenDecrypted.role ?? "",
     };
+    if (tokenDecrypted.staffJobRole) {
+      newCookies.staffJobRole = tokenDecrypted.staffJobRole;
+    }
     Cookies.set("sub", encryptData(newCookies), { path: "/" });
     return accessToken;
   } catch (err) {
@@ -158,7 +167,7 @@ export const axiosPost = async <T, U>(
   data: T,
   file?: boolean,
   close?: boolean,
-) => {
+): Promise<ApiResponse<U>> => {
   const authToken = Cookies.get("sub") ?? "";
   const tokenDecrypted = decryptData(authToken) as DecryptedToken;
   const HeaderImg = { "Content-Type": "multipart/form-data" };
@@ -194,6 +203,13 @@ export const axiosPost = async <T, U>(
 
     return { data: fetchData.data as unknown as U, status: true };
   } catch (err) {
+    // Backend uses 405 for expired JWT (see auth.middleware); refresh then retry like axiosGet
+    if ((err as AxiosError).response?.status === 405) {
+      const newToken = await getRefreshTokenPromise();
+      if (newToken) {
+        return axiosPost(url, locale, data, file, close);
+      }
+    }
     return {
       data: (err as AxiosError)?.response?.data as U,
       status: false,

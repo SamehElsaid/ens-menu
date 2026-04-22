@@ -1,7 +1,8 @@
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import { useCallback, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useAppDispatch } from "@/store/hooks";
+import { isUserNotFoundApiBody } from "@/shared/jwtPayload";
 
 interface ErrorResponse {
     status?: boolean;
@@ -65,8 +66,17 @@ export default function useCatchError() {
             function (response: AxiosResponse<unknown>) {
                 return response;
             },
-            function (error) {
+            function (error: AxiosError) {
                 const status = error.response?.status ?? 500;
+                const requestUrl = error.config?.url ?? "";
+                // Staff JWT on /auth/me returns 404 "user not found" — handled by hydrate fallback; do not toast.
+                if (
+                    status === 404 &&
+                    requestUrl.includes("/auth/me") &&
+                    isUserNotFoundApiBody(error.response?.data)
+                ) {
+                    return Promise.reject(error);
+                }
                 handleErrorResponse(error.response?.data, status);
                 return Promise.reject(error);
             }

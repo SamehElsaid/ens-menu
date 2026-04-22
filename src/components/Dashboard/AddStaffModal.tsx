@@ -14,6 +14,8 @@ import {
   IoRemoveCircle,
   IoAddCircleOutline,
   IoPeopleOutline,
+  IoShirtOutline,
+  IoCashOutline,
 } from "react-icons/io5";
 import CustomBtn from "../Custom/CustomBtn";
 
@@ -25,6 +27,7 @@ export interface AddStaffFormData {
   password: string;
   confirmPassword: string;
   isActive: boolean;
+  role: "waiter" | "cashier";
 }
 
 interface AddStaffModalProps {
@@ -38,12 +41,21 @@ function buildStaffPayload(data: AddStaffFormData): Record<string, unknown> {
   const payload: Record<string, unknown> = {
     name: data.name.trim(),
     isActive: data.isActive,
+    role: data.role,
   };
   const email = data.email.trim();
   if (email) payload.email = email;
   const password = data.password.trim();
   if (password) payload.password = password;
   return payload;
+}
+
+function normalizeStaffRoleForForm(role?: string): "waiter" | "cashier" {
+  const s = String(role ?? "")
+    .trim()
+    .toLowerCase();
+  if (s === "casher" || s === "cashier") return "cashier";
+  return "waiter";
 }
 
 export default function AddStaffModal({
@@ -71,6 +83,7 @@ export default function AddStaffModal({
       password: "",
       confirmPassword: "",
       isActive: true,
+      role: "waiter" as const,
     },
     mode: "onChange",
   });
@@ -85,6 +98,9 @@ export default function AddStaffModal({
         password: "",
         confirmPassword: "",
         isActive: staff.isActive ?? true,
+        role: normalizeStaffRoleForForm(
+          typeof staff.role === "string" ? staff.role : undefined,
+        ),
       });
     } else {
       reset({
@@ -93,6 +109,7 @@ export default function AddStaffModal({
         password: "",
         confirmPassword: "",
         isActive: true,
+        role: "waiter",
       });
     }
   }, [staff, reset]);
@@ -191,6 +208,43 @@ export default function AddStaffModal({
         >
           <div className="overflow-y-auto p-6 space-y-6">
             <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t("roleLabel")}
+                </label>
+                <Controller
+                  name="role"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="flex rounded-2xl p-1 bg-gray-100 dark:bg-gray-600/40 border border-gray-200/80 dark:border-gray-600/50 w-fit flex-wrap gap-1">
+                      <button
+                        type="button"
+                        onClick={() => field.onChange("waiter")}
+                        className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                          field.value === "waiter"
+                            ? "bg-white dark:bg-gray-700 text-primary shadow-sm border border-gray-200/80 dark:border-gray-600 ring-1 ring-primary/20"
+                            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                        }`}
+                      >
+                        <IoShirtOutline className="text-lg" />
+                        {t("roleWaiter")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => field.onChange("cashier")}
+                        className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                          field.value === "cashier"
+                            ? "bg-white dark:bg-gray-700 text-primary shadow-sm border border-gray-200/80 dark:border-gray-600 ring-1 ring-primary/20"
+                            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                        }`}
+                      >
+                        <IoCashOutline className="text-lg" />
+                        {t("roleCashier")}
+                      </button>
+                    </div>
+                  )}
+                />
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {t("name")} *
