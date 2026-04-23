@@ -153,14 +153,14 @@ export default function PricingSection() {
                     .slice(0, 5)
                     .map((line) => translatePlanFeatureLine(line, tProfile))
                     .map((f, i) => (
-                    <li
-                      key={i}
-                      className="flex items-center gap-2 text-slate-600 dark:text-slate-300 text-sm"
-                    >
-                      <HiCheck className="w-5 h-5 text-green-500 shrink-0" />
-                      <span>{f}</span>
-                    </li>
-                  ))}
+                      <li
+                        key={i}
+                        className="flex items-center gap-2 text-slate-600 dark:text-slate-300 text-sm"
+                      >
+                        <HiCheck className="w-5 h-5 text-green-500 shrink-0" />
+                        <span>{f}</span>
+                      </li>
+                    ))}
                 </ul>
                 <Link
                   href={`/auth/register`}
