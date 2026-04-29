@@ -1,14 +1,7 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { MdSmartphone, MdTabletMac } from "react-icons/md";
 
 const TAB_KEYS = [
@@ -19,7 +12,6 @@ const TAB_KEYS = [
   "createFromApp",
 ] as const;
 
-/** Place MP4 files in `public/app/` with these names (one per tab). */
 const TAB_VIDEO_PATHS: readonly string[] = [
   "/app/order.mp4",
   "/app/recieveOrder.mp4",
@@ -28,7 +20,6 @@ const TAB_VIDEO_PATHS: readonly string[] = [
   "/app/makeNewOrder.mp4",
 ];
 
-/** Portrait tablet variants (`public/app/`). Last tab has no dedicated tablet asset yet. */
 const TAB_VIDEO_PATHS_TABLET: readonly string[] = [
   "/app/makeOrder-tablet.mp4",
   "/app/recieveOrder-tablet.mp4",
@@ -49,38 +40,53 @@ const PhoneFrameWithVideo = memo(function PhoneFrameWithVideo({
   playing: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const prevSrcRef = useRef<string | undefined>(undefined);
   const isTablet = shape === "tablet";
 
-  const tryPlay = useCallback(() => {
-    const el = videoRef.current;
-    if (!el || !playing) return;
-    const p = el.play();
-    if (p !== undefined) p.catch(() => {});
-  }, [playing]);
-
   useEffect(() => {
     const el = videoRef.current;
-    if (!el) return undefined;
-    const run = () => tryPlay();
-    el.addEventListener("loadeddata", run);
-    el.addEventListener("canplay", run);
-    return () => {
-      el.removeEventListener("loadeddata", run);
-      el.removeEventListener("canplay", run);
-    };
-  }, [src, tryPlay]);
+    if (!el) return;
 
-  useEffect(() => {
-    const el = videoRef.current;
-    if (!el || !src) return;
+    if (!src) {
+      prevSrcRef.current = undefined;
+      el.pause();
+      return;
+    }
+
     if (!playing) {
       el.pause();
-    } else {
-      tryPlay();
+      return;
     }
-  }, [playing, src, tryPlay]);
 
-  const preload = !src ? "none" : playing ? "auto" : "none";
+    const srcChanged = prevSrcRef.current !== src;
+    prevSrcRef.current = src;
+
+    const kickPlay = () => {
+      el.muted = true;
+      void el.play().catch(() => {});
+    };
+
+    const waitThenPlay = () => {
+      el.addEventListener("canplay", kickPlay, { once: true });
+      el.addEventListener("loadeddata", kickPlay, { once: true });
+    };
+
+    if (srcChanged) {
+      el.load();
+      waitThenPlay();
+    } else if (el.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+      kickPlay();
+    } else {
+      waitThenPlay();
+    }
+
+    return () => {
+      el.removeEventListener("canplay", kickPlay);
+      el.removeEventListener("loadeddata", kickPlay);
+    };
+  }, [src, playing]);
+
+  const preload = !src ? "none" : playing ? "auto" : "metadata";
 
   return (
     <div
@@ -108,6 +114,8 @@ const PhoneFrameWithVideo = memo(function PhoneFrameWithVideo({
           preload={preload}
           disablePictureInPicture
           disableRemotePlayback
+          // iOS Safari inline playback (legacy WebKit)
+          {...({ "webkit-playsinline": "true" } as Record<string, string>)}
         />
       </div>
     </div>
@@ -140,16 +148,30 @@ export default function PhoneVideoSection() {
       setIsIntersecting(true);
       return;
     }
+    let hideDelay: ReturnType<typeof setTimeout> | undefined;
     const obs = new IntersectionObserver(
       (entries) => {
         const hit = entries.some((e) => e.isIntersecting);
-        setIsIntersecting(hit);
-        if (hit) setMediaAllowed(true);
+        if (hit) {
+          if (hideDelay) clearTimeout(hideDelay);
+          hideDelay = undefined;
+          setIsIntersecting(true);
+          setMediaAllowed(true);
+        } else {
+          if (hideDelay) clearTimeout(hideDelay);
+          hideDelay = setTimeout(() => {
+            hideDelay = undefined;
+            setIsIntersecting(false);
+          }, 550);
+        }
       },
-      { root: null, rootMargin: "140px 0px", threshold: [0, 0.08, 0.2] }
+      { root: null, rootMargin: "180px 0px 240px 0px", threshold: 0 },
     );
     obs.observe(el);
-    return () => obs.disconnect();
+    return () => {
+      if (hideDelay) clearTimeout(hideDelay);
+      obs.disconnect();
+    };
   }, []);
 
   const resolvedSrc = mediaAllowed ? videoSrc : undefined;
