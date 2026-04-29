@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { memo, useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { MdSmartphone, MdTabletMac } from "react-icons/md";
 
 const TAB_KEYS = [
@@ -12,6 +12,7 @@ const TAB_KEYS = [
   "createFromApp",
 ] as const;
 
+/** Place MP4 files in `public/app/` with these names (one per tab). */
 const TAB_VIDEO_PATHS: readonly string[] = [
   "/app/order.mp4",
   "/app/recieveOrder.mp4",
@@ -20,6 +21,7 @@ const TAB_VIDEO_PATHS: readonly string[] = [
   "/app/makeNewOrder.mp4",
 ];
 
+/** Portrait tablet variants (`public/app/`). Last tab has no dedicated tablet asset yet. */
 const TAB_VIDEO_PATHS_TABLET: readonly string[] = [
   "/app/makeOrder-tablet.mp4",
   "/app/recieveOrder-tablet.mp4",
@@ -30,109 +32,34 @@ const TAB_VIDEO_PATHS_TABLET: readonly string[] = [
 
 type DeviceShape = "phone" | "tablet";
 
-const IOS_INLINE = { "webkit-playsinline": "true" } as Record<string, string>;
-
-function runVideoLayer(
-  el: HTMLVideoElement,
-  src: string | undefined,
-  playing: boolean,
-  isActive: boolean,
-  prevSrc: MutableRefObject<string | undefined>,
-): (() => void) | undefined {
-  if (!src) {
-    prevSrc.current = undefined;
-    el.pause();
-    return undefined;
-  }
-
-  if (!playing) {
-    el.pause();
-    return undefined;
-  }
-
-  const srcChanged = prevSrc.current !== src;
-  prevSrc.current = src;
-
-  const kickPlay = () => {
-    el.muted = true;
-    void el.play().catch(() => {});
-  };
-
-  if (isActive) {
-    const waitThenPlay = () => {
-      el.addEventListener("canplay", kickPlay, { once: true });
-      el.addEventListener("loadeddata", kickPlay, { once: true });
-    };
-    if (srcChanged) {
-      el.load();
-      waitThenPlay();
-    } else if (el.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
-      kickPlay();
-    } else {
-      waitThenPlay();
-    }
-    return () => {
-      el.removeEventListener("canplay", kickPlay);
-      el.removeEventListener("loadeddata", kickPlay);
-    };
-  }
-
-  el.pause();
-  if (srcChanged) {
-    el.load();
-  }
-  return undefined;
-}
-
-const PhoneFrameWithVideo = memo(function PhoneFrameWithVideo({
-  phoneSrc,
-  tabletSrc,
+function PhoneFrameWithVideo({
+  src,
   shape,
-  playing,
 }: {
-  phoneSrc: string | undefined;
-  tabletSrc: string | undefined;
+  src: string;
   shape: DeviceShape;
-  playing: boolean;
 }) {
-  const phoneRef = useRef<HTMLVideoElement>(null);
-  const tabletRef = useRef<HTMLVideoElement>(null);
-  const prevPhoneSrc = useRef<string | undefined>(undefined);
-  const prevTabletSrc = useRef<string | undefined>(undefined);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const isTablet = shape === "tablet";
 
+  const tryPlay = useCallback(() => {
+    const el = videoRef.current;
+    if (!el) return;
+    const p = el.play();
+    if (p !== undefined) p.catch(() => {});
+  }, []);
+
   useEffect(() => {
-    const phone = phoneRef.current;
-    const tablet = tabletRef.current;
-    const cleanups: (() => void)[] = [];
-    if (phone) {
-      const c = runVideoLayer(
-        phone,
-        phoneSrc,
-        playing,
-        shape === "phone",
-        prevPhoneSrc,
-      );
-      if (c) cleanups.push(c);
-    }
-    if (tablet) {
-      const c = runVideoLayer(
-        tablet,
-        tabletSrc,
-        playing,
-        shape === "tablet",
-        prevTabletSrc,
-      );
-      if (c) cleanups.push(c);
-    }
-    return () => cleanups.forEach((fn) => fn());
-  }, [phoneSrc, tabletSrc, shape, playing]);
-
-  const preloadBoth =
-    playing && (phoneSrc || tabletSrc) ? "auto" : "metadata";
-
-  const videoCls =
-    "absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-200 ease-out";
+    const el = videoRef.current;
+    if (!el) return undefined;
+    const run = () => tryPlay();
+    el.addEventListener("loadeddata", run);
+    el.addEventListener("canplay", run);
+    return () => {
+      el.removeEventListener("loadeddata", run);
+      el.removeEventListener("canplay", run);
+    };
+  }, [src, tryPlay]);
 
   return (
     <div
@@ -147,41 +74,30 @@ const PhoneFrameWithVideo = memo(function PhoneFrameWithVideo({
           : { height: "680px", minHeight: "680px", aspectRatio: "340/680" }
       }
     >
+      {/* <div
+        className={`absolute z-50 bg-slate-800 dark:bg-slate-900 ${
+          isTablet
+            ? "top-3 left-1/2 h-2 w-14 -translate-x-1/2 rounded-full"
+            : "top-0 left-1/2 h-6 w-32 -translate-x-1/2 rounded-b-2xl"
+        }`}
+      /> */}
       <div className="relative h-full w-full overflow-hidden bg-black">
         <video
-          ref={phoneRef}
-          className={`${videoCls} ${shape === "phone" ? "z-10 opacity-100" : "z-0 opacity-0"}`}
-          src={phoneSrc || undefined}
-          autoPlay={playing && shape === "phone"}
+          key={src}
+          ref={videoRef}
+          className="absolute inset-0 h-full w-full object-cover object-top"
+          src={src}
+          autoPlay
           loop
-          muted
           playsInline
           controls={false}
-          preload={!phoneSrc ? "none" : preloadBoth}
-          disablePictureInPicture
-          disableRemotePlayback
-          aria-hidden={shape !== "phone"}
-          {...IOS_INLINE}
-        />
-        <video
-          ref={tabletRef}
-          className={`${videoCls} ${shape === "tablet" ? "z-10 opacity-100" : "z-0 opacity-0"}`}
-          src={tabletSrc || undefined}
-          autoPlay={playing && shape === "tablet"}
-          loop
-          muted
-          playsInline
-          controls={false}
-          preload={!tabletSrc ? "none" : preloadBoth}
-          disablePictureInPicture
-          disableRemotePlayback
-          aria-hidden={shape !== "tablet"}
-          {...IOS_INLINE}
+          muted={false}
+          preload="auto"
         />
       </div>
     </div>
   );
-});
+}
 
 export default function PhoneVideoSection() {
   const t = useTranslations("phoneVideoSection");
@@ -190,61 +106,17 @@ export default function PhoneVideoSection() {
 
   const [activeIdx, setActiveIdx] = useState(0);
   const [deviceShape, setDeviceShape] = useState<DeviceShape>("phone");
-  const sectionRef = useRef<HTMLElement | null>(null);
-  const [mediaAllowed, setMediaAllowed] = useState(false);
-  const [isIntersecting, setIsIntersecting] = useState(false);
-
-  const phoneClipSrc = useMemo(
-    () => TAB_VIDEO_PATHS[activeIdx] ?? TAB_VIDEO_PATHS[0],
-    [activeIdx],
-  );
-  const tabletClipSrc = useMemo(
-    () =>
-      TAB_VIDEO_PATHS_TABLET[activeIdx] ?? TAB_VIDEO_PATHS_TABLET[0],
-    [activeIdx],
-  );
+  const [effectiveSrc, setEffectiveSrc] = useState(TAB_VIDEO_PATHS[0]);
 
   useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    if (typeof IntersectionObserver === "undefined") {
-      setMediaAllowed(true);
-      setIsIntersecting(true);
-      return;
-    }
-    let hideDelay: ReturnType<typeof setTimeout> | undefined;
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const hit = entries.some((e) => e.isIntersecting);
-        if (hit) {
-          if (hideDelay) clearTimeout(hideDelay);
-          hideDelay = undefined;
-          setIsIntersecting(true);
-          setMediaAllowed(true);
-        } else {
-          if (hideDelay) clearTimeout(hideDelay);
-          hideDelay = setTimeout(() => {
-            hideDelay = undefined;
-            setIsIntersecting(false);
-          }, 550);
-        }
-      },
-      { root: null, rootMargin: "180px 0px 240px 0px", threshold: 0 },
-    );
-    obs.observe(el);
-    return () => {
-      if (hideDelay) clearTimeout(hideDelay);
-      obs.disconnect();
-    };
-  }, []);
-
-  const resolvedPhone = mediaAllowed ? phoneClipSrc : undefined;
-  const resolvedTablet = mediaAllowed ? tabletClipSrc : undefined;
-  const videoPlaying = mediaAllowed && isIntersecting;
+    const phone = TAB_VIDEO_PATHS[activeIdx] ?? TAB_VIDEO_PATHS[0];
+    const tablet =
+      TAB_VIDEO_PATHS_TABLET[activeIdx] ?? TAB_VIDEO_PATHS_TABLET[0];
+    setEffectiveSrc(deviceShape === "tablet" ? tablet : phone);
+  }, [activeIdx, deviceShape]);
 
   return (
     <section
-      ref={sectionRef}
       id="phone-demo"
       className="relative overflow-hidden bg-slate-50 py-24 dark:bg-[#111827]"
       aria-labelledby="phone-demo-heading"
@@ -347,12 +219,7 @@ export default function PhoneVideoSection() {
               }`}
             >
               <div className="absolute inset-0 -z-10 bg-linear-to-r from-purple-600 to-purple-700 opacity-15 blur-[100px] dark:from-purple-500 dark:to-purple-600 dark:opacity-25" />
-              <PhoneFrameWithVideo
-                phoneSrc={resolvedPhone}
-                tabletSrc={resolvedTablet}
-                shape={deviceShape}
-                playing={videoPlaying}
-              />
+              <PhoneFrameWithVideo src={effectiveSrc} shape={deviceShape} />
               <div
                 className="mt-6 flex justify-center"
                 role="group"
