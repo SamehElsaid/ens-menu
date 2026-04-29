@@ -32,6 +32,11 @@ const TAB_VIDEO_PATHS_TABLET: readonly string[] = [
 
 type DeviceShape = "phone" | "tablet";
 
+/** Poster image beside each MP4 in `public/app/` (e.g. `order.mp4` → `order.jpg`). */
+function posterUrlForVideoSrc(videoSrc: string): string {
+  return videoSrc.replace(/\.mp4$/i, ".jpg");
+}
+
 function PhoneFrameWithVideo({
   src,
   shape,
@@ -39,8 +44,27 @@ function PhoneFrameWithVideo({
   src: string;
   shape: DeviceShape;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const isTablet = shape === "tablet";
+  const posterUrl = posterUrlForVideoSrc(src);
+
+  useEffect(() => {
+    const root = containerRef.current;
+    if (!root) return undefined;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setShouldLoadVideo(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "180px", threshold: 0.01 }
+    );
+    io.observe(root);
+    return () => io.disconnect();
+  }, []);
 
   const tryPlay = useCallback(() => {
     const el = videoRef.current;
@@ -50,6 +74,7 @@ function PhoneFrameWithVideo({
   }, []);
 
   useEffect(() => {
+    if (!shouldLoadVideo) return undefined;
     const el = videoRef.current;
     if (!el) return undefined;
     const run = () => tryPlay();
@@ -59,7 +84,7 @@ function PhoneFrameWithVideo({
       el.removeEventListener("loadeddata", run);
       el.removeEventListener("canplay", run);
     };
-  }, [src, tryPlay]);
+  }, [src, tryPlay, shouldLoadVideo]);
 
   return (
     <div
@@ -81,18 +106,22 @@ function PhoneFrameWithVideo({
             : "top-0 left-1/2 h-6 w-32 -translate-x-1/2 rounded-b-2xl"
         }`}
       /> */}
-      <div className="relative h-full w-full overflow-hidden bg-black">
+      <div
+        ref={containerRef}
+        className="relative h-full w-full overflow-hidden bg-black"
+      >
         <video
           key={src}
           ref={videoRef}
           className="absolute inset-0 h-full w-full object-cover object-top"
-          src={src}
-          autoPlay
+          poster={posterUrl}
+          src={shouldLoadVideo ? src : undefined}
+          autoPlay={shouldLoadVideo}
           loop
           playsInline
           controls={false}
-          muted={false}
-          preload="auto"
+          muted
+          preload={shouldLoadVideo ? "metadata" : "none"}
         />
       </div>
     </div>
