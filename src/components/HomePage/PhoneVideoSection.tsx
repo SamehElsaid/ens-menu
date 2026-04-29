@@ -1,7 +1,14 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { MdSmartphone, MdTabletMac } from "react-icons/md";
 
 const TAB_KEYS = [
@@ -32,22 +39,24 @@ const TAB_VIDEO_PATHS_TABLET: readonly string[] = [
 
 type DeviceShape = "phone" | "tablet";
 
-function PhoneFrameWithVideo({
+const PhoneFrameWithVideo = memo(function PhoneFrameWithVideo({
   src,
   shape,
+  playing,
 }: {
-  src: string;
+  src: string | undefined;
   shape: DeviceShape;
+  playing: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const isTablet = shape === "tablet";
 
   const tryPlay = useCallback(() => {
     const el = videoRef.current;
-    if (!el) return;
+    if (!el || !playing) return;
     const p = el.play();
     if (p !== undefined) p.catch(() => {});
-  }, []);
+  }, [playing]);
 
   useEffect(() => {
     const el = videoRef.current;
@@ -60,6 +69,18 @@ function PhoneFrameWithVideo({
       el.removeEventListener("canplay", run);
     };
   }, [src, tryPlay]);
+
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el || !src) return;
+    if (!playing) {
+      el.pause();
+    } else {
+      tryPlay();
+    }
+  }, [playing, src, tryPlay]);
+
+  const preload = !src ? "none" : playing ? "auto" : "none";
 
   return (
     <div
@@ -74,30 +95,24 @@ function PhoneFrameWithVideo({
           : { height: "680px", minHeight: "680px", aspectRatio: "340/680" }
       }
     >
-      {/* <div
-        className={`absolute z-50 bg-slate-800 dark:bg-slate-900 ${
-          isTablet
-            ? "top-3 left-1/2 h-2 w-14 -translate-x-1/2 rounded-full"
-            : "top-0 left-1/2 h-6 w-32 -translate-x-1/2 rounded-b-2xl"
-        }`}
-      /> */}
       <div className="relative h-full w-full overflow-hidden bg-black">
         <video
-          key={src}
           ref={videoRef}
           className="absolute inset-0 h-full w-full object-cover object-top"
-          src={src}
-          autoPlay
+          src={src || undefined}
+          autoPlay={playing}
           loop
+          muted
           playsInline
           controls={false}
-          muted={false}
-          preload="auto"
+          preload={preload}
+          disablePictureInPicture
+          disableRemotePlayback
         />
       </div>
     </div>
   );
-}
+});
 
 export default function PhoneVideoSection() {
   const t = useTranslations("phoneVideoSection");
@@ -106,17 +121,43 @@ export default function PhoneVideoSection() {
 
   const [activeIdx, setActiveIdx] = useState(0);
   const [deviceShape, setDeviceShape] = useState<DeviceShape>("phone");
-  const [effectiveSrc, setEffectiveSrc] = useState(TAB_VIDEO_PATHS[0]);
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const [mediaAllowed, setMediaAllowed] = useState(false);
+  const [isIntersecting, setIsIntersecting] = useState(false);
 
-  useEffect(() => {
+  const videoSrc = useMemo(() => {
     const phone = TAB_VIDEO_PATHS[activeIdx] ?? TAB_VIDEO_PATHS[0];
     const tablet =
       TAB_VIDEO_PATHS_TABLET[activeIdx] ?? TAB_VIDEO_PATHS_TABLET[0];
-    setEffectiveSrc(deviceShape === "tablet" ? tablet : phone);
+    return deviceShape === "tablet" ? tablet : phone;
   }, [activeIdx, deviceShape]);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setMediaAllowed(true);
+      setIsIntersecting(true);
+      return;
+    }
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const hit = entries.some((e) => e.isIntersecting);
+        setIsIntersecting(hit);
+        if (hit) setMediaAllowed(true);
+      },
+      { root: null, rootMargin: "140px 0px", threshold: [0, 0.08, 0.2] }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  const resolvedSrc = mediaAllowed ? videoSrc : undefined;
+  const videoPlaying = mediaAllowed && isIntersecting;
 
   return (
     <section
+      ref={sectionRef}
       id="phone-demo"
       className="relative overflow-hidden bg-slate-50 py-24 dark:bg-[#111827]"
       aria-labelledby="phone-demo-heading"
@@ -219,7 +260,11 @@ export default function PhoneVideoSection() {
               }`}
             >
               <div className="absolute inset-0 -z-10 bg-linear-to-r from-purple-600 to-purple-700 opacity-15 blur-[100px] dark:from-purple-500 dark:to-purple-600 dark:opacity-25" />
-              <PhoneFrameWithVideo src={effectiveSrc} shape={deviceShape} />
+              <PhoneFrameWithVideo
+                src={resolvedSrc}
+                shape={deviceShape}
+                playing={videoPlaying}
+              />
               <div
                 className="mt-6 flex justify-center"
                 role="group"
