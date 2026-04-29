@@ -904,6 +904,36 @@
     "cta": "Start Now for Free",
     "watchDemo": "Watch Demo"
   },
+  "phoneVideoSection": {
+    "badge": "Staff app",
+    "devicePhone": "Phone",
+    "deviceTablet": "Tablet",
+    "deviceToggleAria": "Preview device frame",
+    "title": "Handle menu orders on your phone",
+    "description": "A staff-facing app for restaurants and cafés to receive customer orders coming from the digital menu, and track each step from intake to handoff in one clear screen.",
+    "tabItems": {
+      "createOrder": {
+        "title": "Create order",
+        "description": "Create a new order from the menu."
+      },
+      "receiveOrder": {
+        "title": "Receive order",
+        "description": "When a new order is received, you will receive a notification with the order, customer, table, time, and notes"
+      },
+      "editOrder": {
+        "title": "Edit order",
+        "description": "Edit the order in the restaurant app. A message 'Edit this order?' appears with a warning that the items and quantities will be sent to the server, and there are two buttons: cancel and edit the order."
+      },
+      "acceptOrder": {
+        "title": "Accept order",
+        "description": "Confirm the order in the restaurant app. A message 'Confirm this order?' appears with a warning that the items and quantities will be sent to the server, and there are two buttons: cancel and confirm the order."
+      },
+      "createFromApp": {
+        "title": "Order from the app",
+        "description": "Add an order from the menu in the app. It displays the items of the desserts and drinks with their images, prices, and descriptions"
+      }
+    }
+  },
   "Landing": {
     "features": {
       "title": "Why Choose Smart Menu?",

@@ -7,6 +7,7 @@ import FAQ from "@/components/HomePage/FAQ";
 import Features from "@/components/HomePage/FeatureSection";
 import FooterSection from "@/components/HomePage/Footer";
 import HeroSection from "@/components/HomePage/HeroSection";
+import PhoneVideoSection from "@/components/HomePage/PhoneVideoSection";
 import HowItWorks from "@/components/HomePage/HowItWorks";
 import PricingSection from "@/components/HomePage/PricingSection";
 import TemplateShow from "@/components/HomePage/TemplateShow";
@@ -37,6 +38,7 @@ async function Page({ params }: Props) {
     <>
       <HeroSection />
       <TemplateShow />
+      <PhoneVideoSection />
       <Features />
       <PricingSection />
       <HowItWorks />
