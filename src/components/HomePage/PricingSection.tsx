@@ -3,7 +3,7 @@
 import { useTranslations, useLocale } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { axiosGet } from "@/shared/axiosCall";
-import { translatePlanFeatureLine } from "@/lib/planFeatureI18n";
+import { translatePlanFeaturesWithMenuLimit } from "@/lib/planFeatureI18n";
 import { FaSpinner } from "react-icons/fa";
 import { HiCheck, HiOutlineChat } from "react-icons/hi";
 import { Link } from "@/i18n/navigation";
@@ -86,8 +86,10 @@ export default function PricingSection() {
   /** API plan features + Pro-only items (staff & tables). */
   const proPlanFeatureLines = useMemo(() => {
     if (!proPlan) return [];
-    const fromApi = (proPlan.features || []).map((line) =>
-      translatePlanFeatureLine(line, tProfile),
+    const fromApi = translatePlanFeaturesWithMenuLimit(
+      proPlan.features,
+      proPlan.maxMenus,
+      tProfile,
     );
     const extra = [
       t("proExtraFeatures.staffSystem"),
@@ -145,13 +147,16 @@ export default function PricingSection() {
                     0
                   </span>
                   <span className="text-slate-500 dark:text-slate-400 text-sm ml-1">
-                    {t("currency")} {t("perYear")}
+                    {t("currencyUsd")} {t("perYear")}
                   </span>
                 </div>
                 <ul className="space-y-3 flex-1">
-                  {(freePlan.features || [])
+                  {translatePlanFeaturesWithMenuLimit(
+                    freePlan.features,
+                    freePlan.maxMenus,
+                    tProfile,
+                  )
                     .slice(0, 5)
-                    .map((line) => translatePlanFeatureLine(line, tProfile))
                     .map((f, i) => (
                       <li
                         key={i}
@@ -195,10 +200,10 @@ export default function PricingSection() {
                 </p>
                 <div className="mb-6">
                   <span className="text-3xl font-black text-slate-900 dark:text-white">
-                    {proPlan.priceYearly ?? proPlan.priceMonthly * 12}
+                    {proPlan.priceYearly}
                   </span>
                   <span className="text-slate-500 dark:text-slate-400 text-sm ml-1">
-                    {t("currency")} {t("perYear")}
+                    {t("currencyUsd")} {t("perYear")}
                   </span>
                 </div>
                 <ul className="space-y-3 flex-1">

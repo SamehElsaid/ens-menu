@@ -33,8 +33,45 @@ import {
 } from "@/schemas/changePasswordSchema";
 import { useRouter } from "@/i18n/navigation";
 import Cookies from "js-cookie";
-import { translatePlanFeatureLine } from "@/lib/planFeatureI18n";
+import { translatePlanFeaturesWithMenuLimit } from "@/lib/planFeatureI18n";
 import type { Subscription, SubscriptionResponse } from "@/types/Subscription";
+import parsePhoneNumberFromString from "libphonenumber-js";
+
+/** Pro checkout uses EGP; Egyptian mobiles are common — normalize to E.164 for gateways. */
+function formatPhoneForPaymentGateway(raw: string): string {
+  const t = raw.trim().replace(/\s+/g, "");
+  if (!t) return "";
+  for (const cc of ["EG", "AE"] as const) {
+    const p = parsePhoneNumberFromString(t, cc);
+    if (p?.isValid()) return p.format("E.164");
+  }
+  const normalized = t.startsWith("+") ? t : `+${t.replace(/^00+/, "")}`;
+  const fallback = parsePhoneNumberFromString(normalized);
+  if (fallback?.isValid()) return fallback.format("E.164");
+  return t;
+}
+
+function pickFailedRequestMessage(data: unknown): string | null {
+  if (data == null || typeof data !== "object") return null;
+  const o = data as Record<string, unknown>;
+  const fromError = typeof o.error === "string" ? o.error.trim() : "";
+  if (fromError) return fromError;
+  const fromMsg = typeof o.message === "string" ? o.message.trim() : "";
+  if (fromMsg) return fromMsg;
+  const details = o.details;
+  if (Array.isArray(details)) {
+    const first = details[0];
+    if (
+      first &&
+      typeof first === "object" &&
+      "message" in first &&
+      typeof (first as { message: unknown }).message === "string"
+    ) {
+      return String((first as { message: string }).message).trim();
+    }
+  }
+  return null;
+}
 
 export type Plan = {
   id: number;
@@ -449,7 +486,13 @@ export default function PersonalProfile({
 
   const handleUpgradeToProYearly = useCallback(async () => {
     const nameToSend = name.trim() || profile?.name || "";
-    const phoneToSend = phone?.trim() || profile?.phoneNumber || "";
+    const rawPhone =
+      (typeof phone === "string" ? phone.trim() : "") ||
+      (typeof profile?.phoneNumber === "string"
+        ? profile.phoneNumber.trim()
+        : "") ||
+      "";
+    const phoneToSend = formatPhoneForPaymentGateway(rawPhone);
     if (!nameToSend || !phoneToSend) {
       toast.error(t("payProYearlyError"));
       return;
@@ -462,7 +505,7 @@ export default function PersonalProfile({
       name: nameToSend,
       email: profile?.email?.trim() || undefined,
       mobile: phoneToSend,
-      currency: "EGP",
+      currency: "USD",
     });
     setProYearlyPayLoading(false);
     if (res?.status && res.data?.data?.redirectUrl) {
@@ -470,7 +513,8 @@ export default function PersonalProfile({
       window.location.href = res.data.data.redirectUrl;
       return;
     }
-    toast.error(t("payProYearlyError"));
+    const serverMsg = pickFailedRequestMessage(res?.data as unknown);
+    toast.error(serverMsg ?? t("payProYearlyError"));
   }, [
     locale,
     name,
@@ -663,6 +707,7 @@ export default function PersonalProfile({
               <CustomInput
                 type="tel"
                 id="phone"
+                defaultCountry="EG"
                 value={phone || undefined}
                 onChange={(val) => setPhone((val as unknown as string) ?? "")}
                 placeholder={t("phone")}
@@ -1049,7 +1094,7 @@ export default function PersonalProfile({
                                   : plan.priceYearly > 0
                                     ? t("yearlyPriceFormatted", {
                                         price: plan.priceYearly,
-                                        currency: tLandingPricing("currency"),
+                                        currency: tLandingPricing("currencyUsd"),
                                         perYear: tLandingPricing("perYear"),
                                       })
                                     : null}
@@ -1066,8 +1111,10 @@ export default function PersonalProfile({
                           <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300 mb-4">
                             {(String(plan.name).toLowerCase() === "pro"
                               ? [
-                                  ...(plan.features || []).map((line) =>
-                                    translatePlanFeatureLine(line, t),
+                                  ...translatePlanFeaturesWithMenuLimit(
+                                    plan.features,
+                                    plan.maxMenus,
+                                    t,
                                   ),
                                   tLandingPricing(
                                     "proExtraFeatures.staffSystem",
@@ -1076,11 +1123,11 @@ export default function PersonalProfile({
                                     "proExtraFeatures.tablesSystem",
                                   ),
                                 ]
-                              : (plan.features || [])
-                                  .slice(0, 4)
-                                  .map((line) =>
-                                    translatePlanFeatureLine(line, t),
-                                  )
+                              : translatePlanFeaturesWithMenuLimit(
+                                  plan.features,
+                                  plan.maxMenus,
+                                  t,
+                                ).slice(0, 5)
                             ).map((f, i) => (
                               <li key={`${plan.id}-f-${i}`}>✓ {f}</li>
                             ))}

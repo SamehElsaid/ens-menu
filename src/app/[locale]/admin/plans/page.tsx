@@ -46,11 +46,15 @@ export default function PlansPage() {
 
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editModal, setEditModal] = useState<{ isOpen: boolean; plan: Plan | null }>({
+  const [editModal, setEditModal] = useState<{
+    isOpen: boolean;
+    plan: Plan | null;
+  }>({
     isOpen: false,
     plan: null,
   });
-  const [form, setForm] = useState<Record<string, string | number | boolean>>(defaultForm);
+  const [form, setForm] =
+    useState<Record<string, string | number | boolean>>(defaultForm);
   const [saving, setSaving] = useState(false);
 
   const fetchPlans = useCallback(async () => {
@@ -111,7 +115,7 @@ export default function PlansPage() {
       const result = await axiosPatch<typeof payload, { message?: string }>(
         `/admin/plans/${editModal.plan.id}`,
         locale,
-        payload
+        payload,
       );
 
       if (result.status) {
@@ -143,11 +147,10 @@ export default function PlansPage() {
         width: 120,
         valueFormatter: (params) =>
           params.value != null
-            ? new Intl.NumberFormat(locale, {
-                style: "currency",
-                currency: "AED",
+            ? `$${Number(params.value).toLocaleString("en-US", {
                 minimumFractionDigits: 2,
-              }).format(Number(params.value))
+                maximumFractionDigits: 2,
+              })}`
             : "—",
       },
       {
@@ -192,29 +195,29 @@ export default function PlansPage() {
         headerName: t("columns.actions"),
         width: 100,
         cellRenderer: (params: { data: Plan }) =>
-          params.data
-            ? (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openEdit(params.data);
-                  }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 font-medium text-sm"
-                >
-                  <IoCreateOutline className="text-base" />
-                  {t("edit")}
-                </button>
-              )
-            : null,
+          params.data ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                openEdit(params.data);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 font-medium text-sm"
+            >
+              <IoCreateOutline className="text-base" />
+              {t("edit")}
+            </button>
+          ) : null,
       },
     ],
-    [t, locale, openEdit]
+    [t, locale, openEdit],
   );
 
   return (
     <div className="space-y-6">
-      <div className={`flex flex-col gap-4 ${isRTL ? "text-right" : "text-left"}`}>
+      <div
+        className={`flex flex-col gap-4 ${isRTL ? "text-right" : "text-left"}`}
+      >
         <div className="flex items-center gap-4">
           <button
             type="button"
@@ -258,7 +261,9 @@ export default function PlansPage() {
                 <input
                   type="text"
                   value={String(form.name)}
-                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, name: e.target.value }))
+                  }
                   className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
                   dir={locale === "ar" ? "rtl" : "ltr"}
                 />
@@ -274,7 +279,10 @@ export default function PlansPage() {
                   step={0.01}
                   value={Number(form.priceYearly)}
                   onChange={(e) =>
-                    setForm((f) => ({ ...f, priceYearly: e.target.value ? Number(e.target.value) : 0 }))
+                    setForm((f) => ({
+                      ...f,
+                      priceYearly: e.target.value ? Number(e.target.value) : 0,
+                    }))
                   }
                   className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
                 />
@@ -324,10 +332,15 @@ export default function PlansPage() {
                   type="checkbox"
                   id="hasAds"
                   checked={Boolean(form.hasAds)}
-                  onChange={(e) => setForm((f) => ({ ...f, hasAds: e.target.checked }))}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, hasAds: e.target.checked }))
+                  }
                   className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
                 />
-                <label htmlFor="hasAds" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                <label
+                  htmlFor="hasAds"
+                  className="text-sm font-medium text-slate-700 dark:text-slate-300"
+                >
                   {t("editModal.hasAds")}
                 </label>
               </div>
@@ -337,10 +350,15 @@ export default function PlansPage() {
                   type="checkbox"
                   id="isActive"
                   checked={Boolean(form.isActive)}
-                  onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, isActive: e.target.checked }))
+                  }
                   className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
                 />
-                <label htmlFor="isActive" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                <label
+                  htmlFor="isActive"
+                  className="text-sm font-medium text-slate-700 dark:text-slate-300"
+                >
                   {t("editModal.isActive")}
                 </label>
               </div>
@@ -351,7 +369,10 @@ export default function PlansPage() {
                   id="allowFullDesignControl"
                   checked={Boolean(form.allowFullDesignControl)}
                   onChange={(e) =>
-                    setForm((f) => ({ ...f, allowFullDesignControl: e.target.checked }))
+                    setForm((f) => ({
+                      ...f,
+                      allowFullDesignControl: e.target.checked,
+                    }))
                   }
                   className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
                 />
