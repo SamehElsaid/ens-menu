@@ -13,6 +13,7 @@ import {
   IoChevronForwardOutline,
   IoOpenOutline,
   IoEyeOutline,
+  IoTimeOutline,
 } from "react-icons/io5";
 import { FaChartLine } from "react-icons/fa";
 import { BiCategory } from "react-icons/bi";
@@ -253,6 +254,15 @@ export default function DashboardMenuPage() {
             <MdOutlineTableBar className="text-lg shrink-0" />
             {t("tables")}
           </LinkTo>
+          {isCashierStaff && (
+            <LinkTo
+              href={`/dashboard/${menuSlugOrId}/history`}
+              className={`${tabBase} ${tabInactive}`}
+            >
+              <IoTimeOutline className="text-lg shrink-0" />
+              {t("activityLog")}
+            </LinkTo>
+          )}
           {!isCashierStaff && (
             <>
               <LinkTo

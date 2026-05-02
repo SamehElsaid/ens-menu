@@ -30,7 +30,7 @@ export type NavSection = {
   items: NavItem[];
 };
 
-/** Cashier staff: operational pages only — no settings, staff management, profile, or ads. */
+/** Cashier staff: operational pages + activity log — no settings, staff management, profile, or ads. */
 export const cashierNavSections: NavSection[] = [
   {
     title: "Overview",
@@ -63,6 +63,12 @@ export const cashierNavSections: NavSection[] = [
         icon: MdOutlineTableBar,
         key: "tables",
         link: "table",
+      },
+      {
+        label: "history",
+        icon: IoTimeOutline,
+        key: "history",
+        link: "history",
       },
     ],
   },
