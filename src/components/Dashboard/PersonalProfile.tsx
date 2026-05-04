@@ -33,7 +33,45 @@ import {
 } from "@/schemas/changePasswordSchema";
 import { useRouter } from "@/i18n/navigation";
 import Cookies from "js-cookie";
-import { translatePlanFeatureLine } from "@/lib/planFeatureI18n";
+import { translatePlanFeaturesWithMenuLimit } from "@/lib/planFeatureI18n";
+import type { Subscription, SubscriptionResponse } from "@/types/Subscription";
+import parsePhoneNumberFromString from "libphonenumber-js";
+
+/** Pro checkout uses EGP; Egyptian mobiles are common — normalize to E.164 for gateways. */
+function formatPhoneForPaymentGateway(raw: string): string {
+  const t = raw.trim().replace(/\s+/g, "");
+  if (!t) return "";
+  for (const cc of ["EG", "AE"] as const) {
+    const p = parsePhoneNumberFromString(t, cc);
+    if (p?.isValid()) return p.format("E.164");
+  }
+  const normalized = t.startsWith("+") ? t : `+${t.replace(/^00+/, "")}`;
+  const fallback = parsePhoneNumberFromString(normalized);
+  if (fallback?.isValid()) return fallback.format("E.164");
+  return t;
+}
+
+function pickFailedRequestMessage(data: unknown): string | null {
+  if (data == null || typeof data !== "object") return null;
+  const o = data as Record<string, unknown>;
+  const fromError = typeof o.error === "string" ? o.error.trim() : "";
+  if (fromError) return fromError;
+  const fromMsg = typeof o.message === "string" ? o.message.trim() : "";
+  if (fromMsg) return fromMsg;
+  const details = o.details;
+  if (Array.isArray(details)) {
+    const first = details[0];
+    if (
+      first &&
+      typeof first === "object" &&
+      "message" in first &&
+      typeof (first as { message: unknown }).message === "string"
+    ) {
+      return String((first as { message: string }).message).trim();
+    }
+  }
+  return null;
+}
 
 export type Plan = {
   id: number;
@@ -155,6 +193,11 @@ export default function PersonalProfile({
   );
   const [plans, setPlans] = useState<Plan[]>([]);
   const [plansLoading, setPlansLoading] = useState(true);
+  const [subscriptionInfo, setSubscriptionInfo] = useState<Subscription | null>(
+    null,
+  );
+  const [subscriptionInfoLoading, setSubscriptionInfoLoading] = useState(true);
+  const [proYearlyPayLoading, setProYearlyPayLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [changePasswordLoading, setChangePasswordLoading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -210,6 +253,19 @@ export default function PersonalProfile({
           : null,
       );
     });
+
+    queueMicrotask(() => {
+      setSubscriptionInfoLoading(true);
+    });
+    void axiosGet<SubscriptionResponse>("/user/subscription", locale)
+      .then((res) => {
+        if (res.status && res.data?.subscription) {
+          setSubscriptionInfo(res.data.subscription);
+        } else {
+          setSubscriptionInfo(null);
+        }
+      })
+      .finally(() => setSubscriptionInfoLoading(false));
 
     axiosGet<PlansResponse>("/public/plans", locale, undefined, undefined, true)
       .then((res) => {
@@ -410,6 +466,65 @@ export default function PersonalProfile({
     String(profile.user.subscription.planName).toLowerCase().includes("custom"),
   );
 
+  const currentPlanNameResolved =
+    subscriptionInfo?.planName ?? profile?.user?.subscription?.planName ?? "";
+
+  const isOnProPlan = String(currentPlanNameResolved).toLowerCase() === "pro";
+
+  const formatPlanDate = (d: string | null | undefined) => {
+    if (d == null || d === "") return "—";
+    try {
+      return new Date(d).toLocaleDateString(locale, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    } catch {
+      return "—";
+    }
+  };
+
+  const handleUpgradeToProYearly = useCallback(async () => {
+    const nameToSend = name.trim() || profile?.name || "";
+    const rawPhone =
+      (typeof phone === "string" ? phone.trim() : "") ||
+      (typeof profile?.phoneNumber === "string"
+        ? profile.phoneNumber.trim()
+        : "") ||
+      "";
+    const phoneToSend = formatPhoneForPaymentGateway(rawPhone);
+    if (!nameToSend || !phoneToSend) {
+      toast.error(t("payProYearlyError"));
+      return;
+    }
+    setProYearlyPayLoading(true);
+    const res = await axiosPost<
+      { name: string; email?: string; mobile: string; currency?: string },
+      { success?: boolean; data?: { redirectUrl?: string } }
+    >("/payment/subscription/pro-yearly/initiate", locale, {
+      name: nameToSend,
+      email: profile?.email?.trim() || undefined,
+      mobile: phoneToSend,
+      currency: "USD",
+    });
+    setProYearlyPayLoading(false);
+    if (res?.status && res.data?.data?.redirectUrl) {
+      toast.info(t("paying"));
+      window.location.href = res.data.data.redirectUrl;
+      return;
+    }
+    const serverMsg = pickFailedRequestMessage(res?.data as unknown);
+    toast.error(serverMsg ?? t("payProYearlyError"));
+  }, [
+    locale,
+    name,
+    phone,
+    profile?.name,
+    profile?.email,
+    profile?.phoneNumber,
+    t,
+  ]);
+
   return (
     <div className="min-h-[calc(100vh-120px)]">
       {defaultBackLink && (
@@ -592,6 +707,7 @@ export default function PersonalProfile({
               <CustomInput
                 type="tel"
                 id="phone"
+                defaultCountry="EG"
                 value={phone || undefined}
                 onChange={(val) => setPhone((val as unknown as string) ?? "")}
                 placeholder={t("phone")}
@@ -783,17 +899,101 @@ export default function PersonalProfile({
                 {t("subscriptionManagement")}
               </h3>
 
-              {/* Current plan badge */}
-              {profile?.user?.subscription?.planName && (
+              {/* Current plan: name + status + billing + renewal + limits */}
+              {subscriptionInfoLoading ? (
                 <div
-                  className={`flex flex-wrap items-center gap-3 mb-6 ${isRTL ? "flex-row-reverse" : ""}`}
+                  className="mb-6 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 animate-pulse space-y-3"
+                  aria-hidden
                 >
-                  <span className="text-sm text-slate-500 dark:text-slate-400">
-                    {t("currentPlanLabel")}:
-                  </span>
-                  <span className="inline-flex items-center px-3 py-1.5 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary font-medium text-sm border border-primary/20 dark:border-primary/30">
-                    {profile.user.subscription.planName}
-                  </span>
+                  <div className="h-4 w-1/3 bg-slate-200 dark:bg-slate-700 rounded" />
+                  <div className="h-3 w-full bg-slate-100 dark:bg-slate-800 rounded" />
+                  <div className="h-3 w-2/3 bg-slate-100 dark:bg-slate-800 rounded" />
+                </div>
+              ) : (
+                <div
+                  className={`mb-6 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/40 p-4 md:p-5 ${isRTL ? "text-right" : "text-left"}`}
+                >
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-3">
+                    {t("currentPlanSummary")}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2 mb-4">
+                    <span className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                      {currentPlanNameResolved
+                        ? (() => {
+                            const n = String(
+                              currentPlanNameResolved,
+                            ).toLowerCase();
+                            if (n === "free") return t("planFree");
+                            if (n === "pro") return t("planPro");
+                            return currentPlanNameResolved;
+                          })()
+                        : t("planFree")}
+                    </span>
+                    {subscriptionInfo?.status && (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200">
+                        {t("status")}: {String(subscriptionInfo.status)}
+                      </span>
+                    )}
+                  </div>
+                  <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                    <div className="flex flex-col sm:flex-row sm:gap-2">
+                      <dt className="text-slate-500 dark:text-slate-400 shrink-0">
+                        {t("billingCycle")}:
+                      </dt>
+                      <dd className="font-medium text-slate-800 dark:text-slate-200">
+                        {(() => {
+                          const c = String(
+                            subscriptionInfo?.billingCycle ?? "",
+                          ).toLowerCase();
+                          if (c === "yearly" || c === "annual")
+                            return t("yearly");
+                          if (c === "monthly") return t("monthly");
+                          if (c === "free" || !c) return t("freePrice");
+                          return subscriptionInfo?.billingCycle ?? "—";
+                        })()}
+                      </dd>
+                    </div>
+                    <div className="flex flex-col sm:flex-row sm:gap-2">
+                      <dt className="text-slate-500 dark:text-slate-400 shrink-0">
+                        {t("renewalDate")}:
+                      </dt>
+                      <dd className="font-medium text-slate-800 dark:text-slate-200">
+                        {formatPlanDate(
+                          subscriptionInfo?.endDate as string | undefined,
+                        )}
+                      </dd>
+                    </div>
+                    <div className="flex flex-col sm:flex-row sm:gap-2">
+                      <dt className="text-slate-500 dark:text-slate-400 shrink-0">
+                        {t("maxMenusLabel")}:
+                      </dt>
+                      <dd className="font-medium text-slate-800 dark:text-slate-200">
+                        {subscriptionInfo?.maxMenus ?? "—"}
+                      </dd>
+                    </div>
+                    <div className="flex flex-col sm:flex-row sm:gap-2">
+                      <dt className="text-slate-500 dark:text-slate-400 shrink-0">
+                        {t("maxProductsLabel")}:
+                      </dt>
+                      <dd className="font-medium text-slate-800 dark:text-slate-200">
+                        {subscriptionInfo?.maxProductsPerMenu ?? "—"}
+                      </dd>
+                    </div>
+                  </dl>
+                  {!isOnProPlan && !isCurrentCustomPlan && (
+                    <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-600">
+                      <button
+                        type="button"
+                        onClick={handleUpgradeToProYearly}
+                        disabled={proYearlyPayLoading}
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary/90 dark:hover:bg-primary/80 transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
+                      >
+                        {proYearlyPayLoading
+                          ? t("paying")
+                          : t("upgradeToProYearlyCta")}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -818,8 +1018,7 @@ export default function PersonalProfile({
                           String(p.name).toLowerCase() === "pro"),
                     )
                     .map((plan, index) => {
-                      const currentPlanName =
-                        profile?.user?.subscription?.planName ?? "";
+                      const currentPlanName = currentPlanNameResolved;
                       const isCurrentPlan =
                         currentPlanName &&
                         String(plan.name).toLowerCase() ===
@@ -845,12 +1044,12 @@ export default function PersonalProfile({
                         currentPlanIndex >= 0 &&
                         index < currentPlanIndex &&
                         !isCustomPlan;
-                                const rtlCol =
-                                    isRTL && index === 0
-                                        ? "md:col-start-3"
-                                        : isRTL && index === 1
-                                            ? "md:col-start-2"
-                                            : "";
+                      const rtlCol =
+                        isRTL && index === 0
+                          ? "md:col-start-3"
+                          : isRTL && index === 1
+                            ? "md:col-start-2"
+                            : "";
 
                       return (
                         <div
@@ -890,15 +1089,15 @@ export default function PersonalProfile({
                               plan.priceMonthly === 0) && (
                               <p className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-3">
                                 {plan.priceMonthly === 0 &&
-                                plan.priceYearly === 0 ? (
-                                  t("freePrice")
-                                ) : plan.priceYearly > 0 ? (
-                                  t("yearlyPriceFormatted", {
-                                    price: plan.priceYearly,
-                                    currency: tLandingPricing("currency"),
-                                    perYear: tLandingPricing("perYear"),
-                                  })
-                                ) : null}
+                                plan.priceYearly === 0
+                                  ? t("freePrice")
+                                  : plan.priceYearly > 0
+                                    ? t("yearlyPriceFormatted", {
+                                        price: plan.priceYearly,
+                                        currency: tLandingPricing("currencyUsd"),
+                                        perYear: tLandingPricing("perYear"),
+                                      })
+                                    : null}
                               </p>
                             )}
                           {(isComingSoon || isCustomPlan) &&
@@ -912,19 +1111,23 @@ export default function PersonalProfile({
                           <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300 mb-4">
                             {(String(plan.name).toLowerCase() === "pro"
                               ? [
-                                  ...(plan.features || []).map((line) =>
-                                    translatePlanFeatureLine(line, t),
+                                  ...translatePlanFeaturesWithMenuLimit(
+                                    plan.features,
+                                    plan.maxMenus,
+                                    t,
                                   ),
-                                  tLandingPricing("proExtraFeatures.staffSystem"),
+                                  tLandingPricing(
+                                    "proExtraFeatures.staffSystem",
+                                  ),
                                   tLandingPricing(
                                     "proExtraFeatures.tablesSystem",
                                   ),
                                 ]
-                              : (plan.features || [])
-                                  .slice(0, 4)
-                                  .map((line) =>
-                                    translatePlanFeatureLine(line, t),
-                                  )
+                              : translatePlanFeaturesWithMenuLimit(
+                                  plan.features,
+                                  plan.maxMenus,
+                                  t,
+                                ).slice(0, 5)
                             ).map((f, i) => (
                               <li key={`${plan.id}-f-${i}`}>✓ {f}</li>
                             ))}
@@ -939,7 +1142,9 @@ export default function PersonalProfile({
                             {canUpgrade && (
                               <button
                                 type="button"
-                                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white font-medium text-sm hover:bg-primary/90 dark:hover:bg-primary/80 transition-colors"
+                                onClick={handleUpgradeToProYearly}
+                                disabled={proYearlyPayLoading}
+                                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white font-medium text-sm hover:bg-primary/90 dark:hover:bg-primary/80 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                               >
                                 <HiArrowUp className="w-4 h-4" />
                                 {t("upgrade")}
@@ -965,7 +1170,7 @@ export default function PersonalProfile({
                       isCurrentCustomPlan
                         ? "border-primary dark:border-primary bg-primary/5 dark:bg-primary/10"
                         : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50/30 dark:bg-slate-800/30"
-                                    } ${isRTL ? "md:col-start-1" : ""}`}
+                    } ${isRTL ? "md:col-start-1" : ""}`}
                   >
                     {isCurrentCustomPlan && (
                       <span className="inline-block px-2.5 py-0.5 rounded-full bg-primary/20 dark:bg-primary/30 text-primary dark:text-primary text-xs font-medium mb-2">
@@ -1004,11 +1209,6 @@ export default function PersonalProfile({
                   </div>
                 </div>
               )}
-              <div className="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 px-4 py-3">
-                <p className="text-sm text-amber-800 dark:text-amber-200">
-                  {t("paymentNote")}
-                </p>
-              </div>
             </section>
           </>
         )}

@@ -478,6 +478,7 @@
     "comingSoon": "قريباً",
     "oneMenu": "منيو واحد",
     "threeMenus": "3 منيو",
+    "menusLimitFeature": "{count} منيو",
     "products50": "50 منتج",
     "products200": "200 منتج لكل قائمة",
     "ads": "اعلانات",
@@ -488,7 +489,9 @@
     "youAreOnFreePlan": "أنت على الخطة المجانية",
     "upgradePlan": "ترقية الخطة",
     "downgradePlan": "تخفيض الخطة",
-    "paymentNote": "ملاحظة: تكامل بوابة الدفع قيد التطوير.",
+    "paymentNote": "خطة Pro تُدفع سنوياً فقط (لا يوجد اشتراك شهري). الدفع يتم عبر EasyKash بشكل آمن.",
+    "proYearlyOnlyNote": "خطة Pro متاحة بالاشتراك السنوي فقط — لا يوجد خطة شهرية.",
+    "payProYearlyError": "تعذّر بدء الدفع. ستظهر هنا رسالة من الخادم إن وُجدت؛ وإلا تحقّق من الاسم والجوال وأعد المحاولة.",
     "notEntered": "غير مدخل",
     "emailVerification": "التحقق من البريد",
     "accountStatus": "حالة الحساب",
@@ -504,7 +507,7 @@
     "renewalDate": "تاريخ التجديد",
     "monthly": "شهرياً",
     "yearly": "سنوي",
-    "yearlyPriceFormatted": "{price} {currency}{perYear}",
+    "yearlyPriceFormatted": "{currency}{price}{perYear}",
     "pricePerMonth": "/شهر",
     "pricePerYear": "/سنة",
     "freePrice": "مجاني",
@@ -517,7 +520,31 @@
     "contactWhatsApp": "تواصل عبر واتساب",
     "upgrade": "ترقية",
     "downgrade": "تخفيض",
-    "currentPlanLabel": "خطتك الحالية"
+    "currentPlanLabel": "خطتك الحالية",
+    "currentPlanSummary": "تفاصيل خطتك الحالية",
+    "maxMenusLabel": "حد المنيوهات",
+    "maxProductsLabel": "المنتجات لكل منيو",
+    "upgradeToProYearlyCta": "الترقية إلى Pro (دفع سنوي)",
+    "paying": "جاري التوجيه للدفع…",
+    "paymentResultTitle": "نتيجة الدفع",
+    "paymentResultChecking": "جاري التأكد من حالة الدفع…",
+    "paymentResultNoCheckout": "لم نتمكن من قراءة جلسة الدفع. افتح الاشتراك من حسابك للتحقق من خطتك.",
+    "paymentResultSuccessPro": "تم الدفع بنجاح. تم تفعيل اشتراك Pro السنوي.",
+    "paymentResultFailed": "لم يكتمل الدفع.",
+    "paymentResultCancelled": "تم إلغاء الدفع.",
+    "paymentResultFailedStatus": "فشل الدفع. يمكنك المحاولة مرة أخرى من إدارة الاشتراك.",
+    "paymentResultPending": "ما زلنا نؤكد الدفع. إذا نجح، ستُحدَّث خطتك قريباً — حدّث صفحة الحساب الشخصي.",
+    "yourPlanUpdateHint": "خطتك الحالية تظهر في صفحة الحساب بعد الدفع.",
+    "paymentBackToPersonal": "العودة للحساب والاشتراك",
+    "goToLogin": "تسجيل الدخول",
+    "devPayBadge": "وضع تجريبي فقط",
+    "devPayTitle": "خطوة دفع تجريبية (ليست EasyKash)",
+    "devPayDescription": "هذه الشاشة تحاكي بوابة الدفع عند EASYKASH_DEV_MOCK=hosted. اضغط أدناه لإتمام الدفع التجريبي — بدون خصم حقيقي.",
+    "devPayConfirm": "تأكيد الدفع التجريبي",
+    "devPayLoading": "جاري المعالجة…",
+    "devPayError": "تعذر إتمام الدفع التجريبي",
+    "devPayNoCheckout": "لا يوجد رقم جلسة دفع في الرابط.",
+    "devPayRealHint": "لصفحة EasyKash الحقيقية: EASYKASH_DEV_MOCK=false واضبط EASYKASH_CREATE_PATH من لوحة البائع."
   },
   "homePage": {
     "centerSection": {
@@ -639,6 +666,36 @@
       "drinks": "مشروبات",
       "bakery": "مخبوزات",
       "desserts": "حلويات"
+    }
+  },
+  "phoneVideoSection": {
+    "badge": "تطبيق الموظفين",
+    "devicePhone": "جوال",
+    "deviceTablet": "تابلت",
+    "deviceToggleAria": "شكل معاينة الجهاز",
+    "title": "إدارة الطلبات من المنيو على الجوال",
+    "description": "تطبيق مخصص لطاقم المطعم أو الكافيه لاستقبال طلبات الزبائن القادمة من المنيو الإلكتروني، ومتابعة كل مرحلة من استلام الطلب حتى التسليم عبر شاشة واحدة واضحة.",
+    "tabItems": {
+      "createOrder": {
+        "title": "إنشاء طلب",
+        "description": "تسجيل طلب جديد من داخل المنيو ."
+      },
+      "receiveOrder": {
+        "title": "استقبال الطلب",
+        "description": "عند أستلام طلب جديد ستصلك رساله بالطلب والعميل والطاولة والوقت والملاحظات"
+      },
+      "editOrder": {
+        "title": "تعديل الطلب",
+        "description": "تعديل الطلب في تطبيق المطعم. تظهر رسالة ' تعديل هذا الطلب؟' مع تنبيه إنه سيتم إرسال الأصناف والكميات للخادم، وفيها زرين إلغاء وتعديل الطلب."
+      },
+      "acceptOrder": {
+        "title": "قبول الطلب",
+        "description": "تأكيد الطلب في تطبيق المطعم. تظهر رسالة ' تأكيد هذا الطلب؟' مع تنبيه إنه سيتم إرسال الأصناف والكميات للخادم، وفيها زرين إلغاء وتأكيد الطلب."
+      },
+      "createFromApp": {
+        "title": "طلب من التطبيق",
+        "description": "إضافة طلب من قائمة المنيو في التطبيق  تعرض أصناف الحلويات والمشروبات مع صورها وسعر كل صنف ووصف كل منتج"
+      }
     }
   },
   "Landing": {
@@ -785,8 +842,9 @@
       "planFree": "مجاني",
       "planPro": "احترافي",
       "planCustom": "مخصص",
-      "currency": "درهم",
-      "perYear": "/سنة",
+      "currencyUsd": "$",
+      "perYear": " / سنة",
+      "proAnnualOnly": "الدفع مرة في السنة. لا يوجد اشتراك شهري لخطة Pro.",
       "yearlyPrice": "السعر السنوي",
       "getStarted": "ابدأ الآن",
       "popular": "الأكثر طلباً",
@@ -1520,7 +1578,7 @@
     "inactive": "غير نشط",
     "columns": {
       "name": "الاسم",
-      "priceYearly": "السعر (سنوي)",
+      "priceYearly": "السعر السنوي ($)",
       "maxMenus": "عدد منيوهات",
       "maxProducts": "عدد منتجات",
       "hasAds": "إعلانات",
@@ -1532,7 +1590,7 @@
     "editModal": {
       "title": "تعديل الخطة",
       "name": "الاسم",
-      "priceYearly": "السعر (سنوي)",
+      "priceYearly": "السعر السنوي ($)",
       "maxMenus": "أقصى منيو",
       "maxProducts": "أقصى منتجات لكل منيو",
       "maxProductsHint": "استخدم -1 لعدد غير محدود",
@@ -1550,6 +1608,7 @@
     "categories": "التصنيفات",
     "products": "المنتجات",
     "tables": "الطاولات",
+    "activityLog": "سجل النشاط",
     "staff": "الموظفون",
     "settings": "الإعدادات",
     "viewMenu": "عرض المنيو",

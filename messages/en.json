@@ -605,6 +605,7 @@
     "comingSoon": "Coming Soon",
     "oneMenu": "One menu",
     "threeMenus": "3 menus",
+    "menusLimitFeature": "{count, plural, one {# menu} other {# menus}}",
     "products50": "50 products",
     "products200": "200 products per menu",
     "ads": "Advertisements",
@@ -615,7 +616,9 @@
     "youAreOnFreePlan": "You are on the Free Plan",
     "upgradePlan": "Upgrade Plan",
     "downgradePlan": "Downgrade",
-    "paymentNote": "Note: Payment gateway integration is pending. This is a trial feature.",
+    "paymentNote": "Pro is billed annually only (no monthly plan). Payment is processed securely via EasyKash.",
+    "proYearlyOnlyNote": "Pro is available as an annual subscription only — there is no monthly plan.",
+    "payProYearlyError": "Could not start payment. If no details appear in the toast, check your name and phone in your profile and try again.",
     "notEntered": "Not entered",
     "emailVerification": "Email Verification",
     "accountStatus": "Account Status",
@@ -631,7 +634,7 @@
     "renewalDate": "Renewal Date",
     "monthly": "Monthly",
     "yearly": "Yearly",
-    "yearlyPriceFormatted": "{price} {currency} {perYear}",
+    "yearlyPriceFormatted": "{currency}{price}{perYear}",
     "pricePerMonth": "/month",
     "pricePerYear": "/year",
     "freePrice": "Free",
@@ -644,7 +647,31 @@
     "contactWhatsApp": "Contact on WhatsApp",
     "upgrade": "Upgrade",
     "downgrade": "Downgrade",
-    "currentPlanLabel": "Your current plan"
+    "currentPlanLabel": "Your current plan",
+    "currentPlanSummary": "Your current plan",
+    "maxMenusLabel": "Menu limit",
+    "maxProductsLabel": "Products per menu",
+    "upgradeToProYearlyCta": "Upgrade to Pro (yearly payment)",
+    "paying": "Redirecting to payment…",
+    "paymentResultTitle": "Payment result",
+    "paymentResultChecking": "Confirming payment status…",
+    "paymentResultNoCheckout": "We could not read this payment session. Open subscription from your account to verify your plan.",
+    "paymentResultSuccessPro": "Payment successful. Your Pro yearly plan is now active.",
+    "paymentResultFailed": "Payment was not completed.",
+    "paymentResultCancelled": "Payment was cancelled.",
+    "paymentResultFailedStatus": "Payment failed. You can try again from subscription management.",
+    "paymentResultPending": "We are still confirming your payment. If it succeeded, your plan will update shortly — refresh the personal page.",
+    "yourPlanUpdateHint": "Your current plan is shown on the personal page after payment.",
+    "paymentBackToPersonal": "Back to personal / subscription",
+    "goToLogin": "Sign in",
+    "devPayBadge": "Development only",
+    "devPayTitle": "Test payment step (not EasyKash)",
+    "devPayDescription": "This screen simulates the payment gateway when EASYKASH_DEV_MOCK=hosted. Click below to complete the test payment — no real charge.",
+    "devPayConfirm": "Confirm test payment",
+    "devPayLoading": "Processing…",
+    "devPayError": "Could not complete test payment",
+    "devPayNoCheckout": "Missing checkout id in the URL.",
+    "devPayRealHint": "For the real EasyKash page, set EASYKASH_DEV_MOCK=false and configure EASYKASH_CREATE_PATH."
   },
   "homePage": {
     "centerSection": {
@@ -917,6 +944,36 @@
       "desserts": "Desserts"
     }
   },
+  "phoneVideoSection": {
+    "badge": "Staff app",
+    "devicePhone": "Phone",
+    "deviceTablet": "Tablet",
+    "deviceToggleAria": "Preview device frame",
+    "title": "Handle menu orders on your phone",
+    "description": "A staff-facing app for restaurants and cafés to receive customer orders coming from the digital menu, and track each step from intake to handoff in one clear screen.",
+    "tabItems": {
+      "createOrder": {
+        "title": "Create order",
+        "description": "Create a new order from the menu."
+      },
+      "receiveOrder": {
+        "title": "Receive order",
+        "description": "When a new order is received, you will receive a notification with the order, customer, table, time, and notes"
+      },
+      "editOrder": {
+        "title": "Edit order",
+        "description": "Edit the order in the restaurant app. A message 'Edit this order?' appears with a warning that the items and quantities will be sent to the server, and there are two buttons: cancel and edit the order."
+      },
+      "acceptOrder": {
+        "title": "Accept order",
+        "description": "Confirm the order in the restaurant app. A message 'Confirm this order?' appears with a warning that the items and quantities will be sent to the server, and there are two buttons: cancel and confirm the order."
+      },
+      "createFromApp": {
+        "title": "Order from the app",
+        "description": "Add an order from the menu in the app. It displays the items of the desserts and drinks with their images, prices, and descriptions"
+      }
+    }
+  },
   "Landing": {
     "features": {
       "title": "Why Choose Smart Menu?",
@@ -1061,8 +1118,9 @@
       "planFree": "Free",
       "planPro": "Pro",
       "planCustom": "Custom",
-      "currency": "AED",
-      "perYear": "/year",
+      "currencyUsd": "$",
+      "perYear": " / year",
+      "proAnnualOnly": "Billed once per year. No monthly subscription.",
       "yearlyPrice": "Yearly price",
       "getStarted": "Get Started",
       "popular": "Popular",
@@ -1798,7 +1856,7 @@
     "inactive": "Inactive",
     "columns": {
       "name": "Name",
-      "priceYearly": "Price (Yearly)",
+      "priceYearly": "Yearly ($)",
       "maxMenus": "Max Menus",
       "maxProducts": "Max Products",
       "hasAds": "Has Ads",
@@ -1810,7 +1868,7 @@
     "editModal": {
       "title": "Edit Plan",
       "name": "Name",
-      "priceYearly": "Price (Yearly)",
+      "priceYearly": "Yearly ($)",
       "maxMenus": "Max Menus",
       "maxProducts": "Max Products per Menu",
       "maxProductsHint": "Use -1 for unlimited",
@@ -1828,6 +1886,7 @@
     "categories": "Categories",
     "products": "Products",
     "tables": "Tables",
+    "activityLog": "Activity log",
     "staff": "Staff",
     "settings": "Settings",
     "viewMenu": "View Menu",
