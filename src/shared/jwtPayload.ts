@@ -22,7 +22,7 @@ export function getAuthHintsFromEncryptedSub(sub: string): {
   effectiveRole?: string;
   token?: string;
   staffJobRole?: string;
-  /** Cashier: persisted from login or patched after /staff-auth/me. */
+  /** Menu id persisted for staff JWTs when needed client-side (e.g. deep links). */
   menuId?: number;
 } | null {
   try {

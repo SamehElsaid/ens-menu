@@ -203,8 +203,15 @@ export const axiosPost = async <T, U>(
 
     return { data: fetchData.data as unknown as U, status: true };
   } catch (err) {
-    // Backend uses 405 for expired JWT (see auth.middleware); refresh then retry like axiosGet
-    if ((err as AxiosError).response?.status === 405) {
+    // Backend uses 405 for expired JWT; refresh then retry. Never do that for unauthenticated auth routes.
+    const skipRefreshOn405 =
+      url.includes("/auth/login") ||
+      url.includes("/auth/signup") ||
+      url.includes("/auth/refresh");
+    if (
+      (err as AxiosError).response?.status === 405 &&
+      !skipRefreshOn405
+    ) {
       const newToken = await getRefreshTokenPromise();
       if (newToken) {
         return axiosPost(url, locale, data, file, close);
@@ -263,6 +270,61 @@ export const axiosPatch = async <T, U>(
       const newToken = await getRefreshTokenPromise();
       if (newToken) {
         return axiosPatch(url, locale, data, file, close);
+      }
+    }
+    return {
+      data: (err as AxiosError)?.response?.data as U,
+      status: false,
+    };
+  }
+};
+
+/** HTTP PATCH (for Express `router.patch` routes). `axiosPatch` above sends PUT. */
+export const axiosHttpPatch = async <T, U>(
+  url: string,
+  locale: string,
+  data: T,
+  close?: boolean,
+): Promise<ApiResponse<U>> => {
+  const authToken = Cookies.get("sub") ?? "";
+  const tokenDecrypted = decryptData(authToken) as DecryptedToken;
+
+  const headerToken: HeadersPost = {};
+  headerToken.Authorization = `Bearer ${tokenDecrypted?.token}`;
+
+  const utcTime = await getApiKey();
+  const apiKey = `${process.env.NEXT_PUBLIC_SECRET_KEY}///${utcTime}`;
+
+  const apiKeyEncrypt = encryptDataApi(
+    apiKey,
+    process.env.NEXT_PUBLIC_SECRET_KEY as string,
+  );
+
+  if (close) {
+    delete headerToken.Authorization;
+  }
+
+  try {
+    const fetchData = await axios.patch<T>(
+      `${process.env.NEXT_PUBLIC_BASE_URL}${url}`,
+      data,
+      {
+        withCredentials: true,
+        headers: {
+          ...headerToken,
+          "Content-Type": "application/json",
+          "Accept-Language": locale,
+          "X-API-KEY": apiKeyEncrypt,
+        },
+      },
+    );
+
+    return { data: fetchData.data as unknown as U, status: true };
+  } catch (err) {
+    if ((err as AxiosError).response?.status === 405) {
+      const newToken = await getRefreshTokenPromise();
+      if (newToken) {
+        return axiosHttpPatch(url, locale, data, close);
       }
     }
     return {

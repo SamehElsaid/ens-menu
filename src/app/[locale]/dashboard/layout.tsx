@@ -9,6 +9,7 @@ import { useEffect, type ReactNode } from "react";
 import { SET_ACTIVE_USER, SET_LOADING } from "@/store/authSlice/menuDataSlice";
 import { useAppDispatch } from "@/store/hooks";
 import { AuthUserHydrate } from "@/components/Dashboard/AuthUserHydrate";
+import { CashierDashboardGate } from "@/components/Dashboard/CashierDashboardGate";
 
 interface ParentLayoutProps {
   children: ReactNode;
@@ -31,9 +32,11 @@ export default function ParentLayout({ children }: ParentLayoutProps) {
   const dispatch = useAppDispatch();
   const locale = useLocale();
   useEffect(() => {
-    if (segment) {
+    const menuIdNum =
+      segment && /^\d+$/.test(segment) ? segment : null;
+    if (menuIdNum) {
       dispatch(SET_LOADING());
-      axiosGet<MenusResponse>(`/menus/${segment}`, locale).then((res) => {
+      axiosGet<MenusResponse>(`/menus/${menuIdNum}`, locale).then((res) => {
         if (res.status) {
           dispatch(
             SET_ACTIVE_USER({
@@ -58,7 +61,9 @@ export default function ParentLayout({ children }: ParentLayoutProps) {
   return (
     <>
       <AuthUserHydrate />
-      <Layout segment={segment}>{children}</Layout>
+      <CashierDashboardGate>
+        <Layout segment={segment}>{children}</Layout>
+      </CashierDashboardGate>
     </>
   );
 }

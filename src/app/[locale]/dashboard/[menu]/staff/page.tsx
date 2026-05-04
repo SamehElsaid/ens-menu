@@ -108,7 +108,7 @@ export default function StaffPage() {
           const r = String(p.value ?? "")
             .trim()
             .toLowerCase();
-          if (r === "cashier" || r === "casher") return t("roleCashier");
+          if (r === "cashier" || r === "casher") return t("roleWaiter");
           if (r === "waiter") return t("roleWaiter");
           return p.value ? String(p.value) : emptyCell;
         },

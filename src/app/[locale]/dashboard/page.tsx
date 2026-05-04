@@ -8,6 +8,7 @@ import CreateMenuModal from "@/components/Dashboard/CreateMenuModal";
 import { toast } from "react-toastify";
 import { Menu, MenusResponse } from "@/types/Menu";
 import { Subscription, SubscriptionResponse } from "@/types/Subscription";
+import { useAppSelector } from "@/store/hooks";
 import {
   IoRestaurant,
   IoAddCircleOutline,
@@ -29,7 +30,11 @@ import LoadImage from "@/components/ImageLoad";
 
 export default function DashboardPage() {
   const t = useTranslations("Menus");
+  const tc = useTranslations("Dashboard");
   const locale = useLocale();
+  const ownerRole = useAppSelector(
+    (s) => (s.auth.data as { user?: { role?: string } } | null)?.user?.role,
+  );
   const [menus, setMenus] = useState<Menu[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -305,6 +310,7 @@ export default function DashboardPage() {
             {t("subtitle")}
           </p>
         </div>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
         <button
           onClick={handleCreateClick}
           className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-primary to-primary/80 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -312,6 +318,15 @@ export default function DashboardPage() {
           <IoAddCircleOutline className="text-xl" />
           {t("createMenu")}
         </button>
+        {ownerRole === "user" && (
+          <LinkTo
+            href="/dashboard/cashiers"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 rounded-xl font-semibold hover:border-primary/40 transition-all"
+          >
+            {tc("cashiersManage")}
+          </LinkTo>
+        )}
+      </div>
       </div>
 
       {/* Menus Grid */}

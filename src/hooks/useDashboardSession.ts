@@ -7,7 +7,7 @@ import { decryptData } from "@/shared/encryption";
 export type DashboardSession = {
   role: string;
   staffJobRole?: string;
-  /** Cashier: menu id from login cookie — used when Redux menu is not loaded (e.g. on home). */
+  /** Optional menu id persisted in `sub` cookie (e.g. staff mobile/session context). */
   menuId?: number;
 } | null;
 

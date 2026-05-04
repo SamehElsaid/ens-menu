@@ -3,14 +3,12 @@ import LinkTo from "./Global/LinkTo";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Cookies from "js-cookie";
-import { getAuthHintsFromEncryptedSub } from "@/shared/jwtPayload";
 import { REMOVE_USER } from "@/store/authSlice/authSlice";
 import { MdOutlineDashboard } from "react-icons/md";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import LoadImage from "./ImageLoad";
 import { IoRestaurantOutline } from "react-icons/io5";
-import { useDashboardSession } from "@/hooks/useDashboardSession";
 
 function buildPublicMenuUrl(slug: string | undefined | null): string {
   if (!slug) return "";
@@ -25,7 +23,6 @@ function UserDropDown() {
   const router = useRouter();
   const locale = useLocale();
   const pathname = usePathname();
-  const session = useDashboardSession();
   const menu = useAppSelector((s) => s.menuData.menu);
   const menuSlug = menu?.slug;
   const profile = useAppSelector((state) => state.auth) as unknown as {
@@ -41,30 +38,9 @@ function UserDropDown() {
     ? t("roles." + profile.data?.user?.role)
     : t("roles.admin");
 
-  const isCashier =
-    session?.role === "staff" && session?.staffJobRole === "cashier";
-
   const publicMenuUrl = buildPublicMenuUrl(menuSlug);
   const isDashboardMenuRoute = /^\/dashboard\/[^/]+/.test(pathname);
   const showRestaurantLink = isDashboardMenuRoute && Boolean(publicMenuUrl);
-
-  /** `menuId` stored in encrypted cookie at staff login or patched after /staff-auth/me. */
-  const subCookie = Cookies.get("sub");
-  const cashierMenuIdFromCookie = subCookie
-    ? getAuthHintsFromEncryptedSub(subCookie)?.menuId
-    : undefined;
-
-  const cashierMenuIdFromPath = pathname.match(/^\/dashboard\/([^/]+)/)?.[1];
-  const cashierDashboardHref =
-    menu?.id != null
-      ? `/dashboard/${menu.id}`
-      : cashierMenuIdFromPath
-        ? `/dashboard/${cashierMenuIdFromPath}`
-        : cashierMenuIdFromCookie != null && !Number.isNaN(cashierMenuIdFromCookie)
-          ? `/dashboard/${cashierMenuIdFromCookie}`
-          : session?.menuId != null && !Number.isNaN(session.menuId)
-            ? `/dashboard/${session.menuId}`
-            : null;
 
   const profileMenuItems = useMemo(() => {
     const items: {
@@ -74,22 +50,12 @@ function UserDropDown() {
       external?: boolean;
     }[] = [];
 
-    if (isCashier) {
-      if (cashierDashboardHref) {
-        items.push({
-          label: t("userProfile.dashboard"),
-          href: cashierDashboardHref,
-          icon: <MdOutlineDashboard />,
-        });
-      }
-    } else {
-      items.push({
-        label: t("userProfile.dashboard"),
-        href:
-          profile.data?.user?.role === "admin" ? "/admin" : "/dashboard/",
-        icon: <MdOutlineDashboard />,
-      });
-    }
+    items.push({
+      label: t("userProfile.dashboard"),
+      href:
+        profile.data?.user?.role === "admin" ? "/admin" : "/dashboard/",
+      icon: <MdOutlineDashboard />,
+    });
 
     if (showRestaurantLink) {
       items.push({
@@ -101,14 +67,7 @@ function UserDropDown() {
     }
 
     return items;
-  }, [
-    cashierDashboardHref,
-    isCashier,
-    profile.data?.user?.role,
-    publicMenuUrl,
-    showRestaurantLink,
-    t,
-  ]);
+  }, [profile.data?.user?.role, publicMenuUrl, showRestaurantLink, t]);
 
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const handleLogout = () => {

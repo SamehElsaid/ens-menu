@@ -17,7 +17,8 @@ export function DashboardHeader({
 }) {
   const locale = useLocale();
   const pathname = usePathname();
-  const showSidebarToggle = segment || isAdmin;
+  const showSidebarToggle =
+    (segment || isAdmin) && segment !== "cashiers";
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 px-4 py-4 backdrop-blur sm:px-8 dark:bg-[#0d1117]/70 dark:border-purple-900">

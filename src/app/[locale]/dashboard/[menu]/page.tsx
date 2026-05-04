@@ -13,7 +13,6 @@ import {
   IoChevronForwardOutline,
   IoOpenOutline,
   IoEyeOutline,
-  IoTimeOutline,
 } from "react-icons/io5";
 import { FaChartLine } from "react-icons/fa";
 import { BiCategory } from "react-icons/bi";
@@ -33,7 +32,6 @@ import {
   StyledQrCode,
   type StyledQrCodeHandle,
 } from "@/components/Global/StyledQrCode";
-import { useDashboardSession } from "@/hooks/useDashboardSession";
 
 type ActivityEntry = {
   id: string;
@@ -77,11 +75,6 @@ export default function DashboardMenuPage() {
     typeof params.menu === "string"
       ? params.menu
       : ((params.menu as string[])?.[0] ?? "");
-
-  const dashboardSession = useDashboardSession();
-  const isCashierStaff =
-    dashboardSession?.role === "staff" &&
-    dashboardSession?.staffJobRole === "cashier";
 
   const [recentItems, setRecentItems] = useState<Item[]>([]);
   const [recentCategories, setRecentCategories] = useState<Category[]>([]);
@@ -254,33 +247,20 @@ export default function DashboardMenuPage() {
             <MdOutlineTableBar className="text-lg shrink-0" />
             {t("tables")}
           </LinkTo>
-          {isCashierStaff && (
-            <LinkTo
-              href={`/dashboard/${menuSlugOrId}/history`}
-              className={`${tabBase} ${tabInactive}`}
-            >
-              <IoTimeOutline className="text-lg shrink-0" />
-              {t("activityLog")}
-            </LinkTo>
-          )}
-          {!isCashierStaff && (
-            <>
-              <LinkTo
-                href={`/dashboard/${menuSlugOrId}/staff`}
-                className={`${tabBase} ${tabInactive}`}
-              >
-                <MdPeopleOutline className="text-lg shrink-0" />
-                {t("staff")}
-              </LinkTo>
-              <LinkTo
-                href={`/dashboard/${menuSlugOrId}/settings`}
-                className={`${tabBase} ${tabInactive}`}
-              >
-                <FiSettings className="text-lg shrink-0" />
-                {t("settings")}
-              </LinkTo>
-            </>
-          )}
+          <LinkTo
+            href={`/dashboard/${menuSlugOrId}/staff`}
+            className={`${tabBase} ${tabInactive}`}
+          >
+            <MdPeopleOutline className="text-lg shrink-0" />
+            {t("staff")}
+          </LinkTo>
+          <LinkTo
+            href={`/dashboard/${menuSlugOrId}/settings`}
+            className={`${tabBase} ${tabInactive}`}
+          >
+            <FiSettings className="text-lg shrink-0" />
+            {t("settings")}
+          </LinkTo>
           <a
             href={menuUrl || "#"}
             target="_blank"
@@ -424,25 +404,23 @@ export default function DashboardMenuPage() {
               <IoLinkOutline className="text-xl" />
             </div>
           </LinkTo>
-          {!isCashierStaff && (
-            <LinkTo
-              href={`/dashboard/${menuSlugOrId}/settings`}
-              role="listitem"
-              className="flex items-center justify-between gap-4 p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:border-primary/20 dark:hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
-            >
-              <div className="min-w-0 flex-1">
-                <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-1 group-hover:text-slate-800 dark:group-hover:text-slate-200">
-                  {t("menuSettings")}
-                </h3>
-                <p className="text-slate-500 dark:text-slate-400 text-sm">
-                  {t("menuSettingsDescription")}
-                </p>
-              </div>
-              <div className="w-11 h-11 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary/20 dark:group-hover:bg-primary/30 group-hover:scale-105 transition-all duration-200">
-                <IoSettingsOutline className="text-xl" />
-              </div>
-            </LinkTo>
-          )}
+          <LinkTo
+            href={`/dashboard/${menuSlugOrId}/settings`}
+            role="listitem"
+            className="flex items-center justify-between gap-4 p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:border-primary/20 dark:hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+          >
+            <div className="min-w-0 flex-1">
+              <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-1 group-hover:text-slate-800 dark:group-hover:text-slate-200">
+                {t("menuSettings")}
+              </h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">
+                {t("menuSettingsDescription")}
+              </p>
+            </div>
+            <div className="w-11 h-11 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary/20 dark:group-hover:bg-primary/30 group-hover:scale-105 transition-all duration-200">
+              <IoSettingsOutline className="text-xl" />
+            </div>
+          </LinkTo>
           <LinkTo
             href={`/dashboard/${menuSlugOrId}/items`}
             role="listitem"

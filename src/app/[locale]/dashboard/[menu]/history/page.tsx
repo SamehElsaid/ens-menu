@@ -419,19 +419,8 @@ function getRoleAccent(row: ActivityLogRow): RoleAccent {
   const kind = normalizeRoleKey(row.actorRole);
   if (kind === "staff") {
     const jr = staffJobRoleFromRow(row);
-    const slug = jr === "casher" ? "cashier" : jr;
-    if (slug === "cashier") {
-      return {
-        bar: "border-l-sky-500",
-        badge:
-          "bg-sky-100 text-sky-900 dark:bg-sky-900/50 dark:text-sky-100",
-        avatar:
-          "bg-linear-to-br from-sky-400 to-cyan-500 text-white shadow-sky-500/20",
-        detailRing: "border-sky-200/90 dark:border-sky-700/50",
-        rowBg: baseRow,
-      };
-    }
-    if (slug === "waiter") {
+    const slugRaw = jr === "casher" || jr === "cashier" ? "waiter" : jr;
+    if (slugRaw === "waiter") {
       return {
         bar: "border-l-teal-500",
         badge:
@@ -492,9 +481,8 @@ function actorBadgeLabel(
   const kind = normalizeRoleKey(row.actorRole);
   if (kind === "staff") {
     const jr = staffJobRoleFromRow(row);
-    const slug = jr === "casher" ? "cashier" : jr;
-    if (slug === "cashier") return t("staffJobRole.cashier");
-    if (slug === "waiter") return t("staffJobRole.waiter");
+    if (jr === "casher" || jr === "cashier" || jr === "waiter")
+      return t("staffJobRole.waiter");
   }
   return t(`role.${kind}`);
 }

@@ -10,25 +10,16 @@ function UnauthorizedContent() {
   const searchParams = useSearchParams();
   const reason = searchParams.get("reason");
 
-  const isCashierDashboard = reason === "cashier_dashboard";
-  const isCashierOwnerPages = reason === "cashier_owner_pages";
+  const isStaffDashboard = reason === "staff_dashboard";
 
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center px-6 py-16 text-center">
       <div className="max-w-md space-y-4">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-          {isCashierDashboard
-            ? t("cashierDashboardTitle")
-            : isCashierOwnerPages
-              ? t("cashierOwnerPagesTitle")
-              : t("title")}
+          {isStaffDashboard ? t("staffDashboardTitle") : t("title")}
         </h1>
         <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-          {isCashierDashboard
-            ? t("cashierDashboardBody")
-            : isCashierOwnerPages
-              ? t("cashierOwnerPagesBody")
-              : t("body")}
+          {isStaffDashboard ? t("staffDashboardBody") : t("body")}
         </p>
         <div className="pt-4">
           <LinkTo
