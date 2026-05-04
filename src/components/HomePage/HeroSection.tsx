@@ -8,7 +8,9 @@ import {
   FiArrowRight as ArrowRight,
   FiMenu as Menu,
   FiShoppingCart as ShoppingCart,
+  FiDownload as Download,
 } from "react-icons/fi";
+import { FaAndroid } from "react-icons/fa";
 import YouTube, { type YouTubeProps, type YouTubeEvent } from "react-youtube";
 import { menuItemsData } from "@/modules/menuItems";
 import { MenuItem } from "@/types/types";
@@ -17,9 +19,9 @@ import LoadImage from "../ImageLoad";
 import { StyledQrCode } from "@/components/Global/StyledQrCode";
 import { BsQrCode } from "react-icons/bs";
 
-// Interactive Phone Component
 const InteractivePhone = () => {
   const [step, setStep] = useState(0);
+  const t = useTranslations("heroSection");
   const locale = useLocale();
   const isRTL = locale === "ar";
   const loginPath = getPathname({ href: "/auth/login", locale });
@@ -75,9 +77,7 @@ const InteractivePhone = () => {
                 )}
               </div>
               <p className="text-purple-700 font-bold text-lg text-center leading-relaxed">
-                {isRTL
-                  ? "قم بمسح الرمز لتصفح المنيو"
-                  : "Scan code to browse menu"}
+                {t("scanCodeToBrowse")}
               </p>
             </div>
           )}
@@ -91,9 +91,7 @@ const InteractivePhone = () => {
                 <div className="absolute left-6 right-6 top-0 h-1 bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.9)] z-10 pointer-events-none animate-hero-qr-scan rounded-full" />
               </div>
               <p className="mt-8 text-white text-lg font-medium tracking-wide">
-                {isRTL
-                  ? "جاري مسح المنيو الالكتروني..."
-                  : "Scanning the electronic menu..."}
+                {t("scanningMenu")}
               </p>
             </div>
           )}
@@ -107,7 +105,7 @@ const InteractivePhone = () => {
                 <div className="flex justify-between items-center mb-4">
                   <Menu size={22} />
                   <p className="text-sm font-black tracking-tight">
-                    {isRTL ? "أسم نشاطك التجاري" : "Your Business Name"}
+                    {t("businessName")}
                   </p>
                   <ShoppingCart size={22} />
                 </div>
@@ -140,7 +138,6 @@ const InteractivePhone = () => {
                         className="w-full h-full object-cover rounded-xl shadow-sm"
                       />
                     </div>
-
                     <div className="flex-1">
                       <h4 className="text-md font-black text-slate-800">
                         {item.name}
@@ -163,6 +160,7 @@ const InteractivePhone = () => {
   );
 };
 
+// --- Main Hero Section ---
 const HeroSection = () => {
   const t = useTranslations("heroSection");
   const locale = useLocale();
@@ -198,57 +196,97 @@ const HeroSection = () => {
   return (
     <section
       id="hero"
-      className="relative flex min-h-[95vh] items-center overflow-hidden bg-white pt-44 pb-24 dark:bg-[#0d1117]"
+      className="relative flex min-h-[95vh] items-center overflow-hidden bg-white pt-30 pb-24 dark:bg-[#0d1117]"
     >
       <Background />
       <div className="container mx-auto px-6 relative z-10">
         <div
-          className={`flex flex-col lg:flex-row items-center gap-16 lg:gap-24 ${
+          className={`flex flex-col lg:flex-row items-center gap-12 lg:gap-20 ${
             isRTL ? "lg:flex-row-reverse" : ""
           }`}
         >
-          <div className={`lg:w-1/2  order-2 `}>
-            <div className="inline-block px-5 py-2 rounded-full bg-purple-50 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 font-bold text-sm mb-8 border border-purple-100 dark:border-purple-500/30 shadow-sm">
-              {t("badge")} 🚀
+          {/* Text and Content */}
+          <div className="lg:w-1/2 order-2 w-full">
+            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-purple-50 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 font-bold text-sm mb-6 border border-purple-100 dark:border-purple-500/30 shadow-sm">
+              <span>{t("badge")}</span>
+              <span>🚀</span>
             </div>
-            <h1 className="text-3xl  font-extrabold leading-[1.1] mb-8 text-slate-900 dark:text-white">
+
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-[1.1] mb-6 text-slate-900 dark:text-white tracking-tight">
               {t("title1")}{" "}
               <span className="bg-linear-to-r from-purple-600 to-indigo-600 dark:from-purple-400 dark:to-indigo-400 bg-clip-text text-transparent">
                 {t("title2")}
               </span>
             </h1>
-            <p
-              className={`text-lg  text-slate-600 dark:text-slate-300 mb-10 leading-relaxed max-w-xl font-medium ${
-                isRTL ? "ml-auto" : ""
-              }`}
-            >
+
+            <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 mb-8 leading-relaxed max-w-xl font-medium">
               {t("description")}
             </p>
+
+         
+
+            {/* Android App Section */}
             <div
-              className={`flex flex-wrap items-center gap-5 ${
-                isRTL ? "justify-end" : "justify-start"
+              className={`relative mb-10 p-5 rounded-2xl border border-purple-100 dark:border-purple-500/20 bg-linear-to-br from-white via-purple-50/40 to-indigo-50/30 dark:from-slate-900 dark:via-purple-900/10 dark:to-indigo-900/10 shadow-lg shadow-purple-500/5 max-w-xl overflow-hidden`}
+            >
+              <div
+                className={`absolute top-0 ${isRTL ? "left-0" : "right-0"} px-3 py-1 bg-linear-to-r from-green-500 to-emerald-500 text-white text-[10px] font-black uppercase tracking-wider ${
+                  isRTL ? "rounded-br-xl rounded-tl-2xl" : "rounded-bl-xl rounded-tr-2xl"
+                }`}
+              >
+                {t("androidExclusive")}
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="shrink-0 p-3 bg-linear-to-br from-green-500/15 to-emerald-500/10 rounded-xl border border-green-500/20">
+                  <FaAndroid className="text-green-600 dark:text-green-400 text-3xl" />
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-black text-slate-800 dark:text-white text-base sm:text-lg mb-1.5 leading-snug">
+                    {t("androidTitle")}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+                    {t("androidDescription")}
+                  </p>
+
+                  <a
+                    href="/app.apk"
+                    download
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-purple-600 hover:bg-slate-800 dark:hover:bg-purple-500 text-white rounded-xl font-bold text-xs sm:text-sm transition-colors shadow-md shadow-slate-900/20 dark:shadow-purple-900/30"
+                  >
+                    <Download size={16} />
+                    {t("androidDownload")}
+                  </a>
+                </div>
+              </div>
+              
+            </div>
+               {/* CTA Buttons */}
+               <div
+              className={`flex flex-wrap items-center gap-4 mb-8 ${
+                isRTL ? "justify-start" : "justify-start"
               }`}
             >
-              <div>
-                <Link
-                  href={`/auth/login`}
-                  className="px-10 py-5 rounded-full bg-linear-to-r from-purple-600 to-purple-700 dark:from-purple-500 dark:to-purple-600 text-white font-bold text-md shadow-2xl shadow-purple-200 dark:shadow-purple-900/50 flex items-center gap-3"
-                >
-                  <span>{t("cta")}</span>
-                  <ArrowIcon size={24} />
-                </Link>
-              </div>
+              <Link
+                href="/auth/login"
+                className="px-8 py-4 rounded-full bg-linear-to-r from-purple-600 to-purple-700 dark:from-purple-500 dark:to-purple-600 text-white font-bold text-base shadow-2xl shadow-purple-300/40 dark:shadow-purple-900/50 flex items-center gap-3 hover:scale-[1.02] transition-transform"
+              >
+                <span>{t("cta")}</span>
+                <ArrowIcon size={22} />
+              </Link>
               <button
                 type="button"
                 onClick={() => setIsVideoOpen(true)}
-                className="px-10 py-5 rounded-full border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-md hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                className="px-8 py-4 rounded-full border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-base hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
               >
                 {t("watchDemo")}
               </button>
             </div>
           </div>
 
-          <div className="lg:w-1/2 relative flex justify-center order-1 ">
+          {/* Phone Preview */}
+          <div className="lg:w-1/2 relative flex justify-center order-1 w-full">
             <div className="relative">
               <div className="absolute inset-0 bg-linear-to-r from-purple-600 to-purple-700 dark:from-purple-500 dark:to-purple-600 blur-[100px] opacity-15 dark:opacity-25" />
               <InteractivePhone />
@@ -257,6 +295,7 @@ const HeroSection = () => {
         </div>
       </div>
 
+      {/* Video Modal */}
       <div
         className={`fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm transition-opacity duration-200 ${
           isVideoOpen

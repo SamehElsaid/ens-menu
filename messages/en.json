@@ -902,7 +902,20 @@
     "title2": "Smart Menu",
     "description": "An interactive digital menu with modern design, enables your customers to browse the food menu easily and clearly by scanning a QR code only",
     "cta": "Start Now for Free",
-    "watchDemo": "Watch Demo"
+    "watchDemo": "Watch Demo",
+    "androidTitle": "Smoother Experience via Android App",
+    "androidDescription": "For business owners seeking peak performance, we provide a dedicated Direct App for instant menu access and one-tap order management, optimized for speed and daily efficiency.",
+    "androidDownload": "Download App Now",
+    "androidExclusive": "Android Exclusive",
+    "scanCodeToBrowse": "Scan code to browse menu",
+    "scanningMenu": "Scanning the electronic menu...",
+    "businessName": "Your Business Name",
+    "categories": {
+      "all": "All",
+      "drinks": "Drinks",
+      "bakery": "Bakery",
+      "desserts": "Desserts"
+    }
   },
   "Landing": {
     "features": {
@@ -995,6 +1008,49 @@
         {
           "question": "Can I customise the menu look, colours, and logo?",
           "answer": "Yes. Depending on your plan you can upload a logo and adjust colours and layout to match your brand; higher tiers offer broader design control."
+        }
+      ]
+    },
+    "templateDescription": {
+      "badge": "User journey",
+      "title": "Effortless order management with",
+      "titleHighlight": "ENS",
+      "description": "See how ENS Menu streamlines front-of-house workflows step by step—from staff login to order confirmation.",
+      "scrollHint": "Swipe horizontally or use the arrows to browse all steps",
+      "prevStepAria": "Previous step",
+      "nextStepAria": "Next step",
+      "steps": [
+        {
+          "title": "Sign in",
+          "desc": "The ENS Menu staff login screen lets users switch language and enter credentials (menu name, email, and password) to access the system."
+        },
+        {
+          "title": "App settings",
+          "desc": "Language and settings let staff tailor the interface between Arabic and English, with a clear option to sign out."
+        },
+        {
+          "title": "Incoming orders",
+          "desc": "View all active orders with table number and customer name, plus status (confirmed or pending), time, and total."
+        },
+        {
+          "title": "Menu browsing",
+          "desc": "Browse items with photos, prices, and short descriptions; filter by category and adjust quantities."
+        },
+        {
+          "title": "Order details",
+          "desc": "Enter the customer name and pick a table from available options before sending the order."
+        },
+        {
+          "title": "Order summary",
+          "desc": "Review table details, customer name, time, and line items—adjust quantities or add more items before sending."
+        },
+        {
+          "title": "Confirm order",
+          "desc": "A confirmation pop-up prevents accidental sends and reminds staff that data goes straight to the server."
+        },
+        {
+          "title": "Sent successfully",
+          "desc": "After a successful send, a confirmation message appears and the orders list updates with the new order at the top."
         }
       ]
     },
