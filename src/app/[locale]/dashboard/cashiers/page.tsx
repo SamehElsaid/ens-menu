@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
+import LinkTo from "@/components/Global/LinkTo";
+import { isFreePlanUser } from "@/lib/subscription";
 import { ColDef } from "ag-grid-community";
 import { IoArrowBack, IoAddOutline } from "react-icons/io5";
 import { FaSpinner, FaUsers, FaUserCheck } from "react-icons/fa";
@@ -20,10 +22,14 @@ type CashiersApi = { cashiers: CashierRow[] };
 export default function CashiersManagementPage() {
   const locale = useLocale();
   const t = useTranslations("dashboardCashiers");
+  const tc = useTranslations("Dashboard");
   const router = useRouter();
   const isRTL = locale === "ar";
 
-  const auth = useAppSelector((s) => s.auth.data) as
+  const userData = useAppSelector((s) => s.auth.data);
+  const isFreePlan = isFreePlanUser(userData);
+
+  const auth = userData as
     | { user?: { role?: string } }
     | undefined;
   const isOwner = auth?.user?.role === "user";
@@ -72,12 +78,14 @@ export default function CashiersManagementPage() {
   }, [locale, isOwner, t]);
 
   useEffect(() => {
+    if (!isOwner) return;
     void fetchMenus();
-  }, [fetchMenus]);
+  }, [fetchMenus, isOwner]);
 
   useEffect(() => {
-    if (isOwner) void fetchCashiers();
-  }, [fetchCashiers, isOwner]);
+    if (!isOwner || isFreePlan) return;
+    void fetchCashiers();
+  }, [fetchCashiers, isOwner, isFreePlan]);
 
   const stats = useMemo(() => {
     const total = cashiers.length;
@@ -255,6 +263,37 @@ export default function CashiersManagementPage() {
             ? "هذه الصفحة لأصحاب الحسابات فقط."
             : "This page is only for restaurant owners."}
         </p>
+      </div>
+    );
+  }
+
+  if (isFreePlan) {
+    const personalHref = menus[0]?.id
+      ? `/dashboard/${menus[0].id}/personal`
+      : "/dashboard";
+
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
+        <h1 className="text-2xl font-bold text-slate-800 sm:text-3xl dark:text-slate-100">
+          {tc("cashiersProOnlyTitle")}
+        </h1>
+        <p className="max-w-md text-slate-500 dark:text-slate-400">
+          {tc("cashiersProOnlyDescription")}
+        </p>
+        <div className="mt-4 flex flex-wrap justify-center gap-3">
+          <LinkTo
+            href="/dashboard"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-slate-200 px-8 py-3 font-semibold text-slate-700 transition-all hover:border-primary/40 dark:border-slate-600 dark:text-slate-200"
+          >
+            {tc("backToMenus")}
+          </LinkTo>
+          <LinkTo
+            href={personalHref}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-linear-to-r from-primary to-primary/80 px-8 py-3 font-semibold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]"
+          >
+            {tc("cashiersUpgradeCta")}
+          </LinkTo>
+        </div>
       </div>
     );
   }

@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { axiosGet, axiosDelete, axiosPatch } from "@/shared/axiosCall";
 import LinkTo from "@/components/Global/LinkTo";
+import { isFreePlanUser } from "@/lib/subscription";
 import CreateMenuModal from "@/components/Dashboard/CreateMenuModal";
 import { toast } from "react-toastify";
 import { Menu, MenusResponse } from "@/types/Menu";
@@ -32,9 +34,13 @@ export default function DashboardPage() {
   const t = useTranslations("Menus");
   const tc = useTranslations("Dashboard");
   const locale = useLocale();
+  const router = useRouter();
+  const userData = useAppSelector((s) => s.auth.data);
+  const isFreePlan = isFreePlanUser(userData);
   const ownerRole = useAppSelector(
     (s) => (s.auth.data as { user?: { role?: string } } | null)?.user?.role,
   );
+  const isCashier = ownerRole === "cashier";
   const [menus, setMenus] = useState<Menu[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -96,12 +102,21 @@ export default function DashboardPage() {
   }, [deleteTarget]);
 
   const handleCreateClick = () => {
+    if (isCashier) return;
     const maxMenus = subscription?.maxMenus ?? 1;
     if (menus.length >= maxMenus) {
       setShowLimitModal(true);
     } else {
       setShowCreateModal(true);
     }
+  };
+
+  const handleCashiersClick = () => {
+    if (isFreePlan) {
+      toast.info(tc("cashiersProRequiredToast"));
+      return;
+    }
+    router.push("/dashboard/cashiers");
   };
 
   const handleMenuCreated = (newMenu?: Menu) => {
@@ -253,6 +268,21 @@ export default function DashboardPage() {
 
   // Empty State
   if (menus.length === 0) {
+    if (isCashier) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 ">
+          <div className="w-32 h-32 bg-primary/5 rounded-full flex items-center justify-center">
+            <IoStorefrontOutline className="text-primary text-6xl" />
+          </div>
+          <div className="text-center max-w-md">
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+              {t("noMenusCashier")}
+            </h2>
+            <p className="text-slate-500 dark:text-slate-400">{t("noMenusCashierDescription")}</p>
+          </div>
+        </div>
+      );
+    }
     return (
       <>
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 ">
@@ -311,6 +341,7 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        {!isCashier && (
         <button
           onClick={handleCreateClick}
           className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-primary to-primary/80 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -318,13 +349,15 @@ export default function DashboardPage() {
           <IoAddCircleOutline className="text-xl" />
           {t("createMenu")}
         </button>
+        )}
         {ownerRole === "user" && (
-          <LinkTo
-            href="/dashboard/cashiers"
+          <button
+            type="button"
+            onClick={handleCashiersClick}
             className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 rounded-xl font-semibold hover:border-primary/40 transition-all"
           >
             {tc("cashiersManage")}
-          </LinkTo>
+          </button>
         )}
       </div>
       </div>
@@ -478,7 +511,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Create Menu Modal */}
-      {showCreateModal && (
+      {!isCashier && showCreateModal && (
         <CreateMenuModal
           onClose={() => setShowCreateModal(false)}
           onMenuCreated={handleMenuCreated}
