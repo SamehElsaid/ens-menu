@@ -126,7 +126,8 @@
     "features": "Features",
     "team": "How It Works",
     "faq": "FAQ",
-    "contact": "Contact"
+    "contact": "Contact",
+    "androidApp": "Android App"
   },
   "home": {
     "title": "Home",
@@ -975,6 +976,101 @@
     }
   },
   "Landing": {
+    "Hero": {
+      "badge": "Staff & Management Edition V2.0",
+      "titleStart": "All restaurant operations with one tap ",
+      "titleHighlight": "from your phone",
+      "description": "The fastest tool for cashiers & staff to track real-time orders, table management, and manager reports. Stable performance, zero browser lag.",
+      "downloadKicker": "Direct APK Download",
+      "downloadCta": "Download App Now",
+      "optimizedFor": "Optimized for:",
+      "platform": "Android",
+      "safeInstall": "Safe install • Works instantly after download",
+      "noSetupRequired": "No setup required • Works instantly",
+      "noBrowser": "No more browser needed",
+      "videoAlt": "App Preview",
+      "features": {
+        "liveAlerts": "Real-time order tracking",
+        "cashier": "Smart cashier interface",
+        "admin": "Admin access"
+      },
+      "floatingCards": {
+        "liveOrderLabel": "Live Order",
+        "liveOrderText": "Table 12 — Ready",
+        "responseLabel": "Response"
+      }
+    },
+    "FaqApp": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Everything you need to know before using the app",
+      "mostAsked": "Most Asked",
+      "items": [
+        {
+          "q": "Is the app a replacement for the website?",
+          "a": "Yes, the app is built to be faster and more stable than the browser, especially for managing orders and daily operations."
+        },
+        {
+          "q": "Is the app safe even though it's a direct download?",
+          "a": "Yes, the app is fully secure and tested, and it doesn't request any unnecessary permissions."
+        },
+        {
+          "q": "Can it be used by cashiers and staff?",
+          "a": "Absolutely. The app is designed for cashiers and staff with a simple, fast interface for managing orders."
+        },
+        {
+          "q": "Can the manager monitor everything?",
+          "a": "Yes, the app provides full reports and management for orders and staff from a single place."
+        },
+        {
+          "q": "Does it support real-time orders?",
+          "a": "Yes, orders are updated instantly with live notifications and zero delay."
+        },
+        {
+          "q": "Does it require experience to use?",
+          "a": "No, the app is very simple and any staff member can use it easily from the first try."
+        }
+      ]
+    },
+   "FeaturesApp": {
+  "title": "Master Your Restaurant Operations",
+  "subtitle": "A comprehensive system connecting waiters, cashiers, and management in one seamless platform to ensure the fastest service for your guests.",
+  "items": [
+    {
+      "title": "Smart & Fast Ordering",
+      "desc": "An interactive menu that allows waiters to add items, adjust quantities, and select tables in just a few taps."
+    },
+    {
+      "title": "Precision Table Management",
+      "desc": "Assign orders to specific tables with customer names to ensure a personalized and error-free dining experience."
+    },
+    {
+      "title": "Live Order Tracking",
+      "desc": "Real-time status updates (Confirmed, Pending) linking the dining floor to the kitchen and cashier instantly."
+    },
+    {
+      "title": "Review & Confirm System",
+      "desc": "A final review screen before sending orders to minimize mistakes, with easy options to edit or cancel on the fly."
+    },
+    {
+      "title": "Multi-Language Support",
+      "desc": "A flexible UI supporting both Arabic and English, making it easy for a diverse team to work efficiently."
+    },
+    {
+      "title": "Daily Order Reports",
+      "desc": "Full history of all incoming orders, displaying timing, totals, and guest details to track shift performance."
+    }
+  ]
+},
+    "WorkflowApp": {
+      "title": "How the system works inside your restaurant",
+      "subtitle": "Every step calculated… from order to delivery",
+      "steps": [
+        {
+          "title": "Receive order",
+          "desc": "The order is received instantly with a direct notification to the cashier."
+        }
+      ]
+    },
     "features": {
       "title": "Why Choose Smart Menu?",
       "description": "We provide everything you need to create a professional digital menu for your restaurant or cafe",

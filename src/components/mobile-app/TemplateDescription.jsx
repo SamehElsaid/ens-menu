@@ -21,13 +21,12 @@ const TemplateDescription = () => {
     return Array.isArray(raw) ? raw : [];
   }, [t]);
 
-  // تقليل الوقت لـ 2000ms لجعل الإيقاع أسرع
   const AUTOPLAY_MS = 2000;
 
   const scrollRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [tabHidden, setTabHidden] = useState(false);
-  const [isPaused, setIsPaused] = useState(false); // لإيقاف الحركة عند الـ Hover
+  const [isPaused, setIsPaused] = useState(false); 
   const [reducedMotion, setReducedMotion] = useState(false);
   const last = Math.max(0, steps.length - 1);
 
@@ -101,7 +100,6 @@ const TemplateDescription = () => {
     return () => mq.removeEventListener("change", fn);
   }, []);
 
-  // تحسين منطق الـ Autoplay
   useEffect(() => {
     if (last < 1 || tabHidden || isPaused) {
       return;
@@ -109,7 +107,6 @@ const TemplateDescription = () => {
     const id = setInterval(() => {
       setActiveIndex((prev) => {
         const next = prev >= last ? 0 : prev + 1;
-        // أزلت التغيير اللحظي (instant) عند العودة للبداية ليكون ناعماً
         requestAnimationFrame(() => {
           scrollToSlide(next, reducedMotion); 
         });
@@ -144,8 +141,8 @@ const TemplateDescription = () => {
     <section
       className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-white py-8 md:py-12"
       dir={isRTL ? "rtl" : "ltr"}
-      onMouseEnter={() => setIsPaused(true)} // توقف عند مرور الماوس
-      onMouseLeave={() => setIsPaused(false)} // استكمال عند خروج الماوس
+      onMouseEnter={() => setIsPaused(true)} 
+      onMouseLeave={() => setIsPaused(false)} 
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-200/80 to-transparent" />
 
@@ -166,7 +163,6 @@ const TemplateDescription = () => {
         </div>
 
         <div className="relative">
-          {/* الأزرار */}
           <button
             type="button"
             onClick={() => go(-1)}

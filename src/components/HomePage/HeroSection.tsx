@@ -251,7 +251,7 @@ const HeroSection = () => {
                   </p>
 
                   <a
-                    href="/app.apk"
+                    href="https://expo.dev/artifacts/eas/iXgE6EHRgCGLqf8HwRek6R.apk"
                     download
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-purple-600 hover:bg-slate-800 dark:hover:bg-purple-500 text-white rounded-xl font-bold text-xs sm:text-sm transition-colors shadow-md shadow-slate-900/20 dark:shadow-purple-900/30"
                   >
