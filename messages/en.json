@@ -1066,10 +1066,26 @@
       "subtitle": "Every step calculated… from order to delivery",
       "steps": [
         {
-          "title": "Receive order",
-          "desc": "The order is received instantly with a direct notification to the cashier."
+          "title": "Receive Order",
+          "desc": "The order arrives instantly with a direct notification to the cashier."
+        },
+        {
+          "title": "Cashier Management",
+          "desc": "Confirm the order and update its status with ease."
+        },
+        {
+          "title": "Order Execution",
+          "desc": "The kitchen receives the order and starts preparing it right away."
+        },
+        {
+          "title": "Manager Oversight",
+          "desc": "Full real-time view of all operations and reports."
         }
       ]
+    },
+    "MobileAppCta": {
+      "title": "Ready to streamline your work?",
+      "button": "Download the App for Free"
     },
     "features": {
       "title": "Why Choose Smart Menu?",
