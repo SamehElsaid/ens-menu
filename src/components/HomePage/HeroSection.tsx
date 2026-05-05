@@ -53,7 +53,10 @@ const InteractivePhone = () => {
       className="relative w-full max-w-[340px] bg-slate-900 dark:bg-slate-950 rounded-[50px] border-12 border-slate-800 dark:border-slate-900 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3),0_30px_60px_-30px_rgba(124,58,237,0.3)] overflow-hidden"
       style={{ height: "680px", minHeight: "680px", aspectRatio: "340/680" }}
     >
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-slate-800 dark:bg-slate-900 rounded-b-2xl z-50"></div>
+      <div className="absolute top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-slate-800 dark:bg-slate-900 rounded-full z-50 flex items-center justify-center gap-1.5 border border-white/5 shadow-sm">
+        <div className="size-1.5 bg-slate-700 dark:bg-slate-800 rounded-full" />
+        <div className="w-8 h-1 bg-slate-700 dark:bg-slate-800 rounded-full opacity-40" />
+      </div>
       <div className="relative h-full bg-white dark:bg-gray-50 overflow-hidden w-full">
         <>
           {step === 0 && (
@@ -114,11 +117,10 @@ const InteractivePhone = () => {
                 {categories.map((cat, i) => (
                   <div
                     key={i}
-                    className={`px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap ${
-                      i === 0
+                    className={`px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap ${i === 0
                         ? "bg-purple-600 text-white shadow-md"
                         : "bg-slate-50 text-slate-500 border border-slate-100"
-                    }`}
+                      }`}
                   >
                     {cat}
                   </div>
@@ -201,9 +203,8 @@ const HeroSection = () => {
       <Background />
       <div className="container mx-auto px-6 relative z-10">
         <div
-          className={`flex flex-col lg:flex-row items-center gap-12 lg:gap-20 ${
-            isRTL ? "lg:flex-row-reverse" : ""
-          }`}
+          className={`flex flex-col lg:flex-row items-center gap-12 lg:gap-20 ${isRTL ? "lg:flex-row-reverse" : ""
+            }`}
         >
           {/* Text and Content */}
           <div className="lg:w-1/2 order-2 w-full">
@@ -223,16 +224,15 @@ const HeroSection = () => {
               {t("description")}
             </p>
 
-         
+
 
             {/* Android App Section */}
             <div
               className={`relative mb-10 p-5 rounded-2xl border border-purple-100 dark:border-purple-500/20 bg-linear-to-br from-white via-purple-50/40 to-indigo-50/30 dark:from-slate-900 dark:via-purple-900/10 dark:to-indigo-900/10 shadow-lg shadow-purple-500/5 max-w-xl overflow-hidden`}
             >
               <div
-                className={`absolute top-0 ${isRTL ? "left-0" : "right-0"} px-3 py-1 bg-linear-to-r from-green-500 to-emerald-500 text-white text-[10px] font-black uppercase tracking-wider ${
-                  isRTL ? "rounded-br-xl rounded-tl-2xl" : "rounded-bl-xl rounded-tr-2xl"
-                }`}
+                className={`absolute top-0 ${isRTL ? "left-0" : "right-0"} px-3 py-1 bg-linear-to-r from-green-500 to-emerald-500 text-white text-[10px] font-black uppercase tracking-wider ${isRTL ? "rounded-br-xl rounded-tl-2xl" : "rounded-bl-xl rounded-tr-2xl"
+                  }`}
               >
                 {t("androidExclusive")}
               </div>
@@ -260,13 +260,12 @@ const HeroSection = () => {
                   </a>
                 </div>
               </div>
-              
+
             </div>
-               {/* CTA Buttons */}
-               <div
-              className={`flex flex-wrap items-center gap-4 mb-8 ${
-                isRTL ? "justify-start" : "justify-start"
-              }`}
+            {/* CTA Buttons */}
+            <div
+              className={`flex flex-wrap items-center gap-4 mb-8 ${isRTL ? "justify-start" : "justify-start"
+                }`}
             >
               <Link
                 href="/auth/login"
@@ -297,11 +296,10 @@ const HeroSection = () => {
 
       {/* Video Modal */}
       <div
-        className={`fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm transition-opacity duration-200 ${
-          isVideoOpen
+        className={`fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm transition-opacity duration-200 ${isVideoOpen
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
-        }`}
+          }`}
       >
         <div className="relative youtube-player-container w-full max-w-4xl mx-4 aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
           <button

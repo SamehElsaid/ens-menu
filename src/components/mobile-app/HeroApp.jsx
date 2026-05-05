@@ -14,7 +14,7 @@ const AppLandingHero = () => {
 
     return (
         <section className="relative overflow-hidden bg-white dark:bg-[#0d1117] pt-24 pb-16 md:pt-32 md:pb-24">
-            
+
             {/* Background Glows */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full z-0 opacity-40 pointer-events-none">
                 <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-violet-500/20 blur-[120px] rounded-full" />
@@ -93,9 +93,9 @@ const AppLandingHero = () => {
 
                             <div className="relative animate-float">
                                 <div className="relative rounded-[3rem] border-[10px] border-slate-900 dark:border-slate-800 bg-slate-950 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.4),0_0_50px_-15px_rgba(124,58,237,0.45)] overflow-hidden aspect-[9/19] ring-2 ring-slate-700/30">
-                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-slate-900 rounded-b-3xl z-20 flex items-center justify-center gap-2">
-                                        <div className="w-12 h-1 bg-slate-700 rounded-full" />
-                                        <div className="size-1.5 bg-slate-700 rounded-full" />
+                                    <div className="absolute top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-slate-900 rounded-full z-20 flex items-center justify-center gap-2 border border-slate-800">
+                                        <div className="size-1.5 bg-slate-800 rounded-full" />
+                                        <div className="w-8 h-1 bg-slate-800 rounded-full opacity-40" />
                                     </div>
 
                                     <video

@@ -26,7 +26,7 @@ const TemplateDescription = () => {
   const scrollRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [tabHidden, setTabHidden] = useState(false);
-  const [isPaused, setIsPaused] = useState(false); 
+  const [isPaused, setIsPaused] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const last = Math.max(0, steps.length - 1);
 
@@ -108,7 +108,7 @@ const TemplateDescription = () => {
       setActiveIndex((prev) => {
         const next = prev >= last ? 0 : prev + 1;
         requestAnimationFrame(() => {
-          scrollToSlide(next, reducedMotion); 
+          scrollToSlide(next, reducedMotion);
         });
         return next;
       });
@@ -121,7 +121,7 @@ const TemplateDescription = () => {
     let next = activeIndex + delta;
     if (next < 0) next = last;
     else if (next > last) next = 0;
-    
+
     scrollToSlide(next, reducedMotion);
     setActiveIndex(next);
   };
@@ -141,12 +141,13 @@ const TemplateDescription = () => {
     <section
       className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-white py-8 md:py-12"
       dir={isRTL ? "rtl" : "ltr"}
-      onMouseEnter={() => setIsPaused(true)} 
-      onMouseLeave={() => setIsPaused(false)} 
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-200/80 to-transparent" />
 
       <div className="relative mx-auto w-full max-w-[min(100%,1536px)] px-4 sm:px-6 lg:px-8">
+        {/* Header */}
         <div className="mb-8 border-b border-gray-100 pb-8 text-center md:mb-10">
           <span className="mb-3 inline-block rounded-full bg-violet-100 px-4 py-1.5 text-sm font-semibold text-violet-700 shadow-inner">
             {t("badge")}
@@ -162,7 +163,9 @@ const TemplateDescription = () => {
           </p>
         </div>
 
+        {/* Slider Container */}
         <div className="relative">
+          {/* Navigation Buttons */}
           <button
             type="button"
             onClick={() => go(-1)}
@@ -180,6 +183,7 @@ const TemplateDescription = () => {
             <ChevronLeft className="size-5 md:size-6" />
           </button>
 
+          {/* Slides */}
           <div
             ref={scrollRef}
             dir="ltr"
@@ -196,9 +200,17 @@ const TemplateDescription = () => {
                   dir={isRTL ? "rtl" : "ltr"}
                   className="flex h-full min-w-0 flex-col rounded-[1.75rem] border border-slate-200/80 bg-white p-4 shadow-sm transition-all duration-300 hover:border-violet-200 hover:shadow-lg"
                 >
+                  {/* iPhone Frame with Dynamic Island (iPhone 17 Pro Style) */}
                   <div className="relative mx-auto mb-5 w-full max-w-[220px]">
-                    <div className="relative aspect-[9/17] overflow-hidden rounded-[2rem] border-[5px] border-slate-800 bg-slate-900 shadow-xl transition-transform duration-300 group-hover:-translate-y-1">
-                      <div className="absolute left-1/2 top-0 z-10 h-4 w-20 -translate-x-1/2 rounded-b-xl bg-slate-800" />
+                    <div className="relative aspect-[9/18.5] overflow-hidden rounded-[2.5rem] border-[6px] border-slate-900 bg-slate-900 shadow-2xl transition-transform duration-500 group-hover:-translate-y-2">
+                      
+                      {/* Dynamic Island Capsule */}
+                      <div className="absolute left-1/2 top-3 z-20 flex items-center justify-center h-3.5 w-14 -translate-x-1/2 rounded-full bg-black ring-1 ring-slate-800/50 shadow-inner">
+                         {/* Subtle Lens Effect */}
+                        <div className="absolute right-3 size-1 rounded-full bg-slate-800/40" />
+                      </div>
+
+                      {/* Screen Image */}
                       <div className="absolute inset-0 bg-slate-100">
                         <img
                           src={`/images/showcase/photo-${index + 1}.png`}
@@ -210,6 +222,7 @@ const TemplateDescription = () => {
                     </div>
                   </div>
 
+                  {/* Card Content */}
                   <div className="flex min-w-0 flex-1 flex-col px-1">
                     <div className="mb-2 flex min-w-0 items-start gap-2">
                       {stepBadge(index)}
@@ -217,9 +230,7 @@ const TemplateDescription = () => {
                         {screen.title}
                       </h3>
                     </div>
-                    <p className="text-sm text-slate-600">
-                      {screen.desc}
-                    </p>
+                    <p className="text-sm text-slate-600">{screen.desc}</p>
                   </div>
                 </div>
               </div>
