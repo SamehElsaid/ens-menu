@@ -213,7 +213,7 @@ const TemplateDescription = () => {
                       {/* Screen Image */}
                       <div className="absolute inset-0 bg-slate-100">
                         <img
-                          src={`/images/showcase/photo-${index + 1}.png`}
+                          src={`/images/showcase/p- (${index + 1}).jpg`}
                           alt={screen.title}
                           className="size-full object-cover object-top"
                           loading="lazy"
