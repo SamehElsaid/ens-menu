@@ -126,7 +126,8 @@
     "features": "Features",
     "team": "How It Works",
     "faq": "FAQ",
-    "contact": "Contact"
+    "contact": "Contact",
+    "androidApp": "Android App"
   },
   "home": {
     "title": "Home",
@@ -929,7 +930,20 @@
     "title2": "Smart Menu",
     "description": "An interactive digital menu with modern design, enables your customers to browse the food menu easily and clearly by scanning a QR code only",
     "cta": "Start Now for Free",
-    "watchDemo": "Watch Demo"
+    "watchDemo": "Watch Demo",
+    "androidTitle": "Smoother Experience via Android App",
+    "androidDescription": "For business owners seeking peak performance, we provide a dedicated Direct App for instant menu access and one-tap order management, optimized for speed and daily efficiency.",
+    "androidDownload": "Download App Now",
+    "androidExclusive": "Android Exclusive",
+    "scanCodeToBrowse": "Scan code to browse menu",
+    "scanningMenu": "Scanning the electronic menu...",
+    "businessName": "Your Business Name",
+    "categories": {
+      "all": "All",
+      "drinks": "Drinks",
+      "bakery": "Bakery",
+      "desserts": "Desserts"
+    }
   },
   "phoneVideoSection": {
     "badge": "Staff app",
@@ -962,6 +976,117 @@
     }
   },
   "Landing": {
+    "Hero": {
+      "badge": "Staff & Management Edition V2.0",
+      "titleStart": "All restaurant operations with one tap ",
+      "titleHighlight": "from your phone",
+      "description": "The fastest tool for cashiers & staff to track real-time orders, table management, and manager reports. Stable performance, zero browser lag.",
+      "downloadKicker": "Direct APK Download",
+      "downloadCta": "Download App Now",
+      "optimizedFor": "Optimized for:",
+      "platform": "Android",
+      "safeInstall": "Safe install • Works instantly after download",
+      "noSetupRequired": "No setup required • Works instantly",
+      "noBrowser": "No more browser needed",
+      "videoAlt": "App Preview",
+      "features": {
+        "liveAlerts": "Real-time order tracking",
+        "cashier": "Smart cashier interface",
+        "admin": "Admin access"
+      },
+      "floatingCards": {
+        "liveOrderLabel": "Live Order",
+        "liveOrderText": "Table 12 — Ready",
+        "responseLabel": "Response"
+      }
+    },
+    "FaqApp": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Everything you need to know before using the app",
+      "mostAsked": "Most Asked",
+      "items": [
+        {
+          "q": "Is the app a replacement for the website?",
+          "a": "Yes, the app is built to be faster and more stable than the browser, especially for managing orders and daily operations."
+        },
+        {
+          "q": "Is the app safe even though it's a direct download?",
+          "a": "Yes, the app is fully secure and tested, and it doesn't request any unnecessary permissions."
+        },
+        {
+          "q": "Can it be used by cashiers and staff?",
+          "a": "Absolutely. The app is designed for cashiers and staff with a simple, fast interface for managing orders."
+        },
+        {
+          "q": "Can the manager monitor everything?",
+          "a": "Yes, the app provides full reports and management for orders and staff from a single place."
+        },
+        {
+          "q": "Does it support real-time orders?",
+          "a": "Yes, orders are updated instantly with live notifications and zero delay."
+        },
+        {
+          "q": "Does it require experience to use?",
+          "a": "No, the app is very simple and any staff member can use it easily from the first try."
+        }
+      ]
+    },
+   "FeaturesApp": {
+  "title": "Master Your Restaurant Operations",
+  "subtitle": "A comprehensive system connecting waiters, cashiers, and management in one seamless platform to ensure the fastest service for your guests.",
+  "items": [
+    {
+      "title": "Smart & Fast Ordering",
+      "desc": "An interactive menu that allows waiters to add items, adjust quantities, and select tables in just a few taps."
+    },
+    {
+      "title": "Precision Table Management",
+      "desc": "Assign orders to specific tables with customer names to ensure a personalized and error-free dining experience."
+    },
+    {
+      "title": "Live Order Tracking",
+      "desc": "Real-time status updates (Confirmed, Pending) linking the dining floor to the kitchen and cashier instantly."
+    },
+    {
+      "title": "Review & Confirm System",
+      "desc": "A final review screen before sending orders to minimize mistakes, with easy options to edit or cancel on the fly."
+    },
+    {
+      "title": "Multi-Language Support",
+      "desc": "A flexible UI supporting both Arabic and English, making it easy for a diverse team to work efficiently."
+    },
+    {
+      "title": "Daily Order Reports",
+      "desc": "Full history of all incoming orders, displaying timing, totals, and guest details to track shift performance."
+    }
+  ]
+},
+    "WorkflowApp": {
+      "title": "How the system works inside your restaurant",
+      "subtitle": "Every step calculated… from order to delivery",
+      "steps": [
+        {
+          "title": "Receive Order",
+          "desc": "The order arrives instantly with a direct notification to the cashier."
+        },
+        {
+          "title": "Cashier Management",
+          "desc": "Confirm the order and update its status with ease."
+        },
+        {
+          "title": "Order Execution",
+          "desc": "The kitchen receives the order and starts preparing it right away."
+        },
+        {
+          "title": "Manager Oversight",
+          "desc": "Full real-time view of all operations and reports."
+        }
+      ]
+    },
+    "MobileAppCta": {
+      "title": "Ready to streamline your work?",
+      "button": "Download the App for Free"
+    },
     "features": {
       "title": "Why Choose Smart Menu?",
       "description": "We provide everything you need to create a professional digital menu for your restaurant or cafe",
@@ -1055,6 +1180,49 @@
         }
       ]
     },
+    "templateDescription": {
+      "badge": "User journey",
+      "title": "Effortless order management with",
+      "titleHighlight": "ENS",
+      "description": "See how ENS Menu streamlines front-of-house workflows step by step—from staff login to order confirmation.",
+      "scrollHint": "Swipe horizontally or use the arrows to browse all steps",
+      "prevStepAria": "Previous step",
+      "nextStepAria": "Next step",
+      "steps": [
+        {
+          "title": "Sign in",
+          "desc": "The ENS Menu staff login screen lets users switch language and enter credentials (menu name, email, and password) to access the system."
+        },
+        {
+          "title": "App settings",
+          "desc": "Language and settings let staff tailor the interface between Arabic and English, with a clear option to sign out."
+        },
+        {
+          "title": "Incoming orders",
+          "desc": "View all active orders with table number and customer name, plus status (confirmed or pending), time, and total."
+        },
+        {
+          "title": "Menu browsing",
+          "desc": "Browse items with photos, prices, and short descriptions; filter by category and adjust quantities."
+        },
+        {
+          "title": "Order details",
+          "desc": "Enter the customer name and pick a table from available options before sending the order."
+        },
+        {
+          "title": "Order summary",
+          "desc": "Review table details, customer name, time, and line items—adjust quantities or add more items before sending."
+        },
+        {
+          "title": "Confirm order",
+          "desc": "A confirmation pop-up prevents accidental sends and reminds staff that data goes straight to the server."
+        },
+        {
+          "title": "Sent successfully",
+          "desc": "After a successful send, a confirmation message appears and the orders list updates with the new order at the top."
+        }
+      ]
+    },
 
     "pricing": {
       "title": "Choose Your Plan",
@@ -1099,7 +1267,8 @@
       "UnitedArabEmirates": "United Arab Emirates",
       "copyright": "All rights reserved.",
       "privacy": "Privacy Policy",
-      "terms": "Terms and Conditions"
+      "terms": "Terms and Conditions",
+      "followUs": "Follow Us"
     }
   },
   "Menus": {
