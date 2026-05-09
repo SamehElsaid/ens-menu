@@ -5,7 +5,10 @@ import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { ar, enUS } from "date-fns/locale";
+import Cookies from "js-cookie";
+import { io } from "socket.io-client";
 import { axiosGet } from "@/shared/axiosCall";
+import { decryptData } from "@/shared/encryption";
 import {
   IoChevronBack,
   IoChevronForward,
@@ -28,6 +31,14 @@ type ActivityLogRow = {
   createdAt: string;
 };
 
+type OrderItemDetail = {
+  name: string;
+  quantity: number;
+  price: number | null;
+  total: number | null;
+  notes: string | null;
+};
+
 type ActivityLogsPayload = {
   total: number;
   page: number;
@@ -37,6 +48,25 @@ type ActivityLogsPayload = {
 };
 
 const PAGE_SIZE = 25;
+
+function dashboardSocketOrigin(): string {
+  const raw = (process.env.NEXT_PUBLIC_BASE_URL ?? "").trim();
+  if (!raw) {
+    if (typeof window !== "undefined") return window.location.origin;
+    return "";
+  }
+  try {
+    const u = new URL(raw);
+    const path = u.pathname.replace(/\/+$/, "");
+    if (path === "/api" || path.endsWith("/api")) {
+      u.pathname = "";
+      return u.origin;
+    }
+    return u.origin;
+  } catch {
+    return raw.replace(/\/?api\/?$/i, "");
+  }
+}
 
 type RoleAccent = {
   bar: string;
@@ -68,6 +98,15 @@ export default function ActivityHistoryPage() {
   const [total, setTotal] = useState(0);
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  /** Bumps when Socket.IO reports new activity so we refetch even if already on page 1. */
+  const [liveTick, setLiveTick] = useState(0);
+  const [selectedEntry, setSelectedEntry] = useState<{
+    row: ActivityLogRow;
+    summary: string;
+    when: string;
+    detail: ParsedDetail | null;
+    roleLabel: string;
+  } | null>(null);
 
   const dfLocale = locale === "ar" ? ar : enUS;
   const isRTL = locale === "ar";
@@ -119,17 +158,65 @@ export default function ActivityHistoryPage() {
     } finally {
       setLoading(false);
     }
-  }, [menuId, locale, page, debouncedSearch]);
+  }, [menuId, locale, page, debouncedSearch, liveTick]);
 
   useEffect(() => {
     fetchLogs();
   }, [fetchLogs]);
 
+  useEffect(() => {
+    const mid = parseInt(menuId, 10);
+    if (!Number.isFinite(mid) || mid <= 0) return;
+
+    const origin = dashboardSocketOrigin();
+    if (!origin) return;
+
+    const authToken = Cookies.get("sub") ?? "";
+    let token: string | undefined;
+    try {
+      token = (decryptData(authToken) as { token?: string })?.token;
+    } catch {
+      return;
+    }
+    if (!token) return;
+
+    const socket = io(origin, {
+      path: "/socket.io/",
+      transports: ["websocket", "polling"],
+    });
+
+    socket.emit(
+      "dashboard:menu_subscribe",
+      { token: `Bearer ${token}`, menuId: mid },
+      () => {
+        /* ack optional */
+      },
+    );
+
+    socket.on("menu:activity_updated", (payload: { menuId?: number }) => {
+      if (payload?.menuId !== mid) return;
+      setPage(1);
+      setLiveTick((n) => n + 1);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [menuId]);
+
+  useEffect(() => {
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setSelectedEntry(null);
+      }
+    };
+    window.addEventListener("keydown", onEsc);
+    return () => window.removeEventListener("keydown", onEsc);
+  }, []);
+
   return (
     <div className="space-y-6 animate-fadeIn">
-      <header
-        className="relative overflow-hidden rounded-2xl border border-violet-200/60 bg-linear-to-br from-violet-50 via-fuchsia-50/80 to-white p-6 shadow-sm dark:border-violet-500/20 dark:from-violet-950/50 dark:via-fuchsia-950/30 dark:to-slate-900 md:p-8"
-      >
+      <header className="relative overflow-hidden rounded-2xl border border-violet-200/60 bg-linear-to-br from-violet-50 via-fuchsia-50/80 to-white p-6 shadow-sm dark:border-violet-500/20 dark:from-violet-950/50 dark:via-fuchsia-950/30 dark:to-slate-900 md:p-8">
         <div
           className="pointer-events-none absolute -end-16 -top-16 h-48 w-48 rounded-full bg-linear-to-br from-violet-400/20 to-fuchsia-400/10 blur-2xl dark:from-violet-500/15 dark:to-fuchsia-500/10"
           aria-hidden
@@ -180,7 +267,7 @@ export default function ActivityHistoryPage() {
             {debouncedSearch ? t("noSearchResults") : t("empty")}
           </div>
         ) : (
-          <ul className="divide-y divide-violet-100/80 dark:divide-violet-900/40">
+          <ul className="m-0 grid list-none grid-cols-1 gap-4 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-3 xl:grid-cols-4">
             {entries.map((row) => {
               const summary =
                 locale === "ar"
@@ -193,11 +280,14 @@ export default function ActivityHistoryPage() {
               const detail = parseActivityDetail(row.detailJson, row.action);
               const accent = getRoleAccent(row);
               const initial =
-                row.actorName?.trim().charAt(0).toUpperCase() || "?";
+                detail?.type === "orderSnapshot"
+                  ? String(detail.tableNumber ?? "?")
+                  : row.actorName?.trim().charAt(0).toUpperCase() || "?";
 
               return (
                 <ActivityRow
                   key={row.id}
+                  row={row}
                   summary={summary}
                   when={when}
                   createdAt={row.createdAt}
@@ -207,6 +297,7 @@ export default function ActivityHistoryPage() {
                   accent={accent}
                   initial={initial}
                   t={t}
+                  onOpenDetails={(payload) => setSelectedEntry(payload)}
                 />
               );
             })}
@@ -235,9 +326,7 @@ export default function ActivityHistoryPage() {
               <button
                 type="button"
                 disabled={page >= totalPages}
-                onClick={() =>
-                  setPage((p) => (p < totalPages ? p + 1 : p))
-                }
+                onClick={() => setPage((p) => (p < totalPages ? p + 1 : p))}
                 className="inline-flex items-center gap-1 rounded-xl border border-violet-200/90 bg-white px-3 py-2 text-sm font-medium text-violet-800 shadow-sm transition-colors hover:bg-violet-50 disabled:pointer-events-none disabled:opacity-40 dark:border-violet-700/60 dark:bg-slate-800 dark:text-violet-200 dark:hover:bg-violet-950/50"
               >
                 {t("next")}
@@ -247,6 +336,13 @@ export default function ActivityHistoryPage() {
           </div>
         ) : null}
       </div>
+      {selectedEntry ? (
+        <OrderDetailsModal
+          entry={selectedEntry}
+          t={t}
+          onClose={() => setSelectedEntry(null)}
+        />
+      ) : null}
     </div>
   );
 }
@@ -254,7 +350,42 @@ export default function ActivityHistoryPage() {
 type ParsedDetail =
   | { type: "menuFields"; fields: string[] }
   | { type: "orderStatus"; status: string }
-  | { type: "itemsEdited" };
+  | { type: "itemsEdited" }
+  | {
+      type: "orderSnapshot";
+      status: string;
+      tableNumber: string | null;
+      customerName: string | null;
+      orderTotal: number | null;
+      itemsCount: number;
+      items: OrderItemDetail[];
+    };
+
+function normalizeOrderItems(raw: unknown): OrderItemDetail[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((item): OrderItemDetail | null => {
+      if (!item || typeof item !== "object") return null;
+      const o = item as Record<string, unknown>;
+      const name = String(o.name ?? "").trim() || "—";
+      const quantityRaw = Number(o.quantity);
+      const quantity = Number.isFinite(quantityRaw) ? quantityRaw : 0;
+      const priceRaw = Number(o.price);
+      const totalRaw = Number(o.total);
+      const notesRaw =
+        o.notes != null && String(o.notes).trim() !== ""
+          ? String(o.notes)
+          : null;
+      return {
+        name,
+        quantity,
+        price: Number.isFinite(priceRaw) ? priceRaw : null,
+        total: Number.isFinite(totalRaw) ? totalRaw : null,
+        notes: notesRaw,
+      };
+    })
+    .filter((x): x is OrderItemDetail => x != null);
+}
 
 function parseActivityDetail(
   detailJson: string | null,
@@ -268,6 +399,34 @@ function parseActivityDetail(
   }
   try {
     const o = JSON.parse(detailJson) as Record<string, unknown>;
+    const orderRaw =
+      o.order && typeof o.order === "object"
+        ? (o.order as Record<string, unknown>)
+        : null;
+    if (orderRaw) {
+      const itemsRaw = Array.isArray(orderRaw.items) ? orderRaw.items : [];
+      const statusRaw =
+        typeof o.status === "string"
+          ? o.status
+          : typeof orderRaw.status === "string"
+            ? orderRaw.status
+            : action;
+      return {
+        type: "orderSnapshot",
+        status: String(statusRaw).toLowerCase(),
+        tableNumber:
+          orderRaw.tableNumber != null ? String(orderRaw.tableNumber) : null,
+        customerName:
+          orderRaw.customerName != null ? String(orderRaw.customerName) : null,
+        orderTotal:
+          orderRaw.orderTotal != null &&
+          Number.isFinite(Number(orderRaw.orderTotal))
+            ? Number(orderRaw.orderTotal)
+            : null,
+        itemsCount: itemsRaw.length,
+        items: normalizeOrderItems(itemsRaw),
+      };
+    }
     if (
       Array.isArray(o.fields) &&
       o.fields.length > 0 &&
@@ -292,6 +451,7 @@ function parseActivityDetail(
 }
 
 function ActivityRow({
+  row,
   summary,
   when,
   createdAt,
@@ -301,87 +461,188 @@ function ActivityRow({
   accent,
   initial,
   t,
+  onOpenDetails,
 }: {
+  row: ActivityLogRow;
   summary: string;
   when: string;
   createdAt: string;
   actorName: string;
   roleLabel: string;
   detail: ParsedDetail | null;
-  accent: RoleAccent;
+  accent: Pick<RoleAccent, "avatar" | "badge">;
   initial: string;
   t: ActivityHistoryT;
+  onOpenDetails: (payload: {
+    row: ActivityLogRow;
+    summary: string;
+    when: string;
+    detail: ParsedDetail | null;
+    roleLabel: string;
+  }) => void;
 }) {
+  const openDetails = () => {
+    onOpenDetails({ row, summary, when, detail, roleLabel });
+  };
+  const orderMeta =
+    detail?.type === "orderSnapshot"
+      ? t("cardOrderMeta", {
+          table: detail.tableNumber ?? "—",
+          count: detail.itemsCount,
+        })
+      : null;
+
   return (
-    <li
-      className={`border-l-4 ${accent.bar} ${accent.rowBg} px-4 py-4 transition-colors hover:brightness-[1.02] dark:hover:brightness-110 sm:px-6`}
-    >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex min-w-0 flex-1 gap-3">
+    <li className="min-w-0">
+      <button
+        type="button"
+        onClick={openDetails}
+        className={`flex h-full w-full flex-col gap-2 rounded-2xl border border-violet-200/80 bg-white p-3.5 text-start shadow-sm ring-1 ring-violet-500/5 transition-all hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/40 dark:border-violet-800/60 dark:bg-slate-800/90 dark:ring-violet-950/30 dark:hover:border-violet-600`}
+      >
+        <div className="flex items-start gap-2.5">
           <div
-            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-bold shadow-inner ${accent.avatar}`}
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-bold shadow-inner ${accent.avatar}`}
             aria-hidden
           >
             {initial}
           </div>
-          <div className="min-w-0 flex-1 space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-semibold text-slate-900 dark:text-slate-100">
-                {actorName}
-              </span>
-              <span
-                className={`text-xs font-medium ${accent.badge} rounded-full px-2.5 py-0.5`}
-              >
-                {roleLabel}
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+                {orderMeta}
               </span>
             </div>
-            <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">
-              {summary}
-            </p>
-            {detail ? (
-              <div
-                className={`rounded-xl border ${accent.detailRing} bg-white/90 px-3 py-2.5 dark:bg-slate-900/50`}
-              >
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-violet-600/90 dark:text-violet-300/90">
-                  {t("changedLabel")}
-                </p>
-                {detail.type === "menuFields" ? (
-                  <ul className="m-0 flex list-none flex-wrap gap-1.5 p-0">
-                    {detail.fields.map((fieldKey) => {
-                      const path = `fields.${fieldKey}`;
-                      const label = t.has(path) ? t(path) : fieldKey;
-                      return (
-                        <li key={fieldKey}>
-                          <span className="inline-block rounded-lg border border-violet-200/80 bg-violet-50/90 px-2.5 py-1 text-xs text-violet-900 dark:border-violet-700/50 dark:bg-violet-950/40 dark:text-violet-100">
-                            {label}
-                          </span>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                ) : detail.type === "orderStatus" ? (
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
-                    {t("orderStatusLine", {
-                      status: t(`orderStatus.${detail.status}` as never),
-                    })}
-                  </p>
-                ) : (
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
-                    {t("changeTypes.itemsEdited")}
-                  </p>
-                )}
-              </div>
-            ) : null}
+            <time
+              dateTime={createdAt}
+              className="mt-1 inline-block rounded-md bg-violet-100 px-2 py-0.5 text-xs font-semibold tabular-nums text-violet-800 dark:bg-violet-900/45 dark:text-violet-200"
+            >
+              {when}
+            </time>
           </div>
         </div>
-        <time
-          dateTime={createdAt}
-          className="shrink-0 text-xs tabular-nums text-violet-600/70 dark:text-violet-300/70 sm:text-end"
-        >
-          {when}
-        </time>
-      </div>
+        <p className="line-clamp-2 text-xs leading-snug text-slate-600 dark:text-slate-300">
+          {summary}
+        </p>
+
+        <span className="mt-auto pt-0.5 text-[10px] font-medium text-violet-600/90 dark:text-violet-400/90">
+          {t("tapForDetails")}
+        </span>
+      </button>
     </li>
+  );
+}
+
+function OrderDetailsModal({
+  entry,
+  onClose,
+  t,
+}: {
+  entry: {
+    row: ActivityLogRow;
+    summary: string;
+    when: string;
+    detail: ParsedDetail | null;
+    roleLabel: string;
+  };
+  onClose: () => void;
+  t: ActivityHistoryT;
+}) {
+  const detail = entry.detail;
+  const items =
+    detail && detail.type === "orderSnapshot"
+      ? detail.items
+      : ([] as OrderItemDetail[]);
+
+  console.log(entry.detail);
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4">
+      <div className="w-full max-w-2xl rounded-2xl border border-violet-200/70 bg-white p-5 shadow-2xl dark:border-violet-600/40 dark:bg-slate-900">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+              {t("detailsTitle")}
+            </h3>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+              {entry.summary}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg border border-violet-200 px-3 py-1.5 text-sm text-violet-800 hover:bg-violet-50 dark:border-violet-600 dark:text-violet-200 dark:hover:bg-violet-950/40"
+          >
+            {t("close")}
+          </button>
+        </div>
+
+        <div className="space-y-2 rounded-xl bg-violet-50/70 p-3 text-sm dark:bg-violet-950/25">
+          <p className="text-slate-700 dark:text-slate-200">
+            <span className="font-semibold">{t("detailsWho")}:</span>{" "}
+            {entry.row.actorName}
+          </p>
+          <p className="text-slate-700 dark:text-slate-200">
+            <span className="font-semibold">{t("detailsWhen")}:</span>{" "}
+            {entry.when}
+          </p>
+          {detail && detail.type === "orderSnapshot" ? (
+            <>
+              <p className="text-slate-700 dark:text-slate-200">
+                <span className="font-semibold">{t("detailsTable")}:</span>{" "}
+                {detail.tableNumber ?? "—"}
+              </p>
+              <p className="text-slate-700 dark:text-slate-200">
+                <span className="font-semibold">{t("detailsCustomer")}:</span>{" "}
+                {detail.customerName ?? "—"}
+              </p>
+              <p className="text-slate-700 dark:text-slate-200">
+                <span className="font-semibold">{t("detailsStatus")}:</span>{" "}
+                {t(`orderStatus.${detail.status}` as never)}
+              </p>
+              <p className="text-slate-700 dark:text-slate-200">
+                <span className="font-semibold">{t("detailsTotal")}:</span>{" "}
+                {detail.orderTotal != null ? detail.orderTotal : "—"}
+              </p>
+            </>
+          ) : null}
+        </div>
+
+        <div className="mt-4">
+          <h4 className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
+            {t("itemsTitle")}
+          </h4>
+          {items.length === 0 ? (
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              {t("itemsEmpty")}
+            </p>
+          ) : (
+            <div className="max-h-72 space-y-2 overflow-auto pe-1">
+              {items.map((it, idx) => (
+                <div
+                  key={`${it.name}-${idx}`}
+                  className="rounded-xl border border-violet-200/70 bg-white p-3 dark:border-violet-700/60 dark:bg-slate-800"
+                >
+                  <p className="font-medium text-slate-900 dark:text-slate-100">
+                    {it.name}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
+                    {t("itemMetaLine", {
+                      qty: it.quantity,
+                      price: it.price != null ? String(it.price) : "—",
+                      total: it.total != null ? String(it.total) : "—",
+                    })}
+                  </p>
+                  {it.notes ? (
+                    <p className="mt-1 text-xs text-violet-700 dark:text-violet-300">
+                      {t("itemNotesLine", { notes: it.notes })}
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -423,8 +684,7 @@ function getRoleAccent(row: ActivityLogRow): RoleAccent {
     if (slug === "cashier") {
       return {
         bar: "border-l-sky-500",
-        badge:
-          "bg-sky-100 text-sky-900 dark:bg-sky-900/50 dark:text-sky-100",
+        badge: "bg-sky-100 text-sky-900 dark:bg-sky-900/50 dark:text-sky-100",
         avatar:
           "bg-linear-to-br from-sky-400 to-cyan-500 text-white shadow-sky-500/20",
         detailRing: "border-sky-200/90 dark:border-sky-700/50",
@@ -485,10 +745,7 @@ function getRoleAccent(row: ActivityLogRow): RoleAccent {
   };
 }
 
-function actorBadgeLabel(
-  row: ActivityLogRow,
-  t: ActivityHistoryT,
-): string {
+function actorBadgeLabel(row: ActivityLogRow, t: ActivityHistoryT): string {
   const kind = normalizeRoleKey(row.actorRole);
   if (kind === "staff") {
     const jr = staffJobRoleFromRow(row);

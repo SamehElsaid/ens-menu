@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import LoadImage from "../ImageLoad";
 
 const TemplateDescription = () => {
   const t = useTranslations("Landing.templateDescription");
@@ -23,16 +24,18 @@ const TemplateDescription = () => {
 
   const AUTOPLAY_MS = 2000;
 
-  const scrollRef = useRef(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [tabHidden, setTabHidden] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const last = Math.max(0, steps.length - 1);
 
-  const scrollToSlide = useCallback((index, instant) => {
+  const scrollToSlide = useCallback((index: number, instant: boolean) => {
     const root = scrollRef.current;
-    const slide = root?.querySelector(`[data-slide-index="${index}"]`);
+    const slide = root?.querySelector<HTMLElement>(
+      `[data-slide-index="${index}"]`,
+    );
     if (!root || !slide) return;
 
     const cRect = root.getBoundingClientRect();
@@ -116,7 +119,7 @@ const TemplateDescription = () => {
     return () => clearInterval(id);
   }, [last, tabHidden, isPaused, reducedMotion, scrollToSlide]);
 
-  const go = (delta) => {
+  const go = (delta: number) => {
     if (last < 1) return;
     let next = activeIndex + delta;
     if (next < 0) next = last;
@@ -126,7 +129,7 @@ const TemplateDescription = () => {
     setActiveIndex(next);
   };
 
-  const stepBadge = (index) => (
+  const stepBadge = (index: number) => (
     <span
       dir="ltr"
       className="inline-flex size-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-purple-500 text-xs font-bold tabular-nums text-white"
@@ -203,16 +206,15 @@ const TemplateDescription = () => {
                   {/* iPhone Frame with Dynamic Island (iPhone 17 Pro Style) */}
                   <div className="relative mx-auto mb-5 w-full max-w-[220px]">
                     <div className="relative aspect-[9/18.5] overflow-hidden rounded-[2.5rem] border-[6px] border-slate-900 bg-slate-900 shadow-2xl transition-transform duration-500 group-hover:-translate-y-2">
-                      
                       {/* Dynamic Island Capsule */}
                       <div className="absolute left-1/2 top-3 z-20 flex items-center justify-center h-3.5 w-14 -translate-x-1/2 rounded-full bg-black ring-1 ring-slate-800/50 shadow-inner">
-                         {/* Subtle Lens Effect */}
+                        {/* Subtle Lens Effect */}
                         <div className="absolute right-3 size-1 rounded-full bg-slate-800/40" />
                       </div>
 
                       {/* Screen Image */}
                       <div className="absolute inset-0 bg-slate-100">
-                        <img
+                        <LoadImage
                           src={`/images/showcase/photo-${index + 1}.png`}
                           alt={screen.title}
                           className="size-full object-cover object-top"

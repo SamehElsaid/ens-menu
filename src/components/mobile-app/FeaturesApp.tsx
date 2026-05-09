@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+
 import { useTranslations, useLocale } from "next-intl";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   FiCheckCircle,
   FiPlusCircle,
@@ -13,6 +12,7 @@ import {
   FiGlobe,
   FiFileText,
 } from "react-icons/fi";
+import LoadImage from "../ImageLoad";
 
 const icons = [
   FiPlusCircle,
@@ -24,20 +24,22 @@ const icons = [
 ];
 
 const showcaseImages = [
-  "/images/showcase/p- (2).jpg",
-  "/images/showcase/p- (5).jpg",
-  "/images/showcase/p- (1).jpg",
-  "/images/showcase/p- (3).jpg",
-  "/images/showcase/p- (4).jpg",
-  "/images/showcase/p- (6).jpg",
+  "/images/showcase/p-(2).jpg",
+  "/images/showcase/p-(5).jpg",
+  "/images/showcase/p-(1).jpg",
+  "/images/showcase/p-(3).jpg",
+  "/images/showcase/p-(4).jpg",
+  "/images/showcase/p-(6).jpg",
 ];
+
+type FeatureItem = { title: string; desc: string };
 
 const FeaturesApp = () => {
   const t = useTranslations("Landing.FeaturesApp");
   const locale = useLocale();
   const isRTL = locale === "ar";
 
-  const items = t.raw("items");
+  const items = t.raw("items") as FeatureItem[];
   const [active, setActive] = useState(0);
   const ActiveIcon = icons[active % icons.length];
 
@@ -45,22 +47,20 @@ const FeaturesApp = () => {
     <section className="relative py-20 bg-white dark:bg-[#0d1117] overflow-hidden">
       {/* Background Glow — matches other sections */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className={`absolute top-[10%] ${isRTL ? "left-[5%]" : "right-[5%]"} w-[35%] h-[35%] bg-violet-500/10 blur-[120px] rounded-full`} />
-        <div className={`absolute bottom-[10%] ${isRTL ? "right-[5%]" : "left-[5%]"} w-[30%] h-[30%] bg-indigo-500/10 blur-[100px] rounded-full`} />
+        <div
+          className={`absolute top-[10%] ${isRTL ? "left-[5%]" : "right-[5%]"} w-[35%] h-[35%] bg-violet-500/10 blur-[120px] rounded-full`}
+        />
+        <div
+          className={`absolute bottom-[10%] ${isRTL ? "right-[5%]" : "left-[5%]"} w-[30%] h-[30%] bg-indigo-500/10 blur-[100px] rounded-full`}
+        />
       </div>
 
       <div className="container mx-auto px-6 relative z-10 max-w-6xl">
-
         {/* Header — matches WorkflowApp/FaqApp */}
         <div className="text-center mb-20">
-          <motion.span
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="inline-block text-violet-600 dark:text-violet-400 font-bold text-sm tracking-widest uppercase mb-3"
-          >
+          <span className="inline-block text-violet-600 dark:text-violet-400 font-bold text-sm tracking-widest uppercase mb-3">
             {isRTL ? "لماذا تطبيقنا؟" : "Why our app?"}
-          </motion.span>
+          </span>
           <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-4">
             {t("title")}
           </h2>
@@ -69,16 +69,17 @@ const FeaturesApp = () => {
           </p>
         </div>
 
-        <div className={`flex flex-col lg:flex-row gap-12 lg:gap-16 items-start ${isRTL ? "lg:flex-row-reverse" : ""}`}>
-
+        <div
+          className={`flex flex-col lg:flex-row gap-12 lg:gap-16 items-start ${isRTL ? "lg:flex-row-reverse" : ""}`}
+        >
           {/* LEFT — Features list */}
           <div className="w-full lg:w-1/2 space-y-3">
-            {items.map((item, i) => {
+            {items.map((item: FeatureItem, i: number) => {
               const Icon = icons[i % icons.length];
               const isActive = active === i;
 
               return (
-                <motion.button
+                <button
                   key={i}
                   type="button"
                   onClick={() => setActive(i)}
@@ -90,20 +91,17 @@ const FeaturesApp = () => {
                   }`}
                 >
                   {/* Active accent bar */}
-                  {isActive && (
-                    <motion.span
-                      layoutId="active-bar"
-                      className={`absolute top-1/2 -translate-y-1/2 h-10 w-1 rounded-full bg-gradient-to-b from-violet-500 to-indigo-600 ${
-                        isRTL ? "right-0" : "left-0"
-                      }`}
-                    />
-                  )}
+                  <span
+                    className={`absolute top-1/2 -translate-y-1/2 h-10 w-1 rounded-full bg-linear-to-b from-violet-500 to-indigo-600 transition-opacity duration-300 ${
+                      isRTL ? "right-0" : "left-0"
+                    } ${isActive ? "opacity-100" : "opacity-0"}`}
+                  />
 
                   <div className="flex items-center gap-4">
                     <div
                       className={`shrink-0 p-3 rounded-xl transition-all duration-300 ${
                         isActive
-                          ? "bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/40 scale-110"
+                          ? "bg-linear-to-br from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/40 scale-110"
                           : "bg-slate-100 dark:bg-slate-800 text-violet-500 group-hover:bg-violet-100 dark:group-hover:bg-violet-500/20"
                       }`}
                     >
@@ -132,29 +130,27 @@ const FeaturesApp = () => {
                     </div>
 
                     {isActive && (
-                      <motion.div
-                        layoutId="pointer"
-                        className="text-violet-500 shrink-0"
-                      >
+                      <div className="text-violet-500 shrink-0">
                         <FiCheckCircle size={20} />
-                      </motion.div>
+                      </div>
                     )}
                   </div>
-                </motion.button>
+                </button>
               );
             })}
           </div>
 
           {/* RIGHT — Phone mockup with screenshot */}
           <div className="w-full lg:w-1/2 lg:sticky lg:top-32">
-            <div className="relative bg-gradient-to-br from-violet-50 via-white to-indigo-50 dark:from-violet-500/5 dark:via-slate-900 dark:to-indigo-500/5 rounded-[2.5rem] p-8 sm:p-12 overflow-hidden border border-slate-200/60 dark:border-slate-700/60 shadow-2xl shadow-violet-500/10">
-
+            <div className="relative bg-linear-to-br from-violet-50 via-white to-indigo-50 dark:from-violet-500/5 dark:via-slate-900 dark:to-indigo-500/5 rounded-[2.5rem] p-8 sm:p-12 overflow-hidden border border-slate-200/60 dark:border-slate-700/60 shadow-2xl shadow-violet-500/10">
               {/* Decorative blobs */}
               <div className="pointer-events-none absolute -top-16 -right-16 size-56 rounded-full bg-violet-400/20 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-16 -left-16 size-56 rounded-full bg-indigo-400/20 blur-3xl" />
 
               {/* Top: Live Preview badge */}
-              <div className={`absolute top-5 z-20 inline-flex items-center gap-2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg border border-white/60 dark:border-slate-700/60 ${isRTL ? "right-5" : "left-5"}`}>
+              <div
+                className={`absolute top-5 z-20 inline-flex items-center gap-2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg border border-white/60 dark:border-slate-700/60 ${isRTL ? "right-5" : "left-5"}`}
+              >
                 <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-[10px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-200">
                   {isRTL ? "معاينة مباشرة" : "Live Preview"}
@@ -162,7 +158,9 @@ const FeaturesApp = () => {
               </div>
 
               {/* Top: Step counter */}
-              <div className={`absolute top-5 z-20 inline-flex items-center gap-1 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg border border-white/60 dark:border-slate-700/60 ${isRTL ? "left-5" : "right-5"}`}>
+              <div
+                className={`absolute top-5 z-20 inline-flex items-center gap-1 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg border border-white/60 dark:border-slate-700/60 ${isRTL ? "left-5" : "right-5"}`}
+              >
                 <span className="text-xs font-black text-violet-600 dark:text-violet-400">
                   {String(active + 1).padStart(2, "0")}
                 </span>
@@ -173,49 +171,34 @@ const FeaturesApp = () => {
               </div>
 
               {/* Tablet screenshot — clean rounded frame, no device chrome */}
-              <div className="relative z-10 mx-auto w-full max-w-[480px] aspect-[770/1280] rounded-2xl overflow-hidden bg-white dark:bg-slate-900 shadow-2xl shadow-violet-500/20 ring-1 ring-slate-200/60 dark:ring-slate-700/60">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={active}
-                    initial={{ opacity: 0, scale: 1.03 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.97 }}
-                    transition={{ duration: 0.35, ease: "easeOut" }}
-                    className="absolute inset-0"
-                  >
-                    <Image
-                      src={showcaseImages[active % showcaseImages.length]}
-                      alt={items[active].title}
-                      fill
-                      sizes="(max-width: 1024px) 100vw, 480px"
-                      className="object-cover object-top"
-                      priority={active === 0}
-                    />
-                  </motion.div>
-                </AnimatePresence>
+              <div className="relative z-10 mx-auto w-full max-w-[480px] aspect-770/1280 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 shadow-2xl shadow-violet-500/20 ring-1 ring-slate-200/60 dark:ring-slate-700/60">
+                <div className="absolute inset-0">
+                  <LoadImage
+                    src={showcaseImages[active % showcaseImages.length]}
+                    alt={items[active].title}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 480px"
+                    className="object-cover object-top"
+                    priority={active === 0}
+                  />
+                </div>
               </div>
 
               {/* Active feature title (under screenshot) */}
               <div className="relative z-10 mt-6 text-center px-4">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={active}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.25 }}
-                    className="flex items-center justify-center gap-2"
-                  >
-                    <ActiveIcon size={18} className="text-violet-600 dark:text-violet-400 shrink-0" />
-                    <h4 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                      {items[active].title}
-                    </h4>
-                  </motion.div>
-                </AnimatePresence>
+                <div className="flex items-center justify-center gap-2">
+                  <ActiveIcon
+                    size={18}
+                    className="text-violet-600 dark:text-violet-400 shrink-0"
+                  />
+                  <h4 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                    {items[active].title}
+                  </h4>
+                </div>
 
                 {/* Dots indicator (clickable) */}
                 <div className="mt-4 flex justify-center gap-1.5">
-                  {items.map((_, i) => (
+                  {items.map((_: FeatureItem, i: number) => (
                     <button
                       key={i}
                       type="button"
@@ -232,7 +215,6 @@ const FeaturesApp = () => {
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </section>

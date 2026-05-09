@@ -7,9 +7,16 @@ import WorkflowApp from "@/components/mobile-app/WorkflowApp";
 import FooterSection from "@/components/HomePage/Footer";
 import PricingSection from "@/components/HomePage/PricingSection";
 
-export default async function MobileAppPage({ params }) {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "Landing.MobileAppCta" });
+type PageProps = {
+  params: { locale: string };
+};
+
+export default async function MobileAppPage({ params }: PageProps) {
+  const { locale } = params;
+  const t = await getTranslations({
+    locale,
+    namespace: "Landing.MobileAppCta",
+  });
 
   return (
     <main className="min-h-screen bg-white dark:bg-[#0d1117]">

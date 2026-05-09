@@ -117,10 +117,11 @@ const InteractivePhone = () => {
                 {categories.map((cat, i) => (
                   <div
                     key={i}
-                    className={`px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap ${i === 0
+                    className={`px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap ${
+                      i === 0
                         ? "bg-purple-600 text-white shadow-md"
                         : "bg-slate-50 text-slate-500 border border-slate-100"
-                      }`}
+                    }`}
                   >
                     {cat}
                   </div>
@@ -203,8 +204,9 @@ const HeroSection = () => {
       <Background />
       <div className="container mx-auto px-6 relative z-10">
         <div
-          className={`flex flex-col lg:flex-row items-center gap-12 lg:gap-20 ${isRTL ? "lg:flex-row-reverse" : ""
-            }`}
+          className={`flex flex-col lg:flex-row items-center gap-12 lg:gap-20 ${
+            isRTL ? "lg:flex-row-reverse" : ""
+          }`}
         >
           {/* Text and Content */}
           <div className="lg:w-1/2 order-2 w-full">
@@ -224,48 +226,11 @@ const HeroSection = () => {
               {t("description")}
             </p>
 
-
-
-            {/* Android App Section */}
-            <div
-              className={`relative mb-10 p-5 rounded-2xl border border-purple-100 dark:border-purple-500/20 bg-linear-to-br from-white via-purple-50/40 to-indigo-50/30 dark:from-slate-900 dark:via-purple-900/10 dark:to-indigo-900/10 shadow-lg shadow-purple-500/5 max-w-xl overflow-hidden`}
-            >
-              <div
-                className={`absolute top-0 ${isRTL ? "left-0" : "right-0"} px-3 py-1 bg-linear-to-r from-green-500 to-emerald-500 text-white text-[10px] font-black uppercase tracking-wider ${isRTL ? "rounded-br-xl rounded-tl-2xl" : "rounded-bl-xl rounded-tr-2xl"
-                  }`}
-              >
-                {t("androidExclusive")}
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="shrink-0 p-3 bg-linear-to-br from-green-500/15 to-emerald-500/10 rounded-xl border border-green-500/20">
-                  <FaAndroid className="text-green-600 dark:text-green-400 text-3xl" />
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-black text-slate-800 dark:text-white text-base sm:text-lg mb-1.5 leading-snug">
-                    {t("androidTitle")}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
-                    {t("androidDescription")}
-                  </p>
-
-                  <a
-                    href="https://expo.dev/artifacts/eas/iXgE6EHRgCGLqf8HwRek6R.apk"
-                    download
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-purple-600 hover:bg-slate-800 dark:hover:bg-purple-500 text-white rounded-xl font-bold text-xs sm:text-sm transition-colors shadow-md shadow-slate-900/20 dark:shadow-purple-900/30"
-                  >
-                    <Download size={16} />
-                    {t("androidDownload")}
-                  </a>
-                </div>
-              </div>
-
-            </div>
             {/* CTA Buttons */}
             <div
-              className={`flex flex-wrap items-center gap-4 mb-8 ${isRTL ? "justify-start" : "justify-start"
-                }`}
+              className={`flex flex-wrap items-center gap-4 mb-8 ${
+                isRTL ? "justify-start" : "justify-start"
+              }`}
             >
               <Link
                 href="/auth/login"
@@ -296,10 +261,11 @@ const HeroSection = () => {
 
       {/* Video Modal */}
       <div
-        className={`fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm transition-opacity duration-200 ${isVideoOpen
+        className={`fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm transition-opacity duration-200 ${
+          isVideoOpen
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
-          }`}
+        }`}
       >
         <div className="relative youtube-player-container w-full max-w-4xl mx-4 aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
           <button

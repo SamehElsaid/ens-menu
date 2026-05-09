@@ -1,23 +1,22 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { motion } from "framer-motion";
 import { FiBell, FiShoppingCart, FiCoffee, FiBarChart2 } from "react-icons/fi";
 
 const icons = [FiBell, FiShoppingCart, FiCoffee, FiBarChart2];
+
+type WorkflowStep = { title: string; desc: string };
 
 const WorkflowApp = () => {
   const t = useTranslations("Landing.WorkflowApp");
   const locale = useLocale();
   const isRTL = locale === "ar";
 
-  const steps = t.raw("steps");
+  const steps = t.raw("steps") as WorkflowStep[];
 
   return (
     <section className="relative py-12 bg-white dark:bg-[#0d1117] overflow-hidden">
-
       <div className="container mx-auto px-6 relative z-10 max-w-6xl">
-
         {/* Header */}
         <div className="text-center mb-20">
           <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-4">
@@ -30,23 +29,19 @@ const WorkflowApp = () => {
 
         {/* Flow */}
         <div className="grid md:grid-cols-4 gap-8 relative">
-          
           {/* Line */}
-          <div className="hidden md:block absolute top-1/2 left-0 right-0 h-[2px] bg-gradient-to-r from-violet-500/30 via-indigo-500/30 to-transparent -translate-y-1/2" />
+          <div className="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-linear-to-r from-violet-500/30 via-indigo-500/30 to-transparent -translate-y-1/2" />
 
-          {steps.map((step, i) => {
+          {steps.map((step: WorkflowStep, i: number) => {
             const Icon = icons[i];
 
             return (
-              <motion.div
+              <div
                 key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.2 }}
                 className="relative flex flex-col items-center text-center"
               >
                 {/* Circle */}
-                <div className="relative z-10 w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-lg">
+                <div className="relative z-10 w-16 h-16 flex items-center justify-center rounded-2xl bg-linear-to-br from-violet-600 to-indigo-600 text-white shadow-lg">
                   <Icon size={22} />
                 </div>
 
@@ -58,7 +53,7 @@ const WorkflowApp = () => {
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xs">
                   {step.desc}
                 </p>
-              </motion.div>
+              </div>
             );
           })}
         </div>
