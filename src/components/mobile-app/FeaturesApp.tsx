@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { useTranslations, useLocale } from "next-intl";
 import {
@@ -39,9 +39,14 @@ const FeaturesApp = () => {
   const locale = useLocale();
   const isRTL = locale === "ar";
 
-  const items = t.raw("items") as FeatureItem[];
+  const items = useMemo(() => {
+    const raw = t.raw("items");
+    return Array.isArray(raw) ? (raw as FeatureItem[]) : [];
+  }, [t]);
   const [active, setActive] = useState(0);
   const ActiveIcon = icons[active % icons.length];
+
+  if (items.length === 0) return null;
 
   return (
     <section className="relative py-20 bg-white dark:bg-[#0d1117] overflow-hidden">
@@ -176,10 +181,8 @@ const FeaturesApp = () => {
                   <LoadImage
                     src={showcaseImages[active % showcaseImages.length]}
                     alt={items[active].title}
-                    fill
                     sizes="(max-width: 1024px) 100vw, 480px"
                     className="object-cover object-top"
-                    priority={active === 0}
                   />
                 </div>
               </div>

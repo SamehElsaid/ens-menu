@@ -62,8 +62,10 @@ export default function TablesPage() {
   const locale = useLocale();
   const params = useParams();
   const menuSlug = useAppSelector((s) => s.menuData.menu?.slug);
+  const menuLogo = useAppSelector((s) => s.menuData.menu?.logo);
   const userData = useAppSelector((s) => s.auth.data);
   const isFreePlan = isFreePlanUser(userData);
+  const qrCenterLogoSrc = !isFreePlan ? (menuLogo ?? null) : null;
   const menuId =
     typeof params.menu === "string"
       ? params.menu
@@ -191,6 +193,7 @@ export default function TablesPage() {
               value: url,
               filename: name,
               size: 640,
+              centerLogoSrc: qrCenterLogoSrc,
             }).then(() => {
               toast.success(t("qrDownloaded"));
             });
@@ -209,6 +212,7 @@ export default function TablesPage() {
                     value={url}
                     size={128}
                     displaySize={64}
+                    centerLogoSrc={qrCenterLogoSrc}
                   />
                 </a>
                 <span className="text-[9px] text-slate-400 dark:text-slate-500 leading-none text-center max-w-[72px]">
@@ -278,7 +282,7 @@ export default function TablesPage() {
         },
       },
     ],
-    [t, handleEdit, handleDelete, menuSlug],
+    [t, handleEdit, handleDelete, menuSlug, qrCenterLogoSrc],
   );
 
   if (isFreePlan) {

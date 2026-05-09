@@ -1,18 +1,19 @@
 "use client";
 
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { FiBell, FiShoppingCart, FiCoffee, FiBarChart2 } from "react-icons/fi";
 
-const icons = [FiBell, FiShoppingCart, FiCoffee, FiBarChart2];
+const icons = [FiBell, FiShoppingCart, FiCoffee, FiBarChart2] as const;
 
 type WorkflowStep = { title: string; desc: string };
 
 const WorkflowApp = () => {
   const t = useTranslations("Landing.WorkflowApp");
-  const locale = useLocale();
-  const isRTL = locale === "ar";
 
-  const steps = t.raw("steps") as WorkflowStep[];
+  const stepsRaw = t.raw("steps");
+  const steps: WorkflowStep[] = Array.isArray(stepsRaw) ? (stepsRaw as WorkflowStep[]) : [];
+
+  if (steps.length === 0) return null;
 
   return (
     <section className="relative py-12 bg-white dark:bg-[#0d1117] overflow-hidden">

@@ -18,10 +18,14 @@ type Props = {
   size: number;
   className?: string;
   displaySize?: number;
+  centerLogoSrc?: string | null;
 };
 
 export const StyledQrCode = forwardRef<StyledQrCodeHandle, Props>(
-  function StyledQrCode({ value, size, className, displaySize }, ref) {
+  function StyledQrCode(
+    { value, size, className, displaySize, centerLogoSrc },
+    ref,
+  ) {
     const containerRef = useRef<HTMLDivElement>(null);
     const instanceRef = useRef<QRCodeStyling | null>(null);
 
@@ -39,14 +43,16 @@ export const StyledQrCode = forwardRef<StyledQrCodeHandle, Props>(
       if (!el || !value) return;
 
       el.innerHTML = "";
-      const qr = new QRCodeStyling(getStyledQrOptions({ value, size }));
+      const qr = new QRCodeStyling(
+        getStyledQrOptions({ value, size, centerLogoSrc }),
+      );
       instanceRef.current = qr;
       qr.append(el);
       return () => {
         instanceRef.current = null;
         el.innerHTML = "";
       };
-    }, [value, size]);
+    }, [value, size, centerLogoSrc]);
 
     const dw = displaySize ?? size;
     const dh = displaySize ?? size;
@@ -84,6 +90,7 @@ export async function downloadStyledQrPng(params: {
   value: string;
   filename: string;
   size?: number;
+  centerLogoSrc?: string | null;
 }): Promise<void> {
   const size = params.size ?? 640;
   const container = document.createElement("div");
@@ -96,6 +103,7 @@ export async function downloadStyledQrPng(params: {
       getStyledQrOptions({
         value: params.value,
         size,
+        centerLogoSrc: params.centerLogoSrc,
       }),
     );
     qr.append(container);

@@ -14,6 +14,8 @@ const FaqApp = () => {
   const items = t.raw("items") as FaqItem[];
   const [open, setOpen] = useState<number | null>(0);
 
+  if (!Array.isArray(items) || items.length === 0) return null;
+
   return (
     <section className="relative overflow-hidden bg-white py-24 dark:bg-[#0d1117]">
       <div className="absolute top-1/2 left-0 h-64 w-64 -translate-x-1/2 rounded-full bg-purple-50 blur-[100px] dark:bg-purple-900/20" />
@@ -35,6 +37,7 @@ const FaqApp = () => {
         <div className="overflow-hidden rounded-[50px] border border-slate-100 bg-white shadow-2xl shadow-slate-100/30 dark:border-slate-800 dark:bg-[#15203c] dark:shadow-slate-900/50">
           {items.map((item: FaqItem, i: number) => {
             const isOpen = open === i;
+            const answerId = `mobile-app-faq-answer-${i}`;
 
             return (
               <div
@@ -46,6 +49,8 @@ const FaqApp = () => {
                 <button
                   type="button"
                   onClick={() => setOpen(isOpen ? null : i)}
+                  aria-expanded={isOpen}
+                  aria-controls={answerId}
                   className={`group flex w-full items-center justify-between gap-4 px-6 py-7 focus:outline-none ${
                     isRTL ? "flex-row-reverse text-right" : "text-left"
                   }`}
@@ -74,6 +79,7 @@ const FaqApp = () => {
                 </button>
 
                 <div
+                  id={answerId}
                   className={`transition-all duration-500 ease-in-out ${
                     isOpen ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
                   }`}

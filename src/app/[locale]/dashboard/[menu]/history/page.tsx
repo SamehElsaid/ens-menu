@@ -399,29 +399,44 @@ function parseActivityDetail(
   }
   try {
     const o = JSON.parse(detailJson) as Record<string, unknown>;
-    const orderRaw =
-      o.order && typeof o.order === "object"
-        ? (o.order as Record<string, unknown>)
+    const nestedDetail =
+      o.detail && typeof o.detail === "object"
+        ? (o.detail as Record<string, unknown>)
         : null;
+    const source = nestedDetail ?? o;
+    const orderRaw =
+      (source.order && typeof source.order === "object"
+        ? (source.order as Record<string, unknown>)
+        : source) ?? null;
     if (orderRaw) {
-      const itemsRaw = Array.isArray(orderRaw.items) ? orderRaw.items : [];
+      const itemsRaw = Array.isArray(orderRaw.items)
+        ? orderRaw.items
+        : Array.isArray(source.items)
+          ? source.items
+          : [];
       const statusRaw =
-        typeof o.status === "string"
-          ? o.status
+        typeof source.status === "string"
+          ? source.status
           : typeof orderRaw.status === "string"
             ? orderRaw.status
+            : action === "TABLE_CALL_CREATED"
+              ? "pending"
             : action;
       return {
         type: "orderSnapshot",
         status: String(statusRaw).toLowerCase(),
         tableNumber:
-          orderRaw.tableNumber != null ? String(orderRaw.tableNumber) : null,
+          (orderRaw.tableNumber ?? source.tableNumber) != null
+            ? String(orderRaw.tableNumber ?? source.tableNumber)
+            : null,
         customerName:
-          orderRaw.customerName != null ? String(orderRaw.customerName) : null,
+          (orderRaw.customerName ?? source.customerName) != null
+            ? String(orderRaw.customerName ?? source.customerName)
+            : null,
         orderTotal:
-          orderRaw.orderTotal != null &&
-          Number.isFinite(Number(orderRaw.orderTotal))
-            ? Number(orderRaw.orderTotal)
+          (orderRaw.orderTotal ?? source.orderTotal) != null &&
+          Number.isFinite(Number(orderRaw.orderTotal ?? source.orderTotal))
+            ? Number(orderRaw.orderTotal ?? source.orderTotal)
             : null,
         itemsCount: itemsRaw.length,
         items: normalizeOrderItems(itemsRaw),
@@ -490,7 +505,7 @@ function ActivityRow({
           table: detail.tableNumber ?? "—",
           count: detail.itemsCount,
         })
-      : null;
+      : summary;
 
   return (
     <li className="min-w-0">

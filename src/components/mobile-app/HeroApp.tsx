@@ -11,7 +11,6 @@ import {
 import { FaAndroid } from "react-icons/fa";
 
 const APP_VIDEO_SRC = "/app/order.mp4";
-const APP_VIDEO_POSTER = "/app/order.jpg";
 
 const AppLandingHero = () => {
   const t = useTranslations("Landing.Hero");
@@ -112,7 +111,6 @@ const AppLandingHero = () => {
 
                   <video
                     src={APP_VIDEO_SRC}
-                    poster={APP_VIDEO_POSTER}
                     className="w-full h-full object-cover"
                     autoPlay
                     loop
