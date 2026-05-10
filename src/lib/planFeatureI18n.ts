@@ -33,6 +33,49 @@ function normalizeFeatureLine(raw: string): string {
 }
 
 /**
+ * Bullet lines from DB that describe only menu count — replaced by Plans.maxMenus in the UI.
+ */
+export function isMenuCountOnlyFeatureLine(raw: string): boolean {
+  const normalized = normalizeFeatureLine(raw);
+  const mappedKey = FEATURE_MAP[normalized];
+  if (mappedKey === "threeMenus" || mappedKey === "oneMenu") {
+    return true;
+  }
+  if (/^\d+\s*منيو$/.test(normalized)) {
+    return true;
+  }
+  if (/^\d+\s*menus?$/.test(normalized)) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Drops stale DB menu-count lines and prepends one line from `maxMenus` (truth from Plans).
+ *
+ * @param tPersonal useTranslations("personalProfile") — must include menusLimitFeature
+ */
+export function translatePlanFeaturesWithMenuLimit(
+  features: string[] | undefined,
+  maxMenus: number | undefined | null,
+  // next-intl Translator — keep loose to match library typings
+  tPersonal: (key: string, values?: Record<string, any>) => string,
+): string[] {
+  const filtered = (features ?? []).filter(
+    (line) => !isMenuCountOnlyFeatureLine(line),
+  );
+  const mapped = filtered.map((line) =>
+    translatePlanFeatureLine(line, (key) => tPersonal(key)),
+  );
+  const n = maxMenus == null ? NaN : Number(maxMenus);
+  if (!Number.isFinite(n) || n <= 0) {
+    return mapped;
+  }
+  const head = tPersonal("menusLimitFeature", { count: n });
+  return [head, ...mapped];
+}
+
+/**
  * @param t - useTranslations("personalProfile")
  */
 export function translatePlanFeatureLine(

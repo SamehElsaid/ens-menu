@@ -7,6 +7,7 @@ export const DEFAULT_QR_CENTER_LOGO = "/ENSd.png";
 export function getStyledQrOptions(params: {
   value: string;
   size: number;
+  centerLogoSrc?: string | null;
 }): Options {
   const margin = Math.max(6, Math.round(params.size * 0.035));
 
@@ -36,7 +37,7 @@ export function getStyledQrOptions(params: {
     backgroundOptions: {
       color: "#ffffff",
     },
-    image: DEFAULT_QR_CENTER_LOGO,
+    image: params.centerLogoSrc || DEFAULT_QR_CENTER_LOGO,
     imageOptions: {
       hideBackgroundDots: true,
       imageSize: 0.32,

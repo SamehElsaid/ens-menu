@@ -13,6 +13,7 @@ import {
   IoChevronForwardOutline,
   IoOpenOutline,
   IoEyeOutline,
+  IoTimeOutline,
 } from "react-icons/io5";
 import { FaChartLine } from "react-icons/fa";
 import { BiCategory } from "react-icons/bi";
@@ -33,6 +34,7 @@ import {
   type StyledQrCodeHandle,
 } from "@/components/Global/StyledQrCode";
 import { useDashboardSession } from "@/hooks/useDashboardSession";
+import { isFreePlanUser } from "@/lib/subscription";
 
 type ActivityEntry = {
   id: string;
@@ -78,9 +80,11 @@ export default function DashboardMenuPage() {
       : ((params.menu as string[])?.[0] ?? "");
 
   const dashboardSession = useDashboardSession();
+  const userData = useAppSelector((state) => state.auth.data);
   const isCashierStaff =
     dashboardSession?.role === "staff" &&
     dashboardSession?.staffJobRole === "cashier";
+  const isFreePlan = isFreePlanUser(userData);
 
   const [recentItems, setRecentItems] = useState<Item[]>([]);
   const [recentCategories, setRecentCategories] = useState<Category[]>([]);
@@ -93,6 +97,7 @@ export default function DashboardMenuPage() {
     )
     : "";
   const menuQrRef = useRef<StyledQrCodeHandle>(null);
+  const qrCenterLogoSrc = !isFreePlan ? (menu?.logo ?? null) : null;
 
   useEffect(() => {
     axiosGet<object>(`/menus/${menuSlugOrId}/activity-logs/`, locale).then((res) => {
@@ -259,6 +264,15 @@ export default function DashboardMenuPage() {
             <MdOutlineTableBar className="text-lg shrink-0" />
             {t("tables")}
           </LinkTo>
+          {isCashierStaff && (
+            <LinkTo
+              href={`/dashboard/${menuSlugOrId}/history`}
+              className={`${tabBase} ${tabInactive}`}
+            >
+              <IoTimeOutline className="text-lg shrink-0" />
+              {t("activityLog")}
+            </LinkTo>
+          )}
           {!isCashierStaff && (
             <>
               <LinkTo
@@ -375,6 +389,7 @@ export default function DashboardMenuPage() {
                     value={menuUrl}
                     size={400}
                     displaySize={200}
+                    centerLogoSrc={qrCenterLogoSrc}
                     className="rounded-xl"
                   />
                 </div>

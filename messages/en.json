@@ -126,7 +126,8 @@
     "features": "Features",
     "team": "How It Works",
     "faq": "FAQ",
-    "contact": "Contact"
+    "contact": "Contact",
+    "androidApp": "Android App"
   },
   "home": {
     "title": "Home",
@@ -605,6 +606,7 @@
     "comingSoon": "Coming Soon",
     "oneMenu": "One menu",
     "threeMenus": "3 menus",
+    "menusLimitFeature": "{count, plural, one {# menu} other {# menus}}",
     "products50": "50 products",
     "products200": "200 products per menu",
     "ads": "Advertisements",
@@ -615,7 +617,9 @@
     "youAreOnFreePlan": "You are on the Free Plan",
     "upgradePlan": "Upgrade Plan",
     "downgradePlan": "Downgrade",
-    "paymentNote": "Note: Payment gateway integration is pending. This is a trial feature.",
+    "paymentNote": "Pro is billed annually only (no monthly plan). Payment is processed securely via EasyKash.",
+    "proYearlyOnlyNote": "Pro is available as an annual subscription only — there is no monthly plan.",
+    "payProYearlyError": "Could not start payment. If no details appear in the toast, check your name and phone in your profile and try again.",
     "notEntered": "Not entered",
     "emailVerification": "Email Verification",
     "accountStatus": "Account Status",
@@ -631,7 +635,7 @@
     "renewalDate": "Renewal Date",
     "monthly": "Monthly",
     "yearly": "Yearly",
-    "yearlyPriceFormatted": "{price} {currency} {perYear}",
+    "yearlyPriceFormatted": "{currency}{price}{perYear}",
     "pricePerMonth": "/month",
     "pricePerYear": "/year",
     "freePrice": "Free",
@@ -644,7 +648,31 @@
     "contactWhatsApp": "Contact on WhatsApp",
     "upgrade": "Upgrade",
     "downgrade": "Downgrade",
-    "currentPlanLabel": "Your current plan"
+    "currentPlanLabel": "Your current plan",
+    "currentPlanSummary": "Your current plan",
+    "maxMenusLabel": "Menu limit",
+    "maxProductsLabel": "Products per menu",
+    "upgradeToProYearlyCta": "Upgrade to Pro (yearly payment)",
+    "paying": "Redirecting to payment…",
+    "paymentResultTitle": "Payment result",
+    "paymentResultChecking": "Confirming payment status…",
+    "paymentResultNoCheckout": "We could not read this payment session. Open subscription from your account to verify your plan.",
+    "paymentResultSuccessPro": "Payment successful. Your Pro yearly plan is now active.",
+    "paymentResultFailed": "Payment was not completed.",
+    "paymentResultCancelled": "Payment was cancelled.",
+    "paymentResultFailedStatus": "Payment failed. You can try again from subscription management.",
+    "paymentResultPending": "We are still confirming your payment. If it succeeded, your plan will update shortly — refresh the personal page.",
+    "yourPlanUpdateHint": "Your current plan is shown on the personal page after payment.",
+    "paymentBackToPersonal": "Back to personal / subscription",
+    "goToLogin": "Sign in",
+    "devPayBadge": "Development only",
+    "devPayTitle": "Test payment step (not EasyKash)",
+    "devPayDescription": "This screen simulates the payment gateway when EASYKASH_DEV_MOCK=hosted. Click below to complete the test payment — no real charge.",
+    "devPayConfirm": "Confirm test payment",
+    "devPayLoading": "Processing…",
+    "devPayError": "Could not complete test payment",
+    "devPayNoCheckout": "Missing checkout id in the URL.",
+    "devPayRealHint": "For the real EasyKash page, set EASYKASH_DEV_MOCK=false and configure EASYKASH_CREATE_PATH."
   },
   "homePage": {
     "centerSection": {
@@ -902,9 +930,163 @@
     "title2": "Smart Menu",
     "description": "An interactive digital menu with modern design, enables your customers to browse the food menu easily and clearly by scanning a QR code only",
     "cta": "Start Now for Free",
-    "watchDemo": "Watch Demo"
+    "watchDemo": "Watch Demo",
+    "androidTitle": "Smoother Experience via Android App",
+    "androidDescription": "For business owners seeking peak performance, we provide a dedicated Direct App for instant menu access and one-tap order management, optimized for speed and daily efficiency.",
+    "androidDownload": "Download App Now",
+    "androidExclusive": "Android Exclusive",
+    "scanCodeToBrowse": "Scan code to browse menu",
+    "scanningMenu": "Scanning the electronic menu...",
+    "businessName": "Your Business Name",
+    "categories": {
+      "all": "All",
+      "drinks": "Drinks",
+      "bakery": "Bakery",
+      "desserts": "Desserts"
+    }
+  },
+  "phoneVideoSection": {
+    "badge": "Staff app",
+    "devicePhone": "Phone",
+    "deviceTablet": "Tablet",
+    "deviceToggleAria": "Preview device frame",
+    "title": "Handle menu orders on your phone",
+    "description": "A staff-facing app for restaurants and cafés to receive customer orders coming from the digital menu, and track each step from intake to handoff in one clear screen.",
+    "tabItems": {
+      "createOrder": {
+        "title": "Create order",
+        "description": "Create a new order from the menu."
+      },
+      "receiveOrder": {
+        "title": "Receive order",
+        "description": "When a new order is received, you will receive a notification with the order, customer, table, time, and notes"
+      },
+      "editOrder": {
+        "title": "Edit order",
+        "description": "Edit the order in the restaurant app. A message 'Edit this order?' appears with a warning that the items and quantities will be sent to the server, and there are two buttons: cancel and edit the order."
+      },
+      "acceptOrder": {
+        "title": "Accept order",
+        "description": "Confirm the order in the restaurant app. A message 'Confirm this order?' appears with a warning that the items and quantities will be sent to the server, and there are two buttons: cancel and confirm the order."
+      },
+      "createFromApp": {
+        "title": "Order from the app",
+        "description": "Add an order from the menu in the app. It displays the items of the desserts and drinks with their images, prices, and descriptions"
+      }
+    }
   },
   "Landing": {
+    "Hero": {
+      "badge": "Staff & Management Edition V2.0",
+      "titleStart": "All restaurant operations with one tap ",
+      "titleHighlight": "from your phone",
+      "description": "The fastest tool for cashiers & staff to track real-time orders, table management, and manager reports. Stable performance, zero browser lag.",
+      "downloadKicker": "Direct APK Download",
+      "downloadCta": "Download App Now",
+      "optimizedFor": "Optimized for:",
+      "platform": "Android",
+      "safeInstall": "Safe install • Works instantly after download",
+      "noSetupRequired": "No setup required • Works instantly",
+      "noBrowser": "No more browser needed",
+      "videoAlt": "App Preview",
+      "features": {
+        "liveAlerts": "Real-time order tracking",
+        "cashier": "Smart cashier interface",
+        "admin": "Admin access"
+      },
+      "floatingCards": {
+        "liveOrderLabel": "Live Order",
+        "liveOrderText": "Table 12 — Ready",
+        "responseLabel": "Response"
+      }
+    },
+    "FaqApp": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Everything you need to know before using the app",
+      "mostAsked": "Most Asked",
+      "items": [
+        {
+          "q": "Is the app a replacement for the website?",
+          "a": "Yes, the app is built to be faster and more stable than the browser, especially for managing orders and daily operations."
+        },
+        {
+          "q": "Is the app safe even though it's a direct download?",
+          "a": "Yes, the app is fully secure and tested, and it doesn't request any unnecessary permissions."
+        },
+        {
+          "q": "Can it be used by cashiers and staff?",
+          "a": "Absolutely. The app is designed for cashiers and staff with a simple, fast interface for managing orders."
+        },
+        {
+          "q": "Can the manager monitor everything?",
+          "a": "Yes, the app provides full reports and management for orders and staff from a single place."
+        },
+        {
+          "q": "Does it support real-time orders?",
+          "a": "Yes, orders are updated instantly with live notifications and zero delay."
+        },
+        {
+          "q": "Does it require experience to use?",
+          "a": "No, the app is very simple and any staff member can use it easily from the first try."
+        }
+      ]
+    },
+   "FeaturesApp": {
+  "title": "Master Your Restaurant Operations",
+  "subtitle": "A comprehensive system connecting waiters, cashiers, and management in one seamless platform to ensure the fastest service for your guests.",
+  "items": [
+    {
+      "title": "Smart & Fast Ordering",
+      "desc": "An interactive menu that allows waiters to add items, adjust quantities, and select tables in just a few taps."
+    },
+    {
+      "title": "Precision Table Management",
+      "desc": "Assign orders to specific tables with customer names to ensure a personalized and error-free dining experience."
+    },
+    {
+      "title": "Live Order Tracking",
+      "desc": "Real-time status updates (Confirmed, Pending) linking the dining floor to the kitchen and cashier instantly."
+    },
+    {
+      "title": "Review & Confirm System",
+      "desc": "A final review screen before sending orders to minimize mistakes, with easy options to edit or cancel on the fly."
+    },
+    {
+      "title": "Multi-Language Support",
+      "desc": "A flexible UI supporting both Arabic and English, making it easy for a diverse team to work efficiently."
+    },
+    {
+      "title": "Daily Order Reports",
+      "desc": "Full history of all incoming orders, displaying timing, totals, and guest details to track shift performance."
+    }
+  ]
+},
+    "WorkflowApp": {
+      "title": "How the system works inside your restaurant",
+      "subtitle": "Every step calculated… from order to delivery",
+      "steps": [
+        {
+          "title": "Receive Order",
+          "desc": "The order arrives instantly with a direct notification to the cashier."
+        },
+        {
+          "title": "Cashier Management",
+          "desc": "Confirm the order and update its status with ease."
+        },
+        {
+          "title": "Order Execution",
+          "desc": "The kitchen receives the order and starts preparing it right away."
+        },
+        {
+          "title": "Manager Oversight",
+          "desc": "Full real-time view of all operations and reports."
+        }
+      ]
+    },
+    "MobileAppCta": {
+      "title": "Ready to streamline your work?",
+      "button": "Download the App for Free"
+    },
     "features": {
       "title": "Why Choose Smart Menu?",
       "description": "We provide everything you need to create a professional digital menu for your restaurant or cafe",
@@ -998,6 +1180,49 @@
         }
       ]
     },
+    "templateDescription": {
+      "badge": "User journey",
+      "title": "Effortless order management with",
+      "titleHighlight": "ENS",
+      "description": "See how ENS Menu streamlines front-of-house workflows step by step—from staff login to order confirmation.",
+      "scrollHint": "Swipe horizontally or use the arrows to browse all steps",
+      "prevStepAria": "Previous step",
+      "nextStepAria": "Next step",
+      "steps": [
+        {
+          "title": "Sign in",
+          "desc": "The ENS Menu staff login screen lets users switch language and enter credentials (menu name, email, and password) to access the system."
+        },
+        {
+          "title": "App settings",
+          "desc": "Language and settings let staff tailor the interface between Arabic and English, with a clear option to sign out."
+        },
+        {
+          "title": "Incoming orders",
+          "desc": "View all active orders with table number and customer name, plus status (confirmed or pending), time, and total."
+        },
+        {
+          "title": "Menu browsing",
+          "desc": "Browse items with photos, prices, and short descriptions; filter by category and adjust quantities."
+        },
+        {
+          "title": "Order details",
+          "desc": "Enter the customer name and pick a table from available options before sending the order."
+        },
+        {
+          "title": "Order summary",
+          "desc": "Review table details, customer name, time, and line items—adjust quantities or add more items before sending."
+        },
+        {
+          "title": "Confirm order",
+          "desc": "A confirmation pop-up prevents accidental sends and reminds staff that data goes straight to the server."
+        },
+        {
+          "title": "Sent successfully",
+          "desc": "After a successful send, a confirmation message appears and the orders list updates with the new order at the top."
+        }
+      ]
+    },
 
     "pricing": {
       "title": "Choose Your Plan",
@@ -1005,8 +1230,9 @@
       "planFree": "Free",
       "planPro": "Pro",
       "planCustom": "Custom",
-      "currency": "AED",
-      "perYear": "/year",
+      "currencyUsd": "$",
+      "perYear": " / year",
+      "proAnnualOnly": "Billed once per year. No monthly subscription.",
       "yearlyPrice": "Yearly price",
       "getStarted": "Get Started",
       "popular": "Popular",
@@ -1041,7 +1267,8 @@
       "UnitedArabEmirates": "United Arab Emirates",
       "copyright": "All rights reserved.",
       "privacy": "Privacy Policy",
-      "terms": "Terms and Conditions"
+      "terms": "Terms and Conditions",
+      "followUs": "Follow Us"
     }
   },
   "Menus": {
@@ -1458,6 +1685,20 @@
   "activityHistory": {
     "title": "Activity log",
     "subtitle": "See who added or changed products, staff, menu settings, and table orders.",
+    "cardOrderMeta": "Table {table} - {count, plural, one {# item} other {# items}}",
+    "tapForDetails": "Tap for details",
+    "detailsTitle": "Order details",
+    "close": "Close",
+    "detailsWho": "By",
+    "detailsWhen": "When",
+    "detailsTable": "Table",
+    "detailsCustomer": "Customer",
+    "detailsStatus": "Status",
+    "detailsTotal": "Total",
+    "itemsTitle": "Items",
+    "itemsEmpty": "No items available for this entry.",
+    "itemMetaLine": "Qty: {qty} - Price: {price} - Total: {total}",
+    "itemNotesLine": "Notes: {notes}",
     "loading": "Loading…",
     "empty": "No activity recorded yet.",
     "noSearchResults": "No entries match this name.",
@@ -1742,7 +1983,7 @@
     "inactive": "Inactive",
     "columns": {
       "name": "Name",
-      "priceYearly": "Price (Yearly)",
+      "priceYearly": "Yearly ($)",
       "maxMenus": "Max Menus",
       "maxProducts": "Max Products",
       "hasAds": "Has Ads",
@@ -1754,7 +1995,7 @@
     "editModal": {
       "title": "Edit Plan",
       "name": "Name",
-      "priceYearly": "Price (Yearly)",
+      "priceYearly": "Yearly ($)",
       "maxMenus": "Max Menus",
       "maxProducts": "Max Products per Menu",
       "maxProductsHint": "Use -1 for unlimited",
@@ -1772,6 +2013,7 @@
     "categories": "Categories",
     "products": "Products",
     "tables": "Tables",
+    "activityLog": "Activity log",
     "staff": "Staff",
     "settings": "Settings",
     "viewMenu": "View Menu",
