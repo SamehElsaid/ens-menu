@@ -98,7 +98,9 @@ function useIsLogin() {
         }, 500);
         return () => clearTimeout(time);
       } else {
+        console.log("remove user");
         dispatch(REMOVE_USER());
+        Cookies.remove("sub", { path: "/" });
 
         const time = setTimeout(() => {
           setLogin(false);

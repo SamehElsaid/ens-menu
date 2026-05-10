@@ -1,5 +1,4 @@
-import type { Metadata } from "next";
-
+ import type { Metadata } from "next";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import RenderInProvider from "@/components/Global/RenderInProvider";
@@ -13,7 +12,6 @@ import "suneditor/dist/css/suneditor.min.css";
 import "swiper/css/navigation";
 import "swiper/css/free-mode";
 import "react-lazy-load-image-component/src/effects/blur.css";
-
 const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
 export const metadata: Metadata = {

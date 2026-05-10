@@ -88,13 +88,19 @@ export default function DashboardMenuPage() {
 
   const menuUrl = menu?.slug
     ? `https://${menu.slug}${process.env.NEXT_PUBLIC_MENU_URL || ""}`.replace(
-        /^https:\/\//,
-        "https://",
-      )
+      /^https:\/\//,
+      "https://",
+    )
     : "";
   const menuQrRef = useRef<StyledQrCodeHandle>(null);
 
   useEffect(() => {
+    axiosGet<object>(`/menus/${menuSlugOrId}/activity-logs/`, locale).then((res) => {
+      if (res.status && res.data) {
+        console.log(res.data);
+
+      }
+    });
     if (!menuSlugOrId) return;
     const fetchActivity = async () => {
       setActivityLoading(true);
@@ -141,8 +147,8 @@ export default function DashboardMenuPage() {
           : item.nameEn || item.nameAr || "",
       date: item.createdAt
         ? format(new Date(item.createdAt), "d MMMM yyyy", {
-            locale: dateLocale,
-          })
+          locale: dateLocale,
+        })
         : "",
     }));
     const categoryEntries: ActivityEntry[] = recentCategories.map((cat) => ({
@@ -501,11 +507,10 @@ export default function DashboardMenuPage() {
                     {entry.name || "—"}
                   </span>
                   <span
-                    className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${
-                      entry.type === "category"
+                    className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${entry.type === "category"
                         ? "bg-primary/10 dark:bg-primary/20 text-primary"
                         : "bg-slate-200/80 dark:bg-slate-600 text-slate-600 dark:text-slate-300"
-                    }`}
+                      }`}
                   >
                     {entry.type === "product" ? t("product") : t("category")}
                   </span>

@@ -20,9 +20,13 @@ export default function middleware(request: NextRequest) {
     ? (decryptData(token?.value ?? "") as DecryptedToken)
     : null;
 
+
+  const hasToken =
+    tokenDecrypted && Object.keys(tokenDecrypted).length > 0;
+
   // Stop Login , Register , Forgot Password , Reset Password , Verify Email , Verify Phone
   if (pathname.startsWith("/auth")) {
-    if (tokenDecrypted) {
+    if (hasToken) {
       url.pathname = "/";
       return NextResponse.redirect(url);
     }
@@ -36,7 +40,7 @@ export default function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith("/dashboard")) {
-    if (!tokenDecrypted) {
+    if (!hasToken) {
       url.pathname = "/unauthorized";
       return NextResponse.redirect(url);
     }
