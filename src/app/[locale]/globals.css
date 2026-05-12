@@ -180,6 +180,21 @@ body {
   animation: fadeIn 0.3s ease-in-out;
 }
 
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideUp {
+  animation: slideUp 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 /* App gradient background helper */
 .bg-gradient-app {
   background-image: radial-gradient(
@@ -911,6 +926,14 @@ input, textarea {
   background: rgba(255, 255, 255, 0.9);
 }
 /* Auth Styles */
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  20%       { transform: rotate(-18deg); }
+  40%       { transform: rotate(16deg); }
+  60%       { transform: rotate(-10deg); }
+  80%       { transform: rotate(8deg); }
+}
 
 /* Template preview auto-scroll animation */@keyframes template-scroll {
   0% {

@@ -12,7 +12,6 @@ import {
   IoSettingsOutline,
   IoChevronForwardOutline,
   IoOpenOutline,
-  IoEyeOutline,
   IoTimeOutline,
 } from "react-icons/io5";
 import { FaChartLine } from "react-icons/fa";
@@ -27,8 +26,7 @@ import { BsQrCode } from "react-icons/bs";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { axiosGet } from "@/shared/axiosCall";
 import type { Category, Item } from "@/types/Menu";
-import { format } from "date-fns";
-import { ar, enUS } from "date-fns/locale";
+import ViewTime from "@/shared/ViewTime";
 import {
   StyledQrCode,
   type StyledQrCodeHandle,
@@ -142,7 +140,6 @@ export default function DashboardMenuPage() {
   }, [menuSlugOrId, locale]);
 
   const latestActivity = useMemo<ActivityEntry[]>(() => {
-    const dateLocale = locale === "ar" ? ar : enUS;
     const productEntries: ActivityEntry[] = recentItems.map((item) => ({
       id: `item-${item.id}`,
       type: "product",
@@ -150,11 +147,7 @@ export default function DashboardMenuPage() {
         locale === "ar"
           ? item.nameAr || item.nameEn || ""
           : item.nameEn || item.nameAr || "",
-      date: item.createdAt
-        ? format(new Date(item.createdAt), "d MMMM yyyy", {
-          locale: dateLocale,
-        })
-        : "",
+      date: item.createdAt ?? "",
     }));
     const categoryEntries: ActivityEntry[] = recentCategories.map((cat) => ({
       id: `cat-${cat.id}`,
@@ -163,9 +156,7 @@ export default function DashboardMenuPage() {
         locale === "ar"
           ? cat.nameAr || cat.nameEn || ""
           : cat.nameEn || cat.nameAr || "",
-      date: cat.createdAt
-        ? format(new Date(cat.createdAt), "d MMMM yyyy", { locale: dateLocale })
-        : "",
+      date: cat.createdAt ?? "",
     }));
     const combined = [...productEntries, ...categoryEntries].filter(
       (e) => e.date,
@@ -534,7 +525,7 @@ export default function DashboardMenuPage() {
                   className={`flex items-center gap-3 shrink-0 ${isRTL ? "flex-row-reverse" : ""}`}
                 >
                   <span className="text-slate-500 dark:text-slate-400 text-xs md:text-sm">
-                    {t("addedOn", { date: entry.date })}
+                    <ViewTime data={entry.date} />
                   </span>
                   <LinkTo
                     href={

@@ -2,18 +2,12 @@ import { useEffect, useState } from "react";
 import Loader from "./Loader";
 import useIsLogin from "@/hooks/useIsLogin";
 import useCatchError from "@/hooks/useCatchError";
-import { generateToken } from "../../../firebase/firebase-confing";
 
 function HomeApp({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const isLogin = useIsLogin();
   useCatchError();
   useEffect(() => {
-    const _generateToken = async () => {
-      const token = await generateToken();
-      console.log(token);
-    };
-    _generateToken();
     setTimeout(() => {
       setLoading(false);
     }, 0);

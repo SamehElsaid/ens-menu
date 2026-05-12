@@ -1734,6 +1734,17 @@
       "nameEn": "Menu name (English)",
       "descriptionEn": "Description (English)"
     },
+    "colOrderId": "Order #",
+    "colWaiter": "Waiter",
+    "colAction": "Action",
+    "colStatus": "Status",
+    "colTotal": "Total",
+    "colTime": "Time",
+    "colItems": "Items",
+    "colItemName": "Item",
+    "colQty": "Qty",
+    "view": "View",
+    "actionsTitle": "Activity Timeline",
     "prev": "Previous",
     "next": "Next",
     "pageInfo": "Page {page} of {totalPages} — {total} entries",
@@ -2189,5 +2200,15 @@
     "admin": "Admin",
     "user": "User",
     "staff": "Staff"
+  },
+  "notificationPermission": {
+    "title": "Enable Notifications",
+    "description": "Allow notifications to receive instant alerts for new orders and updates.",
+    "allowBtn": "Allow Notifications",
+    "deniedTitle": "Notifications Blocked",
+    "deniedDescription": "Notifications are blocked in your browser. Please update your browser settings to allow them.",
+    "openSettings": "Open browser settings",
+    "tryAgain": "Try again",
+    "dismiss": "Dismiss"
   }
 }

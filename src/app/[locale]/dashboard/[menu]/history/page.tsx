@@ -1,53 +1,115 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useParams } from "next/navigation";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useParams, useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { format } from "date-fns";
-import { ar, enUS } from "date-fns/locale";
+import ViewTime from "@/shared/ViewTime";
 import Cookies from "js-cookie";
 import { io } from "socket.io-client";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { axiosGet } from "@/shared/axiosCall";
 import { decryptData } from "@/shared/encryption";
 import {
-  IoChevronBack,
-  IoChevronForward,
-  IoSearchOutline,
   IoTimeOutline,
+  IoSearchOutline,
+  IoEyeOutline,
+  IoCloseOutline,
+  IoPersonOutline,
+  IoCalendarOutline,
+  IoReceiptOutline,
+  IoCheckmarkCircle,
+  IoCloseCircle,
+  IoEllipseSharp,
+  IoListOutline,
 } from "react-icons/io5";
+import { NotificationPermissionCard } from "@/components/Global/NotificationPermissionCard";
+import DataTable from "@/components/Custom/DataTable";
+import { useAppSelector } from "@/store/hooks";
 
-type ActivityLogRow = {
-  id: number;
-  menuId: number;
-  actorRole: string;
-  actorName: string;
-  actorStaffJobRole?: string | null;
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+type CallItem = {
+  name: string;
+  menuItemId: number;
+  quantity: number;
+  price: number;
+  total: number;
+};
+
+/** Shape returned by the list endpoint */
+type ActionDetail = {
+  waiterName: string;
+  time: string;
+  status: string;
+};
+
+type CallEntry = {
+  id: string;
+  orderId: string;
+  lastAction: string;
+  actionDetails: ActionDetail[];
+  items: CallItem[];
+  totalPrice: number;
+};
+
+/** Shape returned by the single-entry endpoint (GET /activity-logs/:id) */
+type EntryAction = {
   action: string;
-  targetType: string | null;
-  targetId: number | null;
+  status: string;
+  waiterName: string;
+  waiterRole: string;
+  actorRole: string;
+  actorStaffJobRole: string | null;
+  time: string;
   summaryAr: string | null;
   summaryEn: string | null;
-  detailJson: string | null;
-  createdAt: string;
+  detail: {
+    status: string;
+    order?: {
+      tableNumber?: string;
+      customerName?: string;
+      items?: CallItem[];
+      orderTotal?: number;
+      status?: string;
+    };
+  } | null;
 };
 
-type OrderItemDetail = {
-  name: string;
-  quantity: number;
-  price: number | null;
-  total: number | null;
-  notes: string | null;
+type EntryOrder = {
+  tableNumber?: string;
+  customerName?: string;
+  items?: CallItem[];
+  orderTotal?: number;
+  status?: string;
 };
 
-type ActivityLogsPayload = {
+type CallEntryDetail = {
+  id: string;
+  orderId: string;
+  lastAction: string;
+  actions: EntryAction[];
+  order?: EntryOrder;
+  items?: CallItem[];
+  totalPrice?: number;
+  updatedAt?: string;
+};
+
+type ActivityCallsPayload = {
   total: number;
   page: number;
   limit: number;
   totalPages: number;
-  entries: ActivityLogRow[];
+  entries: CallEntry[];
+  calls: CallEntry[];
 };
 
-const PAGE_SIZE = 25;
+// ─── Socket helper ────────────────────────────────────────────────────────────
 
 function dashboardSocketOrigin(): string {
   const raw = (process.env.NEXT_PUBLIC_BASE_URL ?? "").trim();
@@ -68,49 +130,60 @@ function dashboardSocketOrigin(): string {
   }
 }
 
-type RoleAccent = {
-  bar: string;
-  badge: string;
-  avatar: string;
-  detailRing: string;
-  rowBg: string;
-};
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
-type ActivityHistoryT = {
-  (key: string): string;
-  (key: string, values: Record<string, string | number>): string;
-  has: (key: string) => boolean;
-};
+const PAGE_SIZE = 10;
 
 export default function ActivityHistoryPage() {
   const t = useTranslations("activityHistory");
   const locale = useLocale();
   const params = useParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const menuId =
     typeof params.menu === "string"
       ? params.menu
       : ((params.menu as string[])?.[0] ?? "");
 
-  const [entries, setEntries] = useState<ActivityLogRow[]>([]);
+  const [entries, setEntries] = useState<CallEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
+  const [, setTotal] = useState(0);
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  /** Bumps when Socket.IO reports new activity so we refetch even if already on page 1. */
   const [liveTick, setLiveTick] = useState(0);
-  const [selectedEntry, setSelectedEntry] = useState<{
-    row: ActivityLogRow;
-    summary: string;
-    when: string;
-    detail: ParsedDetail | null;
-    roleLabel: string;
-  } | null>(null);
 
-  const dfLocale = locale === "ar" ? ar : enUS;
+  // Modal state — entry data + loading state for deep-link fetches
+  const [modalEntry, setModalEntry] = useState<CallEntryDetail | null>(null);
+  const [modalLoading, setModalLoading] = useState(false);
+
   const isRTL = locale === "ar";
+  const currency = useAppSelector((s) => s.menuData.menu?.currency ?? "");
 
+  // ── URL param helpers ────────────────────────────────────────────────────
+  const entryParam = searchParams.get("entry");
+
+  const openModal = useCallback(
+    (id: string) => {
+      const sp = new URLSearchParams(Array.from(searchParams.entries()));
+      sp.set("entry", id);
+      router.replace(`${pathname}?${sp.toString()}`, { scroll: false });
+    },
+    [router, pathname, searchParams],
+  );
+
+  const closeModal = useCallback(() => {
+    const sp = new URLSearchParams(Array.from(searchParams.entries()));
+    sp.delete("entry");
+    const qs = sp.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    setModalEntry(null);
+  }, [router, pathname, searchParams]);
+
+  // ── debounce search ──────────────────────────────────────────────────────
   useEffect(() => {
     const id = setTimeout(() => setDebouncedSearch(searchInput.trim()), 400);
     return () => clearTimeout(id);
@@ -128,26 +201,24 @@ export default function ActivityHistoryPage() {
     }
   }, [debouncedSearch]);
 
+  // ── fetch list ───────────────────────────────────────────────────────────
   const fetchLogs = useCallback(async () => {
     if (!menuId) return;
     try {
       setLoading(true);
-      const paramsQ: Record<string, unknown> = {
-        page,
-        limit: PAGE_SIZE,
-      };
-      if (debouncedSearch.length > 0) {
-        paramsQ.q = debouncedSearch;
-      }
-      const result = await axiosGet<ActivityLogsPayload>(
+      const paramsQ: Record<string, unknown> = { page, limit: PAGE_SIZE };
+      if (debouncedSearch.length > 0) paramsQ.q = debouncedSearch;
+
+      const result = await axiosGet<ActivityCallsPayload>(
         `/menus/${menuId}/activity-logs`,
         locale,
         undefined,
         paramsQ,
       );
-      if (result.status && result.data && "entries" in result.data) {
+
+      if (result.status && result.data) {
         const p = result.data;
-        setEntries(p.entries ?? []);
+        setEntries(p.entries ?? p.calls ?? []);
         setTotalPages(Math.max(1, p.totalPages ?? 1));
         setTotal(p.total ?? 0);
       } else {
@@ -158,19 +229,58 @@ export default function ActivityHistoryPage() {
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [menuId, locale, page, debouncedSearch, liveTick]);
 
   useEffect(() => {
     fetchLogs();
   }, [fetchLogs]);
 
+  // ── fetch single entry by ID whenever ?entry param changes ─────────────
+  useEffect(() => {
+    if (!entryParam || !menuId) {
+      setModalEntry(null);
+      return;
+    }
+
+    let cancelled = false;
+    setModalEntry(null);
+    setModalLoading(true);
+
+    axiosGet<{ entry: CallEntryDetail } | CallEntryDetail>(
+      `/menus/${menuId}/activity-logs/${entryParam}`,
+      locale,
+    ).then((result) => {
+      if (cancelled) return;
+      if (result.status && result.data) {
+        // Unwrap { entry: {...} } wrapper if present
+        const raw = result.data as Record<string, unknown>;
+        const resolved = (raw.entry ?? raw) as CallEntryDetail;
+        setModalEntry(resolved);
+      }
+      setModalLoading(false);
+    }).catch(() => {
+      if (!cancelled) setModalLoading(false);
+    });
+
+    return () => { cancelled = true; };
+  }, [entryParam, menuId, locale]);
+
+  // ── close on Esc ────────────────────────────────────────────────────────
+  useEffect(() => {
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && entryParam) closeModal();
+    };
+    window.addEventListener("keydown", onEsc);
+    return () => window.removeEventListener("keydown", onEsc);
+  }, [entryParam, closeModal]);
+
+  // ── socket for live updates ──────────────────────────────────────────────
   useEffect(() => {
     const mid = parseInt(menuId, 10);
     if (!Number.isFinite(mid) || mid <= 0) return;
-
     const origin = dashboardSocketOrigin();
     if (!origin) return;
-
     const authToken = Cookies.get("sub") ?? "";
     let token: string | undefined;
     try {
@@ -184,61 +294,154 @@ export default function ActivityHistoryPage() {
       path: "/socket.io/",
       transports: ["websocket", "polling"],
     });
-
     socket.emit(
       "dashboard:menu_subscribe",
       { token: `Bearer ${token}`, menuId: mid },
-      () => {
-        /* ack optional */
-      },
+      () => { },
     );
-
     socket.on("menu:activity_updated", (payload: { menuId?: number }) => {
       if (payload?.menuId !== mid) return;
       setPage(1);
       setLiveTick((n) => n + 1);
     });
-
-    return () => {
-      socket.disconnect();
-    };
+    return () => { socket.disconnect(); };
   }, [menuId]);
 
-  useEffect(() => {
-    const onEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setSelectedEntry(null);
-      }
-    };
-    window.addEventListener("keydown", onEsc);
-    return () => window.removeEventListener("keydown", onEsc);
-  }, []);
+  // ── column defs ──────────────────────────────────────────────────────────
+  const columnDefs = useMemo<ColDef<CallEntry>[]>(
+    () => [
+      {
+        headerName: t("colOrderId"),
+        field: "orderId",
+        width: 120,
+        cellRenderer: (p: ICellRendererParams<CallEntry>) => (
+          <span className="font-semibold text-slate-700 dark:text-slate-200">
+            #{p.data?.orderId}
+          </span>
+        ),
+      },
+      {
+        headerName: t("colWaiter"),
+        flex: 1,
+        minWidth: 130,
+        cellRenderer: (p: ICellRendererParams<CallEntry>) => (
+          <span className="text-slate-700 dark:text-slate-200">
+            {p.data?.actionDetails?.[0]?.waiterName ?? "—"}
+          </span>
+        ),
+      },
+      {
+        headerName: t("colItems"),
+        width: 90,
+        sortable: false,
+        cellRenderer: (p: ICellRendererParams<CallEntry>) => (
+          <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-200">
+            {p.data?.items?.length ?? 0}
+          </span>
+        ),
+      },
+      {
+        headerName: t("colStatus"),
+        width: 130,
+        cellRenderer: (p: ICellRendererParams<CallEntry>) => {
+          const status = (p.data?.actionDetails?.[0]?.status ?? "pending").toLowerCase();
+          const cls =
+            status === "confirmed"
+              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+              : status === "cancelled"
+                ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+                : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300";
+          return (
+            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${cls}`}>
+              {t(`orderStatus.${status}` as never)}
+            </span>
+          );
+        },
+      },
+      {
+        headerName: t("colTotal"),
+        field: "totalPrice",
+        width: 130,
+        cellRenderer: (p: ICellRendererParams<CallEntry>) => (
+          <span className="font-semibold text-slate-800 dark:text-slate-100">
+            {p.data?.totalPrice ?? 0}
+            {currency && (
+              <span className="ms-1 text-xs font-normal text-slate-500 dark:text-slate-400">
+                {currency}
+              </span>
+            )}
+          </span>
+        ),
+      },
+      {
+        headerName: t("colTime"),
+        flex: 1,
+        minWidth: 160,
+        cellRenderer: (p: ICellRendererParams<CallEntry>) => {
+          const rawTime = p.data?.actionDetails?.[0]?.time;
+          if (!rawTime) return <span className="text-slate-400">—</span>;
+          return (
+            <span className="text-slate-600 dark:text-slate-300 text-sm">
+              <ViewTime data={rawTime} />
+            </span>
+          );
+        },
+      },
+      {
+        headerName: "",
+        width: 120,
+        pinned: !isRTL ? "right" : "left",
+        sortable: false,
+        cellRenderer: (p: ICellRendererParams<CallEntry>) => {
+          const row = p.data;
+          if (!row) return null;
+          return (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                openModal(row.id);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-violet-200 dark:border-violet-700 text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-950/40 hover:bg-violet-100 dark:hover:bg-violet-900/50 text-xs font-medium transition-colors"
+            >
+              <IoEyeOutline className="text-base" />
+              {t("view")}
+            </button>
+          );
+        },
+      },
+    ],
+    [t, openModal, currency],
+  );
+
+  const showModal = Boolean(entryParam) && (modalLoading || Boolean(modalEntry));
 
   return (
     <div className="space-y-6 animate-fadeIn">
+      <NotificationPermissionCard />
+
+      {/* Header */}
       <header className="relative overflow-hidden rounded-2xl border border-violet-200/60 bg-linear-to-br from-violet-50 via-fuchsia-50/80 to-white p-6 shadow-sm dark:border-violet-500/20 dark:from-violet-950/50 dark:via-fuchsia-950/30 dark:to-slate-900 md:p-8">
         <div
           className="pointer-events-none absolute -end-16 -top-16 h-48 w-48 rounded-full bg-linear-to-br from-violet-400/20 to-fuchsia-400/10 blur-2xl dark:from-violet-500/15 dark:to-fuchsia-500/10"
           aria-hidden
         />
-        <div className="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="flex gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25">
-              <IoTimeOutline className="text-2xl" aria-hidden />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white md:text-3xl">
-                {t("title")}
-              </h1>
-              <p className="mt-1 max-w-xl text-sm text-slate-600 dark:text-slate-300">
-                {t("subtitle")}
-              </p>
-            </div>
+        <div className="relative flex gap-4">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25">
+            <IoTimeOutline className="text-2xl" aria-hidden />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white md:text-3xl">
+              {t("title")}
+            </h1>
+            <p className="mt-1 max-w-xl text-sm text-slate-600 dark:text-slate-300">
+              {t("subtitle")}
+            </p>
           </div>
         </div>
 
         <div className="relative mt-6">
-          <label htmlFor="activity-history-search" className="sr-only">
+          <label htmlFor="history-search" className="sr-only">
             {t("searchPlaceholder")}
           </label>
           <IoSearchOutline
@@ -246,7 +449,7 @@ export default function ActivityHistoryPage() {
             aria-hidden
           />
           <input
-            id="activity-history-search"
+            id="history-search"
             type="search"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
@@ -257,516 +460,438 @@ export default function ActivityHistoryPage() {
         </div>
       </header>
 
-      <div className="overflow-hidden rounded-2xl border border-violet-100/90 bg-white shadow-md shadow-violet-500/5 dark:border-violet-500/15 dark:bg-slate-800 dark:shadow-violet-950/40">
-        {loading ? (
-          <div className="p-12 text-center text-violet-600/80 dark:text-violet-300/80">
-            {t("loading")}
-          </div>
-        ) : entries.length === 0 ? (
-          <div className="p-12 text-center text-slate-500 dark:text-slate-400">
-            {debouncedSearch ? t("noSearchResults") : t("empty")}
-          </div>
-        ) : (
-          <ul className="m-0 grid list-none grid-cols-1 gap-4 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-3 xl:grid-cols-4">
-            {entries.map((row) => {
-              const summary =
-                locale === "ar"
-                  ? (row.summaryAr ?? row.summaryEn ?? "—")
-                  : (row.summaryEn ?? row.summaryAr ?? "—");
-              const when = row.createdAt
-                ? format(new Date(row.createdAt), "PPp", { locale: dfLocale })
-                : "—";
-              const roleLabel = actorBadgeLabel(row, t);
-              const detail = parseActivityDetail(row.detailJson, row.action);
-              const accent = getRoleAccent(row);
-              const initial =
-                detail?.type === "orderSnapshot"
-                  ? String(detail.tableNumber ?? "?")
-                  : row.actorName?.trim().charAt(0).toUpperCase() || "?";
+      {/* Table */}
+      <DataTable<CallEntry>
+        rowData={entries}
+        columnDefs={columnDefs}
+        loading={loading}
+        locale={locale}
+        showRowNumbers={true}
+        pagination={true}
+        paginationPageSize={PAGE_SIZE}
+        page={page}
+        totalPages={totalPages}
+        onPageChange={(p) => setPage(p)}
+      />
 
-              return (
-                <ActivityRow
-                  key={row.id}
-                  row={row}
-                  summary={summary}
-                  when={when}
-                  createdAt={row.createdAt}
-                  actorName={row.actorName || "—"}
-                  roleLabel={roleLabel}
-                  detail={detail}
-                  accent={accent}
-                  initial={initial}
-                  t={t}
-                  onOpenDetails={(payload) => setSelectedEntry(payload)}
-                />
-              );
-            })}
-          </ul>
-        )}
-
-        {!loading && entries.length > 0 ? (
-          <div className="flex flex-col gap-3 border-t border-violet-100/90 bg-linear-to-r from-violet-50/50 to-fuchsia-50/30 px-4 py-4 dark:border-violet-900/50 dark:from-violet-950/30 dark:to-slate-900/50 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              {t("pageInfo", {
-                page,
-                totalPages,
-                total,
-              })}
-            </p>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                disabled={page <= 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="inline-flex items-center gap-1 rounded-xl border border-violet-200/90 bg-white px-3 py-2 text-sm font-medium text-violet-800 shadow-sm transition-colors hover:bg-violet-50 disabled:pointer-events-none disabled:opacity-40 dark:border-violet-700/60 dark:bg-slate-800 dark:text-violet-200 dark:hover:bg-violet-950/50"
-              >
-                <IoChevronBack className="text-lg" />
-                {t("prev")}
-              </button>
-              <button
-                type="button"
-                disabled={page >= totalPages}
-                onClick={() => setPage((p) => (p < totalPages ? p + 1 : p))}
-                className="inline-flex items-center gap-1 rounded-xl border border-violet-200/90 bg-white px-3 py-2 text-sm font-medium text-violet-800 shadow-sm transition-colors hover:bg-violet-50 disabled:pointer-events-none disabled:opacity-40 dark:border-violet-700/60 dark:bg-slate-800 dark:text-violet-200 dark:hover:bg-violet-950/50"
-              >
-                {t("next")}
-                <IoChevronForward className="text-lg" />
-              </button>
-            </div>
-          </div>
-        ) : null}
-      </div>
-      {selectedEntry ? (
+      {/* Detail modal */}
+      {showModal && (
         <OrderDetailsModal
-          entry={selectedEntry}
+          entry={modalEntry}
+          loading={modalLoading}
           t={t}
-          onClose={() => setSelectedEntry(null)}
+          currency={currency}
+          onClose={closeModal}
         />
-      ) : null}
+      )}
     </div>
   );
 }
 
-type ParsedDetail =
-  | { type: "menuFields"; fields: string[] }
-  | { type: "orderStatus"; status: string }
-  | { type: "itemsEdited" }
-  | {
-      type: "orderSnapshot";
-      status: string;
-      tableNumber: string | null;
-      customerName: string | null;
-      orderTotal: number | null;
-      itemsCount: number;
-      items: OrderItemDetail[];
-    };
+// ─── Modal ────────────────────────────────────────────────────────────────────
 
-function normalizeOrderItems(raw: unknown): OrderItemDetail[] {
-  if (!Array.isArray(raw)) return [];
-  return raw
-    .map((item): OrderItemDetail | null => {
-      if (!item || typeof item !== "object") return null;
-      const o = item as Record<string, unknown>;
-      const name = String(o.name ?? "").trim() || "—";
-      const quantityRaw = Number(o.quantity);
-      const quantity = Number.isFinite(quantityRaw) ? quantityRaw : 0;
-      const priceRaw = Number(o.price);
-      const totalRaw = Number(o.total);
-      const notesRaw =
-        o.notes != null && String(o.notes).trim() !== ""
-          ? String(o.notes)
-          : null;
-      return {
-        name,
-        quantity,
-        price: Number.isFinite(priceRaw) ? priceRaw : null,
-        total: Number.isFinite(totalRaw) ? totalRaw : null,
-        notes: notesRaw,
-      };
-    })
-    .filter((x): x is OrderItemDetail => x != null);
+function StatusIcon({ status }: { status: string }) {
+  if (status === "confirmed")
+    return <IoCheckmarkCircle className="text-green-500 text-lg shrink-0" />;
+  if (status === "cancelled")
+    return <IoCloseCircle className="text-red-500 text-lg shrink-0" />;
+  return <IoEllipseSharp className="text-amber-500 text-[10px] shrink-0" />;
 }
 
-function parseActivityDetail(
-  detailJson: string | null,
-  action: string,
-): ParsedDetail | null {
-  if (!detailJson) {
-    if (action === "TABLE_CALL_ITEMS_UPDATED") {
-      return { type: "itemsEdited" };
-    }
-    return null;
-  }
-  try {
-    const o = JSON.parse(detailJson) as Record<string, unknown>;
-    const nestedDetail =
-      o.detail && typeof o.detail === "object"
-        ? (o.detail as Record<string, unknown>)
-        : null;
-    const source = nestedDetail ?? o;
-    const orderRaw =
-      (source.order && typeof source.order === "object"
-        ? (source.order as Record<string, unknown>)
-        : source) ?? null;
-    if (orderRaw) {
-      const itemsRaw = Array.isArray(orderRaw.items)
-        ? orderRaw.items
-        : Array.isArray(source.items)
-          ? source.items
-          : [];
-      const statusRaw =
-        typeof source.status === "string"
-          ? source.status
-          : typeof orderRaw.status === "string"
-            ? orderRaw.status
-            : action === "TABLE_CALL_CREATED"
-              ? "pending"
-            : action;
-      return {
-        type: "orderSnapshot",
-        status: String(statusRaw).toLowerCase(),
-        tableNumber:
-          (orderRaw.tableNumber ?? source.tableNumber) != null
-            ? String(orderRaw.tableNumber ?? source.tableNumber)
-            : null,
-        customerName:
-          (orderRaw.customerName ?? source.customerName) != null
-            ? String(orderRaw.customerName ?? source.customerName)
-            : null,
-        orderTotal:
-          (orderRaw.orderTotal ?? source.orderTotal) != null &&
-          Number.isFinite(Number(orderRaw.orderTotal ?? source.orderTotal))
-            ? Number(orderRaw.orderTotal ?? source.orderTotal)
-            : null,
-        itemsCount: itemsRaw.length,
-        items: normalizeOrderItems(itemsRaw),
-      };
-    }
-    if (
-      Array.isArray(o.fields) &&
-      o.fields.length > 0 &&
-      o.fields.every((x) => typeof x === "string")
-    ) {
-      return { type: "menuFields", fields: o.fields as string[] };
-    }
-    const st = o.status;
-    if (
-      typeof st === "string" &&
-      ["pending", "confirmed", "cancelled"].includes(st.toLowerCase())
-    ) {
-      return { type: "orderStatus", status: st.toLowerCase() };
-    }
-  } catch {
-    return null;
-  }
-  if (action === "TABLE_CALL_ITEMS_UPDATED") {
-    return { type: "itemsEdited" };
-  }
-  return null;
-}
-
-function ActivityRow({
-  row,
-  summary,
-  when,
-  createdAt,
-  actorName,
-  roleLabel,
-  detail,
-  accent,
-  initial,
-  t,
-  onOpenDetails,
-}: {
-  row: ActivityLogRow;
-  summary: string;
-  when: string;
-  createdAt: string;
-  actorName: string;
-  roleLabel: string;
-  detail: ParsedDetail | null;
-  accent: Pick<RoleAccent, "avatar" | "badge">;
-  initial: string;
-  t: ActivityHistoryT;
-  onOpenDetails: (payload: {
-    row: ActivityLogRow;
-    summary: string;
-    when: string;
-    detail: ParsedDetail | null;
-    roleLabel: string;
-  }) => void;
-}) {
-  const openDetails = () => {
-    onOpenDetails({ row, summary, when, detail, roleLabel });
-  };
-  const orderMeta =
-    detail?.type === "orderSnapshot"
-      ? t("cardOrderMeta", {
-          table: detail.tableNumber ?? "—",
-          count: detail.itemsCount,
-        })
-      : summary;
-
+function ModalSkeleton() {
   return (
-    <li className="min-w-0">
-      <button
-        type="button"
-        onClick={openDetails}
-        className={`flex h-full w-full flex-col gap-2 rounded-2xl border border-violet-200/80 bg-white p-3.5 text-start shadow-sm ring-1 ring-violet-500/5 transition-all hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/40 dark:border-violet-800/60 dark:bg-slate-800/90 dark:ring-violet-950/30 dark:hover:border-violet-600`}
-      >
-        <div className="flex items-start gap-2.5">
-          <div
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-bold shadow-inner ${accent.avatar}`}
-            aria-hidden
-          >
-            {initial}
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
-                {orderMeta}
-              </span>
-            </div>
-            <time
-              dateTime={createdAt}
-              className="mt-1 inline-block rounded-md bg-violet-100 px-2 py-0.5 text-xs font-semibold tabular-nums text-violet-800 dark:bg-violet-900/45 dark:text-violet-200"
-            >
-              {when}
-            </time>
-          </div>
-        </div>
-        <p className="line-clamp-2 text-xs leading-snug text-slate-600 dark:text-slate-300">
-          {summary}
-        </p>
+    <div className="animate-pulse space-y-4 p-6">
+      <div className="h-4 w-1/3 rounded-lg bg-slate-200 dark:bg-slate-700" />
+      <div className="h-4 w-1/2 rounded-lg bg-slate-200 dark:bg-slate-700" />
+      <div className="h-4 w-2/5 rounded-lg bg-slate-200 dark:bg-slate-700" />
+      <div className="mt-6 space-y-3">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-10 w-full rounded-lg bg-slate-200 dark:bg-slate-700" />
+        ))}
+      </div>
+    </div>
+  );
+}
 
-        <span className="mt-auto pt-0.5 text-[10px] font-medium text-violet-600/90 dark:text-violet-400/90">
-          {t("tapForDetails")}
-        </span>
-      </button>
-    </li>
+// ─── Actions Timeline ─────────────────────────────────────────────────────────
+
+const ACTION_LABEL: Record<string, { en: string; ar: string }> = {
+  TABLE_CALL_CREATED: { en: "Order Created", ar: "تم إنشاء الطلب" },
+  TABLE_CALL_CONFIRMED: { en: "Order Confirmed", ar: "تم تأكيد الطلب" },
+  TABLE_CALL_CANCELLED: { en: "Order Cancelled", ar: "تم إلغاء الطلب" },
+  TABLE_CALL_ITEMS_UPDATED: { en: "Items Updated", ar: "تم تحديث الأصناف" },
+};
+
+function actionLabel(action: string, locale: string): string {
+  const entry = ACTION_LABEL[action];
+  if (!entry) return action;
+  return locale === "ar" ? entry.ar : entry.en;
+}
+
+function ActionDot({ status }: { status: string }) {
+  const lc = status.toLowerCase();
+  if (lc === "confirmed")
+    return (
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/40 ring-4 ring-white dark:ring-slate-900">
+        <IoCheckmarkCircle className="text-green-500 text-lg" />
+      </span>
+    );
+  if (lc === "cancelled")
+    return (
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/40 ring-4 ring-white dark:ring-slate-900">
+        <IoCloseCircle className="text-red-500 text-lg" />
+      </span>
+    );
+  return (
+    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40 ring-4 ring-white dark:ring-slate-900">
+      <IoTimeOutline className="text-amber-500 text-base" />
+    </span>
+  );
+}
+
+function ActionsTimeline({
+  actions,
+  locale,
+  t,
+}: {
+  actions: EntryAction[];
+  locale: string;
+  t: ReturnType<typeof useTranslations<"activityHistory">>;
+}) {
+  return (
+    <ol className="relative space-y-0">
+      {actions.map((act, idx) => {
+        const isLast = idx === actions.length - 1;
+        const summary =
+          locale === "ar"
+            ? (act.summaryAr ?? act.summaryEn ?? null)
+            : (act.summaryEn ?? act.summaryAr ?? null);
+        const lc = act.status.toLowerCase();
+        const pillCls =
+          lc === "confirmed"
+            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+            : lc === "cancelled"
+              ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+              : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300";
+
+        return (
+          <li key={idx} className="flex gap-3">
+            <div className="flex flex-col items-center">
+              <ActionDot status={act.status} />
+              {!isLast && (
+                <div className="mt-1 flex-1 w-px min-h-6 bg-slate-200 dark:bg-slate-700" />
+              )}
+            </div>
+
+            <div className={`flex-1 min-w-0 ${isLast ? "pb-0" : "pb-4"}`}>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  {actionLabel(act.action, locale)}
+                </span>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${pillCls}`}>
+                  {t(`orderStatus.${lc}` as never)}
+                </span>
+              </div>
+
+              {act.waiterName && (
+                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                  <IoPersonOutline className="shrink-0" />
+                  {act.waiterName}
+                </p>
+              )}
+
+              <time className="mt-1 block text-[11px] text-slate-400 dark:text-slate-500 tabular-nums">
+                {act.time ? <ViewTime data={act.time} /> : "—"}
+              </time>
+
+              {summary && (
+                <p className="mt-1.5 text-xs text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/60 rounded-lg px-3 py-2">
+                  {summary}
+                </p>
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 
 function OrderDetailsModal({
   entry,
-  onClose,
+  loading,
   t,
+  currency,
+  onClose,
 }: {
-  entry: {
-    row: ActivityLogRow;
-    summary: string;
-    when: string;
-    detail: ParsedDetail | null;
-    roleLabel: string;
-  };
+  entry: CallEntryDetail | null;
+  loading: boolean;
+  t: ReturnType<typeof useTranslations<"activityHistory">>;
+  currency: string;
   onClose: () => void;
-  t: ActivityHistoryT;
 }) {
-  const detail = entry.detail;
-  const items =
-    detail && detail.type === "orderSnapshot"
-      ? detail.items
-      : ([] as OrderItemDetail[]);
+  const locale = useLocale();
 
-  console.log(entry.detail);
+  // Primary action (first in the actions array)
+  const action = entry?.actions?.[0];
+
+  // Prefer root-level order, fall back to detail.order
+  const order = entry?.order ?? action?.detail?.order;
+
+  // Items: root items → order.items
+  const items: CallItem[] = entry?.items ?? order?.items ?? [];
+
+  // Totals
+  const totalPrice = entry?.totalPrice ?? order?.orderTotal ?? 0;
+
+  // Status: action status → order status
+  const status = (action?.status ?? order?.status ?? "pending").toLowerCase();
+
+  // Summary line
+  const summary =
+    locale === "ar"
+      ? (action?.summaryAr ?? action?.summaryEn ?? null)
+      : (action?.summaryEn ?? action?.summaryAr ?? null);
+
+
+  const statusConfig = {
+    confirmed: {
+      pill: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 ring-1 ring-green-300/50",
+      header: "from-green-500/10 to-emerald-500/5 dark:from-green-900/30 dark:to-emerald-900/10",
+      border: "border-green-200/60 dark:border-green-700/40",
+    },
+    cancelled: {
+      pill: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 ring-1 ring-red-300/50",
+      header: "from-red-500/10 to-rose-500/5 dark:from-red-900/30 dark:to-rose-900/10",
+      border: "border-red-200/60 dark:border-red-700/40",
+    },
+    pending: {
+      pill: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 ring-1 ring-amber-300/50",
+      header: "from-violet-500/10 to-fuchsia-500/5 dark:from-violet-900/30 dark:to-fuchsia-900/10",
+      border: "border-violet-200/60 dark:border-violet-700/40",
+    },
+  };
+  const cfg = statusConfig[status as keyof typeof statusConfig] ?? statusConfig.pending;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4">
-      <div className="w-full max-w-2xl rounded-2xl border border-violet-200/70 bg-white p-5 shadow-2xl dark:border-violet-600/40 dark:bg-slate-900">
-        <div className="mb-4 flex items-start justify-between gap-3">
-          <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-              {t("detailsTitle")}
-            </h3>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-              {entry.summary}
-            </p>
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-slate-900/10 dark:ring-white/10 flex flex-col max-h-[92dvh] sm:max-h-[85vh] overflow-hidden animate-slideUp"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* ── Gradient header ── */}
+        <div className={`relative bg-linear-to-br ${cfg.header} px-5 pt-5 pb-4 border-b ${cfg.border}`}>
+          {/* Drag handle (mobile) */}
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600 sm:hidden" />
+
+          <div className="flex items-start justify-between gap-3 mt-3 sm:mt-0">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white dark:bg-slate-800 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700">
+                <IoReceiptOutline className="text-2xl text-violet-600 dark:text-violet-400" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 leading-tight">
+                  {t("detailsTitle")}
+                </h3>
+                {entry && (
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    {t("colOrderId")}&nbsp;
+                    <span className="font-semibold text-slate-700 dark:text-slate-300">
+                      #{entry.orderId}
+                    </span>
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              {entry && (
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${cfg.pill}`}>
+                  <StatusIcon status={status} />
+                  {t(`orderStatus.${status}` as never)}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex items-center justify-center w-8 h-8 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+              >
+                <IoCloseOutline className="text-lg" />
+              </button>
+            </div>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-violet-200 px-3 py-1.5 text-sm text-violet-800 hover:bg-violet-50 dark:border-violet-600 dark:text-violet-200 dark:hover:bg-violet-950/40"
-          >
-            {t("close")}
-          </button>
+
+          {/* Summary line */}
+          {summary && (
+            <p className="mt-3 text-xs text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-200/60 dark:border-slate-700/50 pt-2">
+              {summary}
+            </p>
+          )}
         </div>
 
-        <div className="space-y-2 rounded-xl bg-violet-50/70 p-3 text-sm dark:bg-violet-950/25">
-          <p className="text-slate-700 dark:text-slate-200">
-            <span className="font-semibold">{t("detailsWho")}:</span>{" "}
-            {entry.row.actorName}
-          </p>
-          <p className="text-slate-700 dark:text-slate-200">
-            <span className="font-semibold">{t("detailsWhen")}:</span>{" "}
-            {entry.when}
-          </p>
-          {detail && detail.type === "orderSnapshot" ? (
+        {/* ── Body ── */}
+        <div className="flex-1 overflow-y-auto">
+          {loading ? (
+            <ModalSkeleton />
+          ) : entry ? (
             <>
-              <p className="text-slate-700 dark:text-slate-200">
-                <span className="font-semibold">{t("detailsTable")}:</span>{" "}
-                {detail.tableNumber ?? "—"}
-              </p>
-              <p className="text-slate-700 dark:text-slate-200">
-                <span className="font-semibold">{t("detailsCustomer")}:</span>{" "}
-                {detail.customerName ?? "—"}
-              </p>
-              <p className="text-slate-700 dark:text-slate-200">
-                <span className="font-semibold">{t("detailsStatus")}:</span>{" "}
-                {t(`orderStatus.${detail.status}` as never)}
-              </p>
-              <p className="text-slate-700 dark:text-slate-200">
-                <span className="font-semibold">{t("detailsTotal")}:</span>{" "}
-                {detail.orderTotal != null ? detail.orderTotal : "—"}
-              </p>
+              {/* Meta cards */}
+              <div className="px-5 py-4 grid grid-cols-2 gap-3 sm:grid-cols-4 border-b border-slate-100 dark:border-slate-800">
+                <MetaCard
+                  icon={<IoPersonOutline className="text-violet-500" />}
+                  label={t("colWaiter")}
+                  value={action?.waiterName ?? "—"}
+                />
+                <MetaCard
+                  icon={<IoCalendarOutline className="text-violet-500" />}
+                  label={t("detailsWhen")}
+                  value={<ViewTime data={action?.time} />}
+                />
+                {order?.tableNumber && (
+                  <MetaCard
+                    icon={<IoReceiptOutline className="text-violet-500" />}
+                    label={t("detailsTable")}
+                    value={order.tableNumber}
+                  />
+                )}
+                {order?.customerName && (
+                  <MetaCard
+                    icon={<IoPersonOutline className="text-fuchsia-500" />}
+                    label={t("detailsCustomer")}
+                    value={order.customerName}
+                  />
+                )}
+              </div>
+
+              {/* Items */}
+              <div className="px-5 py-4">
+                <h4 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 text-[10px] font-bold">
+                    {items.length}
+                  </span>
+                  {t("itemsTitle")}
+                </h4>
+
+                {items.length === 0 ? (
+                  <p className="text-sm text-slate-500 dark:text-slate-400 py-4 text-center">
+                    {t("itemsEmpty")}
+                  </p>
+                ) : (
+                  <>
+                    {/* Table head */}
+                    <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 px-3 py-2 rounded-t-xl bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      <span>{t("colItemName")}</span>
+                      <span className="text-center">{t("colQty")}</span>
+                      <span className="text-end">{t("colTotal")}</span>
+                    </div>
+
+                    <div className="divide-y divide-slate-100 dark:divide-slate-800 border-x border-b border-slate-200 dark:border-slate-700 rounded-b-xl overflow-hidden">
+                      {items.map((item, idx) => (
+                        <div
+                          key={`${item.menuItemId}-${idx}`}
+                          className="grid grid-cols-[1fr_auto_auto] gap-x-4 px-3 py-3 text-sm items-center odd:bg-white even:bg-slate-50/60 dark:odd:bg-slate-900 dark:even:bg-slate-800/40 hover:bg-violet-50/50 dark:hover:bg-violet-950/20 transition-colors"
+                        >
+                          <div className="min-w-0">
+                            <p className="font-medium text-slate-800 dark:text-slate-100 truncate">
+                              {item.name}
+                            </p>
+                            {item.price != null && (
+                              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+                                {item.price}{currency && <span className="ms-0.5">{currency}</span>} × {item.quantity}
+                              </p>
+                            )}
+                          </div>
+                          <span className="text-center min-w-8 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                            ×{item.quantity}
+                          </span>
+                          <span className="text-end font-semibold text-slate-800 dark:text-slate-100 tabular-nums">
+                            {item.total}
+                            {currency && (
+                              <span className="ms-1 text-xs font-normal text-slate-500 dark:text-slate-400">
+                                {currency}
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Grand total */}
+                    <div className="mt-3 flex items-center justify-between px-4 py-3 rounded-xl bg-linear-to-r from-violet-50 to-fuchsia-50/60 dark:from-violet-950/40 dark:to-fuchsia-950/20 border border-violet-200/60 dark:border-violet-700/40">
+                      <span className="text-sm font-semibold text-violet-800 dark:text-violet-300">
+                        {t("detailsTotal")}
+                      </span>
+                      <span className="text-lg font-bold text-violet-900 dark:text-violet-200 tabular-nums">
+                        {totalPrice}
+                        {currency && (
+                          <span className="ms-1.5 text-sm font-semibold text-violet-700 dark:text-violet-400">
+                            {currency}
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Actions timeline */}
+              {entry.actions && entry.actions.length > 0 && (
+                <div className="px-5 pb-5 border-t border-slate-100 dark:border-slate-800 pt-4">
+                  <h4 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                    <IoListOutline className="text-violet-500 text-base" />
+                    {t("actionsTitle")}
+                  </h4>
+                  <ActionsTimeline
+                    actions={entry.actions}
+                    locale={locale}
+                    t={t}
+                  />
+                </div>
+              )}
             </>
           ) : null}
         </div>
 
-        <div className="mt-4">
-          <h4 className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
-            {t("itemsTitle")}
-          </h4>
-          {items.length === 0 ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              {t("itemsEmpty")}
-            </p>
-          ) : (
-            <div className="max-h-72 space-y-2 overflow-auto pe-1">
-              {items.map((it, idx) => (
-                <div
-                  key={`${it.name}-${idx}`}
-                  className="rounded-xl border border-violet-200/70 bg-white p-3 dark:border-violet-700/60 dark:bg-slate-800"
-                >
-                  <p className="font-medium text-slate-900 dark:text-slate-100">
-                    {it.name}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
-                    {t("itemMetaLine", {
-                      qty: it.quantity,
-                      price: it.price != null ? String(it.price) : "—",
-                      total: it.total != null ? String(it.total) : "—",
-                    })}
-                  </p>
-                  {it.notes ? (
-                    <p className="mt-1 text-xs text-violet-700 dark:text-violet-300">
-                      {t("itemNotesLine", { notes: it.notes })}
-                    </p>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          )}
+        {/* ── Footer ── */}
+        <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-800 flex justify-end bg-slate-50/80 dark:bg-slate-900/80">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+          >
+            {t("close")}
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-function normalizeRoleKey(role: string): string {
-  const r = String(role || "")
-    .trim()
-    .toLowerCase();
-  if (r === "staff") return "staff";
-  if (r === "admin") return "admin";
-  if (r === "user") return "owner";
-  return "other";
-}
-
-function staffJobRoleFromRow(row: ActivityLogRow): string | null {
-  const direct = row.actorStaffJobRole;
-  if (direct != null && String(direct).trim() !== "") {
-    return String(direct).trim().toLowerCase();
-  }
-  try {
-    if (!row.detailJson) return null;
-    const o = JSON.parse(row.detailJson) as { actorStaffJobRole?: string };
-    const j = o.actorStaffJobRole;
-    if (j != null && String(j).trim() !== "") {
-      return String(j).trim().toLowerCase();
-    }
-  } catch {
-    /* ignore */
-  }
-  return null;
-}
-
-function getRoleAccent(row: ActivityLogRow): RoleAccent {
-  const baseRow =
-    "bg-linear-to-r from-white to-violet-50/30 dark:from-slate-800 dark:to-violet-950/25";
-  const kind = normalizeRoleKey(row.actorRole);
-  if (kind === "staff") {
-    const jr = staffJobRoleFromRow(row);
-    const slug = jr === "casher" ? "cashier" : jr;
-    if (slug === "cashier") {
-      return {
-        bar: "border-l-sky-500",
-        badge: "bg-sky-100 text-sky-900 dark:bg-sky-900/50 dark:text-sky-100",
-        avatar:
-          "bg-linear-to-br from-sky-400 to-cyan-500 text-white shadow-sky-500/20",
-        detailRing: "border-sky-200/90 dark:border-sky-700/50",
-        rowBg: baseRow,
-      };
-    }
-    if (slug === "waiter") {
-      return {
-        bar: "border-l-teal-500",
-        badge:
-          "bg-teal-100 text-teal-900 dark:bg-teal-900/50 dark:text-teal-100",
-        avatar:
-          "bg-linear-to-br from-teal-400 to-emerald-500 text-white shadow-teal-500/20",
-        detailRing: "border-teal-200/90 dark:border-teal-700/50",
-        rowBg: baseRow,
-      };
-    }
-    return {
-      bar: "border-l-slate-400",
-      badge:
-        "bg-slate-200 text-slate-800 dark:bg-slate-600 dark:text-slate-100",
-      avatar:
-        "bg-linear-to-br from-slate-400 to-slate-600 text-white shadow-slate-500/20",
-      detailRing: "border-slate-200 dark:border-slate-600",
-      rowBg: baseRow,
-    };
-  }
-  if (kind === "owner") {
-    return {
-      bar: "border-l-emerald-500",
-      badge:
-        "bg-emerald-100 text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-100",
-      avatar:
-        "bg-linear-to-br from-emerald-400 to-green-600 text-white shadow-emerald-500/20",
-      detailRing: "border-emerald-200/90 dark:border-emerald-700/50",
-      rowBg: baseRow,
-    };
-  }
-  if (kind === "admin") {
-    return {
-      bar: "border-l-amber-500",
-      badge:
-        "bg-amber-100 text-amber-950 dark:bg-amber-900/45 dark:text-amber-100",
-      avatar:
-        "bg-linear-to-br from-amber-400 to-orange-500 text-white shadow-amber-500/20",
-      detailRing: "border-amber-200/90 dark:border-amber-700/50",
-      rowBg: baseRow,
-    };
-  }
-  return {
-    bar: "border-l-violet-500",
-    badge:
-      "bg-violet-100 text-violet-900 dark:bg-violet-900/50 dark:text-violet-100",
-    avatar:
-      "bg-linear-to-br from-violet-500 to-fuchsia-600 text-white shadow-violet-500/25",
-    detailRing: "border-violet-200/90 dark:border-violet-700/50",
-    rowBg: baseRow,
-  };
-}
-
-function actorBadgeLabel(row: ActivityLogRow, t: ActivityHistoryT): string {
-  const kind = normalizeRoleKey(row.actorRole);
-  if (kind === "staff") {
-    const jr = staffJobRoleFromRow(row);
-    const slug = jr === "casher" ? "cashier" : jr;
-    if (slug === "cashier") return t("staffJobRole.cashier");
-    if (slug === "waiter") return t("staffJobRole.waiter");
-  }
-  return t(`role.${kind}`);
+function MetaCard({
+  icon,
+  label,
+  value,
+  valueClass = "text-slate-800 dark:text-slate-100",
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+  valueClass?: string;
+}) {
+  return (
+    <div className="flex items-start gap-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 px-3 py-3">
+      <span className="mt-0.5 text-xl shrink-0">{icon}</span>
+      <div className="min-w-0">
+        <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+          {label}
+        </p>
+        <p className={`text-sm font-semibold mt-0.5 truncate ${valueClass}`}>
+          {value}
+        </p>
+      </div>
+    </div>
+  );
 }

@@ -3,7 +3,9 @@ import LinkTo from "./Global/LinkTo";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Cookies from "js-cookie";
+import Loader from "./Global/Loader";
 import { getAuthHintsFromEncryptedSub } from "@/shared/jwtPayload";
+import { decryptData } from "@/shared/encryption";
 import { REMOVE_USER } from "@/store/authSlice/authSlice";
 import { MdOutlineDashboard } from "react-icons/md";
 import { usePathname, useRouter } from "@/i18n/navigation";
@@ -11,6 +13,9 @@ import { useLocale, useTranslations } from "next-intl";
 import LoadImage from "./ImageLoad";
 import { IoRestaurantOutline } from "react-icons/io5";
 import { useDashboardSession } from "@/hooks/useDashboardSession";
+import { axiosPost } from "@/shared/axiosCall";
+import { getExistingFcmToken } from "../../firebase/firebase-confing";
+import { resetFcmSync } from "@/shared/syncFcmToken";
 
 function buildPublicMenuUrl(slug: string | undefined | null): string {
   if (!slug) return "";
@@ -111,10 +116,27 @@ function UserDropDown() {
   ]);
 
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const handleLogout = () => {
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    setIsProfileMenuOpen(false);
+    const sub = Cookies.get("sub");
+    if (sub) {
+      try {
+        const decrypted = decryptData(sub) as { refreshToken?: string };
+        const fcmToken = await getExistingFcmToken();
+        await axiosPost("/auth/logout", locale, {
+          refreshToken: decrypted?.refreshToken ?? "",
+          ...(fcmToken ? { fcmToken } : {}),
+        });
+      } catch {
+        // logout locally even if the API call fails
+      }
+    }
+
+    resetFcmSync();
     Cookies.remove("sub");
     dispatch(REMOVE_USER());
-    setIsProfileMenuOpen(false);
     router.push("/");
   };
 
@@ -132,6 +154,12 @@ function UserDropDown() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
   return (
+    <>
+      {isLoggingOut && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 bg-white z-111111 flex items-center justify-center">
+          <Loader />
+        </div>
+      )}
     <div className="relative" ref={profileMenuRef}>
       <button
         type="button"
@@ -233,6 +261,7 @@ function UserDropDown() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

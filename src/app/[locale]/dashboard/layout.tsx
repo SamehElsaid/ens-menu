@@ -9,6 +9,7 @@ import { useEffect, type ReactNode } from "react";
 import { SET_ACTIVE_USER, SET_LOADING } from "@/store/authSlice/menuDataSlice";
 import { useAppDispatch } from "@/store/hooks";
 import { AuthUserHydrate } from "@/components/Dashboard/AuthUserHydrate";
+import { FcmTokenSync } from "@/components/Dashboard/FcmTokenSync";
 
 interface ParentLayoutProps {
   children: ReactNode;
@@ -58,6 +59,7 @@ export default function ParentLayout({ children }: ParentLayoutProps) {
   return (
     <>
       <AuthUserHydrate />
+      <FcmTokenSync />
       <Layout segment={segment}>{children}</Layout>
     </>
   );

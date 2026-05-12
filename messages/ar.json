@@ -1458,6 +1458,17 @@
       "nameEn": "اسم القائمة (إنجليزي)",
       "descriptionEn": "الوصف (إنجليزي)"
     },
+    "colOrderId": "رقم الطلب",
+    "colWaiter": "النادل",
+    "colAction": "الإجراء",
+    "colStatus": "الحالة",
+    "colTotal": "الإجمالي",
+    "colTime": "الوقت",
+    "colItems": "العناصر",
+    "colItemName": "الصنف",
+    "colQty": "الكمية",
+    "view": "عرض",
+    "actionsTitle": "سجل الأحداث",
     "prev": "السابق",
     "next": "التالي",
     "pageInfo": "صفحة {page} من {totalPages} — {total} سجلًا",
@@ -1906,6 +1917,16 @@
     "singOut": "تسجيل الخروج",
     "dashboard": "لوحة التحكم",
     "restaurantMenu": "قائمة المطعم"
+  },
+  "notificationPermission": {
+    "title": "تفعيل الإشعارات",
+    "description": "اسمح بالإشعارات لتصلك تنبيهات فورية عند وصول طلبات جديدة.",
+    "allowBtn": "السماح بالإشعارات",
+    "deniedTitle": "الإشعارات محظورة",
+    "deniedDescription": "الإشعارات محظورة في متصفحك. يرجى تعديل إعدادات المتصفح للسماح بها.",
+    "openSettings": "افتح إعدادات المتصفح",
+    "tryAgain": "حاول مرة أخرى",
+    "dismiss": "إغلاق"
   },
   "roles": {
     "admin": "مدير",

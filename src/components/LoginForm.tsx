@@ -17,6 +17,7 @@ import { axiosPost } from "@/shared/axiosCall";
 import { useState } from "react";
 import { LoginResponse } from "@/types/LoginResponse";
 import GoogleSignInButton from "@/components/Auth/GoogleSignInButton";
+import { syncFcmToken } from "@/shared/syncFcmToken";
 
 export default function LoginForm() {
   const t = useTranslations("");
@@ -75,6 +76,10 @@ export default function LoginForm() {
         secure: true,
         path: "/",
       });
+
+      // Sync FCM token right after login (check match, update if needed)
+      void syncFcmToken(locale);
+
       router.push(user?.role === "admin" ? "/admin" : "/dashboard");
       if (user) {
         dispatch(SET_ACTIVE_USER({ user }));

@@ -9,6 +9,7 @@ import {
   isUserNotFoundApiBody,
 } from "@/shared/jwtPayload";
 import { patchSubCookieWithStaffMenuId } from "@/shared/staffSubCookie";
+import { syncFcmToken } from "@/shared/syncFcmToken";
 
 type UserProfile = {
   user?: {
@@ -92,6 +93,8 @@ function useIsLogin() {
         const user = await getUser();
         if (user) {
           dispatch(SET_ACTIVE_USER(user as UserProfile));
+
+          void syncFcmToken(locale);
         }
         const time = setTimeout(() => {
           setLogin(false);
@@ -110,7 +113,7 @@ function useIsLogin() {
       }
     };
     void checkLogin();
-  }, [cookies, dispatch, getUser]);
+  }, [cookies, dispatch, getUser, locale]);
 
   return login;
 }
