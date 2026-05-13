@@ -1,4 +1,4 @@
-import { FiHome, FiInfo, FiMessageCircle, FiSmartphone } from "react-icons/fi";
+import { FiCreditCard, FiHome, FiInfo, FiSmartphone } from "react-icons/fi";
 import { LinkProps } from "@/types/types";
 
 export const homeLinks: LinkProps[] = [
@@ -9,5 +9,5 @@ export const homeLinks: LinkProps[] = [
   { title: "header.androidApp", href: "/mobile-app", icon: FiSmartphone },
   // { title: "header.howItWorks", href: "/#how-it-works", icon: FiInfo },
   // { title: "header.faq", href: "/faq", icon: FiInfo },
-  { title: "header.contact", href: "/#contact", icon: FiMessageCircle },
+  { title: "header.pricingPage", href: "/Pricing", icon: FiCreditCard},
 ];
