@@ -1031,36 +1031,36 @@
         }
       ]
     },
-   "FeaturesApp": {
-  "title": "Master Your Restaurant Operations",
-  "subtitle": "A comprehensive system connecting waiters, cashiers, and management in one seamless platform to ensure the fastest service for your guests.",
-  "items": [
-    {
-      "title": "Smart & Fast Ordering",
-      "desc": "An interactive menu that allows waiters to add items, adjust quantities, and select tables in just a few taps."
+    "FeaturesApp": {
+      "title": "Master Your Restaurant Operations",
+      "subtitle": "A comprehensive system connecting waiters, cashiers, and management in one seamless platform to ensure the fastest service for your guests.",
+      "items": [
+        {
+          "title": "Smart & Fast Ordering",
+          "desc": "An interactive menu that allows waiters to add items, adjust quantities, and select tables in just a few taps."
+        },
+        {
+          "title": "Precision Table Management",
+          "desc": "Assign orders to specific tables with customer names to ensure a personalized and error-free dining experience."
+        },
+        {
+          "title": "Live Order Tracking",
+          "desc": "Real-time status updates (Confirmed, Pending) linking the dining floor to the kitchen and cashier instantly."
+        },
+        {
+          "title": "Review & Confirm System",
+          "desc": "A final review screen before sending orders to minimize mistakes, with easy options to edit or cancel on the fly."
+        },
+        {
+          "title": "Multi-Language Support",
+          "desc": "A flexible UI supporting both Arabic and English, making it easy for a diverse team to work efficiently."
+        },
+        {
+          "title": "Daily Order Reports",
+          "desc": "Full history of all incoming orders, displaying timing, totals, and guest details to track shift performance."
+        }
+      ]
     },
-    {
-      "title": "Precision Table Management",
-      "desc": "Assign orders to specific tables with customer names to ensure a personalized and error-free dining experience."
-    },
-    {
-      "title": "Live Order Tracking",
-      "desc": "Real-time status updates (Confirmed, Pending) linking the dining floor to the kitchen and cashier instantly."
-    },
-    {
-      "title": "Review & Confirm System",
-      "desc": "A final review screen before sending orders to minimize mistakes, with easy options to edit or cancel on the fly."
-    },
-    {
-      "title": "Multi-Language Support",
-      "desc": "A flexible UI supporting both Arabic and English, making it easy for a diverse team to work efficiently."
-    },
-    {
-      "title": "Daily Order Reports",
-      "desc": "Full history of all incoming orders, displaying timing, totals, and guest details to track shift performance."
-    }
-  ]
-},
     "WorkflowApp": {
       "title": "How the system works inside your restaurant",
       "subtitle": "Every step calculated… from order to delivery",
@@ -1708,7 +1708,11 @@
     "orderStatus": {
       "pending": "Pending",
       "confirmed": "Confirmed",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "updated": "Updated",
+      "staff_created": "Staff added",
+      "staff_updated": "Staff updated",
+      "staff_deleted": "Staff removed"
     },
     "changeTypes": {
       "itemsEdited": "Order lines were updated (items or quantities)"

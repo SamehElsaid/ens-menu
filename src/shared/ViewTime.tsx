@@ -37,7 +37,7 @@ function ViewTime({ data }: ViewTimeProps) {
     return () => clearInterval(intervalId)
   }, [data, locale])
 
-  return <div>{time}</div>
+  return <span className="block">{time}</span>
 }
 
 export default ViewTime

@@ -31,11 +31,13 @@ export function syncFcmToken(locale: string): Promise<void> {
         locale,
         { fcmToken },
       );
-      console.log("[FCM] /auth/me/fcm-token-match response:", matchRes);
+      if (!matchRes.status) return;
 
       if (matchRes.data?.matches === false) {
-        const updateRes = await axiosPatch("/user/profile", locale, { fcmToken });
-        console.log("[FCM] /user/profile update response:", updateRes);
+        const updateRes = await axiosPatch("/user/profile", locale, {
+          fcmToken,
+        });
+        if (!updateRes.status) return;
       }
 
       _synced = true;
