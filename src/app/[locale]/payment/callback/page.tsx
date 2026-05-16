@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { pushPurchaseEvent } from "@/shared/gtmEvents";
 
 type ApiRedirectResponse = {
   success?: boolean;
@@ -11,6 +12,8 @@ type ApiRedirectResponse = {
     payment_status?: string;
     synced_from_redirect?: boolean;
     order_id?: string;
+    value?: number;
+    currency?: string;
   };
   error?: string;
   errorEn?: string;
@@ -64,6 +67,35 @@ function PaymentCallbackContent() {
         const synced = data.data?.synced_from_redirect === true;
         const ps = String(data.data?.payment_status ?? "").toLowerCase();
         if (ps === "completed" || synced) {
+          const orderId = data.data?.order_id;
+          let value = Number(data.data?.value);
+          let currency = data.data?.currency?.trim() || "USD";
+
+          if (!Number.isFinite(value) || value <= 0) {
+            try {
+              const pending = JSON.parse(
+                sessionStorage.getItem("gtm_pending_purchase") ?? "null",
+              ) as { value?: number; currency?: string } | null;
+              if (pending?.value && pending.value > 0) {
+                value = pending.value;
+                currency = pending.currency?.trim() || "USD";
+              }
+            } catch {
+              /* ignore */
+            }
+          }
+          sessionStorage.removeItem("gtm_pending_purchase");
+
+          if (Number.isFinite(value) && value > 0) {
+            const dedupeKey = orderId
+              ? `gtm_purchase_${orderId}`
+              : "gtm_purchase_anonymous";
+            if (!sessionStorage.getItem(dedupeKey)) {
+              sessionStorage.setItem(dedupeKey, "1");
+              pushPurchaseEvent({ value, currency });
+            }
+          }
+
           setPhase("success");
           setMessage(t("paymentResultSuccessPro"));
           return;

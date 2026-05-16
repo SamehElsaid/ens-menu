@@ -10,6 +10,7 @@ import Cookies from "js-cookie";
 import { useAppDispatch } from "@/store/hooks";
 import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
 import { axiosPost } from "@/shared/axiosCall";
+import { pushSignUpEvent } from "@/shared/gtmEvents";
 import { encryptData } from "@/shared/encryption";
 import { LoginResponse } from "@/types/LoginResponse";
 
@@ -55,7 +56,10 @@ export default function GoogleSignInButton({
         true,
       );
       if (response.status && response.data) {
-        const { accessToken, refreshToken, user } = response.data;
+        const { accessToken, refreshToken, user, isNew } = response.data;
+        if (isNew) {
+          pushSignUpEvent();
+        }
         const saveTokens = {
           token: accessToken ?? "",
           refreshToken: refreshToken ?? "",
