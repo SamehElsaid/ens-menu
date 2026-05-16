@@ -1,8 +1,10 @@
- import type { Metadata } from "next";
+import type { Metadata } from "next";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import RenderInProvider from "@/components/Global/RenderInProvider";
 import ProgressBar from "@/components/Global/ProgressBar";
+import { mergeSeoKeywords } from "@/lib/seo";
 import "react-phone-number-input/style.css";
 import "react-datepicker/dist/react-datepicker.css";
 import { ToastContainer } from "react-toastify";
@@ -12,14 +14,31 @@ import "suneditor/dist/css/suneditor.min.css";
 import "swiper/css/navigation";
 import "swiper/css/free-mode";
 import "react-lazy-load-image-component/src/effects/blur.css";
+
 const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
-export const metadata: Metadata = {
-  metadataBase: appUrl ? new URL(appUrl) : undefined,
-  title: "ENSmenu",
-  description:
-    "ENSmenu is a platform for creating digital menus for restaurants and cafes",
+type LayoutProps = {
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: LayoutProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "meta" });
+
+  return {
+    metadataBase: appUrl ? new URL(appUrl) : undefined,
+    title: {
+      default: t("home.title"),
+      template: `%s | ${t("siteName")}`,
+    },
+    description: t("home.description"),
+    keywords: mergeSeoKeywords(t("coreKeywords"), t("home.keywords")),
+    applicationName: t("siteName"),
+  };
+}
 
 // Script to prevent flash of wrong theme
 const themeScript = `
@@ -36,10 +55,7 @@ const themeScript = `
 export default async function RootLayout({
   children,
   params,
-}: Readonly<{
-  children: React.ReactNode;
-  params: Promise<{ locale: string }>;
-}>) {
+}: Readonly<LayoutProps>) {
   const { locale } = await params;
   return (
     <html

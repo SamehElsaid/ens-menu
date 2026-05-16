@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import FooterSection from "@/components/HomePage/Footer";
-import PricingComparisonPage from "@/components/Pricing/PricingComparisonPage";
+import ContactPageView from "@/components/HomePage/ContactPageView";
 import { buildSeoMetadata } from "@/lib/seo";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -11,20 +11,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: "meta" });
   return buildSeoMetadata({
     locale,
-    path: "Pricing",
-    title: t("pricingPage.title"),
-    description: t("pricingPage.description"),
-    keywords: t("pricingPage.keywords"),
+    path: "contact",
+    title: t("contactPage.title"),
+    description: t("contactPage.description"),
+    keywords: t("contactPage.keywords"),
     coreKeywords: t("coreKeywords"),
     siteName: t("siteName"),
     robots: "index, follow",
   });
 }
 
-export default function PricingRoutePage() {
+export default async function ContactPage() {
   return (
     <>
-      <PricingComparisonPage />
+      <ContactPageView />
       <FooterSection />
     </>
   );

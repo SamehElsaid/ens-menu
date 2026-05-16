@@ -1,44 +1,59 @@
 {
   "meta": {
     "siteName": "ENSmenu",
+    "coreKeywords": "free, electronic menu, QR code",
+    "jsonLd": {
+      "freeOffer": "Free electronic menu with QR code for restaurants and cafes",
+      "featureList": "Free electronic menu, QR code, digital menus, table ordering, restaurant menu, cafe menu"
+    },
     "home": {
-      "title": "ENSmenu - Digital Menus for Restaurants & Cafes",
-      "description": "Create beautiful digital menus for your restaurant or cafe. Easy to use, mobile-friendly menus that your customers will love.",
+      "title": "ENSmenu | Free Electronic Menu & QR Code for Restaurants",
+      "description": "Create a free electronic menu with QR code for your restaurant or cafe. Mobile-friendly digital menus your customers will love.",
       "keywords": "digital menu, restaurant menu, cafe menu, QR code menu, online menu, food menu, table ordering, contactless menu, menu builder, ENSmenu"
+    },
+    "mobileAppPage": {
+      "title": "ENSmenu App | Electronic Menu & Order Management",
+      "description": "Download the ENSmenu app to run your free electronic menu, QR code orders, and staff workflow.",
+      "keywords": "restaurant app, menu app, order management, cashier, ENSmenu"
     },
     "auth": {
       "loginTitle": "Login | ENSmenu",
-      "loginDescription": "Sign in to your ENSmenu account to manage your digital menus.",
+      "loginDescription": "Sign in to manage your free electronic menu and QR code on ENSmenu.",
       "loginKeywords": "login, sign in, ENSmenu account, digital menu login",
       "registerTitle": "Create Account | ENSmenu",
-      "registerDescription": "Create your ENSmenu account and start building your digital menu.",
+      "registerDescription": "Create a free account and launch your electronic menu with QR code in minutes.",
       "registerKeywords": "register, create account, sign up, ENSmenu, digital menu",
       "resetPasswordTitle": "Reset Password | ENSmenu",
-      "resetPasswordDescription": "Reset your ENSmenu account password.",
+      "resetPasswordDescription": "Reset your ENSmenu password for your electronic menu account.",
       "resetPasswordKeywords": "reset password, forgot password, recover account, ENSmenu",
       "staffLoginTitle": "Staff login | ENSmenu",
-      "staffLoginDescription": "Cashier login to the restaurant dashboard.",
+      "staffLoginDescription": "Staff login to manage electronic menu orders and QR code tables.",
       "staffLoginKeywords": "staff login, cashier, ENSmenu dashboard"
     },
     "legalPrivacy": {
       "title": "Privacy Policy | ENSmenu",
-      "description": "Learn how ENSmenu collects, uses, and protects your data when you use our digital menu platform.",
+      "description": "How ENSmenu protects data for your free electronic menu and QR code platform.",
       "keywords": "privacy policy, ENSmenu, personal data, digital menu, data protection"
     },
     "legalTerms": {
       "title": "Terms and Conditions | ENSmenu",
-      "description": "Terms of use for the ENSmenu platform for creating and managing digital restaurant and cafe menus.",
+      "description": "Terms for using ENSmenu to create a free electronic menu and QR code for restaurants and cafes.",
       "keywords": "terms of use, ENSmenu, user agreement, digital menu, SaaS"
     },
     "faqPage": {
-      "title": "FAQ | ENSmenu",
-      "description": "Answers about digital menus, plans, languages, and the ENSmenu dashboard.",
+      "title": "FAQ | Free Electronic Menu & QR Code",
+      "description": "Answers about free electronic menus, QR code setup, plans, and languages on ENSmenu.",
       "keywords": "FAQ, ENSmenu, QR menu, help, support, digital menu"
     },
     "pricingPage": {
-      "title": "Plans & pricing | ENSmenu",
-      "description": "Compare Free, Pro, and Custom plans: menus, products, billing, and features before you subscribe.",
-      "keywords": "ENSmenu pricing, plans, subscription, digital menu plans, Pro plan, free menu"
+      "title": "Plans & Pricing | Free Electronic Menu",
+      "description": "Compare free and Pro plans: electronic menu, QR code, menus, products, and features.",
+      "keywords": "ENSmenu pricing, plans, subscription, digital menu plans, Pro plan"
+    },
+    "contactPage": {
+      "title": "Contact Us | ENSmenu",
+      "description": "Reach the ENSmenu team by phone, email, WhatsApp, or social media.",
+      "keywords": "contact ENSmenu, support, WhatsApp, email, digital menu help"
     }
   },
   "legalPages": {
@@ -127,13 +142,12 @@
   "header": {
     "home": "Home",
     "about": "About",
-    "pricing": "Pricing",
     "features": "Features",
     "team": "How It Works",
     "faq": "FAQ",
     "contact": "Contact",
     "androidApp": "Android App",
-    "pricingPage": "Pricing Page"
+    "pricingPage": "Pricing"
   },
   "home": {
     "title": "Home",
@@ -933,7 +947,7 @@
   "heroSection": {
     "badge": "Start Now for Free",
     "title1": "Transform your restaurant into a",
-    "title2": "Smart Menu",
+    "title2": "Smart Electronic Menu",
     "description": "An interactive digital menu with modern design, enables your customers to browse the food menu easily and clearly by scanning a QR code only",
     "cta": "Start Now for Free",
     "watchDemo": "Watch Demo",
@@ -1252,7 +1266,7 @@
         "billRequest": "Bill request",
         "onlineOrdering": "Online ordering system",
         "deliveryMaps": "Advanced delivery with maps",
-        "newLanguages": "Add new languages",
+        "newLanguages": "Add new languages (German, French, Hindi)",
         "onlinePayment": "Integrated online payment"
       },
       "proExtraFeatures": {
@@ -1265,12 +1279,37 @@
       "description": "Join hundreds of restaurants that switched to smart menus. Start your free trial today.",
       "button": "Start Now for Free"
     },
+    "contactPage": {
+      "title": "Contact Us",
+      "eyebrow": "Support center",
+      "titleBefore": "Let's",
+      "titleHighlight": "Connect",
+      "description": "The ENSmenu team is here to help you set up your electronic menu and answer your questions.",
+      "supportNote": "We reply as quickly as possible by phone or WhatsApp.",
+      "whatsappLabel": "WhatsApp support",
+      "whatsappDescription": "Fast replies, menu setup help, and direct support from the ENSmenu team.",
+      "detailsTitle": "Contact details",
+      "socialTitle": "Follow us on social media",
+      "whatsappCta": "Message us on WhatsApp",
+      "labels": {
+        "phoneUae": "United Arab Emirates",
+        "phoneEgypt": "Egypt",
+        "email": "Email",
+        "address": "Location"
+      },
+      "actions": {
+        "call": "Call",
+        "whatsapp": "WhatsApp",
+        "email": "Send email",
+        "visit": "Visit page"
+      }
+    },
     "footer": {
-      "description": "ENS provides you with the best digital menu solutions for restaurants and cafes through QR codes to receive orders and payments from your customers for a seamless and convenient experience, contributing to increasing customer satisfaction and boosting sales.",
+      "description": "ENSmenu — free electronic menu with QR code for restaurants and cafes. Digital menus and a smooth ordering experience for your guests.",
       "quickLinks": "Quick Links",
       "contactUs": "Contact Us",
       "location": "Egypt",
-      "UnitedArabEmirates": "United Arab Emirates",
+      "UnitedArabEmirates": "Egypt",
       "copyright": "All rights reserved.",
       "privacy": "Privacy Policy",
       "terms": "Terms and Conditions",
@@ -1280,7 +1319,7 @@
   "PricingPage": {
     "eyebrow": "Plans & pricing",
     "title": "All you need for your restaurant… in one platform",
-    "subtitle": "Start with a professional digital menu, expand your experience with orders, QR codes, and table management—without the hassle.",
+    "subtitle": "Start with a free electronic menu and QR code, then expand with orders and table management—without the hassle.",
     "compareTitle": "Feature comparison",
     "columnFeature": "Feature",
     "staticFreeDescription": "Ideal to launch a digital menu and try ENSmenu with essential limits.",

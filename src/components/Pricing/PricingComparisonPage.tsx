@@ -11,7 +11,7 @@ import { HiCheck, HiOutlineChat, HiX, HiLightningBolt, HiStar } from "react-icon
 
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 
-const WHATSAPP_URL = "https://wa.me/971586551491";
+const WHATSAPP_URL = "https://wa.me/201500800050";
 const STATIC_PRO_YEARLY_USD = 100;
 
 const STATIC_FREE_PLAN = {

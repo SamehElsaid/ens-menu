@@ -120,7 +120,7 @@ type AuthUser = {
 
 const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 const AVATAR_ACCEPT = "image/png,image/jpeg,image/jpg,image/gif";
-const WHATSAPP_URL = "https://wa.me/971586551491";
+const WHATSAPP_URL = "https://wa.me/201500800050";
 
 const CUSTOM_PLAN_FEATURE_KEYS = [
   "waiterRequest",
