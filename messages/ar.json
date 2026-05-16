@@ -1463,6 +1463,7 @@
       "descriptionEn": "الوصف (إنجليزي)"
     },
     "colOrderId": "رقم الطلب",
+    "colCustomer": "العميل",
     "colWaiter": "النادل",
     "colAction": "الإجراء",
     "colStatus": "الحالة",

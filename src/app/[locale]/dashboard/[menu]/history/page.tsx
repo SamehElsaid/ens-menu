@@ -53,6 +53,7 @@ type CallEntry = {
   orderId: string;
   lastAction: string;
   actionDetails: ActionDetail[];
+  customerName?: string | null;
   items: CallItem[];
   totalPrice: number;
 };
@@ -326,12 +327,12 @@ export default function ActivityHistoryPage() {
         ),
       },
       {
-        headerName: t("colWaiter"),
+        headerName: t("colCustomer"),
         flex: 1,
         minWidth: 130,
         cellRenderer: (p: ICellRendererParams<CallEntry>) => (
           <span className="text-slate-700 dark:text-slate-200">
-            {p.data?.actionDetails?.[0]?.waiterName ?? "—"}
+            {p.data?.customerName?.trim() || "—"}
           </span>
         ),
       },
@@ -541,6 +542,39 @@ function actionLabel(action: string, locale: string): string {
   return locale === "ar" ? entry.ar : entry.en;
 }
 
+function isGuestOrderAction(act: EntryAction): boolean {
+  return (
+    act.action === "TABLE_CALL_CREATED" ||
+    String(act.actorRole ?? "").toLowerCase() === "guest"
+  );
+}
+
+function actionActorName(
+  act: EntryAction,
+  order?: EntryOrder | null,
+): string {
+  if (isGuestOrderAction(act)) {
+    const fromOrder =
+      order?.customerName ??
+      act.detail?.order?.customerName ??
+      null;
+    if (fromOrder != null && String(fromOrder).trim() !== "") {
+      return String(fromOrder).trim();
+    }
+  }
+  return act.waiterName?.trim() ?? "";
+}
+
+function lastStaffWaiterName(actions: EntryAction[]): string | null {
+  for (let i = actions.length - 1; i >= 0; i -= 1) {
+    const act = actions[i];
+    if (isGuestOrderAction(act)) continue;
+    const name = act.waiterName?.trim();
+    if (name) return name;
+  }
+  return null;
+}
+
 function ActionDot({ status }: { status: string }) {
   const lc = status.toLowerCase();
   if (lc === "confirmed")
@@ -566,15 +600,21 @@ function ActionsTimeline({
   actions,
   locale,
   t,
+  order,
 }: {
   actions: EntryAction[];
   locale: string;
   t: ReturnType<typeof useTranslations<"activityHistory">>;
+  order?: EntryOrder | null;
 }) {
   return (
     <ol className="relative space-y-0">
       {actions.map((act, idx) => {
         const isLast = idx === actions.length - 1;
+        const actorName = actionActorName(act, order);
+        const actorLabel = isGuestOrderAction(act)
+          ? t("detailsCustomer")
+          : t("colWaiter");
         const summary =
           locale === "ar"
             ? (act.summaryAr ?? act.summaryEn ?? null)
@@ -608,10 +648,13 @@ function ActionsTimeline({
                 </span>
               </div>
 
-              {act.waiterName && (
+              {actorName && (
                 <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
                   <IoPersonOutline className="shrink-0" />
-                  {act.waiterName}
+                  <span className="text-slate-400 dark:text-slate-500">
+                    {actorLabel}:
+                  </span>
+                  {actorName}
                 </p>
               )}
 
@@ -667,6 +710,16 @@ function OrderDetailsModal({
     locale === "ar"
       ? (action?.summaryAr ?? action?.summaryEn ?? null)
       : (action?.summaryEn ?? action?.summaryAr ?? null);
+
+  const customerDisplay =
+    order?.customerName?.trim() ||
+    (action && isGuestOrderAction(action)
+      ? actionActorName(action, order)
+      : "") ||
+    null;
+  const waiterDisplay = entry?.actions
+    ? lastStaffWaiterName(entry.actions)
+    : null;
 
   const statusConfig = {
     confirmed: {
@@ -762,11 +815,20 @@ function OrderDetailsModal({
             <>
               {/* Meta cards */}
               <div className="px-5 py-4 grid grid-cols-2 gap-3 sm:grid-cols-4 border-b border-slate-100 dark:border-slate-800">
-                <MetaCard
-                  icon={<IoPersonOutline className="text-violet-500" />}
-                  label={t("colWaiter")}
-                  value={action?.waiterName ?? "—"}
-                />
+                {customerDisplay && (
+                  <MetaCard
+                    icon={<IoPersonOutline className="text-fuchsia-500" />}
+                    label={t("detailsCustomer")}
+                    value={customerDisplay}
+                  />
+                )}
+                {waiterDisplay && (
+                  <MetaCard
+                    icon={<IoPersonOutline className="text-violet-500" />}
+                    label={t("colWaiter")}
+                    value={waiterDisplay}
+                  />
+                )}
                 <MetaCard
                   icon={<IoCalendarOutline className="text-violet-500" />}
                   label={t("detailsWhen")}
@@ -777,13 +839,6 @@ function OrderDetailsModal({
                     icon={<IoReceiptOutline className="text-violet-500" />}
                     label={t("detailsTable")}
                     value={order.tableNumber}
-                  />
-                )}
-                {order?.customerName && (
-                  <MetaCard
-                    icon={<IoPersonOutline className="text-fuchsia-500" />}
-                    label={t("detailsCustomer")}
-                    value={order.customerName}
                   />
                 )}
               </div>
@@ -874,6 +929,7 @@ function OrderDetailsModal({
                     actions={entry.actions}
                     locale={locale}
                     t={t}
+                    order={order}
                   />
                 </div>
               )}

@@ -14,8 +14,10 @@ import LoadImage from "./ImageLoad";
 import { IoRestaurantOutline } from "react-icons/io5";
 import { useDashboardSession } from "@/hooks/useDashboardSession";
 import { axiosPost } from "@/shared/axiosCall";
-import { getExistingFcmToken } from "../../firebase/firebase-confing";
-import { resetFcmSync } from "@/shared/syncFcmToken";
+import {
+  finalizeFcmLogout,
+  resolveFcmTokenForLogout,
+} from "@/shared/syncFcmToken";
 
 function buildPublicMenuUrl(slug: string | undefined | null): string {
   if (!slug) return "";
@@ -124,17 +126,19 @@ function UserDropDown() {
     if (sub) {
       try {
         const decrypted = decryptData(sub) as { refreshToken?: string };
-        const fcmToken = await getExistingFcmToken();
+        const fcmToken = await resolveFcmTokenForLogout();
         await axiosPost("/auth/logout", locale, {
           refreshToken: decrypted?.refreshToken ?? "",
           ...(fcmToken ? { fcmToken } : {}),
         });
+        await finalizeFcmLogout(locale, fcmToken);
       } catch {
         // logout locally even if the API call fails
+        await finalizeFcmLogout(locale, null);
       }
+    } else {
+      await finalizeFcmLogout(locale, null);
     }
-
-    resetFcmSync();
     Cookies.remove("sub");
     dispatch(REMOVE_USER());
     router.push("/");

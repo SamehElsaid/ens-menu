@@ -1739,6 +1739,7 @@
       "descriptionEn": "Description (English)"
     },
     "colOrderId": "Order #",
+    "colCustomer": "Customer",
     "colWaiter": "Waiter",
     "colAction": "Action",
     "colStatus": "Status",
