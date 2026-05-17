@@ -10,31 +10,12 @@ function getBaseUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL ?? "";
 }
 
-/** Deduplicated merge of comma-separated keyword strings (case-insensitive). */
-export function mergeSeoKeywords(...parts: (string | undefined)[]): string[] {
-  const seen = new Set<string>();
-  const result: string[] = [];
-  for (const part of parts) {
-    if (!part) continue;
-    for (const k of part.split(",").map((s) => s.trim()).filter(Boolean)) {
-      const key = k.toLowerCase();
-      if (!seen.has(key)) {
-        seen.add(key);
-        result.push(k);
-      }
-    }
-  }
-  return result;
-}
-
 export type SeoInput = {
   locale: string;
   path: string;
   title: string;
   description: string;
   keywords: string;
-  /** Global terms appended to every public page (e.g. free, electronic menu, QR code). */
-  coreKeywords?: string;
   siteName: string;
   robots?: "index, follow" | "noindex, nofollow";
 };
@@ -49,7 +30,6 @@ export function buildSeoMetadata({
   title,
   description,
   keywords,
-  coreKeywords,
   siteName,
   robots = "index, follow",
 }: SeoInput): Metadata {
@@ -59,12 +39,11 @@ export function buildSeoMetadata({
   const canonicalUrl = baseUrl ? new URL(canonicalPath, baseUrl).href : undefined;
   const arPath = path ? `/${path}` : "/";
   const enPath = path ? `/en/${path}` : "/en";
-  const mergedKeywords = mergeSeoKeywords(coreKeywords, keywords);
 
   return {
     title,
     description,
-    keywords: mergedKeywords,
+    keywords: keywords.split(",").map((k) => k.trim()).filter(Boolean),
     robots,
     openGraph: {
       type: "website",
@@ -90,8 +69,4 @@ export function buildSeoMetadata({
         }
       : undefined,
   };
-}
-
-export function getSeoBaseUrl(): string {
-  return getBaseUrl();
 }

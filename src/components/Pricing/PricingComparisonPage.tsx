@@ -2,14 +2,11 @@
 
 import type { ReactNode } from "react";
 import { useMemo } from "react";
-import { motion, useReducedMotion } from "framer-motion";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { translatePlanFeaturesWithMenuLimit } from "@/lib/planFeatureI18n";
 import { BsQrCode } from "react-icons/bs";
 import { HiCheck, HiOutlineChat, HiX, HiLightningBolt, HiStar } from "react-icons/hi";
-
-const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 
 const WHATSAPP_URL = "https://wa.me/201500800050";
 const STATIC_PRO_YEARLY_USD = 100;
@@ -36,7 +33,6 @@ const STATIC_PRO_PLAN = {
 
 type CellVal = boolean | string | number;
 
-/** Softer violet column — readable in light & dark without heavy saturation. */
 const COL_PRO =
   "relative overflow-hidden border-x border-violet-200/80 dark:border-violet-500/18 bg-gradient-to-b from-violet-500/[0.05] via-fuchsia-500/[0.03] to-violet-600/[0.045] dark:from-violet-500/10 dark:via-fuchsia-500/06 dark:to-violet-950/22 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] px-2 align-middle [transform:scaleY(1.01)] origin-top sm:px-5";
 
@@ -76,43 +72,15 @@ function renderCell(value: CellVal, tYes: string, tNo: string): ReactNode {
   );
 }
 
-function HeroMenuMockup({ reduceMotion }: { reduceMotion: boolean }) {
-  const phoneFloat = reduceMotion
-    ? undefined
-    : {
-        animate: { y: [0, -9, 0], rotate: [-4, -2.8, -4] },
-        transition: {
-          duration: 3.6,
-          repeat: Infinity,
-          ease: "easeInOut" as const,
-        },
-      };
-
-  const qrFloat = reduceMotion
-    ? undefined
-    : {
-        animate: { y: [0, 7, 0], rotate: [7, 5.5, 7] },
-        transition: {
-          duration: 3.2,
-          repeat: Infinity,
-          ease: "easeInOut" as const,
-          delay: 0.35,
-        },
-      };
-
+function HeroMenuMockup() {
   return (
-    <motion.div
-      className="relative mx-auto w-full max-w-[300px] lg:max-w-none"
+    <div
+      className="pricing-reveal-hero relative mx-auto w-full max-w-[300px] lg:max-w-none"
       aria-hidden
-      initial={reduceMotion ? undefined : { opacity: 0, y: 28, scale: 0.96 }}
-      animate={reduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.55, delay: 0.12, ease: EASE_OUT }}
     >
       <div className="pointer-events-none absolute -inset-6 rounded-[2rem] bg-gradient-to-tr from-violet-200/35 via-slate-200/20 to-transparent blur-2xl dark:from-violet-900/15 dark:via-slate-800/20 dark:to-transparent" />
-      <motion.div
-        className="relative rounded-[1.75rem] border border-slate-200/80 bg-white/75 p-2.5 shadow-xl shadow-slate-900/6 backdrop-blur-md will-change-transform dark:border-white/10 dark:bg-slate-900/55 dark:shadow-black/35 sm:p-3"
-        animate={phoneFloat?.animate}
-        transition={phoneFloat?.transition}
+      <div
+        className="animate-pricing-phone-float relative rounded-[1.75rem] border border-slate-200/80 bg-white/75 p-2.5 shadow-xl shadow-slate-900/6 backdrop-blur-md will-change-transform dark:border-white/10 dark:bg-slate-900/55 dark:shadow-black/35 sm:p-3"
       >
         <div className="overflow-hidden rounded-2xl bg-gradient-to-b from-slate-100 to-slate-200/90 ring-1 ring-slate-900/[0.04] dark:from-slate-800 dark:to-slate-900 dark:ring-white/8">
           <div className="flex items-center justify-between px-3 py-2.5 sm:px-4 sm:py-3">
@@ -125,11 +93,9 @@ function HeroMenuMockup({ reduceMotion }: { reduceMotion: boolean }) {
             <div className="h-12 rounded-xl bg-white/55 shadow-sm dark:bg-slate-800/55 sm:h-14" />
           </div>
         </div>
-      </motion.div>
-      <motion.div
-        className="absolute -bottom-1 end-0 z-10 translate-x-[6%] rounded-2xl border border-slate-200/70 bg-white/90 p-3 shadow-lg backdrop-blur-sm will-change-transform dark:border-slate-600/50 dark:bg-slate-900/80 dark:shadow-black/30 sm:-end-3 sm:translate-x-0 sm:p-4"
-        animate={qrFloat?.animate}
-        transition={qrFloat?.transition}
+      </div>
+      <div
+        className="animate-pricing-qr-float absolute -bottom-1 end-0 z-10 translate-x-[6%] rounded-2xl border border-slate-200/70 bg-white/90 p-3 shadow-lg backdrop-blur-sm will-change-transform dark:border-slate-600/50 dark:bg-slate-900/80 dark:shadow-black/30 sm:-end-3 sm:translate-x-0 sm:p-4"
       >
         <div className="flex flex-col items-center gap-1.5 sm:gap-2">
           <div className="rounded-lg bg-slate-800 p-1.5 text-white dark:bg-violet-700/90 sm:p-2">
@@ -137,8 +103,8 @@ function HeroMenuMockup({ reduceMotion }: { reduceMotion: boolean }) {
           </div>
           <div className="h-1 w-10 rounded-full bg-slate-200 dark:bg-slate-600 sm:w-12" />
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
 
@@ -148,7 +114,6 @@ export default function PricingComparisonPage() {
   const tProfile = useTranslations("personalProfile");
   const locale = useLocale();
   const isRTL = locale === "ar";
-  const reduceMotion = useReducedMotion() === true;
 
   const freeFeatures = useMemo(
     () =>
@@ -177,7 +142,6 @@ export default function PricingComparisonPage() {
   const tYes = t("yes");
   const tNo = t("no");
 
-  /** Custom-tier features (labels from Landing.pricing.customFeatures). */
   const CUSTOM_TABLE_FEATURE_KEYS = [
     "onlineOrdering",
     "deliveryMaps",
@@ -269,7 +233,6 @@ export default function PricingComparisonPage() {
       pro: false,
       custom: true,
     })),
-   
   ];
 
   const cellBase =
@@ -278,7 +241,7 @@ export default function PricingComparisonPage() {
 
   return (
     <div
-      className="relative overflow-hidden bg-[#f8f9fc] py-16 dark:bg-[#070a0f] sm:py-24"
+      className="pricing-page relative overflow-hidden bg-[#f8f9fc] py-16 dark:bg-[#070a0f] sm:py-24"
       dir={isRTL ? "rtl" : "ltr"}
     >
       <div className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 opacity-[0.14] blur-3xl dark:opacity-[0.2]">
@@ -286,100 +249,27 @@ export default function PricingComparisonPage() {
       </div>
 
       <div className="relative mx-auto max-w-6xl px-3 sm:px-6 lg:px-8">
-        <motion.div
-          className="mb-14 grid items-center gap-10 lg:mb-20 lg:grid-cols-2 lg:gap-14"
-          initial={reduceMotion ? undefined : "hidden"}
-          whileInView={reduceMotion ? undefined : "show"}
-          viewport={{ once: true, margin: "-80px" }}
-          variants={
-            reduceMotion
-              ? undefined
-              : {
-                  hidden: {},
-                  show: {
-                    transition: { staggerChildren: 0.1, delayChildren: 0.04 },
-                  },
-                }
-          }
-        >
-          <motion.div
-            className="text-center lg:text-start"
-            variants={
-              reduceMotion
-                ? undefined
-                : {
-                    hidden: { opacity: 0, y: 22, x: isRTL ? 0 : 0 },
-                    show: {
-                      opacity: 1,
-                      y: 0,
-                      transition: { duration: 0.5, ease: EASE_OUT },
-                    },
-                  }
-            }
-          >
-            <motion.div
-              className="mb-5 inline-flex items-center gap-2 rounded-full border border-violet-200/70 bg-violet-50/90 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-violet-800 dark:border-violet-500/20 dark:bg-violet-950/35 dark:text-violet-200 sm:text-xs"
-              variants={
-                reduceMotion
-                  ? undefined
-                  : {
-                      hidden: { opacity: 0, scale: 0.94 },
-                      show: {
-                        opacity: 1,
-                        scale: 1,
-                        transition: { duration: 0.4, ease: EASE_OUT },
-                      },
-                    }
-              }
-            >
-              <HiLightningBolt className="shrink-0 opacity-80" aria-hidden />
-              {t("eyebrow")}
-            </motion.div>
-            <motion.h1
-              className="text-3xl font-black tracking-tight text-slate-900 dark:text-white sm:text-5xl lg:text-6xl"
-              variants={
-                reduceMotion
-                  ? undefined
-                  : {
-                      hidden: { opacity: 0, y: 18 },
-                      show: {
-                        opacity: 1,
-                        y: 0,
-                        transition: { duration: 0.52, ease: EASE_OUT },
-                      },
-                    }
-              }
-            >
-              {t("title")}
-            </motion.h1>
-            <motion.p
-              className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-slate-600 dark:text-slate-400 sm:text-lg lg:mx-0"
-              variants={
-                reduceMotion
-                  ? undefined
-                  : {
-                      hidden: { opacity: 0, y: 14 },
-                      show: {
-                        opacity: 1,
-                        y: 0,
-                        transition: { duration: 0.48, ease: EASE_OUT },
-                      },
-                    }
-              }
-            >
-              {t("subtitle")}
-            </motion.p>
-          </motion.div>
-          <HeroMenuMockup reduceMotion={reduceMotion} />
-        </motion.div>
+        <div className="pricing-stagger mb-14 grid items-center gap-10 lg:mb-20 lg:grid-cols-2 lg:gap-14">
+          <div className="pricing-stagger-item text-center lg:text-start">
+            <div className="pricing-hero-text">
+              <div className="pricing-hero-line mb-5 inline-flex items-center gap-2 rounded-full border border-violet-200/70 bg-violet-50/90 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-violet-800 dark:border-violet-500/20 dark:bg-violet-950/35 dark:text-violet-200 sm:text-xs">
+                <HiLightningBolt className="shrink-0 opacity-80" aria-hidden />
+                {t("eyebrow")}
+              </div>
+              <h1 className="pricing-hero-line text-3xl font-black tracking-tight text-slate-900 dark:text-white sm:text-5xl lg:text-6xl">
+                {t("title")}
+              </h1>
+              <p className="pricing-hero-line mx-auto mt-5 max-w-xl text-base leading-relaxed text-slate-600 dark:text-slate-400 sm:text-lg lg:mx-0">
+                {t("subtitle")}
+              </p>
+            </div>
+          </div>
+          <div className="pricing-stagger-item">
+            <HeroMenuMockup />
+          </div>
+        </div>
 
-        <motion.div
-          className="relative max-w-full"
-          initial={reduceMotion ? undefined : { opacity: 0, y: 32 }}
-          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-48px" }}
-          transition={{ duration: 0.55, ease: EASE_OUT }}
-        >
+        <div className="pricing-reveal relative max-w-full">
           <div
             className="pointer-events-none absolute -inset-px rounded-3xl bg-gradient-to-br from-violet-400/[0.06] via-transparent to-fuchsia-400/[0.05] dark:from-violet-500/10 dark:to-fuchsia-500/06"
             aria-hidden
@@ -446,21 +336,7 @@ export default function PricingComparisonPage() {
                   </th>
                 </tr>
               </thead>
-              <motion.tbody
-                initial={reduceMotion ? undefined : "hidden"}
-                whileInView={reduceMotion ? undefined : "show"}
-                viewport={{ once: true, margin: "-32px" }}
-                variants={
-                  reduceMotion
-                    ? undefined
-                    : {
-                        hidden: {},
-                        show: {
-                          transition: { staggerChildren: 0.035, delayChildren: 0.08 },
-                        },
-                      }
-                }
-              >
+              <tbody>
                 {rows.map((row, idx) => {
                   const alt = idx % 2 === 1;
                   const rowTintFree = alt
@@ -475,21 +351,9 @@ export default function PricingComparisonPage() {
                     "before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-slate-900/[0.025] dark:before:bg-black/12";
 
                   return (
-                    <motion.tr
+                    <tr
                       key={row.label}
-                      className="border-b border-slate-100/90 last:border-b-0 dark:border-slate-800/55"
-                      variants={
-                        reduceMotion
-                          ? undefined
-                          : {
-                              hidden: { opacity: 0, y: 8 },
-                              show: {
-                                opacity: 1,
-                                y: 0,
-                                transition: { duration: 0.32, ease: EASE_OUT },
-                              },
-                            }
-                      }
+                      className="pricing-row-item border-b border-slate-100/90 last:border-b-0 dark:border-slate-800/55"
                     >
                       <th
                         className={`${cellBase} hyphens-auto break-words text-start text-[11px] font-semibold leading-snug text-slate-700 dark:text-slate-300 sm:px-5 sm:text-sm ${COL_SEP} ${rowTintFree}`}
@@ -507,116 +371,53 @@ export default function PricingComparisonPage() {
                       <td className={`${cellBase} ${rowTintCustom}`}>
                         {renderCell(row.custom, tYes, tNo)}
                       </td>
-                    </motion.tr>
+                    </tr>
                   );
                 })}
-              </motion.tbody>
+              </tbody>
             </table>
           </div>
-        </motion.div>
+        </div>
 
-        <motion.section
-          className="relative z-[2] mx-auto mt-20 max-w-5xl sm:mt-28"
-          initial={reduceMotion ? undefined : { opacity: 0, y: 28 }}
-          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.5, delay: 0.05, ease: EASE_OUT }}
-        >
+        <section className="pricing-reveal relative z-[2] mx-auto mt-20 max-w-5xl sm:mt-28">
           <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-md dark:rounded-3xl dark:border-slate-700/80 dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-950 dark:p-8 dark:shadow-xl dark:shadow-black/30 dark:ring-1 dark:ring-violet-500/15 sm:p-9">
             <p className="mb-6 text-center text-xs font-medium leading-relaxed text-slate-600 sm:mb-8 sm:text-sm dark:text-slate-400">
               {t("ctaStripIntro")}
             </p>
-            <motion.div
-              className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-4"
-              initial={reduceMotion ? undefined : "hidden"}
-              whileInView={reduceMotion ? undefined : "show"}
-              viewport={{ once: true }}
-              variants={
-                reduceMotion
-                  ? undefined
-                  : {
-                      hidden: {},
-                      show: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
-                    }
-              }
-            >
-              <motion.div
-                variants={
-                  reduceMotion
-                    ? undefined
-                    : {
-                        hidden: { opacity: 0, y: 12 },
-                        show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE_OUT } },
-                      }
-                }
-              >
+            <div className="pricing-cta-stagger flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
+              <div className="pricing-stagger-item">
                 <Link
                   href="/auth/register"
                   className="block rounded-xl border border-slate-300 bg-slate-50 px-6 py-3.5 text-center text-xs font-bold text-slate-900 transition hover:bg-slate-100 dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/14 sm:px-8 sm:text-sm"
                 >
                   {t("ctaRegister")}
                 </Link>
-              </motion.div>
-              <motion.div
-                variants={
-                  reduceMotion
-                    ? undefined
-                    : {
-                        hidden: { opacity: 0, y: 12 },
-                        show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE_OUT } },
-                      }
-                }
-                whileHover={reduceMotion ? undefined : { scale: 1.02 }}
-                whileTap={reduceMotion ? undefined : { scale: 0.98 }}
-              >
+              </div>
+              <div className="pricing-stagger-item">
                 <Link
                   href="/auth/register"
-                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 px-8 py-3.5 text-center text-xs font-bold text-white shadow-md shadow-violet-500/25 transition hover:shadow-violet-500/35 sm:text-sm"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 px-8 py-3.5 text-center text-xs font-bold text-white shadow-md shadow-violet-500/25 transition hover:scale-[1.02] hover:shadow-violet-500/35 active:scale-[0.98] sm:text-sm"
                 >
                   <HiStar className="text-amber-200" aria-hidden />
                   {t("ctaUpgrade")}
                 </Link>
-              </motion.div>
-              <motion.div
-                variants={
-                  reduceMotion
-                    ? undefined
-                    : {
-                        hidden: { opacity: 0, y: 12 },
-                        show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE_OUT } },
-                      }
-                }
-                whileHover={reduceMotion ? undefined : { scale: 1.02 }}
-                whileTap={reduceMotion ? undefined : { scale: 0.98 }}
-              >
+              </div>
+              <div className="pricing-stagger-item">
                 <a
                   href={WHATSAPP_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3.5 text-center text-xs font-bold text-white transition hover:bg-emerald-500 sm:text-sm"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3.5 text-center text-xs font-bold text-white transition hover:scale-[1.02] hover:bg-emerald-500 active:scale-[0.98] sm:text-sm"
                 >
                   <HiOutlineChat className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" aria-hidden />
                   {t("ctaContact")}
                 </a>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           </div>
-        </motion.section>
+        </section>
 
-        <motion.div
-          className="mt-20 grid gap-6 sm:gap-8 lg:mt-28 lg:grid-cols-3"
-          initial={reduceMotion ? undefined : "hidden"}
-          whileInView={reduceMotion ? undefined : "show"}
-          viewport={{ once: true, margin: "-60px" }}
-          variants={
-            reduceMotion
-              ? undefined
-              : {
-                  hidden: {},
-                  show: { transition: { staggerChildren: 0.12, delayChildren: 0.06 } },
-                }
-          }
-        >
+        <div className="pricing-cards-stagger mt-20 grid gap-6 sm:gap-8 lg:mt-28 lg:grid-cols-3">
           {[
             {
               title: tLanding("planFree"),
@@ -646,26 +447,13 @@ export default function PricingComparisonPage() {
               premium: false,
             },
           ].map((card, i) => (
-            <motion.div
+            <div
               key={i}
-              className={`relative rounded-2xl border p-6 transition-all sm:rounded-3xl sm:p-8 ${
+              className={`pricing-stagger-item relative rounded-2xl border p-6 transition-all sm:rounded-3xl sm:p-8 ${
                 card.premium
-                  ? "border-violet-200/80 bg-violet-50/50 shadow-md dark:border-violet-500/18 dark:bg-violet-500/[0.06] lg:scale-[1.02]"
+                  ? "border-violet-200/80 bg-violet-50/50 shadow-md hover:-translate-y-1 dark:border-violet-500/18 dark:bg-violet-500/[0.06] lg:scale-[1.02]"
                   : "border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-900/60"
               }`}
-              variants={
-                reduceMotion
-                  ? undefined
-                  : {
-                      hidden: { opacity: 0, y: 28 },
-                      show: {
-                        opacity: 1,
-                        y: 0,
-                        transition: { duration: 0.48, ease: EASE_OUT },
-                      },
-                    }
-              }
-              whileHover={reduceMotion || !card.premium ? undefined : { y: -4 }}
             >
               <h3
                 className={`text-lg font-black sm:text-xl ${
@@ -691,56 +479,19 @@ export default function PricingComparisonPage() {
                   </li>
                 ))}
               </ul>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
 
-        <motion.div
-          className="mx-auto mt-20 max-w-3xl lg:mt-28"
-          initial={reduceMotion ? undefined : { opacity: 0, y: 24 }}
-          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.5, ease: EASE_OUT }}
-        >
-          <motion.h2
-            className="mb-8 text-center text-2xl font-black text-slate-900 dark:text-white sm:mb-10 sm:text-3xl"
-            initial={reduceMotion ? undefined : { opacity: 0, y: 12 }}
-            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.45, ease: EASE_OUT }}
-          >
+        <div className="pricing-reveal mx-auto mt-20 max-w-3xl lg:mt-28">
+          <h2 className="mb-8 text-center text-2xl font-black text-slate-900 dark:text-white sm:mb-10 sm:text-3xl">
             {t("faqTitle")}
-          </motion.h2>
-          <motion.div
-            className="space-y-3 sm:space-y-4"
-            initial={reduceMotion ? undefined : "hidden"}
-            whileInView={reduceMotion ? undefined : "show"}
-            viewport={{ once: true, margin: "-20px" }}
-            variants={
-              reduceMotion
-                ? undefined
-                : {
-                    hidden: {},
-                    show: { transition: { staggerChildren: 0.1 } },
-                  }
-            }
-          >
+          </h2>
+          <div className="pricing-faq-stagger space-y-3 sm:space-y-4">
             {(["faq1", "faq2", "faq3"] as const).map((id) => (
-              <motion.div
+              <div
                 key={id}
-                className="rounded-2xl border border-slate-200/90 bg-white p-5 transition-colors hover:border-violet-200/80 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-violet-500/20 sm:p-6"
-                variants={
-                  reduceMotion
-                    ? undefined
-                    : {
-                        hidden: { opacity: 0, x: isRTL ? -16 : 16 },
-                        show: {
-                          opacity: 1,
-                          x: 0,
-                          transition: { duration: 0.42, ease: EASE_OUT },
-                        },
-                      }
-                }
+                className="pricing-stagger-item rounded-2xl border border-slate-200/90 bg-white p-5 transition-colors hover:border-violet-200/80 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-violet-500/20 sm:p-6"
               >
                 <dt className="text-base font-bold text-slate-900 transition-colors hover:text-violet-700 dark:text-white dark:hover:text-violet-300 sm:text-lg">
                   {t(`${id}q`)}
@@ -748,10 +499,10 @@ export default function PricingComparisonPage() {
                 <dd className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400 sm:text-sm">
                   {t(`${id}a`)}
                 </dd>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
     </div>
   );

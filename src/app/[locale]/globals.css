@@ -958,3 +958,231 @@ input, textarea {
 .youtube-player-container div{
   height: 100% !important;
 }
+
+/* Pricing page — pure CSS animations */
+@keyframes pricing-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pricing-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pricing-faq-slide {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pricing-faq-slide-rtl {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pricing-phone-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-4deg);
+  }
+  50% {
+    transform: translateY(-9px) rotate(-2.8deg);
+  }
+}
+
+@keyframes pricing-qr-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(7deg);
+  }
+  50% {
+    transform: translateY(7px) rotate(5.5deg);
+  }
+}
+
+.pricing-ease {
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Scroll-driven reveal (modern browsers) */
+@supports (animation-timeline: view()) {
+  .pricing-page .pricing-reveal {
+    animation: pricing-fade-up both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 38%;
+  }
+
+  .pricing-page .pricing-stagger-item,
+  .pricing-page .pricing-hero-line {
+    animation: pricing-fade-up both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 32%;
+  }
+
+  .pricing-page .pricing-reveal-hero {
+    animation: pricing-fade-in both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 35%;
+  }
+
+  .pricing-page .pricing-row-item {
+    animation: pricing-fade-up both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 28%;
+  }
+
+  .pricing-page .pricing-cta-stagger > .pricing-stagger-item:nth-child(1) {
+    animation-range: entry 0% cover 30%;
+  }
+  .pricing-page .pricing-cta-stagger > .pricing-stagger-item:nth-child(2) {
+    animation-range: entry 5% cover 32%;
+  }
+  .pricing-page .pricing-cta-stagger > .pricing-stagger-item:nth-child(3) {
+    animation-range: entry 10% cover 34%;
+  }
+
+  .pricing-page .pricing-cards-stagger > .pricing-stagger-item:nth-child(1) {
+    animation-range: entry 0% cover 32%;
+  }
+  .pricing-page .pricing-cards-stagger > .pricing-stagger-item:nth-child(2) {
+    animation-range: entry 8% cover 34%;
+  }
+  .pricing-page .pricing-cards-stagger > .pricing-stagger-item:nth-child(3) {
+    animation-range: entry 16% cover 36%;
+  }
+
+  .pricing-page .pricing-faq-stagger > .pricing-stagger-item {
+    animation-name: pricing-faq-slide;
+  }
+
+  [dir="rtl"] .pricing-page .pricing-faq-stagger > .pricing-stagger-item {
+    animation-name: pricing-faq-slide-rtl;
+  }
+}
+
+/* Fallback: animate on page load */
+@supports not (animation-timeline: view()) {
+  .pricing-page .pricing-reveal {
+    animation: pricing-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    opacity: 0;
+  }
+
+  .pricing-page .pricing-stagger-item,
+  .pricing-page .pricing-hero-line {
+    animation: pricing-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    opacity: 0;
+  }
+
+  .pricing-page .pricing-reveal-hero {
+    animation: pricing-fade-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.12s forwards;
+    opacity: 0;
+  }
+
+  .pricing-page .pricing-row-item {
+    animation: pricing-fade-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    opacity: 0;
+  }
+
+  .pricing-page .pricing-stagger > .pricing-stagger-item:nth-child(1) {
+    animation-delay: 0.04s;
+  }
+  .pricing-page .pricing-stagger > .pricing-stagger-item:nth-child(2) {
+    animation-delay: 0.14s;
+  }
+
+  .pricing-page .pricing-hero-text .pricing-hero-line:nth-child(1) {
+    animation-delay: 0.04s;
+  }
+  .pricing-page .pricing-hero-text .pricing-hero-line:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+  .pricing-page .pricing-hero-text .pricing-hero-line:nth-child(3) {
+    animation-delay: 0.18s;
+  }
+
+  .pricing-page .pricing-cta-stagger > .pricing-stagger-item:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+  .pricing-page .pricing-cta-stagger > .pricing-stagger-item:nth-child(2) {
+    animation-delay: 0.18s;
+  }
+  .pricing-page .pricing-cta-stagger > .pricing-stagger-item:nth-child(3) {
+    animation-delay: 0.26s;
+  }
+
+  .pricing-page .pricing-cards-stagger > .pricing-stagger-item:nth-child(1) {
+    animation-delay: 0.06s;
+  }
+  .pricing-page .pricing-cards-stagger > .pricing-stagger-item:nth-child(2) {
+    animation-delay: 0.18s;
+  }
+  .pricing-page .pricing-cards-stagger > .pricing-stagger-item:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+
+  .pricing-page .pricing-faq-stagger > .pricing-stagger-item {
+    animation-name: pricing-faq-slide;
+  }
+  .pricing-page .pricing-faq-stagger > .pricing-stagger-item:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+  .pricing-page .pricing-faq-stagger > .pricing-stagger-item:nth-child(3) {
+    animation-delay: 0.2s;
+  }
+
+  [dir="rtl"] .pricing-page .pricing-faq-stagger > .pricing-stagger-item {
+    animation-name: pricing-faq-slide-rtl;
+  }
+}
+
+.animate-pricing-phone-float {
+  animation: pricing-phone-float 3.6s ease-in-out infinite;
+}
+
+.animate-pricing-qr-float {
+  animation: pricing-qr-float 3.2s ease-in-out 0.35s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pricing-page .pricing-reveal,
+  .pricing-page .pricing-reveal-hero,
+  .pricing-page .pricing-stagger-item,
+  .pricing-page .pricing-hero-line,
+  .pricing-page .pricing-row-item,
+  .pricing-page .pricing-cta-stagger > .pricing-stagger-item,
+  .pricing-page .pricing-cards-stagger > .pricing-stagger-item,
+  .pricing-page .pricing-faq-stagger > .pricing-stagger-item {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  .animate-pricing-phone-float,
+  .animate-pricing-qr-float {
+    animation: none !important;
+  }
+}

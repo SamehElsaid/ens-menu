@@ -2,10 +2,6 @@
   "meta": {
     "siteName": "ENSmenu",
     "coreKeywords": "free, electronic menu, QR code",
-    "jsonLd": {
-      "freeOffer": "Free electronic menu with QR code for restaurants and cafes",
-      "featureList": "Free electronic menu, QR code, digital menus, table ordering, restaurant menu, cafe menu"
-    },
     "home": {
       "title": "ENSmenu | Free Electronic Menu & QR Code for Restaurants",
       "description": "Create a free electronic menu with QR code for your restaurant or cafe. Mobile-friendly digital menus your customers will love.",
