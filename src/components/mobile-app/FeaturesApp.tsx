@@ -115,7 +115,7 @@ const FeaturesApp = () => {
 
                     <div className="flex-1 min-w-0">
                       <h3
-                        className={`text-base sm:text-lg font-bold mb-1 transition-colors leading-tight ${
+                        className={`text-base sm:text-lg font-bold mb-1 transition-colors ${
                           isActive
                             ? "text-slate-900 dark:text-white"
                             : "text-slate-600 dark:text-slate-300"

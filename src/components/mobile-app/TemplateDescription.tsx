@@ -155,7 +155,7 @@ const TemplateDescription = () => {
           <span className="mb-3 inline-block rounded-full bg-violet-100 px-4 py-1.5 text-sm font-semibold text-violet-700 shadow-inner">
             {t("badge")}
           </span>
-          <h2 className="text-3xl font-black leading-tight text-gray-900 md:text-4xl">
+          <h2 className="text-3xl font-black text-gray-900 md:text-4xl">
             {t("title")}{" "}
             <span className="bg-gradient-to-r from-violet-600 to-purple-500 bg-clip-text text-transparent">
               {t("titleHighlight")}

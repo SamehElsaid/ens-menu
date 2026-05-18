@@ -451,7 +451,7 @@ export default function PricingComparisonPage() {
                     <th
                       className={`${cellBase} py-8 text-start align-bottom sm:px-5 sm:py-10 ${COL_SEP} bg-slate-50/50 dark:bg-slate-900/50`}
                     >
-                      <h3 className="break-words font-bold leading-tight text-slate-900 dark:text-white sm:text-lg lg:text-xl">
+                      <h3 className="break-words font-bold text-slate-900 dark:text-white sm:text-lg lg:text-xl">
                         {t("compareTitle")}
                       </h3>
                     </th>

@@ -67,7 +67,7 @@ function PhoneFrameWithVideo({
           io.disconnect();
         }
       },
-      { rootMargin: "180px", threshold: 0.01 }
+      { rootMargin: "180px", threshold: 0.01 },
     );
     io.observe(root);
     return () => io.disconnect();
@@ -161,13 +161,16 @@ export default function PhoneVideoSection() {
       aria-labelledby="phone-demo-heading"
     >
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-purple-500/5 via-transparent to-transparent dark:from-purple-500/10" />
-      
+
       <div className="container relative z-10 mx-auto px-6">
         <div className={`mb-16 ${isRTL ? "text-right" : "text-left"}`}>
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-purple-200/80 bg-purple-50 px-4 py-1.5 text-sm font-bold text-purple-700 dark:border-purple-500/30 dark:bg-purple-500/10 dark:text-purple-300">
             {t("badge")}
           </div>
-          <h2 id="phone-demo-heading" className="mb-4 text-3xl font-extrabold leading-tight text-slate-900 lg:text-5xl dark:text-white">
+          <h2
+            id="phone-demo-heading"
+            className="mb-4 text-3xl font-extrabold text-slate-900 lg:text-5xl dark:text-white"
+          >
             <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent dark:from-purple-400 dark:to-indigo-400">
               {t("title")}
             </span>
@@ -177,14 +180,18 @@ export default function PhoneVideoSection() {
           </p>
         </div>
 
-        <div className={`flex flex-col items-center gap-12 lg:flex-row lg:items-start ${isRTL ? "lg:flex-row-reverse" : ""}`}>
-          
+        <div
+          className={`flex flex-col items-center gap-12 lg:flex-row lg:items-start ${isRTL ? "lg:flex-row-reverse" : ""}`}
+        >
           {/* Steps List */}
-          <div className="flex w-full flex-col gap-4 lg:max-w-[400px] lg:shrink-0" role="tablist">
+          <div
+            className="flex w-full flex-col gap-4 lg:max-w-[400px] lg:shrink-0"
+            role="tablist"
+          >
             {TAB_KEYS.map((key, idx) => {
               const selected = idx === activeIdx;
               const stepNum = String(idx + 1).padStart(2, "0");
-              
+
               return (
                 <button
                   key={key}
@@ -199,26 +206,34 @@ export default function PhoneVideoSection() {
                   }`}
                 >
                   <div className="relative flex shrink-0 items-start">
-                    <span className={`flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-black transition-all duration-300 ${
-                      selected
-                        ? "bg-gradient-to-br from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/40 scale-110"
-                        : "bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-500"
-                    }`}>
+                    <span
+                      className={`flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-black transition-all duration-300 ${
+                        selected
+                          ? "bg-gradient-to-br from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/40 scale-110"
+                          : "bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-500"
+                      }`}
+                    >
                       {stepNum}
                     </span>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <span className={`text-base font-bold leading-tight ${
-                      selected ? "text-purple-900 dark:text-white" : "text-slate-600 dark:text-slate-400"
-                    }`}>
+                    <span
+                      className={`text-base font-bold ${
+                        selected
+                          ? "text-purple-900 dark:text-white"
+                          : "text-slate-600 dark:text-slate-400"
+                      }`}
+                    >
                       {t(`tabItems.${key}.title`)}
                     </span>
-                    <span className={`text-sm leading-relaxed ${
-                      selected
-                        ? "text-slate-600 dark:text-slate-300"
-                        : "line-clamp-1 text-slate-500 dark:text-slate-500"
-                    }`}>
+                    <span
+                      className={`text-sm leading-relaxed ${
+                        selected
+                          ? "text-slate-600 dark:text-slate-300"
+                          : "line-clamp-1 text-slate-500 dark:text-slate-500"
+                      }`}
+                    >
                       {t(`tabItems.${key}.description`)}
                     </span>
 
@@ -234,7 +249,9 @@ export default function PhoneVideoSection() {
                   </div>
 
                   {selected && (
-                    <div className={`absolute top-1/2 -translate-y-1/2 -right-2 hidden lg:block`}>
+                    <div
+                      className={`absolute top-1/2 -translate-y-1/2 -right-2 hidden lg:block`}
+                    >
                       <div className="h-4 w-4 rotate-45 border-t border-r border-purple-500/20 bg-white dark:bg-slate-900" />
                     </div>
                   )}
@@ -252,7 +269,7 @@ export default function PhoneVideoSection() {
               }`}
             >
               <div className="absolute inset-0 -z-10 bg-purple-600/10 blur-[120px] dark:bg-purple-500/20" />
-              
+
               <PhoneFrameWithVideo
                 src={effectiveSrc}
                 shape={deviceShape}
@@ -284,12 +301,10 @@ export default function PhoneVideoSection() {
                   </button>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
       </div>
-
     </section>
   );
 }

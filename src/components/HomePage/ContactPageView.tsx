@@ -166,9 +166,9 @@ export default function ContactPageView() {
                 {t("eyebrow")}
               </div>
 
-              <h1 className="mt-4 text-4xl font-black leading-tight tracking-tight md:text-5xl">
-                <span className="text-slate-900 dark:text-white">{t("titleBefore")}{" "}
-                  {t("titleHighlight")}
+              <h1 className="mt-4 text-4xl font-black tracking-tight md:text-5xl">
+                <span className="text-slate-900 dark:text-white">
+                  {t("titleBefore")} {t("titleHighlight")}
                 </span>
               </h1>
 
@@ -177,7 +177,10 @@ export default function ContactPageView() {
               </p>
 
               <p className="mt-3 flex items-start gap-2 text-sm text-slate-500 dark:text-slate-400">
-                <FiMessageCircle className="mt-0.5 size-4 shrink-0 text-purple-500 dark:text-purple-400" aria-hidden />
+                <FiMessageCircle
+                  className="mt-0.5 size-4 shrink-0 text-purple-500 dark:text-purple-400"
+                  aria-hidden
+                />
                 {t("supportNote")}
               </p>
             </header>
@@ -230,7 +233,9 @@ export default function ContactPageView() {
                     <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600 transition-colors group-hover:bg-purple-100 dark:bg-purple-500/15 dark:text-purple-400 dark:group-hover:bg-purple-500/25">
                       <social.icon className="size-5" aria-hidden />
                     </span>
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{social.name}</span>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                      {social.name}
+                    </span>
                     <FiExternalLink
                       className="size-3 text-slate-400 opacity-0 transition-opacity group-hover:opacity-100 dark:text-slate-500"
                       aria-hidden
@@ -251,9 +256,13 @@ export default function ContactPageView() {
             </h2>
             <div className="flex flex-col gap-3">
               {contactInfo.map((info, index) => {
-                const label = info.labelKey ? t(`labels.${info.labelKey}`) : info.value;
+                const label = info.labelKey
+                  ? t(`labels.${info.labelKey}`)
+                  : info.value;
                 const whatsappHref =
-                  info.href && WHATSAPP_BY_TEL[info.href] ? WHATSAPP_BY_TEL[info.href] : undefined;
+                  info.href && WHATSAPP_BY_TEL[info.href]
+                    ? WHATSAPP_BY_TEL[info.href]
+                    : undefined;
 
                 return (
                   <ContactCard
