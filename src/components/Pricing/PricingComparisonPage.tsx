@@ -439,62 +439,66 @@ export default function PricingComparisonPage() {
 
           <div className="-mx-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:overflow-visible sm:px-0">
             <div className="relative min-w-[min(100%,36rem)] overflow-hidden rounded-2xl border border-slate-200/90 bg-white/95 shadow-md shadow-slate-900/4 backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80 dark:shadow-black/25 sm:min-w-0 sm:rounded-3xl">
-              <table className="w-full min-w-[38rem] table-fixed border-collapse text-[11px] sm:min-w-0 sm:text-sm">
-                <caption className="sr-only">{t("compareTitle")}</caption>
+              <table className="w-full table-fixed border-collapse text-[11px] sm:text-sm">
                 <colgroup>
-                  <col style={{ width: "28%" }} />
+                  <col style={{ width: "27%" }} />
                   <col style={{ width: "24%" }} />
                   <col style={{ width: "26%" }} />
-                  <col style={{ width: "22%" }} />
+                  <col style={{ width: "23%" }} />
                 </colgroup>
-                <thead className="sticky top-0 z-30">
-                  <tr className="border-b border-slate-200/90 bg-white/95 backdrop-blur-md dark:border-slate-700/75 dark:bg-slate-900/95">
+                <thead>
+                  <tr className="border-b border-slate-200/90 dark:border-slate-700/75">
                     <th
-                      className={`${cellBase} ${STICKY_FEATURE} py-7 text-start align-bottom sm:px-5 sm:py-9 ${COL_SEP} bg-slate-50/95 dark:bg-slate-900/95`}
+                      className={`${cellBase} py-8 text-start align-bottom sm:px-5 sm:py-10 ${COL_SEP} bg-slate-50/50 dark:bg-slate-900/50`}
                     >
-                      <h3 className="wrap-break-words text-sm font-bold leading-tight text-slate-900 dark:text-white sm:text-lg">
+                      <h3 className="break-words font-bold leading-tight text-slate-900 dark:text-white sm:text-lg lg:text-xl">
                         {t("compareTitle")}
                       </h3>
                     </th>
                     <th
-                      className={`${cellBase} py-7 align-bottom sm:py-9 ${COL_SEP} bg-white/95 dark:bg-slate-900/90`}
+                      className={`${cellBase} py-8 align-bottom sm:py-10 ${COL_SEP} bg-white/60 dark:bg-slate-900/30`}
                     >
-                      <div className="mb-1.5 wrap-break-words text-xs font-semibold text-slate-500 dark:text-slate-400 sm:mb-2 sm:text-sm">
+                      <div className="mb-1.5 break-words font-semibold text-slate-500 dark:text-slate-400 sm:mb-2 sm:text-base">
                         {tLanding("planFree")}
                       </div>
-                      <div className="text-xl font-black text-slate-900 dark:text-white sm:text-3xl">
-                        0{tLanding("currencyUsd")}
+                      <div className="text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">
+                        0$
                       </div>
                     </th>
                     <th
-                      className={`${COL_PRO} ${cellBase} z-1 py-8 text-center align-bottom sm:py-10`}
+                      className={`${COL_PRO} ${cellBase} z-[1] py-9 text-center align-bottom sm:py-11`}
                     >
-                      <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-linear-to-b from-violet-400/18 via-fuchsia-400/10 to-transparent blur-xl dark:from-violet-500/12 dark:via-fuchsia-500/08" />
+                      <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-violet-400/18 via-fuchsia-400/10 to-transparent blur-xl dark:from-violet-500/12 dark:via-fuchsia-500/08" />
                       <div className="relative flex flex-col items-center">
-                        <span className="mb-1.5 inline-flex rounded-full bg-linear-to-r from-violet-500 to-indigo-500 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-tight text-white shadow-sm sm:mb-2 sm:text-[10px]">
+                        <span className="mb-2 inline-flex rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-tight text-white shadow-sm shadow-violet-500/20 sm:mb-2.5 sm:px-3 sm:text-[10px] sm:shadow-violet-500/25">
                           {tLanding("popular")}
                         </span>
-                        <div className="mb-1 text-xs font-semibold text-violet-700 dark:text-violet-300 sm:text-sm">
+                        <div className="mb-1.5 break-words text-sm font-semibold text-violet-700 dark:text-violet-300 sm:text-base">
                           {tLanding("planPro")}
                         </div>
-                        <div
-                          className={`text-xl font-black tracking-tight sm:text-3xl ${cellProText}`}
-                        >
-                          {STATIC_PRO_YEARLY_USD}
-                          {tLanding("currencyUsd")}
-                          <span className="ms-0.5 align-top text-[9px] font-medium text-violet-800/70 dark:text-violet-200/75 sm:text-xs">
-                            /{tLanding("perYear")}
-                          </span>
+                        <div className="relative inline-block">
+                          <div
+                            className="absolute -inset-x-6 -top-2 bottom-0 rounded-full bg-gradient-to-t from-transparent via-violet-300/20 to-fuchsia-300/25 opacity-80 blur-xl dark:via-violet-500/12 dark:to-fuchsia-500/10"
+                            aria-hidden
+                          />
+                          <div
+                            className={`relative text-2xl font-black tracking-tight sm:text-4xl ${cellProText}`}
+                          >
+                            {STATIC_PRO_YEARLY_USD}$
+                            <span className="ms-0.5 align-top text-[9px] font-medium text-violet-800/70 dark:text-violet-200/75 sm:text-xs">
+                              /{tLanding("perYear")}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </th>
                     <th
-                      className={`${cellBase} bg-white/95 py-7 align-bottom dark:bg-slate-900/90 sm:py-9`}
+                      className={`${cellBase} bg-white/50 py-8 align-bottom dark:bg-slate-900/25 sm:py-10`}
                     >
-                      <div className="mb-1.5 text-xs font-semibold text-slate-900 dark:text-white sm:mb-2 sm:text-sm">
+                      <div className="mb-1.5 break-words font-semibold text-slate-900 dark:text-white sm:mb-2 sm:text-base">
                         {tLanding("planCustom")}
                       </div>
-                      <div className="wrap-break-words text-sm font-bold text-slate-500 dark:text-slate-400 sm:text-base">
+                      <div className="break-words text-base font-bold text-slate-500 dark:text-slate-400 sm:text-lg">
                         {tLanding("customPrice")}
                       </div>
                     </th>
@@ -504,23 +508,23 @@ export default function PricingComparisonPage() {
                   {rows.map((row, idx) => {
                     const alt = idx % 2 === 1;
                     const rowTintFree = alt
-                      ? "bg-slate-50/90 dark:bg-slate-800/35"
-                      : "bg-white dark:bg-slate-900/25";
+                      ? "bg-slate-50/80 dark:bg-slate-800/28"
+                      : "bg-white/55 dark:bg-slate-900/18";
                     const rowTintCustom = alt
-                      ? "bg-slate-50/75 dark:bg-slate-800/28"
-                      : "bg-white/90 dark:bg-slate-900/15";
-                    const proStripe = alt
-                      ? "before:bg-slate-900/[0.03] dark:before:bg-black/14"
-                      : "before:bg-gradient-to-b before:from-transparent before:via-violet-400/[0.04] before:to-fuchsia-400/[0.05] dark:before:via-violet-400/08 dark:before:to-fuchsia-500/08";
+                      ? "bg-slate-50/65 dark:bg-slate-800/22"
+                      : "bg-white/45 dark:bg-slate-900/12";
+                    const proStripe =
+                      "before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-gradient-to-b before:from-transparent before:via-violet-400/[0.04] before:to-fuchsia-400/[0.05] dark:before:via-violet-400/08 dark:before:to-fuchsia-500/08";
+                    const proStripeAlt =
+                      "before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-slate-900/[0.025] dark:before:bg-black/12";
 
                     return (
                       <tr
                         key={row.label}
-                        className="border-b border-slate-100/90 last:border-b-0 dark:border-slate-800/55"
+                        className="pricing-row-item border-b border-slate-100/90 last:border-b-0 dark:border-slate-800/55"
                       >
                         <th
-                          scope="row"
-                          className={`${cellBase} ${STICKY_FEATURE} hyphens-auto wrap-break-words text-start text-[11px] font-semibold leading-snug text-slate-700 dark:text-slate-300 sm:px-5 sm:text-sm ${COL_SEP} ${rowTintFree}`}
+                          className={`${cellBase} hyphens-auto break-words text-start text-[11px] font-semibold leading-snug text-slate-700 dark:text-slate-300 sm:px-5 sm:text-sm ${COL_SEP} ${rowTintFree}`}
                         >
                           {row.label}
                         </th>
@@ -528,7 +532,7 @@ export default function PricingComparisonPage() {
                           {renderCell(row.free, tYes, tNo)}
                         </td>
                         <td
-                          className={`${COL_PRO} ${cellBase} relative z-1 font-semibold before:pointer-events-none before:absolute before:inset-0 before:content-[''] ${proStripe} sm:px-5 [&_span]:text-slate-800 dark:[&_span]:text-slate-200 ${cellProText}`}
+                          className={`${COL_PRO} ${cellBase} z-[1] font-semibold sm:px-5 [&_span]:text-slate-800 dark:[&_span]:text-slate-200 ${alt ? proStripeAlt : proStripe} ${cellProText}`}
                         >
                           {renderCell(row.pro, tYes, tNo)}
                         </td>
@@ -542,14 +546,6 @@ export default function PricingComparisonPage() {
               </table>
             </div>
           </div>
-
-          <p className="mt-4 flex items-start gap-2 text-[11px] leading-relaxed text-slate-500 sm:text-xs dark:text-slate-500">
-            <HiInformationCircle
-              className="mt-0.5 h-4 w-4 shrink-0 text-violet-500/80"
-              aria-hidden
-            />
-            <span>{t("staticFiguresNote")}</span>
-          </p>
         </section>
 
         {/* CTA strip */}
