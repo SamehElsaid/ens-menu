@@ -1,13 +1,12 @@
 "use client";
 
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { useParams, useRouter, useSearchParams, usePathname } from "next/navigation";
+  useParams,
+  useRouter,
+  useSearchParams,
+  usePathname,
+} from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import ViewTime from "@/shared/ViewTime";
 import Cookies from "js-cookie";
@@ -54,6 +53,7 @@ type CallEntry = {
   orderId: string;
   lastAction: string;
   actionDetails: ActionDetail[];
+  customerName?: string | null;
   items: CallItem[];
   totalPrice: number;
 };
@@ -250,20 +250,24 @@ export default function ActivityHistoryPage() {
     axiosGet<{ entry: CallEntryDetail } | CallEntryDetail>(
       `/menus/${menuId}/activity-logs/${entryParam}`,
       locale,
-    ).then((result) => {
-      if (cancelled) return;
-      if (result.status && result.data) {
-        // Unwrap { entry: {...} } wrapper if present
-        const raw = result.data as Record<string, unknown>;
-        const resolved = (raw.entry ?? raw) as CallEntryDetail;
-        setModalEntry(resolved);
-      }
-      setModalLoading(false);
-    }).catch(() => {
-      if (!cancelled) setModalLoading(false);
-    });
+    )
+      .then((result) => {
+        if (cancelled) return;
+        if (result.status && result.data) {
+          // Unwrap { entry: {...} } wrapper if present
+          const raw = result.data as Record<string, unknown>;
+          const resolved = (raw.entry ?? raw) as CallEntryDetail;
+          setModalEntry(resolved);
+        }
+        setModalLoading(false);
+      })
+      .catch(() => {
+        if (!cancelled) setModalLoading(false);
+      });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [entryParam, menuId, locale]);
 
   // ── close on Esc ────────────────────────────────────────────────────────
@@ -297,14 +301,16 @@ export default function ActivityHistoryPage() {
     socket.emit(
       "dashboard:menu_subscribe",
       { token: `Bearer ${token}`, menuId: mid },
-      () => { },
+      () => {},
     );
     socket.on("menu:activity_updated", (payload: { menuId?: number }) => {
       if (payload?.menuId !== mid) return;
       setPage(1);
       setLiveTick((n) => n + 1);
     });
-    return () => { socket.disconnect(); };
+    return () => {
+      socket.disconnect();
+    };
   }, [menuId]);
 
   // ── column defs ──────────────────────────────────────────────────────────
@@ -321,12 +327,12 @@ export default function ActivityHistoryPage() {
         ),
       },
       {
-        headerName: t("colWaiter"),
+        headerName: t("colCustomer"),
         flex: 1,
         minWidth: 130,
         cellRenderer: (p: ICellRendererParams<CallEntry>) => (
           <span className="text-slate-700 dark:text-slate-200">
-            {p.data?.actionDetails?.[0]?.waiterName ?? "—"}
+            {p.data?.customerName?.trim() || "—"}
           </span>
         ),
       },
@@ -344,7 +350,9 @@ export default function ActivityHistoryPage() {
         headerName: t("colStatus"),
         width: 130,
         cellRenderer: (p: ICellRendererParams<CallEntry>) => {
-          const status = (p.data?.actionDetails?.[0]?.status ?? "pending").toLowerCase();
+          const status = (
+            p.data?.actionDetails?.[0]?.status ?? "pending"
+          ).toLowerCase();
           const cls =
             status === "confirmed"
               ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
@@ -352,7 +360,9 @@ export default function ActivityHistoryPage() {
                 ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
                 : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300";
           return (
-            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${cls}`}>
+            <span
+              className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${cls}`}
+            >
               {t(`orderStatus.${status}` as never)}
             </span>
           );
@@ -414,7 +424,8 @@ export default function ActivityHistoryPage() {
     [t, openModal, currency],
   );
 
-  const showModal = Boolean(entryParam) && (modalLoading || Boolean(modalEntry));
+  const showModal =
+    Boolean(entryParam) && (modalLoading || Boolean(modalEntry));
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -506,7 +517,10 @@ function ModalSkeleton() {
       <div className="h-4 w-2/5 rounded-lg bg-slate-200 dark:bg-slate-700" />
       <div className="mt-6 space-y-3">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-10 w-full rounded-lg bg-slate-200 dark:bg-slate-700" />
+          <div
+            key={i}
+            className="h-10 w-full rounded-lg bg-slate-200 dark:bg-slate-700"
+          />
         ))}
       </div>
     </div>
@@ -526,6 +540,39 @@ function actionLabel(action: string, locale: string): string {
   const entry = ACTION_LABEL[action];
   if (!entry) return action;
   return locale === "ar" ? entry.ar : entry.en;
+}
+
+function isGuestOrderAction(act: EntryAction): boolean {
+  return (
+    act.action === "TABLE_CALL_CREATED" ||
+    String(act.actorRole ?? "").toLowerCase() === "guest"
+  );
+}
+
+function actionActorName(
+  act: EntryAction,
+  order?: EntryOrder | null,
+): string {
+  if (isGuestOrderAction(act)) {
+    const fromOrder =
+      order?.customerName ??
+      act.detail?.order?.customerName ??
+      null;
+    if (fromOrder != null && String(fromOrder).trim() !== "") {
+      return String(fromOrder).trim();
+    }
+  }
+  return act.waiterName?.trim() ?? "";
+}
+
+function lastStaffWaiterName(actions: EntryAction[]): string | null {
+  for (let i = actions.length - 1; i >= 0; i -= 1) {
+    const act = actions[i];
+    if (isGuestOrderAction(act)) continue;
+    const name = act.waiterName?.trim();
+    if (name) return name;
+  }
+  return null;
 }
 
 function ActionDot({ status }: { status: string }) {
@@ -553,15 +600,21 @@ function ActionsTimeline({
   actions,
   locale,
   t,
+  order,
 }: {
   actions: EntryAction[];
   locale: string;
   t: ReturnType<typeof useTranslations<"activityHistory">>;
+  order?: EntryOrder | null;
 }) {
   return (
     <ol className="relative space-y-0">
       {actions.map((act, idx) => {
         const isLast = idx === actions.length - 1;
+        const actorName = actionActorName(act, order);
+        const actorLabel = isGuestOrderAction(act)
+          ? t("detailsCustomer")
+          : t("colWaiter");
         const summary =
           locale === "ar"
             ? (act.summaryAr ?? act.summaryEn ?? null)
@@ -588,15 +641,20 @@ function ActionsTimeline({
                 <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
                   {actionLabel(act.action, locale)}
                 </span>
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${pillCls}`}>
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${pillCls}`}
+                >
                   {t(`orderStatus.${lc}` as never)}
                 </span>
               </div>
 
-              {act.waiterName && (
+              {actorName && (
                 <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
                   <IoPersonOutline className="shrink-0" />
-                  {act.waiterName}
+                  <span className="text-slate-400 dark:text-slate-500">
+                    {actorLabel}:
+                  </span>
+                  {actorName}
                 </p>
               )}
 
@@ -653,25 +711,38 @@ function OrderDetailsModal({
       ? (action?.summaryAr ?? action?.summaryEn ?? null)
       : (action?.summaryEn ?? action?.summaryAr ?? null);
 
+  const customerDisplay =
+    order?.customerName?.trim() ||
+    (action && isGuestOrderAction(action)
+      ? actionActorName(action, order)
+      : "") ||
+    null;
+  const waiterDisplay = entry?.actions
+    ? lastStaffWaiterName(entry.actions)
+    : null;
 
   const statusConfig = {
     confirmed: {
       pill: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 ring-1 ring-green-300/50",
-      header: "from-green-500/10 to-emerald-500/5 dark:from-green-900/30 dark:to-emerald-900/10",
+      header:
+        "from-green-500/10 to-emerald-500/5 dark:from-green-900/30 dark:to-emerald-900/10",
       border: "border-green-200/60 dark:border-green-700/40",
     },
     cancelled: {
       pill: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 ring-1 ring-red-300/50",
-      header: "from-red-500/10 to-rose-500/5 dark:from-red-900/30 dark:to-rose-900/10",
+      header:
+        "from-red-500/10 to-rose-500/5 dark:from-red-900/30 dark:to-rose-900/10",
       border: "border-red-200/60 dark:border-red-700/40",
     },
     pending: {
       pill: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 ring-1 ring-amber-300/50",
-      header: "from-violet-500/10 to-fuchsia-500/5 dark:from-violet-900/30 dark:to-fuchsia-900/10",
+      header:
+        "from-violet-500/10 to-fuchsia-500/5 dark:from-violet-900/30 dark:to-fuchsia-900/10",
       border: "border-violet-200/60 dark:border-violet-700/40",
     },
   };
-  const cfg = statusConfig[status as keyof typeof statusConfig] ?? statusConfig.pending;
+  const cfg =
+    statusConfig[status as keyof typeof statusConfig] ?? statusConfig.pending;
 
   return (
     <div
@@ -683,7 +754,9 @@ function OrderDetailsModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* ── Gradient header ── */}
-        <div className={`relative bg-linear-to-br ${cfg.header} px-5 pt-5 pb-4 border-b ${cfg.border}`}>
+        <div
+          className={`relative bg-linear-to-br ${cfg.header} px-5 pt-5 pb-4 border-b ${cfg.border}`}
+        >
           {/* Drag handle (mobile) */}
           <div className="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600 sm:hidden" />
 
@@ -709,7 +782,9 @@ function OrderDetailsModal({
 
             <div className="flex items-center gap-2 shrink-0">
               {entry && (
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${cfg.pill}`}>
+                <span
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${cfg.pill}`}
+                >
                   <StatusIcon status={status} />
                   {t(`orderStatus.${status}` as never)}
                 </span>
@@ -740,11 +815,20 @@ function OrderDetailsModal({
             <>
               {/* Meta cards */}
               <div className="px-5 py-4 grid grid-cols-2 gap-3 sm:grid-cols-4 border-b border-slate-100 dark:border-slate-800">
-                <MetaCard
-                  icon={<IoPersonOutline className="text-violet-500" />}
-                  label={t("colWaiter")}
-                  value={action?.waiterName ?? "—"}
-                />
+                {customerDisplay && (
+                  <MetaCard
+                    icon={<IoPersonOutline className="text-fuchsia-500" />}
+                    label={t("detailsCustomer")}
+                    value={customerDisplay}
+                  />
+                )}
+                {waiterDisplay && (
+                  <MetaCard
+                    icon={<IoPersonOutline className="text-violet-500" />}
+                    label={t("colWaiter")}
+                    value={waiterDisplay}
+                  />
+                )}
                 <MetaCard
                   icon={<IoCalendarOutline className="text-violet-500" />}
                   label={t("detailsWhen")}
@@ -755,13 +839,6 @@ function OrderDetailsModal({
                     icon={<IoReceiptOutline className="text-violet-500" />}
                     label={t("detailsTable")}
                     value={order.tableNumber}
-                  />
-                )}
-                {order?.customerName && (
-                  <MetaCard
-                    icon={<IoPersonOutline className="text-fuchsia-500" />}
-                    label={t("detailsCustomer")}
-                    value={order.customerName}
                   />
                 )}
               </div>
@@ -800,7 +877,11 @@ function OrderDetailsModal({
                             </p>
                             {item.price != null && (
                               <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
-                                {item.price}{currency && <span className="ms-0.5">{currency}</span>} × {item.quantity}
+                                {item.price}
+                                {currency && (
+                                  <span className="ms-0.5">{currency}</span>
+                                )}{" "}
+                                × {item.quantity}
                               </p>
                             )}
                           </div>
@@ -848,6 +929,7 @@ function OrderDetailsModal({
                     actions={entry.actions}
                     locale={locale}
                     t={t}
+                    order={order}
                   />
                 </div>
               )}
@@ -888,9 +970,9 @@ function MetaCard({
         <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
           {label}
         </p>
-        <p className={`text-sm font-semibold mt-0.5 truncate ${valueClass}`}>
+        <div className={`text-sm font-semibold mt-0.5 truncate ${valueClass}`}>
           {value}
-        </p>
+        </div>
       </div>
     </div>
   );

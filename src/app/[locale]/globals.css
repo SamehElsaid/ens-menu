@@ -959,11 +959,11 @@ input, textarea {
   height: 100% !important;
 }
 
-/* Pricing page — pure CSS animations */
+/* Pricing page — keep content fully opaque; hero-only load animation (no scroll-driven opacity) */
 @keyframes pricing-fade-up {
   from {
     opacity: 0;
-    transform: translateY(22px);
+    transform: translateY(18px);
   }
   to {
     opacity: 1;
@@ -974,33 +974,11 @@ input, textarea {
 @keyframes pricing-fade-in {
   from {
     opacity: 0;
-    transform: translateY(28px) scale(0.96);
+    transform: translateY(24px) scale(0.97);
   }
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes pricing-faq-slide {
-  from {
-    opacity: 0;
-    transform: translateX(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes pricing-faq-slide-rtl {
-  from {
-    opacity: 0;
-    transform: translateX(-16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
   }
 }
 
@@ -1024,87 +1002,21 @@ input, textarea {
   }
 }
 
-.pricing-ease {
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+/* All sections visible by default (fixes stuck low-opacity from scroll animations) */
+.pricing-page .pricing-reveal,
+.pricing-page .pricing-reveal-hero,
+.pricing-page .pricing-stagger-item,
+.pricing-page .pricing-hero-line,
+.pricing-page .pricing-row-item,
+.pricing-page .pricing-faq-item,
+.pricing-page .pricing-cta-stagger > *,
+.pricing-page .pricing-cards-stagger > * {
+  opacity: 1;
 }
 
-/* Scroll-driven reveal (modern browsers) */
-@supports (animation-timeline: view()) {
-  .pricing-page .pricing-reveal {
-    animation: pricing-fade-up both;
-    animation-timeline: view();
-    animation-range: entry 0% cover 38%;
-  }
-
-  .pricing-page .pricing-stagger-item,
+@media (prefers-reduced-motion: no-preference) {
   .pricing-page .pricing-hero-line {
-    animation: pricing-fade-up both;
-    animation-timeline: view();
-    animation-range: entry 0% cover 32%;
-  }
-
-  .pricing-page .pricing-reveal-hero {
-    animation: pricing-fade-in both;
-    animation-timeline: view();
-    animation-range: entry 0% cover 35%;
-  }
-
-  .pricing-page .pricing-row-item {
-    animation: pricing-fade-up both;
-    animation-timeline: view();
-    animation-range: entry 0% cover 28%;
-  }
-
-  .pricing-page .pricing-cta-stagger > .pricing-stagger-item:nth-child(1) {
-    animation-range: entry 0% cover 30%;
-  }
-  .pricing-page .pricing-cta-stagger > .pricing-stagger-item:nth-child(2) {
-    animation-range: entry 5% cover 32%;
-  }
-  .pricing-page .pricing-cta-stagger > .pricing-stagger-item:nth-child(3) {
-    animation-range: entry 10% cover 34%;
-  }
-
-  .pricing-page .pricing-cards-stagger > .pricing-stagger-item:nth-child(1) {
-    animation-range: entry 0% cover 32%;
-  }
-  .pricing-page .pricing-cards-stagger > .pricing-stagger-item:nth-child(2) {
-    animation-range: entry 8% cover 34%;
-  }
-  .pricing-page .pricing-cards-stagger > .pricing-stagger-item:nth-child(3) {
-    animation-range: entry 16% cover 36%;
-  }
-
-}
-
-/* Fallback: animate on page load */
-@supports not (animation-timeline: view()) {
-  .pricing-page .pricing-reveal {
-    animation: pricing-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    opacity: 0;
-  }
-
-  .pricing-page .pricing-stagger-item,
-  .pricing-page .pricing-hero-line {
-    animation: pricing-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    opacity: 0;
-  }
-
-  .pricing-page .pricing-reveal-hero {
-    animation: pricing-fade-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.12s forwards;
-    opacity: 0;
-  }
-
-  .pricing-page .pricing-row-item {
-    animation: pricing-fade-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    opacity: 0;
-  }
-
-  .pricing-page .pricing-stagger > .pricing-stagger-item:nth-child(1) {
-    animation-delay: 0.04s;
-  }
-  .pricing-page .pricing-stagger > .pricing-stagger-item:nth-child(2) {
-    animation-delay: 0.14s;
+    animation: pricing-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
   .pricing-page .pricing-hero-text .pricing-hero-line:nth-child(1) {
@@ -1114,29 +1026,12 @@ input, textarea {
     animation-delay: 0.1s;
   }
   .pricing-page .pricing-hero-text .pricing-hero-line:nth-child(3) {
-    animation-delay: 0.18s;
+    animation-delay: 0.16s;
   }
 
-  .pricing-page .pricing-cta-stagger > .pricing-stagger-item:nth-child(1) {
-    animation-delay: 0.1s;
+  .pricing-page .pricing-reveal-hero {
+    animation: pricing-fade-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
   }
-  .pricing-page .pricing-cta-stagger > .pricing-stagger-item:nth-child(2) {
-    animation-delay: 0.18s;
-  }
-  .pricing-page .pricing-cta-stagger > .pricing-stagger-item:nth-child(3) {
-    animation-delay: 0.26s;
-  }
-
-  .pricing-page .pricing-cards-stagger > .pricing-stagger-item:nth-child(1) {
-    animation-delay: 0.06s;
-  }
-  .pricing-page .pricing-cards-stagger > .pricing-stagger-item:nth-child(2) {
-    animation-delay: 0.18s;
-  }
-  .pricing-page .pricing-cards-stagger > .pricing-stagger-item:nth-child(3) {
-    animation-delay: 0.3s;
-  }
-
 }
 
 /* Pricing — solid sections (no scroll-linked fade/blur artifacts) */
@@ -1148,8 +1043,62 @@ input, textarea {
 .pricing-page .pricing-faq-section,
 .pricing-page .pricing-faq-section .pricing-faq-item {
   opacity: 1 !important;
-  transform: none !important;
   animation: none !important;
+}
+
+/* Mobile: no hero fade; compact table (no horizontal scroll) */
+@media (max-width: 639px) {
+  .pricing-page {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .pricing-page .pricing-hero-line,
+  .pricing-page .pricing-reveal-hero {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .pricing-page .pricing-table-wrap {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .pricing-page .pricing-table-scroll {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .pricing-page .pricing-compare-table {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+  }
+
+  .pricing-page .pricing-compare-table th,
+  .pricing-page .pricing-compare-table td {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (min-width: 640px) {
+  .pricing-page .pricing-compare-table col:nth-child(1) {
+    width: 28%;
+  }
+  .pricing-page .pricing-compare-table col:nth-child(2) {
+    width: 24%;
+  }
+  .pricing-page .pricing-compare-table col:nth-child(3) {
+    width: 26%;
+  }
+  .pricing-page .pricing-compare-table col:nth-child(4) {
+    width: 22%;
+  }
 }
 
 .animate-pricing-phone-float {
@@ -1161,10 +1110,8 @@ input, textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pricing-page .pricing-reveal,
-  .pricing-page .pricing-reveal-hero,
-  .pricing-page .pricing-stagger-item,
   .pricing-page .pricing-hero-line,
+  .pricing-page .pricing-reveal-hero,
   .pricing-page .pricing-table-wrap,
   .pricing-page .pricing-table-wrap .pricing-row-item,
   .pricing-page .pricing-cta-section,
@@ -1172,9 +1119,9 @@ input, textarea {
   .pricing-page .pricing-cards-stagger > .pricing-stagger-item,
   .pricing-page .pricing-faq-section,
   .pricing-page .pricing-faq-section .pricing-faq-item {
+    animation: none !important;
     opacity: 1 !important;
     transform: none !important;
-    animation: none !important;
   }
 
   .animate-pricing-phone-float,

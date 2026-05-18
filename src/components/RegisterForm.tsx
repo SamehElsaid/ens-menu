@@ -11,6 +11,7 @@ import CustomBtn from "./Custom/CustomBtn";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useCallback, useState } from "react";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
+import { pushSignUpEvent } from "@/shared/gtmEvents";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import GoogleSignInButton from "@/components/Auth/GoogleSignInButton";
@@ -142,6 +143,7 @@ export default function RegisterForm() {
       true,
     );
     if (response.status) {
+      pushSignUpEvent();
       toast.success(t("auth.registerSuccess"));
       router.push("/auth/login");
     } else {

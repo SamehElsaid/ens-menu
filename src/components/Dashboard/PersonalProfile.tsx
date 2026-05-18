@@ -500,7 +500,10 @@ export default function PersonalProfile({
     setProYearlyPayLoading(true);
     const res = await axiosPost<
       { name: string; email?: string; mobile: string; currency?: string },
-      { success?: boolean; data?: { redirectUrl?: string } }
+      {
+        success?: boolean;
+        data?: { redirectUrl?: string; amount?: number; order_id?: string };
+      }
     >("/payment/subscription/pro-yearly/initiate", locale, {
       name: nameToSend,
       email: profile?.email?.trim() || undefined,
@@ -509,6 +512,17 @@ export default function PersonalProfile({
     });
     setProYearlyPayLoading(false);
     if (res?.status && res.data?.data?.redirectUrl) {
+      const amount = Number(res.data.data.amount);
+      if (Number.isFinite(amount) && amount > 0) {
+        sessionStorage.setItem(
+          "gtm_pending_purchase",
+          JSON.stringify({
+            value: amount,
+            currency: "USD",
+            orderId: res.data.data.order_id,
+          }),
+        );
+      }
       toast.info(t("paying"));
       window.location.href = res.data.data.redirectUrl;
       return;

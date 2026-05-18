@@ -1,6 +1,7 @@
 export interface LoginResponse {
   accessToken: string;
   refreshToken: string;
+  isNew?: boolean;
   user?: {
     email: string;
     id: number;
