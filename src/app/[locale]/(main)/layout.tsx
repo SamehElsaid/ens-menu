@@ -5,6 +5,7 @@ export default async function MainLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <>
       <Header />

@@ -35,7 +35,7 @@ const CUSTOM_PLAN_FEATURE_KEYS = [
   "onlinePayment",
 ] as const;
 
-const WHATSAPP_URL = "https://wa.me/971586551491";
+const WHATSAPP_URL = "https://wa.me/201500800050";
 
 export default function PricingSection() {
   const t = useTranslations("Landing.pricing");

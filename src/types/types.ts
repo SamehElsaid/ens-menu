@@ -118,6 +118,7 @@ export interface ContactInfo {
   value: string;
   href?: string;
   dir?: "ltr" | "rtl";
+  labelKey?: string;
 }
 
 export interface FAQItemType {

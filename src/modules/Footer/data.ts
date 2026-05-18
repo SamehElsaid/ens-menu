@@ -21,6 +21,7 @@ export const getContactInfo = (t: TranslationFunction): ContactInfo[] => [
   {
     icon: FiPhone,
     type: "phone",
+    labelKey: "phoneUae",
     value: "+971586551491",
     href: "tel:+971586551491",
     dir: "ltr",
@@ -28,6 +29,7 @@ export const getContactInfo = (t: TranslationFunction): ContactInfo[] => [
   {
     icon: FiSmartphone,
     type: "phone",
+    labelKey: "phoneEgypt",
     value: "01500800050",
     href: "tel:+201500800050",
     dir: "ltr",
@@ -35,12 +37,14 @@ export const getContactInfo = (t: TranslationFunction): ContactInfo[] => [
   {
     icon: FiMail,
     type: "email",
+    labelKey: "email",
     value: "info@ensmenu.com",
     href: "mailto:info@ensmenu.com",
   },
   {
     icon: FiMapPin,
     type: "address",
+    labelKey: "address",
     value: t("UnitedArabEmirates"),
   },
 ];
@@ -50,27 +54,27 @@ export const getSocialLinks = () => [
   {
     name: "Instagram",
     icon: FaInstagram,
-    href: "https://instagram.com/yourpage",
+    href: "https://www.instagram.com/ens.menu",
   },
   {
     name: "Facebook",
     icon: FaFacebook,
-    href: "https://facebook.com/yourpage",
+    href: "https://www.facebook.com/Ensmenu/",
   },
   {
     name: "TikTok",
     icon: FaTiktok,
-    href: "https://tiktok.com/@yourpage",
+    href: "https://www.tiktok.com/@ensmenu6?_r=1&_t=ZS-96PDguGCcBk",
   },
   {
     name: "WhatsApp",
     icon: FaWhatsapp,
-    href: "https://wa.me/971586551491",
+    href: "https://wa.me/201500800050",
   },
   {
     name: "Youtube",
     icon: FaYoutube,
-    href: "https://youtube.com/@yourpage",
+    href: "https://www.youtube.com/@EnsMENU",
   },
 ];
 
@@ -81,7 +85,6 @@ export const getNavLinks = (headerT: TranslationFunction): NavLink[] => [
   { name: headerT("faq"), path: "/faq" },
   {
     name: headerT("contact"),
-    path: "https://wa.me/971586551491",
-    external: true,
+    path: "/contact",
   },
 ];

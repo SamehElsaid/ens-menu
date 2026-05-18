@@ -17,6 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: t("auth.registerTitle"),
     description: t("auth.registerDescription"),
     keywords: t("auth.registerKeywords"),
+    coreKeywords: t("coreKeywords"),
     siteName: t("siteName"),
     robots: "noindex, nofollow",
   });

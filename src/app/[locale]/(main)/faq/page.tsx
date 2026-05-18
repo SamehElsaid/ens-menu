@@ -15,6 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: t("faqPage.title"),
     description: t("faqPage.description"),
     keywords: t("faqPage.keywords"),
+    coreKeywords: t("coreKeywords"),
     siteName: t("siteName"),
     robots: "index, follow",
   });

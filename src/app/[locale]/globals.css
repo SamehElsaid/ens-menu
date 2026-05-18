@@ -958,3 +958,100 @@ input, textarea {
 .youtube-player-container div{
   height: 100% !important;
 }
+
+/* Pricing page — keep content fully opaque; hero-only load animation (no scroll-driven opacity) */
+@keyframes pricing-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pricing-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pricing-phone-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-4deg);
+  }
+  50% {
+    transform: translateY(-9px) rotate(-2.8deg);
+  }
+}
+
+@keyframes pricing-qr-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(7deg);
+  }
+  50% {
+    transform: translateY(7px) rotate(5.5deg);
+  }
+}
+
+/* All sections visible by default (fixes stuck low-opacity from scroll animations) */
+.pricing-page .pricing-reveal,
+.pricing-page .pricing-reveal-hero,
+.pricing-page .pricing-stagger-item,
+.pricing-page .pricing-hero-line,
+.pricing-page .pricing-row-item,
+.pricing-page .pricing-faq-item,
+.pricing-page .pricing-cta-stagger > *,
+.pricing-page .pricing-cards-stagger > * {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pricing-page .pricing-hero-line {
+    animation: pricing-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .pricing-page .pricing-hero-text .pricing-hero-line:nth-child(1) {
+    animation-delay: 0.04s;
+  }
+  .pricing-page .pricing-hero-text .pricing-hero-line:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+  .pricing-page .pricing-hero-text .pricing-hero-line:nth-child(3) {
+    animation-delay: 0.16s;
+  }
+
+  .pricing-page .pricing-reveal-hero {
+    animation: pricing-fade-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+  }
+}
+
+.animate-pricing-phone-float {
+  animation: pricing-phone-float 3.6s ease-in-out infinite;
+}
+
+.animate-pricing-qr-float {
+  animation: pricing-qr-float 3.2s ease-in-out 0.35s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pricing-page .pricing-hero-line,
+  .pricing-page .pricing-reveal-hero {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .animate-pricing-phone-float,
+  .animate-pricing-qr-float {
+    animation: none !important;
+  }
+}
