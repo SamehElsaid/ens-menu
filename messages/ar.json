@@ -1536,7 +1536,11 @@
     "orderStatus": {
       "pending": "قيد الانتظار",
       "confirmed": "مؤكد",
-      "cancelled": "ملغى"
+      "cancelled": "ملغى",
+      "updated": "محدّث",
+      "staff_created": "إضافة موظف",
+      "staff_updated": "تعديل موظف",
+      "staff_deleted": "حذف موظف"
     },
     "changeTypes": {
       "itemsEdited": "تعديل أصناف الطلب أو الكميات"
@@ -1563,6 +1567,7 @@
       "descriptionEn": "الوصف (إنجليزي)"
     },
     "colOrderId": "رقم الطلب",
+    "colCustomer": "العميل",
     "colWaiter": "النادل",
     "colAction": "الإجراء",
     "colStatus": "الحالة",

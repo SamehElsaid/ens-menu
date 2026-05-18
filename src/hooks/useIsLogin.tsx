@@ -74,7 +74,10 @@ function useIsLogin() {
     }
 
     if (tokenFromCookie && isUserNotFoundApiBody(res.data)) {
-      const staffRes = await axiosGet<StaffMeResponse>("/staff-auth/me", locale);
+      const staffRes = await axiosGet<StaffMeResponse>(
+        "/staff-auth/me",
+        locale,
+      );
       if (staffRes.status && staffRes.data?.staff) {
         const mid = staffRes.data.menu?.id;
         if (typeof mid === "number" && !Number.isNaN(mid)) {
@@ -101,7 +104,6 @@ function useIsLogin() {
         }, 500);
         return () => clearTimeout(time);
       } else {
-        console.log("remove user");
         dispatch(REMOVE_USER());
         Cookies.remove("sub", { path: "/" });
 

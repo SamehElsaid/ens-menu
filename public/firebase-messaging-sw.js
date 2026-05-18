@@ -1,5 +1,9 @@
-importScripts("https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js");
-importScripts("https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging-compat.js");
+importScripts(
+  "https://www.gstatic.com/firebasejs/12.13.0/firebase-app-compat.js",
+);
+importScripts(
+  "https://www.gstatic.com/firebasejs/12.13.0/firebase-messaging-compat.js",
+);
 
 self.addEventListener("install", () => {
   console.log("[SW] Firebase messaging service worker installed");
@@ -18,7 +22,7 @@ const firebaseConfig = {
   storageBucket: "ens-staff.firebasestorage.app",
   messagingSenderId: "1021433211661",
   appId: "1:1021433211661:web:032b75c20714c889109e44",
-  measurementId: "G-GGMTF0WRSR" 
+  measurementId: "G-GGMTF0WRSR",
 };
 firebase.initializeApp(firebaseConfig);
 
@@ -43,7 +47,10 @@ messaging.onBackgroundMessage((payload) => {
     ],
   };
 
-  return self.registration.showNotification(notificationTitle, notificationOptions);
+  return self.registration.showNotification(
+    notificationTitle,
+    notificationOptions,
+  );
 });
 
 self.addEventListener("notificationclick", (event) => {
@@ -54,25 +61,28 @@ self.addEventListener("notificationclick", (event) => {
     const urlToOpen = event.notification.data?.url ?? "/";
     event.waitUntil(self.clients.openWindow(urlToOpen));
   } else {
+    const data = event.notification.data || {};
+    const targetUrl =
+      typeof data.url === "string" && data.url.trim()
+        ? data.url.trim()
+        : null;
     event.waitUntil(
-      self.clients
-        .matchAll({ type: "window" })
-        .then((clientList) => {
-          for (const client of clientList) {
-            if (
-              client.url.includes(self.location.origin) &&
-              "focus" in client
-            ) {
-              client.focus();
-              client.postMessage({
-                type: "NOTIFICATION_CLICKED",
-                data: event.notification.data,
-              });
-              return;
-            }
+      self.clients.matchAll({ type: "window" }).then((clientList) => {
+        if (targetUrl) {
+          return self.clients.openWindow(targetUrl);
+        }
+        for (const client of clientList) {
+          if (client.url.includes(self.location.origin) && "focus" in client) {
+            client.focus();
+            client.postMessage({
+              type: "NOTIFICATION_CLICKED",
+              data: event.notification.data,
+            });
+            return;
           }
-          return self.clients.openWindow("/");
-        })
+        }
+        return self.clients.openWindow("/");
+      }),
     );
   }
 });

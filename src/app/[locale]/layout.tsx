@@ -4,6 +4,8 @@ import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import RenderInProvider from "@/components/Global/RenderInProvider";
 import ProgressBar from "@/components/Global/ProgressBar";
+import GoogleAnalytics from "@/components/Global/GoogleAnalytics";
+import GoogleTagManager from "@/components/Global/GoogleTagManager";
 import "react-phone-number-input/style.css";
 import "react-datepicker/dist/react-datepicker.css";
 import { ToastContainer } from "react-toastify";
@@ -53,6 +55,8 @@ export default async function RootLayout({
       </head>
       <body suppressHydrationWarning>
         <Suspense fallback={null}>
+          <GoogleTagManager />
+          <GoogleAnalytics />
         </Suspense>
         <ProgressBar />
         <ToastContainer
