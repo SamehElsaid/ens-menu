@@ -16,6 +16,7 @@ export type SeoInput = {
   title: string;
   description: string;
   keywords: string;
+  coreKeywords?: string;
   siteName: string;
   robots?: "index, follow" | "noindex, nofollow";
 };
@@ -30,9 +31,11 @@ export function buildSeoMetadata({
   title,
   description,
   keywords,
+  coreKeywords,
   siteName,
   robots = "index, follow",
 }: SeoInput): Metadata {
+  const mergedKeywords = [keywords, coreKeywords].filter(Boolean).join(",");
   const baseUrl = getBaseUrl();
   const canonicalPath =
     locale === DEFAULT_LOCALE ? (path ? `/${path}` : "/") : path ? `/${path}` : `/${locale}`;
@@ -43,7 +46,7 @@ export function buildSeoMetadata({
   return {
     title,
     description,
-    keywords: keywords.split(",").map((k) => k.trim()).filter(Boolean),
+    keywords: mergedKeywords.split(",").map((k) => k.trim()).filter(Boolean),
     robots,
     openGraph: {
       type: "website",
