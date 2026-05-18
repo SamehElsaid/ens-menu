@@ -1075,13 +1075,6 @@ input, textarea {
     animation-range: entry 16% cover 36%;
   }
 
-  .pricing-page .pricing-faq-stagger > .pricing-stagger-item {
-    animation-name: pricing-faq-slide;
-  }
-
-  [dir="rtl"] .pricing-page .pricing-faq-stagger > .pricing-stagger-item {
-    animation-name: pricing-faq-slide-rtl;
-  }
 }
 
 /* Fallback: animate on page load */
@@ -1144,19 +1137,19 @@ input, textarea {
     animation-delay: 0.3s;
   }
 
-  .pricing-page .pricing-faq-stagger > .pricing-stagger-item {
-    animation-name: pricing-faq-slide;
-  }
-  .pricing-page .pricing-faq-stagger > .pricing-stagger-item:nth-child(2) {
-    animation-delay: 0.1s;
-  }
-  .pricing-page .pricing-faq-stagger > .pricing-stagger-item:nth-child(3) {
-    animation-delay: 0.2s;
-  }
+}
 
-  [dir="rtl"] .pricing-page .pricing-faq-stagger > .pricing-stagger-item {
-    animation-name: pricing-faq-slide-rtl;
-  }
+/* Pricing — solid sections (no scroll-linked fade/blur artifacts) */
+.pricing-page .pricing-table-wrap,
+.pricing-page .pricing-table-wrap .pricing-row-item,
+.pricing-page .pricing-cta-section,
+.pricing-page .pricing-cta-section .pricing-stagger-item,
+.pricing-page .pricing-cards-stagger > .pricing-stagger-item,
+.pricing-page .pricing-faq-section,
+.pricing-page .pricing-faq-section .pricing-faq-item {
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
 }
 
 .animate-pricing-phone-float {
@@ -1172,10 +1165,13 @@ input, textarea {
   .pricing-page .pricing-reveal-hero,
   .pricing-page .pricing-stagger-item,
   .pricing-page .pricing-hero-line,
-  .pricing-page .pricing-row-item,
-  .pricing-page .pricing-cta-stagger > .pricing-stagger-item,
+  .pricing-page .pricing-table-wrap,
+  .pricing-page .pricing-table-wrap .pricing-row-item,
+  .pricing-page .pricing-cta-section,
+  .pricing-page .pricing-cta-section .pricing-stagger-item,
   .pricing-page .pricing-cards-stagger > .pricing-stagger-item,
-  .pricing-page .pricing-faq-stagger > .pricing-stagger-item {
+  .pricing-page .pricing-faq-section,
+  .pricing-page .pricing-faq-section .pricing-faq-item {
     opacity: 1 !important;
     transform: none !important;
     animation: none !important;
