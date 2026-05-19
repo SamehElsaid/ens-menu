@@ -77,8 +77,11 @@ export default function AppVersionPage() {
     try {
       setLoading(true);
       const result = await axiosGet<AppVersionGetResponse>(
-        "/admin/app-version",
+        "/public/app-version",
         locale,
+        undefined,
+        undefined,
+        true,
       );
 
       if (result.status && result.data?.version) {
