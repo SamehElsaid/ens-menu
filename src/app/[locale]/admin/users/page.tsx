@@ -250,7 +250,7 @@ export default function UsersPage() {
                                         <FaSpinner className="animate-spin text-xs" />
                                     </>
                                 ) : (
-                                    isActive ? t("actions.suspend") : t("status.active")
+                                    isActive ? t("actions.suspend") : t("actions.reactivate")
                                 )}
                             </button>
                         </div>

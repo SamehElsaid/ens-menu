@@ -74,6 +74,7 @@ interface UserDetailsResponse {
 export default function UserDetailsPage() {
   const locale = useLocale();
   const t = useTranslations("adminUsers.userDetails");
+  const tAccount = useTranslations("adminUsers.userDetails.accountActions");
   const router = useRouter();
   const params = useParams();
   const userId =
@@ -98,6 +99,15 @@ export default function UserDetailsPage() {
   const [subscriptionSubmitting, setSubscriptionSubmitting] = useState(false);
   const [applyFreeConfirmOpen, setApplyFreeConfirmOpen] = useState(false);
   const [applyFreeLoading, setApplyFreeLoading] = useState(false);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordSubmitting, setPasswordSubmitting] = useState(false);
+  const [suspendModalOpen, setSuspendModalOpen] = useState(false);
+  const [suspendReason, setSuspendReason] = useState("");
+  const [suspendSubmitting, setSuspendSubmitting] = useState(false);
+  const [reactivateConfirmOpen, setReactivateConfirmOpen] = useState(false);
+  const [accountActionLoading, setAccountActionLoading] = useState(false);
 
   const fetchUserDetails = useCallback(async () => {
     try {
@@ -135,6 +145,89 @@ export default function UserDetailsPage() {
       day: "2-digit",
     });
   };
+
+  const handleSetPassword = useCallback(async () => {
+    if (!newPassword.trim()) {
+      toast.error(tAccount("passwordRequired"));
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error(tAccount("passwordMismatch"));
+      return;
+    }
+    setPasswordSubmitting(true);
+    try {
+      const result = await axiosPatch<{ newPassword: string }, { message?: string }>(
+        `/admin/users/${userId}/password`,
+        locale,
+        { newPassword },
+      );
+      if (result.status) {
+        toast.success(tAccount("passwordSuccess"));
+        setPasswordModalOpen(false);
+        setNewPassword("");
+        setConfirmPassword("");
+      } else {
+        toast.error(tAccount("passwordError"));
+      }
+    } catch (err) {
+      console.error("Error setting user password:", err);
+      toast.error(tAccount("passwordError"));
+    } finally {
+      setPasswordSubmitting(false);
+    }
+  }, [newPassword, confirmPassword, userId, locale, tAccount]);
+
+  const handleSuspendUser = useCallback(async () => {
+    setSuspendSubmitting(true);
+    try {
+      const payload: { isSuspended: boolean; reason?: string } = {
+        isSuspended: true,
+      };
+      if (suspendReason.trim()) {
+        payload.reason = suspendReason.trim();
+      }
+      const result = await axiosPatch<
+        typeof payload,
+        { isSuspended: boolean; message?: string }
+      >(`/admin/users/${userId}/suspend`, locale, payload);
+      if (result.status) {
+        toast.success(tAccount("suspendSuccess"));
+        setSuspendModalOpen(false);
+        setSuspendReason("");
+        fetchUserDetails();
+      } else {
+        toast.error(tAccount("suspendError"));
+      }
+    } catch (err) {
+      console.error("Error suspending user:", err);
+      toast.error(tAccount("suspendError"));
+    } finally {
+      setSuspendSubmitting(false);
+    }
+  }, [userId, locale, suspendReason, tAccount, fetchUserDetails]);
+
+  const handleReactivateUser = useCallback(async () => {
+    setAccountActionLoading(true);
+    try {
+      const result = await axiosPatch<
+        { isSuspended: boolean },
+        { isSuspended: boolean; message?: string }
+      >(`/admin/users/${userId}/suspend`, locale, { isSuspended: false });
+      if (result.status) {
+        toast.success(tAccount("reactivateSuccess"));
+        setReactivateConfirmOpen(false);
+        fetchUserDetails();
+      } else {
+        toast.error(tAccount("reactivateError"));
+      }
+    } catch (err) {
+      console.error("Error reactivating user:", err);
+      toast.error(tAccount("reactivateError"));
+    } finally {
+      setAccountActionLoading(false);
+    }
+  }, [userId, locale, tAccount, fetchUserDetails]);
 
   const getBillingCycleLabel = (cycle: string) => {
     if (cycle.toLowerCase() === "free") return t("free");
@@ -666,6 +759,212 @@ export default function UserDetailsPage() {
           </div>
         </div>
       </CardDashBoard>
+
+      {/* Account management */}
+      <CardDashBoard>
+        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">
+          {tAccount("title")}
+        </h2>
+        {user.isSuspended && user.suspendedReason && (
+          <p className="text-sm text-red-600 dark:text-red-400 mb-4">
+            {tAccount("suspendedReasonLabel")}: {user.suspendedReason}
+          </p>
+        )}
+        <div
+          className={`flex flex-wrap gap-3 ${isRTL ? "flex-row-reverse" : ""}`}
+        >
+          <button
+            type="button"
+            onClick={() => setPasswordModalOpen(true)}
+            className="px-4 py-2.5 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-colors"
+          >
+            {tAccount("changePassword")}
+          </button>
+          {user.isSuspended ? (
+            <button
+              type="button"
+              onClick={() => setReactivateConfirmOpen(true)}
+              disabled={accountActionLoading}
+              className="px-4 py-2.5 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 disabled:opacity-50 transition-colors"
+            >
+              {tAccount("reactivate")}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setSuspendModalOpen(true)}
+              className="px-4 py-2.5 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors"
+            >
+              {tAccount("suspend")}
+            </button>
+          )}
+        </div>
+      </CardDashBoard>
+
+      {passwordModalOpen && (
+        <div
+          className="fixed m-0 p-4 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          style={{
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: "100vw",
+            minHeight: "100dvh",
+          }}
+        >
+          <div
+            className={`bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-md w-full p-6 ${isRTL ? "text-right" : "text-left"}`}
+          >
+            <div
+              className={`flex items-center justify-between mb-4 ${isRTL ? "flex-row-reverse" : ""}`}
+            >
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+                {tAccount("changePassword")}
+              </h3>
+              <button
+                type="button"
+                onClick={() =>
+                  !passwordSubmitting && setPasswordModalOpen(false)
+                }
+                disabled={passwordSubmitting}
+                className="p-2 text-slate-400 hover:text-slate-600 rounded-lg"
+              >
+                <FaTimes className="text-lg" />
+              </button>
+            </div>
+            <form
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSetPassword();
+              }}
+            >
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  {tAccount("newPassword")}
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800"
+                  dir="ltr"
+                  autoComplete="new-password"
+                />
+                <p className="text-xs text-slate-500 mt-1">
+                  {tAccount("passwordHint")}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  {tAccount("confirmPassword")}
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800"
+                  dir="ltr"
+                  autoComplete="new-password"
+                />
+              </div>
+              <div
+                className={`flex gap-3 pt-2 ${isRTL ? "flex-row-reverse" : ""}`}
+              >
+                <button
+                  type="button"
+                  onClick={() =>
+                    !passwordSubmitting && setPasswordModalOpen(false)
+                  }
+                  disabled={passwordSubmitting}
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 font-medium disabled:opacity-50"
+                >
+                  {t("lists.cancel")}
+                </button>
+                <button
+                  type="submit"
+                  disabled={passwordSubmitting}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-primary text-white font-semibold disabled:opacity-50"
+                >
+                  {passwordSubmitting
+                    ? tAccount("savingPassword")
+                    : tAccount("savePassword")}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {suspendModalOpen && (
+        <div
+          className="fixed m-0 p-4 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          style={{
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: "100vw",
+            minHeight: "100dvh",
+          }}
+        >
+          <div
+            className={`bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-md w-full p-6 ${isRTL ? "text-right" : "text-left"}`}
+          >
+            <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+              {tAccount("suspendConfirmTitle")}
+            </h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+              {tAccount("suspendConfirmMessage")}
+            </p>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+              {tAccount("suspendReason")}
+            </label>
+            <textarea
+              rows={3}
+              value={suspendReason}
+              onChange={(e) => setSuspendReason(e.target.value)}
+              placeholder={tAccount("suspendReasonPlaceholder")}
+              className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 mb-4 resize-y"
+            />
+            <div className={`flex gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
+              <button
+                type="button"
+                onClick={() =>
+                  !suspendSubmitting && setSuspendModalOpen(false)
+                }
+                disabled={suspendSubmitting}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 font-medium disabled:opacity-50"
+              >
+                {t("lists.cancel")}
+              </button>
+              <button
+                type="button"
+                onClick={handleSuspendUser}
+                disabled={suspendSubmitting}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white font-semibold disabled:opacity-50"
+              >
+                {suspendSubmitting ? t("lists.updating") : tAccount("suspend")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ConfirmationModal
+        isOpen={reactivateConfirmOpen}
+        onClose={() => !accountActionLoading && setReactivateConfirmOpen(false)}
+        onConfirm={handleReactivateUser}
+        title={tAccount("reactivateConfirmTitle")}
+        message={tAccount("reactivateConfirmMessage")}
+        confirmText={tAccount("reactivate")}
+        cancelText={t("lists.cancel")}
+        isLoading={accountActionLoading}
+        loadingText={t("lists.updating")}
+      />
 
       {/* Statistics Section */}
       <div>

@@ -1917,7 +1917,8 @@
     },
     "actions": {
       "view": "View",
-      "suspend": "Suspend"
+      "suspend": "Suspend",
+      "reactivate": "Reactivate"
     },
     "showing": "Showing {from} to {to} of {total}",
     "loading": "Loading...",
@@ -2002,6 +2003,32 @@
       "status": {
         "active": "Active",
         "suspended": "Suspended"
+      },
+      "accountActions": {
+        "title": "Account management",
+        "changePassword": "Change password",
+        "suspend": "Suspend account",
+        "reactivate": "Reactivate account",
+        "suspendReason": "Suspension reason (optional)",
+        "suspendReasonPlaceholder": "e.g. Terms of service violation",
+        "suspendedReasonLabel": "Suspension reason",
+        "newPassword": "New password",
+        "confirmPassword": "Confirm password",
+        "passwordHint": "At least 8 characters with uppercase, lowercase, number, and special character",
+        "savePassword": "Save password",
+        "savingPassword": "Saving...",
+        "passwordMismatch": "Passwords do not match",
+        "passwordRequired": "Password is required",
+        "passwordSuccess": "Password updated successfully",
+        "passwordError": "Failed to update password",
+        "suspendConfirmTitle": "Suspend account",
+        "suspendConfirmMessage": "Are you sure you want to suspend this user? They will not be able to log in.",
+        "reactivateConfirmTitle": "Reactivate account",
+        "reactivateConfirmMessage": "Are you sure you want to reactivate this user account?",
+        "suspendSuccess": "User suspended successfully",
+        "suspendError": "Failed to suspend user",
+        "reactivateSuccess": "User reactivated successfully",
+        "reactivateError": "Failed to reactivate user"
       }
     }
   },
