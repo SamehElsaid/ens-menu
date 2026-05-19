@@ -1769,6 +1769,7 @@
     "staff": "Staff",
     "items": "Items",
     "advertisements": "Advertisements",
+    "appVersion": "App Version",
     "Overview": "Overview",
     "Profile": "Profile",
     "Menu Control": "Menu Control",
@@ -2087,6 +2088,31 @@
       "cancel": "Cancel",
       "createSuccess": "Administrator created successfully",
       "createError": "Failed to create administrator"
+    }
+  },
+  "adminAppVersion": {
+    "title": "App Version",
+    "subtitle": "View the latest release and add a new app version",
+    "back": "Back",
+    "currentVersion": "Current version",
+    "addNew": "Add new version",
+    "noVersion": "No version recorded yet",
+    "loadError": "Failed to load version settings",
+    "saveSuccess": "New version added successfully",
+    "saveError": "Failed to add version",
+    "saving": "Adding...",
+    "add": "Add version",
+    "yes": "Yes",
+    "no": "No",
+    "lastUpdated": "Last updated",
+    "versionRequired": "Version number is required",
+    "downloadUrlRequired": "Download URL is required",
+    "fields": {
+      "version": "Version number",
+      "forceUpdate": "Force update (users must update)",
+      "downloadUrl": "Download URL",
+      "releaseNotesAr": "Release notes (Arabic)",
+      "releaseNotesEn": "Release notes (English)"
     }
   },
   "adminPlans": {

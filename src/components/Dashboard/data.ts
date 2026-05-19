@@ -11,6 +11,7 @@ import {
 } from "react-icons/md";
 import {
   IoDocumentTextOutline,
+  IoPhonePortraitOutline,
   IoSettingsOutline,
   IoTimeOutline,
 } from "react-icons/io5";
@@ -195,6 +196,12 @@ export const adminNavSections: NavSection[] = [
         icon: IoSettingsOutline,
         key: "administrators",
         link: "administrators",
+      },
+      {
+        label: "appVersion",
+        icon: IoPhonePortraitOutline,
+        key: "app-version",
+        link: "app-version",
       },
     ],
   },

@@ -1493,6 +1493,7 @@
     "categories": "الفئات",
     "items": "العناصر",
     "advertisements": "الإعلانات",
+    "appVersion": "إصدار التطبيق",
     "Overview": "نظرة عامة",
     "Profile": "الملف الشخصي",
     "Menu Control": "تحكم في القائمة",
@@ -1810,6 +1811,31 @@
       "cancel": "إلغاء",
       "createSuccess": "تم إنشاء المشرف بنجاح",
       "createError": "فشل إنشاء المشرف"
+    }
+  },
+  "adminAppVersion": {
+    "title": "إصدار التطبيق",
+    "subtitle": "عرض آخر إصدار وإضافة إصدار جديد للتطبيق",
+    "back": "رجوع",
+    "currentVersion": "الإصدار الحالي",
+    "addNew": "إضافة إصدار جديد",
+    "noVersion": "لا يوجد إصدار مسجّل بعد",
+    "loadError": "فشل تحميل إعدادات الإصدار",
+    "saveSuccess": "تم إضافة الإصدار الجديد بنجاح",
+    "saveError": "فشل إضافة الإصدار",
+    "saving": "جاري الإضافة...",
+    "add": "إضافة الإصدار",
+    "yes": "نعم",
+    "no": "لا",
+    "lastUpdated": "آخر تحديث",
+    "versionRequired": "رقم الإصدار مطلوب",
+    "downloadUrlRequired": "رابط التحميل مطلوب",
+    "fields": {
+      "version": "رقم الإصدار",
+      "forceUpdate": "تحديث إجباري (يجب على المستخدمين التحديث)",
+      "downloadUrl": "رابط التحميل",
+      "releaseNotesAr": "ملاحظات الإصدار (عربي)",
+      "releaseNotesEn": "ملاحظات الإصدار (إنجليزي)"
     }
   },
   "adminPlans": {
