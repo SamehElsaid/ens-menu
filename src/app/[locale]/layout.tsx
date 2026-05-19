@@ -6,6 +6,7 @@ import RenderInProvider from "@/components/Global/RenderInProvider";
 import ProgressBar from "@/components/Global/ProgressBar";
 import GoogleAnalytics from "@/components/Global/GoogleAnalytics";
 import GoogleTagManager from "@/components/Global/GoogleTagManager";
+import GoogleAds from "@/components/Global/GoogleAds";
 import "react-phone-number-input/style.css";
 import "react-datepicker/dist/react-datepicker.css";
 import { ToastContainer } from "react-toastify";
@@ -57,6 +58,7 @@ export default async function RootLayout({
         <Suspense fallback={null}>
           <GoogleTagManager />
           <GoogleAnalytics />
+          <GoogleAds />
         </Suspense>
         <ProgressBar />
         <ToastContainer
