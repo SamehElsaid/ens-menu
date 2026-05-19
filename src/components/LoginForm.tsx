@@ -85,8 +85,14 @@ export default function LoginForm() {
         dispatch(SET_ACTIVE_USER({ user }));
       }
     } else {
+      const payload = response.data as {
+        message?: string;
+        error?: string;
+        errorType?: string;
+      };
       const errorMessage =
-        (response.data as { message?: string })?.message ||
+        payload?.error ||
+        payload?.message ||
         t("auth.invalidCredentials");
       setApiError(errorMessage);
       setLoading(false);

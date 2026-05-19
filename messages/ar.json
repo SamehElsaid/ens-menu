@@ -188,7 +188,7 @@
     "gender": "الجنس",
     "birthDate": "تاريخ الميلاد",
     "specialization": "التخصص",
-    "fullName": "الاسم الكامل (كما في الشهادة)",
+    "fullName": "الاسم الكامل ",
     "nationalID": "رقم الهوية الوطنية",
     "attachments": "المرفقات",
     "ownsCenter": "أمتلك مركزاً",
@@ -1640,7 +1640,8 @@
     },
     "actions": {
       "view": "عرض",
-      "suspend": "إيقاف"
+      "suspend": "إيقاف",
+      "reactivate": "تفعيل"
     },
     "showing": "عرض {from} إلى {to} من {total}",
     "loading": "جاري التحميل...",
@@ -1725,6 +1726,32 @@
       "status": {
         "active": "نشط",
         "suspended": "موقوف"
+      },
+      "accountActions": {
+        "title": "إدارة الحساب",
+        "changePassword": "تغيير كلمة المرور",
+        "suspend": "إيقاف الحساب",
+        "reactivate": "إعادة تفعيل الحساب",
+        "suspendReason": "سبب الإيقاف (اختياري)",
+        "suspendReasonPlaceholder": "مثال: مخالفة شروط الاستخدام",
+        "suspendedReasonLabel": "سبب الإيقاف",
+        "newPassword": "كلمة المرور الجديدة",
+        "confirmPassword": "تأكيد كلمة المرور",
+        "passwordHint": "8 أحرف على الأقل، حرف كبير وصغير ورقم ورمز خاص",
+        "savePassword": "حفظ كلمة المرور",
+        "savingPassword": "جاري الحفظ...",
+        "passwordMismatch": "كلمتا المرور غير متطابقتين",
+        "passwordRequired": "كلمة المرور مطلوبة",
+        "passwordSuccess": "تم تغيير كلمة المرور بنجاح",
+        "passwordError": "فشل تغيير كلمة المرور",
+        "suspendConfirmTitle": "إيقاف الحساب",
+        "suspendConfirmMessage": "هل أنت متأكد من إيقاف حساب هذا المستخدم؟ لن يتمكن من تسجيل الدخول.",
+        "reactivateConfirmTitle": "إعادة تفعيل الحساب",
+        "reactivateConfirmMessage": "هل أنت متأكد من إعادة تفعيل حساب هذا المستخدم؟",
+        "suspendSuccess": "تم إيقاف المستخدم بنجاح",
+        "suspendError": "فشل إيقاف المستخدم",
+        "reactivateSuccess": "تم إعادة تفعيل المستخدم بنجاح",
+        "reactivateError": "فشل إعادة تفعيل المستخدم"
       }
     }
   },
