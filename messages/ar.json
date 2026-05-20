@@ -1154,7 +1154,8 @@
       "descriptionAr": "الوصف (عربي)",
       "logo": "الشعار",
       "logoUpload": "رفع الشعار",
-      "logoHint": "ارفع شعار لقائمتك (اختياري)",
+      "logoHint": "ارفع شعار لقائمتك (مطلوب)",
+      "logoUploadError": "فشل رفع الشعار. حاول مرة أخرى.",
       "currency": "العملة",
       "currencyLabel": "اختر العملة",
       "urlSettings": "إعدادات الرابط",
@@ -1170,16 +1171,17 @@
       "slugTaken": "هذا الرابط مستخدم بالفعل",
       "slugSuggestions": "اقتراحات مشابهة:",
       "slugTakenError": "هذا الرابط مستخدم بالفعل. يرجى اختيار رابط آخر.",
-      "logoFormatError": "يرجى اختيار صورة بصيغة PNG أو ICO أو JPG",
+      "logoFormatError": "يرجى اختيار صورة بصيغة PNG أو ICO أو JPG أو WebP",
       "logoSizeError": "حجم الصورة يجب أن يكون أقل من 2 ميجابايت",
-      "supportedFormats": "الصيغ المدعومة: PNG, ICO, JPG - الحد الأقصى: 2MB",
+      "supportedFormats": "الصيغ المدعومة: PNG, ICO, JPG, WebP - الحد الأقصى: 2MB",
       "validation": {
         "nameEnRequired": "الاسم (إنجليزي) مطلوب",
         "nameArRequired": "الاسم (عربي) مطلوب",
         "slugRequired": "رابط القائمة مطلوب",
         "slugMin": "الرابط يجب أن يكون 3 أحرف على الأقل",
         "slugInvalid": "الرابط يمكن أن يحتوي على حروف صغيرة وأرقام وشرطات فقط",
-        "currencyRequired": "العملة مطلوبة"
+        "currencyRequired": "العملة مطلوبة",
+        "logoRequired": "شعار المنيو مطلوب"
       }
     }
   },

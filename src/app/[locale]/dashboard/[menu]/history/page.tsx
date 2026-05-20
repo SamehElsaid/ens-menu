@@ -134,6 +134,31 @@ function dashboardSocketOrigin(): string {
 
 const PAGE_SIZE = 10;
 
+/** Latest lifecycle status (not the first TABLE_CALL_CREATED row). */
+function resolveLatestOrderStatus(
+  actions?: Array<{ status?: string }>,
+  order?: { status?: string } | null,
+): string {
+  const orderStatus = order?.status?.trim().toLowerCase();
+  if (
+    orderStatus === "confirmed" ||
+    orderStatus === "cancelled" ||
+    orderStatus === "pending"
+  ) {
+    return orderStatus;
+  }
+  if (!actions?.length) return "pending";
+  for (let i = actions.length - 1; i >= 0; i -= 1) {
+    const s = String(actions[i]?.status ?? "")
+      .trim()
+      .toLowerCase();
+    if (s === "confirmed" || s === "cancelled") return s;
+  }
+  return String(actions[actions.length - 1]?.status ?? "pending")
+    .trim()
+    .toLowerCase();
+}
+
 export default function ActivityHistoryPage() {
   const t = useTranslations("activityHistory");
   const locale = useLocale();
@@ -268,7 +293,7 @@ export default function ActivityHistoryPage() {
     return () => {
       cancelled = true;
     };
-  }, [entryParam, menuId, locale]);
+  }, [entryParam, menuId, locale, liveTick]);
 
   // ── close on Esc ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -350,9 +375,7 @@ export default function ActivityHistoryPage() {
         headerName: t("colStatus"),
         width: 130,
         cellRenderer: (p: ICellRendererParams<CallEntry>) => {
-          const status = (
-            p.data?.actionDetails?.[0]?.status ?? "pending"
-          ).toLowerCase();
+          const status = resolveLatestOrderStatus(p.data?.actionDetails);
           const cls =
             status === "confirmed"
               ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
@@ -388,7 +411,11 @@ export default function ActivityHistoryPage() {
         flex: 1,
         minWidth: 160,
         cellRenderer: (p: ICellRendererParams<CallEntry>) => {
-          const rawTime = p.data?.actionDetails?.[0]?.time;
+          const details = p.data?.actionDetails;
+          const rawTime =
+            details && details.length > 0
+              ? details[details.length - 1]?.time
+              : undefined;
           if (!rawTime) return <span className="text-slate-400">—</span>;
           return (
             <span className="text-slate-600 dark:text-slate-300 text-sm">
@@ -690,11 +717,13 @@ function OrderDetailsModal({
 }) {
   const locale = useLocale();
 
-  // Primary action (first in the actions array)
-  const action = entry?.actions?.[0];
+  const actions = entry?.actions ?? [];
+  const lastAction =
+    actions.length > 0 ? actions[actions.length - 1] : undefined;
 
-  // Prefer root-level order, fall back to detail.order
-  const order = entry?.order ?? action?.detail?.order;
+  // Prefer root-level order, fall back to detail.order from latest action
+  const order =
+    entry?.order ?? lastAction?.detail?.order ?? actions[0]?.detail?.order;
 
   // Items: root items → order.items
   const items: CallItem[] = entry?.items ?? order?.items ?? [];
@@ -702,20 +731,27 @@ function OrderDetailsModal({
   // Totals
   const totalPrice = entry?.totalPrice ?? order?.orderTotal ?? 0;
 
-  // Status: action status → order status
-  const status = (action?.status ?? order?.status ?? "pending").toLowerCase();
+  const status = resolveLatestOrderStatus(actions, order);
 
-  // Summary line
+  // Summary from the most recent action
   const summary =
     locale === "ar"
-      ? (action?.summaryAr ?? action?.summaryEn ?? null)
-      : (action?.summaryEn ?? action?.summaryAr ?? null);
+      ? (lastAction?.summaryAr ??
+        lastAction?.summaryEn ??
+        actions[0]?.summaryAr ??
+        null)
+      : (lastAction?.summaryEn ??
+        lastAction?.summaryAr ??
+        actions[0]?.summaryEn ??
+        null);
 
   const customerDisplay =
     order?.customerName?.trim() ||
-    (action && isGuestOrderAction(action)
-      ? actionActorName(action, order)
-      : "") ||
+    (lastAction && isGuestOrderAction(lastAction)
+      ? actionActorName(lastAction, order)
+      : actions[0] && isGuestOrderAction(actions[0])
+        ? actionActorName(actions[0], order)
+        : "") ||
     null;
   const waiterDisplay = entry?.actions
     ? lastStaffWaiterName(entry.actions)
@@ -832,7 +868,7 @@ function OrderDetailsModal({
                 <MetaCard
                   icon={<IoCalendarOutline className="text-violet-500" />}
                   label={t("detailsWhen")}
-                  value={<ViewTime data={action?.time} />}
+                  value={<ViewTime data={lastAction?.time ?? actions[0]?.time} />}
                 />
                 {order?.tableNumber && (
                   <MetaCard

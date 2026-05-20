@@ -1429,7 +1429,8 @@
       "descriptionAr": "Description (Arabic)",
       "logo": "Logo",
       "logoUpload": "Upload Logo",
-      "logoHint": "Upload a logo for your menu (optional)",
+      "logoHint": "Upload a logo for your menu (required)",
+      "logoUploadError": "Failed to upload logo. Please try again.",
       "currency": "Currency",
       "currencyLabel": "Select Currency",
       "urlSettings": "URL Settings",
@@ -1445,16 +1446,17 @@
       "slugTaken": "This link is already taken",
       "slugSuggestions": "Similar suggestions:",
       "slugTakenError": "This link is already in use. Please choose another one.",
-      "logoFormatError": "Please select a PNG, ICO, or JPG image",
+      "logoFormatError": "Please select a PNG, ICO, JPG, or WebP image",
       "logoSizeError": "Image size must be less than 2MB",
-      "supportedFormats": "Supported formats: PNG, ICO, JPG - Max: 2MB",
+      "supportedFormats": "Supported formats: PNG, ICO, JPG, WebP - Max: 2MB",
       "validation": {
         "nameEnRequired": "Name (English) is required",
         "nameArRequired": "Name (Arabic) is required",
         "slugRequired": "Menu link is required",
         "slugMin": "Link must be at least 3 characters",
         "slugInvalid": "Link can only contain lowercase letters, numbers and hyphens",
-        "currencyRequired": "Currency is required"
+        "currencyRequired": "Currency is required",
+        "logoRequired": "Menu logo is required"
       }
     }
   },

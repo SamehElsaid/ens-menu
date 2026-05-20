@@ -193,8 +193,8 @@ export default function SettingsPage() {
       let logoUrl: string | null = null;
       if (logoFile) {
         const logoFormData = new FormData();
-        logoFormData.append("file", logoFile);
         logoFormData.append("type", "logos");
+        logoFormData.append("file", logoFile);
 
         const uploadResult = await axiosPost<FormData, UploadResponse>(
           "/upload",
