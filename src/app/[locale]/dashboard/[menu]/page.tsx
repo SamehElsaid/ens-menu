@@ -397,7 +397,7 @@ export default function DashboardMenuPage() {
           ) : (
             <div className="w-[200px] h-[200px] rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 flex flex-col items-center justify-center gap-2 text-slate-400 dark:text-slate-500 text-sm">
               <BsQrCode className="text-3xl" />
-              <span>{locale === "ar" ? "QR غير متاح" : "QR unavailable"}</span>
+              <span>{t("qrUnavailable")}</span>
             </div>
           )}
         </section>
@@ -487,12 +487,10 @@ export default function DashboardMenuPage() {
               <IoListOutline className="text-2xl" />
             </div>
             <p className="text-slate-500 dark:text-slate-400 text-sm">
-              {locale === "ar" ? "لا يوجد نشاط حديث." : "No recent activity."}
+              {t("noRecentActivity")}
             </p>
             <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">
-              {locale === "ar"
-                ? "ستظهر هنا عند إضافة عناصر أو تصنيفات."
-                : "Activity will appear here when you add items or categories."}
+              {t("activityHint")}
             </p>
           </div>
         ) : (

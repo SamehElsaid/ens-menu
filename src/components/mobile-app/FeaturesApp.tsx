@@ -36,6 +36,7 @@ type FeatureItem = { title: string; desc: string };
 
 const FeaturesApp = () => {
   const t = useTranslations("Landing.FeaturesApp");
+  const tMobile = useTranslations("Landing.mobileApp");
   const locale = useLocale();
   const isRTL = locale === "ar";
 
@@ -64,7 +65,7 @@ const FeaturesApp = () => {
         {/* Header — matches WorkflowApp/FaqApp */}
         <div className="text-center mb-20">
           <span className="inline-block text-violet-600 dark:text-violet-400 font-bold text-sm tracking-widest uppercase mb-3">
-            {isRTL ? "لماذا تطبيقنا؟" : "Why our app?"}
+            {tMobile("whyOurApp")}
           </span>
           <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-4">
             {t("title")}
@@ -158,7 +159,7 @@ const FeaturesApp = () => {
               >
                 <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-[10px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-200">
-                  {isRTL ? "معاينة مباشرة" : "Live Preview"}
+                  {tMobile("livePreview")}
                 </span>
               </div>
 

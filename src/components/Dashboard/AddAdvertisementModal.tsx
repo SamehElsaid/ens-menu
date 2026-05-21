@@ -314,7 +314,7 @@ export default function AddAdvertisementModal({
                         value={field.value}
                         onChange={(e) => field.onChange(e.target.value)}
                         onBlur={field.onBlur}
-                        placeholder="e.g., Summer Offer"
+                        placeholder={t("titlePlaceholder")}
                         className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                         error={errors.title?.message}
                       />
@@ -368,7 +368,7 @@ export default function AddAdvertisementModal({
                           )
                         }
                         onBlur={field.onBlur}
-                        placeholder="Promotion details..."
+                        placeholder={t("contentPlaceholder")}
                         className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         error={errors.content?.message}
                       />
@@ -481,7 +481,7 @@ export default function AddAdvertisementModal({
                         value={field.value ?? ""}
                         onChange={(e) => field.onChange(e.target.value)}
                         onBlur={field.onBlur}
-                        placeholder="https://..."
+                        placeholder={t("linkUrlPlaceholder")}
                         className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         error={errors.linkUrl?.message}
                       />

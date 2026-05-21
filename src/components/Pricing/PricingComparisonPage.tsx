@@ -25,7 +25,6 @@ const STATIC_FREE_PLAN = {
   maxProductsPerMenu: 50,
   allowCustomDomain: false,
   hasAds: false,
-  features: ["50 منتج", "بدون تعديلات"],
 } as const;
 
 const STATIC_PRO_PLAN = {
@@ -33,7 +32,6 @@ const STATIC_PRO_PLAN = {
   maxProductsPerMenu: 200,
   allowCustomDomain: true,
   hasAds: true,
-  features: ["200 منتج لكل قائمة", "شامل التعديلات", "تحكم في الإعلانات"],
 } as const;
 
 const CUSTOM_TABLE_FEATURE_KEYS = [
@@ -228,16 +226,20 @@ export default function PricingComparisonPage() {
   const freeFeatures = useMemo(
     () =>
       translatePlanFeaturesWithMenuLimit(
-        [...STATIC_FREE_PLAN.features],
+        [t("staticFreeFeature1"), t("staticFreeFeature2")],
         STATIC_FREE_PLAN.maxMenus,
         tProfile,
       ),
-    [tProfile],
+    [t, tProfile],
   );
 
   const proFeatures = useMemo(() => {
     const base = translatePlanFeaturesWithMenuLimit(
-      [...STATIC_PRO_PLAN.features],
+      [
+        t("staticProFeature1"),
+        t("staticProFeature2"),
+        t("staticProFeature3"),
+      ],
       STATIC_PRO_PLAN.maxMenus,
       tProfile,
     );

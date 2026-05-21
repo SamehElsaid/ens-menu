@@ -681,7 +681,7 @@ function LimitReachedModal({
           {/* Plan info badge */}
           <div className="w-full p-3 bg-slate-50 rounded-xl flex items-center justify-between">
             <span className="text-sm text-slate-500">
-              {locale === "ar" ? "الخطة الحالية" : "Current Plan"}
+              {t("currentPlan")}
             </span>
             <span className="text-sm font-bold text-slate-800">
               {planName} ({currentCount}/{maxMenus})

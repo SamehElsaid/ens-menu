@@ -171,7 +171,15 @@
     "next": "التالي",
     "back": "السابق",
     "edit": "تعديل",
-    "delete": "حذف"
+    "delete": "حذف",
+    "close": "إغلاق",
+    "cancel": "إلغاء",
+    "openMenu": "فتح القائمة",
+    "search": "بحث...",
+    "optional": "اختياري",
+    "urlPlaceholder": "https://...",
+    "dateFormatPlaceholder": "يوم/شهر/سنة",
+    "confirmDelete": "تأكيد الحذف"
   },
   "auth": {
     "parentTitle": "تسجيل الوالد",
@@ -692,7 +700,15 @@
     "devPayLoading": "جاري المعالجة…",
     "devPayError": "تعذر إتمام الدفع التجريبي",
     "devPayNoCheckout": "لا يوجد رقم جلسة دفع في الرابط.",
-    "devPayRealHint": "لصفحة EasyKash الحقيقية: EASYKASH_DEV_MOCK=false واضبط EASYKASH_CREATE_PATH من لوحة البائع."
+    "devPayRealHint": "لصفحة EasyKash الحقيقية: EASYKASH_DEV_MOCK=false واضبط EASYKASH_CREATE_PATH من لوحة البائع.",
+    "changesSavedSuccess": "تم حفظ التغييرات بنجاح",
+    "changesSaveFailed": "فشل في حفظ التغييرات",
+    "changePasswordFailed": "فشل في تغيير كلمة المرور",
+    "maxFileSize": "حد أقصى 5 ميجا",
+    "remove": "إزالة",
+    "saving": "جاري الحفظ...",
+    "changingPassword": "جاري التغيير...",
+    "dateFormatPlaceholder": "يوم/شهر/سنة"
   },
   "homePage": {
     "centerSection": {
@@ -1229,6 +1245,19 @@
       "privacy": "سياسة الخصوصية",
       "terms": "الشروط والأحكام",
       "followUs": "تابعنا"
+    },
+    "header": {
+      "signIn": "دخول",
+      "startNow": "ابدأ الآن"
+    },
+    "templateShow": {
+      "choosePrefix": "اختر القالب ",
+      "chooseHighlight": "المناسب لك",
+      "subtitle": "مجموعة متنوعة من القوالب الاحترافية المصممة خصيصًا لتناسب كل أنواع المطاعم والكافيهات"
+    },
+    "mobileApp": {
+      "whyOurApp": "لماذا تطبيقنا؟",
+      "livePreview": "معاينة مباشرة"
     }
   },
   "PricingPage": {
@@ -1291,7 +1320,12 @@
     "faq2q": "ماذا يحدث عند التخفيض؟",
     "faq2a": "تبقى بياناتك، لكن تُطبّق حدود الخطة الأدنى (منيوهات، منتجات، ميزات). قد تحتاج لإيقاف منيو إضافي حتى تلتزم بالحد.",
     "faq3q": "هل يوجد استرداد؟",
-    "faq3a": "سياسة الاسترداد تعتمد على قناة الاشتراك. راجع الشروط وقت الشراء أو اسأل المبيعات عبر واتساب."
+    "faq3a": "سياسة الاسترداد تعتمد على قناة الاشتراك. راجع الشروط وقت الشراء أو اسأل المبيعات عبر واتساب.",
+    "staticFreeFeature1": "50 منتج",
+    "staticFreeFeature2": "بدون تعديلات",
+    "staticProFeature1": "200 منتج لكل قائمة",
+    "staticProFeature2": "شامل التعديلات",
+    "staticProFeature3": "تحكم في الإعلانات"
   },
   "Menus": {
     "title": "قوائمي",
@@ -1373,8 +1407,14 @@
         "slugMin": "الرابط يجب أن يكون 3 أحرف على الأقل",
         "slugInvalid": "الرابط يمكن أن يحتوي على حروف صغيرة وأرقام وشرطات فقط",
         "currencyRequired": "العملة مطلوبة"
-      }
-    }
+      },
+      "nameEnPlaceholder": "مثال: منيو مطعمي",
+      "descriptionEnPlaceholder": "صف منيوك بالإنجليزية...",
+      "slugPlaceholder": "my-restaurant-menu"
+    },
+    "deletePermanentInstruction": "لحذف هذه القائمة نهائيًا، اكتب اسم القائمة تمامًا كما يظهر بالأسفل، ثم اضغط تأكيد الحذف.",
+    "deleteSuccessDetail": "تم حذف القائمة بنجاح.",
+    "currentPlan": "الخطة الحالية"
   },
   "Categories": {
     "title": "الفئات",
@@ -1415,7 +1455,8 @@
       "editTitle": "تعديل الفئة",
       "save": "حفظ",
       "editSuccess": "تم تحديث الفئة بنجاح",
-      "editError": "فشل تحديث الفئة"
+      "editError": "فشل تحديث الفئة",
+      "namePlaceholder": "مثال: مشروبات"
     },
     "deleteConfirmTitle": "حذف الفئة",
     "deleteConfirm": "هل أنت متأكد من حذف الفئة « {name} »؟ لا يمكن التراجع عن هذا الإجراء.",
@@ -1536,7 +1577,11 @@
       "editError": "فشل تحديث الموظف",
       "closeAriaLabel": "إغلاق"
     },
-    "phone": "الهاتف"
+    "phone": "الهاتف",
+    "proOnlyTitle": "إدارة الطاقم متاحة لخطط Pro فقط",
+    "proOnlyDescription": "قم بالترقية لإضافة موظفين وتلقي نداءات الطاولات.",
+    "upgradeShort": "الترقية",
+    "personalProfileLink": "الصفحة الشخصية"
   },
   "Items": {
     "title": "العناصر",
@@ -1601,7 +1646,9 @@
       "editError": "فشل تحديث العنصر",
       "imageFormatError": "يرجى اختيار صورة PNG أو JPG أو WebP",
       "imageSizeError": "حجم الصورة يجب أن يكون أقل من 2 ميجابايت",
-      "imageUploadError": "فشل رفع الصورة"
+      "imageUploadError": "فشل رفع الصورة",
+      "namePlaceholder": "مثال: برجر",
+      "optionalPlaceholder": "اختياري"
     },
     "deleteConfirmTitle": "حذف العنصر",
     "deleteConfirm": "هل أنت متأكد من حذف هذا العنصر؟ لا يمكن التراجع عن هذا الإجراء.",
@@ -1610,7 +1657,10 @@
     "subscribeNow": "اشترك الآن",
     "deleteSuccess": "تم حذف العنصر بنجاح",
     "deleteError": "فشل حذف العنصر",
-    "confirmDelete": "حذف"
+    "confirmDelete": "حذف",
+    "searchByName": "بحث بالاسم...",
+    "selectCategory": "اختر الفئة",
+    "availableToOrderNow": "هل المنتج متوفر للطلب الآن؟"
   },
   "Advertisements": {
     "addModal": {
@@ -1642,8 +1692,13 @@
       "createSuccess": "تم إنشاء الإعلان بنجاح",
       "createError": "فشل إنشاء الإعلان",
       "editSuccess": "تم تحديث الإعلان بنجاح",
-      "editError": "فشل تحديث الإعلان"
+      "editError": "فشل تحديث الإعلان",
+      "titlePlaceholder": "مثال: عرض صيفي",
+      "contentPlaceholder": "تفاصيل العرض...",
+      "linkUrlPlaceholder": "https://..."
     },
+    "freePlanTitle": "هذه الميزة متاحة للخطط المدفوعة فقط",
+    "freePlanDescription": "قم بالترقية للوصول إلى ميزة الإعلانات وإبراز عروضك لعملائك.",
     "page": {
       "title": "الإعلانات",
       "description": "إدارة الإعلانات الترويجية لهذه القائمة.",
@@ -1809,7 +1864,10 @@
     "adminsLabel": "Admins",
     "trialUsersLabel": "Trial Users",
     "revenueLabel": "Revenue",
-    "suspendedLabel": "Suspended"
+    "suspendedLabel": "Suspended",
+    "viewDetailedAnalytics": "عرض الإحصائيات التفصيلية",
+    "usersGrowth": "نمو المستخدمين",
+    "plansDistribution": "توزيع الخطط"
   },
   "adminUsers": {
     "title": "إدارة المستخدمين",
@@ -2125,7 +2183,10 @@
     "view": "عرض",
     "product": "منتج",
     "category": "تصنيف",
-    "addedOn": "تمت الإضافة في {date}"
+    "addedOn": "تمت الإضافة في {date}",
+    "qrUnavailable": "QR غير متاح",
+    "noRecentActivity": "لا يوجد نشاط حديث.",
+    "activityHint": "ستظهر هنا عند إضافة عناصر أو تصنيفات."
   },
   "settings": {
     "setting": "الإعدادات",
@@ -2259,7 +2320,11 @@
     "buttons": {
       "save": "حفظ التغييرات",
       "cancel": "إلغاء"
-    }
+    },
+    "noMenuSelected": "لم يتم تحديد قائمة.",
+    "savedSuccess": "تم حفظ إعدادات الميديا بنجاح.",
+    "addressArPlaceholder": "العنوان بالعربية",
+    "addressEnPlaceholder": "العنوان بالإنجليزية"
   },
   "Unauthorized": {
     "title": "غير مسموح",
@@ -2373,5 +2438,28 @@
     "content": "محتوى خطة العلاج",
     "description": "إنشاء وإدارة خطة العلاج لهذا العميل",
     "title": "خطة العلاج"
+  },
+  "menuSettingsPage": {
+    "generalSettings": "إعدادات عامة",
+    "logoUploadFailed": "فشل رفع الشعار",
+    "noLogo": "لا يوجد شعار",
+    "menuStatus": "حالة القائمة",
+    "currentStatus": "الحالة الحالية",
+    "dangerZone": "منطقة الخطر",
+    "deleteThisMenu": "حذف هذه القائمة",
+    "saveChanges": "حفظ التغييرات",
+    "namePlaceholder": "منيو مطعمي",
+    "descriptionPlaceholder": "صف منيوك بالإنجليزية..."
+  },
+  "menuMediaSettings": {
+    "noMenuSelected": "لم يتم تحديد قائمة.",
+    "savedSuccess": "تم حفظ إعدادات الميديا بنجاح.",
+    "addressArPlaceholder": "العنوان بالعربية",
+    "addressEnPlaceholder": "العنوان بالإنجليزية"
+  },
+  "map": {
+    "searchPlaceholder": "ابحث عن موقع...",
+    "searching": "جاري البحث...",
+    "selectedLocation": "الموقع المحدد:"
   }
 }
