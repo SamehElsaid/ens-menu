@@ -1,8 +1,14 @@
-export function pushSignUpEvent(): void {
+export type SignUpMethod = "email" | "google";
+
+export function pushSignUpEvent(method: SignUpMethod = "email"): void {
   if (typeof window === "undefined") return;
 
   window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push({ event: "sign_up" });
+  window.dataLayer.push({
+    event: "signup_success",
+    signup_method: method,
+    platform: "ensmenu",
+  });
 }
 
 export type PurchaseEventData = {
