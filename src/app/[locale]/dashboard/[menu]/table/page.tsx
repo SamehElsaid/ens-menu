@@ -59,6 +59,7 @@ function safeTableFilenameSegment(tableNumber: string): string {
 
 export default function TablesPage() {
   const t = useTranslations("Tables");
+  const tStaff = useTranslations("Staff");
   const locale = useLocale();
   const params = useParams();
   const menuSlug = useAppSelector((s) => s.menuData.menu?.slug);
@@ -294,7 +295,7 @@ export default function TablesPage() {
       locale === "ar"
         ? "قم بالترقية من الصفحة الشخصية لإدارة الطاولات ونداء الطاقم."
         : "Upgrade from your profile to manage tables and staff calls.";
-    const buttonLabel = locale === "ar" ? "الصفحة الشخصية" : "Personal profile";
+    const buttonLabel = tStaff("personalProfileLink");
 
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">
@@ -328,7 +329,7 @@ export default function TablesPage() {
             href={`/dashboard/${menuId}`}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-primary/30 dark:hover:border-primary/50 text-sm font-medium transition-all"
           >
-            {locale === "ar" ? "الرجوع للصفحة الرئيسية" : "Back to main page"}
+            {tStaff("backToOverview")}
           </LinkTo>
           <button
             type="button"

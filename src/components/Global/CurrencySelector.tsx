@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { IoChevronDownOutline, IoSearchOutline } from "react-icons/io5";
 
 interface Currency {
@@ -42,6 +43,7 @@ export default function CurrencySelector({
   onChange,
   showArabOnly = false,
 }: CurrencySelectorProps) {
+  const tCommon = useTranslations("common");
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -98,7 +100,7 @@ export default function CurrencySelector({
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search..."
+                placeholder={tCommon("search")}
                 className="w-full ps-9 pe-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
               />
             </div>

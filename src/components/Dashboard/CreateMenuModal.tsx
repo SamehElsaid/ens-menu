@@ -285,7 +285,7 @@ export default function CreateMenuModal({
                       onChange={field.onChange}
                       onBlur={field.onBlur}
                       className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                      placeholder="e.g., My Restaurant Menu"
+                      placeholder={t("nameEnPlaceholder")}
                       error={errors.name?.message}
                     />
                   )}
@@ -341,7 +341,7 @@ export default function CreateMenuModal({
                       onBlur={field.onBlur}
                       rows={3}
                       className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary resize-none"
-                      placeholder="Describe your menu in English..."
+                      placeholder={t("descriptionEnPlaceholder")}
                     />
                   )}
                 />
@@ -497,7 +497,7 @@ export default function CreateMenuModal({
                             ? "border-green-300 dark:border-green-600 focus:ring-green-500"
                             : "border-gray-300 dark:border-gray-600 focus:ring-primary"
                       }`}
-                      placeholder="my-restaurant-menu"
+                      placeholder={t("slugPlaceholder")}
                       error={errors.slug?.message}
                       icon={
                         slugStatus.checking ? (

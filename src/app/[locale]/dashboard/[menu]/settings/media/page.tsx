@@ -126,7 +126,7 @@ export default function MediaPage() {
 
     const handleSave = async () => {
         if (!menu?.id) {
-            toast.error(locale === "ar" ? "لم يتم تحديد قائمة." : "No menu selected.");
+            toast.error(t("noMenuSelected"));
             return;
         }
         const socialByKey = Object.fromEntries(
@@ -153,7 +153,7 @@ export default function MediaPage() {
                 const updatedMenu = { ...menu, ...payload };
                 dispatch(SET_ACTIVE_USER(updatedMenu as Menu));
                 toast.success(
-                    locale === "ar" ? "تم حفظ إعدادات الميديا بنجاح." : "Media settings saved successfully."
+                    t("savedSuccess")
                 );
             }
         } finally {
@@ -242,7 +242,7 @@ export default function MediaPage() {
                                 type="text"
                                 value={contact.addressAr}
                                 onChange={(e) => setContact((c) => ({ ...c, addressAr: e.target.value }))}
-                                placeholder={isRTL ? "العنوان بالعربية" : "Address in Arabic"}
+                                placeholder={t("addressArPlaceholder")}
                             />
                         </div>
                         <div className="space-y-1.5">
@@ -251,7 +251,7 @@ export default function MediaPage() {
                                 type="text"
                                 value={contact.addressEn}
                                 onChange={(e) => setContact((c) => ({ ...c, addressEn: e.target.value }))}
-                                placeholder={isRTL ? "Address in English" : "العنوان بالإنجليزية"}
+                                placeholder={t("addressEnPlaceholder")}
                             />
                         </div>
                         <div className="space-y-1.5">

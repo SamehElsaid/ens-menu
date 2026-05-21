@@ -275,7 +275,7 @@ export default function AddCategoryModal({
                         onChange={(e) => field.onChange(e.target.value)}
                         onBlur={field.onBlur}
                         className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                        placeholder="e.g., Drinks"
+                        placeholder={t("namePlaceholder")}
                         error={errors.nameEn?.message}
                       />
                     )}

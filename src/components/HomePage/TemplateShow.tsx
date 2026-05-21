@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 // import Image from "next/image";       
 import { BsCheckCircle } from "react-icons/bs";
 import { templates } from "@/modules/TemplateShow";
@@ -11,6 +11,7 @@ export const TemplateShow = () => {
   const [activeTab, setActiveTab] = useState(0);
   const locale = useLocale();
   const isRTL = locale === "ar";
+  const t = useTranslations("Landing.templateShow");
 
   const activeTemplate = templates[activeTab];
 
@@ -19,15 +20,13 @@ export const TemplateShow = () => {
       <div className="container mx-auto px-6">
         <div className="text-center mb-20">
           <h2 className="text-4xl lg:text-5xl font-black text-slate-900 dark:text-white mb-6">
-            {isRTL ? "اختر القالب " : "Choose the "}
+            {t("choosePrefix")}
             <span className="bg-linear-to-r from-purple-600 to-indigo-600 dark:from-purple-400 dark:to-indigo-400 bg-clip-text text-transparent">
-              {isRTL ? "المناسب لك" : "Right Template"}
+              {t("chooseHighlight")}
             </span>
           </h2>
           <p className="text-lg text-slate-500 dark:text-slate-400 font-medium max-w-2xl mx-auto">
-            {isRTL
-              ? "مجموعة متنوعة من القوالب الاحترافية المصممة خصيصًا لتناسب كل أنواع المطاعم والكافيهات"
-              : "A variety of professional templates designed specifically to suit all types of restaurants and cafes"}
+            {t("subtitle")}
           </p>
         </div>
 

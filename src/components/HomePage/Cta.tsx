@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 
 export const CTA = () => {
   const t = useTranslations("Landing.cta");
+  const tFooter = useTranslations("Landing.footer");
   const locale = useLocale();
   const isRTL = locale === "ar";
 
@@ -37,7 +38,7 @@ export const CTA = () => {
               </Link>
             </div>
             <button className="px-10 py-5 bg-purple-800/50 text-white rounded-full font-black text-md border border-purple-400 backdrop-blur-md hover:bg-purple-700/50 transition-all">
-              {isRTL ? "تواصل معنا" : "Contact Us"}
+              {tFooter("contactUs")}
             </button>
           </div>
         </div>

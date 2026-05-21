@@ -184,15 +184,9 @@ export default function StaffPage() {
   );
 
   if (isFreePlan) {
-    const title =
-      locale === "ar"
-        ? "إدارة الطاقم متاحة لخطط Pro فقط"
-        : "Staff management is available on Pro plans only";
-    const description =
-      locale === "ar"
-        ? "قم بالترقية لإضافة موظفين وتلقي نداءات الطاولات."
-        : "Upgrade to add staff and receive table call notifications.";
-    const buttonLabel = locale === "ar" ? "الترقية" : "Upgrade";
+    const title = t("proOnlyTitle");
+    const description = t("proOnlyDescription");
+    const buttonLabel = t("upgradeShort");
 
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">

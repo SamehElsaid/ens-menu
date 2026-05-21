@@ -363,7 +363,7 @@ export default function AddItemModal({
                                                 onChange={(e) => field.onChange(e.target.value)}
                                                 onBlur={field.onBlur}
                                                 className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                                                placeholder="e.g., Burger"
+                                                placeholder={t("namePlaceholder")}
                                                 error={errors.nameEn?.message}
                                             />
                                         )}
@@ -424,7 +424,7 @@ export default function AddItemModal({
                                                 onBlur={field.onBlur}
                                                 disabled={isFreePlan}
                                                 className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white disabled:opacity-70 disabled:cursor-not-allowed"
-                                                placeholder="Optional"
+                                                placeholder={t("optionalPlaceholder")}
                                                 error={errors.descriptionEn?.message}
                                             />
                                         )}
@@ -470,7 +470,7 @@ export default function AddItemModal({
                                                 onBlur={field.onBlur}
                                                 className="w-full px-4 py-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary focus:border-primary"
                                             >
-                                                <option value="">— {locale === "ar" ? "اختر الفئة" : "Select category"} —</option>
+                                                <option value="">— {tItems("selectCategory")} —</option>
                                                 {categories.map((cat) => (
                                                     <option key={cat.id} value={String(cat.id)}>
                                                         {getCategoryName(cat)}
@@ -522,7 +522,7 @@ export default function AddItemModal({
                                                 onBlur={field.onBlur}
                                                 disabled={isFreePlan}
                                                 className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white disabled:opacity-70 disabled:cursor-not-allowed"
-                                                placeholder="Optional"
+                                                placeholder={t("optionalPlaceholder")}
                                             />
                                         )}
                                     />
@@ -571,7 +571,7 @@ export default function AddItemModal({
                                 <h3 className="text-base font-semibold text-gray-900 dark:text-white">{t("currentlyAvailable")}</h3>
                             </div>
                             <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                                {locale === "ar" ? "هل المنتج متوفر للطلب الآن؟" : "Is this product available to order now?"}
+                                {tItems("availableToOrderNow")}
                             </p>
                             <Controller
                                 name="isAvailable"

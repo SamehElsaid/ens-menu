@@ -1,7 +1,7 @@
  "use client";
 
 import { useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { axiosDelete } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import { IoCloseOutline, IoTrashOutline } from "react-icons/io5";
@@ -21,6 +21,8 @@ export default function DeleteMenuConfirm({
     onDeleted,
 }: DeleteMenuConfirmProps) {
     const locale = useLocale();
+    const t = useTranslations("Menus");
+    const tCommon = useTranslations("common");
     const [isDeleting, setIsDeleting] = useState(false);
     const [confirmName, setConfirmName] = useState("");
 
@@ -31,11 +33,7 @@ export default function DeleteMenuConfirm({
             setIsDeleting(true);
             const result = await axiosDelete<unknown>(`/menus/${menuId}`, locale);
             if (result.status) {
-                toast.success(
-                    locale === "ar"
-                        ? "تم حذف القائمة بنجاح."
-                        : "Menu has been deleted successfully."
-                );
+                toast.success(t("deleteSuccessDetail"));
                 onDeleted?.();
                 onClose();
             }
@@ -65,9 +63,7 @@ export default function DeleteMenuConfirm({
                             id="delete-menu-title"
                             className="text-xl font-bold text-gray-900"
                         >
-                            {locale === "ar"
-                                ? "تأكيد حذف القائمة"
-                                : "Confirm menu deletion"}
+                            {t("deleteConfirmTitle")}
                         </h2>
                     </div>
                     <button
@@ -75,16 +71,14 @@ export default function DeleteMenuConfirm({
                         onClick={onClose}
                         disabled={isDeleting}
                         className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 transition-colors disabled:opacity-50"
-                        aria-label={locale === "ar" ? "إغلاق" : "Close"}
+                        aria-label={tCommon("close")}
                     >
                         <IoCloseOutline className="text-xl" />
                     </button>
                 </div>
 
                 <p className="text-gray-600 mb-4 text-sm">
-                    {locale === "ar"
-                        ? "لحذف هذه القائمة نهائيًا، اكتب اسم القائمة تمامًا كما يظهر بالأسفل، ثم اضغط تأكيد الحذف."
-                        : "To permanently delete this menu, type its name exactly as shown below, then confirm deletion."}{" "}
+                    {t("deletePermanentInstruction")}{" "}
                     <strong>«{menuTitle}»</strong>
                 </p>
 
@@ -93,9 +87,7 @@ export default function DeleteMenuConfirm({
                         htmlFor="delete-menu-confirm-input"
                         className="block text-sm font-medium text-gray-700 mb-2"
                     >
-                        {locale === "ar"
-                            ? "اكتب اسم القائمة للتأكيد"
-                            : "Type the menu name to confirm"}
+                        {t("typeMenuNameToConfirm")}
                     </label>
                     <input
                         id="delete-menu-confirm-input"
@@ -116,7 +108,7 @@ export default function DeleteMenuConfirm({
                         disabled={isDeleting}
                         className="px-5 py-3 rounded-2xl border-2 border-gray-300 text-gray-700 font-medium hover:bg-gray-100 transition-all disabled:opacity-50"
                     >
-                        {locale === "ar" ? "إلغاء" : "Cancel"}
+                        {tCommon("cancel")}
                     </button>
                     <CustomBtn
                         type="button"
@@ -128,7 +120,7 @@ export default function DeleteMenuConfirm({
                     >
                         <div className="flex items-center justify-center gap-2">
                             <IoTrashOutline className="text-xl" />
-                            {locale === "ar" ? "تأكيد الحذف" : "Confirm delete"}
+                            {tCommon("confirmDelete")}
                         </div>
                     </CustomBtn>
                 </div>
