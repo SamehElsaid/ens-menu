@@ -29,6 +29,7 @@ export default function GoogleTagManager() {
 
   return (
     <>
+    
       <Script id="google-tag-manager" strategy="afterInteractive">
         {`
           (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
