@@ -171,7 +171,15 @@
     "next": "التالي",
     "back": "السابق",
     "edit": "تعديل",
-    "delete": "حذف"
+    "delete": "حذف",
+    "close": "إغلاق",
+    "cancel": "إلغاء",
+    "openMenu": "فتح القائمة",
+    "search": "بحث...",
+    "optional": "اختياري",
+    "urlPlaceholder": "https://...",
+    "dateFormatPlaceholder": "يوم/شهر/سنة",
+    "confirmDelete": "تأكيد الحذف"
   },
   "auth": {
     "parentTitle": "تسجيل الوالد",
@@ -285,12 +293,12 @@
     "welcomeBackDescription": "أدخل تفاصيلك لتسجيل الدخول",
     "staffLoginLink": "تسجيل دخول موظف ",
     "staffLoginHeading": "تسجيل دخول الموظف",
-    "staffLoginSubheading": "الكاشير يمكنه استخدام لوحة تحكم المطعم. أدخل رابط القائمة (السلَج) والبريد وكلمة المرور.",
-    "menuSlug": "رابط القائمة (السلَج)",
+    "staffLoginSubheading": "الكاشير يمكنه استخدام لوحة تحكم المطعم. أدخل رابط القائمة (رابط القائمة المختصر)والبريد وكلمة المرور.",
+    "menuSlug": "رابط القائمة (رابط القائمة المختصر)",
     "menuSlugPlaceholder": "مثال: my-restaurant",
     "menuSlugRequired": "رابط القائمة مطلوب",
     "staffLoginFailed": "تعذّر تسجيل الدخول. تحقق من اسم المطعم والبريد وكلمة المرور.",
-    "staffOnlyCashierDashboard": "لوحة التحكم متاحة للكاشير فقط. النادل يستخدم أدوات نداء الطاولات.",
+    "staffOnlyCashierDashboard": "لوحة التحكم متاحة للكاشير فقط، بينما يستخدم النادل نظام نداء الطاولات.",
     "staffLoginSubmit": "دخول ككاشير",
     "ownerLoginLink": "دخول صاحب المطعم",
     "dontHaveAccount": "ليس لديك حساب؟",
@@ -312,7 +320,15 @@
     "resetPasswordSubmit": "تحديث كلمة المرور",
     "resetLinkSent": "تم إرسال رابط إعادة التعيين. يرجى التحقق من بريدك الإلكتروني.",
     "resetPasswordSuccess": "تم تحديث كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن.",
-    "invalidResetToken": "رابط إعادة التعيين غير صالح. اطلب رابطًا جديدًا."
+    "invalidResetToken": "رابط إعادة التعيين غير صالح. اطلب رابطًا جديدًا.",
+    "centerDescription": "انضم إلى شبكة المراكز لدينا",
+    "centerTitle": "تسجيل مركز",
+    "profileImage": "صورة الملف الشخصي",
+    "selectSpeciality": "اختر التخصص",
+    "speciality": "التخصص",
+    "specialityInvalid": "يرجى اختيار تخصص صحيح",
+    "specialityRequired": "التخصص مطلوب",
+    "switchToCenter": "التسجيل كمركز"
   },
   "form": {
     "personalInformation": "المعلومات الشخصية",
@@ -384,7 +400,12 @@
     "fullName": "الاسم الكامل",
     "nationalID": "رقم الهوية الوطنية",
     "ownsCenter": "أمتلك مركزاً",
-    "jobInformation": "معلومات الوظيفة"
+    "jobInformation": "معلومات الوظيفة",
+    "confirm": "تأكيد",
+    "confirmChangeMessage": "هل أنت متأكد أنك تريد {action} {fieldName}؟",
+    "confirmChanges": "تأكيد التغييرات",
+    "confirmChangesMessage": "هل أنت متأكد أنك تريد حفظ هذه التغييرات؟",
+    "search": "بحث"
   },
   "personal": {
     "information": "المعلومات",
@@ -451,7 +472,125 @@
     "fields": "حقول",
     "selectChoice": "اختر خياراً",
     "fieldRequired": "مطلوب",
-    "choicesMinRequired": "يجب إضافة خيارين على الأقل"
+    "choicesMinRequired": "يجب إضافة خيارين على الأقل",
+    "addChoice": "إضافة خيار",
+    "addField": "إضافة حقل",
+    "addFirstLocation": "اضغط «إضافة موقع» للبدء",
+    "addFirstWorkedAt": "اضغط «إضافة خبرة عمل» للبدء",
+    "addLocation": "إضافة موقع",
+    "addWorkedAt": "إضافة خبرة عمل",
+    "allowBookingOffline": "السماح بالحجز غير الإلكتروني",
+    "allowBookingOfflineDescription": "تفعيل الحجز غير الإلكتروني لخدماتك",
+    "allowBookingOnline": "السماح بالحجز الإلكتروني",
+    "allowBookingOnlineDescription": "تفعيل الحجز الإلكتروني لخدماتك",
+    "allowConsultation": "السماح بالاستشارة",
+    "allowConsultationDescription": "تفعيل خدمات الاستشارة للعملاء",
+    "center": "المركز",
+    "centerRequired": "المركز مطلوب",
+    "choiceNameAr": "اسم الخيار (عربي)",
+    "choiceNameArMinLength": "يجب ألا يقل اسم الخيار بالعربية عن حرفين",
+    "choiceNameArPlaceholder": "أدخل اسم الخيار بالعربية",
+    "choiceNameArRequired": "اسم الخيار بالعربية مطلوب",
+    "choiceNameEn": "اسم الخيار (إنجليزي)",
+    "choiceNameEnMinLength": "يجب ألا يقل اسم الخيار بالإنجليزية عن حرفين",
+    "choiceNameEnPlaceholder": "أدخل اسم الخيار بالإنجليزية",
+    "choiceNameEnRequired": "اسم الخيار بالإنجليزية مطلوب",
+    "choices": "الخيارات",
+    "current": "حالي",
+    "currentPosition": "المنصب الحالي",
+    "deleteLocation": "حذف الموقع",
+    "deleteLocationConfirm": "هل أنت متأكد أنك تريد حذف الموقع: {location}؟",
+    "deleteLocationConfirmMessage": "هل أنت متأكد أنك تريد حذف هذا الموقع؟",
+    "deleteWorkedAt": "حذف خبرة العمل",
+    "deleteWorkedAtConfirm": "هل أنت متأكد أنك تريد حذف: {title}؟",
+    "deleteWorkedAtConfirmMessage": "هل أنت متأكد أنك تريد حذف خبرة العمل هذه؟",
+    "disable": "تعطيل",
+    "editStep": "تعديل الخطوة",
+    "enable": "تفعيل",
+    "endDate": "تاريخ الانتهاء",
+    "endDateAfterStartDate": "يجب أن يكون تاريخ الانتهاء بعد تاريخ البداية",
+    "endDateBeforeStartDate": "يجب أن يكون تاريخ الانتهاء قبل تاريخ البداية",
+    "endDateFuture": "لا يمكن أن يكون تاريخ الانتهاء في المستقبل",
+    "endDateRequired": "تاريخ الانتهاء مطلوب",
+    "experienceRequired": "مطلوب إدخال خبرة واحدة على الأقل",
+    "fieldNameAr": "اسم الحقل (عربي)",
+    "fieldNameArMinLength": "يجب ألا يقل اسم الحقل بالعربية عن حرفين",
+    "fieldNameArPlaceholder": "أدخل اسم الحقل بالعربية",
+    "fieldNameArRequired": "اسم الحقل بالعربية مطلوب",
+    "fieldNameEn": "اسم الحقل (إنجليزي)",
+    "fieldNameEnMinLength": "يجب ألا يقل اسم الحقل بالإنجليزية عن حرفين",
+    "fieldNameEnPlaceholder": "أدخل اسم الحقل بالإنجليزية",
+    "fieldNameEnRequired": "اسم الحقل بالإنجليزية مطلوب",
+    "fieldType": "نوع الحقل",
+    "fieldTypeChoice": "اختيار",
+    "fieldTypeDate": "تاريخ",
+    "fieldTypeInput": "إدخال",
+    "fieldTypeNumber": "رقم",
+    "fieldTypePhone": "هاتف",
+    "fieldTypePlaceholder": "اختر نوع الحقل",
+    "fieldTypeRequired": "نوع الحقل مطلوب",
+    "fieldTypeSelect": "قائمة منسدلة",
+    "fieldTypeTextarea": "نص متعدد الأسطر",
+    "isAvailableNow": "متاح الآن",
+    "isAvailableNowDescription": "تفعيل التوفر للعملاء",
+    "locationDetails": "تفاصيل الموقع",
+    "locationDetailsPlaceholder": "أدخل تفاصيل إضافية للموقع (مثل العنوان، اسم المبنى، إلخ)",
+    "locationDetailsRequired": "تفاصيل الموقع مطلوبة",
+    "noChoicesAdded": "لم تُضف خيارات بعد. اضغط «إضافة خيار» لإضافة واحد.",
+    "noLocations": "لا توجد مواقع بعد",
+    "noWorkedAt": "لا توجد خبرة عمل بعد",
+    "noWorkedAtFound": "لم يتم العثور على خبرة عمل",
+    "prefixTitle": "اللقب",
+    "prefixTitleRequired": "اللقب مطلوب",
+    "present": "حتى الآن",
+    "qualificationActivitiesAndSocieties": "الأنشطة والجمعيات",
+    "qualificationActivitiesAndSocietiesPlaceholder": "أدخل الأنشطة والجمعيات",
+    "qualificationDegree": "الدرجة",
+    "qualificationDegreePlaceholder": "أدخل الدرجة",
+    "qualificationDegreeRequired": "الدرجة مطلوبة",
+    "qualificationDescription": "الوصف",
+    "qualificationDescriptionPlaceholder": "أدخل الوصف",
+    "qualificationEndDate": "تاريخ الانتهاء",
+    "qualificationEndDateAfterStart": "يجب أن يكون تاريخ الانتهاء بعد تاريخ البداية",
+    "qualificationEndDatePlaceholder": "اختر تاريخ الانتهاء",
+    "qualificationEndDateRequired": "تاريخ الانتهاء مطلوب",
+    "qualificationFieldOfStudy": "مجال الدراسة",
+    "qualificationFieldOfStudyPlaceholder": "أدخل مجال الدراسة",
+    "qualificationFieldOfStudyRequired": "مجال الدراسة مطلوب",
+    "qualificationSchool": "اسم المدرسة/الجامعة",
+    "qualificationSchoolMinLength": "يجب ألا يقل اسم المدرسة عن حرفين",
+    "qualificationSchoolPlaceholder": "أدخل اسم المدرسة أو الجامعة",
+    "qualificationSchoolRequired": "اسم المدرسة مطلوب",
+    "qualificationStartDate": "تاريخ البداية",
+    "qualificationStartDatePlaceholder": "اختر تاريخ البداية",
+    "qualificationStartDateRequired": "تاريخ البداية مطلوب",
+    "qualificationTypePlaceholder": "اختر نوع المؤهل",
+    "searchWorkedAt": "ابحث بالمسمى أو المركز...",
+    "selectCenter": "اختر المركز",
+    "selectEndDate": "اختر تاريخ الانتهاء",
+    "selectLocationOnMap": "اختر الموقع على الخريطة",
+    "selectStartDate": "اختر تاريخ البداية",
+    "special": "التخصص الفرعي",
+    "specialRequired": "التخصص الفرعي مطلوب",
+    "startDate": "تاريخ البداية",
+    "startDateFuture": "لا يمكن أن يكون تاريخ البداية في المستقبل",
+    "startDateRequired": "تاريخ البداية مطلوب",
+    "stepNameAr": "اسم الخطوة (عربي)",
+    "stepNameArMinLength": "يجب ألا يقل اسم الخطوة بالعربية عن حرفين",
+    "stepNameArPlaceholder": "أدخل اسم الخطوة بالعربية",
+    "stepNameArRequired": "اسم الخطوة بالعربية مطلوب",
+    "stepNameEn": "اسم الخطوة (إنجليزي)",
+    "stepNameEnMinLength": "يجب ألا يقل اسم الخطوة بالإنجليزية عن حرفين",
+    "stepNameEnPlaceholder": "أدخل اسم الخطوة بالإنجليزية",
+    "stepNameEnRequired": "اسم الخطوة بالإنجليزية مطلوب",
+    "subSpecial": "التخصص الدقيق",
+    "subSpecialRequired": "مطلوب تخصص دقيق واحد على الأقل",
+    "workedAt": "خبرة العمل",
+    "workedAtDescription": "أضف خبرتك المهنية إلى ملفك. سيساعدك ذلك في جذب المزيد من العملاء وتحسين ظهورك.",
+    "workedAtTitle": "المسمى الوظيفي",
+    "workedAtTitleMinLength": "يجب ألا يقل المسمى عن حرفين",
+    "workedAtTitlePlaceholder": "أدخل المسمى أو المنصب",
+    "workedAtTitleRequired": "المسمى الوظيفي مطلوب"
   },
   "personalProfile": {
     "title": "ملفي الشخصي",
@@ -561,7 +700,15 @@
     "devPayLoading": "جاري المعالجة…",
     "devPayError": "تعذر إتمام الدفع التجريبي",
     "devPayNoCheckout": "لا يوجد رقم جلسة دفع في الرابط.",
-    "devPayRealHint": "لصفحة EasyKash الحقيقية: EASYKASH_DEV_MOCK=false واضبط EASYKASH_CREATE_PATH من لوحة البائع."
+    "devPayRealHint": "لصفحة EasyKash الحقيقية: EASYKASH_DEV_MOCK=false واضبط EASYKASH_CREATE_PATH من لوحة البائع.",
+    "changesSavedSuccess": "تم حفظ التغييرات بنجاح",
+    "changesSaveFailed": "فشل في حفظ التغييرات",
+    "changePasswordFailed": "فشل في تغيير كلمة المرور",
+    "maxFileSize": "حد أقصى 5 ميجا",
+    "remove": "إزالة",
+    "saving": "جاري الحفظ...",
+    "changingPassword": "جاري التغيير...",
+    "dateFormatPlaceholder": "يوم/شهر/سنة"
   },
   "homePage": {
     "centerSection": {
@@ -624,10 +771,75 @@
     "searchByParentName": "البحث حسب اسم الوالد",
     "searchByPatientName": "البحث حسب اسم المريض",
     "selectLocation": "اختر الموقع",
-    "allLocations": "جميع المواقع"
+    "allLocations": "جميع المواقع",
+    "accept": "قبول",
+    "acceptBooking": "قبول الحجز",
+    "acceptBookingMessage": "هل أنت متأكد أنك تريد قبول حجز {patientName} ({parentName}) في {reservationDate} الساعة {reservationTime}؟",
+    "actions": "الإجراءات",
+    "offline-booking": "حجز غير إلكتروني",
+    "online-booking": "حجز إلكتروني",
+    "refuse": "رفض",
+    "refuseBooking": "رفض الحجز",
+    "refuseBookingMessage": "هل أنت متأكد أنك تريد رفض حجز {patientName} ({parentName}) في {reservationDate} الساعة {reservationTime}؟",
+    "reset": "إعادة تعيين",
+    "searchBySpecialistName": "البحث حسب اسم الأخصائي",
+    "searchByType": "البحث حسب النوع",
+    "specialistName": "اسم الأخصائي",
+    "type-booking": "النوع"
   },
   "workSchedule": {
-    "timeCaption": "الوقت"
+    "timeCaption": "الوقت",
+    "addAppointment": "إضافة موعد",
+    "allDay": "طوال اليوم",
+    "allLocations": "جميع المواقع",
+    "am": "ص",
+    "appointment": "موعد",
+    "appointmentTitle": "عنوان الموعد",
+    "appointmentTitlePlaceholder": "مثال: استشارة طبية",
+    "appointmentType": "نوع الموعد",
+    "availableTimes": "الأوقات المتاحة",
+    "calendarView": "عرض التقويم",
+    "date": "التاريخ",
+    "dateFuture": "يجب أن يكون التاريخ اليوم أو في المستقبل",
+    "dateRequired": "التاريخ مطلوب",
+    "delete": "حذف",
+    "deleteAppointment": "حذف الموعد",
+    "deleteAppointmentConfirm": "هل أنت متأكد أنك تريد حذف الموعد: {title}؟",
+    "deleteAppointmentMessage": "هل أنت متأكد أنك تريد حذف هذا الموعد؟",
+    "description": "إدارة المواعيد المتاحة للمرضى",
+    "duration": "المدة (بالدقائق)",
+    "durationMax": "يجب ألا تتجاوز المدة 8 ساعات",
+    "durationMin": "يجب ألا تقل المدة عن 15 دقيقة",
+    "durationRequired": "المدة مطلوبة",
+    "editAppointment": "تعديل الموعد",
+    "filterByLocation": "تصفية حسب الموقع",
+    "hours": "ساعات محددة",
+    "hoursMin": "يجب اختيار ساعة واحدة على الأقل",
+    "hoursRequired": "الساعات مطلوبة",
+    "location": "الموقع",
+    "locationRequired": "الموقع مطلوب",
+    "maxAppointments": "عدد المواعيد في اليوم",
+    "maxAppointmentsMin": "يجب أن يكون موعداً واحداً على الأقل",
+    "maxAppointmentsPlaceholder": "مثال: 10",
+    "maxAppointmentsRequired": "عدد المواعيد مطلوب",
+    "more": "المزيد",
+    "multiple": "مواعيد متعددة في اليوم",
+    "noAppointments": "لا توجد مواعيد متاحة",
+    "noAvailableHours": "لا توجد ساعات متاحة",
+    "pm": "م",
+    "selectAvailableHours": "اختر الساعات المتاحة",
+    "selectDate": "اختر التاريخ",
+    "selectDuration": "اختر المدة",
+    "selectLocation": "اختر الموقع",
+    "selectTime": "اختر الوقت",
+    "selectType": "اختر النوع",
+    "single": "موعد واحد",
+    "startTime": "وقت البداية",
+    "timeRequired": "الوقت مطلوب",
+    "timeSlotsView": "عرض الفترات الزمنية",
+    "title": "جدول العمل",
+    "titleMinLength": "يجب ألا يقل العنوان عن حرفين",
+    "titleRequired": "العنوان مطلوب"
   },
   "overview": {
     "title": "نظرة عامة",
@@ -804,7 +1016,6 @@
     "WorkflowApp": {
       "title": "كيف يعمل النظام داخل مطعمك",
       "subtitle": "كل خطوة محسوبة… من الطلب حتى التسليم",
-
       "steps": [
         {
           "title": "استقبال الطلب",
@@ -861,23 +1072,23 @@
     "howItWorks": {
       "title": "ثلاث خطوات بسيطة للانطلاق",
       "description": "نحن نسهل عليك الانتقال من المنيو الورقي القديم إلى العصر الرقمي في دقائق.",
-      "steps": [
-        {
+      "steps": {
+        "0": {
           "number": "01",
           "title": "سجل الآن",
           "description": "أنشئ حسابك مجاناً بخطوات بسيطة وسهلة أو سجل دخولك مباشرة وبسرعة باستخدام حساب جوجل."
         },
-        {
+        "1": {
           "number": "02",
           "title": "خصص تصميمك",
           "description": "اختر الألوان، اللوجو، وأسلوب الـ QR والمنيو الذي يناسب هويتك التجارية."
         },
-        {
+        "2": {
           "number": "03",
           "title": "انشر الرمز",
           "description": "قم بتحميل الرمز بجودة عالية واطبعه على الطاولات أو في مدخل مطعمك."
         }
-      ]
+      }
     },
     "faq": {
       "title": "الأسئلة الشائعة",
@@ -964,7 +1175,6 @@
         }
       ]
     },
-
     "pricing": {
       "title": "اختر خطتك",
       "description": "ابدأ مجاناً وترقّى عند الحاجة. خطة مخصصة للمتطلبات المتقدمة.",
@@ -1035,6 +1245,19 @@
       "privacy": "سياسة الخصوصية",
       "terms": "الشروط والأحكام",
       "followUs": "تابعنا"
+    },
+    "header": {
+      "signIn": "دخول",
+      "startNow": "ابدأ الآن"
+    },
+    "templateShow": {
+      "choosePrefix": "اختر القالب ",
+      "chooseHighlight": "المناسب لك",
+      "subtitle": "مجموعة متنوعة من القوالب الاحترافية المصممة خصيصًا لتناسب كل أنواع المطاعم والكافيهات"
+    },
+    "mobileApp": {
+      "whyOurApp": "لماذا تطبيقنا؟",
+      "livePreview": "معاينة مباشرة"
     }
   },
   "PricingPage": {
@@ -1096,9 +1319,13 @@
     "faq1a": "نعم. الخطة المجانية تسمح بإنشاء منيو وتجربة المنتج. رقِّ عندما تحتاج حدود أو ميزات Pro.",
     "faq2q": "ماذا يحدث عند التخفيض؟",
     "faq2a": "تبقى بياناتك، لكن تُطبّق حدود الخطة الأدنى (منيوهات، منتجات، ميزات). قد تحتاج لإيقاف منيو إضافي حتى تلتزم بالحد.",
-
     "faq3q": "هل يوجد استرداد؟",
-    "faq3a": "سياسة الاسترداد تعتمد على قناة الاشتراك. راجع الشروط وقت الشراء أو اسأل المبيعات عبر واتساب."
+    "faq3a": "سياسة الاسترداد تعتمد على قناة الاشتراك. راجع الشروط وقت الشراء أو اسأل المبيعات عبر واتساب.",
+    "staticFreeFeature1": "50 منتج",
+    "staticFreeFeature2": "بدون تعديلات",
+    "staticProFeature1": "200 منتج لكل قائمة",
+    "staticProFeature2": "شامل التعديلات",
+    "staticProFeature3": "تحكم في الإعلانات"
   },
   "Menus": {
     "title": "قوائمي",
@@ -1154,7 +1381,8 @@
       "descriptionAr": "الوصف (عربي)",
       "logo": "الشعار",
       "logoUpload": "رفع الشعار",
-      "logoHint": "ارفع شعار لقائمتك (اختياري)",
+      "logoHint": "ارفع شعار لقائمتك (مطلوب)",
+      "logoUploadError": "فشل رفع الشعار. حاول مرة أخرى.",
       "currency": "العملة",
       "currencyLabel": "اختر العملة",
       "urlSettings": "إعدادات الرابط",
@@ -1170,9 +1398,9 @@
       "slugTaken": "هذا الرابط مستخدم بالفعل",
       "slugSuggestions": "اقتراحات مشابهة:",
       "slugTakenError": "هذا الرابط مستخدم بالفعل. يرجى اختيار رابط آخر.",
-      "logoFormatError": "يرجى اختيار صورة بصيغة PNG أو ICO أو JPG",
+      "logoFormatError": "يرجى اختيار صورة بصيغة PNG أو ICO أو JPG أو WebP",
       "logoSizeError": "حجم الصورة يجب أن يكون أقل من 2 ميجابايت",
-      "supportedFormats": "الصيغ المدعومة: PNG, ICO, JPG - الحد الأقصى: 2MB",
+      "supportedFormats": "الصيغ المدعومة: PNG, ICO, JPG, WebP - الحد الأقصى: 2MB",
       "validation": {
         "nameEnRequired": "الاسم (إنجليزي) مطلوب",
         "nameArRequired": "الاسم (عربي) مطلوب",
@@ -1180,8 +1408,14 @@
         "slugMin": "الرابط يجب أن يكون 3 أحرف على الأقل",
         "slugInvalid": "الرابط يمكن أن يحتوي على حروف صغيرة وأرقام وشرطات فقط",
         "currencyRequired": "العملة مطلوبة"
-      }
-    }
+      },
+      "nameEnPlaceholder": "مثال: منيو مطعمي",
+      "descriptionEnPlaceholder": "صف منيوك بالإنجليزية...",
+      "slugPlaceholder": "my-restaurant-menu"
+    },
+    "deletePermanentInstruction": "لحذف هذه القائمة نهائيًا، اكتب اسم القائمة تمامًا كما يظهر بالأسفل، ثم اضغط تأكيد الحذف.",
+    "deleteSuccessDetail": "تم حذف القائمة بنجاح.",
+    "currentPlan": "الخطة الحالية"
   },
   "Categories": {
     "title": "الفئات",
@@ -1222,7 +1456,8 @@
       "editTitle": "تعديل الفئة",
       "save": "حفظ",
       "editSuccess": "تم تحديث الفئة بنجاح",
-      "editError": "فشل تحديث الفئة"
+      "editError": "فشل تحديث الفئة",
+      "namePlaceholder": "مثال: مشروبات"
     },
     "deleteConfirmTitle": "حذف الفئة",
     "deleteConfirm": "هل أنت متأكد من حذف الفئة « {name} »؟ لا يمكن التراجع عن هذا الإجراء.",
@@ -1342,7 +1577,12 @@
       "editSuccess": "تم تحديث الموظف بنجاح",
       "editError": "فشل تحديث الموظف",
       "closeAriaLabel": "إغلاق"
-    }
+    },
+    "phone": "الهاتف",
+    "proOnlyTitle": "إدارة الطاقم متاحة لخطط Pro فقط",
+    "proOnlyDescription": "قم بالترقية لإضافة موظفين وتلقي نداءات الطاولات.",
+    "upgradeShort": "الترقية",
+    "personalProfileLink": "الصفحة الشخصية"
   },
   "Items": {
     "title": "العناصر",
@@ -1407,7 +1647,9 @@
       "editError": "فشل تحديث العنصر",
       "imageFormatError": "يرجى اختيار صورة PNG أو JPG أو WebP",
       "imageSizeError": "حجم الصورة يجب أن يكون أقل من 2 ميجابايت",
-      "imageUploadError": "فشل رفع الصورة"
+      "imageUploadError": "فشل رفع الصورة",
+      "namePlaceholder": "مثال: برجر",
+      "optionalPlaceholder": "اختياري"
     },
     "deleteConfirmTitle": "حذف العنصر",
     "deleteConfirm": "هل أنت متأكد من حذف هذا العنصر؟ لا يمكن التراجع عن هذا الإجراء.",
@@ -1416,7 +1658,10 @@
     "subscribeNow": "اشترك الآن",
     "deleteSuccess": "تم حذف العنصر بنجاح",
     "deleteError": "فشل حذف العنصر",
-    "confirmDelete": "حذف"
+    "confirmDelete": "حذف",
+    "searchByName": "بحث بالاسم...",
+    "selectCategory": "اختر الفئة",
+    "availableToOrderNow": "هل المنتج متوفر للطلب الآن؟"
   },
   "Advertisements": {
     "addModal": {
@@ -1448,8 +1693,13 @@
       "createSuccess": "تم إنشاء الإعلان بنجاح",
       "createError": "فشل إنشاء الإعلان",
       "editSuccess": "تم تحديث الإعلان بنجاح",
-      "editError": "فشل تحديث الإعلان"
+      "editError": "فشل تحديث الإعلان",
+      "titlePlaceholder": "مثال: عرض صيفي",
+      "contentPlaceholder": "تفاصيل العرض...",
+      "linkUrlPlaceholder": "https://..."
     },
+    "freePlanTitle": "هذه الميزة متاحة للخطط المدفوعة فقط",
+    "freePlanDescription": "قم بالترقية للوصول إلى ميزة الإعلانات وإبراز عروضك لعملائك.",
     "page": {
       "title": "الإعلانات",
       "description": "إدارة الإعلانات الترويجية لهذه القائمة.",
@@ -1615,7 +1865,10 @@
     "adminsLabel": "Admins",
     "trialUsersLabel": "Trial Users",
     "revenueLabel": "Revenue",
-    "suspendedLabel": "Suspended"
+    "suspendedLabel": "Suspended",
+    "viewDetailedAnalytics": "عرض الإحصائيات التفصيلية",
+    "usersGrowth": "نمو المستخدمين",
+    "plansDistribution": "توزيع الخطط"
   },
   "adminUsers": {
     "title": "إدارة المستخدمين",
@@ -1632,7 +1885,8 @@
       "email": "البريد الإلكتروني",
       "plan": "الخطة",
       "status": "الحالة",
-      "actions": "إجراءات"
+      "actions": "إجراءات",
+      "role": "الدور"
     },
     "status": {
       "active": "نشط",
@@ -1930,7 +2184,10 @@
     "view": "عرض",
     "product": "منتج",
     "category": "تصنيف",
-    "addedOn": "تمت الإضافة في {date}"
+    "addedOn": "تمت الإضافة في {date}",
+    "qrUnavailable": "QR غير متاح",
+    "noRecentActivity": "لا يوجد نشاط حديث.",
+    "activityHint": "ستظهر هنا عند إضافة عناصر أو تصنيفات."
   },
   "settings": {
     "setting": "الإعدادات",
@@ -2064,7 +2321,11 @@
     "buttons": {
       "save": "حفظ التغييرات",
       "cancel": "إلغاء"
-    }
+    },
+    "noMenuSelected": "لم يتم تحديد قائمة.",
+    "savedSuccess": "تم حفظ إعدادات الميديا بنجاح.",
+    "addressArPlaceholder": "العنوان بالعربية",
+    "addressEnPlaceholder": "العنوان بالإنجليزية"
   },
   "Unauthorized": {
     "title": "غير مسموح",
@@ -2094,5 +2355,112 @@
     "admin": "مدير",
     "user": "مستخدم",
     "staff": "موظف"
+  },
+  "application": {
+    "view": "عرض"
+  },
+  "chat": {
+    "appTitle": "عرض واتساب",
+    "attachmentDocument": "مستند",
+    "attachmentDocumentPrefix": "مستند مرفق:",
+    "attachmentPhotosAndVideos": "صور وفيديو",
+    "contactsLabel": "جهات الاتصال",
+    "errorsAudioNotSupported": "تسجيل الصوت غير مدعوم في هذا المتصفح.",
+    "errorsAudioStartFailed": "تعذّر بدء التسجيل.",
+    "errorsImagesOnly": "يُسمح بملفات الصور فقط.",
+    "errorsInvalidDocumentType": "يجب أن يكون المستند بصيغة PDF أو XLSX فقط.",
+    "errorsSvgNotSupported": "صور SVG غير مدعومة. يرجى اختيار صورة أخرى.",
+    "fakeConversation": "محادثة تجريبية",
+    "imageReady": "الصورة جاهزة للإرسال",
+    "online": "متصل",
+    "placeholderMessage": "اكتب رسالة أو أرسل تسجيلاً صوتياً...",
+    "subtitle": "تخطيط شبيه بواتساب مع بيانات تجريبية."
+  },
+  "progressBar": {
+    "addProgressBar": "إضافة شريط تقدم",
+    "editProgressBar": "تعديل شريط التقدم",
+    "nameAr": "الاسم (عربي)",
+    "nameArMinLength": "يجب ألا يقل الاسم بالعربية عن حرفين",
+    "nameArPlaceholder": "أدخل الاسم بالعربية",
+    "nameArRequired": "الاسم بالعربية مطلوب",
+    "nameEn": "الاسم (إنجليزي)",
+    "nameEnMinLength": "يجب ألا يقل الاسم بالإنجليزية عن حرفين",
+    "nameEnPlaceholder": "أدخل الاسم بالإنجليزية",
+    "nameEnRequired": "الاسم بالإنجليزية مطلوب",
+    "progressRate": "نسبة التقدم (%)",
+    "progressRateMax": "يجب ألا تتجاوز نسبة التقدم 100",
+    "progressRateMin": "يجب ألا تقل نسبة التقدم عن 0",
+    "progressRateRequired": "نسبة التقدم مطلوبة"
+  },
+  "rates": {
+    "date": "التاريخ",
+    "description": "عرض وإدارة جميع معدلات التقدم عبر الجلسات",
+    "noRates": "لا توجد معدلات بعد",
+    "notes": "ملاحظات",
+    "section": "القسم",
+    "time": "الوقت",
+    "title": "المعدلات"
+  },
+  "section": {
+    "addFirstProgressBar": "اضغط «إضافة شريط تقدم» للبدء",
+    "noProgressBars": "لا توجد أشرطة تقدم بعد",
+    "notes": "ملاحظات",
+    "notesDescription": "أضف ملاحظاتك وملاحظاتك هنا",
+    "notesLabel": "ملاحظات",
+    "notesPlaceholder": "أدخل ملاحظاتك هنا...",
+    "progressBars": "أشرطة التقدم",
+    "progressBarsDescription": "تتبع وإدارة مؤشرات التقدم"
+  },
+  "sessions": {
+    "actions": "الإجراءات",
+    "addSession": "إضافة جلسة",
+    "confirmDelete": "هل أنت متأكد أنك تريد حذف هذه الجلسة؟",
+    "date": "التاريخ",
+    "dateRequired": "التاريخ مطلوب",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "editSession": "تعديل الجلسة",
+    "noSessions": "لا توجد جلسات بعد",
+    "notes": "ملاحظات",
+    "notesPlaceholder": "أدخل ملاحظات هذه الجلسة...",
+    "sectionName": "اسم القسم",
+    "sectionNameMinLength": "يجب ألا يقل اسم القسم عن حرفين",
+    "sectionNamePlaceholder": "أدخل اسم القسم",
+    "sectionNameRequired": "اسم القسم مطلوب",
+    "selectTime": "اختر الوقت",
+    "status": "الحالة",
+    "statusAttended": "حاضر",
+    "statusCanceled": "ملغي",
+    "statusPending": "قيد الانتظار",
+    "time": "الوقت",
+    "timeRequired": "الوقت مطلوب"
+  },
+  "treatmentPlan": {
+    "content": "محتوى خطة العلاج",
+    "description": "إنشاء وإدارة خطة العلاج لهذا العميل",
+    "title": "خطة العلاج"
+  },
+  "menuSettingsPage": {
+    "generalSettings": "إعدادات عامة",
+    "logoUploadFailed": "فشل رفع الشعار",
+    "noLogo": "لا يوجد شعار",
+    "menuStatus": "حالة القائمة",
+    "currentStatus": "الحالة الحالية",
+    "dangerZone": "منطقة الخطر",
+    "deleteThisMenu": "حذف هذه القائمة",
+    "saveChanges": "حفظ التغييرات",
+    "namePlaceholder": "منيو مطعمي",
+    "descriptionPlaceholder": "صف منيوك بالإنجليزية..."
+  },
+  "menuMediaSettings": {
+    "noMenuSelected": "لم يتم تحديد قائمة.",
+    "savedSuccess": "تم حفظ إعدادات الميديا بنجاح.",
+    "addressArPlaceholder": "العنوان بالعربية",
+    "addressEnPlaceholder": "العنوان بالإنجليزية"
+  },
+  "map": {
+    "searchPlaceholder": "ابحث عن موقع...",
+    "searching": "جاري البحث...",
+    "selectedLocation": "الموقع المحدد:"
   }
 }

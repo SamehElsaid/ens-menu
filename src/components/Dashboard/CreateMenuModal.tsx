@@ -33,9 +33,29 @@ interface CreateMenuModalProps {
   onRefresh?: () => void;
 }
 
+const LOGO_ACCEPT =
+  ".png,.ico,.jpg,.jpeg,.webp,image/png,image/x-icon,image/vnd.microsoft.icon,image/jpeg,image/webp";
+
+const LOGO_MIME_TYPES = new Set([
+  "image/png",
+  "image/x-icon",
+  "image/vnd.microsoft.icon",
+  "image/jpeg",
+  "image/jpg",
+  "image/webp",
+]);
+
+const LOGO_EXTENSIONS = /\.(png|ico|jpe?g|webp)$/i;
+
+function isValidLogoFile(file: File): boolean {
+  if (file.type && LOGO_MIME_TYPES.has(file.type)) return true;
+  return LOGO_EXTENSIONS.test(file.name);
+}
+
 export default function CreateMenuModal({
   onClose,
   onRefresh,
+  onMenuCreated,
 }: CreateMenuModalProps) {
   const t = useTranslations("Menus.createModal");
   const locale = useLocale();
@@ -74,6 +94,7 @@ export default function CreateMenuModal({
     suggestions: [],
   });
   const [isCreating, setIsCreating] = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
 
   // Debounced slug check
   useEffect(() => {
@@ -120,31 +141,35 @@ export default function CreateMenuModal({
       return;
     }
 
+    if (!logo) {
+      setLogoError(t("validation.logoRequired"));
+      toast.error(t("validation.logoRequired"));
+      return;
+    }
+
     try {
       setIsCreating(true);
+      setLogoError(null);
 
-      let logoUrl: string | null = null;
-      if (logo) {
-        const logoFormData = new FormData();
-        logoFormData.append("file", logo);
-        logoFormData.append("type", "logos");
+      const logoFormData = new FormData();
+      logoFormData.append("type", "logos");
+      logoFormData.append("file", logo);
 
-        const uploadResult = await axiosPost<FormData, UploadResponse>(
-          "/upload",
-          locale,
-          logoFormData,
-          true,
-        );
+      const uploadResult = await axiosPost<FormData, UploadResponse>(
+        "/upload",
+        locale,
+        logoFormData,
+        true,
+      );
 
-        if (!uploadResult.status || !uploadResult.data?.url) {
-          console.error("Logo upload error:", uploadResult.data);
-          toast.error(t("createError"));
-          setIsCreating(false);
-          return;
-        }
-
-        logoUrl = uploadResult.data.url;
+      if (!uploadResult.status || !uploadResult.data?.url) {
+        console.error("Logo upload error:", uploadResult.data);
+        toast.error(t("logoUploadError"));
+        setIsCreating(false);
+        return;
       }
+
+      const logoUrl = uploadResult.data.url;
 
       const menuData = {
         nameEn: data.name,
@@ -153,7 +178,7 @@ export default function CreateMenuModal({
         descriptionAr: data.descriptionAr,
         slug: data.slug,
         currency: data.currency,
-        ...(logoUrl && { logo: logoUrl }),
+        logo: logoUrl,
       };
 
       const result = await axiosPost<typeof menuData, Menu>(
@@ -164,6 +189,8 @@ export default function CreateMenuModal({
 
       if (result.status && result.data) {
         toast.success(t("createSuccess"));
+
+        onMenuCreated?.(result.data);
 
         if (onRefresh) {
           onRefresh();
@@ -186,14 +213,7 @@ export default function CreateMenuModal({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const validTypes = [
-      "image/png",
-      "image/x-icon",
-      "image/vnd.microsoft.icon",
-      "image/jpeg",
-      "image/jpg",
-    ];
-    if (!validTypes.includes(file.type)) {
+    if (!isValidLogoFile(file)) {
       toast.error(t("logoFormatError"));
       return;
     }
@@ -203,6 +223,7 @@ export default function CreateMenuModal({
       return;
     }
 
+    setLogoError(null);
     setLogo(file);
 
     const reader = new FileReader();
@@ -215,6 +236,7 @@ export default function CreateMenuModal({
   const handleRemoveLogo = () => {
     setLogo(null);
     setLogoPreview(null);
+    setLogoError(t("validation.logoRequired"));
   };
 
   return (
@@ -263,7 +285,7 @@ export default function CreateMenuModal({
                       onChange={field.onChange}
                       onBlur={field.onBlur}
                       className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                      placeholder="e.g., My Restaurant Menu"
+                      placeholder={t("nameEnPlaceholder")}
                       error={errors.name?.message}
                     />
                   )}
@@ -319,7 +341,7 @@ export default function CreateMenuModal({
                       onBlur={field.onBlur}
                       rows={3}
                       className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary resize-none"
-                      placeholder="Describe your menu in English..."
+                      placeholder={t("descriptionEnPlaceholder")}
                     />
                   )}
                 />
@@ -354,7 +376,7 @@ export default function CreateMenuModal({
             <div className="flex items-center gap-2 mb-3">
               <IoImageOutline className="text-primary text-xl" />
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {t("logo")}
+                {t("logo")} *
               </h3>
             </div>
 
@@ -386,7 +408,7 @@ export default function CreateMenuModal({
                 <label className="cursor-pointer">
                   <input
                     type="file"
-                    accept=".png,.ico,.jpg,.jpeg,image/png,image/x-icon,image/vnd.microsoft.icon,image/jpeg"
+                    accept={LOGO_ACCEPT}
                     onChange={handleLogoChange}
                     className="hidden"
                   />
@@ -403,6 +425,11 @@ export default function CreateMenuModal({
                 <p className="text-xs text-gray-400 dark:text-gray-500">
                   {t("supportedFormats")}
                 </p>
+                {logoError && (
+                  <p className="text-xs text-red-600 dark:text-red-400">
+                    {logoError}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -470,7 +497,7 @@ export default function CreateMenuModal({
                             ? "border-green-300 dark:border-green-600 focus:ring-green-500"
                             : "border-gray-300 dark:border-gray-600 focus:ring-primary"
                       }`}
-                      placeholder="my-restaurant-menu"
+                      placeholder={t("slugPlaceholder")}
                       error={errors.slug?.message}
                       icon={
                         slugStatus.checking ? (
@@ -563,7 +590,7 @@ export default function CreateMenuModal({
             <div className="w-fit!">
               <CustomBtn
                 loading={isCreating}
-                disabled={isCreating || !slugStatus.available}
+                disabled={isCreating || !slugStatus.available || !logo}
               >
                 <div className="flex items-center justify-center gap-2">
                   <IoAddCircleOutline className="text-xl" /> {t("create")}

@@ -2,7 +2,7 @@ import { FiMenu } from "react-icons/fi";
 import UserDropDown from "../UserDropDown";
 import { Logo } from "../Global/Logo";
 import LanguageToggle from "../Global/LanguageTogle";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import DarkModeToggle from "../Global/DarkModeToggle";
 
@@ -16,6 +16,7 @@ export function DashboardHeader({
   isAdmin?: boolean;
 }) {
   const locale = useLocale();
+  const tCommon = useTranslations("common");
   const pathname = usePathname();
   const showSidebarToggle = segment || isAdmin;
 
@@ -28,7 +29,7 @@ export function DashboardHeader({
               type="button"
               onClick={() => setIsMenuOpen((prev: boolean) => !prev)}
               className="rounded-full flex items-center justify-center w-10 h-10 border border-slate-200 dark:border-purple-900 bg-white dark:bg-[#0d1117]/70  text-slate-500 dark:text-slate-300 transition hover:text-primary hover:border-secondary lg:hidden"
-              aria-label={locale === "ar" ? "فتح القائمة" : "Open menu"}
+              aria-label={tCommon("openMenu")}
             >
               <FiMenu className="text-lg" />
             </button>

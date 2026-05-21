@@ -51,6 +51,7 @@ function Header() {
   const pathname = usePathname();
   const locale = useLocale();
   const t = useTranslations("");
+  const tHeader = useTranslations("Landing.header");
   const profile = useAppSelector((state) => state.auth);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -145,7 +146,7 @@ function Header() {
                 href={`/auth/login`}
                 className="px-5 hidden lg:block py-2 rounded-full font-bold text-[14px] text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-500/20 transition-all"
               >
-                {locale === "ar" ? "دخول" : "Sign In"}
+                {tHeader("signIn")}
               </Link>
 
               {/* Sign Up Button */}
@@ -154,7 +155,7 @@ function Header() {
                   href={`/auth/register`}
                   className="px-7 py-2.5 rounded-full bg-linear-to-r from-purple-600 to-purple-700 dark:from-purple-500 dark:to-purple-600 text-white font-bold text-[14px] shadow-lg shadow-purple-200 dark:shadow-purple-900/50 transition-all hover:shadow-xl"
                 >
-                  {locale === "ar" ? "ابدأ الآن" : "Start Now"}
+                  {tHeader("startNow")}
                 </Link>
               </div>
             </>
@@ -194,14 +195,14 @@ function Header() {
                 onClick={handleNavClick}
                 className="block w-full py-3 rounded-2xl border-2 border-purple-600 dark:border-purple-500 text-purple-600 dark:text-purple-400 font-bold text-base hover:bg-purple-50 dark:hover:bg-purple-500/20 transition-all"
               >
-                {locale === "ar" ? "دخول" : "Sign In"}
+                {tHeader("signIn")}
               </Link>
               <Link
                 href={`/auth/register`}
                 onClick={handleNavClick}
                 className="block w-full py-4 rounded-2xl bg-linear-to-r from-purple-600 to-purple-700 dark:from-purple-500 dark:to-purple-600 text-white font-bold text-base"
               >
-                {locale === "ar" ? "ابدأ الآن" : "Start Now"}
+                {tHeader("startNow")}
               </Link>
             </div>
           )}

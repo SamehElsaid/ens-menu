@@ -433,7 +433,7 @@ export default function AdminPage() {
               {t("detailedStatistics")}
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              {isRTL ? "عرض الإحصائيات التفصيلية" : "View detailed analytics"}
+              {t("viewDetailedAnalytics")}
             </p>
           </div>
         </div>
@@ -444,7 +444,7 @@ export default function AdminPage() {
             {charts.usersGrowth.length > 0 && (
               <div>
                 <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">
-                  {isRTL ? "نمو المستخدمين" : "Users Growth"}
+                  {t("usersGrowth")}
                 </h3>
                 <div className="grid grid-cols-3 gap-3">
                   {charts.usersGrowth.map((item, index) => (
@@ -468,7 +468,7 @@ export default function AdminPage() {
             {charts.plansDistribution.length > 0 && (
               <div>
                 <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">
-                  {isRTL ? "توزيع الخطط" : "Plans Distribution"}
+                  {t("plansDistribution")}
                 </h3>
                 <div className="grid grid-cols-2 gap-3">
                   {charts.plansDistribution.map((plan, index) => (

@@ -397,11 +397,7 @@ export default function PersonalProfile({
     setSaveLoading(false);
 
     if (res?.status && res.data) {
-      toast.success(
-        locale === "ar"
-          ? "تم حفظ التغييرات بنجاح"
-          : "Changes saved successfully",
-      );
+      toast.success(t("changesSavedSuccess"));
       const updatedUser = (res.data as { user?: AuthUser })?.user;
       if (updatedUser && authData) {
         dispatch(
@@ -424,9 +420,7 @@ export default function PersonalProfile({
       }
       setProfileImageFile(null);
     } else {
-      toast.error(
-        locale === "ar" ? "فشل في حفظ التغييرات" : "Failed to save changes",
-      );
+      toast.error(t("changesSaveFailed"));
     }
   };
 
@@ -447,11 +441,7 @@ export default function PersonalProfile({
       router.push("/auth/login");
       resetPasswordForm();
     } else {
-      toast.error(
-        locale === "ar"
-          ? "فشل في تغيير كلمة المرور"
-          : "Failed to change password",
-      );
+      toast.error(t("changePasswordFailed"));
     }
   };
 
@@ -643,7 +633,7 @@ export default function PersonalProfile({
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     PNG, JPG, GIF ·{" "}
-                    {locale === "ar" ? "حد أقصى 5 ميجا" : "Max 5MB"}
+                    {t("maxFileSize")}
                   </p>
                 </div>
                 <button
@@ -673,7 +663,7 @@ export default function PersonalProfile({
                     className="inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                   >
                     <HiOutlineX className="w-3.5 h-3.5" />
-                    {locale === "ar" ? "إزالة" : "Remove"}
+                    {t("remove")}
                   </button>
                 </div>
               )}
@@ -735,7 +725,7 @@ export default function PersonalProfile({
               <CustomInput
                 type="date"
                 id="dateOfBirth"
-                placeholder="mm/dd/yyyy"
+                placeholder={t("dateFormatPlaceholder")}
                 value={dateOfBirth}
                 onChange={(e) => setDateOfBirth((e as unknown as Date) ?? null)}
                 icon={<HiOutlineCalendar className="text-lg" />}
@@ -798,11 +788,7 @@ export default function PersonalProfile({
             disabled={saveLoading}
             className="mt-5 px-5 py-2.5 rounded-xl bg-primary text-white font-medium text-sm hover:bg-primary/90 dark:hover:bg-primary/80 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            {saveLoading
-              ? locale === "ar"
-                ? "جاري الحفظ..."
-                : "Saving..."
-              : t("saveChanges")}
+            {saveLoading ? t("saving") : t("saveChanges")}
           </button>
         </section>
 
@@ -897,9 +883,7 @@ export default function PersonalProfile({
               className="mt-5 px-5 py-2.5 rounded-xl bg-amber-500 dark:bg-amber-600 text-white font-medium text-sm hover:bg-amber-600 dark:hover:bg-amber-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {changePasswordLoading
-                ? locale === "ar"
-                  ? "جاري التغيير..."
-                  : "Changing..."
+                ? t("changingPassword")
                 : t("changePasswordButton")}
             </button>
           </form>

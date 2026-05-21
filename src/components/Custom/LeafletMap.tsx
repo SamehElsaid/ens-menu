@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { FaSearch, FaTimes } from "react-icons/fa";
 
 // Dynamic import for Leaflet components (client-side only)
@@ -265,6 +265,7 @@ export default function LeafletMap({
   initialAddress,
 }: LeafletMapProps) {
   const locale = useLocale();
+  const tMap = useTranslations("map");
   const [searchQuery, setSearchQuery] = useState(initialAddress || "");
   const [searchResults, setSearchResults] = useState<
     Array<{
@@ -428,9 +429,7 @@ export default function LeafletMap({
             type="text"
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder={
-              locale === "ar" ? "ابحث عن موقع..." : "Search for a location..."
-            }
+            placeholder={tMap("searchPlaceholder")}
             className="w-full ps-10 pe-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-sm"
             dir={locale === "ar" ? "rtl" : "ltr"}
           />
@@ -474,7 +473,7 @@ export default function LeafletMap({
         {isSearching && (
           <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-4">
             <p className="text-sm text-gray-500 text-center">
-              {locale === "ar" ? "جاري البحث..." : "Searching..."}
+              {tMap("searching")}
             </p>
           </div>
         )}
@@ -510,7 +509,7 @@ export default function LeafletMap({
         <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
           <p className="text-sm text-gray-600">
             <span className="font-medium">
-              {locale === "ar" ? "الموقع المحدد:" : "Selected Location:"}
+              {tMap("selectedLocation")}
             </span>{" "}
             <span className="text-gray-900">{selectedAddress}</span>
           </p>

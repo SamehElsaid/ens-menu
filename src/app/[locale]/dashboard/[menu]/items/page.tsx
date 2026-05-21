@@ -22,6 +22,7 @@ import {
 
 export default function ItemsPage() {
   const t = useTranslations("Items");
+  const tStaff = useTranslations("Staff");
   const locale = useLocale();
   const params = useParams();
   const menuId =
@@ -340,7 +341,7 @@ export default function ItemsPage() {
             href={`/dashboard/${menuId}`}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-primary/30 dark:hover:border-primary/50 text-sm font-medium transition-all"
           >
-            {locale === "ar" ? "الرجوع للصفحة الرئيسية" : "Back to main page"}
+            {tStaff("backToOverview")}
           </LinkTo>
           <button
             onClick={() => {
@@ -374,7 +375,7 @@ export default function ItemsPage() {
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 placeholder={
-                  locale === "ar" ? "بحث بالاسم..." : "Search by name..."
+                  t("searchByName")
                 }
                 className={`w-full h-11 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-shadow ${locale === "ar" ? "pr-10 pl-4" : "pl-10 pr-4"}`}
               />

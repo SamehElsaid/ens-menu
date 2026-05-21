@@ -22,6 +22,8 @@ import LinkTo from "@/components/Global/LinkTo";
 export default function AdvertisementsPage() {
   const locale = useLocale();
   const t = useTranslations("Advertisements.page");
+  const tAds = useTranslations("Advertisements");
+  const tMenus = useTranslations("Menus");
   const params = useParams();
   const menuParam = (params as Record<string, string | string[] | undefined>)
     .menu;
@@ -239,15 +241,9 @@ export default function AdvertisementsPage() {
   );
 
   if (isFreePlan) {
-    const title =
-      locale === "ar"
-        ? "هذه الميزة متاحة للخطط المدفوعة فقط"
-        : "This feature is available on paid plans only";
-    const description =
-      locale === "ar"
-        ? "قم بالترقية للوصول إلى ميزة الإعلانات وإبراز عروضك لعملائك."
-        : "Upgrade your plan to enable advertisements and highlight your offers.";
-    const buttonLabel = locale === "ar" ? "ترقية الخطة" : "Upgrade plan";
+    const title = tAds("freePlanTitle");
+    const description = tAds("freePlanDescription");
+    const buttonLabel = tMenus("upgradePlan");
 
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">

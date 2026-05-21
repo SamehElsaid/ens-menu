@@ -20,6 +20,7 @@ import {
 
 export default function CategoriesPage() {
   const t = useTranslations("Categories");
+  const tStaff = useTranslations("Staff");
   const locale = useLocale();
   const params = useParams();
   const menuId =
@@ -208,7 +209,7 @@ export default function CategoriesPage() {
             href={`/dashboard/${menuId}`}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-primary/30 dark:hover:border-primary/50 text-sm font-medium transition-all"
           >
-            {locale === "ar" ? "الرجوع للصفحة الرئيسية" : "Back to main page"}
+            {tStaff("backToOverview")}
           </LinkTo>
           <button
             onClick={() => {
