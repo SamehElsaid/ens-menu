@@ -137,7 +137,13 @@ export default function AddItemModal({
                     item.description ??
                     snake.description_ar ??
                     "",
-                categoryId: String(item.categoryId ?? ""),
+                categoryId: String(
+                    item.categoryId ??
+                        (typeof item.category === "object" && item.category?.id != null
+                            ? item.category.id
+                            : (item as { category_id?: number }).category_id) ??
+                        "",
+                ),
                 price: item.price != null ? String(item.price) : "",
                 originalPrice: item.originalPrice != null ? String(item.originalPrice) : "",
                 discountPercent: item.discountPercent != null ? String(item.discountPercent) : "",
@@ -462,8 +468,7 @@ export default function AddItemModal({
                                                 value={field.value}
                                                 onChange={(e) => field.onChange(e.target.value)}
                                                 onBlur={field.onBlur}
-                                                disabled={isEdit}
-                                                className="w-full px-4 py-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary focus:border-primary disabled:opacity-70"
+                                                className="w-full px-4 py-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary focus:border-primary"
                                             >
                                                 <option value="">— {tItems("selectCategory")} —</option>
                                                 {categories.map((cat) => (
