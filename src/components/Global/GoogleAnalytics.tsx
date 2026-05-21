@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 const GA_ID = process.env.NEXT_PUBLIC_GADS_ID?.trim();
+const googleAdsId = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID?.trim();
 
 export default function GoogleAnalytics() {
   const pathname = usePathname();
@@ -19,7 +20,7 @@ export default function GoogleAnalytics() {
     window.gtag("config", GA_ID, { page_path: pagePath });
   }, [pathname, searchParams]);
 
-  if (!GA_ID) return null;
+  if (!GA_ID || !googleAdsId) return null;
 
   return (
     <>
@@ -33,6 +34,7 @@ export default function GoogleAnalytics() {
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
           gtag('config', '${GA_ID}');
+          gtag('config', '${googleAdsId}');
         `}
       </Script>
     </>
