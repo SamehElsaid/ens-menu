@@ -14,7 +14,6 @@ import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import { pushSignUpEvent } from "@/shared/gtmEvents";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import GoogleSignInButton from "@/components/Auth/GoogleSignInButton";
 import Loader from "./Global/Loader";
 
 let emailCheckTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -275,9 +274,7 @@ export default function RegisterForm() {
         />
       </div>
 
-      <div className="mt-12 flex flex-col items-center justify-center">
-        <GoogleSignInButton dividerLabel="auth.orRegisterWith" />
-      </div>
+      
 
       <div className="flex items-center justify-center mt-6">
         <LinkTo

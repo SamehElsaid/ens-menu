@@ -8,7 +8,7 @@ export type RegisterSchemaOptions = {
 
 export const registerSchema = (
   t: ReturnType<typeof useTranslations<"">>,
-  options?: RegisterSchemaOptions
+  options?: RegisterSchemaOptions,
 ) => {
   const baseEmail = yup
     .string()
@@ -22,14 +22,12 @@ export const registerSchema = (
         async (value) => {
           if (!value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return true;
           return options.checkEmailAvailable!(value);
-        }
+        },
       )
     : baseEmail;
 
   return yup.object().shape({
-    fullName: yup
-      .string()
-      .required(t("auth.fullNameRequired")),
+    fullName: yup.string().required(t("auth.fullNameRequired")),
     email: emailWithAvailability,
     phone: (() => {
       const basePhone = yup
@@ -43,15 +41,14 @@ export const registerSchema = (
             async (value) => {
               if (!value || !/^\+?[0-9]{8,15}$/.test(value)) return true;
               return options.checkPhoneAvailable!(value);
-            }
+            },
           )
         : basePhone;
     })(),
     password: yup
       .string()
       .required(t("auth.passwordRequired"))
-      .min(8, t("auth.passwordMinLength"))
-      .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/, t("auth.passwordInvalid")),
+      .min(8, t("auth.passwordMinLength")),
     confirmPassword: yup
       .string()
       .required(t("auth.confirmPasswordRequired"))
@@ -60,4 +57,3 @@ export const registerSchema = (
 };
 
 export type RegisterSchema = yup.InferType<ReturnType<typeof registerSchema>>;
-

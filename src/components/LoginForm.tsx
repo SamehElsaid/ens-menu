@@ -18,6 +18,8 @@ import { useState } from "react";
 import { LoginResponse } from "@/types/LoginResponse";
 import GoogleSignInButton from "@/components/Auth/GoogleSignInButton";
 import { syncFcmToken } from "@/shared/syncFcmToken";
+import ReCAPTCHA from "react-google-recaptcha";
+import Loader from "./Global/Loader";
 
 export default function LoginForm() {
   const t = useTranslations("");
@@ -44,9 +46,15 @@ export default function LoginForm() {
 
   const locale = useLocale();
   const [loading, setLoading] = useState(false);
+  const [loadingLoader, setLoadingLoader] = useState(true);
+  const [recaptchaVerified, setRecaptchaVerified] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
   const onSubmit = async (data: LoginSchema) => {
+    if (!recaptchaVerified) {
+      return;
+    }
+
     setLoading(true);
     setApiError(null);
 
@@ -152,14 +160,30 @@ export default function LoginForm() {
         </LinkTo>
       </h2>
 
-      <p className="text-center text-sm text-slate-600 dark:text-slate-400">
-        <LinkTo
-          href="/auth/staff-login"
-          className="font-medium text-primary hover:underline"
-        >
-          {t("auth.staffLoginLink")}
-        </LinkTo>
-      </p>
+      <div className="mt-4">
+        <div className="h-[78px] relative">
+          {loadingLoader && <div className="absolute z- inset-0 flex items-center justify-center"><Loader /></div>}
+
+          <div className={`${loadingLoader ? "opacity-0" : "opacity-100"} transition-all duration-300`}>
+            <ReCAPTCHA
+              onLoadCapture={() => {
+                setLoadingLoader(false);
+              }}
+              sitekey="6LfZunYsAAAAAChMIIbG-lhkDy6uMnAgm9cfZnrN"
+              hl={locale}
+              onChange={(token: string | null) => {
+                setRecaptchaVerified(!!token);
+              }}
+              onExpired={() => {
+                setRecaptchaVerified(false);
+              }}
+              onErrored={() => {
+                setRecaptchaVerified(false);
+              }}
+            />
+          </div>
+        </div>
+      </div>
 
       {apiError && (
         <div
@@ -183,7 +207,12 @@ export default function LoginForm() {
       )}
 
       <div className="flex w-full mt-8">
-        <CustomBtn text={t("auth.login")} type="submit" loading={loading} />
+        <CustomBtn
+          text={t("auth.login")}
+          type="submit"
+          disabled={!recaptchaVerified}
+          loading={loading}
+        />
       </div>
       <div className="mt-12 flex flex-col items-center">
         <GoogleSignInButton dividerLabel="auth.orLoginWith" />

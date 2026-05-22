@@ -11,7 +11,6 @@ export const loginSchema = (t: ReturnType<typeof useTranslations<"">>) =>
       .string()
       .required(t("auth.passwordRequired"))
       .min(8, t("auth.passwordMinLength"))
-      .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, t("auth.passwordInvalid")),
   });
 
 export type LoginSchema = yup.InferType<ReturnType<typeof loginSchema>>;

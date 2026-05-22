@@ -301,7 +301,7 @@ export default function CustomInput({
                 border: props?.value === undefined && "1px solid #00cfe8",
               }}
               ref={phoneRef}
-              defaultCountry={"AE"}
+              defaultCountry={"EG"}
               className={`phoneNumber ${Boolean(error) ? "error" : ""} ${
                 active ? "main" : ""
               } ${props?.value === undefined ? "error" : ""} `}
