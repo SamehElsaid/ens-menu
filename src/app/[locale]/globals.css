@@ -3,7 +3,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap");
 
 @import "tailwindcss";
-@import "leaflet/dist/leaflet.css";
 
 html {
   scroll-behavior: smooth;
@@ -149,7 +148,9 @@ body {
   font-family: "Tajawal", "Cairo", sans-serif;
   background-color: var(--background);
   color: var(--foreground);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 .dark body {
@@ -159,7 +160,8 @@ body {
 
 /* Dark mode gradient background */
 .dark .bg-gradient-app {
-  background-image: radial-gradient(
+  background-image:
+    radial-gradient(
       1200px 600px at 10% 10%,
       color-mix(in oklab, var(--primary) 10%, transparent) 0%,
       transparent 60%
@@ -197,7 +199,8 @@ body {
 
 /* App gradient background helper */
 .bg-gradient-app {
-  background-image: radial-gradient(
+  background-image:
+    radial-gradient(
       1200px 600px at 10% 10%,
       color-mix(in oklab, var(--primary) 15%, transparent) 0%,
       transparent 60%
@@ -376,7 +379,8 @@ body {
 .dark .PhoneInputInput::placeholder {
   @apply !text-slate-500;
 }
-input, textarea {
+input,
+textarea {
   direction: auto;
   unicode-bidi: plaintext;
 }
@@ -928,14 +932,26 @@ input, textarea {
 /* Auth Styles */
 
 @keyframes wiggle {
-  0%, 100% { transform: rotate(0deg); }
-  20%       { transform: rotate(-18deg); }
-  40%       { transform: rotate(16deg); }
-  60%       { transform: rotate(-10deg); }
-  80%       { transform: rotate(8deg); }
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(-18deg);
+  }
+  40% {
+    transform: rotate(16deg);
+  }
+  60% {
+    transform: rotate(-10deg);
+  }
+  80% {
+    transform: rotate(8deg);
+  }
 }
 
-/* Template preview auto-scroll animation */@keyframes template-scroll {
+/* Template preview auto-scroll animation */
+@keyframes template-scroll {
   0% {
     transform: translateY(0);
   }
@@ -951,11 +967,11 @@ input, textarea {
   animation: template-scroll 10s linear infinite;
 }
 
-.react-datepicker__day-name{
+.react-datepicker__day-name {
   font-size: 8px !important;
 }
 
-.youtube-player-container div{
+.youtube-player-container div {
   height: 100% !important;
 }
 
