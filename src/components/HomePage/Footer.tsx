@@ -70,7 +70,7 @@ const FooterSection = () => {
                       {link.name}
                     </a>
                   ) : (
-                    <Link href={link.path} onClick={(e) => handleLinkClick(e, link.path)} className={linkStyle}>
+                    <Link href={link.path} prefetch={false} onClick={(e) => handleLinkClick(e, link.path)} className={linkStyle}>
                       {link.name}
                     </Link>
                   )}
@@ -128,10 +128,10 @@ const FooterSection = () => {
             </p>
             
             <div className="flex gap-8">
-              <Link href="/privacy-policy" className="text-sm text-gray-500 hover:text-purple-400 transition-colors">
+              <Link href="/privacy-policy" prefetch={false} className="text-sm text-gray-500 hover:text-purple-400 transition-colors">
                 {t("privacy")}
               </Link>
-              <Link href="/terms-and-conditions" className="text-sm text-gray-500 hover:text-purple-400 transition-colors">
+              <Link href="/terms-and-conditions" prefetch={false} className="text-sm text-gray-500 hover:text-purple-400 transition-colors">
                 {t("terms")}
               </Link>
             </div>

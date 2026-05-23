@@ -15,7 +15,7 @@ export const templates: Template[] = [
       "أنشئ منيو إلكتروني احترافي لمطعمك أو كافيهك خلال دقائق بدون أي تعقيد لوحة تحكم بسيطة تتيح لك إضافة الأصناف والصور والأسعار بكل سهولة تحكم كامل في المنيو وحدّثه في أي وقت ليكون جاهزًا دائمًا لعملائك",
     textEn:
       "Create a professional electronic menu for your restaurant or cafe in minutes without any complexity. A simple control panel that allows you to add items, images, and prices easily. Full control over the menu and update it anytime to be always ready for your customers.",
-    image: "/images/temp/1sst.jpg",
+    image: "/images/temp/1sst.webp",
     textAltAr: "يزيد المبيعات ويُحسن تجربة العملاء",
     textAltEn: "Increases sales and improves customer experience",
   },

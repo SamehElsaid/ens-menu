@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import "./globals.css";
+import { cairo, fontVariables } from "@/lib/fonts";
 import { NextIntlClientProvider } from "next-intl";
 import RenderInProvider from "@/components/Global/RenderInProvider";
 import ProgressBar from "@/components/Global/ProgressBar";
@@ -23,6 +24,10 @@ export const metadata: Metadata = {
   title: "ENSmenu",
   description:
     "ENSmenu is a platform for creating digital menus for restaurants and cafes",
+  icons: {
+    icon: [{ url: "/favicon.ico", sizes: "32x32" }],
+    shortcut: "/favicon.ico",
+  },
 };
 
 // Script to prevent flash of wrong theme
@@ -49,6 +54,7 @@ export default async function RootLayout({
     <html
       lang={locale}
       dir={locale === "ar" ? "rtl" : "ltr"}
+      className={`${fontVariables} ${cairo.className}`}
       suppressHydrationWarning
     >
       <head>
