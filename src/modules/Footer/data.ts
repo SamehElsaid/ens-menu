@@ -19,19 +19,19 @@ type TranslationFunction = (key: string) => string;
 
 export const getContactInfo = (t: TranslationFunction): ContactInfo[] => [
   {
-    icon: FiPhone,
-    type: "phone",
-    labelKey: "phoneUae",
-    value: "+971586551491",
-    href: "tel:+971586551491",
-    dir: "ltr",
-  },
-  {
     icon: FiSmartphone,
     type: "phone",
     labelKey: "phoneEgypt",
     value: "01500800050",
     href: "tel:+201500800050",
+    dir: "ltr",
+  },
+  {
+    icon: FiPhone,
+    type: "phone",
+    labelKey: "phoneUae",
+    value: "+971586551491",
+    href: "tel:+971586551491",
     dir: "ltr",
   },
   {
@@ -45,7 +45,7 @@ export const getContactInfo = (t: TranslationFunction): ContactInfo[] => [
     icon: FiMapPin,
     type: "address",
     labelKey: "address",
-    value: t("UnitedArabEmirates"),
+    value: t("location"),
   },
 ];
 

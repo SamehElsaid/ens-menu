@@ -83,7 +83,7 @@ export default function SettingsPage() {
       nameAr: menu?.nameAr ?? "",
       description: menu?.descriptionEn ?? "",
       descriptionAr: menu?.descriptionAr ?? "",
-      currency: menu?.currency ?? "AED",
+      currency: menu?.currency ?? "EGP",
       isActive: menu?.isActive ?? false,
     },
   });

@@ -12,9 +12,9 @@ interface Currency {
 }
 
 const currencies: Currency[] = [
+  { code: "EGP", name: "Egyptian Pound", nameAr: "جنيه مصري", symbol: "ج.م" },
   { code: "AED", name: "UAE Dirham", nameAr: "درهم إماراتي", symbol: "د.إ" },
   { code: "SAR", name: "Saudi Riyal", nameAr: "ريال سعودي", symbol: "ر.س" },
-  { code: "EGP", name: "Egyptian Pound", nameAr: "جنيه مصري", symbol: "ج.م" },
   { code: "USD", name: "US Dollar", nameAr: "دولار أمريكي", symbol: "$" },
   { code: "EUR", name: "Euro", nameAr: "يورو", symbol: "€" },
   { code: "GBP", name: "British Pound", nameAr: "جنيه إسترليني", symbol: "£" },

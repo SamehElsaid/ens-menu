@@ -7,15 +7,8 @@ import ProgressBar from "@/components/Global/ProgressBar";
 import GoogleAnalytics from "@/components/Global/GoogleAnalytics";
 import GoogleTagManager from "@/components/Global/GoogleTagManager";
 import GoogleAds from "@/components/Global/GoogleAds";
-import "react-phone-number-input/style.css";
-import "react-datepicker/dist/react-datepicker.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "swiper/css";
-import "suneditor/dist/css/suneditor.min.css";
-import "swiper/css/navigation";
-import "swiper/css/free-mode";
-import "react-lazy-load-image-component/src/effects/blur.css";
 const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
 export const metadata: Metadata = {

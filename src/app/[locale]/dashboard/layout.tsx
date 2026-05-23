@@ -10,6 +10,7 @@ import { SET_ACTIVE_USER, SET_LOADING } from "@/store/authSlice/menuDataSlice";
 import { useAppDispatch } from "@/store/hooks";
 import { AuthUserHydrate } from "@/components/Dashboard/AuthUserHydrate";
 import { FcmTokenSync } from "@/components/Dashboard/FcmTokenSync";
+import AuthSessionGate from "@/components/Global/AuthSessionGate";
 
 interface ParentLayoutProps {
   children: ReactNode;
@@ -57,10 +58,10 @@ export default function ParentLayout({ children }: ParentLayoutProps) {
   }, [segment, locale, dispatch]);
 
   return (
-    <>
+    <AuthSessionGate>
       <AuthUserHydrate />
       <FcmTokenSync />
       <Layout segment={segment}>{children}</Layout>
-    </>
+    </AuthSessionGate>
   );
 }

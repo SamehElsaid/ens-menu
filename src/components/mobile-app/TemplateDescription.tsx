@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import LoadImage from "../ImageLoad";
 
 const TemplateDescription = () => {
@@ -175,7 +175,7 @@ const TemplateDescription = () => {
             disabled={last < 1}
             className="absolute start-2 top-1/2 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-full border border-violet-200/90 bg-white text-violet-700 shadow-md transition hover:border-violet-300 hover:bg-violet-50 disabled:opacity-35 md:size-11"
           >
-            <ChevronRight className="size-5 md:size-6" />
+            <FiChevronRight className="size-5 md:size-6" />
           </button>
           <button
             type="button"
@@ -183,7 +183,7 @@ const TemplateDescription = () => {
             disabled={last < 1}
             className="absolute end-2 top-1/2 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-full border border-violet-200/90 bg-white text-violet-700 shadow-md transition hover:border-violet-300 hover:bg-violet-50 disabled:opacity-35 md:size-11"
           >
-            <ChevronLeft className="size-5 md:size-6" />
+            <FiChevronLeft className="size-5 md:size-6" />
           </button>
 
           {/* Slides */}

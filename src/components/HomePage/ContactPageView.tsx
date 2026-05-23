@@ -18,8 +18,15 @@ import type { ContactInfo } from "@/types/types";
 const WHATSAPP_PRIMARY = "https://wa.me/201500800050";
 
 const WHATSAPP_BY_TEL: Record<string, string> = {
-  "tel:+971586551491": "https://wa.me/971586551491",
   "tel:+201500800050": WHATSAPP_PRIMARY,
+  "tel:+971586551491": "https://wa.me/971586551491",
+};
+
+const CONTACT_ORDER: Record<string, number> = {
+  phoneEgypt: 0,
+  phoneUae: 1,
+  email: 2,
+  address: 3,
 };
 
 function ContactCard({
@@ -125,7 +132,15 @@ export default function ContactPageView() {
   const isRtl = locale === "ar";
   const BackIcon = isRtl ? FiArrowRight : FiArrowLeft;
 
-  const contactInfo = useMemo(() => getContactInfo(footerT), [footerT]);
+  const contactInfo = useMemo(
+    () =>
+      getContactInfo(footerT).sort(
+        (a, b) =>
+          (CONTACT_ORDER[a.labelKey ?? ""] ?? 99) -
+          (CONTACT_ORDER[b.labelKey ?? ""] ?? 99),
+      ),
+    [footerT],
+  );
   const socialLinks = useMemo(() => getSocialLinks(), []);
 
   return (
@@ -255,7 +270,7 @@ export default function ContactPageView() {
               {t("detailsTitle")}
             </h2>
             <div className="flex flex-col gap-3">
-              {contactInfo.map((info, index) => {
+              {contactInfo.map((info) => {
                 const label = info.labelKey
                   ? t(`labels.${info.labelKey}`)
                   : info.value;
@@ -271,7 +286,7 @@ export default function ContactPageView() {
                     label={label}
                     whatsappHref={whatsappHref}
                     t={t}
-                    featured={index === 0}
+                    featured={info.labelKey === "phoneEgypt"}
                   />
                 );
               })}

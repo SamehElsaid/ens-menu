@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, getPathname } from "@/i18n/navigation";
 import {
@@ -8,16 +9,29 @@ import {
   FiArrowRight as ArrowRight,
   FiMenu as Menu,
   FiShoppingCart as ShoppingCart,
-  FiDownload as Download,
 } from "react-icons/fi";
-import { FaAndroid } from "react-icons/fa";
-import YouTube, { type YouTubeProps, type YouTubeEvent } from "react-youtube";
 import { menuItemsData } from "@/modules/menuItems";
 import { MenuItem } from "@/types/types";
 import Background from "../Global/Background";
 import LoadImage from "../ImageLoad";
-import { StyledQrCode } from "@/components/Global/StyledQrCode";
 import { BsQrCode } from "react-icons/bs";
+import HeroYouTubeModal from "./HeroYouTubeModal";
+
+const StyledQrCode = dynamic(
+  () =>
+    import("@/components/Global/StyledQrCode").then((mod) => mod.StyledQrCode),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        className="h-40 w-40 animate-pulse rounded-xl bg-slate-100"
+        aria-hidden
+      />
+    ),
+  },
+);
+
+const HERO_VIDEO_ID = "C1Tsud95BTE";
 
 const InteractivePhone = () => {
   const [step, setStep] = useState(0);
@@ -163,38 +177,12 @@ const InteractivePhone = () => {
   );
 };
 
-// --- Main Hero Section ---
 const HeroSection = () => {
   const t = useTranslations("heroSection");
   const locale = useLocale();
   const isRTL = locale === "ar";
   const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
   const [isVideoOpen, setIsVideoOpen] = useState(false);
-  const playerRef = useRef<YouTubeEvent["target"] | null>(null);
-
-  const videoOpts: YouTubeProps["opts"] = {
-    width: "100%",
-    height: "100%",
-    playerVars: {
-      autoplay: 0,
-    },
-  };
-
-  const handleVideoReady: YouTubeProps["onReady"] = (event) => {
-    playerRef.current = event.target;
-    if (isVideoOpen) {
-      event.target.playVideo();
-    }
-  };
-
-  useEffect(() => {
-    if (!playerRef.current) return;
-    if (isVideoOpen) {
-      playerRef.current.playVideo();
-    } else {
-      playerRef.current.pauseVideo();
-    }
-  }, [isVideoOpen]);
 
   return (
     <section
@@ -208,7 +196,6 @@ const HeroSection = () => {
             isRTL ? "lg:flex-row-reverse" : ""
           }`}
         >
-          {/* Text and Content */}
           <div className="lg:w-1/2 order-2 w-full">
             <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-purple-50 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 font-bold text-sm mb-6 border border-purple-100 dark:border-purple-500/30 shadow-sm">
               <span>{t("badge")}</span>
@@ -226,7 +213,6 @@ const HeroSection = () => {
               {t("description")}
             </p>
 
-            {/* CTA Buttons */}
             <div
               className={`flex flex-wrap items-center gap-4 mb-8 ${
                 isRTL ? "justify-start" : "justify-start"
@@ -249,7 +235,6 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Phone Preview */}
           <div className="lg:w-1/2 relative flex justify-center order-1 w-full">
             <div className="relative">
               <div className="absolute inset-0 bg-linear-to-r from-purple-600 to-purple-700 dark:from-purple-500 dark:to-purple-600 blur-[100px] opacity-15 dark:opacity-25" />
@@ -259,30 +244,11 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Video Modal */}
-      <div
-        className={`fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm transition-opacity duration-200 ${
-          isVideoOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-        }`}
-      >
-        <div className="relative youtube-player-container w-full max-w-4xl mx-4 aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
-          <button
-            type="button"
-            onClick={() => setIsVideoOpen(false)}
-            className="absolute top-3 right-3 z-10 rounded-full bg-black/70 text-white px-3 py-1 text-sm hover:bg-black"
-          >
-            ✕
-          </button>
-          <YouTube
-            videoId="C1Tsud95BTE"
-            opts={videoOpts}
-            className="w-full h-full"
-            onReady={handleVideoReady}
-          />
-        </div>
-      </div>
+      <HeroYouTubeModal
+        isOpen={isVideoOpen}
+        onClose={() => setIsVideoOpen(false)}
+        videoId={HERO_VIDEO_ID}
+      />
     </section>
   );
 };

@@ -1223,8 +1223,8 @@
       "socialTitle": "تابعنا على وسائل التواصل",
       "whatsappCta": "راسلنا على واتساب",
       "labels": {
-        "phoneUae": "الإمارات العربية المتحدة",
         "phoneEgypt": "مصر",
+        "phoneUae": "الإمارات العربية المتحدة",
         "email": "البريد الإلكتروني",
         "address": "الموقع"
       },
@@ -1240,7 +1240,6 @@
       "quickLinks": "روابط سريعة",
       "contactUs": "تواصل معنا",
       "location": "مصر",
-      "UnitedArabEmirates": "مصر",
       "copyright": "جميع الحقوق محفوظة.",
       "privacy": "سياسة الخصوصية",
       "terms": "الشروط والأحكام",
@@ -2301,7 +2300,7 @@
       "addressAr": "العنوان (عربي)",
       "addressEn": "العنوان (إنجليزي)",
       "phone": "رقم الهاتف",
-      "phonePlaceholder": "رقم افتراضي: الإمارات +971"
+      "phonePlaceholder": "رقم افتراضي: مصر +20"
     },
     "businessHours": {
       "title": "مواعيد العمل",

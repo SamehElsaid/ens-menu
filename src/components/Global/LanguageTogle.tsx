@@ -23,7 +23,7 @@ const LanguageToggle: React.FC<LanguageToggleProps> = ({
       <span
         className="w-5 h-5"
         dangerouslySetInnerHTML={{
-          __html: locale !== "ar" ? flagIcons.UAE : flagIcons.USA,
+          __html: locale !== "ar" ? flagIcons.Egypt : flagIcons.USA,
         }}
       />
     </button>
