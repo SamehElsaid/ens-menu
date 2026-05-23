@@ -3,7 +3,7 @@ import { decryptData } from "@/shared/encryption";
 /** Read JWT payload (no verify) for routing / hydrate (role, staff job). */
 export function decodeJwtPayload(
   token: string,
-): { role?: string; staffJobRole?: string } | null {
+): { role?: string; staffJobRole?: string; exp?: number } | null {
   try {
     const parts = token.split(".");
     if (parts.length < 2) return null;
@@ -11,7 +11,11 @@ export function decodeJwtPayload(
     const pad = base64.length % 4;
     if (pad) base64 += "=".repeat(4 - pad);
     const json = atob(base64);
-    return JSON.parse(json) as { role?: string; staffJobRole?: string };
+    return JSON.parse(json) as {
+      role?: string;
+      staffJobRole?: string;
+      exp?: number;
+    };
   } catch {
     return null;
   }
@@ -49,6 +53,23 @@ export function getAuthHintsFromEncryptedSub(sub: string): {
   } catch {
     return null;
   }
+}
+
+/** True when `sub` cookie has a non-expired JWT (used in middleware). */
+export function isAuthenticatedSession(subCookie: string | undefined): boolean {
+  if (!subCookie?.trim()) return false;
+
+  const hints = getAuthHintsFromEncryptedSub(subCookie);
+  if (!hints?.token || !hints.effectiveRole) return false;
+
+  const payload = decodeJwtPayload(hints.token);
+  if (!payload) return false;
+
+  if (typeof payload.exp === "number") {
+    return payload.exp * 1000 > Date.now();
+  }
+
+  return true;
 }
 
 /** API body from GET /auth/me when staff JWT was sent (expected before fallback to /staff-auth/me). */

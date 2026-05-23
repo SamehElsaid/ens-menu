@@ -2,55 +2,56 @@ import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { decryptData } from "./shared/encryption";
+import {
+  getAuthHintsFromEncryptedSub,
+  isAuthenticatedSession,
+} from "./shared/jwtPayload";
 
-interface DecryptedToken {
-  role: string;
-  staffJobRole?: string;
-  [key: string]: unknown;
+const AUTH_LOGIN_PATHS = ["/auth/login", "/auth/staff-login"];
+
+function isAuthLoginPath(pathname: string) {
+  return AUTH_LOGIN_PATHS.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
 }
 
 export default function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
 
-  const token = request.cookies.get("sub");
+  const subCookie = request.cookies.get("sub")?.value;
   const pathname = url.pathname.replace(/^\/(ar|en)/, "");
 
-  const tokenDecrypted = token
-    ? (decryptData(token?.value ?? "") as DecryptedToken)
-    : null;
+  const authHints = subCookie ? getAuthHintsFromEncryptedSub(subCookie) : null;
+  const isLoggedIn = isAuthenticatedSession(subCookie);
 
-
-  const hasToken =
-    tokenDecrypted && Object.keys(tokenDecrypted).length > 0;
-
-  // Stop Login , Register , Forgot Password , Reset Password , Verify Email , Verify Phone
-  if (pathname.startsWith("/auth")) {
-    if (hasToken) {
-      url.pathname = "/";
-      return NextResponse.redirect(url);
-    }
+  // Logged-in users: skip login pages only (register/reset stay reachable)
+  if (isAuthLoginPath(pathname) && isLoggedIn) {
+    url.pathname = "/";
+    return NextResponse.redirect(url);
   }
 
   if (pathname.startsWith("/admin")) {
-    if (tokenDecrypted?.role !== "admin") {
+    if (authHints?.effectiveRole !== "admin") {
       url.pathname = "/unauthorized";
       return NextResponse.redirect(url);
     }
   }
 
   if (pathname.startsWith("/dashboard")) {
-    if (!hasToken) {
+    if (!isLoggedIn) {
       url.pathname = "/unauthorized";
       return NextResponse.redirect(url);
     }
-    // Staff JWT cookie: only cashiers may use the owner dashboard UI
-    if (tokenDecrypted.role === "staff") {
-      if (tokenDecrypted.staffJobRole !== "cashier") {
+
+    const role = authHints?.effectiveRole;
+    const staffJobRole = authHints?.staffJobRole;
+
+    if (role === "staff") {
+      if (staffJobRole !== "cashier") {
         url.pathname = "/unauthorized";
         return NextResponse.redirect(url);
       }
-      // Cashier: /dashboard (menu list) is owner-only — must use /dashboard/:menuId
+
       const isDashboardRoot =
         pathname === "/dashboard" || pathname === "/dashboard/";
       if (isDashboardRoot) {
@@ -62,7 +63,7 @@ export default function middleware(request: NextRequest) {
         target.searchParams.set("reason", "cashier_dashboard");
         return NextResponse.redirect(target);
       }
-      // Cashier: settings & staff management are owner-only
+
       const ownerOnlyNested = /^\/dashboard\/[^/]+\/(staff|settings)(\/|$)/;
       if (ownerOnlyNested.test(pathname)) {
         const fullPath = request.nextUrl.pathname;

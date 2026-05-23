@@ -166,7 +166,7 @@ export default function LoginForm() {
 
           <div className={`${loadingLoader ? "opacity-0" : "opacity-100"} transition-all duration-300`}>
             <ReCAPTCHA
-              onLoadCapture={() => {
+              asyncScriptOnLoad={() => {
                 setLoadingLoader(false);
               }}
               sitekey="6LfZunYsAAAAAChMIIbG-lhkDy6uMnAgm9cfZnrN"

@@ -1,15 +1,9 @@
-import Header from "@/components/Global/Header";
+import MainChrome from "@/components/Global/MainChrome";
 
-export default async function MainLayout({
+export default function MainLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-  return (
-    <>
-      <Header />
-      {children}
-    </>
-  );
+  return <MainChrome>{children}</MainChrome>;
 }

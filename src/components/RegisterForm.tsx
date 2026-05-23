@@ -8,13 +8,31 @@ import { useLocale, useTranslations } from "next-intl";
 import { registerSchema, RegisterSchema } from "@/schemas/registerSchema";
 import LinkTo from "./Global/LinkTo";
 import CustomBtn from "./Custom/CustomBtn";
-import ReCAPTCHA from "react-google-recaptcha";
+import dynamic from "next/dynamic";
 import { useCallback, useState } from "react";
+
+const HCaptcha = dynamic(
+  () => import("@hcaptcha/react-hcaptcha").then((mod) => mod.default),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        className="flex h-[78px] w-full items-center justify-center rounded-lg bg-slate-100 text-sm text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+        aria-hidden
+      >
+        …
+      </div>
+    ),
+  },
+);
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import { pushSignUpEvent } from "@/shared/gtmEvents";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import Loader from "./Global/Loader";
+
+const HCAPTCHA_SITE_KEY =
+  process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ??
+  "29aec278-e602-4efa-8578-f8144344a312";
 
 let emailCheckTimeout: ReturnType<typeof setTimeout> | null = null;
 let lastCheckedAvailableEmail: string | null = null;
@@ -103,7 +121,8 @@ export default function RegisterForm() {
         checkPhoneAvailable: checkPhoneAvailableDebounced,
       }),
     ) as unknown as Resolver<RegisterSchema>,
-    mode: "onChange",
+    mode: "onTouched",
+    reValidateMode: "onChange",
   });
 
   const messages = {
@@ -116,13 +135,12 @@ export default function RegisterForm() {
   };
 
   const [loading, setLoading] = useState(false);
-  const [loadingLoader, setLoadingLoader] = useState(true);
-  const [recaptchaVerified, setRecaptchaVerified] = useState(false);
+  const [hcaptchaVerified, setHcaptchaVerified] = useState(false);
   const router = useRouter();
 
   const onSubmit = async (data: RegisterSchema) => {
-    if (!recaptchaVerified) {
-      // يمكنك هنا إضافة توست / رسالة خطأ لو حابب
+    if (!hcaptchaVerified) {
+      toast.error(t("auth.captchaRequired"));
       return;
     }
 
@@ -240,36 +258,27 @@ export default function RegisterForm() {
         )}
       />
 
-      <div className="mt-4">
-        <div className="h-[78px] relative">
-          {loadingLoader && <div className="absolute z- inset-0 flex items-center justify-center"><Loader /></div>}
-
-          <div className={`${loadingLoader ? "opacity-0" : "opacity-100"} transition-all duration-300`}>
-            <ReCAPTCHA
-              onLoadCapture={() => {
-                setLoadingLoader(false);
-              }}
-              sitekey="6LfZunYsAAAAAChMIIbG-lhkDy6uMnAgm9cfZnrN"
-              hl={locale}
-              onChange={(token: string | null) => {
-                setRecaptchaVerified(!!token);
-              }}
-              onExpired={() => {
-                setRecaptchaVerified(false);
-              }}
-              onErrored={() => {
-                setRecaptchaVerified(false);
-              }}
-            />
-          </div>
-        </div>
+      <div className="mt-4 flex justify-center">
+        <HCaptcha
+          sitekey={HCAPTCHA_SITE_KEY}
+          languageOverride={locale}
+          onVerify={() => {
+            setHcaptchaVerified(true);
+          }}
+          onExpire={() => {
+            setHcaptchaVerified(false);
+          }}
+          onError={() => {
+            setHcaptchaVerified(false);
+          }}
+        />
       </div>
 
       <div className="flex w-full mt-8">
         <CustomBtn
           text={messages.register}
           type="submit"
-          disabled={!recaptchaVerified}
+          disabled={!hcaptchaVerified}
           loading={loading}
         />
       </div>

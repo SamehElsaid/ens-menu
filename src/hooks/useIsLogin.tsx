@@ -91,30 +91,38 @@ function useIsLogin() {
   }, [locale]);
 
   useEffect(() => {
+    let cancelled = false;
+
+    const finish = () => {
+      if (!cancelled) setLogin(false);
+    };
+
+    const maxWait = setTimeout(finish, 8000);
+
     const checkLogin = async () => {
       if (cookies) {
-        const user = await getUser();
-        if (user) {
-          dispatch(SET_ACTIVE_USER(user as UserProfile));
-
-          void syncFcmToken(locale);
+        try {
+          const user = await getUser();
+          if (user) {
+            dispatch(SET_ACTIVE_USER(user as UserProfile));
+            void syncFcmToken(locale);
+          }
+        } finally {
+          setTimeout(finish, 300);
         }
-        const time = setTimeout(() => {
-          setLogin(false);
-        }, 500);
-        return () => clearTimeout(time);
       } else {
         dispatch(REMOVE_USER());
         Cookies.remove("sub", { path: "/" });
-
-        const time = setTimeout(() => {
-          setLogin(false);
-        }, 500);
-
-        return () => clearTimeout(time);
+        setTimeout(finish, 0);
       }
     };
+
     void checkLogin();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(maxWait);
+    };
   }, [cookies, dispatch, getUser, locale]);
 
   return login;

@@ -4,7 +4,6 @@ import { buildSeoMetadata } from "@/lib/seo";
 import CustomLogo from "@/components/Custom/CustomLogo";
 import LoginForm from "@/components/LoginForm";
 import Card from "@/components/ui/Card";
-import { useTranslations } from "next-intl";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -23,8 +22,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-export default function LoginPage() {
-  const t = useTranslations("");
+export default async function LoginPage() {
+  const t = await getTranslations();
 
   return (
     <div className=" bg-gradient-app overflow-hidden py-12 px-4 sm:px-6 lg:px-8 relative  flex items-center justify-center">
