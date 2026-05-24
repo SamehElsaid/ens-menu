@@ -112,7 +112,7 @@ export default function LoginForm() {
       // Sync FCM token right after login (check match, update if needed)
       void syncFcmToken(locale);
 
-      router.push(user?.role === "admin" ? "/admin" : "/dashboard");
+      window.location.href = `/${locale}${user?.role === "admin" ? "/admin" : "/dashboard"}`;
       if (user) {
         dispatch(SET_ACTIVE_USER({ user }));
       }

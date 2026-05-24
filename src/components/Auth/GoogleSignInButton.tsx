@@ -72,7 +72,7 @@ export default function GoogleSignInButton({
           secure: true,
           path: "/",
         });
-        router.push(user?.role === "admin" ? "/admin" : "/dashboard");
+        window.location.href = `/${locale}${user?.role === "admin" ? "/admin" : "/dashboard"}`;
         if (user) {
           dispatch(SET_ACTIVE_USER({ user }));
         }
