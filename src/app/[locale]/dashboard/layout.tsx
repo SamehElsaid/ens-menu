@@ -10,6 +10,7 @@ import { SET_ACTIVE_USER, SET_LOADING } from "@/store/authSlice/menuDataSlice";
 import { useAppDispatch } from "@/store/hooks";
 import { AuthUserHydrate } from "@/components/Dashboard/AuthUserHydrate";
 import { FcmTokenSync } from "@/components/Dashboard/FcmTokenSync";
+import { RequirePhone } from "@/components/Dashboard/RequirePhone";
 
 interface ParentLayoutProps {
   children: ReactNode;
@@ -28,7 +29,6 @@ interface MenusResponse {
 }
 export default function ParentLayout({ children }: ParentLayoutProps) {
   const segment = useSelectedLayoutSegment();
-
   const dispatch = useAppDispatch();
   const locale = useLocale();
   useEffect(() => {
@@ -60,7 +60,12 @@ export default function ParentLayout({ children }: ParentLayoutProps) {
     <>
       <AuthUserHydrate />
       <FcmTokenSync />
-      <Layout segment={segment}>{children}</Layout>
+      <Layout segment={segment}>
+
+        <RequirePhone>
+          {children}
+        </RequirePhone>
+      </Layout>
     </>
   );
 }

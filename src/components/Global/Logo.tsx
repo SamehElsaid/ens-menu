@@ -2,6 +2,7 @@
 
 import { LogoProps } from "@/types/types";
 import { BsQrCode } from "react-icons/bs";
+import LinkTo from "./LinkTo";
 
 export const Logo = ({ variant = "default" }: LogoProps) => {
   const gradientClasses =
@@ -18,7 +19,7 @@ export const Logo = ({ variant = "default" }: LogoProps) => {
       : "bg-purple-600 shadow-[0_0_10px_rgba(124,58,237,0.5)] dark:bg-purple-400 opacity-40";
 
   return (
-    <div className="flex items-center gap-4 group cursor-pointer scale-100 origin-right">
+    <LinkTo href="/" className="flex items-center gap-4 group cursor-pointer scale-100 origin-right">
       <div className={`animate-logo-spin ${iconClasses}`}>
         <BsQrCode size={40} />
       </div>
@@ -30,7 +31,7 @@ export const Logo = ({ variant = "default" }: LogoProps) => {
         </div>
         <div className={`w-full h-1 -mt-0.5 rounded-full ${lineClasses}`} />
       </div>
-    </div>
+    </LinkTo>
   );
 };
 

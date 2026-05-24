@@ -20,6 +20,7 @@ import GoogleSignInButton from "@/components/Auth/GoogleSignInButton";
 import { syncFcmToken } from "@/shared/syncFcmToken";
 import ReCAPTCHA from "react-google-recaptcha";
 import Loader from "./Global/Loader";
+import CustomRecaptcha from "./Auth/CustomRecaptcha";
 
 const RECAPTCHA_WIDTH = 304;
 const RECAPTCHA_HEIGHT = 78;
@@ -153,61 +154,45 @@ export default function LoginForm() {
         )}
       />
 
+
       <Controller
         control={control}
         name="password"
         render={({ field: { value, onChange } }) => (
-          <CustomInput
-            type="password"
-            placeholder={messages.password}
-            id="password"
-            icon={<TbLockPassword />}
-            label={messages.password}
-            error={errors.password?.message}
-            value={value}
-            onChange={(e) => {
-              setApiError(null);
-              onChange(e);
-            }}
-            className="bg-white/80 text-slate-900 placeholder:text-slate-400 dark:bg-slate-900/60 dark:text-slate-100 dark:placeholder:text-slate-400 dark:border-slate-700"
-          />
+          <>
+            <h2 className="text-xs font-medium text-accent-purple dark:text-purple-400 text-end mb-0.5">
+              <LinkTo
+                href="/auth/reset-password"
+                className="w-fit ms-auto block hover:text-accent-purple/80 transition-all duration-200"
+              >
+                {t("auth.forgotPassword")}
+              </LinkTo>
+            </h2>
+            <CustomInput
+              type="password"
+              placeholder={messages.password}
+              id="password"
+              icon={<TbLockPassword />}
+              label={messages.password}
+              error={errors.password?.message}
+              value={value}
+              onChange={(e) => {
+                setApiError(null);
+                onChange(e);
+              }}
+              className="bg-white/80 text-slate-900 placeholder:text-slate-400 dark:bg-slate-900/60 dark:text-slate-100 dark:placeholder:text-slate-400 dark:border-slate-700"
+            />
+          </>
+
         )}
       />
 
-      <h2 className="text-sm font-medium text-accent-purple dark:text-purple-400 text-end">
-        <LinkTo
-          href="/auth/reset-password"
-          className="w-fit ms-auto block hover:text-accent-purple/80 transition-all duration-200"
-        >
-          {t("auth.forgotPassword")}
-        </LinkTo>
-      </h2>
 
-      <div className="mt-4">
-        <div className="h-[78px] relative">
-          {loadingLoader && <div className="absolute z-10 bg-white inset-0 dark:bg-slate-900/60 rounded-lg p-4 inset-0 flex items-center justify-center"><Loader /></div>}
 
-          <div className={`${loadingLoader ? "opacity-0" : "opacity-100"} transition-all duration-300`}>
-            <ReCAPTCHA
-              onLoadCapture={() => {
-                setLoadingLoader(false);
-              }}
-              sitekey="6LfZunYsAAAAAChMIIbG-lhkDy6uMnAgm9cfZnrN"
-              hl={locale}
-              onChange={(token: string | null) => {
-                setRecaptchaVerified(!!token);
-              }}
-              
-              onExpired={() => {
-                setRecaptchaVerified(false);
-              }}
-              onErrored={() => {
-                setRecaptchaVerified(false); 
-              }}
-            />
-          </div>
-        </div>
-      </div>
+      <CustomRecaptcha
+        className="mt-10"
+        onVerifiedChange={setRecaptchaVerified}
+      />
 
       {apiError && (
         <div
@@ -230,7 +215,7 @@ export default function LoginForm() {
         </div>
       )}
 
-      <div className="flex w-full mt-8">
+      <div className="flex w-full mt-3">
         <CustomBtn
           text={t("auth.login")}
           type="submit"

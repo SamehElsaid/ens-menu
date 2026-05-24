@@ -328,7 +328,16 @@
     "resetPasswordSubmit": "Reset Password",
     "resetLinkSent": "If the email exists, a reset link has been sent.",
     "resetPasswordSuccess": "Password reset successfully. You can now log in.",
-    "invalidResetToken": "Invalid reset token. Please request a new reset link."
+    "invalidResetToken": "Invalid reset token. Please request a new reset link.",
+    "recaptchaLabel": "Verify you're human",
+    "recaptchaHint": "Tap here to complete the security check",
+    "recaptchaVerified": "Verification complete",
+    "recaptchaVerifiedHint": "You're cleared to continue",
+    "recaptchaVerifying": "Verifying...",
+    "recaptchaVerifyingHint": "Please wait while we confirm you're human",
+    "recaptchaRejected": "Verification failed",
+    "recaptchaRejectedHint": "Tap to try again",
+    "recaptchaBoot": "Loading security check..."
   },
   "form": {
     "personalInformation": "Personal Information",
@@ -591,6 +600,20 @@
     "choiceNameEnMinLength": "Choice name in English must be at least 2 characters",
     "selectChoice": "Select an option",
     "locationDetailsRequired": "Location Details is required"
+  },
+  "phoneGate": {
+    "title": "One last step",
+    "subtitle": "Please add your phone number to complete your profile and continue.",
+    "phoneLabel": "Phone Number",
+    "submit": "Continue",
+    "saving": "Saving...",
+    "successMessage": "Phone number saved successfully",
+    "errorMessage": "Failed to save phone number. Please try again.",
+    "welcomeBack": "Welcome back",
+    "benefit1": "Receive order and reservation notifications",
+    "benefit2": "Quick & secure account recovery",
+    "benefit3": "Required for subscription upgrades",
+    "trustBadge": "Your number is safe and never shared"
   },
   "personalProfile": {
     "title": "My Profile",

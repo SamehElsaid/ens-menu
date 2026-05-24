@@ -328,7 +328,16 @@
     "speciality": "التخصص",
     "specialityInvalid": "يرجى اختيار تخصص صحيح",
     "specialityRequired": "التخصص مطلوب",
-    "switchToCenter": "التسجيل كمركز"
+    "switchToCenter": "التسجيل كمركز",
+    "recaptchaLabel": "تأكيد أنك إنسان",
+    "recaptchaHint": "اضغط هنا لإكمال التحقق الأمني",
+    "recaptchaVerified": "تم التحقق بنجاح",
+    "recaptchaVerifiedHint": "يمكنك المتابعة الآن",
+    "recaptchaVerifying": "جاري التحقق...",
+    "recaptchaVerifyingHint": "يرجى الانتظار حتى نتأكد أنك إنسان",
+    "recaptchaRejected": "فشل التحقق",
+    "recaptchaRejectedHint": "اضغط للمحاولة مرة أخرى",
+    "recaptchaBoot": "جاري تحميل التحقق الأمني..."
   },
   "form": {
     "personalInformation": "المعلومات الشخصية",
@@ -591,6 +600,20 @@
     "workedAtTitleMinLength": "يجب ألا يقل المسمى عن حرفين",
     "workedAtTitlePlaceholder": "أدخل المسمى أو المنصب",
     "workedAtTitleRequired": "المسمى الوظيفي مطلوب"
+  },
+  "phoneGate": {
+    "title": "خطوة أخيرة",
+    "subtitle": "يرجى إضافة رقم هاتفك لإكمال ملفك الشخصي والمتابعة.",
+    "phoneLabel": "رقم الهاتف",
+    "submit": "متابعة",
+    "saving": "جارٍ الحفظ...",
+    "successMessage": "تم حفظ رقم الهاتف بنجاح",
+    "errorMessage": "فشل حفظ رقم الهاتف، يرجى المحاولة مجدداً.",
+    "welcomeBack": "مرحباً",
+    "benefit1": "استلام إشعارات الطلبات والحجوزات",
+    "benefit2": "استرداد الحساب بسرعة وأمان",
+    "benefit3": "مطلوب لترقية الاشتراك",
+    "trustBadge": "رقمك آمن ولن يُشارك مع أحد"
   },
   "personalProfile": {
     "title": "ملفي الشخصي",
