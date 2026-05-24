@@ -24,6 +24,8 @@ export default function middleware(request: NextRequest) {
   const hasToken =
     tokenDecrypted && Object.keys(tokenDecrypted).length > 0;
 
+  console.log(tokenDecrypted);
+
   // Stop Login , Register , Forgot Password , Reset Password , Verify Email , Verify Phone
   if (pathname.startsWith("/auth")) {
     if (hasToken) {
