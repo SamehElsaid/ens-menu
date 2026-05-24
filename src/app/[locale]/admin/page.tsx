@@ -20,6 +20,7 @@ import {
   IoMegaphoneOutline,
   IoPersonOutline,
   IoStatsChart,
+  IoPricetagOutline,
 } from "react-icons/io5";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import { axiosGet } from "@/shared/axiosCall";
@@ -109,6 +110,13 @@ export default function AdminPage() {
       icon: IoPersonOutline,
       color: "slate",
       href: "/admin/admins",
+    },
+    {
+      id: "promo",
+      label: t("promo"),
+      icon: IoPricetagOutline,
+      color: "amber",
+      href: "/admin/promo",
     },
   ];
 

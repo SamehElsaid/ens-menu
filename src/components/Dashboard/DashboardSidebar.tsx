@@ -45,53 +45,55 @@ export function DashboardSidebar({
         hidden ? "hidden w-[270px]" : " w-full"
       }  flex flex-col border-e border-slate-100 dark:border-purple-900 bg-white dark:bg-[#0d1117]/70 lg:flex h-dvh fixed top-0 start-0`}
     >
-      <LinkTo
-        href="/"
-        className="flex items-center gap-3 px-6 py-6 max-w-[200px]!"
-      >
-        {isAdmin ? (
-          <Logo />
-        ) : loading || !menu ? (
-          <div className="flex items-center gap-3 w-full">
-            <div className="h-11 w-11 rounded-2xl bg-slate-200 dark:bg-[#0d1117]/70 animate-pulse" />
-            <div className="flex flex-col gap-1 flex-1">
-              <div className="h-3 w-24 rounded-full bg-slate-200 dark:bg-[#0d1117]/70 animate-pulse" />
-              <div className="h-3 w-16 rounded-full bg-slate-100 dark:bg-[#0d1117]/70 animate-pulse" />
+      {isAdmin ? (
+        <div className="h-[70px] flex items-center justify-center">
+          <Logo size="small"/>
+        </div>
+      ) : (
+        <LinkTo
+          href="/"
+          className="flex items-center gap-3 px-6 py-6 max-w-[200px]!"
+        >
+          {loading || !menu ? (
+            <div className="flex items-center gap-3 w-full">
+              <div className="h-11 w-11 rounded-2xl bg-slate-200 dark:bg-[#0d1117]/70 animate-pulse" />
+              <div className="flex flex-col gap-1 flex-1">
+                <div className="h-3 w-24 rounded-full bg-slate-200 dark:bg-[#0d1117]/70 animate-pulse" />
+                <div className="h-3 w-16 rounded-full bg-slate-100 dark:bg-[#0d1117]/70 animate-pulse" />
+              </div>
             </div>
-          </div>
-        ) : (
-          <>
-            {menu.logo ? (
-              <LoadImage
-                src={menu.logo}
-                alt={
-                  locale === "ar" ? (menu.nameAr ?? "") : (menu.nameEn ?? "")
-                }
-                className="w-11 h-11 rounded-2xl"
-                width={44}
-                height={44}
-              />
-            ) : (
-              <span className="flex capitalize h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-lg font-semibold text-primary ">
-                {locale === "ar"
-                  ? (menu.nameAr?.charAt(0) ?? "")
-                  : (menu.nameEn?.charAt(0) ?? "")}
-              </span>
-            )}
-            <div className="flex flex-col">
-              <p className="text-lg font-semibold capitalize truncate dark:text-slate-100">
-                {locale === "ar" ? menu.nameAr : menu.nameEn}
-              </p>
-            </div>
-          </>
-        )}
-      </LinkTo>
+          ) : (
+            <>
+              {menu.logo ? (
+                <LoadImage
+                  src={menu.logo}
+                  alt={
+                    locale === "ar" ? (menu.nameAr ?? "") : (menu.nameEn ?? "")
+                  }
+                  className="w-11 h-11 rounded-2xl"
+                  width={44}
+                  height={44}
+                />
+              ) : (
+                <span className="flex capitalize h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-lg font-semibold text-primary ">
+                  {locale === "ar"
+                    ? (menu.nameAr?.charAt(0) ?? "")
+                    : (menu.nameEn?.charAt(0) ?? "")}
+                </span>
+              )}
+              <div className="flex flex-col">
+                <p className="text-lg font-semibold capitalize truncate dark:text-slate-100">
+                  {locale === "ar" ? menu.nameAr : menu.nameEn}
+                </p>
+              </div>
+            </>
+          )}
+        </LinkTo>
+      )}
       <nav className="flex-1 space-y-8 overflow-y-auto px-4 pb-10 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {navSectionsData.map((section) => (
           <div key={section.title}>
-            <p className="px-2 text-xs uppercase tracking-[0.3em] text-slate-400 dark:text-slate-300">
-              {t(section.title)}
-            </p>
+         
             <div className="mt-3 space-y-1">
               {section.items.map((item) => (
                 <LinkTo

@@ -25,7 +25,7 @@ import CustomRecaptcha from "./Auth/CustomRecaptcha";
 const RECAPTCHA_WIDTH = 304;
 const RECAPTCHA_HEIGHT = 78;
 
-export default function LoginForm() {
+export default function LoginForm({ promoText, promoEnabled }: { promoText: string, promoEnabled: boolean }) {
   const t = useTranslations("");
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -132,7 +132,7 @@ export default function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 ">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
       <Controller
         control={control}
         name="email"

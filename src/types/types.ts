@@ -135,4 +135,5 @@ export interface FAQItemProps {
 
 export interface LogoProps {
   variant?: "default" | "white";
+  size?: "default" | "small";
 }

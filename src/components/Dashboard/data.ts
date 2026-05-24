@@ -12,6 +12,7 @@ import {
 import {
   IoDocumentTextOutline,
   IoPhonePortraitOutline,
+  IoPricetagOutline,
   IoSettingsOutline,
   IoTimeOutline,
 } from "react-icons/io5";
@@ -202,6 +203,12 @@ export const adminNavSections: NavSection[] = [
         icon: IoPhonePortraitOutline,
         key: "app-version",
         link: "app-version",
+      },
+      {
+        label: "promo",
+        icon: IoPricetagOutline,
+        key: "promo",
+        link: "promo",
       },
     ],
   },
