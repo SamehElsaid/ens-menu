@@ -160,7 +160,7 @@ function UserDropDown() {
   return (
     <>
       {isLoggingOut && (
-        <div className="fixed top-0 left-0 right-0 bottom-0 bg-white z-111111 flex items-center justify-center">
+        <div className="fixed inset-0 h-[100dvh] bg-white z-111111 flex items-center justify-center">
           <Loader />
         </div>
       )}

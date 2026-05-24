@@ -14,12 +14,15 @@ import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
 import { useAppDispatch } from "@/store/hooks";
 import CustomBtn from "./Custom/CustomBtn";
 import { axiosPost } from "@/shared/axiosCall";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LoginResponse } from "@/types/LoginResponse";
 import GoogleSignInButton from "@/components/Auth/GoogleSignInButton";
 import { syncFcmToken } from "@/shared/syncFcmToken";
 import ReCAPTCHA from "react-google-recaptcha";
 import Loader from "./Global/Loader";
+
+const RECAPTCHA_WIDTH = 304;
+const RECAPTCHA_HEIGHT = 78;
 
 export default function LoginForm() {
   const t = useTranslations("");
@@ -48,7 +51,27 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [loadingLoader, setLoadingLoader] = useState(true);
   const [recaptchaVerified, setRecaptchaVerified] = useState(false);
+  const [recaptchaScale, setRecaptchaScale] = useState(1);
   const [apiError, setApiError] = useState<string | null>(null);
+  const recaptchaContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = recaptchaContainerRef.current;
+    if (!container) return;
+
+    const updateScale = () => {
+      const availableWidth = container.getBoundingClientRect().width;
+      setRecaptchaScale(
+        availableWidth < RECAPTCHA_WIDTH ? availableWidth / RECAPTCHA_WIDTH : 1,
+      );
+    };
+
+    updateScale();
+
+    const observer = new ResizeObserver(updateScale);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   const onSubmit = async (data: LoginSchema) => {
     if (!recaptchaVerified) {
@@ -162,7 +185,7 @@ export default function LoginForm() {
 
       <div className="mt-4">
         <div className="h-[78px] relative">
-          {loadingLoader && <div className="absolute z- inset-0 flex items-center justify-center"><Loader /></div>}
+          {loadingLoader && <div className="absolute z-10 bg-white inset-0 dark:bg-slate-900/60 rounded-lg p-4 inset-0 flex items-center justify-center"><Loader /></div>}
 
           <div className={`${loadingLoader ? "opacity-0" : "opacity-100"} transition-all duration-300`}>
             <ReCAPTCHA
@@ -174,11 +197,12 @@ export default function LoginForm() {
               onChange={(token: string | null) => {
                 setRecaptchaVerified(!!token);
               }}
+              
               onExpired={() => {
                 setRecaptchaVerified(false);
               }}
               onErrored={() => {
-                setRecaptchaVerified(false);
+                setRecaptchaVerified(false); 
               }}
             />
           </div>
