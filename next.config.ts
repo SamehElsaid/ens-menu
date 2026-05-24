@@ -8,6 +8,9 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 const nextConfig: NextConfig = {
   reactStrictMode: false,
+  images: {
+    formats: ["image/avif", "image/webp"],
+  },
 };
 
 const withNextIntl = createNextIntlPlugin();

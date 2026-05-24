@@ -8,16 +8,31 @@ export function useDelayedLoad(delayMs = DEFAULT_DELAY_MS) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const load = () => setReady(true);
+    if (ready) return;
 
+    const load = () => setReady(true);
+    const events = ["scroll", "click", "touchstart", "keydown"] as const;
+
+    events.forEach((event) =>
+      window.addEventListener(event, load, { once: true, passive: true })
+    );
+
+    let idleId: number | undefined;
     if (typeof window.requestIdleCallback === "function") {
-      const id = window.requestIdleCallback(load, { timeout: delayMs });
-      return () => window.cancelIdleCallback(id);
+      idleId = window.requestIdleCallback(load, { timeout: delayMs });
+    } else {
+      idleId = window.setTimeout(load, delayMs) as unknown as number;
     }
 
-    const timer = window.setTimeout(load, delayMs);
-    return () => window.clearTimeout(timer);
-  }, [delayMs]);
+    return () => {
+      events.forEach((event) => window.removeEventListener(event, load));
+      if (typeof window.cancelIdleCallback === "function" && idleId) {
+        window.cancelIdleCallback(idleId);
+      } else if (idleId) {
+        window.clearTimeout(idleId);
+      }
+    };
+  }, [delayMs, ready]);
 
   return ready;
 }

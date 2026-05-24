@@ -1,3 +1,5 @@
+"use client";
+
 import { useTranslations, useLocale } from "next-intl";
 import { FeatureCardProps } from "@/types/types";
 import { features } from "@/modules/FeatureSection/data";

@@ -6,7 +6,7 @@ export default function ProgressBar() {
       color="#9234ea"
       height="3px"
       easing="linear"
-      showSpinner={true}
+      showSpinner={false}
       ignoreSearchParams
       boxShadow="0 0 10px 0 rgba(0, 0, 0, 0.1)"
     />

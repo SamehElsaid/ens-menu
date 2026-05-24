@@ -3,41 +3,41 @@ import dynamic from "next/dynamic";
 import { getTranslations } from "next-intl/server";
 import { buildSeoMetadata } from "@/lib/seo";
 import { FaWhatsapp } from "react-icons/fa";
-import HeroSection from "@/components/HomePage/HeroSection";
-import Features from "@/components/HomePage/FeatureSection";
+import HeroContent from "@/components/HomePage/HeroContent";
+import HeroPhoneDesktopPortal from "@/components/HomePage/HeroPhoneDesktopPortal";
+import SectionSkeleton from "@/components/HomePage/SectionSkeleton";
 
-const PhoneVideoSection = dynamic(
-  () => import("@/components/HomePage/PhoneVideoSection"),
-  {
-    loading: () => <div className="h-[500px]" />,
-  },
-);
+const dynamicSection = (factory: () => Promise<unknown>, height: string) =>
+  dynamic(() => factory() as Promise<{ default: React.ComponentType }>, {
+    loading: () => <SectionSkeleton height={height} />,
+  });
 
-const HowItWorks = dynamic(() => import("@/components/HomePage/HowItWorks"), {
-  loading: () => <div className="h-[400px]" />,
-});
-
-const PricingSection = dynamic(
-  () => import("@/components/HomePage/PricingSection"),
-  {
-    loading: () => <div className="h-[500px]" />,
-  },
-);
-
-const TemplateShow = dynamic(
+const TemplateShow = dynamicSection(
   () => import("@/components/HomePage/TemplateShow"),
-  {
-    loading: () => <div className="h-[500px]" />,
-  },
+  "640px",
 );
 
-const FAQ = dynamic(() => import("@/components/HomePage/FAQ"), {
-  loading: () => <div className="h-[400px]" />,
-});
+const PhoneVideoSection = dynamicSection(
+  () => import("@/components/HomePage/PhoneVideoSection"),
+  "720px",
+);
 
-const FooterSection = dynamic(() => import("@/components/HomePage/Footer"), {
-  loading: () => <div className="h-[300px]" />,
-});
+const Features = dynamicSection(
+  () => import("@/components/HomePage/FeatureSection"),
+  "520px",
+);
+
+const HowItWorks = dynamicSection(
+  () => import("@/components/HomePage/HowItWorks"),
+  "480px",
+);
+
+const FAQ = dynamicSection(() => import("@/components/HomePage/FAQ"), "420px");
+
+const FooterSection = dynamicSection(
+  () => import("@/components/HomePage/Footer"),
+  "320px",
+);
 
 const HOME_WHATSAPP_URL = "https://wa.me/201500800050";
 type Props = { params: Promise<{ locale: string }> };
@@ -63,15 +63,15 @@ async function Page({ params }: Props) {
 
   return (
     <>
-      <HeroSection />
+      <HeroContent locale={locale} />
       <TemplateShow />
       <PhoneVideoSection />
       <Features />
-
       <HowItWorks />
       <FAQ />
-
       <FooterSection />
+      {/* <HeroPhoneDesktopPortal /> */}
+
       <a
         href={HOME_WHATSAPP_URL}
         target="_blank"
