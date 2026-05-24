@@ -1,0 +1,61 @@
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { buildSeoMetadata } from "@/lib/seo";
+import CustomLogo from "@/components/Custom/CustomLogo";
+import AddPhoneForm from "@/components/AddPhoneForm";
+import Card from "@/components/ui/Card";
+import { useTranslations } from "next-intl";
+
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "meta" });
+  return buildSeoMetadata({
+    locale,
+    path: "auth/add-phone",
+    title: t("auth.addPhoneTitle"),
+    description: t("auth.addPhoneDescription"),
+    keywords: t("auth.addPhoneKeywords"),
+    coreKeywords: t("coreKeywords"),
+    siteName: t("siteName"),
+    robots: "noindex, nofollow",
+  });
+}
+
+export default function AddPhonePage() {
+  const t = useTranslations("");
+
+  return (
+    <div className=" bg-gradient-app overflow-hidden py-12 px-4 sm:px-6 lg:px-8 relative  flex items-center justify-center">
+      <div className="container flex items-center justify-center ">
+        <div className="rounded-md!   mt-16 min-h-[calc(100dvh-140px)] w-full flex items-center justify-center">
+          <div className="flex gap-10  w-full flex-col lg:flex-row ">
+            <div className="fixed inset-0 overflow-hidden bg-white dark:bg-[#0d1117] pointer-events-none">
+              <div className="particle particle-drift-slow w-64 h-64 bg-accent-purple rounded-full top-[-5%] right-[-10%]" style={{ opacity: "0.08" }} />
+              <div className="particle particle-drift-medium w-48 h-48 bg-deep-indigo rounded-full top-[60%] left-[-5%]" style={{ opacity: "0.05" }} />
+            </div>
+            <div className=" max-w-[500px]  mx-auto relative">
+              <Card className="max-w-none! bg-transparent! md:bg-white! dark:md:bg-slate-900/95! shadow-none! md:shadow-md! dark:md:shadow-slate-950/50 dark:md:border dark:md:border-slate-700/50 ">
+                <div className="relative z-10 flex flex-col h-full  w-full px-6 py-8">
+                  <CustomLogo />
+                  <div className="flex-1 flex flex-col max-w-[400px] mx-auto w-full">
+                    <div className="mb-10 text-center">
+                      <h2 className="text-2xl text-royal-purple dark:text-purple-300 mb-2">
+                        {t("auth.addPhoneTitle")}
+                      </h2>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        {t("auth.addPhoneDescription")}
+                      </p>
+                    </div>
+                    <AddPhoneForm />
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

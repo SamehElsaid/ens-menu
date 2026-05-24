@@ -1,7 +1,7 @@
 "use client";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import CustomInput from "@/components/Custom/CustomInput";
-import { FaEnvelope, FaUser, FaPhone } from "react-icons/fa";
+import { FaEnvelope, FaUser, FaPhone, FaStore } from "react-icons/fa";
 import { TbLockPassword } from "react-icons/tb";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLocale, useTranslations } from "next-intl";
@@ -15,6 +15,7 @@ import { pushSignUpEvent } from "@/shared/gtmEvents";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import Loader from "./Global/Loader";
+import GoogleSignInButton from "@/components/Auth/GoogleSignInButton";
 
 let emailCheckTimeout: ReturnType<typeof setTimeout> | null = null;
 let lastCheckedAvailableEmail: string | null = null;
@@ -92,6 +93,7 @@ export default function RegisterForm() {
   } = useForm<RegisterSchema>({
     defaultValues: {
       fullName: "",
+      businessName: "",
       email: "",
       phone: "",
       password: "",
@@ -108,6 +110,7 @@ export default function RegisterForm() {
 
   const messages = {
     fullName: t("auth.fullName"),
+    businessName: `${t("auth.businessName")} (${t("common.optional")})`,
     email: t("auth.email"),
     phone: t("auth.phone"),
     password: t("auth.password"),
@@ -128,8 +131,10 @@ export default function RegisterForm() {
 
     setLoading(true);
     // TODO: اربط هنا API التسجيل
+    const trimmedBusinessName = data.businessName?.trim();
     const dataSend = {
       name: data.fullName,
+      ...(trimmedBusinessName ? { businessName: trimmedBusinessName } : {}),
       email: data.email,
       phoneNumber: data.phone,
       password: data.password,
@@ -143,8 +148,9 @@ export default function RegisterForm() {
     );
     if (response.status) {
       pushSignUpEvent();
-      toast.success(t("auth.registerSuccess"));
-      router.push("/auth/login");
+      sessionStorage.setItem("pendingPhoneVerification", data.phone);
+      toast.success(t("auth.registerSuccessWhatsApp"));
+      router.push(`/auth/verify-phone?phone=${encodeURIComponent(data.phone)}`);
     } else {
       setLoading(false);
     }
@@ -166,6 +172,23 @@ export default function RegisterForm() {
             icon={<FaUser />}
             label={messages.fullName}
             error={errors.fullName?.message}
+            value={value}
+            onChange={onChange}
+          />
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="businessName"
+        render={({ field: { value, onChange } }) => (
+          <CustomInput
+            type="text"
+            placeholder={messages.businessName}
+            id="businessName"
+            icon={<FaStore />}
+            label={messages.businessName}
+            error={errors.businessName?.message}
             value={value}
             onChange={onChange}
           />
@@ -274,7 +297,9 @@ export default function RegisterForm() {
         />
       </div>
 
-      
+      <div className="mt-12 flex flex-col items-center">
+        <GoogleSignInButton dividerLabel="auth.orRegisterWith" />
+      </div>
 
       <div className="flex items-center justify-center mt-6">
         <LinkTo

@@ -6,13 +6,12 @@ import { useRouter } from "@/i18n/navigation";
 import { useGoogleLogin } from "@react-oauth/google";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import Cookies from "js-cookie";
 import { useAppDispatch } from "@/store/hooks";
 import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
 import { axiosPost } from "@/shared/axiosCall";
 import { pushSignUpEvent } from "@/shared/gtmEvents";
-import { encryptData } from "@/shared/encryption";
 import { LoginResponse } from "@/types/LoginResponse";
+import { writeAuthCookie } from "@/shared/authCookie";
 
 // Must be set at BUILD time in production (e.g. in Vercel/Netlify env vars).
 const hasGoogleClientId = !!(
@@ -56,22 +55,41 @@ export default function GoogleSignInButton({
         true,
       );
       if (response.status && response.data) {
-        const { accessToken, refreshToken, user, isNew } = response.data;
+        const {
+          accessToken,
+          refreshToken,
+          user,
+          isNew,
+          phoneVerificationRequired,
+        } = response.data;
         if (isNew) {
           pushSignUpEvent();
         }
-        const saveTokens = {
+        const needsPhoneVerification = Boolean(phoneVerificationRequired);
+        writeAuthCookie({
           token: accessToken ?? "",
           refreshToken: refreshToken ?? "",
           role: user?.role ?? "",
-        };
-        const encryptedData = encryptData(saveTokens);
-        Cookies.set("sub", encryptedData, {
-          expires: 3,
-          sameSite: "Strict",
-          secure: true,
-          path: "/",
+          phoneVerified: needsPhoneVerification ? false : true,
+          phoneNumber: user?.phoneNumber ?? null,
         });
+
+        if (needsPhoneVerification) {
+          const phone = user?.phoneNumber?.trim();
+          if (phone) {
+            sessionStorage.setItem("pendingPhoneVerification", phone);
+            router.push(
+              `/auth/verify-phone?phone=${encodeURIComponent(phone)}`,
+            );
+          } else {
+            router.push("/auth/add-phone");
+          }
+          if (user) {
+            dispatch(SET_ACTIVE_USER({ user }));
+          }
+          return;
+        }
+
         router.push(user?.role === "admin" ? "/admin" : "/dashboard");
         if (user) {
           dispatch(SET_ACTIVE_USER({ user }));

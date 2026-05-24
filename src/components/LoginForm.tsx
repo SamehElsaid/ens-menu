@@ -6,8 +6,7 @@ import { TbLockPassword } from "react-icons/tb";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLocale, useTranslations } from "next-intl";
 import { loginSchema, LoginSchema } from "@/schemas/loginSchema";
-import { encryptData } from "@/shared/encryption";
-import Cookies from "js-cookie";
+import { writeAuthCookie } from "@/shared/authCookie";
 import { useRouter } from "@/i18n/navigation";
 import LinkTo from "./Global/LinkTo";
 import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
@@ -70,19 +69,11 @@ export default function LoginForm() {
 
       const { accessToken, refreshToken, user } = response.data;
 
-      const saveTokens = {
+      writeAuthCookie({
         token: accessToken ?? "",
         refreshToken: refreshToken ?? "",
         role: user?.role ?? "",
-      };
-
-      const encryptedData = encryptData(saveTokens);
-
-      Cookies.set("sub", encryptedData, {
-        expires: 3,
-        sameSite: "Strict",
-        secure: true,
-        path: "/",
+        phoneVerified: true,
       });
 
       // Sync FCM token right after login (check match, update if needed)
@@ -97,7 +88,19 @@ export default function LoginForm() {
         message?: string;
         error?: string;
         errorType?: string;
+        phoneVerificationRequired?: boolean;
+        phoneNumber?: string;
       };
+
+      if (payload?.phoneVerificationRequired) {
+        const phone = payload.phoneNumber?.trim();
+        if (phone) {
+          sessionStorage.setItem("pendingPhoneVerification", phone);
+          router.push(`/auth/verify-phone?phone=${encodeURIComponent(phone)}`);
+          return;
+        }
+      }
+
       const errorMessage =
         payload?.error ||
         payload?.message ||

@@ -4,7 +4,7 @@
     "coreKeywords": "مجاني، منيو الكتروني، منيو إلكتروني، QR code",
     "home": {
       "title": "ENSmenu | منيو إلكتروني مجاني و QR code للمطاعم والمقاهي",
-      "description": "أنشئ منيو إلكتروني مجاني بـ QR code لمطعمك أو مقهاك. قوائم رقمية سهلة الاستخدام ومتوافقة مع الجوال.",
+      "description": "أنشئ منيو إلكتروني مجاني بـ QR code لمطعمك أو مقهاك. قوائم رقمية سهلة الاستخدام ومتوافقة مع الهاتف.",
       "keywords": "قائمة QR، قائمة رقمية، قائمة مطعم، قائمة مقهى، قائمة طعام، طلب من الطاولة، قائمة بدون تلامس، منشئ قوائم، ENSmenu"
     },
     "mobileAppPage": {
@@ -24,7 +24,13 @@
       "resetPasswordKeywords": "إعادة تعيين كلمة المرور، استعادة الحساب، ENSmenu",
       "staffLoginTitle": "تسجيل دخول الموظف | ENSmenu",
       "staffLoginDescription": "دخول الكاشير لإدارة المنيو الإلكتروني وطلبات QR code.",
-      "staffLoginKeywords": "تسجيل دخول موظف، كاشير، لوحة تحكم ENSmenu"
+      "staffLoginKeywords": "تسجيل دخول موظف، كاشير، لوحة تحكم ENSmenu",
+      "verifyPhoneTitle": "تأكيد الهاتف | ENSmenu",
+      "verifyPhoneDescription": "أدخل رمز التحقق المرسل إلى واتساب.",
+      "verifyPhoneKeywords": "تأكيد الهاتف، رمز واتساب، حساب ENSmenu",
+      "addPhoneTitle": "إضافة الهاتف | ENSmenu",
+      "addPhoneDescription": "أضف رقم هاتفك لإكمال التسجيل عبر Google.",
+      "addPhoneKeywords": "إضافة هاتف، تسجيل Google، تحقق واتساب، ENSmenu"
     },
     "legalPrivacy": {
       "title": "سياسة الخصوصية | ENSmenu",
@@ -189,7 +195,7 @@
     "firstName": "الاسم الأول",
     "lastName": "اسم العائلة",
     "registerSuccess": "تم إنشاء الحساب بنجاح",
-    "phone": "رقم الجوال",
+    "phone": "رقم الهاتف",
     "email": "البريد الإلكتروني",
     "password": "كلمة المرور",
     "confirmPassword": "تأكيد كلمة المرور",
@@ -197,6 +203,7 @@
     "birthDate": "تاريخ الميلاد",
     "specialization": "التخصص",
     "fullName": "الاسم الكامل ",
+    "businessName": "اسم العمل التجاري",
     "nationalID": "رقم الهوية الوطنية",
     "attachments": "المرفقات",
     "ownsCenter": "أمتلك مركزاً",
@@ -218,9 +225,9 @@
     "firstNameMinLength": "يجب ألا يقل الاسم الأول عن حرفين",
     "lastNameRequired": "اسم العائلة مطلوب",
     "lastNameMinLength": "يجب ألا يقل اسم العائلة عن حرفين",
-    "phoneRequired": "رقم الجوال مطلوب",
-    "phoneInvalid": "يرجى إدخال رقم جوال صحيح",
-    "phoneAlreadyInUse": "رقم الجوال مسجل مسبقاً",
+    "phoneRequired": "رقم الهاتف مطلوب",
+    "phoneInvalid": "يرجى إدخال رقم هاتف صحيح",
+    "phoneAlreadyInUse": "رقم الهاتف مسجل مسبقاً",
     "emailRequired": "البريد الإلكتروني مطلوب",
     "parentDescription": "إنشاء حسابك للبدء",
     "emailInvalid": "يرجى إدخال بريد إلكتروني صحيح",
@@ -235,6 +242,8 @@
     "specializationRequired": "التخصص مطلوب",
     "specializationInvalid": "يرجى اختيار تخصص صحيح",
     "fullNameRequired": "الاسم الكامل مطلوب",
+    "businessNameRequired": "اسم العمل التجاري مطلوب",
+    "businessNameMinLength": "يجب ألا يقل اسم العمل التجاري عن حرفين",
     "fullNameInvalid": "يرجى إدخال اسم كامل صحيح",
     "nationalIDRequired": "رقم الهوية الوطنية مطلوب",
     "nationalIDInvalid": "يرجى إدخال رقم هوية وطنية صحيح",
@@ -321,6 +330,22 @@
     "resetLinkSent": "تم إرسال رابط إعادة التعيين. يرجى التحقق من بريدك الإلكتروني.",
     "resetPasswordSuccess": "تم تحديث كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن.",
     "invalidResetToken": "رابط إعادة التعيين غير صالح. اطلب رابطًا جديدًا.",
+    "registerSuccessWhatsApp": "تم إنشاء الحساب! تحقق من واتساب للحصول على رمز التحقق.",
+    "verifyPhoneTitle": "تأكيد رقم الهاتف",
+    "verifyPhoneDescription": "أرسلنا رمزاً مكوناً من 6 أرقام إلى واتساب. أدخله لتفعيل حسابك.",
+    "verifyPhoneHint": "تم إرسال الرمز إلى {phone} عبر واتساب",
+    "verificationCode": "رمز التحقق",
+    "verificationCodeRequired": "رمز التحقق مطلوب",
+    "verificationCodeInvalid": "أدخل رمزاً صالحاً من 6 أرقام",
+    "verifyPhone": "تأكيد الهاتف",
+    "verificationCodeSent": "تم إرسال رمز التحقق عبر واتساب",
+    "phoneVerifiedSuccess": "تم تأكيد الهاتف بنجاح. يمكنك تسجيل الدخول الآن.",
+    "resendCode": "إعادة إرسال الرمز عبر واتساب",
+    "resendCodeIn": "إعادة الإرسال خلال {seconds} ث",
+    "addPhoneTitle": "أضف رقم الهاتف",
+    "addPhoneDescription": "لإكمال حسابك، أدخل رقمك . سنرسل رمز التحقق عبر واتساب.",
+    "addPhoneHint": "تسجيل الدخول عبر Google يتطلب رقم هاتف مفعّل على حسابك.",
+    "sendVerificationCode": "إرسال رمز التحقق",
     "centerDescription": "انضم إلى شبكة المراكز لدينا",
     "centerTitle": "تسجيل مركز",
     "profileImage": "صورة الملف الشخصي",
@@ -647,7 +672,7 @@
     "downgradePlan": "تخفيض الخطة",
     "paymentNote": "خطة Pro تُدفع سنوياً فقط (لا يوجد اشتراك شهري). الدفع يتم عبر EasyKash بشكل آمن.",
     "proYearlyOnlyNote": "خطة Pro متاحة بالاشتراك السنوي فقط — لا يوجد خطة شهرية.",
-    "payProYearlyError": "تعذّر بدء الدفع. ستظهر هنا رسالة من الخادم إن وُجدت؛ وإلا تحقّق من الاسم والجوال وأعد المحاولة.",
+    "payProYearlyError": "تعذّر بدء الدفع. ستظهر هنا رسالة من الخادم إن وُجدت؛ وإلا تحقّق من الاسم والهاتف وأعد المحاولة.",
     "notEntered": "غير مدخل",
     "emailVerification": "التحقق من البريد",
     "accountStatus": "حالة الحساب",
@@ -899,10 +924,10 @@
   },
   "phoneVideoSection": {
     "badge": "تطبيق الموظفين",
-    "devicePhone": "جوال",
+    "devicePhone": "هاتف",
     "deviceTablet": "تابلت",
     "deviceToggleAria": "شكل معاينة الجهاز",
-    "title": "إدارة الطلبات من المنيو على الجوال",
+    "title": "إدارة الطلبات من المنيو على الهاتف",
     "description": "تطبيق مخصص لطاقم المطعم أو الكافيه لاستقبال طلبات الزبائن القادمة من المنيو الإلكتروني، ومتابعة كل مرحلة من استلام الطلب حتى التسليم عبر شاشة واحدة واضحة.",
     "tabItems": {
       "createOrder": {
@@ -1052,7 +1077,7 @@
           "description": "تابع أداء منتجاتك واكتشف الأكثر مبيعاً لتحسين قراراتك وزيادة أرباحك."
         },
         "2": {
-          "title": "متوافق مع الجوال",
+          "title": "متوافق مع الهاتف",
           "description": "تصميم متجاوب يعمل بشكل مثالي على جميع الأجهزة - الهواتف والتابلت والكمبيوتر"
         },
         "3": {

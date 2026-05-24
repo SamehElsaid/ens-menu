@@ -7,7 +7,40 @@ import { decryptData } from "./shared/encryption";
 interface DecryptedToken {
   role: string;
   staffJobRole?: string;
+  phoneVerified?: boolean;
+  phoneNumber?: string | null;
   [key: string]: unknown;
+}
+
+const PHONE_AUTH_PATHS = ["/auth/add-phone", "/auth/verify-phone"];
+
+function isPhoneAuthPath(pathname: string): boolean {
+  return PHONE_AUTH_PATHS.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
+}
+
+function phoneVerificationRedirect(
+  request: NextRequest,
+  pathname: string,
+  tokenDecrypted: DecryptedToken,
+): NextResponse {
+  const fullPath = request.nextUrl.pathname;
+  const localeMatch = fullPath.match(/^\/(ar|en)(?=\/|$)/);
+  const prefix = localeMatch ? `/${localeMatch[1]}` : "";
+  const target = request.nextUrl.clone();
+  const phone =
+    typeof tokenDecrypted.phoneNumber === "string"
+      ? tokenDecrypted.phoneNumber.trim()
+      : "";
+
+  if (phone) {
+    target.pathname = `${prefix}/auth/verify-phone`;
+    target.searchParams.set("phone", phone);
+  } else {
+    target.pathname = `${prefix}/auth/add-phone`;
+  }
+  return NextResponse.redirect(target);
 }
 
 export default function middleware(request: NextRequest) {
@@ -24,9 +57,9 @@ export default function middleware(request: NextRequest) {
   const hasToken =
     tokenDecrypted && Object.keys(tokenDecrypted).length > 0;
 
-  // Stop Login , Register , Forgot Password , Reset Password , Verify Email , Verify Phone
+  // Block auth pages for logged-in users, except phone verification flow
   if (pathname.startsWith("/auth")) {
-    if (hasToken) {
+    if (hasToken && !isPhoneAuthPath(pathname)) {
       url.pathname = "/";
       return NextResponse.redirect(url);
     }
@@ -43,6 +76,9 @@ export default function middleware(request: NextRequest) {
     if (!hasToken) {
       url.pathname = "/unauthorized";
       return NextResponse.redirect(url);
+    }
+    if (tokenDecrypted?.phoneVerified === false) {
+      return phoneVerificationRedirect(request, pathname, tokenDecrypted);
     }
     // Staff JWT cookie: only cashiers may use the owner dashboard UI
     if (tokenDecrypted.role === "staff") {

@@ -10,6 +10,7 @@ import { SET_ACTIVE_USER, SET_LOADING } from "@/store/authSlice/menuDataSlice";
 import { useAppDispatch } from "@/store/hooks";
 import { AuthUserHydrate } from "@/components/Dashboard/AuthUserHydrate";
 import { FcmTokenSync } from "@/components/Dashboard/FcmTokenSync";
+import { PhoneVerificationGuard } from "@/components/Dashboard/PhoneVerificationGuard";
 
 interface ParentLayoutProps {
   children: ReactNode;
@@ -59,6 +60,7 @@ export default function ParentLayout({ children }: ParentLayoutProps) {
   return (
     <>
       <AuthUserHydrate />
+      <PhoneVerificationGuard />
       <FcmTokenSync />
       <Layout segment={segment}>{children}</Layout>
     </>

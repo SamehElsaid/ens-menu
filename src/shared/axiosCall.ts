@@ -15,6 +15,8 @@ interface ApiResponse<T> {
 
 interface DecryptedToken {
   token?: string;
+  phoneVerified?: boolean;
+  phoneNumber?: string | null;
   [key: string]: unknown;
 }
 
@@ -80,6 +82,12 @@ const doRefreshAccessToken = async (): Promise<string | null> => {
     };
     if (tokenDecrypted.staffJobRole) {
       newCookies.staffJobRole = tokenDecrypted.staffJobRole;
+    }
+    if (tokenDecrypted.phoneVerified !== undefined) {
+      newCookies.phoneVerified = tokenDecrypted.phoneVerified;
+    }
+    if (tokenDecrypted.phoneNumber !== undefined) {
+      newCookies.phoneNumber = tokenDecrypted.phoneNumber;
     }
     Cookies.set("sub", encryptData(newCookies), { path: "/" });
     return accessToken;

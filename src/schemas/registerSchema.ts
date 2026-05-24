@@ -28,6 +28,15 @@ export const registerSchema = (
 
   return yup.object().shape({
     fullName: yup.string().required(t("auth.fullNameRequired")),
+    businessName: yup
+      .string()
+      .trim()
+      .notRequired()
+      .test(
+        "business-name-min-length",
+        t("auth.businessNameMinLength"),
+        (value) => !value || value.length >= 2,
+      ),
     email: emailWithAvailability,
     phone: (() => {
       const basePhone = yup

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, getPathname } from "@/i18n/navigation";
 import {
@@ -8,7 +8,6 @@ import {
   FiArrowRight as ArrowRight,
   FiMenu as Menu,
   FiShoppingCart as ShoppingCart,
-  FiDownload as Download,
 } from "react-icons/fi";
 
 import { menuItemsData } from "@/modules/menuItems";
@@ -230,25 +229,6 @@ const HeroSection = () => {
               <InteractivePhone />
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Video Modal */}
-      <div
-        className={`fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm transition-opacity duration-200 ${
-          isVideoOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-        }`}
-      >
-        <div className="relative youtube-player-container w-full max-w-4xl mx-4 aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
-          <button
-            type="button"
-            onClick={() => setIsVideoOpen(false)}
-            className="absolute top-3 right-3 z-10 rounded-full bg-black/70 text-white px-3 py-1 text-sm hover:bg-black"
-          >
-            ✕
-          </button>
         </div>
       </div>
     </section>
