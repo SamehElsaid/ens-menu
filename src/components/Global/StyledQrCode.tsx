@@ -6,7 +6,6 @@ import {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import QRCodeStyling from "qr-code-styling";
 import { getStyledQrOptions } from "@/lib/styledQr";
 
 export type StyledQrCodeHandle = {
@@ -27,7 +26,9 @@ export const StyledQrCode = forwardRef<StyledQrCodeHandle, Props>(
     ref,
   ) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const instanceRef = useRef<QRCodeStyling | null>(null);
+    const instanceRef = useRef<InstanceType<
+      Awaited<typeof import("qr-code-styling")>["default"]
+    > | null>(null);
 
     useImperativeHandle(ref, () => ({
       download: async (filename: string) => {
@@ -42,13 +43,22 @@ export const StyledQrCode = forwardRef<StyledQrCodeHandle, Props>(
       const el = containerRef.current;
       if (!el || !value) return;
 
-      el.innerHTML = "";
-      const qr = new QRCodeStyling(
-        getStyledQrOptions({ value, size, centerLogoSrc }),
-      );
-      instanceRef.current = qr;
-      qr.append(el);
+      let cancelled = false;
+
+      void (async () => {
+        const { default: QRCodeStyling } = await import("qr-code-styling");
+        if (cancelled || !containerRef.current) return;
+
+        el.innerHTML = "";
+        const qr = new QRCodeStyling(
+          getStyledQrOptions({ value, size, centerLogoSrc }),
+        );
+        instanceRef.current = qr;
+        qr.append(el);
+      })();
+
       return () => {
+        cancelled = true;
         instanceRef.current = null;
         el.innerHTML = "";
       };
@@ -99,6 +109,7 @@ export async function downloadStyledQrPng(params: {
 
   document.body.appendChild(container);
   try {
+    const { default: QRCodeStyling } = await import("qr-code-styling");
     const qr = new QRCodeStyling(
       getStyledQrOptions({
         value: params.value,

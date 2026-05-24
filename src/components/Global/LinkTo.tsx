@@ -7,7 +7,7 @@ interface LinkToProps {
 }
 function LinkTo({ href, children, ...props }: LinkToProps) {
   return (
-    <Link {...props} href={href} >
+    <Link {...props} href={href} prefetch={false}>
       {children}
     </Link>
   );

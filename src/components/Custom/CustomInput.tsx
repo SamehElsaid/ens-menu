@@ -1,5 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 
+import "react-phone-number-input/style.css";
+import "react-datepicker/dist/react-datepicker.css";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { UnmountClosed } from "react-collapse";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";

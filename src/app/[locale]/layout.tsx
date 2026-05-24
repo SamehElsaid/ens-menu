@@ -3,20 +3,13 @@ import { Suspense } from "react";
 import "./globals.css";
 import { cairo, fontVariables } from "@/lib/fonts";
 import { NextIntlClientProvider } from "next-intl";
+import { getMessages, setRequestLocale } from "next-intl/server";
 import RenderInProvider from "@/components/Global/RenderInProvider";
 import ProgressBar from "@/components/Global/ProgressBar";
-import GoogleAnalytics from "@/components/Global/GoogleAnalytics";
+import GoogleGtag from "@/components/Global/GoogleGtag";
 import GoogleTagManager from "@/components/Global/GoogleTagManager";
-import GoogleAds from "@/components/Global/GoogleAds";
-import "react-phone-number-input/style.css";
-import "react-datepicker/dist/react-datepicker.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "swiper/css";
-
-import "swiper/css/navigation";
-import "swiper/css/free-mode";
-import "react-lazy-load-image-component/src/effects/blur.css";
 const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
 export const metadata: Metadata = {
@@ -24,10 +17,6 @@ export const metadata: Metadata = {
   title: "ENSmenu",
   description:
     "ENSmenu is a platform for creating digital menus for restaurants and cafes",
-  icons: {
-    icon: [{ url: "/favicon.ico", sizes: "32x32" }],
-    shortcut: "/favicon.ico",
-  },
 };
 
 // Script to prevent flash of wrong theme
@@ -50,6 +39,8 @@ export default async function RootLayout({
   params: Promise<{ locale: string }>;
 }>) {
   const { locale } = await params;
+  setRequestLocale(locale);
+  const messages = await getMessages();
   return (
     <html
       lang={locale}
@@ -63,8 +54,7 @@ export default async function RootLayout({
       <body suppressHydrationWarning>
         <Suspense fallback={null}>
           <GoogleTagManager />
-          <GoogleAnalytics />
-          <GoogleAds />
+          <GoogleGtag />
         </Suspense>
         <ProgressBar />
         <ToastContainer
@@ -79,7 +69,7 @@ export default async function RootLayout({
           pauseOnHover
           theme="light"
         />
-        <NextIntlClientProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <RenderInProvider>{children}</RenderInProvider>
         </NextIntlClientProvider>
       </body>

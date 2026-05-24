@@ -91,7 +91,6 @@ export const TemplateShow = () => {
                     alt={
                       isRTL ? activeTemplate.titleAr : activeTemplate.titleEn
                     }
-                    disableLazy={true}
                     className="w-full h-full object-cover"
                   />
                 

@@ -5,11 +5,12 @@ export default async function MainLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   return (
     <>
       <Header />
-      {children}
+      <main className="home-main min-h-screen w-full overflow-x-hidden">
+        {children}
+      </main>
     </>
   );
 }
