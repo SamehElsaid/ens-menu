@@ -33,6 +33,7 @@ const NavLink: React.FC<NavLinkProps> = ({
 }) => (
   <Link
     href={href}
+    prefetch={false}
     onClick={onClick}
     className="relative group text-slate-600 dark:text-slate-300 text-[14px] font-bold transition-colors duration-300 py-1 flex items-center gap-1.5 cursor-pointer"
   >
@@ -106,6 +107,7 @@ function Header() {
         {/* Logo */}
         <Link
           href="/"
+          prefetch={false}
           onClick={handleNavClick}
           className="flex items-center gap-2 text-xl font-semibold text-slate-900 dark:text-white"
         >
@@ -144,6 +146,7 @@ function Header() {
               {/* Sign In Button */}
               <Link
                 href={`/auth/login`}
+                prefetch={false}
                 className="px-5 hidden lg:block py-2 rounded-full font-bold text-[14px] text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-500/20 transition-all"
               >
                 {tHeader("signIn")}
@@ -153,6 +156,7 @@ function Header() {
               <div className="hidden lg:block">
                 <Link
                   href={`/auth/register`}
+                  prefetch={false}
                   className="px-7 py-2.5 rounded-full bg-linear-to-r from-purple-600 to-purple-700 dark:from-purple-500 dark:to-purple-600 text-white font-bold text-[14px] shadow-lg shadow-purple-200 dark:shadow-purple-900/50 transition-all hover:shadow-xl"
                 >
                   {tHeader("startNow")}
@@ -180,6 +184,7 @@ function Header() {
             <Link
               key={link.name}
               href={link.href}
+              prefetch={false}
               onClick={(e) => handleInPageNav(e, link.href)}
               className="py-4 text-lg font-bold text-slate-800 dark:text-slate-200 hover:text-purple-600 dark:hover:text-purple-400 transition-colors flex items-center justify-center gap-4 cursor-pointer"
             >
@@ -192,6 +197,7 @@ function Header() {
             <div className="pt-4 flex flex-col gap-3">
               <Link
                 href={`/auth/login`}
+                prefetch={false}
                 onClick={handleNavClick}
                 className="block w-full py-3 rounded-2xl border-2 border-purple-600 dark:border-purple-500 text-purple-600 dark:text-purple-400 font-bold text-base hover:bg-purple-50 dark:hover:bg-purple-500/20 transition-all"
               >
@@ -199,6 +205,7 @@ function Header() {
               </Link>
               <Link
                 href={`/auth/register`}
+                prefetch={false}
                 onClick={handleNavClick}
                 className="block w-full py-4 rounded-2xl bg-linear-to-r from-purple-600 to-purple-700 dark:from-purple-500 dark:to-purple-600 text-white font-bold text-base"
               >

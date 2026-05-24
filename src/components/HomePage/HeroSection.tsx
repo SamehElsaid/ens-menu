@@ -10,8 +10,7 @@ import {
   FiShoppingCart as ShoppingCart,
   FiDownload as Download,
 } from "react-icons/fi";
-import { FaAndroid } from "react-icons/fa";
-import YouTube, { type YouTubeProps, type YouTubeEvent } from "react-youtube";
+
 import { menuItemsData } from "@/modules/menuItems";
 import { MenuItem } from "@/types/types";
 import Background from "../Global/Background";
@@ -170,31 +169,6 @@ const HeroSection = () => {
   const isRTL = locale === "ar";
   const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
   const [isVideoOpen, setIsVideoOpen] = useState(false);
-  const playerRef = useRef<YouTubeEvent["target"] | null>(null);
-
-  const videoOpts: YouTubeProps["opts"] = {
-    width: "100%",
-    height: "100%",
-    playerVars: {
-      autoplay: 0,
-    },
-  };
-
-  const handleVideoReady: YouTubeProps["onReady"] = (event) => {
-    playerRef.current = event.target;
-    if (isVideoOpen) {
-      event.target.playVideo();
-    }
-  };
-
-  useEffect(() => {
-    if (!playerRef.current) return;
-    if (isVideoOpen) {
-      playerRef.current.playVideo();
-    } else {
-      playerRef.current.pauseVideo();
-    }
-  }, [isVideoOpen]);
 
   return (
     <section
@@ -239,13 +213,13 @@ const HeroSection = () => {
                 <span>{t("cta")}</span>
                 <ArrowIcon size={22} />
               </Link>
-              <button
+              {/* <button
                 type="button"
                 onClick={() => setIsVideoOpen(true)}
                 className="px-8 py-4 rounded-full border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-base hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
               >
                 {t("watchDemo")}
-              </button>
+              </button> */}
             </div>
           </div>
 
@@ -275,12 +249,6 @@ const HeroSection = () => {
           >
             ✕
           </button>
-          <YouTube
-            videoId="C1Tsud95BTE"
-            opts={videoOpts}
-            className="w-full h-full"
-            onReady={handleVideoReady}
-          />
         </div>
       </div>
     </section>

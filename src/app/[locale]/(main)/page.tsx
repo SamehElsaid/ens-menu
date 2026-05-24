@@ -1,18 +1,45 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import { getTranslations } from "next-intl/server";
-import { FaWhatsapp } from "react-icons/fa";
 import { buildSeoMetadata } from "@/lib/seo";
-import FAQ from "@/components/HomePage/FAQ";
-import Features from "@/components/HomePage/FeatureSection";
-import FooterSection from "@/components/HomePage/Footer";
+import { FaWhatsapp } from "react-icons/fa";
 import HeroSection from "@/components/HomePage/HeroSection";
-import PhoneVideoSection from "@/components/HomePage/PhoneVideoSection";
-import HowItWorks from "@/components/HomePage/HowItWorks";
-import PricingSection from "@/components/HomePage/PricingSection";
-import TemplateShow from "@/components/HomePage/TemplateShow";
+import Features from "@/components/HomePage/FeatureSection";
+
+const PhoneVideoSection = dynamic(
+  () => import("@/components/HomePage/PhoneVideoSection"),
+  {
+    loading: () => <div className="h-[500px]" />,
+  },
+);
+
+const HowItWorks = dynamic(() => import("@/components/HomePage/HowItWorks"), {
+  loading: () => <div className="h-[400px]" />,
+});
+
+const PricingSection = dynamic(
+  () => import("@/components/HomePage/PricingSection"),
+  {
+    loading: () => <div className="h-[500px]" />,
+  },
+);
+
+const TemplateShow = dynamic(
+  () => import("@/components/HomePage/TemplateShow"),
+  {
+    loading: () => <div className="h-[500px]" />,
+  },
+);
+
+const FAQ = dynamic(() => import("@/components/HomePage/FAQ"), {
+  loading: () => <div className="h-[400px]" />,
+});
+
+const FooterSection = dynamic(() => import("@/components/HomePage/Footer"), {
+  loading: () => <div className="h-[300px]" />,
+});
 
 const HOME_WHATSAPP_URL = "https://wa.me/201500800050";
-
 type Props = { params: Promise<{ locale: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -40,10 +67,10 @@ async function Page({ params }: Props) {
       <TemplateShow />
       <PhoneVideoSection />
       <Features />
-      <PricingSection />
+
       <HowItWorks />
       <FAQ />
-      
+
       <FooterSection />
       <a
         href={HOME_WHATSAPP_URL}

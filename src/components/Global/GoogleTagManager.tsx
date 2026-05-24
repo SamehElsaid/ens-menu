@@ -3,15 +3,17 @@
 import Script from "next/script";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
+import { useDelayedLoad } from "@/hooks/useDelayedLoad";
 
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID?.trim();
 
 export default function GoogleTagManager() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const shouldLoad = useDelayedLoad();
 
   useEffect(() => {
-    if (!GTM_ID) return;
+    if (!GTM_ID || !shouldLoad) return;
 
     const query = searchParams?.toString();
     const pagePath = query ? `${pathname}?${query}` : pathname;
@@ -23,14 +25,13 @@ export default function GoogleTagManager() {
       page_location: window.location.href,
       page_title: document.title,
     });
-  }, [pathname, searchParams]);
+  }, [pathname, searchParams, shouldLoad]);
 
-  if (!GTM_ID) return null;
+  if (!GTM_ID || !shouldLoad) return null;
 
   return (
     <>
-    
-      <Script id="google-tag-manager" strategy="afterInteractive">
+      <Script id="google-tag-manager" strategy="lazyOnload">
         {`
           (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
           new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],

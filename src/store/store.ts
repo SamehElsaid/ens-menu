@@ -1,10 +1,9 @@
-import { configureStore } from '@reduxjs/toolkit';
-import counterReducer from './slices/counterSlice';
-import authReducer from './authSlice/authSlice';
-import menuDataReducer from './authSlice/menuDataSlice';
+import { configureStore } from "@reduxjs/toolkit";
+
+import authReducer from "./authSlice/authSlice";
+import menuDataReducer from "./authSlice/menuDataSlice";
 export const store = configureStore({
   reducer: {
-    counter: counterReducer,
     auth: authReducer,
     menuData: menuDataReducer,
   },
@@ -12,4 +11,3 @@ export const store = configureStore({
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
-
