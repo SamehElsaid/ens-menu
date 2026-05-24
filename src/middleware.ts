@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { decryptData } from "./shared/encryption";
 
-interface DecryptedToken {
+export interface DecryptedToken {
   role: string;
   staffJobRole?: string;
   [key: string]: unknown;

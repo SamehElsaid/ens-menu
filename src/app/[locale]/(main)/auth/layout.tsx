@@ -1,13 +1,29 @@
 import GoogleAuthProvider from "@/components/Global/GoogleAuthProvider";
 import NoBfcache from "@/components/Global/NoBfcache";
+import { DecryptedToken } from "@/middleware";
+import { decryptData } from "@/shared/encryption";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export default function AuthLayout({
+export default async function AuthLayout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }>) {
+  const cookieStore = await cookies();
+  const { locale } = await params;
+
+  const token = cookieStore.get("sub");
+  const tokenDecrypted = token ? decryptData(token.value) as DecryptedToken : null;
+
+  if (tokenDecrypted) {
+    return redirect(`/${locale}${tokenDecrypted?.role === "admin" ? "/admin" : "/dashboard"}`);
+  }
+
   return (
     <GoogleAuthProvider>
       <NoBfcache />

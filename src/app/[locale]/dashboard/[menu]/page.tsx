@@ -1,7 +1,7 @@
 "use client";
 
 import { useAppSelector } from "@/store/hooks";
-import { useParams } from "next/navigation";
+import { redirect, useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import LinkTo from "@/components/Global/LinkTo";
 import {
@@ -69,6 +69,7 @@ export default function DashboardMenuPage() {
   const { menu, loading: menuLoading } = useAppSelector(
     (state) => state.menuData,
   );
+
   const locale = useLocale();
   const t = useTranslations("menuOverview");
   const params = useParams();
@@ -90,16 +91,19 @@ export default function DashboardMenuPage() {
 
   const menuUrl = menu?.slug
     ? `https://${menu.slug}${process.env.NEXT_PUBLIC_MENU_URL || ""}`.replace(
-        /^https:\/\//,
-        "https://",
-      )
+      /^https:\/\//,
+      "https://",
+    )
     : "";
   const menuQrRef = useRef<StyledQrCodeHandle>(null);
   const qrCenterLogoSrc = !isFreePlan ? (menu?.logo ?? null) : null;
 
+
+
+
   useEffect(() => {
     axiosGet<object>(`/menus/${menuSlugOrId}/activity-logs/`, locale).then(
-      (res) => {},
+      (res) => { },
     );
     if (!menuSlugOrId) return;
     const fetchActivity = async () => {
@@ -168,6 +172,9 @@ export default function DashboardMenuPage() {
     if (!menuUrl) return;
     void menuQrRef.current?.download(`menu-qr-${menu?.slug ?? "menu"}.png`);
   };
+
+
+
 
   if (menuLoading || !menu) {
     return (
@@ -508,11 +515,10 @@ export default function DashboardMenuPage() {
                     {entry.name || "—"}
                   </span>
                   <span
-                    className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${
-                      entry.type === "category"
+                    className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${entry.type === "category"
                         ? "bg-primary/10 dark:bg-primary/20 text-primary"
                         : "bg-slate-200/80 dark:bg-slate-600 text-slate-600 dark:text-slate-300"
-                    }`}
+                      }`}
                   >
                     {entry.type === "product" ? t("product") : t("category")}
                   </span>

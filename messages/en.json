@@ -2486,5 +2486,10 @@
     "searchPlaceholder": "Search for a location...",
     "searching": "Searching...",
     "selectedLocation": "Selected Location:"
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "body": "Sorry, the page you are looking for doesn't exist or has been moved.",
+    "backHome": "Back to home"
   }
 }
