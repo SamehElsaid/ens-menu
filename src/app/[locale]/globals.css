@@ -4,6 +4,93 @@ html {
   scroll-behavior: smooth;
 }
 
+@keyframes typing-dot {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+}
+
+@keyframes contact-picker-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes contact-picker-item-in {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes chat-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes chat-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-contact-picker-in {
+  animation: contact-picker-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: bottom right;
+}
+
+.animate-contact-picker-item {
+  animation: contact-picker-item-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-chat-panel-in {
+  animation: chat-panel-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: bottom center;
+}
+
+@media (min-width: 640px) {
+  .animate-chat-panel-in {
+    transform-origin: bottom right;
+  }
+}
+
+.animate-chat-backdrop-in {
+  animation: chat-backdrop-in 0.25s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-contact-picker-in,
+  .animate-contact-picker-item,
+  .animate-chat-panel-in,
+  .animate-chat-backdrop-in {
+    animation: none;
+  }
+}
+
 /* Homepage: clearer compositing on iOS Safari */
 .site-header {
   isolation: isolate;
