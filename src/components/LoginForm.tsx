@@ -104,7 +104,7 @@ export default function LoginForm({ promoText, promoEnabled }: { promoText: stri
 
       Cookies.set("sub", encryptedData, {
         expires: 3,
-        sameSite: "Strict",
+        sameSite: "Lax",
         secure: true,
         path: "/",
       });
