@@ -2385,6 +2385,13 @@
   "application": {
     "view": "عرض"
   },
+  "chatWidget": {
+    "openChat": "تحدث مع لينا",
+    "dismissTeaser": "إغلاق التنبيه",
+    "teaser1": "أهلاً 👋 محتاج مساعدة في المنيو الرقمي؟",
+    "teaser2": "اسألني عن الأسعار والخطط ✨",
+    "teaser3": "جاهزة أساعدك تبدأ بسرعة 🍽️"
+  },
   "chat": {
     "appTitle": "عرض واتساب",
     "attachmentDocument": "مستند",

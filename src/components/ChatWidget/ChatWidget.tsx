@@ -3,11 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
-import { FaWhatsapp } from "react-icons/fa";
-import { FiMessageCircle, FiSend, FiX } from "react-icons/fi";
-import { useLocale } from "next-intl";
+import { FiSend, FiX } from "react-icons/fi";
+import { useLocale, useTranslations } from "next-intl";
 import { useChatSession } from "@/hooks/useChatSession";
-import { ALLOWED_CONTACT } from "@/lib/lena/assistantConfig";
 import {
   sendChatMessage,
   type ChatMessage as ChatMessageType,
@@ -18,6 +16,10 @@ import LenaAvatar from "./LenaAvatar";
 import { getChatSuggestions } from "./suggestionEngine";
 import TypingIndicator from "./TypingIndicator";
 
+const TEASER_INTERVAL_MS = 10_000;
+const TEASER_VISIBLE_MS = 7_000;
+const TEASER_INITIAL_DELAY_MS = 5_000;
+
 const WELCOME_MESSAGE: ChatMessageType = {
   id: "welcome",
   role: "assistant",
@@ -27,7 +29,6 @@ const WELCOME_MESSAGE: ChatMessageType = {
 };
 
 export default function ChatWidget() {
-  const [pickerOpen, setPickerOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
@@ -39,12 +40,49 @@ export default function ChatWidget() {
   const isRTL = locale === "ar";
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const fabRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
+  const [teaserVisible, setTeaserVisible] = useState(false);
+  const [teaserIndex, setTeaserIndex] = useState(0);
+  const t = useTranslations("chatWidget");
+
+  const teaserMessages = [t("teaser1"), t("teaser2"), t("teaser3")];
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (open) {
+      setTeaserVisible(false);
+      return;
+    }
+
+    if (document.visibilityState === "hidden") return;
+
+    let hideTimer: ReturnType<typeof setTimeout>;
+    let intervalId: ReturnType<typeof setInterval>;
+
+    const showTeaser = () => {
+      if (document.visibilityState === "hidden") return;
+      setTeaserVisible(true);
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => {
+        setTeaserVisible(false);
+        setTeaserIndex((i) => (i + 1) % teaserMessages.length);
+      }, TEASER_VISIBLE_MS);
+    };
+
+    const initialTimer = setTimeout(() => {
+      showTeaser();
+      intervalId = setInterval(showTeaser, TEASER_INTERVAL_MS);
+    }, TEASER_INITIAL_DELAY_MS);
+
+    return () => {
+      clearTimeout(initialTimer);
+      clearTimeout(hideTimer);
+      clearInterval(intervalId);
+    };
+  }, [open, teaserMessages.length, locale]);
 
   useEffect(() => {
     if (open && !welcomeShown) {
@@ -52,19 +90,6 @@ export default function ChatWidget() {
       setWelcomeShown(true);
     }
   }, [open, welcomeShown]);
-
-  useEffect(() => {
-    if (!pickerOpen) return;
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (fabRef.current && !fabRef.current.contains(event.target as Node)) {
-        setPickerOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [pickerOpen]);
 
   const lastAssistantMessage = [...messages]
     .reverse()
@@ -96,17 +121,15 @@ export default function ChatWidget() {
   }, [open]);
 
   useEffect(() => {
-    if (!open && !pickerOpen) return;
+    if (!open) return;
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      if (open) setOpen(false);
-      setPickerOpen(false);
+      if (e.key === "Escape") setOpen(false);
     };
 
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [open, pickerOpen]);
+  }, [open]);
 
   const sendMessage = useCallback(
     async (text: string) => {
@@ -156,15 +179,6 @@ export default function ChatWidget() {
       e.preventDefault();
       handleSend();
     }
-  };
-
-  const openChat = () => {
-    setPickerOpen(false);
-    setOpen(true);
-  };
-
-  const handleFabClick = () => {
-    setPickerOpen((v) => !v);
   };
 
   const ui = (
@@ -290,70 +304,52 @@ export default function ChatWidget() {
         </>
       )}
 
-      {/* Contact FAB + orbital picker — hidden while chat is open */}
       {!open && (
-        <div
-          ref={fabRef}
-          className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-4 z-102 sm:bottom-6 sm:right-6"
-        >
-          <div
-            role={pickerOpen ? "menu" : undefined}
-            aria-label={pickerOpen ? "اختر طريقة التواصل" : undefined}
-            className="relative size-14 overflow-visible"
-          >
-            {pickerOpen && (
-              <>
-                <a
-                  role="menuitem"
-                  href={ALLOWED_CONTACT.whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="واتساب"
-                  onClick={() => setPickerOpen(false)}
-                  style={{ animationDelay: "0.05s" }}
-                  className="animate-contact-picker-item absolute bottom-[calc(100%+0.65rem)] right-1 flex size-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg shadow-green-600/30 transition-transform hover:scale-105 active:scale-95"
-                >
-                  <FaWhatsapp className="size-6" aria-hidden />
-                </a>
-                <button
-                  type="button"
-                  role="menuitem"
-                  aria-label="شات بوت"
-                  onClick={openChat}
-                  style={{ animationDelay: "0.1s" }}
-                  className="animate-contact-picker-item absolute bottom-1.5 right-[calc(100%+0.65rem)] size-12 overflow-hidden rounded-full border-2 border-white shadow-lg shadow-purple-500/30 ring-2 ring-accent-purple/40 transition-transform hover:scale-105 active:scale-95 dark:border-slate-700 dark:ring-purple-500/30"
-                >
-                  <Image
-                    src="/images/AiAvatar.png"
-                    alt=""
-                    width={48}
-                    height={48}
-                    className="size-full object-cover object-center"
-                  />
-                </button>
-              </>
-            )}
-
-            <button
-              type="button"
-              onClick={handleFabClick}
-              aria-label={pickerOpen ? "إغلاق القائمة" : "تواصل معنا"}
-              aria-expanded={pickerOpen}
-              className={`relative z-10 flex size-14 items-center justify-center rounded-full bg-linear-to-br from-accent-purple to-deep-indigo text-white shadow-lg transition-all duration-300 ease-out hover:scale-[1.07] hover:shadow-xl hover:shadow-purple-500/40 active:scale-[0.93] focus-visible:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-purple ${
-                pickerOpen
-                  ? "shadow-purple-500/45 ring-2 ring-white/30 dark:ring-purple-400/25"
-                  : "shadow-purple-500/30"
-              }`}
+        <div className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-4 z-102 size-14 overflow-visible sm:bottom-6 sm:right-6">
+          {teaserVisible && (
+            <div
+              role="status"
+              className="animate-contact-picker-in pointer-events-auto absolute bottom-[calc(100%+0.75rem)] right-0 w-[min(260px,calc(100vw-5.5rem))]"
             >
-              <span
-                className={`flex items-center justify-center transition-all duration-300 ease-out ${
-                  pickerOpen ? "rotate-90 scale-100" : "rotate-0 scale-100"
-                }`}
+              <button
+                type="button"
+                onClick={() => {
+                  setTeaserVisible(false);
+                  setOpen(true);
+                }}
+                className="w-full rounded-2xl rounded-br-sm border border-slate-200/90 bg-white px-3.5 py-3 text-start text-[13px] leading-snug font-medium text-slate-700 shadow-lg shadow-slate-900/10 transition-colors hover:bg-purple-50/80 dark:border-slate-700/80 dark:bg-[#161b22] dark:text-slate-200 dark:hover:bg-purple-500/10"
               >
-                {pickerOpen ? <FiX size={24} /> : <FiMessageCircle size={26} />}
-              </span>
-            </button>
-          </div>
+                {teaserMessages[teaserIndex]}
+              </button>
+              <button
+                type="button"
+                onClick={() => setTeaserVisible(false)}
+                aria-label={t("dismissTeaser")}
+                className="absolute -top-1.5 -left-1.5 flex size-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300"
+              >
+                <FiX size={12} />
+              </button>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            aria-label={t("openChat")}
+            className="relative size-14 overflow-hidden rounded-full border-2 border-white shadow-lg shadow-purple-500/30 ring-2 ring-accent-purple/40 transition-transform hover:scale-105 active:scale-95 dark:border-slate-700 dark:ring-purple-500/30"
+          >
+            <Image
+              src="/images/AiAvatar.png"
+              alt="لينا"
+              width={56}
+              height={56}
+              className="size-full object-cover object-center"
+            />
+            <span
+              aria-hidden
+              className="absolute -top-0.5 -right-0.5 size-3 rounded-full bg-accent-purple/90 ring-2 ring-white dark:ring-[#0d1117]"
+            />
+          </button>
         </div>
       )}
     </>
