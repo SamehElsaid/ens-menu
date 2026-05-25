@@ -2,10 +2,16 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-// import Image from "next/image";       
+import Image from "next/image";
 import { BsCheckCircle } from "react-icons/bs";
+import { HiOutlineSquares2X2 } from "react-icons/hi2";
 import { templates } from "@/modules/TemplateShow";
-import LoadImage from "../ImageLoad";
+import {
+  SectionBadge,
+  sectionDescriptionClassName,
+  sectionHeadingClassName,
+  sectionHighlightClassName,
+} from "@/components/HomePage/SectionBadge";
 
 export const TemplateShow = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -16,18 +22,21 @@ export const TemplateShow = () => {
   const activeTemplate = templates[activeTab];
 
   return (
-    <section className="py-24 bg-white dark:bg-[#0d1117] overflow-hidden">
+    <section className="py-16 bg-white dark:bg-[#0d1117] overflow-hidden">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-20">
-          <h2 className="text-4xl lg:text-5xl font-black text-slate-900 dark:text-white mb-6">
+        <div className="mb-16 flex flex-col items-center text-center">
+          <SectionBadge
+            icon={<HiOutlineSquares2X2 className="h-4 w-4" aria-hidden />}
+          >
+            {t("badge")}
+          </SectionBadge>
+          <h2 className={sectionHeadingClassName}>
             {t("choosePrefix")}
-            <span className="bg-linear-to-r from-purple-600 to-indigo-600 dark:from-purple-400 dark:to-indigo-400 bg-clip-text text-transparent">
+            <span className={sectionHighlightClassName}>
               {t("chooseHighlight")}
             </span>
           </h2>
-          <p className="text-lg text-slate-500 dark:text-slate-400 font-medium max-w-2xl mx-auto">
-            {t("subtitle")}
-          </p>
+          <p className={sectionDescriptionClassName}>{t("subtitle")}</p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-12 items-center">
@@ -52,7 +61,7 @@ export const TemplateShow = () => {
                 </div>
                 <div className="flex-1">
                   <h4
-                    className={`text-[17px]! font-black mb-1 ${activeTab === template.id
+                    className={`text-base! font-black mb-1 ${activeTab === template.id
                         ? "text-purple-600 dark:text-purple-400"
                         : "text-slate-800 dark:text-slate-200"
                       }`}
@@ -78,28 +87,30 @@ export const TemplateShow = () => {
                     className={`bg-white dark:bg-[#0d1117] p-6 rounded-[25px] border border-slate-100 dark:border-slate-800 shadow-sm inline-block max-w-full ${isRTL ? "text-right" : "text-left"
                       }`}
                   >
-                    <p className="text-[14px] text-slate-700 dark:text-slate-300 leading-relaxed font-bold">
+                    <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
                       {isRTL ? activeTemplate.textAr : activeTemplate.textEn}
                     </p>
                   </div>
                 </div>
 
-                <div className="relative group overflow-hidden rounded-[40px] shadow-2xl border-4 border-white dark:border-[#0d1117] aspect-video">
-
-                  <LoadImage
+                <div className="relative aspect-square overflow-hidden rounded-[40px] border-4 border-white shadow-2xl dark:border-[#0d1117] lg:aspect-video">
+                  <Image
                     src={activeTemplate.image}
                     alt={
                       isRTL ? activeTemplate.titleAr : activeTemplate.titleEn
                     }
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 66vw"
+                    className="object-cover object-center"
+                    priority={activeTab === 0}
                   />
-                
-                  <div className="absolute inset-0 bg-linear-to-t from-slate-900/60 to-transparent flex items-end p-10">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white">
-                        <BsCheckCircle size={24} />
+
+                  <div className="absolute inset-0 z-10 flex items-end bg-linear-to-t from-slate-900/60 to-transparent p-5 sm:p-8 lg:p-10">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md sm:h-12 sm:w-12">
+                        <BsCheckCircle className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden />
                       </div>
-                      <span className="text-white text-xl font-black">
+                      <span className="text-base font-black text-white sm:text-lg lg:text-xl">
                         {isRTL
                           ? activeTemplate.textAltAr
                           : activeTemplate.textAltEn}

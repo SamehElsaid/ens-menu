@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { FiChevronDown, FiHelpCircle } from "react-icons/fi";
+import {
+  sectionDescriptionClassName,
+  sectionHeadingClassName,
+} from "@/components/HomePage/SectionBadge";
 
 type FaqItem = { q: string; a: string };
 
@@ -17,7 +21,7 @@ const FaqApp = () => {
   if (!Array.isArray(items) || items.length === 0) return null;
 
   return (
-    <section className="relative overflow-hidden bg-white py-24 dark:bg-[#0d1117]">
+    <section className="relative overflow-hidden bg-white py-16 dark:bg-[#0d1117]">
       <div className="absolute top-1/2 left-0 h-64 w-64 -translate-x-1/2 rounded-full bg-purple-50 blur-[100px] dark:bg-purple-900/20" />
 
       <div className="container relative z-10 mx-auto max-w-4xl px-6">
@@ -26,12 +30,8 @@ const FaqApp = () => {
             <FiHelpCircle size={28} />
           </div>
 
-          <h2 className="mb-4 text-4xl font-black text-slate-900 dark:text-white lg:text-5xl">
-            {t("title")}
-          </h2>
-          <p className="text-base font-medium text-slate-500 dark:text-slate-400">
-            {t("subtitle")}
-          </p>
+          <h2 className={sectionHeadingClassName}>{t("title")}</h2>
+          <p className={sectionDescriptionClassName}>{t("subtitle")}</p>
         </div>
 
         <div className="overflow-hidden rounded-[50px] border border-slate-100 bg-white shadow-2xl shadow-slate-100/30 dark:border-slate-800 dark:bg-[#15203c] dark:shadow-slate-900/50">
@@ -56,7 +56,7 @@ const FaqApp = () => {
                   }`}
                 >
                   <h4
-                    className={`flex-1 text-[17px] font-bold transition-colors ${
+                    className={`flex-1 text-base font-black transition-colors ${
                       isOpen
                         ? "text-purple-700 dark:text-purple-400"
                         : "text-slate-800 dark:text-slate-200"

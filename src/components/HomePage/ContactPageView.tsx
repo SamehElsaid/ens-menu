@@ -13,6 +13,10 @@ import {
 import { FaWhatsapp } from "react-icons/fa";
 import { Link } from "@/i18n/navigation";
 import { getContactInfo, getSocialLinks } from "@/modules/Footer";
+import {
+  sectionDescriptionClassName,
+  sectionHeadingClassName,
+} from "@/components/HomePage/SectionBadge";
 import type { ContactInfo } from "@/types/types";
 
 const WHATSAPP_PRIMARY = "https://wa.me/201500800050";
@@ -166,13 +170,13 @@ export default function ContactPageView() {
                 {t("eyebrow")}
               </div>
 
-              <h1 className="mt-4 text-4xl font-black tracking-tight md:text-5xl">
+              <h1 className={`mt-4 ${sectionHeadingClassName}`}>
                 <span className="text-slate-900 dark:text-white">
                   {t("titleBefore")} {t("titleHighlight")}
                 </span>
               </h1>
 
-              <p className="mt-4 text-sm font-medium leading-relaxed text-slate-500 dark:text-slate-400 md:text-base">
+              <p className={`mt-4 ${sectionDescriptionClassName} text-start md:mx-0`}>
                 {t("description")}
               </p>
 

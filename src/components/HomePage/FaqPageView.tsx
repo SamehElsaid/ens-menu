@@ -5,6 +5,10 @@ import { FiArrowLeft, FiArrowRight, FiHelpCircle } from "react-icons/fi";
 import { Link } from "@/i18n/navigation";
 import FaqAccordion from "@/components/HomePage/FaqAccordion";
 import { FAQ_CONFIG } from "@/modules/FAQ";
+import {
+  sectionDescriptionClassName,
+  sectionHeadingClassName,
+} from "@/components/HomePage/SectionBadge";
 
 export default function FaqPageView() {
   const t = useTranslations("Landing.faq");
@@ -42,12 +46,8 @@ export default function FaqPageView() {
           <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-[35px] border border-purple-200 bg-purple-100 text-purple-600 shadow-2xl shadow-purple-100 dark:border-purple-500/30 dark:bg-purple-500/20 dark:text-purple-400 dark:shadow-purple-900/50">
             <FiHelpCircle size={FAQ_CONFIG.iconSize} />
           </div>
-          <h1 className="mb-4 text-4xl font-black text-slate-900 dark:text-white lg:text-5xl">
-            {t("title")}
-          </h1>
-          <p className="mx-auto max-w-2xl text-base font-medium text-slate-500 dark:text-slate-400">
-            {t("description")}
-          </p>
+          <h1 className={sectionHeadingClassName}>{t("title")}</h1>
+          <p className={sectionDescriptionClassName}>{t("description")}</p>
         </div>
 
         <div className="mx-auto mt-12">

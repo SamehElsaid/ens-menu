@@ -194,7 +194,7 @@ function UserDropDown() {
         >
           <div className="flex items-center gap-3 border-b border-purple-100 dark:border-purple-500/30 px-4 py-3">
             <div className="relative">
-              <span className="flex h-12 w-12 overflow-hidden items-center justify-center rounded-full bg-purple-100 dark:bg-purple-500/20 text-base font-bold text-purple-600 dark:text-purple-400">
+              <span className="flex h-12 w-12 overflow-hidden items-center justify-center rounded-full bg-purple-100 dark:bg-purple-500/20 text-base font-black text-purple-600 dark:text-purple-400">
                 {profile.data?.user?.profileImage ? (
                   <LoadImage
                     src={profile.data?.user?.profileImage as string}

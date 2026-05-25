@@ -13,6 +13,10 @@ import {
   FiFileText,
 } from "react-icons/fi";
 import LoadImage from "../ImageLoad";
+import {
+  sectionDescriptionClassName,
+  sectionHeadingClassName,
+} from "@/components/HomePage/SectionBadge";
 
 const icons = [
   FiPlusCircle,
@@ -67,12 +71,8 @@ const FeaturesApp = () => {
           <span className="inline-block text-violet-600 dark:text-violet-400 font-bold text-sm tracking-widest uppercase mb-3">
             {tMobile("whyOurApp")}
           </span>
-          <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-4">
-            {t("title")}
-          </h2>
-          <p className="text-slate-500 dark:text-slate-400 text-lg max-w-2xl mx-auto">
-            {t("subtitle")}
-          </p>
+          <h2 className={sectionHeadingClassName}>{t("title")}</h2>
+          <p className={sectionDescriptionClassName}>{t("subtitle")}</p>
         </div>
 
         <div

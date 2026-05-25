@@ -29,7 +29,7 @@ const FAQItem: React.FC<FAQItemProps> = ({
         } ${isRTL ? "text-right" : "text-left"} group focus:outline-none`}
       >
         <h4
-          className={`flex-1 text-[17px] font-bold transition-colors ${
+          className={`flex-1 text-base font-black transition-colors ${
             isOpen
               ? "text-purple-700 dark:text-purple-400"
               : "text-slate-800 dark:text-slate-200"
@@ -55,7 +55,7 @@ const FAQItem: React.FC<FAQItemProps> = ({
         }`}
       >
         <div
-          className={`px-6 pb-8 text-base font-medium leading-relaxed text-slate-500 dark:text-slate-400 ${
+          className={`px-6 pb-8 text-sm font-medium leading-relaxed text-slate-500 dark:text-slate-400 ${
             isRTL ? "pr-16" : "pl-16"
           }`}
         >

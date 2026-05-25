@@ -1,40 +1,62 @@
-import { IoFlashSharp } from "react-icons/io5";
-import { HiOutlineChartBar } from "react-icons/hi";
-import { MdOutlineSmartphone } from "react-icons/md";
-import { MdOutlineShield } from "react-icons/md";
-import { BiLayer } from "react-icons/bi";
-import { FiExternalLink } from "react-icons/fi";
+"use client";
+
+import { 
+  HiOutlineClock,          
+  HiOutlineNoSymbol,       
+  HiOutlineBolt,         
+  HiOutlineBanknotes,     
+  HiOutlineArrowPath,  
+  HiOutlineChartBar,     
+  HiOutlinePaintBrush,     
+  HiOutlineBell,           
+  HiOutlineGlobeAlt,       
+} from "react-icons/hi2";
 import { Feature } from "@/types/types";
 
 export const features: Feature[] = [
   {
+    id: 6,
+    icon: HiOutlineClock,
+    translationKey: "saveTime",
+  },
+  {
+    id: 7,
+    icon: HiOutlineNoSymbol, 
+    translationKey: "saveCost",
+  },
+  {
+    id: 8,
+    icon: HiOutlineBolt, 
+    translationKey: "quickMenu",
+  },
+  {
     id: 0,
-    icon: IoFlashSharp,
-    translationKey: "0",
+    icon: HiOutlineBanknotes, 
+    translationKey: "noCommission",
   },
   {
     id: 1,
-    icon: HiOutlineChartBar,
-    translationKey: "1",
+    icon: HiOutlineArrowPath, 
+    translationKey: "instantUpdate",
   },
   {
     id: 2,
-    icon: MdOutlineSmartphone,
-    translationKey: "2",
+    icon: HiOutlineChartBar,
+    translationKey: "analytics",
   },
   {
     id: 3,
-    icon: MdOutlineShield,
-    translationKey: "3",
+    icon: HiOutlinePaintBrush, 
+    translationKey: "customIdentity",
   },
   {
     id: 4,
-    icon: BiLayer,
-    translationKey: "4",
+    icon: HiOutlineBell,
+    translationKey: "staffApp",
   },
   {
     id: 5,
-    icon: FiExternalLink,
-    translationKey: "5",
+    icon: HiOutlineGlobeAlt, 
+    translationKey: "customDomain",
   },
 ];

@@ -103,7 +103,7 @@ export default function PricingSection() {
   );
 
   return (
-    <section id="pricing" className="py-24 bg-slate-50 dark:bg-[#0d1117]">
+    <section id="pricing" className="py-16 bg-slate-50 dark:bg-[#0d1117]">
       <div className="container mx-auto px-6">
         <div
           className={`flex flex-col md:flex-row justify-between items-end mb-16 gap-6 ${
@@ -118,10 +118,10 @@ export default function PricingSection() {
           <div
             className={`max-w-2xl ${isRTL ? "text-right md:text-right" : "text-left md:text-left"}`}
           >
-            <h2 className="text-4xl font-extrabold text-slate-900 dark:text-white mb-6">
+            <h2 className="mb-6 text-3xl font-extrabold text-slate-900 lg:text-5xl dark:text-white">
               {t("title")}
             </h2>
-            <p className="text-md text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+            <p className="max-w-2xl text-base font-medium leading-relaxed text-slate-600 md:text-lg dark:text-slate-400">
               {t("description")}
             </p>
           </div>

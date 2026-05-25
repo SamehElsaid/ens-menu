@@ -2,6 +2,10 @@
 
 import { useTranslations } from "next-intl";
 import { FiBell, FiShoppingCart, FiCoffee, FiBarChart2 } from "react-icons/fi";
+import {
+  sectionDescriptionClassName,
+  sectionHeadingClassName,
+} from "@/components/HomePage/SectionBadge";
 
 const icons = [FiBell, FiShoppingCart, FiCoffee, FiBarChart2] as const;
 
@@ -20,12 +24,8 @@ const WorkflowApp = () => {
       <div className="container mx-auto px-6 relative z-10 max-w-6xl">
         {/* Header */}
         <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-4">
-            {t("title")}
-          </h2>
-          <p className="text-slate-500 dark:text-slate-400 text-lg">
-            {t("subtitle")}
-          </p>
+          <h2 className={sectionHeadingClassName}>{t("title")}</h2>
+          <p className={sectionDescriptionClassName}>{t("subtitle")}</p>
         </div>
 
         {/* Flow */}

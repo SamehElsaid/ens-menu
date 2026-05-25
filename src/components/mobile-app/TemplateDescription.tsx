@@ -142,26 +142,26 @@ const TemplateDescription = () => {
 
   return (
     <section
-      className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-white py-8 md:py-12"
+      className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-white py-8 dark:from-[#0d1117] dark:to-[#0d1117] md:py-12"
       dir={isRTL ? "rtl" : "ltr"}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-200/80 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-200/80 to-transparent dark:via-violet-500/30" />
 
       <div className="relative mx-auto w-full max-w-[min(100%,1536px)] px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8 border-b border-gray-100 pb-8 text-center md:mb-10">
-          <span className="mb-3 inline-block rounded-full bg-violet-100 px-4 py-1.5 text-sm font-semibold text-violet-700 shadow-inner">
+        <div className="mb-8 border-b border-gray-100 pb-8 text-center dark:border-slate-800 md:mb-10">
+          <span className="mb-3 inline-block rounded-full bg-violet-100 px-4 py-1.5 text-sm font-semibold text-violet-700 shadow-inner dark:border dark:border-violet-500/20 dark:bg-violet-500/10 dark:text-violet-400">
             {t("badge")}
           </span>
-          <h2 className="text-3xl font-black text-gray-900 md:text-4xl">
+          <h2 className="mb-4 text-3xl font-extrabold text-slate-900 lg:text-5xl dark:text-white">
             {t("title")}{" "}
-            <span className="bg-gradient-to-r from-violet-600 to-purple-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent dark:from-purple-400 dark:to-indigo-400">
               {t("titleHighlight")}
             </span>
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-gray-600 md:text-lg">
+          <p className="mx-auto max-w-2xl text-base font-medium leading-relaxed text-slate-600 md:text-lg dark:text-slate-400">
             {t("description")}
           </p>
         </div>
@@ -173,7 +173,7 @@ const TemplateDescription = () => {
             type="button"
             onClick={() => go(-1)}
             disabled={last < 1}
-            className="absolute start-2 top-1/2 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-full border border-violet-200/90 bg-white text-violet-700 shadow-md transition hover:border-violet-300 hover:bg-violet-50 disabled:opacity-35 md:size-11"
+            className="absolute start-2 top-1/2 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-full border border-violet-200/90 bg-white text-violet-700 shadow-md transition hover:border-violet-300 hover:bg-violet-50 disabled:opacity-35 dark:border-slate-700 dark:bg-slate-800 dark:text-violet-400 dark:hover:border-violet-500/40 dark:hover:bg-slate-700 md:size-11"
           >
             <FaChevronRight className="size-5 md:size-6" />
           </button>
@@ -181,7 +181,7 @@ const TemplateDescription = () => {
             type="button"
             onClick={() => go(1)}
             disabled={last < 1}
-            className="absolute end-2 top-1/2 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-full border border-violet-200/90 bg-white text-violet-700 shadow-md transition hover:border-violet-300 hover:bg-violet-50 disabled:opacity-35 md:size-11"
+            className="absolute end-2 top-1/2 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-full border border-violet-200/90 bg-white text-violet-700 shadow-md transition hover:border-violet-300 hover:bg-violet-50 disabled:opacity-35 dark:border-slate-700 dark:bg-slate-800 dark:text-violet-400 dark:hover:border-violet-500/40 dark:hover:bg-slate-700 md:size-11"
           >
             <FaChevronLeft className="size-5 md:size-6" />
           </button>
@@ -201,7 +201,7 @@ const TemplateDescription = () => {
               >
                 <div
                   dir={isRTL ? "rtl" : "ltr"}
-                  className="flex h-full min-w-0 flex-col rounded-[1.75rem] border border-slate-200/80 bg-white p-4 shadow-sm transition-all duration-300 hover:border-violet-200 hover:shadow-lg"
+                  className="flex h-full min-w-0 flex-col rounded-[1.75rem] border border-slate-200/80 bg-white p-4 shadow-sm transition-all duration-300 hover:border-violet-200 hover:shadow-lg dark:border-slate-700/80 dark:bg-slate-800/80 dark:hover:border-violet-500/40 dark:hover:shadow-violet-500/10"
                 >
                   {/* iPhone Frame with Dynamic Island (iPhone 17 Pro Style) */}
                   <div className="relative mx-auto mb-5 w-full max-w-[220px]">
@@ -213,7 +213,7 @@ const TemplateDescription = () => {
                       </div>
 
                       {/* Screen Image */}
-                      <div className="absolute inset-0 bg-slate-100">
+                      <div className="absolute inset-0 bg-slate-100 dark:bg-slate-900">
                         <LoadImage
                           src={`/images/showcase/photo-${index + 1}.png`}
                           alt={screen.title}
@@ -228,11 +228,11 @@ const TemplateDescription = () => {
                   <div className="flex min-w-0 flex-1 flex-col px-1">
                     <div className="mb-2 flex min-w-0 items-start gap-2">
                       {stepBadge(index)}
-                      <h3 className="text-lg font-bold text-slate-900">
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                         {screen.title}
                       </h3>
                     </div>
-                    <p className="text-sm text-slate-600">{screen.desc}</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">{screen.desc}</p>
                   </div>
                 </div>
               </div>

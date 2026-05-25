@@ -3,6 +3,13 @@
 import { useTranslations, useLocale } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MdSmartphone, MdTabletMac } from "react-icons/md";
+import { HiOutlineDevicePhoneMobile } from "react-icons/hi2";
+import {
+  SectionBadge,
+  sectionDescriptionClassName,
+  sectionHeadingClassName,
+  sectionHighlightClassName,
+} from "@/components/HomePage/SectionBadge";
 
 const TAB_KEYS = [
   "createOrder",
@@ -157,27 +164,24 @@ export default function PhoneVideoSection() {
   return (
     <section
       id="phone-demo"
-      className="relative overflow-hidden bg-slate-50 py-24 dark:bg-[#0f172a]"
+      className="relative overflow-hidden bg-slate-50 py-16 dark:bg-[#0f172a]"
       aria-labelledby="phone-demo-heading"
     >
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-purple-500/5 via-transparent to-transparent dark:from-purple-500/10" />
 
       <div className="container relative z-10 mx-auto px-6">
-        <div className={`mb-16 ${isRTL ? "text-right" : "text-left"}`}>
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-purple-200/80 bg-purple-50 px-4 py-1.5 text-sm font-bold text-purple-700 dark:border-purple-500/30 dark:bg-purple-500/10 dark:text-purple-300">
-            {t("badge")}
-          </div>
-          <h2
-            id="phone-demo-heading"
-            className="mb-4 text-3xl font-extrabold text-slate-900 lg:text-5xl dark:text-white"
+        <div
+          className={`mb-16 flex flex-col items-center text-center md:items-center md:text-center`}
+        >
+          <SectionBadge
+            icon={<HiOutlineDevicePhoneMobile className="h-4 w-4" aria-hidden />}
           >
-            <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent dark:from-purple-400 dark:to-indigo-400">
-              {t("title")}
-            </span>
+            {t("badge")}
+          </SectionBadge>
+          <h2 id="phone-demo-heading" className={sectionHeadingClassName}>
+            <span className={sectionHighlightClassName}>{t("title")}</span>
           </h2>
-          <p className="max-w-2xl text-base font-medium leading-relaxed text-slate-600 md:text-lg dark:text-slate-400">
-            {t("description")}
-          </p>
+          <p className={sectionDescriptionClassName}>{t("description")}</p>
         </div>
 
         <div
@@ -219,7 +223,7 @@ export default function PhoneVideoSection() {
 
                   <div className="flex flex-col gap-1.5">
                     <span
-                      className={`text-base font-bold ${
+                      className={`text-base font-black ${
                         selected
                           ? "text-purple-900 dark:text-white"
                           : "text-slate-600 dark:text-slate-400"

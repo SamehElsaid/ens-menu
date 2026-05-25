@@ -36,14 +36,14 @@ const AppLandingHero = () => {
               <span className="tracking-wide">{t("badge")}</span>
             </div>
 
-            <h1 className="text-4xl md:text-5xl font-black leading-[1.1] mb-6 text-slate-900 dark:text-white tracking-tight">
+            <h1 className="mb-6 text-3xl font-extrabold leading-[1.1] tracking-tight text-slate-900 lg:text-5xl dark:text-white">
               {t("titleStart")}{" "}
-              <span className="text-transparent bg-clip-text bg-linear-to-r from-violet-600 to-indigo-500">
+              <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent dark:from-purple-400 dark:to-indigo-400">
                 {t("titleHighlight")}
               </span>
             </h1>
 
-            <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+            <p className="mb-10 max-w-2xl text-base font-medium leading-relaxed text-slate-600 md:text-lg dark:text-slate-400 mx-auto lg:mx-0">
               {t("description")}
             </p>
 

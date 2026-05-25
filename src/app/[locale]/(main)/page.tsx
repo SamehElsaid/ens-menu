@@ -6,6 +6,7 @@ import { FaWhatsapp } from "react-icons/fa";
 import HeroContent from "@/components/HomePage/HeroContent";
 import HeroPhoneDesktopPortal from "@/components/HomePage/HeroPhoneDesktopPortal";
 import SectionSkeleton from "@/components/HomePage/SectionSkeleton";
+import PricingPlanCardsSection from "@/components/Pricing/PricingPlanCardsSection";
 
 const dynamicSection = (factory: () => Promise<unknown>, height: string) =>
   dynamic(() => factory() as Promise<{ default: React.ComponentType }>, {
@@ -65,9 +66,10 @@ async function Page({ params }: Props) {
     <>
       <HeroContent locale={locale} />
       <TemplateShow />
+      <HowItWorks />
       <PhoneVideoSection />
       <Features />
-      <HowItWorks />
+      <PricingPlanCardsSection />
       <FAQ />
       <FooterSection />
       {/* <HeroPhoneDesktopPortal /> */}

@@ -4,7 +4,7 @@
     "coreKeywords": "free, electronic menu, QR code",
     "home": {
       "title": "ENSmenu | Free Electronic Menu & QR Code for Restaurants",
-      "description": "Create a free electronic menu with QR code for your restaurant or cafe. Mobile-friendly digital menus your customers will love.",
+      "description": "Create a free electronic menu with QR code for your restaurant or cafe. Easy-to-use digital menus optimized for mobile.",
       "keywords": "digital menu, restaurant menu, cafe menu, QR code menu, online menu, food menu, table ordering, contactless menu, menu builder, ENSmenu"
     },
     "mobileAppPage": {
@@ -191,7 +191,7 @@
     "centerDescription": "Join our network of centers",
     "firstName": "First Name",
     "lastName": "Last Name",
-    "phone": "Phone Number",
+    "phone": "Mobile number",
     "email": "Email",
     "password": "Password",
     "confirmPassword": "Confirm Password",
@@ -221,9 +221,9 @@
     "firstNameMinLength": "First name must be at least 2 characters",
     "lastNameRequired": "Last name is required",
     "lastNameMinLength": "Last name must be at least 2 characters",
-    "phoneRequired": "Phone number is required",
-    "phoneInvalid": "Please enter a valid phone number",
-    "phoneAlreadyInUse": "This phone number is already registered",
+    "phoneRequired": "Mobile number is required",
+    "phoneInvalid": "Please enter a valid mobile number",
+    "phoneAlreadyInUse": "This mobile number is already registered",
     "emailRequired": "Email is required",
     "parentDescription": "Create your account to get started",
     "emailInvalid": "Please enter a valid email address",
@@ -638,16 +638,16 @@
     "products50": "50 products",
     "products200": "200 products per menu",
     "ads": "Advertisements",
-    "noModifications": "No modifications",
+    "noModifications": "Fixed template — colors cannot be customized",
     "controlAds": "Control over advertisements",
-    "fullModifications": "Full modifications",
+    "fullModifications": "Open customization for design and colors",
     "contactForDetails": "Contact us for more details",
     "youAreOnFreePlan": "You are on the Free Plan",
     "upgradePlan": "Upgrade Plan",
     "downgradePlan": "Downgrade",
     "paymentNote": "Pro is billed annually only (no monthly plan). Payment is processed securely via EasyKash.",
     "proYearlyOnlyNote": "Pro is available as an annual subscription only — there is no monthly plan.",
-    "payProYearlyError": "Could not start payment. If no details appear in the toast, check your name and phone in your profile and try again.",
+    "payProYearlyError": "Could not start payment. If no details appear in the toast, check your name and mobile number in your profile and try again.",
     "notEntered": "Not entered",
     "emailVerification": "Email Verification",
     "accountStatus": "Account Status",
@@ -934,7 +934,7 @@
     },
     "messages": {
       "title": "Messages",
-      "description": "Communicate with parent/specialist",
+      "description": "Contact technical support",
       "noMessages": "No messages yet",
       "parent": "Parent",
       "specialist": "Specialist",
@@ -965,7 +965,7 @@
     "linaAlt": "Lina - ENSmenu assistant",
     "title1": "Transform your restaurant into a",
     "title2": "Smart Electronic Menu",
-    "description": "An interactive digital menu with modern design, enables your customers to browse the food menu easily and clearly by scanning a QR code only",
+    "description": "Create an electronic menu in seconds, save on costly printed menus, and receive orders faster—guests scan your QR and orders go straight to your dashboard.",
     "cta": "Start Now for Free",
     "watchDemo": "Watch Demo",
     "androidTitle": "Smoother Experience via Android App",
@@ -984,10 +984,10 @@
   },
   "phoneVideoSection": {
     "badge": "Staff app",
-    "devicePhone": "Phone",
+    "devicePhone": "Mobile",
     "deviceTablet": "Tablet",
     "deviceToggleAria": "Preview device frame",
-    "title": "Handle menu orders on your phone",
+    "title": "Manage orders from the menu on mobile",
     "description": "A staff-facing app for restaurants and cafés to receive customer orders coming from the digital menu, and track each step from intake to handoff in one clear screen.",
     "tabItems": {
       "createOrder": {
@@ -1040,6 +1040,7 @@
     "FaqApp": {
       "title": "Frequently Asked Questions",
       "subtitle": "Everything you need to know before using the app",
+      "badge":"All your questions here",
       "mostAsked": "Most Asked",
       "items": [
         {
@@ -1125,59 +1126,118 @@
       "button": "Download the App for Free"
     },
     "features": {
-      "title": "Why Choose Smart Menu?",
-      "description": "We provide everything you need to create a professional digital menu for your restaurant or cafe",
+      "badge": "All-in-one tools for your restaurant",
+      "title": "Everything You Need to Run Your Restaurant ",
+      "subtitle": "in One Place",
+      "description": "Save time on every order, cut the cost of old printed menus, and launch your electronic menu in seconds—tools that make service faster and running your restaurant clearer.",
       "items": {
-        "0": {
-          "title": "Lightning Fast",
-          "description": "Create a professional digital menu for your restaurant in minutes, with instant updates anytime"
+        "saveTime": {
+          "title": "Faster Orders, Less Waiting",
+          "description": "Customers browse and order instantly via QR—no waiting for paper menus or staff to write down every item by hand."
         },
-        "1": {
-          "title": "Advanced Analytics",
-          "description": "Track your products performance and see the most ordered items to improve your decisions and increase sales"
+        "saveCost": {
+          "title": "Lower Cost Than Printed Menus",
+          "description": "Say goodbye to costly reprints every time prices change. One digital menu updates everywhere—instantly."
         },
-        "2": {
-          "title": "Mobile Responsive",
-          "description": "Responsive design that works perfectly on all devices - phones, tablets, and computers"
+        "quickMenu": {
+          "title": "Electronic menu ready in seconds",
+          "description": "Sign up, add your dishes, and publish—a professional digital menu goes live in minutes, not the days it takes with traditional printing."
         },
-        "3": {
-          "title": "Secure & Protected",
-          "description": "Advanced data protection with automatic backups and world-class security standards"
-        },
-        "4": {
+        "noCommission": {
           "title": "Multiple Designs",
-          "description": "Choose from a wide range of ready-made templates or customize the design to match your restaurant identity"
+          "description": "Choose from a wide range of ready-made templates or customize the design to match your restaurant identity."
         },
-        "5": {
-          "title": "Multi-language Support",
-          "description": "Offer menus in multiple languages to customers from different nationalities to expand your customer base"
+        "instantUpdate": {
+          "title": "Instant One-Tap Updates",
+          "description": "Change prices, add new dishes, or hide sold-out items instantly—from anywhere on your mobile."
+        },
+        "analytics": {
+          "title": "Smart Analytics & Reports",
+          "description": "Understand your customers' behavior precisely; see best-selling dishes and peak hours to grow your profits."
+        },
+        "customIdentity": {
+          "title": "Custom Brand Identity",
+          "description": "Set colors, add your logo, and make your menu fully reflect your brand's unique character."
+        },
+        "staffApp": {
+          "title": "Staff Dashboard & App",
+          "description": "Cashiers and waitstaff get sound alerts and instant notifications when a table orders or calls the waiter."
+        },
+        "customDomain": {
+          "title": "Custom Domain & Multiple Menus",
+          "description": "Link your menu with a custom URL and create multiple menus with one account (Pro upgrade)."
         }
       }
     },
     "howItWorks": {
-      "title": "Three Simple Steps to Get Started",
-      "description": "We make it easy for you to transition from your old paper menu to the digital era in minutes.",
+      "badge": "Easy to use · No technical skills needed",
+      "title": "Digital menu ready",
+      "subtitle": " in 3 simple steps",
+      "description": "No technical skills needed—create your electronic menu in seconds, save on paper printing costs, and start receiving faster orders in minutes.",
       "steps": {
         "0": {
           "number": "01",
-          "title": "Register Now",
-          "description": "Create your account for free in just a few simple steps or sign in directly and quickly using a Google account."
+          "title": "Create Your Account & Menu",
+          "description": "Sign up free and launch your electronic menu in seconds—add categories, dishes, photos, and prices without waiting for design or printing."
         },
         "1": {
           "number": "02",
-          "title": "Customize Your Design",
-          "description": "Choose the colors, logo, and QR style and menu that matches your restaurant's brand identity."
+          "title": "Print Your Custom QR Code",
+          "description": "Download your QR code and print it on tables, or share it directly on social media."
         },
         "2": {
           "number": "03",
-          "title": "Publish the QR Code",
-          "description": "Upload the QR code in high quality and print it on the tables or at the entrance of your restaurant."
+          "title": "Receive Orders Instantly",
+          "description": "As soon as customers scan the QR code, orders reach your dashboard in seconds—faster service, less staff back-and-forth, and happier tables."
+        }
+      }
+    },
+    "scanBrowseEnjoy": {
+      "badge": "Guest experience · QR to order",
+      "title": "Scan, Browse,",
+      "subtitle": " & Enjoy",
+      "description": "A fully interactive digital journey—your guests scan, explore your menu, and order in seconds.",
+      "steps": {
+        "scan": "Scan",
+        "browse": "Browse",
+        "enjoy": "Enjoy"
+      },
+      "controls": {
+        "prevAria": "Previous screen",
+        "nextAria": "Next screen",
+        "goToStep": "Go to {step}"
+      },
+      "slides": {
+        "scan": {
+          "title": "Scan the QR",
+          "description": "Guests open your digital menu instantly—no app download needed.",
+          "scanning": "Scanning menu…"
+        },
+        "browse": {
+          "title": "Browse categories",
+          "description": "Explore dishes with photos and prices in a clear experience on mobile.",
+          "selectMenu": "Select a menu",
+          "appetizers": "Appetizers",
+          "drinks": "Drinks"
+        },
+        "enjoy": {
+          "title": "Order & enjoy",
+          "description": "Add items to the cart and send orders straight to your dashboard.",
+          "dishName": "Avocado Toast",
+          "dishDescription": "Toasted sourdough with smashed avocado, lime juice, and a touch of chili.",
+          "price": "$37.00",
+          "quantity": "3 of 3",
+          "addToOrder": "Add to order",
+          "restaurantName": "Your restaurant",
+          "itemName": "Summer Salad",
+          "itemPrice": "$12.00"
         }
       }
     },
     "faq": {
       "title": "Frequently Asked Questions",
-      "description": "Everything you need to know about ENSmenu in one place.",
+      "description": "Everything you need to know about ENS Menu in one place.",
+      "badge":"All your questions here",
       "items": [
         {
           "question": "Can I create a QR menu for free?",
@@ -1261,8 +1321,10 @@
       ]
     },
     "pricing": {
+      "badge": "Plans & pricing",
       "title": "Choose your plan",
       "description": "Start free and upgrade when you need to. A custom plan for advanced requirements.",
+      "comparePlansCta": "See full comparison table",
       "planFree": "Free",
       "planPro": "Pro",
       "planCustom": "Custom",
@@ -1336,6 +1398,7 @@
       "startNow": "Start Now"
     },
     "templateShow": {
+      "badge": "Ready-made professional templates",
       "choosePrefix": "Choose the ",
       "chooseHighlight": "Right Template",
       "subtitle": "A variety of professional templates designed specifically to suit all types of restaurants and cafes"
@@ -1394,7 +1457,7 @@
     "no": "No",
     "ctaRegister": "Create free account",
     "ctaUpgrade": "Get Pro",
-    "ctaContact": "Talk to sales (WhatsApp)",
+    "ctaContact": "Contact technical support (WhatsApp)",
     "notesTitle": "Good to know",
     "noteProAnnual": "Pro is billed once per year. There is no monthly Pro subscription in the product today.",
     "noteLimits": "Menu and product limits come from your active plan in the dashboard after you sign up.",
@@ -1407,9 +1470,9 @@
     "faq3q": "Do you offer refunds?",
     "faq3a": "Refund rules depend on how you subscribed. Check the terms at purchase time or ask sales on WhatsApp.",
     "staticFreeFeature1": "50 products",
-    "staticFreeFeature2": "No modifications",
+    "staticFreeFeature2": "Fixed template — colors cannot be customized",
     "staticProFeature1": "200 products per menu",
-    "staticProFeature2": "Includes modifications",
+    "staticProFeature2": "Open customization for design and colors",
     "staticProFeature3": "Ad controls"
   },
   "Menus": {
@@ -1495,7 +1558,7 @@
         "currencyRequired": "Currency is required"
       },
       "nameEnPlaceholder": "e.g., My Restaurant Menu",
-      "descriptionEnPlaceholder": "Describe your menu in English...",
+      "descriptionEnPlaceholder": "Describe your electronic menu in English...",
       "slugPlaceholder": "my-restaurant-menu"
     },
     "deletePermanentInstruction": "To permanently delete this menu, type its name exactly as shown below, then confirm deletion.",
@@ -2451,7 +2514,7 @@
     "deleteThisMenu": "Delete this menu",
     "saveChanges": "Save changes",
     "namePlaceholder": "My Restaurant Menu",
-    "descriptionPlaceholder": "Describe your menu in English..."
+    "descriptionPlaceholder": "Describe your electronic menu in English..."
   },
   "menuMediaSettings": {
     "noMenuSelected": "No menu selected.",

@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import HeroBackground from "@/components/HomePage/HeroBackground";
 import HeroLinaImage from "@/components/HomePage/HeroLinaImage";
+import { SectionBadge } from "@/components/HomePage/SectionBadge";
 
 type HeroContentProps = {
   locale: string;
@@ -20,10 +21,12 @@ export default async function HeroContent({ locale }: HeroContentProps) {
       <div className="container relative z-10 mx-auto px-6">
         <div className="mx-auto flex-col-reverse lg:flex-row flex w-full  justify-between  items-center text-center">
           <div>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-purple-100 bg-purple-50 px-5 py-2 text-sm font-bold text-purple-700 shadow-sm dark:border-purple-500/30 dark:bg-purple-500/20 dark:text-purple-400">
-              <span>{t("badge")}</span>
-              <span>🚀</span>
-            </div>
+            <SectionBadge
+              className="mb-6 px-5 py-2 text-sm shadow-sm"
+              icon={<span aria-hidden>🚀</span>}
+            >
+              {t("badge")}
+            </SectionBadge>
 
             <h1 className="mb-6 text-2xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-3xl lg:text-4xl dark:text-white">
               {t("title1")}{" "}
@@ -32,7 +35,7 @@ export default async function HeroContent({ locale }: HeroContentProps) {
               </span>
             </h1>
 
-            <p className="mb-8 max-w-xl text-base leading-relaxed font-medium text-slate-600 sm:text-lg dark:text-slate-300">
+            <p className="mb-8 max-w-xl text-base font-medium leading-relaxed text-slate-600 md:text-lg dark:text-slate-300">
               {t("description")}
             </p>
 

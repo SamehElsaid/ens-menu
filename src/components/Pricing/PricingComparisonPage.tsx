@@ -1,11 +1,22 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { translatePlanFeaturesWithMenuLimit } from "@/lib/planFeatureI18n";
 import { BsQrCode } from "react-icons/bs";
+import {
+  sectionDescriptionClassName,
+  sectionHeadingClassName,
+} from "@/components/HomePage/SectionBadge";
+import PricingPlanCards from "./PricingPlanCards";
+import {
+  STATIC_FREE_PLAN,
+  STATIC_PRO_PLAN,
+  STATIC_PRO_YEARLY_USD,
+  WHATSAPP_URL,
+} from "./pricingStaticPlans";
+import { usePricingPlanCards } from "./usePricingPlanCards";
 import {
   HiCheck,
   HiOutlineChat,
@@ -16,37 +27,12 @@ import {
   HiInformationCircle,
 } from "react-icons/hi";
 
-const WHATSAPP_URL = "https://wa.me/201500800050";
-const STATIC_PRO_YEARLY_USD = 100;
 const FAQ_IDS = ["faq1", "faq2", "faq3"] as const;
-
-const STATIC_FREE_PLAN = {
-  maxMenus: 1,
-  maxProductsPerMenu: 50,
-  allowCustomDomain: false,
-  hasAds: false,
-} as const;
-
-const STATIC_PRO_PLAN = {
-  maxMenus: 4,
-  maxProductsPerMenu: 200,
-  allowCustomDomain: true,
-  hasAds: true,
-} as const;
 
 const CUSTOM_TABLE_FEATURE_KEYS = [
   "onlineOrdering",
   "deliveryMaps",
   "newLanguages",
-] as const;
-
-const CUSTOM_CARD_FEATURE_KEYS = [
-  "waiterRequest",
-  "billRequest",
-  "onlineOrdering",
-  "deliveryMaps",
-  "newLanguages",
-  "onlinePayment",
 ] as const;
 
 type CellVal = boolean | string | number;
@@ -161,10 +147,10 @@ function PricingFaqItem({
 
   return (
     <div
-      className={`overflow-hidden rounded-2xl border transition-colors sm:rounded-2xl ${
+      className={`group/faq overflow-hidden rounded-2xl border transition-colors duration-200 sm:rounded-2xl ${
         isOpen
-          ? "border-violet-200/90 bg-violet-50/40 dark:border-violet-500/25 dark:bg-violet-500/08"
-          : "border-slate-200/90 bg-white hover:border-violet-200/70 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-violet-500/20"
+          ? "border-violet-200/90 bg-violet-50/40 dark:border-violet-500/30 dark:bg-violet-500/10"
+          : "border-slate-200/90 bg-white hover:border-violet-200/70 hover:bg-slate-50/90 dark:border-slate-700/80 dark:bg-slate-900/70 dark:hover:border-violet-500/35 dark:hover:bg-slate-800/85"
       }`}
     >
       <button
@@ -173,24 +159,24 @@ function PricingFaqItem({
         aria-expanded={isOpen}
         aria-controls={`pricing-faq-panel-${id}`}
         onClick={onToggle}
-        className={`flex w-full items-center justify-between gap-3 px-5 py-4 text-start sm:px-6 sm:py-5 ${
+        className={`flex w-full items-center justify-between gap-3 px-5 py-4 text-start transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f8f9fc] dark:focus-visible:ring-violet-400/50 dark:focus-visible:ring-offset-[#070a0f] sm:px-6 sm:py-5 ${
           isRTL ? "flex-row-reverse text-end" : ""
         }`}
       >
         <span
-          className={`flex-1 text-base font-bold sm:text-lg ${
+          className={`flex-1 text-base font-bold transition-colors sm:text-lg ${
             isOpen
               ? "text-violet-700 dark:text-violet-300"
-              : "text-slate-900 dark:text-white"
+              : "text-slate-900 group-hover/faq:text-violet-700 dark:text-slate-100 dark:group-hover/faq:text-violet-200"
           }`}
         >
           {t(`${id}q`)}
         </span>
         <span
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all ${
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all duration-200 ${
             isOpen
               ? "rotate-180 bg-violet-600 text-white dark:bg-violet-500"
-              : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+              : "bg-slate-100 text-slate-500 group-hover/faq:bg-violet-100 group-hover/faq:text-violet-600 dark:bg-slate-800 dark:text-slate-400 dark:group-hover/faq:bg-violet-500/25 dark:group-hover/faq:text-violet-300"
           }`}
           aria-hidden
         >
@@ -218,38 +204,11 @@ function PricingFaqItem({
 export default function PricingComparisonPage() {
   const t = useTranslations("PricingPage");
   const tLanding = useTranslations("Landing.pricing");
-  const tProfile = useTranslations("personalProfile");
   const locale = useLocale();
   const isRTL = locale === "ar";
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-
-  const freeFeatures = useMemo(
-    () =>
-      translatePlanFeaturesWithMenuLimit(
-        [t("staticFreeFeature1"), t("staticFreeFeature2")],
-        STATIC_FREE_PLAN.maxMenus,
-        tProfile,
-      ),
-    [t, tProfile],
-  );
-
-  const proFeatures = useMemo(() => {
-    const base = translatePlanFeaturesWithMenuLimit(
-      [
-        t("staticProFeature1"),
-        t("staticProFeature2"),
-        t("staticProFeature3"),
-      ],
-      STATIC_PRO_PLAN.maxMenus,
-      tProfile,
-    );
-    return [
-      ...base,
-      tLanding("proExtraFeatures.staffSystem"),
-      tLanding("proExtraFeatures.tablesSystem"),
-      t("proStaffMobileAppBullet"),
-    ];
-  }, [tProfile, tLanding, t]);
+  const { cards: planCards, title: planCardsTitle, popularLabel } =
+    usePricingPlanCards();
 
   const tYes = t("yes");
   const tNo = t("no");
@@ -344,49 +303,6 @@ export default function PricingComparisonPage() {
   const cellBase = "px-2 py-3.5 text-center align-middle sm:px-4 sm:py-4";
   const cellProText = "text-slate-800 dark:text-slate-100";
 
-  const planCards = [
-    {
-      id: "free",
-      title: tLanding("planFree"),
-      desc: t("staticFreeDescription"),
-      price: `0${tLanding("currencyUsd")}`,
-      priceNote: tLanding("perYear"),
-      features: freeFeatures,
-      premium: false,
-      cta: {
-        href: "/auth/register" as const,
-        label: t("ctaRegister"),
-        external: false,
-      },
-    },
-    {
-      id: "pro",
-      title: tLanding("planPro"),
-      desc: t("staticProDescription"),
-      price: `${STATIC_PRO_YEARLY_USD}${tLanding("currencyUsd")}`,
-      priceNote: tLanding("perYear"),
-      features: proFeatures,
-      premium: true,
-      cta: {
-        href: "/auth/register" as const,
-        label: t("ctaUpgrade"),
-        external: false,
-      },
-    },
-    {
-      id: "custom",
-      title: tLanding("planCustom"),
-      desc: tLanding("customDescription"),
-      price: tLanding("customPrice"),
-      priceNote: null,
-      features: CUSTOM_CARD_FEATURE_KEYS.map((k) =>
-        tLanding(`customFeatures.${k}`),
-      ),
-      premium: false,
-      cta: { href: WHATSAPP_URL, label: t("ctaContact"), external: true },
-    },
-  ];
-
   const notes = [
     { key: "noteProAnnual", icon: HiStar },
     { key: "noteLimits", icon: HiInformationCircle },
@@ -395,7 +311,7 @@ export default function PricingComparisonPage() {
 
   return (
     <div
-      className="pricing-page relative overflow-hidden bg-[#f8f9fc] py-14 dark:bg-[#070a0f] sm:py-20 lg:py-24"
+      className="pricing-page relative overflow-hidden bg-[#f8f9fc] pt-28 pb-12 dark:bg-[#070a0f] sm:pb-14 md:pt-32 md:pb-16 lg:pb-20"
       dir={isRTL ? "rtl" : "ltr"}
     >
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -412,15 +328,15 @@ export default function PricingComparisonPage() {
                 <HiLightningBolt className="shrink-0 opacity-80" aria-hidden />
                 {t("eyebrow")}
               </div>
-              <h1 className="pricing-hero-line text-3xl font-black tracking-tight text-slate-900 dark:text-white sm:text-5xl lg:text-[3.25rem] lg:leading-[1.1]">
+              <h1 className={`pricing-hero-line ${sectionHeadingClassName}`}>
                 {t("title")}
               </h1>
-              <p className="pricing-hero-line mx-auto mt-4 max-w-xl text-base leading-relaxed text-slate-600 dark:text-slate-400 sm:mt-5 sm:text-lg lg:mx-0">
+              <p className={`pricing-hero-line ${sectionDescriptionClassName} lg:mx-0`}>
                 {t("subtitle")}
               </p>
             </div>
           </div>
-          <div className=" hidden sm:block">
+          <div className="  sm:block">
             <HeroMenuMockup />
           </div>
         </div>
@@ -551,7 +467,7 @@ export default function PricingComparisonPage() {
         </section>
 
         {/* CTA strip */}
-        <section className="relative z-2 mx-auto mt-14 max-w-5xl sm:mt-20">
+        <section className="relative z-2 mx-auto mt-14 max-w-5xl sm:mt-20 pb-16">
           <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-md dark:rounded-3xl dark:border-slate-700/80 dark:bg-linear-to-b dark:from-slate-900 dark:to-slate-950 dark:p-8 dark:shadow-xl dark:shadow-black/30 dark:ring-1 dark:ring-violet-500/15 sm:p-9">
             <p className="mb-5 text-center text-sm font-medium leading-relaxed text-slate-600 sm:mb-7 dark:text-slate-400">
               {t("ctaStripIntro")}
@@ -589,100 +505,11 @@ export default function PricingComparisonPage() {
           </div>
         </section>
 
-        {/* Plan cards */}
-        <section
-          className="mt-16 sm:mt-20 lg:mt-24"
-          aria-labelledby="pricing-plans-heading"
-        >
-          <h2
-            id="pricing-plans-heading"
-            className="mb-8 text-center text-2xl font-black text-slate-900 dark:text-white sm:text-3xl"
-          >
-            {tLanding("title")}
-          </h2>
-          <div className="grid gap-6 sm:gap-8 lg:grid-cols-3">
-            {planCards.map((card) => (
-              <article
-                key={card.id}
-                className={`relative flex flex-col rounded-2xl border p-6 transition-all sm:rounded-3xl sm:p-8 ${
-                  card.premium
-                    ? "border-violet-200/80 bg-violet-50/50 shadow-lg shadow-violet-500/10 hover:-translate-y-1 dark:border-violet-500/20 dark:bg-violet-500/[0.07] lg:scale-[1.02]"
-                    : "border-slate-200/80 bg-white shadow-sm hover:-translate-y-0.5 dark:border-slate-800 dark:bg-slate-900/60"
-                }`}
-              >
-                {card.premium && (
-                  <span className="absolute -top-3 start-1/2 -translate-x-1/2 rounded-full bg-linear-to-r from-violet-500 to-indigo-500 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
-                    {tLanding("popular")}
-                  </span>
-                )}
-                <h3
-                  className={`text-lg font-black sm:text-xl ${
-                    card.premium
-                      ? "text-violet-700 dark:text-violet-300"
-                      : "text-slate-900 dark:text-white"
-                  } ${card.premium ? "mt-2" : ""}`}
-                >
-                  {card.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                  {card.desc}
-                </p>
-                <div className="mt-5 border-b border-slate-200/80 pb-5 dark:border-slate-700/60">
-                  <span className="text-3xl font-black text-slate-900 dark:text-white">
-                    {card.price}
-                  </span>
-                  {card.priceNote && (
-                    <span className="ms-1 text-sm font-medium text-slate-500 dark:text-slate-400">
-                      {card.priceNote}
-                    </span>
-                  )}
-                </div>
-                <ul className="mt-5 flex-1 space-y-2.5 sm:space-y-3">
-                  {card.features.map((feat, idx) => (
-                    <li
-                      key={idx}
-                      className="flex items-start gap-2.5 text-sm font-medium text-slate-700 dark:text-slate-300"
-                    >
-                      <HiCheck
-                        className={`mt-0.5 h-4 w-4 shrink-0 sm:h-5 sm:w-5 ${
-                          card.premium
-                            ? "text-violet-500 dark:text-violet-400"
-                            : "text-emerald-500 dark:text-emerald-400"
-                        }`}
-                        aria-hidden
-                      />
-                      {feat}
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-6 sm:mt-8">
-                  {card.cta.external ? (
-                    <a
-                      href={card.cta.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3.5 text-sm font-bold text-white transition hover:bg-emerald-500"
-                    >
-                      <HiOutlineChat className="h-5 w-5" aria-hidden />
-                      {card.cta.label}
-                    </a>
-                  ) : (
-                    <Link
-                      href={card.cta.href}
-                      className={`block w-full rounded-xl py-3.5 text-center text-sm font-bold transition ${
-                        card.premium
-                          ? "bg-linear-to-br from-violet-500 to-indigo-600 text-white shadow-md shadow-violet-500/20 hover:shadow-violet-500/30"
-                          : "border border-slate-300 bg-slate-50 text-slate-900 hover:bg-slate-100 dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/14"
-                      }`}
-                    >
-                      {card.cta.label}
-                    </Link>
-                  )}
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
+        <PricingPlanCards
+          cards={planCards}
+          title={planCardsTitle}
+          popularLabel={popularLabel}
+        />
 
         {/* FAQ */}
         <section
@@ -691,7 +518,7 @@ export default function PricingComparisonPage() {
         >
           <h2
             id="pricing-faq-heading"
-            className="mb-6 text-center text-2xl font-black text-slate-900 dark:text-white sm:mb-8 sm:text-3xl"
+            className={`mb-8 text-center ${sectionHeadingClassName}`}
           >
             {t("faqTitle")}
           </h2>

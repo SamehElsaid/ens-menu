@@ -1,5 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import { FiArrowLeft, FiArrowRight } from "react-icons/fi";
+import { sectionHeadingClassName } from "@/components/HomePage/SectionBadge";
 
 export type LegalSection = {
   heading: string;
@@ -49,9 +50,7 @@ export default function LegalDocumentView({ doc, backToHome, locale }: Props) {
 
         <article className="mx-auto mt-8 max-w-3xl rounded-2xl border border-slate-200/90 bg-white/90 p-8 shadow-lg backdrop-blur-md dark:border-slate-800 dark:bg-[#0d1117]/90 dark:shadow-purple-950/20 md:p-12">
           <header className="mb-10 border-b border-slate-200 pb-8 dark:border-slate-800">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white md:text-4xl">
-              {doc.title}
-            </h1>
+            <h1 className={sectionHeadingClassName}>{doc.title}</h1>
             <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
               {doc.updated}
             </p>

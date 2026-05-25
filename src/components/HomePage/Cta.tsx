@@ -16,10 +16,10 @@ export const CTA = () => {
           <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/10 rounded-full -ml-32 -mb-32 blur-3xl"></div>
 
           {/* Content */}
-          <h2 className="text-4xl  font-black mb-8 relative z-10">
+          <h2 className="relative z-10 mb-6 text-3xl font-extrabold lg:text-5xl">
             {t("title")}
           </h2>
-          <p className="text-md text-purple-100 dark:text-purple-200 mb-10 max-w-2xl mx-auto relative z-10 font-medium leading-relaxed">
+          <p className="relative z-10 mx-auto mb-10 max-w-2xl text-base font-medium leading-relaxed text-purple-100 md:text-lg dark:text-purple-200">
             {t("description")}
           </p>
 

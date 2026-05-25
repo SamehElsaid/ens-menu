@@ -46,7 +46,7 @@ export const templates: Template[] = [
       "رتّب الأصناف داخل كل تصنيف، وعدّل الأسماء والترتيب في أي وقت ليظهر المنيو بشكل منظم واحترافي أمام عملائك",
     textEn:
       "Sort items within each category, edit names and order anytime to display the menu in a professional and organized way in front of your customers",
-    image: "/images/temp/4rd.webp",
+    image: "/images/temp/3rd.webp",
     textAltAr: "أضف المنتجات بسهولة",
     textAltEn: "Add products easily",
   },
