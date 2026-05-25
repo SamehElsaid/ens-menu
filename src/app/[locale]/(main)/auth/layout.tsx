@@ -20,6 +20,7 @@ export default async function AuthLayout({
   const token = cookieStore.get("sub");
   const tokenDecrypted = token ? decryptData(token.value) as DecryptedToken : null;
 
+  console.log(tokenDecrypted);
   if (tokenDecrypted) {
     return redirect(`/${locale}${tokenDecrypted?.role === "admin" ? "/admin" : "/dashboard"}`);
   }

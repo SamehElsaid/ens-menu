@@ -68,7 +68,7 @@ export default function GoogleSignInButton({
         const encryptedData = encryptData(saveTokens);
         Cookies.set("sub", encryptedData, {
           expires: 3,
-          sameSite: "Strict",
+          sameSite: "Lax",
           secure: true,
           path: "/",
         });
