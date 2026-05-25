@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { decryptData } from "./shared/encryption";
 
-interface DecryptedToken {
+export interface DecryptedToken {
   role: string;
   staffJobRole?: string;
   [key: string]: unknown;
@@ -24,14 +24,16 @@ export default function middleware(request: NextRequest) {
   const hasToken =
     tokenDecrypted && Object.keys(tokenDecrypted).length > 0;
 
-  console.log(tokenDecrypted);
 
   // Stop Login , Register , Forgot Password , Reset Password , Verify Email , Verify Phone
   if (pathname.startsWith("/auth")) {
     if (hasToken) {
-      url.pathname = "/";
+      const localeMatch = request.nextUrl.pathname.match(/^\/(ar|en)(?=\/|$)/);
+      const prefix = localeMatch ? `/${localeMatch[1]}` : "";
+      url.pathname = tokenDecrypted?.role === "admin" ? `${prefix}/admin` : `${prefix}/dashboard`;
       return NextResponse.redirect(url);
     }
+    return createMiddleware(routing)(request);
   }
 
   if (pathname.startsWith("/admin")) {

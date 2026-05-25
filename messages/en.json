@@ -328,7 +328,16 @@
     "resetPasswordSubmit": "Reset Password",
     "resetLinkSent": "If the email exists, a reset link has been sent.",
     "resetPasswordSuccess": "Password reset successfully. You can now log in.",
-    "invalidResetToken": "Invalid reset token. Please request a new reset link."
+    "invalidResetToken": "Invalid reset token. Please request a new reset link.",
+    "recaptchaLabel": "Verify you're human",
+    "recaptchaHint": "Tap here to complete the security check",
+    "recaptchaVerified": "Verification complete",
+    "recaptchaVerifiedHint": "You're cleared to continue",
+    "recaptchaVerifying": "Verifying...",
+    "recaptchaVerifyingHint": "Please wait while we confirm you're human",
+    "recaptchaRejected": "Verification failed",
+    "recaptchaRejectedHint": "Tap to try again",
+    "recaptchaBoot": "Loading security check..."
   },
   "form": {
     "personalInformation": "Personal Information",
@@ -591,6 +600,20 @@
     "choiceNameEnMinLength": "Choice name in English must be at least 2 characters",
     "selectChoice": "Select an option",
     "locationDetailsRequired": "Location Details is required"
+  },
+  "phoneGate": {
+    "title": "One last step",
+    "subtitle": "Please add your phone number to complete your profile and continue.",
+    "phoneLabel": "Phone Number",
+    "submit": "Continue",
+    "saving": "Saving...",
+    "successMessage": "Phone number saved successfully",
+    "errorMessage": "Failed to save phone number. Please try again.",
+    "welcomeBack": "Welcome back",
+    "benefit1": "Receive order and reservation notifications",
+    "benefit2": "Quick & secure account recovery",
+    "benefit3": "Required for subscription upgrades",
+    "trustBadge": "Your number is safe and never shared"
   },
   "personalProfile": {
     "title": "My Profile",
@@ -941,6 +964,13 @@
       "placeholder": "Type your message here...",
       "send": "Send"
     }
+  },
+  "chatWidget": {
+    "openChat": "Chat with Lina",
+    "dismissTeaser": "Dismiss",
+    "teaser1": "Hi 👋 Need help with your digital menu?",
+    "teaser2": "Ask me about pricing and plans ✨",
+    "teaser3": "I can help you get started quickly 🍽️"
   },
   "chat": {
     "appTitle": "WhatsApp Demo",
@@ -1892,6 +1922,7 @@
     "items": "Items",
     "advertisements": "Advertisements",
     "appVersion": "App Version",
+    "promo": "Promo",
     "Overview": "Overview",
     "Profile": "Profile",
     "Menu Control": "Menu Control",
@@ -1998,6 +2029,7 @@
     "plans": "Plans",
     "advertisements": "Advertisements",
     "admins": "Admins",
+    "promo": "Promo",
     "totalUsers": "Total Users",
     "activeAccounts": "Active Restaurants / Companies",
     "paidPlans": "Paid Subscribers",
@@ -2526,5 +2558,33 @@
     "searchPlaceholder": "Search for a location...",
     "searching": "Searching...",
     "selectedLocation": "Selected Location:"
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "body": "Sorry, the page you are looking for doesn't exist or has been moved.",
+    "backHome": "Back to home"
+  },
+  "adminPromo": {
+    "title": "Promo Banner",
+    "subtitle": "Manage the promotional banner displayed to users",
+    "back": "Back",
+    "statusLabel": "Banner Status",
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
+    "currentText": "Current Text",
+    "formTitle": "Edit Promo Banner",
+    "textLabelAr": "Promotional Text (Arabic)",
+    "textLabelEn": "Promotional Text (English)",
+    "textPlaceholderAr": "Enter promotional text in Arabic...",
+    "textPlaceholderEn": "Enter promotional text in English...",
+    "jsonPreview": "Payload Preview",
+    "enableLabel": "Enable Banner",
+    "enableDescription": "Show or hide the promotional banner for all users",
+    "save": "Save Changes",
+    "saving": "Saving...",
+    "saveSuccess": "Promo banner updated successfully",
+    "saveError": "Failed to update promo banner",
+    "fetchError": "Failed to load promo banner",
+    "textRequired": "Promotional text is required"
   }
 }

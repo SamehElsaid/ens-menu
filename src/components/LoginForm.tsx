@@ -14,14 +14,18 @@ import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
 import { useAppDispatch } from "@/store/hooks";
 import CustomBtn from "./Custom/CustomBtn";
 import { axiosPost } from "@/shared/axiosCall";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LoginResponse } from "@/types/LoginResponse";
 import GoogleSignInButton from "@/components/Auth/GoogleSignInButton";
 import { syncFcmToken } from "@/shared/syncFcmToken";
 import ReCAPTCHA from "react-google-recaptcha";
 import Loader from "./Global/Loader";
+import CustomRecaptcha from "./Auth/CustomRecaptcha";
 
-export default function LoginForm() {
+const RECAPTCHA_WIDTH = 304;
+const RECAPTCHA_HEIGHT = 78;
+
+export default function LoginForm({ promoText, promoEnabled }: { promoText: string, promoEnabled: boolean }) {
   const t = useTranslations("");
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -48,7 +52,27 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [loadingLoader, setLoadingLoader] = useState(true);
   const [recaptchaVerified, setRecaptchaVerified] = useState(false);
+  const [recaptchaScale, setRecaptchaScale] = useState(1);
   const [apiError, setApiError] = useState<string | null>(null);
+  const recaptchaContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = recaptchaContainerRef.current;
+    if (!container) return;
+
+    const updateScale = () => {
+      const availableWidth = container.getBoundingClientRect().width;
+      setRecaptchaScale(
+        availableWidth < RECAPTCHA_WIDTH ? availableWidth / RECAPTCHA_WIDTH : 1,
+      );
+    };
+
+    updateScale();
+
+    const observer = new ResizeObserver(updateScale);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   const onSubmit = async (data: LoginSchema) => {
     if (!recaptchaVerified) {
@@ -80,7 +104,7 @@ export default function LoginForm() {
 
       Cookies.set("sub", encryptedData, {
         expires: 3,
-        sameSite: "Strict",
+        sameSite: "Lax",
         secure: true,
         path: "/",
       });
@@ -88,7 +112,7 @@ export default function LoginForm() {
       // Sync FCM token right after login (check match, update if needed)
       void syncFcmToken(locale);
 
-      router.push(user?.role === "admin" ? "/admin" : "/dashboard");
+      window.location.href = `/${locale}${user?.role === "admin" ? "/admin" : "/dashboard"}`;
       if (user) {
         dispatch(SET_ACTIVE_USER({ user }));
       }
@@ -108,7 +132,7 @@ export default function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 ">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
       <Controller
         control={control}
         name="email"
@@ -130,60 +154,45 @@ export default function LoginForm() {
         )}
       />
 
+
       <Controller
         control={control}
         name="password"
         render={({ field: { value, onChange } }) => (
-          <CustomInput
-            type="password"
-            placeholder={messages.password}
-            id="password"
-            icon={<TbLockPassword />}
-            label={messages.password}
-            error={errors.password?.message}
-            value={value}
-            onChange={(e) => {
-              setApiError(null);
-              onChange(e);
-            }}
-            className="bg-white/80 text-slate-900 placeholder:text-slate-400 dark:bg-slate-900/60 dark:text-slate-100 dark:placeholder:text-slate-400 dark:border-slate-700"
-          />
+          <>
+            <h2 className="text-xs font-medium text-accent-purple dark:text-purple-400 text-end mb-0.5">
+              <LinkTo
+                href="/auth/reset-password"
+                className="w-fit ms-auto block hover:text-accent-purple/80 transition-all duration-200"
+              >
+                {t("auth.forgotPassword")}
+              </LinkTo>
+            </h2>
+            <CustomInput
+              type="password"
+              placeholder={messages.password}
+              id="password"
+              icon={<TbLockPassword />}
+              label={messages.password}
+              error={errors.password?.message}
+              value={value}
+              onChange={(e) => {
+                setApiError(null);
+                onChange(e);
+              }}
+              className="bg-white/80 text-slate-900 placeholder:text-slate-400 dark:bg-slate-900/60 dark:text-slate-100 dark:placeholder:text-slate-400 dark:border-slate-700"
+            />
+          </>
+
         )}
       />
 
-      <h2 className="text-sm font-medium text-accent-purple dark:text-purple-400 text-end">
-        <LinkTo
-          href="/auth/reset-password"
-          className="w-fit ms-auto block hover:text-accent-purple/80 transition-all duration-200"
-        >
-          {t("auth.forgotPassword")}
-        </LinkTo>
-      </h2>
 
-      <div className="mt-4">
-        <div className="h-[78px] relative">
-          {loadingLoader && <div className="absolute z- inset-0 flex items-center justify-center"><Loader /></div>}
 
-          <div className={`${loadingLoader ? "opacity-0" : "opacity-100"} transition-all duration-300`}>
-            <ReCAPTCHA
-              onLoadCapture={() => {
-                setLoadingLoader(false);
-              }}
-              sitekey="6LfZunYsAAAAAChMIIbG-lhkDy6uMnAgm9cfZnrN"
-              hl={locale}
-              onChange={(token: string | null) => {
-                setRecaptchaVerified(!!token);
-              }}
-              onExpired={() => {
-                setRecaptchaVerified(false);
-              }}
-              onErrored={() => {
-                setRecaptchaVerified(false);
-              }}
-            />
-          </div>
-        </div>
-      </div>
+      <CustomRecaptcha
+        className="mt-10"
+        onVerifiedChange={setRecaptchaVerified}
+      />
 
       {apiError && (
         <div
@@ -206,7 +215,7 @@ export default function LoginForm() {
         </div>
       )}
 
-      <div className="flex w-full mt-8">
+      <div className="flex w-full mt-3">
         <CustomBtn
           text={t("auth.login")}
           type="submit"

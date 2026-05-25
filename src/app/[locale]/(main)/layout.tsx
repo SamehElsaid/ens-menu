@@ -1,3 +1,4 @@
+import ChatWidget from "@/components/ChatWidget";
 import Header from "@/components/Global/Header";
 
 export default async function MainLayout({
@@ -11,6 +12,7 @@ export default async function MainLayout({
       <main className="home-main min-h-screen w-full overflow-x-hidden">
         {children}
       </main>
+      <ChatWidget />
     </>
   );
 }

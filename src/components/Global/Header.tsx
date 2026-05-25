@@ -106,14 +106,7 @@ function Header() {
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
         {/* Logo */}
-        <Link
-          href="/"
-          prefetch={false}
-          onClick={handleNavClick}
-          className="flex items-center gap-2 text-xl font-semibold text-slate-900 dark:text-white"
-        >
-          <Logo />
-        </Link>
+        <Logo />
 
 
         {/* Desktop Navigation */}

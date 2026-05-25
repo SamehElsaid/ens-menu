@@ -328,7 +328,16 @@
     "speciality": "التخصص",
     "specialityInvalid": "يرجى اختيار تخصص صحيح",
     "specialityRequired": "التخصص مطلوب",
-    "switchToCenter": "التسجيل كمركز"
+    "switchToCenter": "التسجيل كمركز",
+    "recaptchaLabel": "تأكيد أنك إنسان",
+    "recaptchaHint": "اضغط هنا لإكمال التحقق الأمني",
+    "recaptchaVerified": "تم التحقق بنجاح",
+    "recaptchaVerifiedHint": "يمكنك المتابعة الآن",
+    "recaptchaVerifying": "جاري التحقق...",
+    "recaptchaVerifyingHint": "يرجى الانتظار حتى نتأكد أنك إنسان",
+    "recaptchaRejected": "فشل التحقق",
+    "recaptchaRejectedHint": "اضغط للمحاولة مرة أخرى",
+    "recaptchaBoot": "جاري تحميل التحقق الأمني..."
   },
   "form": {
     "personalInformation": "المعلومات الشخصية",
@@ -591,6 +600,20 @@
     "workedAtTitleMinLength": "يجب ألا يقل المسمى عن حرفين",
     "workedAtTitlePlaceholder": "أدخل المسمى أو المنصب",
     "workedAtTitleRequired": "المسمى الوظيفي مطلوب"
+  },
+  "phoneGate": {
+    "title": "خطوة أخيرة",
+    "subtitle": "يرجى إضافة رقم هاتفك لإكمال ملفك الشخصي والمتابعة.",
+    "phoneLabel": "رقم الهاتف",
+    "submit": "متابعة",
+    "saving": "جارٍ الحفظ...",
+    "successMessage": "تم حفظ رقم الهاتف بنجاح",
+    "errorMessage": "فشل حفظ رقم الهاتف، يرجى المحاولة مجدداً.",
+    "welcomeBack": "مرحباً",
+    "benefit1": "استلام إشعارات الطلبات والحجوزات",
+    "benefit2": "استرداد الحساب بسرعة وأمان",
+    "benefit3": "مطلوب لترقية الاشتراك",
+    "trustBadge": "رقمك آمن ولن يُشارك مع أحد"
   },
   "personalProfile": {
     "title": "ملفي الشخصي",
@@ -1807,6 +1830,7 @@
     "items": "العناصر",
     "advertisements": "الإعلانات",
     "appVersion": "إصدار التطبيق",
+    "promo": "الترويج",
     "Overview": "نظرة عامة",
     "Profile": "الملف الشخصي",
     "Menu Control": "تحكم في القائمة",
@@ -1913,6 +1937,7 @@
     "plans": "الخطط",
     "advertisements": "الإعلانات",
     "admins": "المشرفين",
+    "promo": "الترويج",
     "totalUsers": "إجمالي المستخدمين",
     "activeAccounts": "المطاعم / الشركات النشطة",
     "paidPlans": "المشتركين المدفوعين",
@@ -2422,6 +2447,13 @@
   "application": {
     "view": "عرض"
   },
+  "chatWidget": {
+    "openChat": "تحدث مع لينا",
+    "dismissTeaser": "إغلاق التنبيه",
+    "teaser1": "أهلاً 👋 محتاج مساعدة في المنيو الرقمي؟",
+    "teaser2": "اسألني عن الأسعار والخطط ✨",
+    "teaser3": "جاهزة أساعدك تبدأ بسرعة 🍽️"
+  },
   "chat": {
     "appTitle": "عرض واتساب",
     "attachmentDocument": "مستند",
@@ -2525,5 +2557,33 @@
     "searchPlaceholder": "ابحث عن موقع...",
     "searching": "جاري البحث...",
     "selectedLocation": "الموقع المحدد:"
+  },
+  "NotFound": {
+    "title": "الصفحة غير موجودة",
+    "body": "عذراً، الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
+    "backHome": "العودة للرئيسية"
+  },
+  "adminPromo": {
+    "title": "البانر الترويجي",
+    "subtitle": "إدارة البانر الترويجي الظاهر للمستخدمين",
+    "back": "رجوع",
+    "statusLabel": "حالة البانر",
+    "statusActive": "مفعّل",
+    "statusInactive": "معطّل",
+    "currentText": "النص الحالي",
+    "formTitle": "تعديل البانر الترويجي",
+    "textLabelAr": "النص الترويجي (عربي)",
+    "textLabelEn": "النص الترويجي (إنجليزي)",
+    "textPlaceholderAr": "أدخل النص الترويجي بالعربية...",
+    "textPlaceholderEn": "Enter promotional text in English...",
+    "jsonPreview": "معاينة البيانات المُرسَلة",
+    "enableLabel": "تفعيل البانر",
+    "enableDescription": "إظهار أو إخفاء البانر الترويجي لجميع المستخدمين",
+    "save": "حفظ التغييرات",
+    "saving": "جاري الحفظ...",
+    "saveSuccess": "تم تحديث البانر الترويجي بنجاح",
+    "saveError": "فشل تحديث البانر الترويجي",
+    "fetchError": "فشل تحميل بيانات البانر",
+    "textRequired": "النص الترويجي مطلوب"
   }
 }

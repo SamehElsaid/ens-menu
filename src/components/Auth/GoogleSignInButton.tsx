@@ -68,11 +68,11 @@ export default function GoogleSignInButton({
         const encryptedData = encryptData(saveTokens);
         Cookies.set("sub", encryptedData, {
           expires: 3,
-          sameSite: "Strict",
+          sameSite: "Lax",
           secure: true,
           path: "/",
         });
-        router.push(user?.role === "admin" ? "/admin" : "/dashboard");
+        window.location.href = `/${locale}${user?.role === "admin" ? "/admin" : "/dashboard"}`;
         if (user) {
           dispatch(SET_ACTIVE_USER({ user }));
         }
