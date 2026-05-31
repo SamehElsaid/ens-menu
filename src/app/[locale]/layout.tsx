@@ -5,11 +5,14 @@ import { cairo, fontVariables } from "@/lib/fonts";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import RenderInProvider from "@/components/Global/RenderInProvider";
+import AutoDirInputs from "@/components/Global/AutoDirInputs";
 import ProgressBar from "@/components/Global/ProgressBar";
 import GoogleGtag from "@/components/Global/GoogleGtag";
 import GoogleTagManager from "@/components/Global/GoogleTagManager";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import 'suneditor/dist/css/suneditor.min.css'
+
 const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
 export const metadata: Metadata = {
@@ -69,6 +72,7 @@ export default async function RootLayout({
           pauseOnHover
           theme="light"
         />
+        <AutoDirInputs />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <RenderInProvider>{children}</RenderInProvider>
         </NextIntlClientProvider>

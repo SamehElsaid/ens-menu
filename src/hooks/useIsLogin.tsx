@@ -21,6 +21,8 @@ type UserProfile = {
   };
 };
 
+type GetUserResult = UserProfile | "logout" | null;
+
 type AuthMeResponse = { user?: Record<string, unknown> };
 type StaffMeResponse = {
   staff?: {
@@ -47,7 +49,7 @@ function useIsLogin() {
   const dispatch = useDispatch();
   const locale = useLocale();
 
-  const getUser = useCallback(async (): Promise<UserProfile | null> => {
+  const getUser = useCallback(async (): Promise<GetUserResult> => {
     const sub = Cookies.get("sub");
     if (!sub) return null;
 
@@ -58,6 +60,7 @@ function useIsLogin() {
 
     if (effectiveRole === "staff") {
       const res = await axiosGet<StaffMeResponse>("/staff-auth/me", locale);
+      if (res.statusCode === 401) return "logout";
       if (res.status && res.data?.staff) {
         const mid = res.data.menu?.id;
         if (typeof mid === "number" && !Number.isNaN(mid)) {
@@ -69,6 +72,7 @@ function useIsLogin() {
     }
 
     const res = await axiosGet<AuthMeResponse>("/auth/me", locale);
+    if (res.statusCode === 401) return "logout";
     if (res.status && res.data?.user) {
       return { user: res.data.user } as UserProfile;
     }
@@ -78,6 +82,7 @@ function useIsLogin() {
         "/staff-auth/me",
         locale,
       );
+      if (staffRes.statusCode === 401) return "logout";
       if (staffRes.status && staffRes.data?.staff) {
         const mid = staffRes.data.menu?.id;
         if (typeof mid === "number" && !Number.isNaN(mid)) {
@@ -93,10 +98,12 @@ function useIsLogin() {
   useEffect(() => {
     const checkLogin = async () => {
       if (cookies) {
-        const user = await getUser();
-        if (user) {
-          dispatch(SET_ACTIVE_USER(user as UserProfile));
-
+        const result = await getUser();
+        if (result === "logout") {
+          dispatch(REMOVE_USER());
+          Cookies.remove("sub", { path: "/" });
+        } else if (result) {
+          dispatch(SET_ACTIVE_USER(result as UserProfile));
           void syncFcmToken(locale);
         }
         const time = setTimeout(() => {

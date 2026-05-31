@@ -11,6 +11,7 @@ import Logo from "../Global/Logo";
 import { homeLinks } from "@/modules/Header";
 import LanguageToggle from "./LanguageTogle";
 import DarkModeToggle from "./DarkModeToggle";
+import HeaderSearch from "./HeaderSearch";
 
 function isHomePathname(pathname: string) {
   const p = pathname.replace(/\/$/, "") || "/";
@@ -130,6 +131,9 @@ function Header() {
 
           {/* Dark Mode Toggle */}
           <DarkModeToggle />
+
+          {/* Knowledge Search */}
+          <HeaderSearch />
 
 
           {/* Auth Buttons */}

@@ -5,6 +5,7 @@ import LanguageToggle from "../Global/LanguageTogle";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import DarkModeToggle from "../Global/DarkModeToggle";
+import HeaderSearch from "../Global/HeaderSearch";
 
 export function DashboardHeader({
   setIsMenuOpen,
@@ -44,6 +45,7 @@ export function DashboardHeader({
           <Logo />
         </div>
         <div className="flex items-center gap-1 ">
+          <HeaderSearch />
           <DarkModeToggle />
 
           {/* <button className="rounded-full flex items-center justify-center w-10 h-10 border border-slate-200 bg-white  text-slate-500 transition hover:text-primary hover:border-secondary">

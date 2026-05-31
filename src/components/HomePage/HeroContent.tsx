@@ -18,8 +18,12 @@ export default async function HeroContent({ locale }: HeroContentProps) {
     >
       <HeroBackground />
       <div className="container relative z-10 mx-auto px-6">
-        <div className="mx-auto flex-col-reverse lg:flex-row flex w-full  justify-between  items-center text-center">
+
+        <div className="mx-auto flex-col lg:text-start gap-10 text-center lg:flex-row flex w-full  justify-between  items-center ">
+        <HeroLinaImage alt={t("linaAlt")} />
+         
           <div>
+
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-purple-100 bg-purple-50 px-5 py-2 text-sm font-bold text-purple-700 shadow-sm dark:border-purple-500/30 dark:bg-purple-500/20 dark:text-purple-400">
               <span>{t("badge")}</span>
               <span>🚀</span>
@@ -36,7 +40,7 @@ export default async function HeroContent({ locale }: HeroContentProps) {
               {t("description")}
             </p>
 
-            <div className="mb-4 flex flex-wrap items-center justify-center gap-4">
+            <div className="mb-4 flex flex-wrap items-center justify-center lg:justify-start gap-4">
               <Link
                 href="/auth/login"
                 prefetch={false}
@@ -48,7 +52,6 @@ export default async function HeroContent({ locale }: HeroContentProps) {
             </div>
           </div>
 
-          <HeroLinaImage alt={t("linaAlt")} />
         </div>
       </div>
     </section>

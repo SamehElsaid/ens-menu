@@ -158,7 +158,8 @@
         "templates": "القوالب",
         "learning": "التعلم",
         "documentation": "التوثيق",
-        "deployNow": "انشر الآن"
+        "deployNow": "انشر الآن",
+        "saving": "جاري الحفظ..."
       }
     }
   },
@@ -179,7 +180,11 @@
     "optional": "اختياري",
     "urlPlaceholder": "https://...",
     "dateFormatPlaceholder": "يوم/شهر/سنة",
-    "confirmDelete": "تأكيد الحذف"
+    "confirmDelete": "تأكيد الحذف",
+    "saving": "جاري الحفظ...",
+    "paginationInfo": "عرض {from}–{to} من {total}",
+    "showMore": "عرض المزيد",
+    "showLess": "عرض أقل"
   },
   "auth": {
     "parentTitle": "تسجيل الوالد",
@@ -1769,6 +1774,7 @@
     "advertisements": "الإعلانات",
     "appVersion": "إصدار التطبيق",
     "promo": "الترويج",
+    "knowledgeManagement": "إدارة المعرفة",
     "Overview": "نظرة عامة",
     "Profile": "الملف الشخصي",
     "Menu Control": "تحكم في القائمة",
@@ -2493,6 +2499,67 @@
     "title": "الصفحة غير موجودة",
     "body": "عذراً، الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
     "backHome": "العودة للرئيسية"
+  },
+  "knowledgeBase": {
+    "sectionLabel": "قاعدة المعرفة",
+    "searchPlaceholder": "فلتر المقالات...",
+    "articlesCount": "مقالة",
+    "noResults": "لا توجد مقالات",
+    "emptyTitle": "لا توجد مقالات بعد",
+    "emptyDescription": "تابعنا لاحقاً للاطلاع على المقالات.",
+    "createdAt": "نُشر",
+    "updatedAt": "آخر تحديث"
+  },
+  "headerSearch": {
+    "label": "البحث في قاعدة المعرفة",
+    "placeholder": "ابحث في المقالات...",
+    "loading": "جاري البحث...",
+    "noResults": "لا توجد نتائج",
+    "close": "إغلاق البحث"
+  },
+  "adminKnowledge": {
+    "title": "إدارة المعرفة",
+    "subtitle": "إنشاء وإدارة مدخلات معلومات البحث",
+    "back": "رجوع",
+    "totalItems": "إجمالي المدخلات",
+    "filteredItems": "المعروض",
+    "addNew": "إضافة مدخل",
+    "addTitle": "إضافة مدخل جديد",
+    "editTitle": "تعديل المدخل",
+    "searchPlaceholder": "ابحث بالعنوان أو الوصف...",
+    "titleEn": "العنوان (إنجليزي)",
+    "titleAr": "العنوان (عربي)",
+    "descriptionEn": "الوصف (إنجليزي)",
+    "descriptionAr": "الوصف (عربي)",
+    "titleEnPlaceholder": "Enter title in English",
+    "titleArPlaceholder": "أدخل العنوان بالعربية",
+    "descriptionEnPlaceholder": "Enter description in English",
+    "descriptionArPlaceholder": "أدخل الوصف بالعربية",
+    "emptyTitle": "لا توجد مدخلات بعد",
+    "emptyDescription": "أضف أول مدخل معرفي للبدء.",
+    "noResults": "لا توجد نتائج",
+    "noResultsDescription": "جرب كلمة بحث مختلفة.",
+    "validationError": "جميع الحقول (عربي وإنجليزي) مطلوبة.",
+    "createSuccess": "تم إنشاء المدخل بنجاح.",
+    "createError": "فشل في إنشاء المدخل.",
+    "editSuccess": "تم تحديث المدخل بنجاح.",
+    "editError": "فشل في تحديث المدخل.",
+    "deleteSuccess": "تم حذف المدخل بنجاح.",
+    "deleteError": "فشل في حذف المدخل.",
+    "deleteConfirmTitle": "حذف المدخل",
+    "deleteConfirm": "هل أنت متأكد من حذف \"{title}\"؟ لا يمكن التراجع عن هذا الإجراء.",
+    "deleting": "جارٍ الحذف...",
+    "saving": "جارٍ الحفظ...",
+    "createdAt": "أُنشئ",
+    "updatedAt": "آخر تعديل",
+    "paginationInfo": "عرض {from}–{to} من {total}",
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف",
+      "cancel": "إلغاء",
+      "save": "حفظ التغييرات",
+      "create": "إنشاء"
+    }
   },
   "adminPromo": {
     "title": "البانر الترويجي",

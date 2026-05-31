@@ -9,7 +9,7 @@ interface LinkToProps {
 function LinkTo({ href, children, ...props }: LinkToProps) {
   const locale = useLocale();
   return (
-    <Link {...props} locale={locale} href={`/${href}`} >
+    <Link {...props} locale={locale} href={(`/${href}`).replaceAll("//", "/")} >
       {children}
     </Link>
   );

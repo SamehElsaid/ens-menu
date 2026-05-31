@@ -11,6 +11,7 @@ import {
 } from "react-icons/md";
 import {
   IoDocumentTextOutline,
+  IoLibraryOutline,
   IoPhonePortraitOutline,
   IoPricetagOutline,
   IoSettingsOutline,
@@ -209,6 +210,12 @@ export const adminNavSections: NavSection[] = [
         icon: IoPricetagOutline,
         key: "promo",
         link: "promo",
+      },
+      {
+        label: "knowledgeManagement",
+        icon: IoLibraryOutline,
+        key: "knowledge-management",
+        link: "knowledge-management",
       },
     ],
   },

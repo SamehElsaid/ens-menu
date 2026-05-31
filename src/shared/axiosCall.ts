@@ -11,6 +11,7 @@ import { LoginResponse } from "@/types/LoginResponse";
 interface ApiResponse<T> {
   data?: T;
   status: boolean;
+  statusCode?: number;
 }
 
 interface DecryptedToken {
@@ -140,7 +141,8 @@ export const axiosGet = async <T>(
 
     return { data: fetchData.data, status: true };
   } catch (err) {
-    if ((err as AxiosError).response?.status === 405) {
+    const statusCode = (err as AxiosError).response?.status;
+    if (statusCode === 405) {
       // كل الطلبات اللي تجي 405 تستنى على نفس الـ refresh
       const newToken = await getRefreshTokenPromise();
       if (newToken) {
@@ -150,6 +152,7 @@ export const axiosGet = async <T>(
     return {
       data: (err as AxiosError)?.response?.data as T,
       status: false,
+      statusCode,
     };
   }
 };

@@ -210,7 +210,7 @@ export default function ActivityHistoryPage() {
 
   // ── debounce search ──────────────────────────────────────────────────────
   useEffect(() => {
-    const id = setTimeout(() => setDebouncedSearch(searchInput.trim()), 400);
+    const id = setTimeout(() => setDebouncedSearch(searchInput.trim()), 100);
     return () => clearTimeout(id);
   }, [searchInput]);
 

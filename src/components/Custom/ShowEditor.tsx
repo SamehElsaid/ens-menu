@@ -1,0 +1,87 @@
+'use client'
+
+import dynamic from "next/dynamic";
+import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
+import CustomBtn from "./CustomBtn";
+import type SunEditorCore from "suneditor/src/lib/core";
+
+const SunEditor = dynamic(() => import("suneditor-react"), {
+  ssr: false,
+});
+
+interface ShowEditorProps {
+  initialTemplateName: string;
+  showMore?: boolean;
+}
+
+const ShowEditor = ({ initialTemplateName, showMore = true }: ShowEditorProps) => {
+  const [showMoreState, setShowMoreState] = useState(false);
+  const divRef = useRef<HTMLDivElement>(null);
+  const editorInstance = useRef<SunEditorCore | null>(null);
+  const t = useTranslations("common");
+
+  useEffect(() => {
+    if (!editorInstance.current) return;
+
+    try {
+      const content = showMoreState
+        ? initialTemplateName.slice(0, 600)
+        : initialTemplateName;
+      editorInstance.current.setContents(content);
+    } catch {
+      // setContents may fail before the editor is fully mounted
+    }
+  }, [showMoreState, initialTemplateName]);
+
+  return (
+    <div ref={divRef}>
+      <SunEditor
+        getSunEditorInstance={(sunEditor) => {
+          editorInstance.current = sunEditor;
+        }}
+        readOnly
+        disableToolbar
+        hideToolbar
+        onLoad={() => {
+          const editor = document.querySelector<HTMLElement>(".sun-editor-editable");
+          if (editor) {
+            editor.setAttribute("contenteditable", "false");
+            editor.style.pointerEvents = "auto";
+            editor.style.userSelect = "text";
+          }
+        }}
+        setOptions={{
+          buttonList: [],
+          resizingBar: false,
+        }}
+        width="100%"
+        defaultValue={initialTemplateName}
+      />
+      {showMore && initialTemplateName.length > 600 && (
+        <CustomBtn
+          className="w-full lg:w-auto"
+          variant={showMoreState ? "secondary" : "danger"}
+          onClick={() => {
+            setShowMoreState((prev) => !prev);
+            setTimeout(() => {
+              if (!divRef.current) return;
+              const scrollOffset = 300;
+              const top =
+                divRef.current.getBoundingClientRect().top +
+                window.scrollY -
+                scrollOffset;
+              window.scrollTo({ top, behavior: "auto" });
+            }, 0);
+          }}
+        >
+          <div className="text-xs">
+            {showMoreState ? t("showMore") : t("showLess")}
+          </div>
+        </CustomBtn>
+      )}
+    </div>
+  );
+};
+
+export default ShowEditor;
