@@ -970,6 +970,13 @@
       "send": "Send"
     }
   },
+  "chatWidget": {
+    "openChat": "Chat with Lina",
+    "dismissTeaser": "Dismiss",
+    "teaser1": "Hi 👋 Need help with your digital menu?",
+    "teaser2": "Ask me about pricing and plans ✨",
+    "teaser3": "I can help you get started quickly 🍽️"
+  },
   "chat": {
     "appTitle": "WhatsApp Demo",
     "contactsLabel": "contacts",
