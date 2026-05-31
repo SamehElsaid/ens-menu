@@ -10,6 +10,7 @@ import Cookies from "js-cookie";
 import { useAppDispatch } from "@/store/hooks";
 import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
 import { axiosPost } from "@/shared/axiosCall";
+import { pushSignUpEvent } from "@/shared/gtmEvents";
 import { encryptData } from "@/shared/encryption";
 import { LoginResponse } from "@/types/LoginResponse";
 
@@ -57,11 +58,7 @@ export default function GoogleSignInButton({
       if (response.status && response.data) {
         const { accessToken, refreshToken, user, isNew } = response.data;
         if (isNew) {
-          try {
-            localStorage.setItem("signup_method", "google");
-          } catch (e) {
-            console.error("Failed to save signup_method to localStorage", e);
-          }
+          pushSignUpEvent();
         }
         const saveTokens = {
           token: accessToken ?? "",
