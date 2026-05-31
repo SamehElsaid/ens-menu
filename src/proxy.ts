@@ -10,7 +10,7 @@ export interface DecryptedToken {
   [key: string]: unknown;
 }
 
-export default function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const url = request.nextUrl.clone();
 
   const token = request.cookies.get("sub");

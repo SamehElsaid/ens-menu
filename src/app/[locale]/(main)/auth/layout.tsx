@@ -1,6 +1,6 @@
 import GoogleAuthProvider from "@/components/Global/GoogleAuthProvider";
 import NoBfcache from "@/components/Global/NoBfcache";
-import { DecryptedToken } from "@/middleware";
+import { DecryptedToken } from "@/proxy";
 import { decryptData } from "@/shared/encryption";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
