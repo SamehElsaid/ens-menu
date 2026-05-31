@@ -67,8 +67,9 @@ const Editor = ({ initialTemplateName, type, setValue, trigger, refresh, loading
         onImageUploadBefore={(files, _info, uploadHandler) => {
           const formData = new FormData()
           formData.append('image', files[0])
-          axiosPost<FormData, { image: string }>('structure/image/', locale, formData).then(res => {
+          axiosPost<FormData, { image: string }>('/structure/image/', locale, formData).then(res => {
             if (res.status && res.data) {
+              console.log(res.data)
               const result: ImageUploadResult = {
                 result: [{ url: res.data.image, name: files[0].name, size: files[0].size }]
               }
@@ -89,7 +90,7 @@ const Editor = ({ initialTemplateName, type, setValue, trigger, refresh, loading
             ['undo', 'redo'],
             ['removeFormat'],
             ['link'],
-            ['preview', 'print'],
+            ['preview', 'print',"image"],
             ['fullScreen', 'showBlocks', 'codeView']
           ]
         }}

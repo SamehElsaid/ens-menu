@@ -1312,4 +1312,5 @@ textarea {
 }
 .show-editor .se-wrapper-inner.se-wrapper-wysiwyg {
   padding: 0 !important;
+  height: auto !important;
 }

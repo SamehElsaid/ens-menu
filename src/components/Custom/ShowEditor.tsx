@@ -1,21 +1,18 @@
 'use client'
 
-import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import CustomBtn from "./CustomBtn";
 import type SunEditorCore from "suneditor/src/lib/core";
+import SunEditor from "suneditor-react";
 
-const SunEditor = dynamic(() => import("suneditor-react"), {
-  ssr: false,
-});
 
 interface ShowEditorProps {
   initialTemplateName: string;
   showMore?: boolean;
 }
 
-const ShowEditor = ({ initialTemplateName, showMore = true }: ShowEditorProps) => {
+const ShowEditor = ({ initialTemplateName, showMore = false }: ShowEditorProps) => {
   const [showMoreState, setShowMoreState] = useState(false);
   const divRef = useRef<HTMLDivElement>(null);
   const editorInstance = useRef<SunEditorCore | null>(null);
