@@ -4,6 +4,8 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "";
 const MENU_URL = process.env.NEXT_PUBLIC_MENU_URL ?? "";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     const base = (APP_URL || request.nextUrl.origin).replace(/\/$/, "");
