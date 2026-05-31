@@ -11,7 +11,6 @@ import CustomBtn from "./Custom/CustomBtn";
 import CustomRecaptcha from "@/components/Auth/CustomRecaptcha";
 import { useCallback, useState } from "react";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
-import { pushSignUpEvent } from "@/shared/gtmEvents";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
@@ -140,7 +139,11 @@ export default function RegisterForm() {
       true,
     );
     if (response.status) {
-      pushSignUpEvent();
+      try {
+        localStorage.setItem("signup_method", "email");
+      } catch (e) {
+        console.error("Failed to save signup_method to localStorage", e);
+      }
       toast.success(t("auth.registerSuccess"));
       router.push("/auth/login");
     } else {
@@ -252,7 +255,7 @@ export default function RegisterForm() {
         />
       </div>
 
-      
+
 
       <div className="flex items-center justify-center mt-6">
         <LinkTo

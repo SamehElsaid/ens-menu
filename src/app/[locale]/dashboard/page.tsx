@@ -8,6 +8,7 @@ import CreateMenuModal from "@/components/Dashboard/CreateMenuModal";
 import { toast } from "react-toastify";
 import { Menu, MenusResponse } from "@/types/Menu";
 import { Subscription, SubscriptionResponse } from "@/types/Subscription";
+import { pushSignUpEvent, SignUpMethod } from "@/shared/gtmEvents";
 import {
   IoRestaurant,
   IoAddCircleOutline,
@@ -100,6 +101,18 @@ export default function DashboardPage() {
   };
 
   const handleMenuCreated = (newMenu?: Menu) => {
+    if (menus.length === 0) {
+      try {
+        const method =
+          (localStorage.getItem("signup_method") as SignUpMethod | null) ||
+          "email";
+        pushSignUpEvent(method);
+        localStorage.removeItem("signup_method");
+      } catch (e) {
+        console.error("Error pushing signup GTM event:", e);
+        pushSignUpEvent("email");
+      }
+    }
     if (newMenu) {
       setMenus((prev) => [...prev, newMenu]);
     } else {
