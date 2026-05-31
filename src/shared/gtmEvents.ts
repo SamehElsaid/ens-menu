@@ -52,5 +52,10 @@ export function pushFirstMenuCreatedEvent(): void {
   // 3. Fire the configuration commands for AW-18048331734
   window.gtag("js", new Date());
   window.gtag("config", "AW-18048331734");
+
+  // 4. Fire the event snippet for Menu Created conversion
+  window.gtag("event", "conversion", {
+    send_to: "AW-18048331734/VoLwCLfQuLYcENbfjp5D",
+  });
 }
 
