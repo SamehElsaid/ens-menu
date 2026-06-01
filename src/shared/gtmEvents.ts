@@ -27,6 +27,15 @@ export function pushPurchaseEvent({ value, currency }: PurchaseEventData): void 
   });
 }
 
+export function pushMenuCreatedEvent(): void {
+  if (typeof window === "undefined") return;
+
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({
+    event: "menu_created",
+  });
+}
+
 export function pushFirstMenuCreatedEvent(callback?: () => void): void {
   if (typeof window === "undefined") return;
 

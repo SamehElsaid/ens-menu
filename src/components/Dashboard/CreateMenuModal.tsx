@@ -6,6 +6,7 @@ import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLocale, useTranslations } from "next-intl";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
+import { pushMenuCreatedEvent } from "@/shared/gtmEvents";
 import CurrencySelector from "@/components/Global/CurrencySelector";
 import CustomInput from "@/components/Custom/CustomInput";
 import { createMenuSchema, CreateMenuSchema } from "@/schemas/createMenuSchema";
@@ -188,6 +189,7 @@ export default function CreateMenuModal({
       );
 
       if (result.status && result.data) {
+        pushMenuCreatedEvent();
         toast.success(t("createSuccess"));
 
         onMenuCreated?.(result.data);

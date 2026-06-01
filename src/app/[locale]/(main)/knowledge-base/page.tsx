@@ -187,11 +187,10 @@ function KnowledgeBaseInner() {
   return (
     <div
       dir={isRTL ? "rtl" : "ltr"}
-      className="flex min-h-screen bg-slate-50 dark:bg-[#090e18] pt-[72px]"
+      className="flex min-h-screen bg-slate-50 dark:bg-[#090e18] pt-[100px]"
     >
       {/* ══════════════════════ SIDEBAR ══════════════════════ */}
       <aside className="w-72 shrink-0 sticky top-[72px] self-start h-[calc(100vh-72px)] flex flex-col bg-white dark:bg-[#0d1117] border-e border-slate-200 dark:border-slate-800">
-
         {/* ── Header ── */}
         <div className="px-4 pt-5 pb-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
           {/* label row */}
@@ -319,12 +318,11 @@ function KnowledgeBaseInner() {
 
       {/* ══════════════════════ MAIN ══════════════════════ */}
       <main className="flex-1 min-w-0 overflow-y-auto">
-
         {/* loading skeleton */}
         {detailLoading && (
           <div className="px-6 md:px-12 py-10 space-y-5">
             <div className="h-9 w-3/5 bg-slate-200 dark:bg-slate-800 rounded-xl animate-pulse" />
-           
+
             <div className="h-px bg-slate-200 dark:bg-slate-800" />
             <div className="space-y-3 pt-2">
               {[100, 92, 96, 78, 88, 62, 82].map((w, i) => (
@@ -339,8 +337,9 @@ function KnowledgeBaseInner() {
         )}
 
         {/* empty state */}
-        {!detailLoading && !article && (
-          listLoading ? (
+        {!detailLoading &&
+          !article &&
+          (listLoading ? (
             <div className="flex items-center justify-center h-[60vh]">
               <FaSpinner className="animate-spin text-purple-400 text-2xl" />
             </div>
@@ -356,8 +355,7 @@ function KnowledgeBaseInner() {
                 {t("emptyDescription")}
               </p>
             </div>
-          )
-        )}
+          ))}
 
         {/* article */}
         {!detailLoading && article && (
@@ -367,8 +365,6 @@ function KnowledgeBaseInner() {
               <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-50 leading-tight mb-4">
                 {getTitle(article)}
               </h1>
-
-           
 
               {/* dates */}
               {(article.createdAt || article.updatedAt) && (
