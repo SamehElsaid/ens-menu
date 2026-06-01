@@ -13,7 +13,13 @@ import { useCallback, useState } from "react";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import { pushSignUpEvent } from "@/shared/gtmEvents";
 import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
+import { encryptData } from "@/shared/encryption";
+import Cookies from "js-cookie";
+import { useAppDispatch } from "@/store/hooks";
+import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
+import { LoginResponse } from "@/types/LoginResponse";
+import { syncFcmToken } from "@/shared/syncFcmToken";
+import { useRouter } from "@/i18n/navigation";
 
 let emailCheckTimeout: ReturnType<typeof setTimeout> | null = null;
 let lastCheckedAvailableEmail: string | null = null;
@@ -117,6 +123,7 @@ export default function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [recaptchaVerified, setRecaptchaVerified] = useState(false);
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const onSubmit = async (data: RegisterSchema) => {
     if (!recaptchaVerified) {
@@ -142,7 +149,41 @@ export default function RegisterForm() {
     if (response.status) {
       pushSignUpEvent();
       toast.success(t("auth.registerSuccess"));
+
+      const loginResponse = await axiosPost<
+        { email: string; password: string },
+        LoginResponse & { message?: string }
+      >(
+        "/auth/login",
+        locale,
+        { email: data.email, password: data.password },
+        false,
+        true,
+      );
+
+      if (loginResponse.status && loginResponse.data) {
+        const { accessToken, refreshToken, user } = loginResponse.data;
+        const encryptedData = encryptData({
+          token: accessToken ?? "",
+          refreshToken: refreshToken ?? "",
+          role: user?.role ?? "",
+        });
+        Cookies.set("sub", encryptedData, {
+          expires: 3,
+          sameSite: "Lax",
+          secure: true,
+          path: "/",
+        });
+        void syncFcmToken(locale);
+        if (user) {
+          dispatch(SET_ACTIVE_USER({ user }));
+        }
+        window.location.href = `/${locale}${user?.role === "admin" ? "/admin" : "/dashboard"}`;
+        return;
+      }
+
       router.push("/auth/login");
+      setLoading(false);
     } else {
       setLoading(false);
     }

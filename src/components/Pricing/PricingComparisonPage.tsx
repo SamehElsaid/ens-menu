@@ -235,11 +235,7 @@ export default function PricingComparisonPage() {
 
   const proFeatures = useMemo(() => {
     const base = translatePlanFeaturesWithMenuLimit(
-      [
-        t("staticProFeature1"),
-        t("staticProFeature2"),
-        t("staticProFeature3"),
-      ],
+      [t("staticProFeature1"), t("staticProFeature2"), t("staticProFeature3")],
       STATIC_PRO_PLAN.maxMenus,
       tProfile,
     );
@@ -368,7 +364,7 @@ export default function PricingComparisonPage() {
       features: proFeatures,
       premium: true,
       cta: {
-        href: "/auth/register" as const,
+        href: "/auth/login" as const,
         label: t("ctaUpgrade"),
         external: false,
       },
@@ -395,7 +391,7 @@ export default function PricingComparisonPage() {
 
   return (
     <div
-      className="pricing-page relative overflow-hidden bg-[#f8f9fc] py-14 dark:bg-[#070a0f] sm:py-20 lg:py-24"
+      className="pricing-page relative overflow-hidden bg-[#f8f9fc]  dark:bg-[#070a0f]  py-30"
       dir={isRTL ? "rtl" : "ltr"}
     >
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -559,7 +555,7 @@ export default function PricingComparisonPage() {
             <div className=" flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-stretch sm:justify-center sm:gap-4">
               <div className=" order-1 sm:order-2 sm:flex-1 sm:max-w-xs">
                 <Link
-                  href="/auth/register"
+                  href="/auth/login"
                   className="flex h-full min-h-12 items-center justify-center gap-2 rounded-xl bg-linear-to-br from-violet-500 to-indigo-600 px-6 py-3.5 text-center text-sm font-bold text-white shadow-md shadow-violet-500/25 transition hover:scale-[1.02] hover:shadow-violet-500/35 active:scale-[0.98]"
                 >
                   <HiStar className="text-amber-200" aria-hidden />
