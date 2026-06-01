@@ -7,6 +7,9 @@ import { translatePlanFeaturesWithMenuLimit } from "@/lib/planFeatureI18n";
 import { FaSpinner } from "react-icons/fa";
 import { HiCheck, HiOutlineChat } from "react-icons/hi";
 import { Link } from "@/i18n/navigation";
+import ProPlanPriceSelector, {
+  type ProBillingChoice,
+} from "@/components/Pricing/ProPlanPriceSelector";
 
 export type ApiPlan = {
   id: number;
@@ -14,6 +17,8 @@ export type ApiPlan = {
   description: string;
   priceMonthly: number;
   priceYearly: number;
+  firstYearlyPrice?: number;
+  currency?: string;
   maxMenus: number;
   maxProductsPerMenu: number;
   allowCustomDomain: boolean;
@@ -44,6 +49,8 @@ export default function PricingSection() {
   const isRTL = locale === "ar";
   const [plans, setPlans] = useState<ApiPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [proBillingChoice, setProBillingChoice] =
+    useState<ProBillingChoice>("yearly");
 
   const fetchPlans = useCallback(async (): Promise<ApiPlan[]> => {
     const result = await axiosGet<PlansResponse>(
@@ -147,7 +154,7 @@ export default function PricingSection() {
                     0
                   </span>
                   <span className="text-slate-500 dark:text-slate-400 text-sm ml-1">
-                    {t("currencyUsd")} {t("perYear")}
+                    {t("currencyEgp")} {t("perYear")}
                   </span>
                 </div>
                 <ul className="space-y-3 flex-1">
@@ -198,14 +205,16 @@ export default function PricingSection() {
                 <p className="text-slate-500 dark:text-slate-400 text-sm mb-4 line-clamp-2">
                   {proPlan.description}
                 </p>
-                <div className="mb-6">
-                  <span className="text-3xl font-black text-slate-900 dark:text-white">
-                    {proPlan.priceYearly}
-                  </span>
-                  <span className="text-slate-500 dark:text-slate-400 text-sm ml-1">
-                    {t("currencyUsd")} {t("perYear")}
-                  </span>
-                </div>
+                <ProPlanPriceSelector
+                  billingChoice={proBillingChoice}
+                  onBillingChange={setProBillingChoice}
+                  priceMonthly={proPlan.priceMonthly}
+                  priceYearly={proPlan.priceYearly}
+                  firstYearlyPrice={proPlan.firstYearlyPrice}
+                  isRTL={isRTL}
+                  size="large"
+                  className="mb-6"
+                />
                 <ul className="space-y-3 flex-1">
                   {proPlanFeatureLines.map((f, i) => (
                     <li

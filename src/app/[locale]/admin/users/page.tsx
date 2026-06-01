@@ -200,6 +200,19 @@ export default function UsersPage() {
                 width: 120,
             },
             {
+                headerName: t("columns.menusCount"),
+                field: "menusCount",
+                width: 100,
+                cellRenderer: (params: { value: number | undefined }) => {
+                    const count = params.value ?? 0;
+                    return (
+                        <span className="inline-flex items-center justify-center min-w-[2rem] px-2 py-1 rounded-lg text-sm font-semibold bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                            {count}
+                        </span>
+                    );
+                },
+            },
+            {
                 headerName: t("columns.status"),
                 field: "isSuspended",
                 width: 120,

@@ -81,12 +81,18 @@ export type Plan = {
   description: string;
   priceMonthly: number;
   priceYearly: number;
+  firstYearlyPrice?: number;
+  currency?: string;
   maxMenus: number;
   maxProductsPerMenu: number;
   allowCustomDomain: boolean;
   hasAds: boolean;
   features: string[];
 };
+
+function formatEgpPrice(value: number): string {
+  return value.toLocaleString("en-US");
+}
 
 type PlansResponse = {
   success: boolean;
@@ -199,7 +205,10 @@ export default function PersonalProfile({
     null,
   );
   const [subscriptionInfoLoading, setSubscriptionInfoLoading] = useState(true);
-  const [proYearlyPayLoading, setProYearlyPayLoading] = useState(false);
+  const [proBillingChoice, setProBillingChoice] = useState<"monthly" | "yearly">(
+    "yearly",
+  );
+  const [proPayLoading, setProPayLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [changePasswordLoading, setChangePasswordLoading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -482,7 +491,7 @@ export default function PersonalProfile({
     }
   };
 
-  const handleUpgradeToProYearly = useCallback(async () => {
+  const handleUpgradeToPro = useCallback(async () => {
     const nameToSend = name.trim() || profile?.name || "";
     const rawPhone =
       (typeof phone === "string" ? phone.trim() : "") ||
@@ -492,31 +501,41 @@ export default function PersonalProfile({
       "";
     const phoneToSend = formatPhoneForPaymentGateway(rawPhone);
     if (!nameToSend || !phoneToSend) {
-      toast.error(t("payProYearlyError"));
+      toast.error(t("payProError"));
       return;
     }
-    setProYearlyPayLoading(true);
+    const endpoint =
+      proBillingChoice === "monthly"
+        ? "/payment/subscription/pro-monthly/initiate"
+        : "/payment/subscription/pro-yearly/initiate";
+    setProPayLoading(true);
     const res = await axiosPost<
       { name: string; email?: string; mobile: string; currency?: string },
       {
         success?: boolean;
-        data?: { redirectUrl?: string; amount?: number; order_id?: string };
+        data?: {
+          redirectUrl?: string;
+          amount?: number;
+          order_id?: string;
+          currency?: string;
+        };
       }
-    >("/payment/subscription/pro-yearly/initiate", locale, {
+    >(endpoint, locale, {
       name: nameToSend,
       email: profile?.email?.trim() || undefined,
       mobile: phoneToSend,
-      currency: "USD",
+      currency: "EGP",
     });
-    setProYearlyPayLoading(false);
+    setProPayLoading(false);
     if (res?.status && res.data?.data?.redirectUrl) {
       const amount = Number(res.data.data.amount);
+      const currency = res.data.data.currency || "EGP";
       if (Number.isFinite(amount) && amount > 0) {
         sessionStorage.setItem(
           "gtm_pending_purchase",
           JSON.stringify({
             value: amount,
-            currency: "USD",
+            currency,
             orderId: res.data.data.order_id,
           }),
         );
@@ -526,11 +545,12 @@ export default function PersonalProfile({
       return;
     }
     const serverMsg = pickFailedRequestMessage(res?.data as unknown);
-    toast.error(serverMsg ?? t("payProYearlyError"));
+    toast.error(serverMsg ?? t("payProError"));
   }, [
     locale,
     name,
     phone,
+    proBillingChoice,
     profile?.name,
     profile?.email,
     profile?.phoneNumber,
@@ -998,20 +1018,6 @@ export default function PersonalProfile({
                       </dd>
                     </div>
                   </dl>
-                  {!isOnProPlan && !isCurrentCustomPlan && (
-                    <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-600">
-                      <button
-                        type="button"
-                        onClick={handleUpgradeToProYearly}
-                        disabled={proYearlyPayLoading}
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary/90 dark:hover:bg-primary/80 transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
-                      >
-                        {proYearlyPayLoading
-                          ? t("paying")
-                          : t("upgradeToProYearlyCta")}
-                      </button>
-                    </div>
-                  )}
                 </div>
               )}
 
@@ -1069,6 +1075,10 @@ export default function PersonalProfile({
                             ? "md:col-start-2"
                             : "";
 
+                      const isProPlan =
+                        String(plan.name).toLowerCase() === "pro";
+                      const showProBilling = isProPlan && canUpgrade;
+
                       return (
                         <div
                           key={plan.id}
@@ -1105,18 +1115,133 @@ export default function PersonalProfile({
                             plan.priceYearly != null &&
                             (plan.priceYearly > 0 ||
                               plan.priceMonthly === 0) && (
-                              <p className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-3">
+                              <div className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-3 space-y-2">
                                 {plan.priceMonthly === 0 &&
-                                plan.priceYearly === 0
-                                  ? t("freePrice")
-                                  : plan.priceYearly > 0
-                                    ? t("yearlyPriceFormatted", {
-                                        price: plan.priceYearly,
-                                        currency: tLandingPricing("currencyUsd"),
-                                        perYear: tLandingPricing("perYear"),
-                                      })
-                                    : null}
-                              </p>
+                                plan.priceYearly === 0 ? (
+                                  <p>{t("freePrice")}</p>
+                                ) : showProBilling ? (
+                                  <>
+                                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                                      {t("selectBillingCycle")}
+                                    </p>
+                                    <div
+                                      className={`inline-flex w-full rounded-xl border border-slate-200 dark:border-slate-600 p-1 bg-white dark:bg-slate-900 ${isRTL ? "flex-row-reverse" : ""}`}
+                                      role="group"
+                                      aria-label={t("selectBillingCycle")}
+                                    >
+                                      {(["monthly", "yearly"] as const).map(
+                                        (cycle) => (
+                                          <button
+                                            key={cycle}
+                                            type="button"
+                                            onClick={() =>
+                                              setProBillingChoice(cycle)
+                                            }
+                                            className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                                              proBillingChoice === cycle
+                                                ? "bg-primary text-white shadow-sm"
+                                                : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                            }`}
+                                          >
+                                            {cycle === "monthly"
+                                              ? t("monthly")
+                                              : t("yearly")}
+                                          </button>
+                                        ),
+                                      )}
+                                    </div>
+                                    <p>
+                                      {proBillingChoice === "monthly"
+                                        ? t("monthlyPriceFormatted", {
+                                            price: formatEgpPrice(
+                                              plan.priceMonthly,
+                                            ),
+                                            currency:
+                                              tLandingPricing("currencyEgp"),
+                                            perMonth:
+                                              tLandingPricing("perMonth"),
+                                          })
+                                        : t("yearlyPriceFormatted", {
+                                            price: formatEgpPrice(
+                                              plan.firstYearlyPrice ??
+                                                plan.priceYearly,
+                                            ),
+                                            currency:
+                                              tLandingPricing("currencyEgp"),
+                                            perYear:
+                                              tLandingPricing("perYear"),
+                                          })}
+                                    </p>
+                                    {proBillingChoice === "yearly" &&
+                                      plan.firstYearlyPrice != null &&
+                                      plan.firstYearlyPrice > 0 &&
+                                      plan.firstYearlyPrice <
+                                        plan.priceYearly && (
+                                        <>
+                                          <p className="text-sm text-slate-500 dark:text-slate-400 line-through font-normal">
+                                            {t("yearlyPriceBeforeDiscount", {
+                                              price: formatEgpPrice(
+                                                plan.priceYearly,
+                                              ),
+                                              currency:
+                                                tLandingPricing("currencyEgp"),
+                                            })}
+                                          </p>
+                                          <p className="text-sm font-semibold text-primary">
+                                            {t("proFirstYearlyOffer")}
+                                          </p>
+                                        </>
+                                      )}
+                                  </>
+                                ) : (
+                                  <>
+                                    {plan.priceMonthly > 0 && (
+                                      <p>
+                                        {t("monthlyPriceFormatted", {
+                                          price: formatEgpPrice(
+                                            plan.priceMonthly,
+                                          ),
+                                          currency:
+                                            tLandingPricing("currencyEgp"),
+                                          perMonth:
+                                            tLandingPricing("perMonth"),
+                                        })}
+                                      </p>
+                                    )}
+                                    {plan.priceYearly > 0 && (
+                                      <p>
+                                        {t("yearlyPriceFormatted", {
+                                          price: formatEgpPrice(
+                                            plan.priceYearly,
+                                          ),
+                                          currency:
+                                            tLandingPricing("currencyEgp"),
+                                          perYear: tLandingPricing("perYear"),
+                                        })}
+                                      </p>
+                                    )}
+                                    {plan.firstYearlyPrice != null &&
+                                      plan.firstYearlyPrice > 0 &&
+                                      plan.firstYearlyPrice <
+                                        plan.priceYearly && (
+                                        <>
+                                          <p className="text-sm text-slate-500 dark:text-slate-400 line-through font-normal">
+                                            {t("yearlyPriceBeforeDiscount", {
+                                              price: formatEgpPrice(
+                                                plan.priceYearly,
+                                              ),
+                                              currency:
+                                                tLandingPricing("currencyEgp"),
+                                            })}
+                                          </p>
+                                          <p className="text-sm font-semibold text-primary">
+                                            {t("proFirstYearlyOffer")}
+                                          </p>
+                                        </>
+                                      )}
+                                  </>
+                                )}
+                              </div>
                             )}
                           {(isComingSoon || isCustomPlan) &&
                             plan.priceMonthly === 0 && (
@@ -1160,12 +1285,18 @@ export default function PersonalProfile({
                             {canUpgrade && (
                               <button
                                 type="button"
-                                onClick={handleUpgradeToProYearly}
-                                disabled={proYearlyPayLoading}
+                                onClick={handleUpgradeToPro}
+                                disabled={proPayLoading}
                                 className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white font-medium text-sm hover:bg-primary/90 dark:hover:bg-primary/80 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                               >
                                 <HiArrowUp className="w-4 h-4" />
-                                {t("upgrade")}
+                                {proPayLoading
+                                  ? t("paying")
+                                  : isProPlan
+                                    ? proBillingChoice === "monthly"
+                                      ? t("upgradeToProMonthlyCta")
+                                      : t("upgradeToProYearlyCta")
+                                    : t("upgrade")}
                               </button>
                             )}
                             {canDowngrade && (

@@ -2,8 +2,12 @@
 
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import ProPlanPriceSelector, {
+  type ProBillingChoice,
+} from "@/components/Pricing/ProPlanPriceSelector";
 import { translatePlanFeaturesWithMenuLimit } from "@/lib/planFeatureI18n";
 import { BsQrCode } from "react-icons/bs";
 import {
@@ -14,11 +18,41 @@ import {
   HiStar,
   HiChevronDown,
   HiInformationCircle,
+  HiShieldCheck,
 } from "react-icons/hi";
 
 const WHATSAPP_URL = "https://wa.me/201500800050";
-const STATIC_PRO_YEARLY_USD = 100;
+const STATIC_PRO_MONTHLY_EGP = 499;
+const STATIC_PRO_YEARLY_EGP = 5988;
+const STATIC_PRO_FIRST_YEAR_EGP = 5489;
 const FAQ_IDS = ["faq1", "faq2", "faq3"] as const;
+
+const PAYMENT_METHODS = [
+  {
+    id: "visa",
+    imageSrc: "/payment/VISA-logo-768x432.png",
+    imageWidth: 160,
+    imageHeight: 90,
+  },
+  {
+    id: "vodafoneCash",
+    imageSrc: "/payment/clipart1517832.png",
+    imageWidth: 96,
+    imageHeight: 96,
+  },
+  {
+    id: "orangeMoney",
+    imageSrc: "/payment/Orange_Money_29.webp",
+    imageWidth: 140,
+    imageHeight: 48,
+  },
+  {
+    id: "etisalatCash",
+    imageSrc: "/payment/etisalat-logo.svg",
+    imageWidth: 120,
+    imageHeight: 40,
+  },
+] as const;
 
 const STATIC_FREE_PLAN = {
   maxMenus: 1,
@@ -222,11 +256,13 @@ export default function PricingComparisonPage() {
   const locale = useLocale();
   const isRTL = locale === "ar";
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [proBillingChoice, setProBillingChoice] =
+    useState<ProBillingChoice>("yearly");
 
   const freeFeatures = useMemo(
     () =>
       translatePlanFeaturesWithMenuLimit(
-        [t("staticFreeFeature1"), t("staticFreeFeature2")],
+        [t("staticFreeFeature1"), t("staticFreeFeature2"), t("staticFreeFeatureAI")],
         STATIC_FREE_PLAN.maxMenus,
         tProfile,
       ),
@@ -241,6 +277,7 @@ export default function PricingComparisonPage() {
     );
     return [
       ...base,
+      t("staticProFeatureAI"),
       tLanding("proExtraFeatures.staffSystem"),
       tLanding("proExtraFeatures.tablesSystem"),
       t("proStaffMobileAppBullet"),
@@ -318,6 +355,12 @@ export default function PricingComparisonPage() {
       custom: true,
     },
     {
+      label: t("rowAI"),
+      free: t("aiFree"),
+      pro: t("aiPro"),
+      custom: t("aiCustom"),
+    },
+    {
       label: t("rowDesign"),
       free: t("designFree"),
       pro: t("designPro"),
@@ -345,7 +388,7 @@ export default function PricingComparisonPage() {
       id: "free",
       title: tLanding("planFree"),
       desc: t("staticFreeDescription"),
-      price: `0${tLanding("currencyUsd")}`,
+      price: `0${tLanding("currencyEgp")}`,
       priceNote: tLanding("perYear"),
       features: freeFeatures,
       premium: false,
@@ -359,8 +402,6 @@ export default function PricingComparisonPage() {
       id: "pro",
       title: tLanding("planPro"),
       desc: t("staticProDescription"),
-      price: `${STATIC_PRO_YEARLY_USD}${tLanding("currencyUsd")}`,
-      priceNote: tLanding("perYear"),
       features: proFeatures,
       premium: true,
       cta: {
@@ -460,7 +501,7 @@ export default function PricingComparisonPage() {
                         {tLanding("planFree")}
                       </div>
                       <div className="text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">
-                        0$
+                        0{tLanding("currencyEgp")}
                       </div>
                     </th>
                     <th
@@ -474,19 +515,21 @@ export default function PricingComparisonPage() {
                         <div className="mb-1.5 break-words text-sm font-semibold text-violet-700 dark:text-violet-300 sm:text-base">
                           {tLanding("planPro")}
                         </div>
-                        <div className="relative inline-block">
+                        <div className="relative inline-block w-full max-w-[12rem]">
                           <div
                             className="absolute -inset-x-6 -top-2 bottom-0 rounded-full bg-gradient-to-t from-transparent via-violet-300/20 to-fuchsia-300/25 opacity-80 blur-xl dark:via-violet-500/12 dark:to-fuchsia-500/10"
                             aria-hidden
                           />
-                          <div
-                            className={`relative text-2xl font-black tracking-tight sm:text-4xl ${cellProText}`}
-                          >
-                            {STATIC_PRO_YEARLY_USD}$
-                            <span className="ms-0.5 align-top text-[9px] font-medium text-violet-800/70 dark:text-violet-200/75 sm:text-xs">
-                              /{tLanding("perYear")}
-                            </span>
-                          </div>
+                          <ProPlanPriceSelector
+                            billingChoice={proBillingChoice}
+                            onBillingChange={setProBillingChoice}
+                            priceMonthly={STATIC_PRO_MONTHLY_EGP}
+                            priceYearly={STATIC_PRO_YEARLY_EGP}
+                            firstYearlyPrice={STATIC_PRO_FIRST_YEAR_EGP}
+                            isRTL={isRTL}
+                            compact
+                            className="relative"
+                          />
                         </div>
                       </div>
                     </th>
@@ -542,6 +585,62 @@ export default function PricingComparisonPage() {
                   })}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </section>
+
+        {/* Payment methods */}
+        <section
+          className="mt-10 sm:mt-12"
+          aria-labelledby="pricing-payment-heading"
+        >
+          <div className="rounded-2xl border border-slate-200/90 bg-white/90 p-5 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/70 sm:rounded-3xl sm:p-7">
+            <div className="flex flex-col items-center gap-4 text-center sm:gap-5">
+              <div className="flex items-center gap-2">
+                <HiShieldCheck
+                  className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400"
+                  aria-hidden
+                />
+                <h2
+                  id="pricing-payment-heading"
+                  className="text-base font-bold text-slate-900 dark:text-white sm:text-lg"
+                >
+                  {t("paymentMethodsTitle")}
+                </h2>
+              </div>
+              <p className="max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                {t("paymentMethodsDescription")}
+              </p>
+              <ul className="flex flex-wrap justify-center gap-3 sm:gap-4">
+                {PAYMENT_METHODS.map((method) => {
+                  const label = t(`paymentMethod.${method.id}`);
+                  return (
+                    <li key={method.id}>
+                      <div className="flex h-14 min-w-28 items-center justify-center rounded-xl border border-slate-200/90 bg-white px-4 py-2 shadow-sm dark:border-slate-700/80 dark:bg-slate-800/80 sm:h-16 sm:min-w-32 sm:px-5">
+                        {method.imageSrc.endsWith(".svg") ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={method.imageSrc}
+                            alt={label}
+                            className="h-8 max-w-28 object-contain sm:h-9 sm:max-w-32"
+                          />
+                        ) : (
+                          <Image
+                            src={method.imageSrc}
+                            alt={label}
+                            width={method.imageWidth}
+                            height={method.imageHeight}
+                            className="h-8 w-auto max-w-28 object-contain sm:h-9 sm:max-w-32"
+                          />
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+              <p className="text-xs text-slate-500 dark:text-slate-500">
+                {t("paymentMethodsSecureNote")}
+              </p>
             </div>
           </div>
         </section>
@@ -624,13 +723,26 @@ export default function PricingComparisonPage() {
                   {card.desc}
                 </p>
                 <div className="mt-5 border-b border-slate-200/80 pb-5 dark:border-slate-700/60">
-                  <span className="text-3xl font-black text-slate-900 dark:text-white">
-                    {card.price}
-                  </span>
-                  {card.priceNote && (
-                    <span className="ms-1 text-sm font-medium text-slate-500 dark:text-slate-400">
-                      {card.priceNote}
-                    </span>
+                  {card.id === "pro" ? (
+                    <ProPlanPriceSelector
+                      billingChoice={proBillingChoice}
+                      onBillingChange={setProBillingChoice}
+                      priceMonthly={STATIC_PRO_MONTHLY_EGP}
+                      priceYearly={STATIC_PRO_YEARLY_EGP}
+                      firstYearlyPrice={STATIC_PRO_FIRST_YEAR_EGP}
+                      isRTL={isRTL}
+                    />
+                  ) : (
+                    <>
+                      <span className="text-3xl font-black text-slate-900 dark:text-white">
+                        {"price" in card ? card.price : ""}
+                      </span>
+                      {"priceNote" in card && card.priceNote && (
+                        <span className="ms-1 text-sm font-medium text-slate-500 dark:text-slate-400">
+                          {card.priceNote}
+                        </span>
+                      )}
+                    </>
                   )}
                 </div>
                 <ul className="mt-5 flex-1 space-y-2.5 sm:space-y-3">

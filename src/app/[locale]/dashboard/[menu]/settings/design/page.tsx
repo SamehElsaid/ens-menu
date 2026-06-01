@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
 import LoadImage from "@/components/ImageLoad";
 import { templatesInfo } from "@/modules/TemplateShow/data";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import LinkTo from "@/components/Global/LinkTo";
+import TemplateDesignCustomizePanel from "@/components/Settings/TemplateDesignCustomizePanel";
 import { FiEye, FiSettings } from "react-icons/fi";
 import { HiOutlineHand } from "react-icons/hi";
 import { axiosPatch } from "@/shared/axiosCall";
@@ -23,14 +24,21 @@ import {
 } from "@/lib/onboarding/onboardingStorage";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 
+const customizeButtonClassName =
+  "flex-1 inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-xs font-medium border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors";
+
 export default function DesignPage() {
   const locale = useLocale();
   const isRTL = locale === "ar";
+  const routeParams = useParams<{ menu: string }>();
 
   const t = useTranslations("settingsDesignPage");
 
   const dispatch = useAppDispatch();
   const { menu } = useAppSelector((state) => state.menuData);
+  const resolvedMenuId =
+    menu?.id ??
+    (routeParams?.menu ? Number(routeParams.menu) : undefined);
   const templatesForMenu = templatesInfo.filter((template) => {
     if (template.showInPickerOnlyWhenThemeMatches) {
       return menu?.theme === template.id;
@@ -38,6 +46,10 @@ export default function DesignPage() {
     return true;
   });
   const [isLoading, setIsLoading] = useState<boolean | string>(false);
+  const [customizingSlug, setCustomizingSlug] = useState<string | null>(null);
+  const [customizeLoadingSlug, setCustomizeLoadingSlug] = useState<
+    string | null
+  >(null);
   const [activeTemplateId, setActiveTemplateId] = useState<string>(
     typeof menu?.theme === "string" && menu.theme !== ""
       ? (menu.theme as string)
@@ -58,36 +70,94 @@ export default function DesignPage() {
     }
   }, []);
 
-  const handleSelectTemplate = async (templateId: string) => {
-    if (!menu?.id) return;
+  const handleSelectTemplate = async (
+    templateId: string,
+    options?: { silentOnboarding?: boolean; skipLoadingUi?: boolean },
+  ): Promise<boolean> => {
+    if (!resolvedMenuId) {
+      return false;
+    }
 
-    setIsLoading(templateId);
+    if (!options?.skipLoadingUi) {
+      setIsLoading(templateId);
+    }
     try {
       const payload = { theme: templateId };
       const result = await axiosPatch<typeof payload, Menu>(
-        `/menus/${menu.id}`,
+        `/menus/${resolvedMenuId}`,
         locale,
         payload,
       );
 
       if (result.status) {
         setActiveTemplateId(templateId);
-        dispatch(
-          SET_ACTIVE_USER({
-            ...menu,
-            theme: templateId,
-          }),
-        );
-        if (!isOnboardingCompleted()) {
+        if (menu) {
+          dispatch(
+            SET_ACTIVE_USER({
+              ...menu,
+              theme: templateId,
+            }),
+          );
+        }
+        if (!options?.silentOnboarding && !isOnboardingCompleted()) {
           markTourSeen("settings-design");
           completeOnboarding();
           toast.success(t("onboardingComplete"));
         }
+        return true;
       }
+      return false;
     } finally {
-      setIsLoading(false);
+      if (!options?.skipLoadingUi) {
+        setIsLoading(false);
+      }
     }
   };
+
+  const handleOpenCustomize = async (template: {
+    id: string;
+    slug: string;
+  }) => {
+    if (!resolvedMenuId) {
+      toast.error(
+        locale === "ar"
+          ? "لا توجد قائمة محددة."
+          : "No menu selected.",
+      );
+      return;
+    }
+
+    setCustomizeLoadingSlug(template.slug);
+    try {
+      if (template.id !== activeTemplateId) {
+        const activated = await handleSelectTemplate(template.id, {
+          silentOnboarding: true,
+          skipLoadingUi: true,
+        });
+        if (!activated) {
+          toast.error(
+            locale === "ar"
+              ? "تعذّر تفعيل القالب. حاول مرة أخرى."
+              : "Could not activate the template. Please try again.",
+          );
+          return;
+        }
+      }
+      setCustomizingSlug(template.slug);
+    } finally {
+      setCustomizeLoadingSlug(null);
+    }
+  };
+
+  if (customizingSlug) {
+    return (
+      <TemplateDesignCustomizePanel
+        tempSlug={customizingSlug}
+        embedded
+        onClose={() => setCustomizingSlug(null)}
+      />
+    );
+  }
 
   return (
     <div className="space-y-8 mb-2">
@@ -117,7 +187,7 @@ export default function DesignPage() {
             const isNew = template.isNew;
             const linkView =
               "https://" + template.slug + process.env.NEXT_PUBLIC_MENU_URL;
-            const editLink = `/dashboard/${menu?.id}/settings/design/${template.slug}`;
+            const isCustomizeLoading = customizeLoadingSlug === template.slug;
 
             return (
               <div
@@ -271,19 +341,22 @@ export default function DesignPage() {
                         {t("cards.preview")}
                       </button>
                       {template.canEdit && (
-                        <LinkTo
-                          href={isActive ? editLink : "#"}
-                          onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                        <button
+                          type="button"
+                          disabled={Boolean(customizeLoadingSlug)}
+                          onClick={(e) => {
                             e.stopPropagation();
-                            if (!isActive) {
-                              toast.error(t("cards.templateNotActive"));
-                            }
+                            void handleOpenCustomize(template);
                           }}
-                          className={`flex-1 inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-xs font-medium border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors ${!template.canEdit ? "cursor-not-allowed opacity-50" : ""}`}
+                          className={`${customizeButtonClassName} disabled:opacity-60 disabled:cursor-wait`}
                         >
-                          <FiSettings className="text-sm" />
+                          {isCustomizeLoading ? (
+                            <FaSpinner className="animate-spin text-sm" />
+                          ) : (
+                            <FiSettings className="text-sm" />
+                          )}
                           {t("cards.customize")}
-                        </LinkTo>
+                        </button>
                       )}
                     </div>
                   </div>
