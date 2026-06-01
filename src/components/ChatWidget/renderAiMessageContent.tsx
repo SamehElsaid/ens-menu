@@ -1,6 +1,9 @@
 "use client";
 
-import { hasContactIntent, sanitizeAiMessage } from "@/lib/lena/sanitizeAiMessage";
+import {
+  hasContactIntent,
+  sanitizeAiMessage,
+} from "@/lib/lena/sanitizeAiMessage";
 import { LENA_CTA_URLS } from "@/lib/lena/assistantConfig";
 import ChatCtaButton from "./ChatCtaButton";
 
@@ -17,7 +20,11 @@ type ExtractedCta = {
 };
 
 const URL_LABEL_RULES: UrlLabelRule[] = [
-  { test: (p) => /\/pricing/i.test(p), label: "👀 شوف الأسعار", variant: "primary" },
+  {
+    test: (p) => /\/pricing/i.test(p),
+    label: "👀 شوف الأسعار",
+    variant: "primary",
+  },
   {
     test: (p) => /\/auth\/register|\/register/i.test(p),
     label: "🚀 ابدأ مجانًا",
@@ -33,7 +40,11 @@ const URL_LABEL_RULES: UrlLabelRule[] = [
     label: "📱 التطبيق",
     variant: "primary",
   },
-  { test: (p) => /\/contact/i.test(p), label: "📞 تواصل معنا", variant: "secondary" },
+  {
+    test: (p) => /\/contact/i.test(p),
+    label: "📞 تواصل معنا",
+    variant: "secondary",
+  },
 ];
 
 const KEYWORD_CTAS: {
@@ -110,7 +121,7 @@ const PHRASE_LINKS = [
     href: LENA_CTA_URLS.pricing,
   },
   {
-    phrases: ["افتح التطبيق 📱", "افتح التطبيق", "حمّل التطبيق"],
+    phrases: ["افتح التطبيق 📱", "افتح التطبيق", "حمل التطبيق"],
     href: LENA_CTA_URLS.mobileApp,
   },
   {
@@ -208,7 +219,10 @@ function isCtaOnlyLine(line: string): boolean {
 function stripPhrases(text: string): string {
   let result = text;
   for (const { phrase } of ALL_PHRASES) {
-    const regex = new RegExp(phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+    const regex = new RegExp(
+      phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+      "gi",
+    );
     result = result.replace(regex, "");
   }
   return result;

@@ -5,12 +5,20 @@ import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { axiosGet } from "@/shared/axiosCall";
+import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import AddItemModal from "@/components/Dashboard/AddItemModal";
 import DeleteItemConfirm from "@/components/Dashboard/DeleteItemConfirm";
 import DataTable from "@/components/Custom/DataTable";
 import LinkTo from "@/components/Global/LinkTo";
 import LoadImage from "@/components/ImageLoad";
 import { Item, Category } from "@/types/Menu";
+import { usePathname } from "@/i18n/navigation";
+import {
+  getOnboardingPhase,
+  isOnboardingCompleted,
+  ONBOARDING_REFRESH_EVENT,
+  setOnboardingPhase,
+} from "@/lib/onboarding/onboardingStorage";
 import {
   IoAddCircleOutline,
   IoEllipseSharp,
@@ -29,6 +37,7 @@ export default function ItemsPage() {
     typeof params.menu === "string"
       ? params.menu
       : ((params.menu as string[])?.[0] ?? "");
+  const pathname = usePathname();
 
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
@@ -166,9 +175,26 @@ export default function ItemsPage() {
     setDeletingItem(item);
   }, []);
 
+  useEffect(() => {
+    if (isOnboardingCompleted()) return;
+    const phase = getOnboardingPhase();
+    if (phase === "go-to-menu" && pathname.includes("/items")) {
+      setOnboardingPhase("add-item");
+      window.dispatchEvent(new Event(ONBOARDING_REFRESH_EVENT));
+    }
+  }, [pathname]);
+
   const refreshList = useCallback(() => {
     setRefreshing((r) => r + 1);
   }, []);
+
+  const handleItemSaved = useCallback(() => {
+    refreshList();
+    if (!isOnboardingCompleted()) {
+      setOnboardingPhase("go-to-design");
+      window.dispatchEvent(new Event(ONBOARDING_REFRESH_EVENT));
+    }
+  }, [refreshList]);
 
   const closeAddModal = useCallback(() => {
     setShowAddModal(false);
@@ -327,11 +353,16 @@ export default function ItemsPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+      <div
+        id="onboarding-items-header"
+        className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8"
+      >
         <div>
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
-            {t("title")}
-          </h1>
+          <PageTitleWithHelp>
+            <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
+              {t("title")}
+            </h1>
+          </PageTitleWithHelp>
           <p className="text-slate-500 dark:text-slate-400 mt-1">
             {t("subtitle")}
           </p>
@@ -344,6 +375,7 @@ export default function ItemsPage() {
             {tStaff("backToOverview")}
           </LinkTo>
           <button
+            id="onboarding-add-item"
             onClick={() => {
               setEditingItem(null);
               setShowAddModal(true);
@@ -356,7 +388,10 @@ export default function ItemsPage() {
         </div>
       </div>
 
-      <div className="mb-6 p-5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div
+        id="onboarding-items-filters"
+        className="mb-6 p-5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm"
+      >
         <div className="flex flex-wrap items-end gap-4">
           <div
             className="flex-1 min-w-[200px]"
@@ -441,6 +476,7 @@ export default function ItemsPage() {
         </div>
       </div>
 
+      <div id="onboarding-items-table">
       <DataTable<Item>
         rowData={items}
         columnDefs={columnDefs}
@@ -453,6 +489,7 @@ export default function ItemsPage() {
         totalPages={totalPages}
         onPageChange={(p) => setPage(p)}
       />
+      </div>
 
       {(showAddModal || editingItem) && menuId && (
         <AddItemModal
@@ -460,7 +497,7 @@ export default function ItemsPage() {
           item={editingItem}
           categories={categories}
           onClose={closeAddModal}
-          onRefresh={refreshList}
+          onRefresh={handleItemSaved}
         />
       )}
 

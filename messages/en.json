@@ -2320,6 +2320,7 @@
   "settingsDesignPage": {
     "title": "Menu design",
     "subtitle": "Choose the template that best fits how you want your menu to look. You can change it at any time.",
+    "onboardingComplete": "Great! Your menu setup tour is complete. Your menu is ready to share.",
     "badges": {
       "activeNow": "Active now",
       "currentTemplate": "Current template",
@@ -2590,5 +2591,249 @@
     "saveError": "Failed to update promo banner",
     "fetchError": "Failed to load promo banner",
     "textRequired": "Promotional text is required"
+  },
+  "onboarding": {
+    "tourLabel": "Quick guide",
+    "restartTutorial": "Replay this page",
+    "noTourOnPage": "There is no guide for this page.",
+    "progress": "'{{current}} of {{total}}'",
+    "buttons": {
+      "next": "Next",
+      "prev": "Back",
+      "done": "Got it",
+      "skip": "Skip"
+    },
+    "steps": {
+      "createMenu": {
+        "title": "Create your first menu",
+        "description": "Click here to set up your restaurant's digital menu with name, logo, and link."
+      },
+      "createMenuForm": {
+        "title": "Menu details",
+        "description": "Fill in your menu name in Arabic and English, description, currency, and upload your logo."
+      },
+      "createMenuSubmit": {
+        "title": "Save your menu",
+        "description": "When you're done, press here to create the menu and continue."
+      },
+      "manageMenu": {
+        "title": "Open your menu",
+        "description": "Tap Manage to open the dashboard for this menu and continue setup."
+      },
+      "navProducts": {
+        "title": "Go to products",
+        "description": "Open the Products tab to add items to your menu."
+      },
+      "personalProfile": {
+        "header": {
+          "title": "Personal profile",
+          "description": "Update your account details here. Use the back link to return to the previous page when you are done."
+        },
+        "personalInfo": {
+          "title": "Personal information",
+          "description": "Change your photo, name, phone, country, address, date of birth, and gender. Press Save Changes when finished."
+        },
+        "password": {
+          "title": "Change password",
+          "description": "Enter your current password, then a new password (at least 8 characters). You will be signed out after a successful change."
+        },
+        "subscription": {
+          "title": "Subscription & plans",
+          "description": "See your current plan, renewal date, and limits. Compare Free and Pro or contact us on WhatsApp for a Custom plan."
+        }
+      },
+      "menuOverview": {
+        "header": {
+          "title": "Menu overview",
+          "description": "This is your control center for this menu. The name and short description remind you which menu you are managing."
+        },
+        "nav": {
+          "title": "Quick navigation",
+          "description": "Use these tabs to jump between overview, categories, products, tables, staff, settings, and to preview your live menu."
+        },
+        "stats": {
+          "title": "Key numbers",
+          "description": "See how many categories, active products, and total products your menu has at a glance."
+        },
+        "qr": {
+          "title": "Menu QR code",
+          "description": "Download and print this QR code so customers can open your digital menu on their phones."
+        },
+        "quickActions": {
+          "title": "Shortcuts",
+          "description": "Open a live preview, go to menu settings, or manage products in one click from here."
+        },
+        "activity": {
+          "title": "Latest activity",
+          "description": "Track the most recent products and categories added or updated, with quick links to view them."
+        }
+      },
+      "sidebarItems": {
+        "title": "Products section",
+        "description": "You can always open the products page from the sidebar to manage your menu items."
+      },
+      "addItem": {
+        "title": "Add a product",
+        "description": "Add your dishes with price, category, and photo so customers can see them on the menu."
+      },
+      "sidebarSettings": {
+        "title": "Menu settings",
+        "description": "Open Settings from the sidebar to customize your menu design."
+      },
+      "designTab": {
+        "title": "Menu design",
+        "description": "Open the Design tab to choose how your public menu looks."
+      },
+      "selectTemplate": {
+        "title": "Pick a template",
+        "description": "Choose a design template for your menu. You can change it anytime later."
+      },
+      "categoriesPage": {
+        "header": {
+          "title": "Categories",
+          "description": "Organize your menu into sections. Each category groups related products."
+        },
+        "actions": {
+          "title": "Add a category",
+          "description": "Create categories with a name and image, then assign products to them."
+        },
+        "table": {
+          "title": "Your categories",
+          "description": "Edit or delete categories from this list. Changes appear on your live menu."
+        }
+      },
+      "itemsPage": {
+        "header": {
+          "title": "Products",
+          "description": "Manage everything customers see on your menu: dishes, prices, and photos."
+        },
+        "filters": {
+          "title": "Search & filters",
+          "description": "Find products by name, category, or availability before editing."
+        },
+        "table": {
+          "title": "Product list",
+          "description": "View all items in a table. Use the action buttons to edit or remove any product."
+        },
+        "add": {
+          "title": "Add a product",
+          "description": "Add dishes with price, category, and photo so customers can order from your menu."
+        }
+      },
+      "tablesPage": {
+        "upgrade": {
+          "title": "Tables (Pro)",
+          "description": "Upgrade your plan to create tables, QR links per table, and staff call features."
+        },
+        "header": {
+          "title": "Tables",
+          "description": "Each table gets its own QR code so guests open the menu with the correct table number."
+        },
+        "actions": {
+          "title": "Add a table",
+          "description": "Create table numbers and download QR codes to place on each table."
+        },
+        "table": {
+          "title": "Table list",
+          "description": "Copy menu links, download QR codes, and activate or deactivate tables from here."
+        }
+      },
+      "staffPage": {
+        "upgrade": {
+          "title": "Staff (Pro)",
+          "description": "Upgrade to add waiters and kitchen staff who receive orders on their devices."
+        },
+        "header": {
+          "title": "Staff",
+          "description": "Manage team members who handle orders and table calls for this menu."
+        },
+        "actions": {
+          "title": "Add staff",
+          "description": "Invite staff with name, role, and login so they can work from the staff app."
+        },
+        "table": {
+          "title": "Staff list",
+          "description": "Edit roles or remove staff members. Inactive staff cannot sign in."
+        }
+      },
+      "advertisementsPage": {
+        "upgrade": {
+          "title": "Promotions (Pro)",
+          "description": "Upgrade to show promotional banners on your public menu."
+        },
+        "header": {
+          "title": "Advertisements",
+          "description": "Create promotional banners that appear on your digital menu."
+        },
+        "actions": {
+          "title": "New promotion",
+          "description": "Add an image, title, text, and optional link for each banner."
+        },
+        "table": {
+          "title": "Your promotions",
+          "description": "Review, edit, or delete active and scheduled ads from this table."
+        }
+      },
+      "activityHistoryPage": {
+        "header": {
+          "title": "Activity log",
+          "description": "Track table calls and orders in real time. Useful for monitoring service during busy hours."
+        },
+        "search": {
+          "title": "Search orders",
+          "description": "Filter by order ID or customer details to find a specific call quickly."
+        },
+        "table": {
+          "title": "Recent activity",
+          "description": "Open any row to see full order details, items, and staff actions."
+        }
+      },
+      "settingsPage": {
+        "general": {
+          "title": "General info",
+          "description": "Update menu name and description in Arabic and English as shown to customers."
+        },
+        "branding": {
+          "title": "Logo & currency",
+          "description": "Upload your logo and confirm the currency used for all prices."
+        },
+        "status": {
+          "title": "Menu status",
+          "description": "Activate or pause the menu. Paused menus are hidden from the public link."
+        },
+        "save": {
+          "title": "Save changes",
+          "description": "Press here after editing. Unsaved changes will not appear on your live menu."
+        }
+      },
+      "settingsMedia": {
+        "header": {
+          "title": "Media & contact",
+          "description": "Social links, address, phone, and opening hours shown on your public menu."
+        },
+        "social": {
+          "title": "Social media",
+          "description": "Add links to Facebook, Instagram, Twitter, and WhatsApp."
+        },
+        "contact": {
+          "title": "Contact details",
+          "description": "Set your address in both languages and a phone number for customers."
+        },
+        "hours": {
+          "title": "Opening hours",
+          "description": "Set open and close times per day, or mark days as closed."
+        }
+      },
+      "settingsDesign": {
+        "header": {
+          "title": "Menu design",
+          "description": "Choose how your public menu looks. You can customize templates after selecting one."
+        },
+        "templates": {
+          "title": "Templates",
+          "description": "Pick a template, preview it live, or open customize to adjust colors and layout."
+        }
+      }
+    }
   }
 }

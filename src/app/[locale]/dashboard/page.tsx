@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { axiosGet, axiosDelete, axiosPatch } from "@/shared/axiosCall";
 import LinkTo from "@/components/Global/LinkTo";
 import CreateMenuModal from "@/components/Dashboard/CreateMenuModal";
+import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import { pushFirstMenuCreatedEvent } from "@/shared/gtmEvents";
 import { toast } from "react-toastify";
 import { Menu, MenusResponse } from "@/types/Menu";
@@ -27,6 +28,11 @@ import {
   IoCalendarOutline,
 } from "react-icons/io5";
 import LoadImage from "@/components/ImageLoad";
+import {
+  isOnboardingCompleted,
+  ONBOARDING_REFRESH_EVENT,
+  setOnboardingPhase,
+} from "@/lib/onboarding/onboardingStorage";
 
 export default function DashboardPage() {
   const t = useTranslations("Menus");
@@ -88,6 +94,12 @@ export default function DashboardPage() {
   }, [fetchSubscription]);
 
   useEffect(() => {
+    if (showCreateModal) {
+      window.dispatchEvent(new Event("ensmenu-onboarding-refresh"));
+    }
+  }, [showCreateModal]);
+
+  useEffect(() => {
     if (!deleteTarget) setDeleteConfirmText("");
   }, [deleteTarget]);
 
@@ -96,6 +108,9 @@ export default function DashboardPage() {
     if (menus.length >= maxMenus) {
       setShowLimitModal(true);
     } else {
+      if (!isOnboardingCompleted()) {
+        setOnboardingPhase("create-menu-modal");
+      }
       setShowCreateModal(true);
     }
   };
@@ -107,6 +122,10 @@ export default function DashboardPage() {
 
     if (newMenu) {
       setMenus((prev) => [...prev, newMenu]);
+      if (!isOnboardingCompleted()) {
+        setOnboardingPhase("go-to-menu");
+        window.dispatchEvent(new Event(ONBOARDING_REFRESH_EVENT));
+      }
     } else {
       fetchMenus();
     }
@@ -260,11 +279,14 @@ export default function DashboardPage() {
             <IoStorefrontOutline className="text-primary text-6xl" />
           </div>
           <div className="text-center max-w-md">
-            <h2 className="text-2xl font-bold text-slate-800 mb-2">
-              {t("noMenus")}
-            </h2>
+            <PageTitleWithHelp className="justify-center mb-2">
+              <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+                {t("noMenus")}
+              </h2>
+            </PageTitleWithHelp>
             <p className="text-slate-500 mb-8">{t("noMenusDescription")}</p>
             <button
+              id="onboarding-create-menu"
               onClick={handleCreateClick}
               className="inline-flex items-center gap-2 px-8 py-4 bg-linear-to-r from-primary to-primary/80 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
@@ -303,14 +325,17 @@ export default function DashboardPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 ">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
-            {t("title")}
-          </h1>
+          <PageTitleWithHelp>
+            <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
+              {t("title")}
+            </h1>
+          </PageTitleWithHelp>
           <p className="text-slate-500 mt-1 dark:text-slate-400">
             {t("subtitle")}
           </p>
         </div>
         <button
+          id="onboarding-create-menu"
           onClick={handleCreateClick}
           className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-primary to-primary/80 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
         >
@@ -446,6 +471,7 @@ export default function DashboardPage() {
             {/* Card Footer with Action Buttons */}
             <div className="px-6 py-3 bg-slate-50/50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex items-center gap-3">
               <LinkTo
+                id={index === 0 ? "onboarding-manage-menu" : undefined}
                 href={`/dashboard/${menu.id}`}
                 className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition-all"
               >

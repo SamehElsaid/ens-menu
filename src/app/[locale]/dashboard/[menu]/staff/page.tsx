@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { axiosGet } from "@/shared/axiosCall";
+import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import AddStaffModal from "@/components/Dashboard/AddStaffModal";
 import DeleteStaffConfirm from "@/components/Dashboard/DeleteStaffConfirm";
 import DataTable from "@/components/Custom/DataTable";
@@ -189,10 +190,15 @@ export default function StaffPage() {
     const buttonLabel = t("upgradeShort");
 
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100">
-          {title}
-        </h1>
+      <div
+        id="onboarding-staff-upgrade"
+        className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4"
+      >
+        <PageTitleWithHelp className="justify-center">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100">
+            {title}
+          </h1>
+        </PageTitleWithHelp>
         <p className="max-w-md text-slate-500 dark:text-slate-400">{description}</p>
         <LinkTo
           href={`/dashboard/${menuId}/personal`}
@@ -206,16 +212,21 @@ export default function StaffPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+      <div
+        id="onboarding-staff-header"
+        className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8"
+      >
         <div>
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
-            {t("title")}
-          </h1>
+          <PageTitleWithHelp>
+            <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
+              {t("title")}
+            </h1>
+          </PageTitleWithHelp>
           <p className="text-slate-500 mt-1 dark:text-slate-400">
             {t("subtitle")}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div id="onboarding-staff-actions" className="flex flex-wrap items-center gap-3">
           <LinkTo
             href={`/dashboard/${menuId}`}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-primary/30 dark:hover:border-primary/50 text-sm font-medium transition-all"
@@ -236,6 +247,7 @@ export default function StaffPage() {
         </div>
       </div>
 
+      <div id="onboarding-staff-table">
       <DataTable<MenuStaff>
         rowData={staffList}
         columnDefs={columnDefs}
@@ -245,6 +257,7 @@ export default function StaffPage() {
         pagination={true}
         paginationPageSize={10}
       />
+      </div>
 
       {(showAddModal || editingStaff) && menuId && (
         <AddStaffModal

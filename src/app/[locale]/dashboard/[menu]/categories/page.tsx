@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { axiosGet } from "@/shared/axiosCall";
+import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import AddCategoryModal from "@/components/Dashboard/AddCategoryModal";
 import DeleteCategoryConfirm from "@/components/Dashboard/DeleteCategoryConfirm";
 import DataTable from "@/components/Custom/DataTable";
@@ -195,16 +196,21 @@ export default function CategoriesPage() {
 
   return (
     <>
-      <div className="flex flex-col  sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+      <div
+        id="onboarding-categories-header"
+        className="flex flex-col  sm:flex-row items-start sm:items-center justify-between gap-4 mb-8"
+      >
         <div>
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
-            {t("title")}
-          </h1>
+          <PageTitleWithHelp>
+            <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
+              {t("title")}
+            </h1>
+          </PageTitleWithHelp>
           <p className="text-slate-500 mt-1 dark:text-slate-400">
             {t("subtitle")}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div id="onboarding-categories-actions" className="flex flex-wrap items-center gap-3">
           <LinkTo
             href={`/dashboard/${menuId}`}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-primary/30 dark:hover:border-primary/50 text-sm font-medium transition-all"
@@ -224,6 +230,7 @@ export default function CategoriesPage() {
         </div>
       </div>
 
+      <div id="onboarding-categories-table">
       <DataTable<Category>
         rowData={categories}
         columnDefs={columnDefs}
@@ -236,6 +243,7 @@ export default function CategoriesPage() {
         totalPages={totalPages}
         onPageChange={(page) => setPage(page)}
       />
+      </div>
 
       {(showAddModal || editingCategory) && menuId && (
         <AddCategoryModal

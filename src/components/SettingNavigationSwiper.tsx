@@ -75,6 +75,7 @@ export default function SettingNavigationSwiper({
               <LinkTo
                 disabled={loading}
                 href={"/dashboard/" + menu + "/settings" + item.href}
+                id={item.href === "/design" ? "onboarding-settings-design-tab" : undefined}
                 onClick={() => (!isActive(item.href) ? setLoading(true) : null)}
                 className={`
                   inline-flex  items-center gap-2 px-4 md:px-6 py-2.5 rounded-lg font-medium text-sm md:text-base

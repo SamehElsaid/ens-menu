@@ -4,6 +4,7 @@ import { useAppSelector } from "@/store/hooks";
 import { redirect, useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import LinkTo from "@/components/Global/LinkTo";
+import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import {
   IoListOutline,
   IoCheckmarkCircleOutline,
@@ -33,6 +34,7 @@ import {
 } from "@/components/Global/StyledQrCode";
 import { useDashboardSession } from "@/hooks/useDashboardSession";
 import { isFreePlanUser } from "@/lib/subscription";
+import { ONBOARDING_REFRESH_EVENT } from "@/lib/onboarding/onboardingStorage";
 
 type ActivityEntry = {
   id: string;
@@ -100,6 +102,12 @@ export default function DashboardMenuPage() {
 
 
 
+
+  useEffect(() => {
+    if (!menuLoading && menu) {
+      window.dispatchEvent(new Event(ONBOARDING_REFRESH_EVENT));
+    }
+  }, [menuLoading, menu]);
 
   useEffect(() => {
     axiosGet<object>(`/menus/${menuSlugOrId}/activity-logs/`, locale).then(
@@ -219,15 +227,21 @@ export default function DashboardMenuPage() {
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Title + subtitle + tabs */}
-      <header className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 md:p-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-1 tracking-tight">
-          {menuName}
-        </h1>
+      <header
+        id="onboarding-overview-header"
+        className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 md:p-8"
+      >
+        <PageTitleWithHelp className="mb-1">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+            {menuName}
+          </h1>
+        </PageTitleWithHelp>
         <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
           {t("fullMenuManagement")}
         </p>
 
         <nav
+          id="onboarding-overview-nav"
           className={`flex flex-wrap gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
           aria-label={t("fullMenuManagement")}
         >
@@ -246,6 +260,7 @@ export default function DashboardMenuPage() {
             {t("categories")}
           </LinkTo>
           <LinkTo
+            id="onboarding-nav-products"
             href={`/dashboard/${menuSlugOrId}/items`}
             className={`${tabBase} ${tabInactive}`}
           >
@@ -300,6 +315,7 @@ export default function DashboardMenuPage() {
 
       {/* Stats cards */}
       <section
+        id="onboarding-overview-stats"
         className="grid grid-cols-1 sm:grid-cols-3 gap-4"
         aria-label="Menu statistics"
       >
@@ -360,6 +376,7 @@ export default function DashboardMenuPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* QR code section */}
         <section
+          id="onboarding-overview-qr"
           className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 transition-all duration-200 hover:shadow-md hover:border-slate-200 dark:hover:border-slate-600 flex flex-col items-center justify-center"
           aria-labelledby="qr-title"
         >
@@ -410,7 +427,11 @@ export default function DashboardMenuPage() {
         </section>
 
         {/* Quick action cards */}
-        <div className="lg:col-span-2 space-y-4" role="list">
+        <div
+          id="onboarding-overview-quick-actions"
+          className="lg:col-span-2 space-y-4"
+          role="list"
+        >
           <LinkTo
             href={menuUrl || "#"}
             target="_blank"
@@ -471,6 +492,7 @@ export default function DashboardMenuPage() {
 
       {/* Latest activity */}
       <section
+        id="onboarding-overview-activity"
         className="mb-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 transition-all duration-200 hover:shadow-md"
         aria-labelledby="activity-title"
       >

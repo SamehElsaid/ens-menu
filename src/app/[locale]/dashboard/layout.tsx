@@ -11,6 +11,7 @@ import { useAppDispatch } from "@/store/hooks";
 import { AuthUserHydrate } from "@/components/Dashboard/AuthUserHydrate";
 import { FcmTokenSync } from "@/components/Dashboard/FcmTokenSync";
 import { RequirePhone } from "@/components/Dashboard/RequirePhone";
+import OnboardingTour from "@/components/Dashboard/OnboardingTour";
 
 interface ParentLayoutProps {
   children: ReactNode;
@@ -66,7 +67,7 @@ export default function ParentLayout({ children }: ParentLayoutProps) {
       <AuthUserHydrate />
       <FcmTokenSync />
       <Layout segment={segment}>
-
+        <OnboardingTour />
         <RequirePhone>
           {segment ? (hasMenu ? children : null) : children}
         </RequirePhone>

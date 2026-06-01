@@ -36,6 +36,8 @@ import Cookies from "js-cookie";
 import { translatePlanFeaturesWithMenuLimit } from "@/lib/planFeatureI18n";
 import type { Subscription, SubscriptionResponse } from "@/types/Subscription";
 import parsePhoneNumberFromString from "libphonenumber-js";
+import { ONBOARDING_REFRESH_EVENT } from "@/lib/onboarding/onboardingStorage";
+import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 
 /** Pro checkout uses EGP; Egyptian mobiles are common — normalize to E.164 for gateways. */
 function formatPhoneForPaymentGateway(raw: string): string {
@@ -275,6 +277,12 @@ export default function PersonalProfile({
       })
       .finally(() => setPlansLoading(false));
   }, [locale, authData?.user, t]);
+
+  useEffect(() => {
+    if (authData?.user) {
+      window.dispatchEvent(new Event(ONBOARDING_REFRESH_EVENT));
+    }
+  }, [authData?.user]);
 
   // Revoke blob URL on unmount or when profileImage changes to avoid memory leaks
   useEffect(() => {
@@ -546,20 +554,26 @@ export default function PersonalProfile({
       )}
 
       <header
+        id="onboarding-personal-header"
         className={
           isRTL ? "text-right space-y-1 mb-8" : "text-left space-y-1 mb-8"
         }
       >
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100">
-          {t("editPageTitle")}
-        </h1>
+        <PageTitleWithHelp>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100">
+            {t("editPageTitle")}
+          </h1>
+        </PageTitleWithHelp>
         <p className="text-sm text-slate-500 dark:text-slate-400">
           {t("editSubtitle")}
         </p>
       </header>
 
       <div className="space-y-8">
-        <section className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 md:p-6">
+        <section
+          id="onboarding-personal-info"
+          className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 md:p-6"
+        >
           <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-5">
             {t("personalInfo")}
           </h3>
@@ -792,7 +806,10 @@ export default function PersonalProfile({
           </button>
         </section>
 
-        <section className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 md:p-6">
+        <section
+          id="onboarding-personal-password"
+          className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 md:p-6"
+        >
           <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-5">
             {t("changePassword")}
           </h3>
@@ -892,7 +909,10 @@ export default function PersonalProfile({
         {!hideSubscriptionSection && (
           <>
             {/* Subscription: current plan + plans with upgrade/downgrade or WhatsApp for Custom */}
-            <section className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 md:p-6">
+            <section
+              id="onboarding-personal-subscription"
+              className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 md:p-6"
+            >
               <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-5">
                 {t("subscriptionManagement")}
               </h3>

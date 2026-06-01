@@ -13,6 +13,7 @@ import {
   IoCreateOutline,
   IoTrashOutline,
 } from "react-icons/io5";
+import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import AddAdvertisementModal from "@/components/Dashboard/AddAdvertisementModal";
 import DeleteAdvertisementConfirm from "@/components/Dashboard/DeleteAdvertisementConfirm";
 import { useAppSelector } from "@/store/hooks";
@@ -246,10 +247,15 @@ export default function AdvertisementsPage() {
     const buttonLabel = tMenus("upgradePlan");
 
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100">
-          {title}
-        </h1>
+      <div
+        id="onboarding-ads-upgrade"
+        className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4"
+      >
+        <PageTitleWithHelp className="justify-center">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100">
+            {title}
+          </h1>
+        </PageTitleWithHelp>
         <p className="max-w-md text-slate-500 dark:text-slate-400">{description}</p>
         <LinkTo
           href={`/dashboard/${menuId}/personal`}
@@ -271,13 +277,19 @@ export default function AdvertisementsPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+      <div
+        id="onboarding-advertisements-header"
+        className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8"
+      >
         <div>
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">{t("title")}</h1>
+          <PageTitleWithHelp>
+            <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">{t("title")}</h1>
+          </PageTitleWithHelp>
           <p className="text-slate-500 dark:text-slate-400 mt-1">
             {t("description")}
           </p>
         </div>
+        <div id="onboarding-advertisements-actions">
         <button
           onClick={handleAddClick}
           className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold shadow-lg hover:opacity-90 transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -285,8 +297,10 @@ export default function AdvertisementsPage() {
           <IoAddCircleOutline className="text-xl" />
           {t("addButton")}
         </button>
+        </div>
       </div>
 
+      <div id="onboarding-advertisements-table">
       <DataTable<Advertisement>
         rowData={ads}
         columnDefs={columnDefs}
@@ -299,6 +313,7 @@ export default function AdvertisementsPage() {
         totalPages={totalPages}
         onPageChange={(p) => setPage(p)}
       />
+      </div>
 
       {(showModal || editingAd) && menuId && (
         <AddAdvertisementModal

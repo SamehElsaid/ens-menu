@@ -103,6 +103,13 @@ export function DashboardSidebar({
                       : "/dashboard/" + segment + "/" + item.link || ""
                   }
                   key={item.label}
+                  id={
+                    item.key === "items"
+                      ? "onboarding-sidebar-items"
+                      : item.key === "settings"
+                        ? "onboarding-sidebar-settings"
+                        : undefined
+                  }
                   onClick={() => setIsMenuOpen(false)}
                   className={`flex w-full items-center  justify-between rounded-xl px-3 py-3 text-sm font-semibold transition hover:text-slate-100 
                     

@@ -28,6 +28,7 @@ import {
   IoListOutline,
 } from "react-icons/io5";
 import { NotificationPermissionCard } from "@/components/Global/NotificationPermissionCard";
+import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import DataTable from "@/components/Custom/DataTable";
 import { useAppSelector } from "@/store/hooks";
 
@@ -459,7 +460,10 @@ export default function ActivityHistoryPage() {
       <NotificationPermissionCard />
 
       {/* Header */}
-      <header className="relative overflow-hidden rounded-2xl border border-violet-200/60 bg-linear-to-br from-violet-50 via-fuchsia-50/80 to-white p-6 shadow-sm dark:border-violet-500/20 dark:from-violet-950/50 dark:via-fuchsia-950/30 dark:to-slate-900 md:p-8">
+      <header
+        id="onboarding-history-header"
+        className="relative overflow-hidden rounded-2xl border border-violet-200/60 bg-linear-to-br from-violet-50 via-fuchsia-50/80 to-white p-6 shadow-sm dark:border-violet-500/20 dark:from-violet-950/50 dark:via-fuchsia-950/30 dark:to-slate-900 md:p-8"
+      >
         <div
           className="pointer-events-none absolute -end-16 -top-16 h-48 w-48 rounded-full bg-linear-to-br from-violet-400/20 to-fuchsia-400/10 blur-2xl dark:from-violet-500/15 dark:to-fuchsia-500/10"
           aria-hidden
@@ -469,16 +473,18 @@ export default function ActivityHistoryPage() {
             <IoTimeOutline className="text-2xl" aria-hidden />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white md:text-3xl">
-              {t("title")}
-            </h1>
+            <PageTitleWithHelp>
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white md:text-3xl">
+                {t("title")}
+              </h1>
+            </PageTitleWithHelp>
             <p className="mt-1 max-w-xl text-sm text-slate-600 dark:text-slate-300">
               {t("subtitle")}
             </p>
           </div>
         </div>
 
-        <div className="relative mt-6">
+        <div id="onboarding-history-search" className="relative mt-6">
           <label htmlFor="history-search" className="sr-only">
             {t("searchPlaceholder")}
           </label>
@@ -499,6 +505,7 @@ export default function ActivityHistoryPage() {
       </header>
 
       {/* Table */}
+      <div id="onboarding-history-table">
       <DataTable<CallEntry>
         rowData={entries}
         columnDefs={columnDefs}
@@ -511,6 +518,7 @@ export default function ActivityHistoryPage() {
         totalPages={totalPages}
         onPageChange={(p) => setPage(p)}
       />
+      </div>
 
       {/* Detail modal */}
       {showModal && (

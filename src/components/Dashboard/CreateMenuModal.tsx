@@ -240,8 +240,14 @@ export default function CreateMenuModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-3xl w-full p-8 max-h-[90vh] overflow-y-auto">
+    <div
+      id="onboarding-create-menu-modal-root"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+    >
+      <div
+        id="onboarding-create-menu-modal"
+        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-3xl w-full p-8 max-h-[90vh] overflow-y-auto overscroll-contain"
+      >
         {/* Header */}
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3">
@@ -260,7 +266,11 @@ export default function CreateMenuModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form
+          id="onboarding-create-menu-form"
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-6"
+        >
           {/* Names Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-3">
@@ -576,7 +586,10 @@ export default function CreateMenuModal({
           </div>
 
           {/* Buttons */}
-          <div className="flex gap-3 pt-6 border-t border-gray-200 dark:border-gray-700 justify-end">
+          <div
+            id="onboarding-create-actions"
+            className="flex gap-3 pt-6 border-t border-gray-200 dark:border-gray-700 justify-end"
+          >
             <div className="w-fit!">
               <button
                 type="button"
@@ -589,6 +602,7 @@ export default function CreateMenuModal({
             </div>
             <div className="w-fit!">
               <CustomBtn
+                id="onboarding-create-submit"
                 loading={isCreating}
                 disabled={isCreating || !slugStatus.available || !logo}
               >

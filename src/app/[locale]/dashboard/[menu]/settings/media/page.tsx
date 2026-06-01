@@ -12,6 +12,7 @@ import { axiosPatch } from "@/shared/axiosCall";
 import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
 import { toast } from "react-toastify";
 import type { Menu } from "@/types/Menu";
+import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 
 function timeStringToDate(s: string): Date | null {
     if (!s || !/^\d{2}:\d{2}$/.test(s)) return null;
@@ -164,19 +165,27 @@ export default function MediaPage() {
 
     return (
         <div className="min-h-[calc(100vh-160px)]">
-            <header className={isRTL ? "text-right space-y-1" : "text-left space-y-1 mb-8"}>
+            <header
+                id="onboarding-media-header"
+                className={isRTL ? "text-right space-y-1" : "text-left space-y-1 mb-8"}
+            >
                 <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 dark:bg-primary/20 text-primary px-3 py-1.5 text-xs font-semibold">
                     <HiOutlineShare className="text-sm" />
                     <span>{t("badge")}</span>
                 </div>
-                <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 mt-2">
-                    {t("title")}
-                </h1>
+                <PageTitleWithHelp className="mt-2">
+                    <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100">
+                        {t("title")}
+                    </h1>
+                </PageTitleWithHelp>
             </header>
 
             <div className="space-y-6 ">
                 {/* Social media links */}
-                <section className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 md:p-6 space-y-4">
+                <section
+                    id="onboarding-media-social"
+                    className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 md:p-6 space-y-4"
+                >
                     <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-xl bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center">
                             <HiOutlineShare className="text-lg text-blue-600 dark:text-blue-400" />
@@ -225,7 +234,10 @@ export default function MediaPage() {
                 </section>
 
                 {/* Contact information */}
-                <section className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 md:p-6 space-y-4">
+                <section
+                    id="onboarding-media-contact"
+                    className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 md:p-6 space-y-4"
+                >
                     <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
                             <HiOutlineMail className="text-lg text-primary" />
@@ -272,7 +284,10 @@ export default function MediaPage() {
                 </section>
 
                 {/* Business hours */}
-                <section className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 md:p-6 space-y-4">
+                <section
+                    id="onboarding-media-hours"
+                    className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 md:p-6 space-y-4"
+                >
                     <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
                             <HiOutlineClock className="text-lg text-primary" />

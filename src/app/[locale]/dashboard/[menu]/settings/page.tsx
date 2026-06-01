@@ -25,6 +25,7 @@ import type { Menu, UploadResponse } from "@/types/Menu";
 import { useParams, useRouter } from "next/navigation";
 import CustomBtn from "@/components/Custom/CustomBtn";
 import DeleteMenuConfirm from "../../../../../components/Dashboard/DeleteMenuConfirm";
+import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 
 interface SettingsFormValues {
   name: string;
@@ -247,8 +248,17 @@ export default function SettingsPage() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <PageTitleWithHelp className="mb-2">
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100">
+          {tSettings("generalSettings")}
+        </h1>
+      </PageTitleWithHelp>
+
       {/* General information */}
-      <section className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6 space-y-6">
+      <section
+        id="onboarding-settings-general"
+        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6 space-y-6"
+      >
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
@@ -354,7 +364,7 @@ export default function SettingsPage() {
 
       {/* Logo, currency & status */}
 
-      <section className="space-y-6">
+      <section id="onboarding-settings-branding" className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Logo card */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6 space-y-4">
@@ -490,7 +500,10 @@ export default function SettingsPage() {
       <section className="flex flex-col gap-6 lg:flex-row w-full">
         {/* Favicon / logo for menu */}
         {/* Status card */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border min-w-[32%] border-slate-100 dark:border-slate-800 shadow-sm p-6 flex flex-col justify-between">
+        <div
+          id="onboarding-settings-status"
+          className="bg-white dark:bg-slate-900 rounded-2xl border min-w-[32%] border-slate-100 dark:border-slate-800 shadow-sm p-6 flex flex-col justify-between"
+        >
           <div>
             <div className="flex items-center gap-3 mb-3">
               <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 flex items-center justify-center">
@@ -592,7 +605,10 @@ export default function SettingsPage() {
       </section>
 
       {/* Footer actions (visual only) */}
-      <div className="flex flex-col md:flex-row justify-end gap-3 pt-4 pb-10 border-t border-slate-100 dark:border-slate-800 mt-4">
+      <div
+        id="onboarding-settings-save"
+        className="flex flex-col md:flex-row justify-end gap-3 pt-4 pb-10 border-t border-slate-100 dark:border-slate-800 mt-4"
+      >
         <button
           type="button"
           disabled

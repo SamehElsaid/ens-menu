@@ -13,6 +13,15 @@ import type { Menu } from "@/types/Menu";
 import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
 import { FaCheck, FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
+import {
+  completeOnboarding,
+  getOnboardingPhase,
+  isOnboardingCompleted,
+  markTourSeen,
+  ONBOARDING_REFRESH_EVENT,
+  setOnboardingPhase,
+} from "@/lib/onboarding/onboardingStorage";
+import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 
 export default function DesignPage() {
   const locale = useLocale();
@@ -41,6 +50,14 @@ export default function DesignPage() {
     }
   }, [menu?.theme]);
 
+  useEffect(() => {
+    if (isOnboardingCompleted()) return;
+    if (getOnboardingPhase() === "go-to-design") {
+      setOnboardingPhase("choose-design");
+      window.dispatchEvent(new Event(ONBOARDING_REFRESH_EVENT));
+    }
+  }, []);
+
   const handleSelectTemplate = async (templateId: string) => {
     if (!menu?.id) return;
 
@@ -61,6 +78,11 @@ export default function DesignPage() {
             theme: templateId,
           }),
         );
+        if (!isOnboardingCompleted()) {
+          markTourSeen("settings-design");
+          completeOnboarding();
+          toast.success(t("onboardingComplete"));
+        }
       }
     } finally {
       setIsLoading(false);
@@ -70,19 +92,27 @@ export default function DesignPage() {
   return (
     <div className="space-y-8 mb-2">
       {/* Page header */}
-      <header className={isRTL ? "text-right" : "text-left"}>
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-          {t("title")}
-        </h1>
+      <header
+        id="onboarding-design-header"
+        className={isRTL ? "text-right" : "text-left"}
+      >
+        <PageTitleWithHelp>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-0">
+            {t("title")}
+          </h1>
+        </PageTitleWithHelp>
         <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 max-w-2xl">
           {t("subtitle")}
         </p>
       </header>
 
       {/* Templates grid */}
-      <section className="bg-slate-50/60 dark:bg-slate-800/60 rounded-3xl border border-slate-100 dark:border-slate-700 p-4 md:p-6 lg:p-8">
+      <section
+        id="onboarding-design-templates"
+        className="bg-slate-50/60 dark:bg-slate-800/60 rounded-3xl border border-slate-100 dark:border-slate-700 p-4 md:p-6 lg:p-8"
+      >
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {templatesForMenu.map((template) => {
+          {templatesForMenu.map((template, templateIndex) => {
             const isActive = template.id === activeTemplateId;
             const isNew = template.isNew;
             const linkView =
@@ -187,6 +217,11 @@ export default function DesignPage() {
                     {/* Primary select button - full width */}
                     <button
                       type="button"
+                      id={
+                        templateIndex === 0
+                          ? "onboarding-select-template"
+                          : undefined
+                      }
                       disabled={
                         typeof isLoading === "string"
                           ? isLoading !== template.id
