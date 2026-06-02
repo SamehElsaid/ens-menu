@@ -19,6 +19,24 @@ import DeleteAdvertisementConfirm from "@/components/Dashboard/DeleteAdvertiseme
 import { useAppSelector } from "@/store/hooks";
 import { isFreePlanUser } from "@/lib/subscription";
 import LinkTo from "@/components/Global/LinkTo";
+import {
+  AdminMetricsGrid,
+  DemoDataBanner,
+} from "@/components/Admin/AdminAnalyticsWidgets";
+import { fetchMenuAnalytics } from "@/lib/fetchMenuAnalytics";
+
+function adRowMetrics(ad: {
+  clickCount?: number;
+  impressionCount?: number;
+}): { clickCount: number; impressionCount: number; ctr: number } {
+  const impressionCount = Number(ad.impressionCount ?? 0);
+  const clickCount = Number(ad.clickCount ?? 0);
+  const ctr =
+    impressionCount > 0
+      ? Math.round((clickCount / impressionCount) * 1000) / 10
+      : 0;
+  return { clickCount, impressionCount, ctr };
+}
 
 export default function AdvertisementsPage() {
   const locale = useLocale();
@@ -43,6 +61,7 @@ export default function AdvertisementsPage() {
   const [refreshing, setRefreshing] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [adAnalyticsDemo, setAdAnalyticsDemo] = useState(false);
 
   const userData = useAppSelector((state) => state.auth.data);
   const isFreePlan = isFreePlanUser(userData);
@@ -79,9 +98,53 @@ export default function AdvertisementsPage() {
     fetchAds();
   }, [fetchAds, refreshing]);
 
+  useEffect(() => {
+    if (!menuId || isFreePlan) return;
+    void fetchMenuAnalytics(menuId, locale, "30d").then((data) => {
+      setAdAnalyticsDemo(Boolean(data._isDemoData));
+    });
+  }, [menuId, locale, isFreePlan]);
+
+  const adSummaryMetrics = useMemo(() => {
+    const totalImpressions = ads.reduce(
+      (s, ad) => s + Number(ad.impressionCount ?? 0),
+      0,
+    );
+    const totalClicks = ads.reduce(
+      (s, ad) => s + Number(ad.clickCount ?? 0),
+      0,
+    );
+    const ctr =
+      totalImpressions > 0
+        ? Math.round((totalClicks / totalImpressions) * 1000) / 10
+        : 0;
+    return [
+      {
+        id: "imp",
+        label: t("metrics.impressions"),
+        value: totalImpressions.toLocaleString(),
+        tone: "sky" as const,
+      },
+      {
+        id: "clk",
+        label: t("metrics.clicks"),
+        value: totalClicks.toLocaleString(),
+        tone: "amber" as const,
+      },
+      {
+        id: "ctr",
+        label: t("metrics.ctr"),
+        value: `${ctr}%`,
+        tone: "emerald" as const,
+      },
+    ];
+  }, [ads, t]);
+
+  const showAdDemoBanner = adAnalyticsDemo;
+
   const refreshList = useCallback(
     () => setRefreshing((v) => v + 1),
-    []
+    [],
   );
 
   const closeModal = useCallback(() => {
@@ -182,21 +245,66 @@ export default function AdvertisementsPage() {
       {
         headerName: t("columns.link"),
         field: "linkUrl",
-        minWidth: 160,
+        minWidth: 140,
         cellRenderer: (params: ICellRendererParams<Advertisement>) => {
           const ad = params.data;
           const link = ad?.linkUrl;
           if (!link) return <span className="text-slate-400 dark:text-slate-500">—</span>;
-          const label = link.length > 40 ? `${link.slice(0, 37)}...` : link;
+          const label = link.length > 32 ? `${link.slice(0, 29)}...` : link;
           return (
             <a
               href={link}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:underline break-all"
+              className="text-primary hover:underline break-all text-sm"
             >
               {label}
             </a>
+          );
+        },
+      },
+      {
+        headerName: t("columns.impressions"),
+        field: "impressionCount",
+        width: 110,
+        cellRenderer: (params: ICellRendererParams<Advertisement>) => {
+          const ad = params.data;
+          if (!ad) return null;
+          const metrics = adRowMetrics(ad);
+          return (
+            <span className="tabular-nums text-slate-700 dark:text-slate-300">
+              {metrics.impressionCount.toLocaleString()}
+            </span>
+          );
+        },
+      },
+      {
+        headerName: t("columns.clicks"),
+        field: "clickCount",
+        width: 90,
+        cellRenderer: (params: ICellRendererParams<Advertisement>) => {
+          const ad = params.data;
+          if (!ad) return null;
+          const metrics = adRowMetrics(ad);
+          return (
+            <span className="tabular-nums text-slate-700 dark:text-slate-300">
+              {metrics.clickCount.toLocaleString()}
+            </span>
+          );
+        },
+      },
+      {
+        headerName: t("columns.ctr"),
+        width: 80,
+        sortable: false,
+        cellRenderer: (params: ICellRendererParams<Advertisement>) => {
+          const ad = params.data;
+          if (!ad) return null;
+          const metrics = adRowMetrics(ad);
+          return (
+            <span className="tabular-nums font-medium text-emerald-600 dark:text-emerald-400">
+              {metrics.ctr}%
+            </span>
           );
         },
       },
@@ -238,7 +346,7 @@ export default function AdvertisementsPage() {
         },
       },
     ],
-    [locale, getTitle, getContent, t]
+    [locale, getTitle, getContent, t, ads],
   );
 
   if (isFreePlan) {
@@ -258,7 +366,7 @@ export default function AdvertisementsPage() {
         </PageTitleWithHelp>
         <p className="max-w-md text-slate-500 dark:text-slate-400">{description}</p>
         <LinkTo
-          href={`/dashboard/${menuId}/personal`}
+          href={`/dashboard/${menuId}/subscription`}
           className="mt-4 inline-flex items-center justify-center gap-2 px-8 py-3 bg-linear-to-r from-primary to-primary/80 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
         >
           {buttonLabel}
@@ -275,11 +383,14 @@ export default function AdvertisementsPage() {
     );
   }
 
+  const textDir = locale === "ar" ? "rtl" : "ltr";
+
   return (
     <>
       <div
         id="onboarding-advertisements-header"
         className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8"
+        dir={textDir}
       >
         <div>
           <PageTitleWithHelp>
@@ -299,6 +410,25 @@ export default function AdvertisementsPage() {
         </button>
         </div>
       </div>
+
+      {showAdDemoBanner && (
+        <DemoDataBanner
+          message={t("demoDataBanner")}
+          dir={textDir}
+        />
+      )}
+
+      {ads.length > 0 && (
+        <div
+          className="mb-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6"
+          dir={textDir}
+        >
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
+            {t("metricsTitle")}
+          </h2>
+          <AdminMetricsGrid items={adSummaryMetrics} columns={3} dir={textDir} />
+        </div>
+      )}
 
       <div id="onboarding-advertisements-table">
       <DataTable<Advertisement>

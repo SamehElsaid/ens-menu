@@ -521,7 +521,17 @@ body {
   transition: height 300ms;
 }
 
+.dir-ltr {
+  direction: ltr;
+}
+
+.unicode-bidi-isolate {
+  unicode-bidi: isolate;
+}
+
 .phoneNumber {
+  direction: ltr;
+  unicode-bidi: isolate;
   @apply border border-accent-purple/20 rounded-2xl ps-4 duration-200;
 }
 .phoneNumber input {

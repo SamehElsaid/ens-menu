@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
 import { IoArrowBack } from "react-icons/io5";
@@ -10,6 +10,8 @@ import CardDashBoard from "@/components/Card/CardDashBoard";
 import ConfirmationModal from "@/components/Custom/ConfirmationModal";
 import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
+import UserFollowUpTimeline from "@/components/Admin/UserFollowUpTimeline";
+import PhoneDisplay from "@/components/Global/PhoneDisplay";
 
 interface Plan {
   id: number;
@@ -135,6 +137,46 @@ export default function UserDetailsPage() {
       fetchUserDetails();
     }
   }, [userId, fetchUserDetails]);
+
+  const userAnalytics = useMemo(() => {
+    const u = userData?.user;
+    const menuList = userData?.menus ?? [];
+    if (!u) return null;
+
+    const activeSubscription =
+      userData?.subscriptions?.find((sub) => sub.status === "active") ||
+      userData?.subscriptions?.[0];
+    const subEnd =
+      activeSubscription?.endDate ?? u.endDate ?? null;
+
+    const activeMenus = menuList.filter((m) => m.isActive).length;
+    const totalItems = menuList.reduce((sum, m) => sum + (m.itemsCount ?? 0), 0);
+    const activeItems = menuList.reduce(
+      (sum, m) => sum + (m.activeItemsCount ?? 0),
+      0,
+    );
+    const daysSinceLogin = u.lastLoginAt
+      ? Math.floor(
+          (Date.now() - new Date(u.lastLoginAt).getTime()) / 86400000,
+        )
+      : null;
+    const subscriptionEnd = subEnd ? new Date(subEnd) : null;
+    const daysUntilExpiry =
+      subscriptionEnd && subscriptionEnd > new Date()
+        ? Math.ceil(
+            (subscriptionEnd.getTime() - Date.now()) / 86400000,
+          )
+        : null;
+
+    return {
+      menusCount: menuList.length,
+      activeMenus,
+      totalItems,
+      activeItems,
+      daysSinceLogin,
+      daysUntilExpiry,
+    };
+  }, [userData]);
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "-";
@@ -407,8 +449,9 @@ export default function UserDetailsPage() {
     status: user.subscriptionStatus,
   };
 
+  const textDir = isRTL ? "rtl" : "ltr";
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-6 pb-8" dir={textDir}>
       {/* Header Section */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
@@ -483,6 +526,79 @@ export default function UserDetailsPage() {
           </button>
         </div>
       </CardDashBoard>
+
+      {userAnalytics && (
+      <CardDashBoard>
+        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-6">
+          {t("analytics.title")}
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="rounded-xl bg-primary/5 dark:bg-primary/10 border border-primary/10 p-4">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
+              {t("analytics.menusCount")}
+            </p>
+            <p className="text-2xl font-bold tabular-nums">
+              {userAnalytics.menusCount}
+            </p>
+          </div>
+          <div className="rounded-xl bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/10 p-4">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
+              {t("analytics.activeMenus")}
+            </p>
+            <p className="text-2xl font-bold tabular-nums">
+              {userAnalytics.activeMenus}
+            </p>
+          </div>
+          <div className="rounded-xl bg-sky-500/5 dark:bg-sky-500/10 border border-sky-500/10 p-4">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
+              {t("analytics.totalItems")}
+            </p>
+            <p className="text-2xl font-bold tabular-nums">
+              {userAnalytics.totalItems}
+            </p>
+          </div>
+          <div className="rounded-xl bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/10 p-4">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
+              {t("analytics.activeItems")}
+            </p>
+            <p className="text-2xl font-bold tabular-nums">
+              {userAnalytics.activeItems}
+            </p>
+          </div>
+          <div className="rounded-xl bg-slate-500/5 border border-slate-200 dark:border-slate-600 p-4">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
+              {t("analytics.daysSinceLogin")}
+            </p>
+            <p className="text-2xl font-bold tabular-nums">
+              {userAnalytics.daysSinceLogin ?? t("analytics.neverLoggedIn")}
+            </p>
+          </div>
+          {userAnalytics.daysUntilExpiry !== null &&
+            userAnalytics.daysUntilExpiry <= 7 && (
+              <div className="rounded-xl bg-red-500/5 border border-red-500/20 p-4 col-span-2">
+                <p className="text-xs text-red-600 dark:text-red-400 mb-1">
+                  {t("analytics.expiringSoon")}
+                </p>
+                <p className="text-lg font-bold text-red-700 dark:text-red-300">
+                  {t("analytics.daysUntilExpiry", {
+                    days: userAnalytics.daysUntilExpiry,
+                  })}
+                </p>
+              </div>
+            )}
+        </div>
+      </CardDashBoard>
+      )}
+
+      {user && (
+        <CardDashBoard>
+          <UserFollowUpTimeline
+            userId={user.id}
+            userName={user.name}
+            phoneNumber={user.phoneNumber}
+          />
+        </CardDashBoard>
+      )}
 
       {/* Change Subscription Modal */}
       {subscriptionModalOpen && (
@@ -737,9 +853,16 @@ export default function UserDetailsPage() {
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
               {t("basicInfo.phoneNumber")}
             </p>
-            <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-              {user.phoneNumber || "-"}
-            </p>
+            {user.phoneNumber ? (
+              <PhoneDisplay
+                value={user.phoneNumber}
+                className="text-lg font-semibold text-slate-900 dark:text-slate-100"
+              />
+            ) : (
+              <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                -
+              </p>
+            )}
           </div>
           <div>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">

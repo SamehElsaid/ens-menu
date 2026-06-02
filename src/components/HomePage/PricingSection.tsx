@@ -1,8 +1,7 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { axiosGet } from "@/shared/axiosCall";
+import { useMemo, useState } from "react";
 import { translatePlanFeaturesWithMenuLimit } from "@/lib/planFeatureI18n";
 import { FaSpinner } from "react-icons/fa";
 import { HiCheck, HiOutlineChat } from "react-icons/hi";
@@ -10,6 +9,7 @@ import { Link } from "@/i18n/navigation";
 import ProPlanPriceSelector, {
   type ProBillingChoice,
 } from "@/components/Pricing/ProPlanPriceSelector";
+import { usePlans } from "@/hooks/usePlans";
 
 export type ApiPlan = {
   id: number;
@@ -17,6 +17,7 @@ export type ApiPlan = {
   description: string;
   priceMonthly: number;
   priceYearly: number;
+  firstMonthlyPrice?: number;
   firstYearlyPrice?: number;
   currency?: string;
   maxMenus: number;
@@ -24,11 +25,6 @@ export type ApiPlan = {
   allowCustomDomain: boolean;
   hasAds: boolean;
   features: string[];
-};
-
-type PlansResponse = {
-  success?: boolean;
-  plans?: ApiPlan[];
 };
 
 const CUSTOM_PLAN_FEATURE_KEYS = [
@@ -47,48 +43,9 @@ export default function PricingSection() {
   const tProfile = useTranslations("personalProfile");
   const locale = useLocale();
   const isRTL = locale === "ar";
-  const [plans, setPlans] = useState<ApiPlan[]>([]);
-  const [loading, setLoading] = useState(true);
   const [proBillingChoice, setProBillingChoice] =
     useState<ProBillingChoice>("yearly");
-
-  const fetchPlans = useCallback(async (): Promise<ApiPlan[]> => {
-    const result = await axiosGet<PlansResponse>(
-      "/public/plans",
-      locale,
-      undefined,
-      undefined,
-      true,
-    );
-    if (result.status && result.data?.plans?.length) {
-      return result.data.plans.filter(
-        (p) =>
-          p.name?.toLowerCase() === "free" || p.name?.toLowerCase() === "pro",
-      );
-    }
-    return [];
-  }, [locale]);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetchPlans()
-      .then((data) => {
-        if (!cancelled) {
-          setPlans(data);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [fetchPlans]);
-
-  const freePlan = plans.find((p) => p.name?.toLowerCase() === "free");
-  const proPlan = plans.find((p) => p.name?.toLowerCase() === "pro");
+  const { plans, loading, freePlan, proPlan } = usePlans();
 
   /** API plan features + Pro-only items (staff & tables). */
   const proPlanFeatureLines = useMemo(() => {
@@ -151,10 +108,7 @@ export default function PricingSection() {
                 </p>
                 <div className="mb-6">
                   <span className="text-3xl font-black text-slate-900 dark:text-white">
-                    0
-                  </span>
-                  <span className="text-slate-500 dark:text-slate-400 text-sm ml-1">
-                    {t("currencyEgp")} {t("perYear")}
+                    {tProfile("freePrice")}
                   </span>
                 </div>
                 <ul className="space-y-3 flex-1">
@@ -210,6 +164,7 @@ export default function PricingSection() {
                   onBillingChange={setProBillingChoice}
                   priceMonthly={proPlan.priceMonthly}
                   priceYearly={proPlan.priceYearly}
+                  firstMonthlyPrice={proPlan.firstMonthlyPrice}
                   firstYearlyPrice={proPlan.firstYearlyPrice}
                   isRTL={isRTL}
                   size="large"

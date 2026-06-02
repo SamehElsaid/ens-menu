@@ -3,6 +3,7 @@ import { routing } from "./i18n/routing";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { decryptData } from "./shared/encryption";
+import { isSafeInternalRedirect } from "./lib/authRedirect";
 
 export interface DecryptedToken {
   role: string;
@@ -30,7 +31,19 @@ export default function proxy(request: NextRequest) {
     if (hasToken) {
       const localeMatch = request.nextUrl.pathname.match(/^\/(ar|en)(?=\/|$)/);
       const prefix = localeMatch ? `/${localeMatch[1]}` : "";
-      url.pathname = tokenDecrypted?.role === "admin" ? `${prefix}/admin` : `${prefix}/dashboard`;
+      const redirectParam = request.nextUrl.searchParams.get("redirect");
+      if (
+        isSafeInternalRedirect(redirectParam) &&
+        tokenDecrypted?.role !== "admin"
+      ) {
+        url.pathname = `${prefix}${redirectParam}`;
+      } else {
+        url.pathname =
+          tokenDecrypted?.role === "admin"
+            ? `${prefix}/admin`
+            : `${prefix}/dashboard`;
+      }
+      url.search = "";
       return NextResponse.redirect(url);
     }
     return createMiddleware(routing)(request);

@@ -9,6 +9,8 @@ import ProPlanPriceSelector, {
   type ProBillingChoice,
 } from "@/components/Pricing/ProPlanPriceSelector";
 import { translatePlanFeaturesWithMenuLimit } from "@/lib/planFeatureI18n";
+import { usePlans } from "@/hooks/usePlans";
+import useSubscriptionUpgradeHref from "@/hooks/useSubscriptionUpgradeHref";
 import { BsQrCode } from "react-icons/bs";
 import {
   HiCheck,
@@ -24,7 +26,6 @@ import {
 const WHATSAPP_URL = "https://wa.me/201500800050";
 const STATIC_PRO_MONTHLY_EGP = 499;
 const STATIC_PRO_YEARLY_EGP = 5988;
-const STATIC_PRO_FIRST_YEAR_EGP = 5489;
 const FAQ_IDS = ["faq1", "faq2", "faq3"] as const;
 
 const PAYMENT_METHODS = [
@@ -258,11 +259,22 @@ export default function PricingComparisonPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [proBillingChoice, setProBillingChoice] =
     useState<ProBillingChoice>("yearly");
+  const { proPlan } = usePlans();
+  const subscriptionUpgradeHref = useSubscriptionUpgradeHref();
+
+  const proPriceMonthly = proPlan?.priceMonthly ?? STATIC_PRO_MONTHLY_EGP;
+  const proPriceYearly = proPlan?.priceYearly ?? STATIC_PRO_YEARLY_EGP;
+  const proFirstMonthlyPrice = proPlan?.firstMonthlyPrice;
+  const proFirstYearlyPrice = proPlan?.firstYearlyPrice;
 
   const freeFeatures = useMemo(
     () =>
       translatePlanFeaturesWithMenuLimit(
-        [t("staticFreeFeature1"), t("staticFreeFeature2"), t("staticFreeFeatureAI")],
+        [
+          t("staticFreeFeature1"),
+          t("staticFreeFeature2"),
+          t("staticFreeFeatureAI"),
+        ],
         STATIC_FREE_PLAN.maxMenus,
         tProfile,
       ),
@@ -388,8 +400,8 @@ export default function PricingComparisonPage() {
       id: "free",
       title: tLanding("planFree"),
       desc: t("staticFreeDescription"),
-      price: `0${tLanding("currencyEgp")}`,
-      priceNote: tLanding("perYear"),
+      price: tProfile("freePrice"),
+      priceNote: "",
       features: freeFeatures,
       premium: false,
       cta: {
@@ -405,7 +417,7 @@ export default function PricingComparisonPage() {
       features: proFeatures,
       premium: true,
       cta: {
-        href: "/auth/login" as const,
+        href: subscriptionUpgradeHref,
         label: t("ctaUpgrade"),
         external: false,
       },
@@ -501,7 +513,7 @@ export default function PricingComparisonPage() {
                         {tLanding("planFree")}
                       </div>
                       <div className="text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">
-                        0{tLanding("currencyEgp")}
+                        {tProfile("freePrice")}
                       </div>
                     </th>
                     <th
@@ -523,9 +535,10 @@ export default function PricingComparisonPage() {
                           <ProPlanPriceSelector
                             billingChoice={proBillingChoice}
                             onBillingChange={setProBillingChoice}
-                            priceMonthly={STATIC_PRO_MONTHLY_EGP}
-                            priceYearly={STATIC_PRO_YEARLY_EGP}
-                            firstYearlyPrice={STATIC_PRO_FIRST_YEAR_EGP}
+                            priceMonthly={proPriceMonthly}
+                            priceYearly={proPriceYearly}
+                            firstMonthlyPrice={proFirstMonthlyPrice}
+                            firstYearlyPrice={proFirstYearlyPrice}
                             isRTL={isRTL}
                             compact
                             className="relative"
@@ -654,7 +667,7 @@ export default function PricingComparisonPage() {
             <div className=" flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-stretch sm:justify-center sm:gap-4">
               <div className=" order-1 sm:order-2 sm:flex-1 sm:max-w-xs">
                 <Link
-                  href="/auth/login"
+                  href={subscriptionUpgradeHref}
                   className="flex h-full min-h-12 items-center justify-center gap-2 rounded-xl bg-linear-to-br from-violet-500 to-indigo-600 px-6 py-3.5 text-center text-sm font-bold text-white shadow-md shadow-violet-500/25 transition hover:scale-[1.02] hover:shadow-violet-500/35 active:scale-[0.98]"
                 >
                   <HiStar className="text-amber-200" aria-hidden />
@@ -727,9 +740,10 @@ export default function PricingComparisonPage() {
                     <ProPlanPriceSelector
                       billingChoice={proBillingChoice}
                       onBillingChange={setProBillingChoice}
-                      priceMonthly={STATIC_PRO_MONTHLY_EGP}
-                      priceYearly={STATIC_PRO_YEARLY_EGP}
-                      firstYearlyPrice={STATIC_PRO_FIRST_YEAR_EGP}
+                      priceMonthly={proPriceMonthly}
+                      priceYearly={proPriceYearly}
+                      firstMonthlyPrice={proFirstMonthlyPrice}
+                      firstYearlyPrice={proFirstYearlyPrice}
                       isRTL={isRTL}
                     />
                   ) : (

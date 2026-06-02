@@ -1,5 +1,5 @@
 import type { IconType } from "react-icons";
-import { FaChartLine, FaUserAlt } from "react-icons/fa";
+import { FaChartLine, FaCreditCard, FaUserAlt } from "react-icons/fa";
 
 import { BiCategory } from "react-icons/bi";
 import { FiSettings } from "react-icons/fi";
@@ -15,7 +15,9 @@ import {
   IoPhonePortraitOutline,
   IoPricetagOutline,
   IoSettingsOutline,
+  IoStatsChartOutline,
   IoTimeOutline,
+  IoCallOutline,
 } from "react-icons/io5";
 export type NavItem = {
   label: string;
@@ -87,6 +89,12 @@ export const navSections: NavSection[] = [
         key: "overview",
         link: "",
       },
+      {
+        label: "analytics",
+        icon: IoStatsChartOutline,
+        key: "analytics",
+        link: "analytics",
+      },
     ],
   },
   {
@@ -97,6 +105,12 @@ export const navSections: NavSection[] = [
         icon: FaUserAlt,
         key: "personal",
         link: "personal",
+      },
+      {
+        label: "Subscription",
+        icon: FaCreditCard,
+        key: "subscription",
+        link: "subscription",
       },
     ],
   },
@@ -164,6 +178,12 @@ export const adminNavSections: NavSection[] = [
         key: "overview",
         link: "",
       },
+      {
+        label: "analytics",
+        icon: IoStatsChartOutline,
+        key: "analytics",
+        link: "analytics",
+      },
     ],
   },
   {
@@ -182,10 +202,22 @@ export const adminNavSections: NavSection[] = [
     items: [
       { label: "users", icon: FaUserAlt, key: "users", link: "users" },
       {
+        label: "followUps",
+        icon: IoCallOutline,
+        key: "follow-ups",
+        link: "follow-ups",
+      },
+      {
         label: "plans",
         icon: IoDocumentTextOutline,
         key: "plans",
         link: "plans",
+      },
+      {
+        label: "payments",
+        icon: FaCreditCard,
+        key: "payments",
+        link: "payments",
       },
       {
         label: "advertisements",

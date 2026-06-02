@@ -16,6 +16,7 @@ export type OnboardingTourId =
   | "go-to-menu-manage"
   | "menu-overview"
   | "personal-profile"
+  | "subscription-plans"
   | "categories-page"
   | "items-page"
   | "tables-page"

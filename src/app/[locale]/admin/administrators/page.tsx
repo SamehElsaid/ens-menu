@@ -13,6 +13,13 @@ import { toast } from "react-toastify";
 import { useAppSelector } from "@/store/hooks";
 import ConfirmationModal from "@/components/Custom/ConfirmationModal";
 import AddAdministratorModal from "@/components/Dashboard/AddAdministratorModal";
+import EditAdministratorPermissionsModal from "@/components/Admin/EditAdministratorPermissionsModal";
+import {
+  getAdminPermissionsByEmail,
+  removeAdminPermissionsByEmail,
+} from "@/lib/adminPermissions";
+import { ADMIN_PERMISSION_KEYS } from "@/types/AdminPermission";
+import { useAdminPermissions } from "@/hooks/useAdminPermissions";
 
 interface Administrator {
     id: number;
@@ -48,6 +55,8 @@ export default function AdministratorsPage() {
         user?: { email?: string };
     };
     const currentUserEmail = currentUser?.user?.email || "";
+    const { has: hasAdminPermission } = useAdminPermissions();
+    const canManageAdmins = hasAdminPermission("administrators");
 
     const [admins, setAdmins] = useState<Administrator[]>([]);
     const [loading, setLoading] = useState(true);
@@ -65,6 +74,10 @@ export default function AdministratorsPage() {
         isOpen: boolean;
         admin: Administrator | null;
     }>({ isOpen: false, admin: null });
+    const [permissionsModal, setPermissionsModal] = useState<{
+        open: boolean;
+        admin: Administrator | null;
+    }>({ open: false, admin: null });
     const [loadingAdminId, setLoadingAdminId] = useState<number | null>(null);
 
     const fetchAdmins = useCallback(async (pageNum: number = 1) => {
@@ -118,6 +131,7 @@ export default function AdministratorsPage() {
             );
 
             if (result.status) {
+                removeAdminPermissionsByEmail(deleteModal.admin.email);
                 toast.success(t("deleteSuccess"));
                 setDeleteModal({ isOpen: false, admin: null });
                 // If current page will be empty after deletion, go to previous page
@@ -207,37 +221,64 @@ export default function AdministratorsPage() {
                 },
             },
             {
+                headerName: t("columns.permissions"),
+                width: 130,
+                cellRenderer: (params: { data: Administrator }) => {
+                    const admin = params.data;
+                    if (!admin) return null;
+                    const stored = getAdminPermissionsByEmail(admin.email);
+                    const label =
+                        !stored || stored.length >= ADMIN_PERMISSION_KEYS.length
+                            ? t("permissions.fullAccess")
+                            : t("permissions.limited", { count: stored.length });
+                    return (
+                        <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                            {label}
+                        </span>
+                    );
+                },
+            },
+            {
                 headerName: t("columns.actions"),
-                width: 100,
+                width: 180,
                 cellRenderer: (params: { data: Administrator }) => {
                     const admin = params.data;
                     if (!admin) return null;
                     const isCurrentUser = admin.email === currentUserEmail;
                     const isLoading = loadingAdminId === admin.id;
 
-                    if (isCurrentUser) {
-                        return null; // Don't show delete for current user
-                    }
-
                     return (
                         <div className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
-                            <button
-                                onClick={() => setDeleteModal({ isOpen: true, admin })}
-                                disabled={isLoading}
-                                className="px-3 py-1.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-lg transition-colors flex items-center gap-1"
-                            >
-                                {isLoading ? (
-                                    <FaSpinner className="animate-spin text-xs" />
-                                ) : (
-                                    t("actions.delete")
-                                )}
-                            </button>
+                            {canManageAdmins && (
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setPermissionsModal({ open: true, admin })
+                                    }
+                                    className="px-3 py-1.5 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800"
+                                >
+                                    {t("actions.permissions")}
+                                </button>
+                            )}
+                            {!isCurrentUser && canManageAdmins && (
+                                <button
+                                    onClick={() => setDeleteModal({ isOpen: true, admin })}
+                                    disabled={isLoading}
+                                    className="px-3 py-1.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-lg transition-colors flex items-center gap-1"
+                                >
+                                    {isLoading ? (
+                                        <FaSpinner className="animate-spin text-xs" />
+                                    ) : (
+                                        t("actions.delete")
+                                    )}
+                                </button>
+                            )}
                         </div>
                     );
                 },
             },
         ],
-        [t, isRTL, currentUserEmail, loadingAdminId, formatDate]
+        [t, isRTL, currentUserEmail, loadingAdminId, formatDate, canManageAdmins]
     );
 
     return (
@@ -309,15 +350,17 @@ export default function AdministratorsPage() {
             </div>
 
             {/* Add New Administrator Button */}
-            <div className={`flex ${isRTL ? "justify-start" : "justify-end"}`}>
-                <button
-                    onClick={() => setShowAddModal(true)}
-                    className="flex items-center gap-2 px-6 py-3 bg-linear-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-                >
-                    <IoAddOutline className="text-lg" />
-                    <span>{t("addNewAdmin")}</span>
-                </button>
-            </div>
+            {canManageAdmins && (
+                <div className={`flex ${isRTL ? "justify-start" : "justify-end"}`}>
+                    <button
+                        onClick={() => setShowAddModal(true)}
+                        className="flex items-center gap-2 px-6 py-3 bg-linear-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                    >
+                        <IoAddOutline className="text-lg" />
+                        <span>{t("addNewAdmin")}</span>
+                    </button>
+                </div>
+            )}
 
             {/* Administrators Table */}
             <CardDashBoard>
@@ -354,6 +397,15 @@ export default function AdministratorsPage() {
                 cancelText={t("actions.cancel")}
                 isLoading={loadingAdminId === deleteModal.admin?.id}
                 loadingText={t("deleting")}
+            />
+
+            <EditAdministratorPermissionsModal
+                open={permissionsModal.open}
+                admin={permissionsModal.admin}
+                isCurrentUser={
+                    permissionsModal.admin?.email === currentUserEmail
+                }
+                onClose={() => setPermissionsModal({ open: false, admin: null })}
             />
         </div>
     );

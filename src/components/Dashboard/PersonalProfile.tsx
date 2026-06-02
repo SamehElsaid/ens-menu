@@ -16,9 +16,6 @@ import {
   HiOutlineArrowRight,
   HiOutlineCamera,
   HiOutlineX,
-  HiOutlineChat,
-  HiArrowUp,
-  HiArrowDown,
 } from "react-icons/hi";
 import LinkTo from "@/components/Global/LinkTo";
 import CustomInput from "@/components/Custom/CustomInput";
@@ -33,71 +30,15 @@ import {
 } from "@/schemas/changePasswordSchema";
 import { useRouter } from "@/i18n/navigation";
 import Cookies from "js-cookie";
-import { translatePlanFeaturesWithMenuLimit } from "@/lib/planFeatureI18n";
 import type { Subscription, SubscriptionResponse } from "@/types/Subscription";
-import parsePhoneNumberFromString from "libphonenumber-js";
 import { ONBOARDING_REFRESH_EVENT } from "@/lib/onboarding/onboardingStorage";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
+import CurrentPlanSummary from "@/components/Dashboard/CurrentPlanSummary";
 
-/** Pro checkout uses EGP; Egyptian mobiles are common — normalize to E.164 for gateways. */
-function formatPhoneForPaymentGateway(raw: string): string {
-  const t = raw.trim().replace(/\s+/g, "");
-  if (!t) return "";
-  for (const cc of ["EG", "AE"] as const) {
-    const p = parsePhoneNumberFromString(t, cc);
-    if (p?.isValid()) return p.format("E.164");
-  }
-  const normalized = t.startsWith("+") ? t : `+${t.replace(/^00+/, "")}`;
-  const fallback = parsePhoneNumberFromString(normalized);
-  if (fallback?.isValid()) return fallback.format("E.164");
-  return t;
-}
+const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+const AVATAR_ACCEPT = "image/png,image/jpeg,image/jpg,image/gif";
 
-function pickFailedRequestMessage(data: unknown): string | null {
-  if (data == null || typeof data !== "object") return null;
-  const o = data as Record<string, unknown>;
-  const fromError = typeof o.error === "string" ? o.error.trim() : "";
-  if (fromError) return fromError;
-  const fromMsg = typeof o.message === "string" ? o.message.trim() : "";
-  if (fromMsg) return fromMsg;
-  const details = o.details;
-  if (Array.isArray(details)) {
-    const first = details[0];
-    if (
-      first &&
-      typeof first === "object" &&
-      "message" in first &&
-      typeof (first as { message: unknown }).message === "string"
-    ) {
-      return String((first as { message: string }).message).trim();
-    }
-  }
-  return null;
-}
-
-export type Plan = {
-  id: number;
-  name: string;
-  description: string;
-  priceMonthly: number;
-  priceYearly: number;
-  firstYearlyPrice?: number;
-  currency?: string;
-  maxMenus: number;
-  maxProductsPerMenu: number;
-  allowCustomDomain: boolean;
-  hasAds: boolean;
-  features: string[];
-};
-
-function formatEgpPrice(value: number): string {
-  return value.toLocaleString("en-US");
-}
-
-type PlansResponse = {
-  success: boolean;
-  plans: Plan[];
-};
+type GenderOption = { label: string; value: string };
 
 type AuthUser = {
   name?: string;
@@ -126,21 +67,6 @@ type AuthUser = {
   };
 };
 
-const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
-const AVATAR_ACCEPT = "image/png,image/jpeg,image/jpg,image/gif";
-const WHATSAPP_URL = "https://wa.me/201500800050";
-
-const CUSTOM_PLAN_FEATURE_KEYS = [
-  "waiterRequest",
-  "billRequest",
-  "onlineOrdering",
-  "deliveryMaps",
-  "newLanguages",
-  "onlinePayment",
-] as const;
-
-type GenderOption = { label: string; value: string };
-
 type PersonalProfileProps = {
   backLink?: string;
   backLinkText?: string;
@@ -157,7 +83,6 @@ export default function PersonalProfile({
   const isRTL = locale === "ar";
   const t = useTranslations("personalProfile");
   const tRoot = useTranslations("");
-  const tLandingPricing = useTranslations("Landing.pricing");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const authData = useAppSelector((state) => state.auth.data) as unknown as {
@@ -199,16 +124,10 @@ export default function PersonalProfile({
         }
       : null,
   );
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [plansLoading, setPlansLoading] = useState(true);
   const [subscriptionInfo, setSubscriptionInfo] = useState<Subscription | null>(
     null,
   );
   const [subscriptionInfoLoading, setSubscriptionInfoLoading] = useState(true);
-  const [proBillingChoice, setProBillingChoice] = useState<"monthly" | "yearly">(
-    "yearly",
-  );
-  const [proPayLoading, setProPayLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [changePasswordLoading, setChangePasswordLoading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -233,15 +152,13 @@ export default function PersonalProfile({
     reset: resetPasswordForm,
   } = changePasswordForm;
 
-  // Fetch plans and sync form from auth when profile is available (skip for admin)
+  // Sync form from auth when profile is available (skip subscription fetch for admin)
   useEffect(() => {
     if (!authData?.user) {
-      queueMicrotask(() => setPlansLoading(false));
       return;
     }
     const u = authData.user as AuthUser;
     if (u?.role === "admin") {
-      queueMicrotask(() => setPlansLoading(false));
       return;
     }
     queueMicrotask(() => {
@@ -277,14 +194,6 @@ export default function PersonalProfile({
         }
       })
       .finally(() => setSubscriptionInfoLoading(false));
-
-    axiosGet<PlansResponse>("/public/plans", locale, undefined, undefined, true)
-      .then((res) => {
-        if (res.status && res.data?.plans?.length) {
-          setPlans(res.data.plans);
-        }
-      })
-      .finally(() => setPlansLoading(false));
   }, [locale, authData?.user, t]);
 
   useEffect(() => {
@@ -465,97 +374,8 @@ export default function PersonalProfile({
   const defaultBackLink = backLink ?? `/dashboard/${menuId ?? ""}/settings`;
   const defaultBackLinkText = backLinkText ?? t("backToProfile");
 
-  const customPlanFeatures = CUSTOM_PLAN_FEATURE_KEYS.map((key) =>
-    tRoot("Landing.pricing.customFeatures." + key),
-  );
-  const isCurrentCustomPlan = Boolean(
-    profile?.user?.subscription?.planName &&
-    String(profile.user.subscription.planName).toLowerCase().includes("custom"),
-  );
-
   const currentPlanNameResolved =
     subscriptionInfo?.planName ?? profile?.user?.subscription?.planName ?? "";
-
-  const isOnProPlan = String(currentPlanNameResolved).toLowerCase() === "pro";
-
-  const formatPlanDate = (d: string | null | undefined) => {
-    if (d == null || d === "") return "—";
-    try {
-      return new Date(d).toLocaleDateString(locale, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-    } catch {
-      return "—";
-    }
-  };
-
-  const handleUpgradeToPro = useCallback(async () => {
-    const nameToSend = name.trim() || profile?.name || "";
-    const rawPhone =
-      (typeof phone === "string" ? phone.trim() : "") ||
-      (typeof profile?.phoneNumber === "string"
-        ? profile.phoneNumber.trim()
-        : "") ||
-      "";
-    const phoneToSend = formatPhoneForPaymentGateway(rawPhone);
-    if (!nameToSend || !phoneToSend) {
-      toast.error(t("payProError"));
-      return;
-    }
-    const endpoint =
-      proBillingChoice === "monthly"
-        ? "/payment/subscription/pro-monthly/initiate"
-        : "/payment/subscription/pro-yearly/initiate";
-    setProPayLoading(true);
-    const res = await axiosPost<
-      { name: string; email?: string; mobile: string; currency?: string },
-      {
-        success?: boolean;
-        data?: {
-          redirectUrl?: string;
-          amount?: number;
-          order_id?: string;
-          currency?: string;
-        };
-      }
-    >(endpoint, locale, {
-      name: nameToSend,
-      email: profile?.email?.trim() || undefined,
-      mobile: phoneToSend,
-      currency: "EGP",
-    });
-    setProPayLoading(false);
-    if (res?.status && res.data?.data?.redirectUrl) {
-      const amount = Number(res.data.data.amount);
-      const currency = res.data.data.currency || "EGP";
-      if (Number.isFinite(amount) && amount > 0) {
-        sessionStorage.setItem(
-          "gtm_pending_purchase",
-          JSON.stringify({
-            value: amount,
-            currency,
-            orderId: res.data.data.order_id,
-          }),
-        );
-      }
-      toast.info(t("paying"));
-      window.location.href = res.data.data.redirectUrl;
-      return;
-    }
-    const serverMsg = pickFailedRequestMessage(res?.data as unknown);
-    toast.error(serverMsg ?? t("payProError"));
-  }, [
-    locale,
-    name,
-    phone,
-    proBillingChoice,
-    profile?.name,
-    profile?.email,
-    profile?.phoneNumber,
-    t,
-  ]);
 
   return (
     <div className="min-h-[calc(100vh-120px)]">
@@ -927,439 +747,32 @@ export default function PersonalProfile({
         </section>
 
         {!hideSubscriptionSection && (
-          <>
-            {/* Subscription: current plan + plans with upgrade/downgrade or WhatsApp for Custom */}
-            <section
-              id="onboarding-personal-subscription"
-              className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 md:p-6"
-            >
-              <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-5">
-                {t("subscriptionManagement")}
-              </h3>
-
-              {/* Current plan: name + status + billing + renewal + limits */}
-              {subscriptionInfoLoading ? (
-                <div
-                  className="mb-6 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 animate-pulse space-y-3"
-                  aria-hidden
-                >
-                  <div className="h-4 w-1/3 bg-slate-200 dark:bg-slate-700 rounded" />
-                  <div className="h-3 w-full bg-slate-100 dark:bg-slate-800 rounded" />
-                  <div className="h-3 w-2/3 bg-slate-100 dark:bg-slate-800 rounded" />
-                </div>
-              ) : (
-                <div
-                  className={`mb-6 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/40 p-4 md:p-5 ${isRTL ? "text-right" : "text-left"}`}
-                >
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-3">
-                    {t("currentPlanSummary")}
-                  </p>
-                  <div className="flex flex-wrap items-center gap-2 mb-4">
-                    <span className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                      {currentPlanNameResolved
-                        ? (() => {
-                            const n = String(
-                              currentPlanNameResolved,
-                            ).toLowerCase();
-                            if (n === "free") return t("planFree");
-                            if (n === "pro") return t("planPro");
-                            return currentPlanNameResolved;
-                          })()
-                        : t("planFree")}
-                    </span>
-                    {subscriptionInfo?.status && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200">
-                        {t("status")}: {String(subscriptionInfo.status)}
-                      </span>
-                    )}
-                  </div>
-                  <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                    <div className="flex flex-col sm:flex-row sm:gap-2">
-                      <dt className="text-slate-500 dark:text-slate-400 shrink-0">
-                        {t("billingCycle")}:
-                      </dt>
-                      <dd className="font-medium text-slate-800 dark:text-slate-200">
-                        {(() => {
-                          const c = String(
-                            subscriptionInfo?.billingCycle ?? "",
-                          ).toLowerCase();
-                          if (c === "yearly" || c === "annual")
-                            return t("yearly");
-                          if (c === "monthly") return t("monthly");
-                          if (c === "free" || !c) return t("freePrice");
-                          return subscriptionInfo?.billingCycle ?? "—";
-                        })()}
-                      </dd>
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:gap-2">
-                      <dt className="text-slate-500 dark:text-slate-400 shrink-0">
-                        {t("renewalDate")}:
-                      </dt>
-                      <dd className="font-medium text-slate-800 dark:text-slate-200">
-                        {formatPlanDate(
-                          subscriptionInfo?.endDate as string | undefined,
-                        )}
-                      </dd>
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:gap-2">
-                      <dt className="text-slate-500 dark:text-slate-400 shrink-0">
-                        {t("maxMenusLabel")}:
-                      </dt>
-                      <dd className="font-medium text-slate-800 dark:text-slate-200">
-                        {subscriptionInfo?.maxMenus ?? "—"}
-                      </dd>
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:gap-2">
-                      <dt className="text-slate-500 dark:text-slate-400 shrink-0">
-                        {t("maxProductsLabel")}:
-                      </dt>
-                      <dd className="font-medium text-slate-800 dark:text-slate-200">
-                        {subscriptionInfo?.maxProductsPerMenu ?? "—"}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-              )}
-
-              {plansLoading ? (
-                <div className="grid gap-4 md:grid-cols-3 mb-6">
-                  {[1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 p-5 animate-pulse h-52 bg-slate-50 dark:bg-slate-800/50"
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div
-                  className={`grid gap-4 md:grid-cols-3 mb-6 ${isRTL ? "md:grid-flow-dense" : ""}`}
-                >
-                  {plans
-                    .filter(
-                      (p) =>
-                        !String(p.name).toLowerCase().includes("custom") &&
-                        (String(p.name).toLowerCase() === "free" ||
-                          String(p.name).toLowerCase() === "pro"),
-                    )
-                    .map((plan, index) => {
-                      const currentPlanName = currentPlanNameResolved;
-                      const isCurrentPlan =
-                        currentPlanName &&
-                        String(plan.name).toLowerCase() ===
-                          String(currentPlanName).toLowerCase();
-                      const isCustomPlan = String(plan.name)
-                        .toLowerCase()
-                        .includes("custom");
-                      const isComingSoon =
-                        plan.maxMenus === 0 &&
-                        plan.priceMonthly === 0 &&
-                        !isCustomPlan;
-                      const isMostPopular = index === 1 && plans.length > 1;
-                      const currentPlanIndex = plans.findIndex(
-                        (p) =>
-                          String(p.name).toLowerCase() ===
-                          String(currentPlanName).toLowerCase(),
-                      );
-                      const canUpgrade =
-                        currentPlanIndex >= 0 &&
-                        index > currentPlanIndex &&
-                        !isCustomPlan;
-                      const canDowngrade =
-                        currentPlanIndex >= 0 &&
-                        index < currentPlanIndex &&
-                        !isCustomPlan;
-                      const rtlCol =
-                        isRTL && index === 0
-                          ? "md:col-start-3"
-                          : isRTL && index === 1
-                            ? "md:col-start-2"
-                            : "";
-
-                      const isProPlan =
-                        String(plan.name).toLowerCase() === "pro";
-                      const showProBilling = isProPlan && canUpgrade;
-
-                      return (
-                        <div
-                          key={plan.id}
-                          className={`relative rounded-2xl border-2 p-5 transition-all ${
-                            isCurrentPlan
-                              ? "border-primary dark:border-primary bg-primary/5 dark:bg-primary/10"
-                              : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50/30 dark:bg-slate-800/30"
-                          } ${isComingSoon ? "opacity-90" : ""} ${rtlCol}`}
-                        >
-                          {isCurrentPlan && (
-                            <span className="inline-block px-2.5 py-0.5 rounded-full bg-primary/20 dark:bg-primary/30 text-primary dark:text-primary text-xs font-medium mb-2">
-                              {t("currentPlan")}
-                            </span>
-                          )}
-                          {isMostPopular && !isCurrentPlan && (
-                            <span className="inline-block px-2.5 py-0.5 rounded-full bg-primary/15 dark:bg-primary/20 text-primary dark:text-primary text-xs font-medium mb-2">
-                              {t("mostPopular")}
-                            </span>
-                          )}
-                          {isComingSoon && (
-                            <span className="inline-block px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-xs font-medium mb-2">
-                              {t("comingSoon")}
-                            </span>
-                          )}
-                          <p className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-1">
-                            {(() => {
-                              const n = String(plan.name).toLowerCase();
-                              if (n === "free") return t("planFree");
-                              if (n === "pro") return t("planPro");
-                              return plan.name;
-                            })()}
-                          </p>
-                          {!isComingSoon &&
-                            plan.priceYearly != null &&
-                            (plan.priceYearly > 0 ||
-                              plan.priceMonthly === 0) && (
-                              <div className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-3 space-y-2">
-                                {plan.priceMonthly === 0 &&
-                                plan.priceYearly === 0 ? (
-                                  <p>{t("freePrice")}</p>
-                                ) : showProBilling ? (
-                                  <>
-                                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                                      {t("selectBillingCycle")}
-                                    </p>
-                                    <div
-                                      className={`inline-flex w-full rounded-xl border border-slate-200 dark:border-slate-600 p-1 bg-white dark:bg-slate-900 ${isRTL ? "flex-row-reverse" : ""}`}
-                                      role="group"
-                                      aria-label={t("selectBillingCycle")}
-                                    >
-                                      {(["monthly", "yearly"] as const).map(
-                                        (cycle) => (
-                                          <button
-                                            key={cycle}
-                                            type="button"
-                                            onClick={() =>
-                                              setProBillingChoice(cycle)
-                                            }
-                                            className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                                              proBillingChoice === cycle
-                                                ? "bg-primary text-white shadow-sm"
-                                                : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-                                            }`}
-                                          >
-                                            {cycle === "monthly"
-                                              ? t("monthly")
-                                              : t("yearly")}
-                                          </button>
-                                        ),
-                                      )}
-                                    </div>
-                                    <p>
-                                      {proBillingChoice === "monthly"
-                                        ? t("monthlyPriceFormatted", {
-                                            price: formatEgpPrice(
-                                              plan.priceMonthly,
-                                            ),
-                                            currency:
-                                              tLandingPricing("currencyEgp"),
-                                            perMonth:
-                                              tLandingPricing("perMonth"),
-                                          })
-                                        : t("yearlyPriceFormatted", {
-                                            price: formatEgpPrice(
-                                              plan.firstYearlyPrice ??
-                                                plan.priceYearly,
-                                            ),
-                                            currency:
-                                              tLandingPricing("currencyEgp"),
-                                            perYear:
-                                              tLandingPricing("perYear"),
-                                          })}
-                                    </p>
-                                    {proBillingChoice === "yearly" &&
-                                      plan.firstYearlyPrice != null &&
-                                      plan.firstYearlyPrice > 0 &&
-                                      plan.firstYearlyPrice <
-                                        plan.priceYearly && (
-                                        <>
-                                          <p className="text-sm text-slate-500 dark:text-slate-400 line-through font-normal">
-                                            {t("yearlyPriceBeforeDiscount", {
-                                              price: formatEgpPrice(
-                                                plan.priceYearly,
-                                              ),
-                                              currency:
-                                                tLandingPricing("currencyEgp"),
-                                            })}
-                                          </p>
-                                          <p className="text-sm font-semibold text-primary">
-                                            {t("proFirstYearlyOffer")}
-                                          </p>
-                                        </>
-                                      )}
-                                  </>
-                                ) : (
-                                  <>
-                                    {plan.priceMonthly > 0 && (
-                                      <p>
-                                        {t("monthlyPriceFormatted", {
-                                          price: formatEgpPrice(
-                                            plan.priceMonthly,
-                                          ),
-                                          currency:
-                                            tLandingPricing("currencyEgp"),
-                                          perMonth:
-                                            tLandingPricing("perMonth"),
-                                        })}
-                                      </p>
-                                    )}
-                                    {plan.priceYearly > 0 && (
-                                      <p>
-                                        {t("yearlyPriceFormatted", {
-                                          price: formatEgpPrice(
-                                            plan.priceYearly,
-                                          ),
-                                          currency:
-                                            tLandingPricing("currencyEgp"),
-                                          perYear: tLandingPricing("perYear"),
-                                        })}
-                                      </p>
-                                    )}
-                                    {plan.firstYearlyPrice != null &&
-                                      plan.firstYearlyPrice > 0 &&
-                                      plan.firstYearlyPrice <
-                                        plan.priceYearly && (
-                                        <>
-                                          <p className="text-sm text-slate-500 dark:text-slate-400 line-through font-normal">
-                                            {t("yearlyPriceBeforeDiscount", {
-                                              price: formatEgpPrice(
-                                                plan.priceYearly,
-                                              ),
-                                              currency:
-                                                tLandingPricing("currencyEgp"),
-                                            })}
-                                          </p>
-                                          <p className="text-sm font-semibold text-primary">
-                                            {t("proFirstYearlyOffer")}
-                                          </p>
-                                        </>
-                                      )}
-                                  </>
-                                )}
-                              </div>
-                            )}
-                          {(isComingSoon || isCustomPlan) &&
-                            plan.priceMonthly === 0 && (
-                              <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
-                                {isCustomPlan
-                                  ? t("contactForDetails")
-                                  : t("comingSoon")}
-                              </p>
-                            )}
-                          <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300 mb-4">
-                            {(String(plan.name).toLowerCase() === "pro"
-                              ? [
-                                  ...translatePlanFeaturesWithMenuLimit(
-                                    plan.features,
-                                    plan.maxMenus,
-                                    t,
-                                  ),
-                                  tLandingPricing(
-                                    "proExtraFeatures.staffSystem",
-                                  ),
-                                  tLandingPricing(
-                                    "proExtraFeatures.tablesSystem",
-                                  ),
-                                ]
-                              : translatePlanFeaturesWithMenuLimit(
-                                  plan.features,
-                                  plan.maxMenus,
-                                  t,
-                                ).slice(0, 5)
-                            ).map((f, i) => (
-                              <li key={`${plan.id}-f-${i}`}>✓ {f}</li>
-                            ))}
-                          </ul>
-
-                          <div className="mt-4 flex flex-col gap-2">
-                            {isCurrentPlan && (
-                              <span className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-200/80 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300 text-sm font-medium">
-                                {t("currentPlan")}
-                              </span>
-                            )}
-                            {canUpgrade && (
-                              <button
-                                type="button"
-                                onClick={handleUpgradeToPro}
-                                disabled={proPayLoading}
-                                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white font-medium text-sm hover:bg-primary/90 dark:hover:bg-primary/80 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                              >
-                                <HiArrowUp className="w-4 h-4" />
-                                {proPayLoading
-                                  ? t("paying")
-                                  : isProPlan
-                                    ? proBillingChoice === "monthly"
-                                      ? t("upgradeToProMonthlyCta")
-                                      : t("upgradeToProYearlyCta")
-                                    : t("upgrade")}
-                              </button>
-                            )}
-                            {canDowngrade && (
-                              <button
-                                type="button"
-                                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                              >
-                                <HiArrowDown className="w-4 h-4" />
-                                {t("downgrade")}
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  {/* Custom plan card - static with fixed features */}
-                  <div
-                    key="custom-plan"
-                    className={`relative rounded-2xl border-2 p-5 transition-all ${
-                      isCurrentCustomPlan
-                        ? "border-primary dark:border-primary bg-primary/5 dark:bg-primary/10"
-                        : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50/30 dark:bg-slate-800/30"
-                    } ${isRTL ? "md:col-start-1" : ""}`}
-                  >
-                    {isCurrentCustomPlan && (
-                      <span className="inline-block px-2.5 py-0.5 rounded-full bg-primary/20 dark:bg-primary/30 text-primary dark:text-primary text-xs font-medium mb-2">
-                        {t("currentPlan")}
-                      </span>
-                    )}
-                    <p className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-1">
-                      {t("planCustom")}
-                    </p>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
-                      {t("contactForDetails")}
-                    </p>
-                    <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300 mb-4">
-                      {customPlanFeatures.map((f: string, i: number) => (
-                        <li key={i}>✓ {f}</li>
-                      ))}
-                    </ul>
-                    <div className="mt-4 flex flex-col gap-2">
-                      {isCurrentCustomPlan && (
-                        <span className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-200/80 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300 text-sm font-medium">
-                          {t("currentPlan")}
-                        </span>
-                      )}
-                      {!isCurrentCustomPlan && (
-                        <a
-                          href={WHATSAPP_URL}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 dark:bg-emerald-600 text-white font-medium text-sm hover:bg-emerald-600 dark:hover:bg-emerald-700 transition-colors"
-                        >
-                          <HiOutlineChat className="w-5 h-5" />
-                          {t("contactWhatsApp")}
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </section>
-          </>
+          <section
+            id="onboarding-personal-subscription"
+            className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 md:p-6"
+          >
+            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-5">
+              {t("subscription")}
+            </h3>
+            <CurrentPlanSummary
+              subscriptionInfo={subscriptionInfo}
+              loading={subscriptionInfoLoading}
+              currentPlanName={currentPlanNameResolved}
+              className="mb-5"
+            />
+            {menuId && (
+              <LinkTo
+                id="onboarding-personal-subscription-link"
+                href={`/dashboard/${menuId}/subscription`}
+                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary/90 dark:hover:bg-primary/80 transition-colors shadow-sm"
+              >
+                {t("manageSubscriptionAndPricing")}
+                <HiOutlineArrowRight
+                  className={`text-lg ${isRTL ? "rotate-180" : ""}`}
+                />
+              </LinkTo>
+            )}
+          </section>
         )}
       </div>
     </div>

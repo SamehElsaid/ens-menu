@@ -37,6 +37,8 @@ export interface Menu {
   categoriesCount: number;
   itemsCount: number;
   views: number;
+  /** Times customers opened the menu via a QR link (?src=qr). */
+  qrScans?: number;
   staffCount?: number;
   tablesCount?: number;
   menuStaff?: MenuStaffMember[];

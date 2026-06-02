@@ -33,22 +33,13 @@ import {
   IoTrashOutline,
 } from "react-icons/io5";
 
-function buildPublicMenuBaseUrl(slug: string | undefined | null): string {
-  if (!slug) return "";
-  return `https://${slug}${process.env.NEXT_PUBLIC_MENU_URL || ""}`.replace(
-    /^https:\/\//,
-    "https://",
-  );
-}
+import { publicMenuQrUrl } from "@/lib/publicMenuUrl";
 
 function tablePublicMenuUrl(
   slug: string | undefined | null,
   tableNumber: string,
 ): string {
-  const base = buildPublicMenuBaseUrl(slug);
-  if (!base) return "";
-  const sep = base.includes("?") ? "&" : "?";
-  return `${base}${sep}table=${encodeURIComponent(tableNumber)}`;
+  return publicMenuQrUrl(slug, { table: tableNumber });
 }
 
 function safeTableFilenameSegment(tableNumber: string): string {
@@ -310,7 +301,7 @@ export default function TablesPage() {
         </PageTitleWithHelp>
         <p className="max-w-md text-slate-500 dark:text-slate-400">{description}</p>
         <LinkTo
-          href={`/dashboard/${menuId}/personal`}
+          href={`/dashboard/${menuId}/subscription`}
           className="mt-4 inline-flex items-center justify-center gap-2 px-8 py-3 bg-linear-to-r from-primary to-primary/80 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
         >
           {buttonLabel}

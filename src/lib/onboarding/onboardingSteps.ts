@@ -42,6 +42,10 @@ export function resolveTourForPage(pathname: string): PageTour | null {
     return { tourId: "settings-design", phase: "choose-design" };
   }
 
+  if (pathname.includes("/subscription")) {
+    return { tourId: "subscription-plans", phase: "go-to-menu" };
+  }
+
   if (pathname.includes("/personal")) {
     return { tourId: "personal-profile", phase: "go-to-menu" };
   }
@@ -166,6 +170,18 @@ export function buildOnboardingStepsForTour(
           },
         },
       ];
+    case "subscription-plans":
+      return [
+        {
+          element: "#onboarding-subscription-plans",
+          popover: {
+            title: t("steps.subscriptionPlans.title"),
+            description: t("steps.subscriptionPlans.description"),
+            side: "top",
+            align: "start",
+          },
+        },
+      ];
     case "personal-profile":
       return [
         {
@@ -196,7 +212,7 @@ export function buildOnboardingStepsForTour(
           },
         },
         {
-          element: "#onboarding-personal-subscription",
+          element: "#onboarding-personal-subscription-link",
           popover: {
             title: t("steps.personalProfile.subscription.title"),
             description: t("steps.personalProfile.subscription.description"),

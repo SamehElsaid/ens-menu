@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import DarkModeToggle from "../Global/DarkModeToggle";
 import HeaderSearch from "../Global/HeaderSearch";
+import { useDashboardTitle } from "@/components/Dashboard/DashboardTitleProvider";
 
 export function DashboardHeader({
   setIsMenuOpen,
@@ -20,6 +21,7 @@ export function DashboardHeader({
   const tCommon = useTranslations("common");
   const pathname = usePathname();
   const showSidebarToggle = segment || isAdmin;
+  const pageTitle = useDashboardTitle();
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 px-4 py-4 backdrop-blur sm:px-8 dark:bg-[#0d1117]/70 dark:border-purple-900">
@@ -42,7 +44,7 @@ export function DashboardHeader({
         </div>
         <div className="flex items-center gap-1">
           {/* <LinkTo href="/" className=" text-lg font-bold text-primary">Logo</LinkTo> */}
-          <Logo />
+          <Logo pageTitle={!isAdmin ? pageTitle : undefined} />
         </div>
         <div className="flex items-center gap-1 ">
           <HeaderSearch />

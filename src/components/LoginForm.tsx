@@ -8,7 +8,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { loginSchema, LoginSchema } from "@/schemas/loginSchema";
 import { encryptData } from "@/shared/encryption";
 import Cookies from "js-cookie";
-import { useRouter } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
+import { resolvePostLoginPath } from "@/lib/authRedirect";
 import LinkTo from "./Global/LinkTo";
 import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
 import { useAppDispatch } from "@/store/hooks";
@@ -27,7 +28,6 @@ const RECAPTCHA_HEIGHT = 78;
 
 export default function LoginForm({ promoText, promoEnabled }: { promoText: string, promoEnabled: boolean }) {
   const t = useTranslations("");
-  const router = useRouter();
   const dispatch = useAppDispatch();
   const {
     control,
@@ -49,6 +49,8 @@ export default function LoginForm({ promoText, promoEnabled }: { promoText: stri
   };
 
   const locale = useLocale();
+  const searchParams = useSearchParams();
+  const redirectParam = searchParams.get("redirect");
   const [loading, setLoading] = useState(false);
   const [loadingLoader, setLoadingLoader] = useState(true);
   const [recaptchaVerified, setRecaptchaVerified] = useState(false);
@@ -112,7 +114,11 @@ export default function LoginForm({ promoText, promoEnabled }: { promoText: stri
       // Sync FCM token right after login (check match, update if needed)
       void syncFcmToken(locale);
 
-      window.location.href = `/${locale}${user?.role === "admin" ? "/admin" : "/dashboard"}`;
+      window.location.href = resolvePostLoginPath(
+        locale,
+        user?.role,
+        redirectParam,
+      );
       if (user) {
         dispatch(SET_ACTIVE_USER({ user }));
       }
@@ -224,7 +230,10 @@ export default function LoginForm({ promoText, promoEnabled }: { promoText: stri
         />
       </div>
       <div className="mt-12 flex flex-col items-center">
-        <GoogleSignInButton dividerLabel="auth.orLoginWith" />
+        <GoogleSignInButton
+          dividerLabel="auth.orLoginWith"
+          redirectParam={redirectParam}
+        />
       </div>
       <div className="flex items-center justify-center mt-6">
         <LinkTo

@@ -1,16 +1,19 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { pushPurchaseEvent } from "@/shared/gtmEvents";
+import { axiosGet, axiosPost } from "@/shared/axiosCall";
 
 type ApiRedirectResponse = {
   success?: boolean;
   data?: {
     payment_status?: string;
+    redirect_status?: string;
     synced_from_redirect?: boolean;
+    subscription_synced?: boolean;
     order_id?: string;
     value?: number;
     currency?: string;
@@ -29,95 +32,139 @@ function PaymentCallbackContent() {
   );
   const [message, setMessage] = useState("");
 
+  const redirectParams = useMemo(() => {
+    const params: Record<string, string> = {};
+    searchParams.forEach((value, key) => {
+      params[key] = value;
+    });
+    return params;
+  }, [searchParams]);
+
   useEffect(() => {
-    const qs = searchParams.toString();
-    if (!qs.trim()) {
+    if (Object.keys(redirectParams).length === 0) {
       setPhase("error");
       setMessage(t("paymentResultNoCheckout"));
       return;
     }
 
-    const base = (process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/$/, "");
-    const url = `${base}/payment/redirect?${qs}`;
-
     let cancelled = false;
-    void (async () => {
-      try {
-        const res = await fetch(url, {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            "Accept-Language": locale,
-          },
-        });
-        const data = (await res.json().catch(() => ({}))) as ApiRedirectResponse;
-        if (cancelled) return;
 
-        if (!res.ok) {
-          setPhase("error");
-          setMessage(
-            data.error ||
-              data.errorEn ||
-              data.message ||
-              t("paymentResultFailedStatus"),
-          );
-          return;
-        }
+    const finishSuccess = (data: ApiRedirectResponse) => {
+      const orderId = data.data?.order_id;
+      let value = Number(data.data?.value);
+      let currency = data.data?.currency?.trim() || "EGP";
 
-        const synced = data.data?.synced_from_redirect === true;
-        const ps = String(data.data?.payment_status ?? "").toLowerCase();
-        if (ps === "completed" || synced) {
-          const orderId = data.data?.order_id;
-          let value = Number(data.data?.value);
-          let currency = data.data?.currency?.trim() || "USD";
-
-          if (!Number.isFinite(value) || value <= 0) {
-            try {
-              const pending = JSON.parse(
-                sessionStorage.getItem("gtm_pending_purchase") ?? "null",
-              ) as { value?: number; currency?: string } | null;
-              if (pending?.value && pending.value > 0) {
-                value = pending.value;
-                currency = pending.currency?.trim() || "USD";
-              }
-            } catch {
-              /* ignore */
-            }
+      if (!Number.isFinite(value) || value <= 0) {
+        try {
+          const pending = JSON.parse(
+            sessionStorage.getItem("gtm_pending_purchase") ?? "null",
+          ) as { value?: number; currency?: string } | null;
+          if (pending?.value && pending.value > 0) {
+            value = pending.value;
+            currency = pending.currency?.trim() || "EGP";
           }
-          sessionStorage.removeItem("gtm_pending_purchase");
-
-          if (Number.isFinite(value) && value > 0) {
-            const dedupeKey = orderId
-              ? `gtm_purchase_${orderId}`
-              : "gtm_purchase_anonymous";
-            if (!sessionStorage.getItem(dedupeKey)) {
-              sessionStorage.setItem(dedupeKey, "1");
-              pushPurchaseEvent({ value, currency });
-            }
-          }
-
-          setPhase("success");
-          setMessage(t("paymentResultSuccessPro"));
-          return;
+        } catch {
+          /* ignore */
         }
-        if (ps === "pending") {
-          setPhase("pending");
-          setMessage(t("paymentResultPending"));
-          return;
-        }
-        setPhase("error");
-        setMessage(t("paymentResultFailed"));
-      } catch (e: unknown) {
-        if (cancelled) return;
-        setPhase("error");
-        setMessage(e instanceof Error ? e.message : t("paymentResultFailedStatus"));
       }
+      sessionStorage.removeItem("gtm_pending_purchase");
+
+      if (Number.isFinite(value) && value > 0) {
+        const dedupeKey = orderId
+          ? `gtm_purchase_${orderId}`
+          : "gtm_purchase_anonymous";
+        if (!sessionStorage.getItem(dedupeKey)) {
+          sessionStorage.setItem(dedupeKey, "1");
+          pushPurchaseEvent({ value, currency });
+        }
+      }
+
+      setPhase("success");
+      setMessage(t("paymentResultSuccessPro"));
+    };
+
+    void (async () => {
+      const res = await axiosGet<ApiRedirectResponse>(
+        "/payment/redirect",
+        locale,
+        undefined,
+        redirectParams,
+      );
+      if (cancelled) return;
+
+      const data = res.data ?? {};
+      if (!res.status) {
+        setPhase("error");
+        setMessage(
+          (data as ApiRedirectResponse).error ||
+            (data as ApiRedirectResponse).errorEn ||
+            (data as ApiRedirectResponse).message ||
+            t("paymentResultFailedStatus"),
+        );
+        return;
+      }
+
+      const ps = String(data.data?.payment_status ?? "").toLowerCase();
+      const redirectStatus = String(data.data?.redirect_status ?? "").toUpperCase();
+      const synced = data.data?.synced_from_redirect === true;
+      const subscriptionSynced = data.data?.subscription_synced === true;
+      const redirectPaid = redirectStatus === "PAID";
+
+      if (
+        ps === "completed" ||
+        synced ||
+        subscriptionSynced ||
+        redirectPaid
+      ) {
+        finishSuccess(data);
+        return;
+      }
+      if (ps === "pending") {
+        setPhase("pending");
+        setMessage(t("paymentResultPending"));
+        return;
+      }
+      setPhase("error");
+      setMessage(t("paymentResultFailed"));
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [searchParams, locale, t]);
+  }, [redirectParams, locale, t]);
+
+  const handleRecover = async () => {
+    setPhase("loading");
+    const orderId =
+      typeof redirectParams.customerReference === "string"
+        ? (() => {
+            try {
+              const parsed = JSON.parse(redirectParams.customerReference) as {
+                orderId?: string;
+              };
+              return parsed.orderId ?? "";
+            } catch {
+              return "";
+            }
+          })()
+        : "";
+
+    const res = await axiosPost<
+      { orderId?: string },
+      { message?: string }
+    >("/user/subscription/recover-payment", locale, {
+      orderId: orderId || undefined,
+    });
+
+    if (res.status) {
+      setPhase("success");
+      setMessage(t("paymentResultSuccessPro"));
+      return;
+    }
+
+    setPhase("error");
+    setMessage(t("paymentResultFailedStatus"));
+  };
 
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center px-4 py-16">
@@ -149,6 +196,15 @@ function PaymentCallbackContent() {
           </p>
         )}
         <div className="mt-8 flex flex-col gap-3">
+          {phase === "error" && (
+            <button
+              type="button"
+              onClick={() => void handleRecover()}
+              className="inline-flex justify-center rounded-xl border border-primary px-4 py-3 text-sm font-semibold text-primary hover:bg-primary/5"
+            >
+              {t("paymentRecoverCta")}
+            </button>
+          )}
           <Link
             href="/dashboard"
             className="inline-flex justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:opacity-90"

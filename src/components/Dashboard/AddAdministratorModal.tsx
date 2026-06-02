@@ -17,6 +17,12 @@ import {
   createAdministratorSchema,
   type AdministratorFormSchema,
 } from "@/schemas/administratorSchema";
+import AdminPermissionsEditor from "@/components/Admin/AdminPermissionsEditor";
+import { setAdminPermissionsByEmail, removeAdminPermissionsByEmail } from "@/lib/adminPermissions";
+import {
+  ADMIN_PERMISSION_KEYS,
+  type AdminPermissionKey,
+} from "@/types/AdminPermission";
 
 type AddAdministratorFormData = AdministratorFormSchema;
 
@@ -33,6 +39,9 @@ export default function AddAdministratorModal({
   const t = useTranslations("adminAdministrators.addModal");
   const tAuth = useTranslations(""); // Root-level translations for schema
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [permissions, setPermissions] = useState<AdminPermissionKey[]>([
+    ...ADMIN_PERMISSION_KEYS,
+  ]);
   const modalRef = useRef<HTMLDivElement | null>(null);
 
   const {
@@ -68,6 +77,10 @@ export default function AddAdministratorModal({
         name: data.name.trim(),
         email: data.email.trim(),
         password: data.password,
+        permissions:
+          permissions.length >= ADMIN_PERMISSION_KEYS.length
+            ? null
+            : permissions,
       };
 
       const result = await axiosPost<typeof payload, { id: number; name: string; email: string }>(
@@ -77,6 +90,11 @@ export default function AddAdministratorModal({
       );
 
       if (result.status && result.data) {
+        if (permissions.length >= ADMIN_PERMISSION_KEYS.length) {
+          removeAdminPermissionsByEmail(data.email.trim());
+        } else {
+          setAdminPermissionsByEmail(data.email.trim(), permissions);
+        }
         toast.success(t("createSuccess"));
         reset();
         onClose();
@@ -196,6 +214,12 @@ export default function AddAdministratorModal({
                 )}
               />
             </div>
+
+            <AdminPermissionsEditor
+              value={permissions}
+              onChange={setPermissions}
+              disabled={isSubmitting}
+            />
           </div>
 
           {/* Footer Actions */}

@@ -14,6 +14,8 @@ import {
   IoChevronForwardOutline,
   IoOpenOutline,
   IoTimeOutline,
+  IoEyeOutline,
+  IoStatsChartOutline,
 } from "react-icons/io5";
 import { FaChartLine } from "react-icons/fa";
 import { BiCategory } from "react-icons/bi";
@@ -35,6 +37,7 @@ import {
 import { useDashboardSession } from "@/hooks/useDashboardSession";
 import { isFreePlanUser } from "@/lib/subscription";
 import { ONBOARDING_REFRESH_EVENT } from "@/lib/onboarding/onboardingStorage";
+import { publicMenuLinkUrl, publicMenuQrUrl } from "@/lib/publicMenuUrl";
 
 type ActivityEntry = {
   id: string;
@@ -91,12 +94,8 @@ export default function DashboardMenuPage() {
   const [recentCategories, setRecentCategories] = useState<Category[]>([]);
   const [activityLoading, setActivityLoading] = useState(true);
 
-  const menuUrl = menu?.slug
-    ? `https://${menu.slug}${process.env.NEXT_PUBLIC_MENU_URL || ""}`.replace(
-      /^https:\/\//,
-      "https://",
-    )
-    : "";
+  const menuLinkUrl = menu?.slug ? publicMenuLinkUrl(menu.slug) : "";
+  const menuQrUrl = menu?.slug ? publicMenuQrUrl(menu.slug) : "";
   const menuQrRef = useRef<StyledQrCodeHandle>(null);
   const qrCenterLogoSrc = !isFreePlan ? (menu?.logo ?? null) : null;
 
@@ -110,23 +109,18 @@ export default function DashboardMenuPage() {
   }, [menuLoading, menu]);
 
   useEffect(() => {
-    axiosGet<object>(`/menus/${menuSlugOrId}/activity-logs/`, locale).then(
-      (res) => { },
-    );
     if (!menuSlugOrId) return;
     const fetchActivity = async () => {
       setActivityLoading(true);
       try {
-        const [itemsRes, categoriesRes] = await Promise.all([
-          axiosGet<{ items?: Item[] }>(
-            `/menus/${menuSlugOrId}/items?page=1&limit=20`,
-            locale,
-          ),
-          axiosGet<{ categories?: Category[] } | Category[]>(
-            `/menus/${menuSlugOrId}/categories?page=1&limit=20`,
-            locale,
-          ),
-        ]);
+        const itemsRes = await axiosGet<{ items?: Item[] }>(
+          `/menus/${menuSlugOrId}/items?page=1&limit=20`,
+          locale,
+        );
+        const categoriesRes = await axiosGet<
+          { categories?: Category[] } | Category[]
+        >(`/menus/${menuSlugOrId}/categories?page=1&limit=20`, locale);
+
         if (itemsRes.status && itemsRes.data) {
           const list = (itemsRes.data as { items?: Item[] }).items ?? [];
           setRecentItems(list);
@@ -177,9 +171,11 @@ export default function DashboardMenuPage() {
   }, [recentItems, recentCategories, locale]);
 
   const handleDownloadQr = () => {
-    if (!menuUrl) return;
+    if (!menuQrUrl) return;
     void menuQrRef.current?.download(`menu-qr-${menu?.slug ?? "menu"}.png`);
   };
+
+  const textDir = locale === "ar" ? "rtl" : "ltr";
 
 
 
@@ -188,7 +184,8 @@ export default function DashboardMenuPage() {
     return (
       <div className="space-y-6 animate-fadeIn">
         <div className="h-24 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm p-6 animate-pulse" />
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCardSkeleton />
           <StatCardSkeleton />
           <StatCardSkeleton />
           <StatCardSkeleton />
@@ -252,6 +249,15 @@ export default function DashboardMenuPage() {
             <FaChartLine className="text-lg shrink-0" />
             {t("overview")}
           </LinkTo>
+          {!isCashierStaff && (
+            <LinkTo
+              href={`/dashboard/${menuSlugOrId}/analytics`}
+              className={`${tabBase} ${tabInactive}`}
+            >
+              <IoStatsChartOutline className="text-lg shrink-0" />
+              {t("analytics")}
+            </LinkTo>
+          )}
           <LinkTo
             href={`/dashboard/${menuSlugOrId}/categories`}
             className={`${tabBase} ${tabInactive}`}
@@ -302,7 +308,7 @@ export default function DashboardMenuPage() {
             </>
           )}
           <a
-            href={menuUrl || "#"}
+            href={menuLinkUrl || "#"}
             target="_blank"
             rel="noopener noreferrer"
             className={`${tabBase} ${tabViewMenu}`}
@@ -316,8 +322,9 @@ export default function DashboardMenuPage() {
       {/* Stats cards */}
       <section
         id="onboarding-overview-stats"
-        className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
         aria-label="Menu statistics"
+        dir={textDir}
       >
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 flex items-center gap-4 transition-all duration-200 hover:shadow-md hover:border-primary/10 dark:hover:border-primary/30 hover:-translate-y-0.5 group">
           <div className="w-12 h-12 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105">
@@ -358,8 +365,8 @@ export default function DashboardMenuPage() {
             </p>
           </div>
         </div>
-        {/* <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 flex items-center gap-4 transition-all duration-200 hover:shadow-md hover:border-red-500/10 dark:hover:border-red-500/30 hover:-translate-y-0.5 group">
-          <div className="w-12 h-12 rounded-xl bg-red-500/10 dark:bg-red-500/20 text-red-500 dark:text-red-400 flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 flex items-center gap-4 transition-all duration-200 hover:shadow-md hover:border-amber-200 dark:hover:border-amber-500/30 hover:-translate-y-0.5 group">
+          <div className="w-12 h-12 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105">
             <IoEyeOutline className="text-2xl" />
           </div>
           <div className="min-w-0">
@@ -370,7 +377,7 @@ export default function DashboardMenuPage() {
               {menu.views ?? 0}
             </p>
           </div>
-        </div> */}
+        </div>
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -379,8 +386,9 @@ export default function DashboardMenuPage() {
           id="onboarding-overview-qr"
           className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 transition-all duration-200 hover:shadow-md hover:border-slate-200 dark:hover:border-slate-600 flex flex-col items-center justify-center"
           aria-labelledby="qr-title"
+          dir={textDir}
         >
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-2 w-full">
             <BsQrCode className="text-primary text-xl shrink-0" aria-hidden />
             <h2
               id="qr-title"
@@ -392,13 +400,13 @@ export default function DashboardMenuPage() {
           <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">
             {t("qrDescription")}
           </p>
-          {menuUrl ? (
+          {menuQrUrl ? (
             <div className="flex flex-col items-center gap-4 w-full">
               <div className="flex flex-col items-center gap-1.5">
                 <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 p-2 shadow-inner ring-1 ring-slate-100/50 dark:ring-slate-700/50">
                   <StyledQrCode
                     ref={menuQrRef}
-                    value={menuUrl}
+                    value={menuQrUrl}
                     size={400}
                     displaySize={200}
                     centerLogoSrc={qrCenterLogoSrc}
@@ -408,6 +416,15 @@ export default function DashboardMenuPage() {
                 <p className="text-[11px] text-slate-400 dark:text-slate-500 tracking-wide text-center max-w-[200px] leading-tight">
                   powered by ensmenu
                 </p>
+              </div>
+              <div className="flex items-center gap-2 rounded-xl bg-primary/5 dark:bg-primary/10 px-4 py-2 w-full justify-center">
+                <BsQrCode className="text-primary text-base shrink-0" aria-hidden />
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                  {t("scanCountLabel")}
+                </span>
+                <span className="text-lg font-bold text-primary tabular-nums">
+                  {menu.qrScans ?? 0}
+                </span>
               </div>
               <button
                 type="button"
@@ -433,7 +450,7 @@ export default function DashboardMenuPage() {
           role="list"
         >
           <LinkTo
-            href={menuUrl || "#"}
+            href={menuLinkUrl || "#"}
             target="_blank"
             rel="noopener noreferrer"
             role="listitem"
@@ -495,6 +512,7 @@ export default function DashboardMenuPage() {
         id="onboarding-overview-activity"
         className="mb-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 transition-all duration-200 hover:shadow-md"
         aria-labelledby="activity-title"
+        dir={textDir}
       >
         <h2
           id="activity-title"

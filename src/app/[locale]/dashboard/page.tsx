@@ -729,7 +729,7 @@ function LimitReachedModal({
             <LinkTo
               href={
                 upgradeMenuId != null
-                  ? `/dashboard/${upgradeMenuId}/personal`
+                  ? `/dashboard/${upgradeMenuId}/subscription`
                   : "/pricing"
               }
               className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-linear-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg"

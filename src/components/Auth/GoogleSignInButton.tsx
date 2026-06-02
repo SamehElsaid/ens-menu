@@ -2,7 +2,6 @@
 
 import { FaGoogle } from "react-icons/fa";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
 import { useGoogleLogin } from "@react-oauth/google";
 import { useState } from "react";
 import { toast } from "react-toastify";
@@ -13,6 +12,7 @@ import { axiosPost } from "@/shared/axiosCall";
 import { pushSignUpEvent } from "@/shared/gtmEvents";
 import { encryptData } from "@/shared/encryption";
 import { LoginResponse } from "@/types/LoginResponse";
+import { resolvePostLoginPath } from "@/lib/authRedirect";
 
 // Must be set at BUILD time in production (e.g. in Vercel/Netlify env vars).
 const hasGoogleClientId = !!(
@@ -27,15 +27,17 @@ type GoogleSignInButtonProps = {
   ariaLabel?: string;
   /** Optional custom class for the wrapper */
   className?: string;
+  /** Post-login redirect path (without locale), e.g. from ?redirect= query param */
+  redirectParam?: string | null;
 };
 
 export default function GoogleSignInButton({
   dividerLabel,
   ariaLabel,
   className = "",
+  redirectParam = null,
 }: GoogleSignInButtonProps) {
   const t = useTranslations("");
-  const router = useRouter();
   const dispatch = useAppDispatch();
   const locale = useLocale();
   const [loading, setLoading] = useState(false);
@@ -72,7 +74,11 @@ export default function GoogleSignInButton({
           secure: true,
           path: "/",
         });
-        window.location.href = `/${locale}${user?.role === "admin" ? "/admin" : "/dashboard"}`;
+        window.location.href = resolvePostLoginPath(
+          locale,
+          user?.role,
+          redirectParam,
+        );
         if (user) {
           dispatch(SET_ACTIVE_USER({ user }));
         }

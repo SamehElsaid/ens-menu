@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import { buildSeoMetadata } from "@/lib/seo";
 import CustomLogo from "@/components/Custom/CustomLogo";
@@ -63,7 +64,9 @@ export default async function LoginPage({ params }: Props) {
                         {t("welcomeBackDescription")}
                       </p>
                     </div>
-                    <LoginForm promoText={promoText} promoEnabled={promoEnabled} />
+                    <Suspense fallback={null}>
+                      <LoginForm promoText={promoText} promoEnabled={promoEnabled} />
+                    </Suspense>
                   </div>
                 </div>
               </Card>

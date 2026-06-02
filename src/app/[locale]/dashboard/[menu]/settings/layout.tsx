@@ -1,17 +1,17 @@
-"use client";
-import SettingNavigationSwiper from "@/components/SettingNavigationSwiper";
-import { useState } from "react";
+import type { ReactNode } from "react";
+import SettingsClientLayout from "@/components/Dashboard/SettingsClientLayout";
+import { getDashboardPageMetadata } from "@/lib/dashboardMetadata";
 
-export default function SettingsLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [loading, setLoading] = useState<boolean>(false);
-  return (
-    <div>
-      <SettingNavigationSwiper setLoading={setLoading} loading={loading}  />
-      {children}
-    </div>
-  );
+type Props = { children: ReactNode; params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props) {
+  const { locale } = await params;
+  return getDashboardPageMetadata(locale, {
+    namespace: "Dashboard",
+    key: "Settings",
+  });
+}
+
+export default function SettingsLayout({ children }: Props) {
+  return <SettingsClientLayout>{children}</SettingsClientLayout>;
 }

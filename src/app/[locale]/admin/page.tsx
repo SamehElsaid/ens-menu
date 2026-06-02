@@ -23,7 +23,19 @@ import {
   IoPricetagOutline,
 } from "react-icons/io5";
 import CardDashBoard from "@/components/Card/CardDashBoard";
+import {
+  AdminBarChart,
+  AdminMonthGrid,
+  DemoDataBanner,
+} from "@/components/Admin/AdminAnalyticsWidgets";
 import { axiosGet } from "@/shared/axiosCall";
+import {
+  fetchAdminAdminsCount,
+  fetchAdminAnalytics,
+} from "@/lib/fetchAdminAnalytics";
+import type { AdminAnalyticsResponse } from "@/types/AdminAnalytics";
+import { useAdminPermissions } from "@/hooks/useAdminPermissions";
+import type { AdminPermissionKey } from "@/types/AdminPermission";
 
 interface AdminStatsResponse {
   stats: {
@@ -63,16 +75,31 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<AdminStatsResponse["stats"] | null>(null);
   const [charts, setCharts] = useState<AdminStatsResponse["charts"] | null>(null);
+  const [adminsCount, setAdminsCount] = useState(0);
+  const [analytics, setAnalytics] = useState<AdminAnalyticsResponse | null>(
+    null,
+  );
+  const textDir = locale === "ar" ? "rtl" : "ltr";
+  const { has: hasAdminPermission } = useAdminPermissions();
+
+  const canSee = (permission: AdminPermissionKey | null) =>
+    !permission || hasAdminPermission(permission);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const result = await axiosGet<AdminStatsResponse>("/admin/stats", locale);
-        if (result.status && result.data) {
-          setStats(result.data.stats);
-          setCharts(result.data.charts);
+        const [statsResult, adminsTotal, analyticsData] = await Promise.all([
+          axiosGet<AdminStatsResponse>("/admin/stats", locale),
+          fetchAdminAdminsCount(locale),
+          fetchAdminAnalytics(locale, "30d"),
+        ]);
+        if (statsResult.status && statsResult.data) {
+          setStats(statsResult.data.stats);
+          setCharts(statsResult.data.charts);
         }
+        setAdminsCount(adminsTotal);
+        setAnalytics(analyticsData);
       } catch (error) {
         console.error("Error fetching admin stats:", error);
       } finally {
@@ -89,6 +116,7 @@ export default function AdminPage() {
       icon: FaUserAlt,
       color: "blue",
       href: "/admin/users",
+      permission: "users" as AdminPermissionKey,
     },
     {
       id: "plans",
@@ -96,6 +124,15 @@ export default function AdminPage() {
       icon: IoDocumentTextOutline,
       color: "purple",
       href: "/admin/plans",
+      permission: "plans" as AdminPermissionKey,
+    },
+    {
+      id: "payments",
+      label: t("payments"),
+      icon: FaCreditCard,
+      color: "emerald",
+      href: "/admin/payments",
+      permission: "payments" as AdminPermissionKey,
     },
     {
       id: "advertisements",
@@ -103,13 +140,15 @@ export default function AdminPage() {
       icon: IoMegaphoneOutline,
       color: "green",
       href: "/admin/advertisements",
+      permission: "advertisements" as AdminPermissionKey,
     },
     {
       id: "admins",
       label: t("admins"),
       icon: IoPersonOutline,
       color: "slate",
-      href: "/admin/admins",
+      href: "/admin/administrators",
+      permission: "administrators" as AdminPermissionKey,
     },
     {
       id: "promo",
@@ -117,8 +156,17 @@ export default function AdminPage() {
       icon: IoPricetagOutline,
       color: "amber",
       href: "/admin/promo",
+      permission: "promo" as AdminPermissionKey,
     },
-  ];
+    {
+      id: "analytics",
+      label: t("analytics"),
+      icon: IoStatsChart,
+      color: "purple",
+      href: "/admin/analytics",
+      permission: "analytics" as AdminPermissionKey,
+    },
+  ].filter((tab) => canSee(tab.permission));
 
   const kpiCards = [
     {
@@ -131,6 +179,7 @@ export default function AdminPage() {
       icon: FaUserAlt,
       color: "blue",
       href: "/admin/users",
+      permission: "users" as AdminPermissionKey,
     },
     {
       id: "activeAccounts",
@@ -142,6 +191,7 @@ export default function AdminPage() {
       icon: IoCalendarOutline,
       color: "green",
       href: "/admin/users?filter=active",
+      permission: "users" as AdminPermissionKey,
     },
     {
       id: "paidPlans",
@@ -153,19 +203,21 @@ export default function AdminPage() {
       icon: FaCreditCard,
       color: "purple",
       href: "/admin/plans",
+      permission: "plans" as AdminPermissionKey,
     },
     {
       id: "admins",
       title: t("adminsCount"),
-      value: stats?.totalUsers ? Math.floor(stats.totalUsers * 0.1) : 0,
+      value: adminsCount,
       change: null,
       changeType: null,
       label: t("adminsLabel"),
       icon: FaUsers,
       color: "slate",
-      href: "/admin/admins",
+      href: "/admin/administrators",
+      permission: "administrators" as AdminPermissionKey,
     },
-  ];
+  ].filter((card) => canSee(card.permission));
 
   const secondRowCards = [
     {
@@ -178,6 +230,7 @@ export default function AdminPage() {
       icon: FaChartLine,
       color: "amber",
       href: "/admin/users?filter=trial",
+      permission: "users" as AdminPermissionKey,
     },
     {
       id: "monthlyRevenue",
@@ -189,6 +242,7 @@ export default function AdminPage() {
       icon: FaDollarSign,
       color: "emerald",
       href: "/admin/plans",
+      permission: "plans" as AdminPermissionKey,
     },
     {
       id: "suspendedAccounts",
@@ -200,8 +254,9 @@ export default function AdminPage() {
       icon: FaBan,
       color: "red",
       href: "/admin/users?filter=suspended",
+      permission: "users" as AdminPermissionKey,
     },
-  ];
+  ].filter((card) => canSee(card.permission));
 
   const isActiveTab = (href: string) => {
     return pathname === href || pathname.startsWith(href + "/");
@@ -263,8 +318,66 @@ export default function AdminPage() {
     return value.toString();
   };
 
+  const platformCards = analytics?.summary
+    ? [
+        {
+          id: "menuViews",
+          title: t("totalMenuViews"),
+          value: analytics.summary.totalMenuViews,
+          color: "amber",
+          href: "/admin/analytics",
+          permission: "analytics" as AdminPermissionKey,
+        },
+        {
+          id: "conversion",
+          title: t("conversionRate"),
+          value: `${analytics.summary.conversionRate}%`,
+          color: "emerald",
+          href: "/admin/analytics",
+          permission: "analytics" as AdminPermissionKey,
+        },
+        {
+          id: "noMenu",
+          title: t("usersWithoutMenu"),
+          value: analytics.summary.usersWithoutMenu,
+          color: "amber",
+          href: "/admin/users?filter=no-menu",
+          permission: "users" as AdminPermissionKey,
+        },
+        {
+          id: "inactive30",
+          title: t("inactiveUsers30d"),
+          value: analytics.summary.inactiveUsers30d,
+          color: "slate",
+          href: "/admin/users?filter=inactive",
+          permission: "users" as AdminPermissionKey,
+        },
+        ...(analytics.freeBannerMetrics
+          ? [
+              {
+                id: "freeBannerClicks",
+                title: t("freeBannerClicks"),
+                value: analytics.freeBannerMetrics.totalClicks,
+                color: "purple",
+                href: "/admin/analytics",
+                permission: "analytics" as AdminPermissionKey,
+              },
+            ]
+          : []),
+      ].filter((card) => canSee(card.permission))
+    : [];
+
+  const revenuePoints =
+    analytics?.revenueOverTime?.length
+      ? analytics.revenueOverTime
+      : charts?.revenueGrowth ?? [];
+
   return (
-    <div className="space-y-5 py-5">
+    <div className="space-y-5 py-5" dir={textDir}>
+      {analytics?._isDemoData && (
+        <DemoDataBanner message={t("demoDataBanner")} dir={textDir} />
+      )}
+
       {/* Simple Elegant Header */}
       <CardDashBoard className="p-8">
         <div className="mb-8">
@@ -430,55 +543,100 @@ export default function AdminPage() {
         )}
       </section>
 
+      {platformCards.length > 0 && (
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {platformCards.map((card) => {
+            const bgClass = getColorClasses(card.color, "bg");
+            const textClass = getColorClasses(card.color, "text");
+            const borderClass = getColorClasses(card.color, "border");
+            return (
+              <LinkTo key={card.id} href={card.href} className="block">
+                <CardDashBoard hover borderColor={borderClass} className="p-5">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
+                    {card.title}
+                  </p>
+                  <p
+                    className={`text-2xl font-bold tabular-nums ${textClass}`}
+                  >
+                    {typeof card.value === "number"
+                      ? card.value.toLocaleString()
+                      : card.value}
+                  </p>
+                </CardDashBoard>
+              </LinkTo>
+            );
+          })}
+        </section>
+      )}
+
       {/* Statistics Section with Charts */}
       <CardDashBoard className="p-8">
-        <div className={`flex items-center gap-3 mb-6 ${isRTL ? "flex-row-reverse" : ""}`}>
-          <div className="w-10 h-10 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
-            <IoStatsChart className="text-primary text-lg" />
+        <div className="flex items-start justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
+              <IoStatsChart className="text-primary text-lg" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                {t("detailedStatistics")}
+              </h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                {t("viewDetailedAnalytics")}
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-              {t("detailedStatistics")}
-            </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              {t("viewDetailedAnalytics")}
-            </p>
-          </div>
+          <LinkTo
+            href="/admin/analytics"
+            className="text-sm font-medium text-primary hover:underline shrink-0"
+          >
+            {t("openFullAnalytics")}
+          </LinkTo>
         </div>
 
-        {charts && (charts.usersGrowth.length > 0 || charts.plansDistribution.length > 0) ? (
-          <div className="space-y-6">
-            {/* Users Growth Chart */}
+        {charts &&
+        (charts.usersGrowth.length > 0 ||
+          charts.plansDistribution.length > 0 ||
+          revenuePoints.length > 0 ||
+          (analytics?.viewsOverTime?.length ?? 0) > 0) ? (
+          <div className="space-y-8">
             {charts.usersGrowth.length > 0 && (
               <div>
                 <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">
                   {t("usersGrowth")}
                 </h3>
-                <div className="grid grid-cols-3 gap-3">
-                  {charts.usersGrowth.map((item, index) => (
-                    <div
-                      key={index}
-                      className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 border border-slate-200 dark:border-slate-700"
-                    >
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
-                        {item.month}
-                      </p>
-                      <p className="text-xl font-bold text-slate-900 dark:text-slate-100">
-                        {item.count}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+                <AdminMonthGrid points={charts.usersGrowth} dir={textDir} />
               </div>
             )}
 
-            {/* Plans Distribution */}
+            {revenuePoints.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">
+                  {t("revenueGrowth")}
+                </h3>
+                <AdminMonthGrid points={revenuePoints} dir={textDir} />
+              </div>
+            )}
+
+            {(analytics?.viewsOverTime?.length ?? 0) > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">
+                  {t("menuViewsChart")}
+                </h3>
+                <AdminBarChart
+                  points={analytics!.viewsOverTime}
+                  locale={locale}
+                  dir={textDir}
+                  emptyMessage={t("noPlatformData")}
+                />
+              </div>
+            )}
+
             {charts.plansDistribution.length > 0 && (
               <div>
                 <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">
                   {t("plansDistribution")}
                 </h3>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {charts.plansDistribution.map((plan, index) => (
                     <div
                       key={index}
@@ -487,7 +645,7 @@ export default function AdminPage() {
                       <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
                         {plan.name}
                       </p>
-                      <p className="text-xl font-bold text-slate-900 dark:text-slate-100">
+                      <p className="text-xl font-bold text-slate-900 dark:text-slate-100 tabular-nums">
                         {plan.count}
                       </p>
                     </div>
@@ -497,18 +655,16 @@ export default function AdminPage() {
             )}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-[280px] bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-dashed border-slate-200 dark:border-slate-700">
-            <div className="w-14 h-14 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-3">
-              <IoStatsChart className="text-slate-400 dark:text-slate-500 text-xl" />
-            </div>
-            <p className="text-slate-600 dark:text-slate-400 font-medium mb-1">
+          <div className="flex flex-col items-center justify-center h-[200px] bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-dashed border-slate-200 dark:border-slate-700">
+            <p className="text-slate-600 dark:text-slate-400 font-medium mb-3">
               {t("graphsComingSoon")}
             </p>
-            <p className="text-sm text-slate-400 dark:text-slate-500">
-              {isRTL
-                ? "سيتم إضافة الرسوم البيانية قريباً"
-                : "Charts will be added soon"}
-            </p>
+            <LinkTo
+              href="/admin/analytics"
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              {t("openFullAnalytics")}
+            </LinkTo>
           </div>
         )}
       </CardDashBoard>

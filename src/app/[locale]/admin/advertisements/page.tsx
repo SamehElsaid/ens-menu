@@ -7,6 +7,7 @@ import { IoArrowBack, IoAddOutline, IoMegaphoneOutline, IoLinkOutline } from "re
 import { FaSpinner, FaEye, FaTrash, FaEdit, FaBan, FaMousePointer, FaChartLine } from "react-icons/fa";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import { axiosGet, axiosDelete, axiosPatch } from "@/shared/axiosCall";
+import { computeCtr } from "@/lib/fetchAdminAnalytics";
 import { toast } from "react-toastify";
 import ConfirmationModal from "@/components/Custom/ConfirmationModal";
 import LoadImage from "@/components/ImageLoad";
@@ -30,6 +31,7 @@ interface AdsResponse {
         total: number;
         totalActive: number;
         totalClicks: number;
+        totalImpressions?: number;
     };
 }
 
@@ -45,6 +47,7 @@ export default function AdminAdvertisementsPage() {
         total: 0,
         totalActive: 0,
         totalClicks: 0,
+        totalImpressions: 0,
     });
     const [deleteModal, setDeleteModal] = useState<{
         isOpen: boolean;
@@ -65,10 +68,12 @@ export default function AdminAdvertisementsPage() {
 
             if (result.status && result.data) {
                 setAds(result.data.ads || []);
-                setStats(result.data.statistics || {
-                    total: 0,
-                    totalActive: 0,
-                    totalClicks: 0,
+                setStats({
+                    total: result.data.statistics?.total ?? 0,
+                    totalActive: result.data.statistics?.totalActive ?? 0,
+                    totalClicks: result.data.statistics?.totalClicks ?? 0,
+                    totalImpressions:
+                        result.data.statistics?.totalImpressions ?? 0,
                 });
             } else {
                 toast.error(t("error"));
@@ -181,8 +186,13 @@ export default function AdminAdvertisementsPage() {
         }).format(date);
     };
 
+    const totalImpressions =
+        stats.totalImpressions ||
+        ads.reduce((sum, ad) => sum + (ad.impressionCount || 0), 0);
+    const averageCtr = computeCtr(stats.totalClicks, totalImpressions);
+
     return (
-        <div className="space-y-6 pb-10 ">
+        <div className="space-y-6 pb-10 " dir={isRTL ? "rtl" : "ltr"}>
             {/* Header Section */}
             <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
@@ -205,7 +215,7 @@ export default function AdminAdvertisementsPage() {
             </div>
 
             {/* Statistics Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <CardDashBoard borderColor="border-blue-200 dark:border-blue-500/20" hover={true}>
                     <div className="flex items-center gap-4">
                         <div className="w-14 h-14 rounded-xl bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-500/20 dark:to-blue-600/10 flex items-center justify-center shadow-sm">
@@ -260,6 +270,26 @@ export default function AdminAdvertisementsPage() {
                                     <span className="inline-block w-8 h-8 border-2 border-purple-300 dark:border-purple-600 border-t-transparent rounded-full animate-spin"></span>
                                 ) : (
                                     stats.totalClicks.toLocaleString()
+                                )}
+                            </p>
+                        </div>
+                    </div>
+                </CardDashBoard>
+
+                <CardDashBoard borderColor="border-emerald-200 dark:border-emerald-500/20" hover={true}>
+                    <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 rounded-xl bg-linear-to-br from-emerald-50 to-emerald-100 dark:from-emerald-500/20 dark:to-emerald-600/10 flex items-center justify-center shadow-sm">
+                            <FaChartLine className="text-emerald-600 dark:text-emerald-400 text-xl" />
+                        </div>
+                        <div className="flex-1">
+                            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+                                {t("averageCtr")}
+                            </p>
+                            <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 transition-all duration-300">
+                                {loading ? (
+                                    <span className="inline-block w-8 h-8 border-2 border-emerald-300 dark:border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
+                                ) : (
+                                    `${averageCtr}%`
                                 )}
                             </p>
                         </div>
@@ -429,6 +459,17 @@ export default function AdminAdvertisementsPage() {
                                                     <p className="text-xs text-slate-500 dark:text-slate-400">{t("views")}</p>
                                                     <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                                                         {(ad.impressionCount || 0).toLocaleString()}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+                                                    <FaChartLine className="text-emerald-600 dark:text-emerald-400 text-sm" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs text-slate-500 dark:text-slate-400">{t("ctr")}</p>
+                                                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                                                        {computeCtr(ad.clickCount || 0, ad.impressionCount || 0)}%
                                                     </p>
                                                 </div>
                                             </div>

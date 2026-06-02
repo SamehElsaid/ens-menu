@@ -9,6 +9,7 @@ type ProPlanPriceSelectorProps = {
   onBillingChange: (choice: ProBillingChoice) => void;
   priceMonthly: number;
   priceYearly: number;
+  firstMonthlyPrice?: number;
   firstYearlyPrice?: number;
   isRTL?: boolean;
   /** Larger price typography for landing cards */
@@ -27,6 +28,7 @@ export default function ProPlanPriceSelector({
   onBillingChange,
   priceMonthly,
   priceYearly,
+  firstMonthlyPrice,
   firstYearlyPrice,
   isRTL = false,
   size = "default",
@@ -36,7 +38,13 @@ export default function ProPlanPriceSelector({
   const tProfile = useTranslations("personalProfile");
   const tLanding = useTranslations("Landing.pricing");
 
+  const monthlyDisplay = firstMonthlyPrice ?? priceMonthly;
   const yearlyDisplay = firstYearlyPrice ?? priceYearly;
+  const showFirstMonthOffer =
+    billingChoice === "monthly" &&
+    firstMonthlyPrice != null &&
+    firstMonthlyPrice > 0 &&
+    firstMonthlyPrice < priceMonthly;
   const showFirstYearOffer =
     billingChoice === "yearly" &&
     firstYearlyPrice != null &&
@@ -83,7 +91,7 @@ export default function ProPlanPriceSelector({
       <div className={compact ? "text-center" : undefined}>
         <span className={priceClass}>
           {formatEgpPrice(
-            billingChoice === "monthly" ? priceMonthly : yearlyDisplay,
+            billingChoice === "monthly" ? monthlyDisplay : yearlyDisplay,
           )}
         </span>
         <span
@@ -97,6 +105,32 @@ export default function ProPlanPriceSelector({
             : tLanding("perYear")}
         </span>
       </div>
+      {showFirstMonthOffer && (
+        <p
+          className={`text-slate-500 dark:text-slate-400 line-through ${
+            compact ? "text-[10px] sm:text-xs text-center" : "text-sm"
+          }`}
+        >
+          {tProfile("monthlyPriceBeforeDiscount", {
+            price: formatEgpPrice(priceMonthly),
+            currency: tLanding("currencyEgp"),
+          })}
+        </p>
+      )}
+      {showFirstMonthOffer && (
+        <p
+          className={`font-semibold text-primary dark:text-purple-300 ${
+            compact
+              ? "text-[10px] sm:text-xs text-center leading-snug"
+              : "text-sm"
+          }`}
+        >
+          {tProfile("proFirstMonthlyOffer", {
+            price: formatEgpPrice(priceMonthly),
+            currency: tLanding("currencyEgp"),
+          })}
+        </p>
+      )}
       {showFirstYearOffer && (
         <p
           className={`text-slate-500 dark:text-slate-400 line-through ${

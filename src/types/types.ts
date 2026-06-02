@@ -136,4 +136,6 @@ export interface FAQItemProps {
 export interface LogoProps {
   variant?: "default" | "white";
   size?: "default" | "small";
+  /** Appended as "ENSmenu - {pageTitle}" in the dashboard header */
+  pageTitle?: string;
 }

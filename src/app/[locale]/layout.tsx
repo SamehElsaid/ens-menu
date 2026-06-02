@@ -16,9 +16,17 @@ const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
 export const metadata: Metadata = {
   metadataBase: appUrl ? new URL(appUrl) : undefined,
-  title: "ENSmenu",
+  title: {
+    default: "ENSmenu",
+    template: "ENSmenu - %s",
+  },
   description:
     "ENSmenu is a platform for creating digital menus for restaurants and cafes",
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    shortcut: "/favicon.svg",
+    apple: [{ url: "/apple-touch-icon.svg", type: "image/svg+xml" }],
+  },
 };
 
 // Script to prevent flash of wrong theme

@@ -8,6 +8,9 @@ import { useLocale, useTranslations } from "next-intl";
 import LoadImage from "../ImageLoad";
 import { useAppSelector } from "@/store/hooks";
 import Logo from "../Global/Logo";
+import { useAdminPermissions } from "@/hooks/useAdminPermissions";
+import type { AdminPermissionKey } from "@/types/AdminPermission";
+import type { NavItem } from "./data";
 
 export function DashboardSidebar({
   isMenuOpen,
@@ -24,8 +27,21 @@ export function DashboardSidebar({
   const locale = useLocale();
   const t = useTranslations("Dashboard");
   const session = useDashboardSession();
+  const { has: hasAdminPermission } = useAdminPermissions();
+
+  const canShowAdminItem = (item: NavItem) => {
+    const key = item.key || item.link || "";
+    if (!key || key === "overview" || key === "personal") return true;
+    return hasAdminPermission(key as AdminPermissionKey);
+  };
+
   const navSectionsData = isAdmin
     ? adminNavSections
+        .map((section) => ({
+          ...section,
+          items: section.items.filter(canShowAdminItem),
+        }))
+        .filter((section) => section.items.length > 0)
     : session?.role === "staff" && session?.staffJobRole === "cashier"
       ? cashierNavSections
       : navSections;

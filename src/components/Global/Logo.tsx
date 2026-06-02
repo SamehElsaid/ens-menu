@@ -4,7 +4,11 @@ import { LogoProps } from "@/types/types";
 import { BsQrCode } from "react-icons/bs";
 import LinkTo from "./LinkTo";
 
-export const Logo = ({ variant = "default", size = "default" }: LogoProps) => {
+export const Logo = ({
+  variant = "default",
+  size = "default",
+  pageTitle,
+}: LogoProps) => {
   const gradientClasses =
     variant === "white"
       ? "bg-gradient-to-r from-gray-200 via-white to-gray-200"
@@ -27,11 +31,25 @@ export const Logo = ({ variant = "default", size = "default" }: LogoProps) => {
           <BsQrCode size={40} />
         </div>
       )}
-      <div className="relative flex flex-col items-center">
+      <div className="relative flex flex-col items-center max-w-[min(72vw,320px)]">
         <div
-          className={`text-2xl lg:text-xl xl:text-3xl font-black tracking-tighter bg-clip-text text-transparent ${gradientClasses} bg-size-[200%_auto]`}
+          className={`text-center font-black tracking-tighter bg-clip-text text-transparent ${gradientClasses} bg-size-[200%_auto] ${
+            pageTitle
+              ? "text-lg lg:text-base xl:text-xl leading-tight"
+              : "text-2xl lg:text-xl xl:text-3xl"
+          }`}
         >
-          ENSMENU
+          {pageTitle ? (
+            <span className="inline-flex flex-wrap items-center justify-center gap-x-1.5 gap-y-0">
+              <span>ENSmenu</span>
+              <span className="text-slate-400 font-bold">-</span>
+              <span className="text-slate-700 dark:text-slate-200 font-semibold truncate max-w-[11rem] sm:max-w-[14rem]">
+                {pageTitle}
+              </span>
+            </span>
+          ) : (
+            "ENSMENU"
+          )}
         </div>
         <div className={`w-full h-1 -mt-0.5 rounded-full ${lineClasses}`} />
       </div>

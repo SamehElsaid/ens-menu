@@ -3,6 +3,7 @@
 import Layout from "@/components/Dashboard/Layout";
 import { AuthUserHydrate } from "@/components/Dashboard/AuthUserHydrate";
 import { FcmTokenSync } from "@/components/Dashboard/FcmTokenSync";
+import AdminAccessGuard from "@/components/Admin/AdminAccessGuard";
 import { type ReactNode } from "react";
 
 interface ParentLayoutProps {
@@ -15,7 +16,7 @@ export default function ParentLayout({ children }: ParentLayoutProps) {
       <AuthUserHydrate />
       <FcmTokenSync />
       <Layout segment={null} isAdmin={true}>
-        {children}
+        <AdminAccessGuard>{children}</AdminAccessGuard>
       </Layout>
     </>
   );
