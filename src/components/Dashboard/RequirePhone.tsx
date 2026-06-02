@@ -303,7 +303,7 @@ export function RequirePhone({ children }: RequirePhoneProps) {
 
   return (
     <div
-      className="min-h-[calc(100vh-80px)] flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-violet-50 via-white to-purple-50/60 dark:from-slate-950 dark:via-slate-900 dark:to-violet-950/20 px-4 py-12"
+      className="min-h-[calc(100vh-80px)] flex items-center justify-center relative overflow-hidden bg-linear-to-br from-violet-50 via-white to-purple-50/60 dark:from-slate-950 dark:via-slate-900 dark:to-violet-950/20 px-4 py-12"
     >
       {/* Decorative blobs */}
       <div className="pointer-events-none absolute start-0 top-0 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-300/20 blur-3xl dark:bg-violet-800/10" />
@@ -319,7 +319,7 @@ export function RequirePhone({ children }: RequirePhoneProps) {
 
         <div className="overflow-hidden rounded-3xl border border-white/80 bg-white/80 shadow-2xl shadow-violet-200/40 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-violet-950/20">
           {/* Top gradient bar */}
-          <div className="h-1 w-full bg-gradient-to-r from-accent-purple via-violet-400 to-purple-500" />
+          <div className="h-1 w-full bg-linear-to-r from-accent-purple via-violet-400 to-purple-500" />
 
           <div className="p-8">
             {/* User greeting */}
@@ -336,7 +336,7 @@ export function RequirePhone({ children }: RequirePhoneProps) {
                     className="h-10 w-10 rounded-full object-cover ring-2 ring-accent-purple/20"
                   />
                 ) : (
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent-purple to-violet-400 text-sm font-bold text-white ring-4 ring-accent-purple/10">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-accent-purple to-violet-400 text-sm font-bold text-white ring-4 ring-accent-purple/10">
                     {initial}
                   </div>
                 )}
@@ -355,7 +355,7 @@ export function RequirePhone({ children }: RequirePhoneProps) {
             <div className="mb-5 flex justify-center">
               <div className="relative">
                 <div className="absolute inset-0 scale-150 rounded-2xl bg-accent-purple/20 blur-xl" />
-                <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-purple to-violet-500 shadow-lg shadow-violet-300/50 dark:shadow-violet-900/50">
+                <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-accent-purple to-violet-500 shadow-lg shadow-violet-300/50 dark:shadow-violet-900/50">
                   <HiOutlinePhone className="text-2xl text-white" />
                 </div>
               </div>
@@ -408,7 +408,7 @@ export function RequirePhone({ children }: RequirePhoneProps) {
                         !deeplink ||
                         !pendingReference
                       }
-                      className="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-accent-purple to-violet-500 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-300/40 transition-all duration-200 hover:shadow-xl hover:shadow-violet-300/50 hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 dark:shadow-violet-900/30 dark:hover:shadow-violet-900/50"
+                      className="group relative w-full overflow-hidden rounded-xl bg-linear-to-r from-accent-purple to-violet-500 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-300/40 transition-all duration-200 hover:shadow-xl hover:shadow-violet-300/50 hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 dark:shadow-violet-900/30 dark:hover:shadow-violet-900/50"
                     >
                       <span className="flex items-center justify-center gap-2">
                         {startingVerification ? (
@@ -494,7 +494,7 @@ export function RequirePhone({ children }: RequirePhoneProps) {
                 <button
                   type="submit"
                   disabled={saving || !phone.trim()}
-                  className="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-accent-purple to-violet-500 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-300/40 transition-all duration-200 hover:shadow-xl hover:shadow-violet-300/50 hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 dark:shadow-violet-900/30 dark:hover:shadow-violet-900/50"
+                  className="group relative w-full overflow-hidden rounded-xl bg-linear-to-r from-accent-purple to-violet-500 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-300/40 transition-all duration-200 hover:shadow-xl hover:shadow-violet-300/50 hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 dark:shadow-violet-900/30 dark:hover:shadow-violet-900/50"
                 >
                   <span className="flex items-center justify-center gap-2">
                     {saving ? (
