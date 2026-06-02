@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ag-grid-community/locale": "^34.3.1",
+    "@fontsource/cairo": "^5.2.7",
     "@hcaptcha/react-hcaptcha": "^2.0.2",
     "@hookform/resolvers": "^5.2.2",
     "@next/bundle-analyzer": "^16.2.6",
