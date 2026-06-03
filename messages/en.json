@@ -2301,7 +2301,7 @@
     "back": "Back",
     "search": "Search",
     "reset": "Reset",
-    "searchPlaceholder": "Search by name or email....",
+    "searchPlaceholder": "Search by name, email, or phone number…",
     "suspendedUsers": "Suspended Users",
     "activeUsers": "Active Users",
     "totalUsers": "Total Users",

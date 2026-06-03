@@ -352,18 +352,14 @@ export default function AdminPage() {
           href: "/admin/users?filter=inactive",
           permission: "users" as AdminPermissionKey,
         },
-        ...(analytics.freeBannerMetrics
-          ? [
-              {
-                id: "freeBannerClicks",
-                title: t("freeBannerClicks"),
-                value: analytics.freeBannerMetrics.totalClicks,
-                color: "purple",
-                href: "/admin/analytics",
-                permission: "analytics" as AdminPermissionKey,
-              },
-            ]
-          : []),
+        {
+          id: "freeBannerClicks",
+          title: t("freeBannerClicks"),
+          value: analytics.freeBannerMetrics?.totalClicks ?? 0,
+          color: "purple",
+          href: "/admin/analytics",
+          permission: "analytics" as AdminPermissionKey,
+        },
       ].filter((card) => canSee(card.permission))
     : [];
 

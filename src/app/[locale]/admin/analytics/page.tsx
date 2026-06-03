@@ -139,8 +139,12 @@ export default function AdminAnalyticsPage() {
   }, [analytics?.summary, t]);
 
   const adMetrics = useMemo<MetricItem[]>(() => {
-    const a = analytics?.adMetrics;
-    if (!a) return [];
+    if (!analytics) return [];
+    const a = analytics.adMetrics ?? {
+      totalImpressions: 0,
+      totalClicks: 0,
+      averageCtr: 0,
+    };
     return [
       {
         id: "impressions",
@@ -161,11 +165,16 @@ export default function AdminAnalyticsPage() {
         tone: "emerald",
       },
     ];
-  }, [analytics?.adMetrics, t]);
+  }, [analytics, t]);
 
   const freeBannerMetrics = useMemo<MetricItem[]>(() => {
-    const b = analytics?.freeBannerMetrics;
-    if (!b) return [];
+    if (!analytics) return [];
+    const b = analytics.freeBannerMetrics ?? {
+      totalImpressions: 0,
+      totalClicks: 0,
+      averageCtr: 0,
+      topMenusByClicks: [],
+    };
     return [
       {
         id: "bannerImpressions",
@@ -186,11 +195,13 @@ export default function AdminAnalyticsPage() {
         tone: "emerald",
       },
     ];
-  }, [analytics?.freeBannerMetrics, t]);
+  }, [analytics, t]);
 
   const topBannerMenus = useMemo(
     () =>
-      (analytics?.freeBannerMetrics?.topMenusByClicks ?? []).map((m) => ({
+      (
+        analytics?.freeBannerMetrics?.topMenusByClicks ?? []
+      ).map((m) => ({
         id: m.id,
         label: getAdminMenuLabel(m, locale),
         count: m.clicks,
@@ -346,55 +357,47 @@ export default function AdminAnalyticsPage() {
             </AdminSectionCard>
           </div>
 
-          {freeBannerMetrics.length > 0 && (
-            <AdminSectionCard
-              title={t("freeBannerPerformance")}
-              subtitle={t("freeBannerPerformanceHint")}
-              icon={
-                <IoLinkOutline className="text-primary text-xl shrink-0" />
-              }
+          <AdminSectionCard
+            title={t("freeBannerPerformance")}
+            subtitle={t("freeBannerPerformanceHint")}
+            icon={<IoLinkOutline className="text-primary text-xl shrink-0" />}
+            dir={textDir}
+          >
+            <AdminMetricsGrid
+              items={freeBannerMetrics}
+              columns={3}
               dir={textDir}
-            >
-              <AdminMetricsGrid
-                items={freeBannerMetrics}
-                columns={3}
+            />
+            <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+                {t("topMenusByBannerClicks")}
+              </p>
+              <AdminRankedList
+                items={topBannerMenus}
                 dir={textDir}
+                emptyMessage={t("noVisitData")}
               />
-              {topBannerMenus.length > 0 && (
-                <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
-                    {t("topMenusByBannerClicks")}
-                  </p>
-                  <AdminRankedList
-                    items={topBannerMenus}
-                    dir={textDir}
-                    emptyMessage={t("noVisitData")}
-                  />
-                </div>
-              )}
-            </AdminSectionCard>
-          )}
+            </div>
+          </AdminSectionCard>
 
-          {analytics?.adMetrics && (
-            <AdminSectionCard
-              title={t("adPerformance")}
-              subtitle={t("adPerformanceHint")}
-              icon={
-                <IoStatsChartOutline className="text-primary text-xl shrink-0" />
-              }
-              dir={textDir}
-              action={
-                <LinkTo
-                  href="/admin/advertisements"
-                  className="text-sm font-medium text-primary hover:underline"
-                >
-                  {t("viewAds")}
-                </LinkTo>
-              }
-            >
-              <AdminMetricsGrid items={adMetrics} columns={3} dir={textDir} />
-            </AdminSectionCard>
-          )}
+          <AdminSectionCard
+            title={t("adPerformance")}
+            subtitle={t("adPerformanceHint")}
+            icon={
+              <IoStatsChartOutline className="text-primary text-xl shrink-0" />
+            }
+            dir={textDir}
+            action={
+              <LinkTo
+                href="/admin/advertisements"
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                {t("viewAds")}
+              </LinkTo>
+            }
+          >
+            <AdminMetricsGrid items={adMetrics} columns={3} dir={textDir} />
+          </AdminSectionCard>
 
           {geoItems.length > 0 && (
             <AdminSectionCard
