@@ -8,6 +8,14 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 const nextConfig: NextConfig = {
   reactStrictMode: false,
+  async rewrites() {
+    return [
+      {
+        source: "/sitemap-menus-:page(\\d{4})\\.xml",
+        destination: "/sitemap-menus/:page",
+      },
+    ];
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
