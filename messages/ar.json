@@ -2248,8 +2248,14 @@
     "actions": {
       "view": "عرض",
       "suspend": "إيقاف",
-      "reactivate": "تفعيل"
+      "reactivate": "تفعيل",
+      "delete": "حذف"
     },
+    "cancel": "إلغاء",
+    "deleteConfirmTitle": "حذف المستخدم",
+    "deleteConfirm": "هل أنت متأكد من حذف {name}؟ لا يمكن التراجع عن هذا الإجراء.",
+    "deleteSuccess": "تم حذف المستخدم بنجاح",
+    "deleteError": "فشل حذف المستخدم",
     "showing": "عرض {from} إلى {to} من {total}",
     "loading": "جاري التحميل...",
     "error": "فشل تحميل المستخدمين",
