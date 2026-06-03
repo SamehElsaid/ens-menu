@@ -5,11 +5,12 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { ColDef } from "ag-grid-community";
-import { FaBan, FaUserCheck, FaSpinner } from "react-icons/fa";
+import { FaBan, FaUserCheck, FaSpinner, FaTrash } from "react-icons/fa";
 import { IoArrowBack, IoSearchOutline, IoRefreshOutline } from "react-icons/io5";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import DataTable from "@/components/Custom/DataTable";
-import { axiosGet, axiosPatch } from "@/shared/axiosCall";
+import ConfirmationModal from "@/components/Custom/ConfirmationModal";
+import { axiosGet, axiosPatch, axiosDelete } from "@/shared/axiosCall";
 import { formatAdminDate } from "@/lib/fetchAdminAnalytics";
 import { toast } from "react-toastify";
 
@@ -22,32 +23,6 @@ type UserFilter =
     | "pro"
     | "no-menu"
     | "inactive";
-
-function matchesUserFilter(user: User, filter: UserFilter): boolean {
-    const plan = user.planName?.toLowerCase() ?? "";
-    switch (filter) {
-        case "active":
-            return !user.isSuspended;
-        case "suspended":
-            return user.isSuspended;
-        case "trial":
-            return user.subscriptionStatus?.toLowerCase() === "trial";
-        case "free":
-            return plan.includes("free");
-        case "pro":
-            return plan.includes("pro");
-        case "no-menu":
-            return (user.menusCount ?? 0) === 0;
-        case "inactive": {
-            if (!user.lastLoginAt) return true;
-            const days =
-                (Date.now() - new Date(user.lastLoginAt).getTime()) / 86400000;
-            return days > 30;
-        }
-        default:
-            return true;
-    }
-}
 
 interface User {
     id: number;
@@ -109,6 +84,7 @@ export default function UsersPage() {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
+    const [totalUsersCount, setTotalUsersCount] = useState(0);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [suspended, setSuspended] = useState(0);
     const [active, setActive] = useState(0);
@@ -117,6 +93,21 @@ export default function UsersPage() {
     const [usersWithoutMenu, setUsersWithoutMenu] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
     const [loadingUserId, setLoadingUserId] = useState<number | null>(null);
+    const [deleteModal, setDeleteModal] = useState<{
+        isOpen: boolean;
+        user: User | null;
+    }>({ isOpen: false, user: null });
+
+    const applyFilter = useCallback(
+        (filter: UserFilter) => {
+            setPlanFilter(filter);
+            setPage(1);
+            const path =
+                filter === "all" ? "/admin/users" : `/admin/users?filter=${filter}`;
+            router.replace(path);
+        },
+        [router],
+    );
 
     const fetchUsers = useCallback(async (
         pageNum: number = 1,
@@ -139,13 +130,9 @@ export default function UsersPage() {
             const result = await axiosGet<UsersResponse>("/admin/users", locale, undefined, params);
 
             if (result.status && result.data) {
-                const list = result.data.users || [];
-                const filtered =
-                    filter === "all"
-                        ? list
-                        : list.filter((u) => matchesUserFilter(u, filter));
-                setUsers(filtered);
+                setUsers(result.data.users || []);
                 setTotal(result.data.pagination?.totalItems || 0);
+                setTotalUsersCount(result.data.stats?.totalUsers || 0);
                 setTotalPages(result.data.pagination?.totalPages || 1);
                 setItemsPerPage(result.data.pagination?.itemsPerPage || 10);
                 setSuspended(result.data.stats?.suspendedUsers || 0);
@@ -195,8 +182,48 @@ export default function UsersPage() {
         setSearchQuery("");
         setPlanFilter("all");
         setPage(1);
+        router.replace("/admin/users");
         fetchUsers(1, "", "all");
-    }, [fetchUsers]);
+    }, [fetchUsers, router]);
+
+    const handleDelete = useCallback(async () => {
+        if (!deleteModal.user) return;
+
+        const userId = deleteModal.user.id;
+        setLoadingUserId(userId);
+        try {
+            const result = await axiosDelete<{ message?: string }>(
+                `/admin/users/${userId}`,
+                locale,
+            );
+
+            if (result.status) {
+                toast.success(t("deleteSuccess"));
+                setDeleteModal({ isOpen: false, user: null });
+                if (users.length === 1 && page > 1) {
+                    setPage(page - 1);
+                } else {
+                    fetchUsers(page, searchQuery, planFilter);
+                }
+            } else {
+                toast.error(t("deleteError"));
+            }
+        } catch (err) {
+            console.error("Error deleting user:", err);
+            toast.error(t("deleteError"));
+        } finally {
+            setLoadingUserId(null);
+        }
+    }, [
+        deleteModal.user,
+        locale,
+        t,
+        fetchUsers,
+        users.length,
+        page,
+        searchQuery,
+        planFilter,
+    ]);
 
     const filterOptions: UserFilter[] = [
         "all",
@@ -356,13 +383,13 @@ export default function UsersPage() {
             },
             {
                 headerName: t("columns.actions"),
-                width: 180,
+                width: 260,
                 cellRenderer: (params: { data: User }) => {
                     const user = params.data;
                     const isActive = !user.isSuspended;
                     const isLoading = loadingUserId === user.id;
                     return (
-                        <div className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
+                        <div className={`flex items-center gap-1.5 flex-wrap ${isRTL ? "flex-row-reverse" : ""}`}>
                             <button
                                 onClick={() => router.push(`/admin/users/${user.id}`)}
                                 disabled={isLoading}
@@ -389,13 +416,89 @@ export default function UsersPage() {
                                     isActive ? t("actions.suspend") : t("actions.reactivate")
                                 )}
                             </button>
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setDeleteModal({ isOpen: true, user })
+                                }
+                                disabled={isLoading}
+                                className="px-3 py-1.5 bg-slate-700 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-lg transition-colors inline-flex items-center gap-1"
+                            >
+                                <FaTrash className="text-[10px]" />
+                                {t("actions.delete")}
+                            </button>
                         </div>
                     );
                 },
             },
         ],
-        [t, isRTL, router, handleSuspend, handleActivate, loadingUserId, locale]
+        [t, isRTL, router, handleSuspend, handleActivate, loadingUserId]
     );
+
+    const statCards: {
+        filter: UserFilter;
+        label: string;
+        value: number;
+        icon: typeof FaBan;
+        borderColor: string;
+        iconBg: string;
+        iconColor: string;
+    }[] = [
+        {
+            filter: "suspended",
+            label: t("suspendedUsers"),
+            value: suspended,
+            icon: FaBan,
+            borderColor: "border-red-200 dark:border-red-500/20",
+            iconBg: "bg-red-50 dark:bg-red-500/10",
+            iconColor: "text-red-600 dark:text-red-400",
+        },
+        {
+            filter: "active",
+            label: t("activeUsers"),
+            value: active,
+            icon: FaUserCheck,
+            borderColor: "border-green-200 dark:border-green-500/20",
+            iconBg: "bg-green-50 dark:bg-green-500/10",
+            iconColor: "text-green-600 dark:text-green-400",
+        },
+        {
+            filter: "all",
+            label: t("totalUsers"),
+            value: totalUsersCount,
+            icon: FaUserCheck,
+            borderColor: "border-blue-200 dark:border-blue-500/20",
+            iconBg: "bg-blue-50 dark:bg-blue-500/10",
+            iconColor: "text-blue-600 dark:text-blue-400",
+        },
+        {
+            filter: "pro",
+            label: t("proUsers"),
+            value: proUsers,
+            icon: FaUserCheck,
+            borderColor: "border-purple-200 dark:border-purple-500/20",
+            iconBg: "bg-purple-50 dark:bg-purple-500/10",
+            iconColor: "text-purple-600 dark:text-purple-400",
+        },
+        {
+            filter: "free",
+            label: t("freeUsers"),
+            value: freeUsers,
+            icon: FaUserCheck,
+            borderColor: "border-slate-200 dark:border-slate-600",
+            iconBg: "bg-slate-50 dark:bg-slate-500/10",
+            iconColor: "text-slate-600 dark:text-slate-400",
+        },
+        {
+            filter: "no-menu",
+            label: t("usersWithoutMenu"),
+            value: usersWithoutMenu,
+            icon: FaUserCheck,
+            borderColor: "border-amber-200 dark:border-amber-500/20",
+            iconBg: "bg-amber-50 dark:bg-amber-500/10",
+            iconColor: "text-amber-600 dark:text-amber-400",
+        },
+    ];
 
     const showingFrom = page === 1 ? 1 : (page - 1) * itemsPerPage + 1;
     const showingTo = Math.min(page * itemsPerPage, total);
@@ -470,10 +573,7 @@ export default function UsersPage() {
                         <button
                             key={filter}
                             type="button"
-                            onClick={() => {
-                                setPlanFilter(filter);
-                                setPage(1);
-                            }}
+                            onClick={() => applyFilter(filter)}
                             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                                 planFilter === filter
                                     ? "bg-primary text-white"
@@ -488,101 +588,43 @@ export default function UsersPage() {
 
             {/* Statistics Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-                <CardDashBoard borderColor="border-red-200 dark:border-red-500/20">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-lg bg-red-50 dark:bg-red-500/10 flex items-center justify-center">
-                            <FaBan className="text-red-600 dark:text-red-400 text-xl" />
-                        </div>
-                        <div>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
-                                {t("suspendedUsers")}
-                            </p>
-                            <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                                {suspended}
-                            </p>
-                        </div>
-                    </div>
-                </CardDashBoard>
-
-                <CardDashBoard borderColor="border-green-200 dark:border-green-500/20">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-lg bg-green-50 dark:bg-green-500/10 flex items-center justify-center">
-                            <FaUserCheck className="text-green-600 dark:text-green-400 text-xl" />
-                        </div>
-                        <div>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
-                                {t("activeUsers")}
-                            </p>
-                            <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                                {active}
-                            </p>
-                        </div>
-                    </div>
-                </CardDashBoard>
-
-                <CardDashBoard borderColor="border-blue-200 dark:border-blue-500/20">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center">
-                            <FaUserCheck className="text-blue-600 dark:text-blue-400 text-xl" />
-                        </div>
-                        <div>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
-                                {t("totalUsers")}
-                            </p>
-                            <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                                {total}
-                            </p>
-                        </div>
-                    </div>
-                </CardDashBoard>
-
-                <CardDashBoard borderColor="border-purple-200 dark:border-purple-500/20">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-lg bg-purple-50 dark:bg-purple-500/10 flex items-center justify-center">
-                            <FaUserCheck className="text-purple-600 dark:text-purple-400 text-xl" />
-                        </div>
-                        <div>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
-                                {t("proUsers")}
-                            </p>
-                            <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 tabular-nums">
-                                {proUsers}
-                            </p>
-                        </div>
-                    </div>
-                </CardDashBoard>
-
-                <CardDashBoard borderColor="border-slate-200 dark:border-slate-600">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-lg bg-slate-50 dark:bg-slate-500/10 flex items-center justify-center">
-                            <FaUserCheck className="text-slate-600 dark:text-slate-400 text-xl" />
-                        </div>
-                        <div>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
-                                {t("freeUsers")}
-                            </p>
-                            <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 tabular-nums">
-                                {freeUsers}
-                            </p>
-                        </div>
-                    </div>
-                </CardDashBoard>
-
-                <CardDashBoard borderColor="border-amber-200 dark:border-amber-500/20">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-lg bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center">
-                            <FaUserCheck className="text-amber-600 dark:text-amber-400 text-xl" />
-                        </div>
-                        <div>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
-                                {t("usersWithoutMenu")}
-                            </p>
-                            <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 tabular-nums">
-                                {usersWithoutMenu}
-                            </p>
-                        </div>
-                    </div>
-                </CardDashBoard>
+                {statCards.map((card) => {
+                    const Icon = card.icon;
+                    const isSelected = planFilter === card.filter;
+                    return (
+                        <button
+                            key={card.filter}
+                            type="button"
+                            onClick={() => applyFilter(card.filter)}
+                            className="text-left w-full"
+                        >
+                            <CardDashBoard
+                                borderColor={
+                                    isSelected
+                                        ? "border-primary ring-2 ring-primary/30"
+                                        : card.borderColor
+                                }
+                                className={`transition-all hover:shadow-md cursor-pointer ${isSelected ? "bg-primary/5 dark:bg-primary/10" : ""}`}
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div
+                                        className={`w-12 h-12 rounded-lg flex items-center justify-center ${card.iconBg}`}
+                                    >
+                                        <Icon className={`${card.iconColor} text-xl`} />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+                                            {card.label}
+                                        </p>
+                                        <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 tabular-nums">
+                                            {card.value}
+                                        </p>
+                                    </div>
+                                </div>
+                            </CardDashBoard>
+                        </button>
+                    );
+                })}
             </div>
 
             {/* Users Table */}
@@ -606,6 +648,19 @@ export default function UsersPage() {
                     </div>
                 )}
             </CardDashBoard>
+
+            <ConfirmationModal
+                isOpen={deleteModal.isOpen}
+                onClose={() => setDeleteModal({ isOpen: false, user: null })}
+                onConfirm={handleDelete}
+                title={t("deleteConfirmTitle")}
+                message={t("deleteConfirm", {
+                    name: deleteModal.user?.name || "",
+                })}
+                confirmText={t("actions.delete")}
+                cancelText={t("cancel")}
+                isLoading={loadingUserId === deleteModal.user?.id}
+            />
         </div>
     );
 }

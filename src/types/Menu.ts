@@ -159,6 +159,8 @@ export interface Advertisement {
   linkUrl?: string;
   isActive?: boolean;
   menuId?: number;
+  clickCount?: number;
+  impressionCount?: number;
   createdAt?: string;
   updatedAt?: string;
   [key: string]: unknown;

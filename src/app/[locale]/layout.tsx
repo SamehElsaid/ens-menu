@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import "./globals.css";
-import { cairo, fontVariables } from "@/lib/fonts";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import RenderInProvider from "@/components/Global/RenderInProvider";
@@ -55,7 +54,6 @@ export default async function RootLayout({
     <html
       lang={locale}
       dir={locale === "ar" ? "rtl" : "ltr"}
-      className={`${fontVariables} ${cairo.className}`}
       suppressHydrationWarning
     >
       <head>
