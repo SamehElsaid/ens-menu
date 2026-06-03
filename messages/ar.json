@@ -609,9 +609,18 @@
     "workedAtTitlePlaceholder": "أدخل المسمى أو المنصب",
     "workedAtTitleRequired": "المسمى الوظيفي مطلوب"
   },
+  "suspendedGate": {
+    "title": "الحساب موقوف",
+    "subtitle": "تم إيقاف حسابك مؤقتاً ولا يمكنك استخدام لوحة التحكم حتى يتم حل المشكلة. يرجى التواصل مع فريق الدعم.",
+    "noteLabel": "سبب الإيقاف",
+    "welcomeBack": "مسجّل الدخول باسم",
+    "whatsappCta": "تواصل مع الدعم عبر واتساب",
+    "contactPageCta": "صفحة التواصل"
+  },
   "phoneGate": {
     "title": "خطوة أخيرة",
     "subtitle": "يرجى إضافة رقم هاتفك لإكمال ملفك الشخصي والمتابعة.",
+    "restaurantNameLabel": "اسم المطعم",
     "phoneLabel": "رقم الهاتف",
     "submit": "متابعة",
     "saving": "جارٍ الحفظ...",
@@ -1388,7 +1397,9 @@
       "visa": "فيزا",
       "vodafoneCash": "Vodafone Cash",
       "orangeMoney": "Orange Money",
-      "etisalatCash": "Etisalat Cash"
+      "etisalatCash": "Etisalat Cash",
+      "creditCard": "البطاقات البنكية",
+      "mobileWallet": "المحافظ الإلكترونية"
     },
     "notesTitle": "معلومات مهمة",
     "noteProAnnual": "الاشتراك الشهري 499 جنيه (أول شهر 99 جنيه). السنوي 5,988 جنيه — عرض أول سنة 5,489 جنيه.",
@@ -2279,6 +2290,7 @@
     "suspendError": "فشل إيقاف المستخدم",
     "activateSuccess": "تم تفعيل المستخدم بنجاح",
     "activateError": "فشل تفعيل المستخدم",
+    "noSuspendReason": "لم يُذكر سبب",
     "userDetails": {
       "title": "تفاصيل المستخدم",
       "subtitle": "عرض معلومات المستخدم التفصيلية",

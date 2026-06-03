@@ -1,6 +1,7 @@
 import "react-lazy-load-image-component/src/effects/blur.css";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import placeholder from "@/components/img/30690.png";
+import { resolveMenuItemImageSrc } from "./menuItemImage";
 
 function LoadImage({
   src,
@@ -20,9 +21,11 @@ function LoadImage({
   [key: string]: unknown;
 }): React.ReactNode {
   // function to resize image using canvas and return Blob URL
+
+  
   const resizeUrl =
     height && width
-      ? `/api/resize?url=${src}&width=${width}&height=${height}`
+      ? `/api/resize?url=${resolveMenuItemImageSrc(src)}&width=${width}&height=${height}`
       : src;
 
   return (

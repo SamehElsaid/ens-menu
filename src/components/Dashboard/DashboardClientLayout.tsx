@@ -10,6 +10,10 @@ import { SET_ACTIVE_USER, SET_LOADING } from "@/store/authSlice/menuDataSlice";
 import { useAppDispatch } from "@/store/hooks";
 import { AuthUserHydrate } from "@/components/Dashboard/AuthUserHydrate";
 import { FcmTokenSync } from "@/components/Dashboard/FcmTokenSync";
+import {
+  SuspendedAccountScreen,
+  useAccountGateStatus,
+} from "@/components/Dashboard/RequireNotSuspended";
 import { RequirePhone } from "@/components/Dashboard/RequirePhone";
 import OnboardingTour from "@/components/Dashboard/OnboardingTour";
 import { DashboardTitleProvider } from "@/components/Dashboard/DashboardTitleProvider";
@@ -36,6 +40,7 @@ export default function DashboardClientLayout({
   const dispatch = useAppDispatch();
   const locale = useLocale();
   const [hasMenu, setHasMenu] = useState(false);
+  const accountGateStatus = useAccountGateStatus();
 
   useEffect(() => {
     const redirectToUnauthorized = () => {
@@ -71,20 +76,27 @@ export default function DashboardClientLayout({
     });
   }, [segment, locale, dispatch]);
 
+  const dashboardContent =
+    segment && segment !== "subscription"
+      ? hasMenu
+        ? children
+        : null
+      : children;
+
   return (
     <DashboardTitleProvider>
       <AuthUserHydrate />
       <FcmTokenSync />
-      <Layout segment={segment}>
-        <OnboardingTour />
-        <RequirePhone>
-          {segment && segment !== "subscription"
-            ? hasMenu
-              ? children
-              : null
-            : children}
-        </RequirePhone>
-      </Layout>
+      {accountGateStatus === "loading" ? null : accountGateStatus === "suspended" ? (
+        <Layout segment={segment} hideSidebar>
+          <SuspendedAccountScreen />
+        </Layout>
+      ) : (
+        <Layout segment={segment}>
+          <OnboardingTour />
+          <RequirePhone>{dashboardContent}</RequirePhone>
+        </Layout>
+      )}
     </DashboardTitleProvider>
   );
 }

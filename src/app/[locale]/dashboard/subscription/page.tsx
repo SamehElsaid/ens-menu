@@ -6,6 +6,7 @@ import { useRouter } from "@/i18n/navigation";
 import { axiosGet } from "@/shared/axiosCall";
 import { Menu, MenusResponse } from "@/types/Menu";
 import Loader from "@/components/Global/Loader";
+import SubscriptionPaymentMethods from "@/components/Dashboard/SubscriptionPaymentMethods";
 
 export default function SubscriptionUpgradeRedirectPage() {
   const locale = useLocale();
@@ -28,8 +29,9 @@ export default function SubscriptionUpgradeRedirectPage() {
   }, [locale, router]);
 
   return (
-    <div className="flex min-h-[50vh] items-center justify-center">
+    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-8 px-4 py-12">
       <Loader />
+      <SubscriptionPaymentMethods compact className="w-full max-w-lg" />
     </div>
   );
 }

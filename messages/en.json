@@ -609,9 +609,18 @@
     "selectChoice": "Select an option",
     "locationDetailsRequired": "Location Details is required"
   },
+  "suspendedGate": {
+    "title": "Account suspended",
+    "subtitle": "Your account has been suspended. You cannot use the dashboard until this is resolved. Please contact our support team.",
+    "noteLabel": "Reason",
+    "welcomeBack": "Signed in as",
+    "whatsappCta": "Contact support on WhatsApp",
+    "contactPageCta": "Visit contact page"
+  },
   "phoneGate": {
     "title": "One last step",
     "subtitle": "Please add your phone number to complete your profile and continue.",
+    "restaurantNameLabel": "Restaurant Name",
     "phoneLabel": "Phone Number",
     "submit": "Continue",
     "saving": "Saving...",
@@ -1479,7 +1488,9 @@
       "visa": "Visa",
       "vodafoneCash": "Vodafone Cash",
       "orangeMoney": "Orange Money",
-      "etisalatCash": "Etisalat Cash"
+      "etisalatCash": "Etisalat Cash",
+      "creditCard": "Credit & debit cards",
+      "mobileWallet": "Mobile wallets"
     },
     "notesTitle": "Good to know",
     "noteProAnnual": "Monthly is 499 EGP (first month 99 EGP). Yearly is 5,988 EGP — first-year offer 5,489 EGP.",
@@ -2369,6 +2380,7 @@
     "suspendError": "Failed to suspend user",
     "activateSuccess": "User activated successfully",
     "activateError": "Failed to activate user",
+    "noSuspendReason": "No reason provided",
     "userDetails": {
       "title": "User Details",
       "subtitle": "View detailed user information",

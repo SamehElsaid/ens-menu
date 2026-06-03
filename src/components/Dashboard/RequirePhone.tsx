@@ -10,6 +10,7 @@ import {
   HiOutlineCreditCard,
   HiOutlineChatAlt2,
 } from "react-icons/hi";
+import { FaStore } from "react-icons/fa";
 import { ImSpinner8 } from "react-icons/im";
 import { toast } from "react-toastify";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -72,11 +73,13 @@ export function RequirePhone({ children }: RequirePhoneProps) {
         role?: string;
         name?: string;
         profileImage?: string;
+        restaurantName?: string | null;
       } & UserProfile;
     }
     | null;
 
   const [phone, setPhone] = useState("");
+  const [restaurantName, setRestaurantName] = useState("");
   const [saving, setSaving] = useState(false);
   const [verificationReference, setVerificationReference] = useState(
     searchParams.get("verifyReference") ?? "",
@@ -89,12 +92,15 @@ export function RequirePhone({ children }: RequirePhoneProps) {
   const [verificationExpired, setVerificationExpired] = useState(false);
 
   const userProfile = authData?.user;
-  const authLoaded = authLoading === "yes";
+  const authLoaded = authLoading === "yes" && Boolean(userProfile);
   const hasPhone = Boolean(userProfile?.phoneNumber?.trim());
+  const hasRestaurantName = Boolean(userProfile?.restaurantName?.trim());
   const isPhoneVerified = userProfile?.isPhoneVerified === true;
-  const requiresPhoneGate = authLoaded && (!hasPhone || !isPhoneVerified);
+  const requiresProfileDetails = authLoaded && (!hasPhone || !hasRestaurantName);
+  const requiresPhoneGate =
+    authLoaded && (requiresProfileDetails || !isPhoneVerified);
   const requiresVerification =
-    authLoaded && hasPhone && !isPhoneVerified;
+    authLoaded && !requiresProfileDetails && !isPhoneVerified;
 
   useEffect(() => {
     if (
@@ -222,6 +228,10 @@ export function RequirePhone({ children }: RequirePhoneProps) {
     t,
   ]);
 
+  if (!authLoaded) {
+    return null;
+  }
+
   if (!requiresPhoneGate) {
     return <>{children}</>;
   }
@@ -247,14 +257,23 @@ export function RequirePhone({ children }: RequirePhoneProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const nextPhone = phone.trim();
-    if (!nextPhone) return;
+    const nextPhone = hasPhone ? userProfile?.phoneNumber?.trim() : phone.trim();
+    const nextRestaurantName = hasRestaurantName
+      ? userProfile?.restaurantName?.trim()
+      : restaurantName.trim();
+    if (!nextPhone || !nextRestaurantName) return;
+
+    const payload = {
+      phoneNumber: nextPhone,
+      restaurantName: nextRestaurantName,
+      resturantName: nextRestaurantName,
+    };
 
     setSaving(true);
     const res = await axiosPatch<
-      { phoneNumber: string },
+      typeof payload,
       { user?: UserProfile }
-    >("/user/profile", locale, { phoneNumber: nextPhone });
+    >("/user/profile", locale, payload);
     setSaving(false);
 
     if (res?.status && res.data) {
@@ -273,7 +292,11 @@ export function RequirePhone({ children }: RequirePhoneProps) {
             ...userProfile,
             ...updatedUser,
             phoneNumber: nextPhone,
-            isPhoneVerified: updatedUser.isPhoneVerified === true,
+            restaurantName: nextRestaurantName,
+            isPhoneVerified:
+              hasPhone &&
+              nextPhone === userProfile?.phoneNumber?.trim() &&
+              (updatedUser.isPhoneVerified === true || isPhoneVerified),
           },
         } as UserProfile),
       );
@@ -479,29 +502,54 @@ export function RequirePhone({ children }: RequirePhoneProps) {
             {/* Form */}
             {!requiresVerification && (
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label
-                    className={`mb-1.5 block text-xs font-semibold text-slate-600 dark:text-slate-400 `}
-                  >
-                    {t("phoneLabel")}{" "}
-                    <span className="text-accent-purple">*</span>
-                  </label>
-                  <CustomInput
-                    type="tel"
-                    id="phone-gate"
-                    defaultCountry="EG"
-                    value={phone || undefined}
-                    onChange={(val) =>
-                      setPhone((val as unknown as string) ?? "")
-                    }
-                    placeholder={t("phoneLabel")}
-                    icon={<HiOutlinePhone className="text-lg" />}
-                  />
-                </div>
+                {!hasRestaurantName && (
+                  <div>
+                    <label
+                      className={`mb-1.5 block text-xs font-semibold text-slate-600 dark:text-slate-400 `}
+                    >
+                      {t("restaurantNameLabel")}{" "}
+                      <span className="text-accent-purple">*</span>
+                    </label>
+                    <CustomInput
+                      type="text"
+                      id="restaurant-name-gate"
+                      value={restaurantName}
+                      onChange={(e) => setRestaurantName(e.target.value)}
+                      placeholder={t("restaurantNameLabel")}
+                      icon={<FaStore className="text-lg" />}
+                    />
+                  </div>
+                )}
+
+                {!hasPhone && (
+                  <div>
+                    <label
+                      className={`mb-1.5 block text-xs font-semibold text-slate-600 dark:text-slate-400 `}
+                    >
+                      {t("phoneLabel")}{" "}
+                      <span className="text-accent-purple">*</span>
+                    </label>
+                    <CustomInput
+                      type="tel"
+                      id="phone-gate"
+                      defaultCountry="EG"
+                      value={phone || undefined}
+                      onChange={(val) =>
+                        setPhone((val as unknown as string) ?? "")
+                      }
+                      placeholder={t("phoneLabel")}
+                      icon={<HiOutlinePhone className="text-lg" />}
+                    />
+                  </div>
+                )}
 
                 <button
                   type="submit"
-                  disabled={saving || !phone.trim()}
+                  disabled={
+                    saving ||
+                    (!hasRestaurantName && !restaurantName.trim()) ||
+                    (!hasPhone && !phone.trim())
+                  }
                   className="group relative w-full overflow-hidden rounded-xl bg-linear-to-r from-accent-purple to-violet-500 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-300/40 transition-all duration-200 hover:shadow-xl hover:shadow-violet-300/50 hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 dark:shadow-violet-900/30 dark:hover:shadow-violet-900/50"
                 >
                   <span className="flex items-center justify-center gap-2">

@@ -12,15 +12,17 @@ export function DashboardHeader({
   setIsMenuOpen,
   segment,
   isAdmin,
+  hideSidebar,
 }: {
   setIsMenuOpen: (isMenuOpen: boolean | ((prev: boolean) => boolean)) => void;
   segment: string | null;
   isAdmin?: boolean;
+  hideSidebar?: boolean;
 }) {
   const locale = useLocale();
   const tCommon = useTranslations("common");
   const pathname = usePathname();
-  const showSidebarToggle = segment || isAdmin;
+  const showSidebarToggle = (segment || isAdmin) && !hideSidebar;
   const pageTitle = useDashboardTitle();
 
   return (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, type KeyboardEvent } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { ColDef } from "ag-grid-community";
@@ -10,6 +10,7 @@ import { IoArrowBack, IoSearchOutline, IoRefreshOutline } from "react-icons/io5"
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import DataTable from "@/components/Custom/DataTable";
 import ConfirmationModal from "@/components/Custom/ConfirmationModal";
+import CustomInput from "@/components/Custom/CustomInput";
 import { axiosGet, axiosPatch, axiosDelete } from "@/shared/axiosCall";
 import { formatAdminDate } from "@/lib/fetchAdminAnalytics";
 import { toast } from "react-toastify";
@@ -65,6 +66,7 @@ interface UsersResponse {
 export default function UsersPage() {
     const locale = useLocale();
     const t = useTranslations("adminUsers");
+    const tAccount = useTranslations("adminUsers.userDetails.accountActions");
     const router = useRouter();
     const searchParams = useSearchParams();
     const isRTL = locale === "ar";
@@ -97,6 +99,15 @@ export default function UsersPage() {
         isOpen: boolean;
         user: User | null;
     }>({ isOpen: false, user: null });
+    const [suspendModal, setSuspendModal] = useState<{
+        isOpen: boolean;
+        user: User | null;
+    }>({ isOpen: false, user: null });
+    const [reactivateModal, setReactivateModal] = useState<{
+        isOpen: boolean;
+        user: User | null;
+    }>({ isOpen: false, user: null });
+    const [suspendReason, setSuspendReason] = useState("");
 
     const applyFilter = useCallback(
         (filter: UserFilter) => {
@@ -236,30 +247,38 @@ export default function UsersPage() {
         "inactive",
     ];
 
-    const handleSuspend = useCallback(async (userId: string) => {
-        const userIdNum = parseInt(userId, 10);
+    const handleConfirmSuspend = useCallback(async () => {
+        if (!suspendModal.user) return;
+
+        const userIdNum = suspendModal.user.id;
         setLoadingUserId(userIdNum);
         try {
-            const payload = { isSuspended: true };
+            const payload: { isSuspended: boolean; reason?: string } = {
+                isSuspended: true,
+            };
+            if (suspendReason.trim()) {
+                payload.reason = suspendReason.trim();
+            }
             const result = await axiosPatch<typeof payload, User>(
-                `/admin/users/${userId}/suspend`,
+                `/admin/users/${userIdNum}/suspend`,
                 locale,
-                payload
+                payload,
             );
-            
+
             if (result.status && result.data) {
-                // Update local state instead of refetching
-                setUsers(prevUsers => 
-                    prevUsers.map(user => 
-                        user.id === userIdNum 
-                            ? { ...user, isSuspended: true }
-                            : user
-                    )
+                const reason = suspendReason.trim() || null;
+                setUsers((prevUsers) =>
+                    prevUsers.map((user) =>
+                        user.id === userIdNum
+                            ? { ...user, isSuspended: true, suspendedReason: reason }
+                            : user,
+                    ),
                 );
-                // Update stats
-                setSuspended(prev => prev + 1);
-                setActive(prev => Math.max(0, prev - 1));
+                setSuspended((prev) => prev + 1);
+                setActive((prev) => Math.max(0, prev - 1));
                 toast.success(t("suspendSuccess"));
+                setSuspendModal({ isOpen: false, user: null });
+                setSuspendReason("");
             } else {
                 toast.error(t("suspendError"));
             }
@@ -269,32 +288,44 @@ export default function UsersPage() {
         } finally {
             setLoadingUserId(null);
         }
-    }, [t, locale]);
+    }, [suspendModal.user, suspendReason, t, locale]);
 
-    const handleActivate = useCallback(async (userId: string) => {
-        const userIdNum = parseInt(userId, 10);
+    const closeSuspendModal = useCallback(() => {
+        if (loadingUserId === suspendModal.user?.id) return;
+        setSuspendModal({ isOpen: false, user: null });
+        setSuspendReason("");
+    }, [loadingUserId, suspendModal.user?.id]);
+
+    const handleConfirmActivate = useCallback(async () => {
+        if (!reactivateModal.user) return;
+
+        const userIdNum = reactivateModal.user.id;
         setLoadingUserId(userIdNum);
         try {
             const payload = { isSuspended: false };
             const result = await axiosPatch<typeof payload, User>(
-                `/admin/users/${userId}/suspend`,
+                `/admin/users/${userIdNum}/suspend`,
                 locale,
-                payload
+                payload,
             );
-            
+
             if (result.status && result.data) {
-                // Update local state instead of refetching
-                setUsers(prevUsers => 
-                    prevUsers.map(user => 
-                        user.id === userIdNum 
-                            ? { ...user, isSuspended: false }
-                            : user
-                    )
+                setUsers((prevUsers) =>
+                    prevUsers.map((user) =>
+                        user.id === userIdNum
+                            ? {
+                                  ...user,
+                                  isSuspended: false,
+                                  suspendedReason: null,
+                                  suspendedAt: null,
+                              }
+                            : user,
+                    ),
                 );
-                // Update stats
-                setActive(prev => prev + 1);
-                setSuspended(prev => Math.max(0, prev - 1));
+                setActive((prev) => prev + 1);
+                setSuspended((prev) => Math.max(0, prev - 1));
                 toast.success(t("activateSuccess"));
+                setReactivateModal({ isOpen: false, user: null });
             } else {
                 toast.error(t("activateError"));
             }
@@ -304,7 +335,12 @@ export default function UsersPage() {
         } finally {
             setLoadingUserId(null);
         }
-    }, [t, locale]);
+    }, [reactivateModal.user, t, locale]);
+
+    const closeReactivateModal = useCallback(() => {
+        if (loadingUserId === reactivateModal.user?.id) return;
+        setReactivateModal({ isOpen: false, user: null });
+    }, [loadingUserId, reactivateModal.user?.id]);
 
     const columnDefs: ColDef<User>[] = useMemo(
         () => [
@@ -342,7 +378,7 @@ export default function UsersPage() {
                 cellRenderer: (params: { value: number | undefined }) => {
                     const count = params.value ?? 0;
                     return (
-                        <span className="inline-flex items-center justify-center min-w-[2rem] px-2 py-1 rounded-lg text-sm font-semibold bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                        <span className="inline-flex items-center justify-center min-w-8 px-2 py-1 rounded-lg text-sm font-semibold bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
                             {count}
                         </span>
                     );
@@ -399,7 +435,9 @@ export default function UsersPage() {
                             </button>
                             <button
                                 onClick={() =>
-                                    isActive ? handleSuspend(user.id.toString()) : handleActivate(user.id.toString())
+                                    isActive
+                                        ? setSuspendModal({ isOpen: true, user })
+                                        : setReactivateModal({ isOpen: true, user })
                                 }
                                 disabled={isLoading}
                                 className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed relative inline-flex items-center justify-center gap-1.5 min-w-[80px] ${
@@ -432,7 +470,7 @@ export default function UsersPage() {
                 },
             },
         ],
-        [t, isRTL, router, handleSuspend, handleActivate, loadingUserId]
+        [t, isRTL, router, loadingUserId]
     );
 
     const statCards: {
@@ -530,19 +568,18 @@ export default function UsersPage() {
             {/* Search Input */}
             <CardDashBoard>
                 <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
-                    <div className="flex-1 relative">
-                        <IoSearchOutline
-                            className={`absolute top-1/2 -translate-y-1/2 text-slate-400 text-xl ${isRTL ? "right-4" : "left-4"
-                                }`}
-                        />
-                        <input
+                    <div className="flex-1">
+                        <CustomInput
+                            id="admin-users-search"
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                            onKeyDown={(e: KeyboardEvent<HTMLInputElement>) =>
+                                e.key === "Enter" && handleSearch()
+                            }
                             placeholder={t("searchPlaceholder")}
-                            className={`w-full h-12 pl-12 pr-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${isRTL ? "text-right" : "text-left"
-                                }`}
+                            icon={<IoSearchOutline />}
+                            dir={textDir}
                         />
                     </div>
                     <button
@@ -659,8 +696,136 @@ export default function UsersPage() {
                 })}
                 confirmText={t("actions.delete")}
                 cancelText={t("cancel")}
+                loadingText={t("loading")}
                 isLoading={loadingUserId === deleteModal.user?.id}
             />
+
+            {reactivateModal.isOpen && reactivateModal.user && (
+                <div
+                    className="fixed m-0 p-4 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+                    style={{
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        width: "100vw",
+                        minHeight: "100dvh",
+                    }}
+                >
+                    <div
+                        className={`bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-md w-full p-6 ${isRTL ? "text-right" : "text-left"}`}
+                    >
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+                            {tAccount("reactivateConfirmTitle")}
+                        </h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">
+                            {tAccount("reactivateConfirmMessage")}
+                        </p>
+                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-4">
+                            {reactivateModal.user.name}
+                        </p>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            {tAccount("suspendedReasonLabel")}
+                        </label>
+                        <div
+                            className="w-full px-4 py-3 border border-red-200 dark:border-red-500/30 rounded-xl bg-red-50 dark:bg-red-900/20 text-sm text-slate-800 dark:text-slate-200 mb-4 min-h-[72px] whitespace-pre-wrap"
+                            dir={textDir}
+                        >
+                            {reactivateModal.user.suspendedReason?.trim() ||
+                                t("noSuspendReason")}
+                        </div>
+                        <div className={`flex gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
+                            <button
+                                type="button"
+                                onClick={closeReactivateModal}
+                                disabled={loadingUserId === reactivateModal.user.id}
+                                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 font-medium disabled:opacity-50"
+                            >
+                                {t("cancel")}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleConfirmActivate}
+                                disabled={loadingUserId === reactivateModal.user.id}
+                                className="flex-1 px-4 py-2.5 rounded-xl bg-green-600 text-white font-semibold disabled:opacity-50 inline-flex items-center justify-center gap-2"
+                            >
+                                {loadingUserId === reactivateModal.user.id ? (
+                                    <>
+                                        <FaSpinner className="animate-spin text-xs" />
+                                        {t("loading")}
+                                    </>
+                                ) : (
+                                    t("actions.reactivate")
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {suspendModal.isOpen && suspendModal.user && (
+                <div
+                    className="fixed m-0 p-4 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+                    style={{
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        width: "100vw",
+                        minHeight: "100dvh",
+                    }}
+                >
+                    <div
+                        className={`bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-md w-full p-6 ${isRTL ? "text-right" : "text-left"}`}
+                    >
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+                            {tAccount("suspendConfirmTitle")}
+                        </h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">
+                            {tAccount("suspendConfirmMessage")}
+                        </p>
+                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-4">
+                            {suspendModal.user.name}
+                        </p>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            {tAccount("suspendReason")}
+                        </label>
+                        <textarea
+                            rows={3}
+                            value={suspendReason}
+                            onChange={(e) => setSuspendReason(e.target.value)}
+                            placeholder={tAccount("suspendReasonPlaceholder")}
+                            className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 mb-4 resize-y"
+                            dir={textDir}
+                        />
+                        <div className={`flex gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
+                            <button
+                                type="button"
+                                onClick={closeSuspendModal}
+                                disabled={loadingUserId === suspendModal.user.id}
+                                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 font-medium disabled:opacity-50"
+                            >
+                                {t("cancel")}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleConfirmSuspend}
+                                disabled={loadingUserId === suspendModal.user.id}
+                                className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white font-semibold disabled:opacity-50 inline-flex items-center justify-center gap-2"
+                            >
+                                {loadingUserId === suspendModal.user.id ? (
+                                    <>
+                                        <FaSpinner className="animate-spin text-xs" />
+                                        {t("loading")}
+                                    </>
+                                ) : (
+                                    t("actions.suspend")
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
