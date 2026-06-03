@@ -1,7 +1,7 @@
 "use client";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import CustomInput from "@/components/Custom/CustomInput";
-import { FaEnvelope, FaUser, FaPhone } from "react-icons/fa";
+import { FaEnvelope, FaUser, FaPhone, FaStore } from "react-icons/fa";
 import { TbLockPassword } from "react-icons/tb";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLocale, useTranslations } from "next-intl";
@@ -97,6 +97,7 @@ export default function RegisterForm() {
   } = useForm<RegisterSchema>({
     defaultValues: {
       fullName: "",
+      resturantName: "",
       email: "",
       phone: "",
       password: "",
@@ -113,6 +114,7 @@ export default function RegisterForm() {
 
   const messages = {
     fullName: t("auth.fullName"),
+    resturantName: t("auth.resturantName"),
     email: t("auth.email"),
     phone: t("auth.phone"),
     password: t("auth.password"),
@@ -135,6 +137,7 @@ export default function RegisterForm() {
     // TODO: اربط هنا API التسجيل
     const dataSend = {
       name: data.fullName,
+      resturantName: data.resturantName,
       email: data.email,
       phoneNumber: data.phone,
       password: data.password,
@@ -205,6 +208,23 @@ export default function RegisterForm() {
             icon={<FaUser />}
             label={messages.fullName}
             error={errors.fullName?.message}
+            value={value}
+            onChange={onChange}
+          />
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="resturantName"
+        render={({ field: { value, onChange } }) => (
+          <CustomInput
+            type="text"
+            placeholder={messages.resturantName}
+            id="resturantName"
+            icon={<FaStore />}
+            label={messages.resturantName}
+            error={errors.resturantName?.message}
             value={value}
             onChange={onChange}
           />

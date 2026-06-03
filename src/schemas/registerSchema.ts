@@ -28,6 +28,7 @@ export const registerSchema = (
 
   return yup.object().shape({
     fullName: yup.string().required(t("auth.fullNameRequired")),
+    resturantName: yup.string().required(t("auth.resturantNameRequired")),
     email: emailWithAvailability,
     phone: (() => {
       const basePhone = yup

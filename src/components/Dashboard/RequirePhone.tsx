@@ -247,25 +247,33 @@ export function RequirePhone({ children }: RequirePhoneProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phone.trim()) return;
+    const nextPhone = phone.trim();
+    if (!nextPhone) return;
 
     setSaving(true);
     const res = await axiosPatch<
       { phoneNumber: string },
       { user?: UserProfile }
-    >("/user/profile", locale, { phoneNumber: phone.trim() });
+    >("/user/profile", locale, { phoneNumber: nextPhone });
     setSaving(false);
 
     if (res?.status && res.data) {
       toast.success(t("successMessage"));
       const updatedUser = (res.data as { user?: UserProfile })?.user ?? {};
+      setVerificationReference("");
+      setPendingReference("");
+      setDeeplink("");
+      setVerificationExpired(false);
+      setTimeLeft(VERIFICATION_TIMEOUT_SECONDS);
+      setStartAttempted(false);
       dispatch(
         SET_ACTIVE_USER({
           ...authData,
           user: {
             ...userProfile,
             ...updatedUser,
-            phoneNumber: phone.trim(),
+            phoneNumber: nextPhone,
+            isPhoneVerified: updatedUser.isPhoneVerified === true,
           },
         } as UserProfile),
       );
