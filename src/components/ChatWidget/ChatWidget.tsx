@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import Image from "next/image";
 import { FiSend, FiX } from "react-icons/fi";
+import { FaWhatsapp } from "react-icons/fa";
+import { ALLOWED_CONTACT } from "@/lib/lena/assistantConfig";
 import { useLocale, useTranslations } from "next-intl";
 import { useChatSession } from "@/hooks/useChatSession";
 import {
@@ -15,6 +16,9 @@ import ChatSuggestions from "./ChatSuggestions";
 import LenaAvatar from "./LenaAvatar";
 import { getChatSuggestions } from "./suggestionEngine";
 import TypingIndicator from "./TypingIndicator";
+
+/** TEMP: hide Lena avatar FAB and link to WhatsApp support instead. */
+const TEMP_WHATSAPP_FAB = true;
 
 const TEASER_INTERVAL_MS = 10_000;
 const TEASER_VISIBLE_MS = 7_000;
@@ -52,7 +56,7 @@ export default function ChatWidget() {
   }, []);
 
   useEffect(() => {
-    if (open) {
+    if (open || TEMP_WHATSAPP_FAB) {
       setTeaserVisible(false);
       return;
     }
@@ -332,24 +336,35 @@ export default function ChatWidget() {
             </div>
           )}
 
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            aria-label={t("openChat")}
-            className="relative size-14 overflow-hidden rounded-full border-2 border-white shadow-lg shadow-purple-500/30 ring-2 ring-accent-purple/40 transition-transform hover:scale-105 active:scale-95 dark:border-slate-700 dark:ring-purple-500/30"
-          >
-            <Image
-              src="/images/AiAvatar.png"
-              alt="لينا"
-              width={56}
-              height={56}
-              className="size-full object-cover object-center"
-            />
-            <span
-              aria-hidden
-              className="absolute -top-0.5 -right-0.5 size-3 rounded-full bg-accent-purple/90 ring-2 ring-white dark:ring-[#0d1117]"
-            />
-          </button>
+          {TEMP_WHATSAPP_FAB ? (
+            <a
+              href={ALLOWED_CONTACT.whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t("contactWhatsApp")}
+              className="relative flex size-14 items-center justify-center rounded-full border-2 border-white bg-[#25D366] text-white shadow-lg shadow-[#25D366]/35 ring-2 ring-[#25D366]/30 transition-transform hover:scale-105 hover:bg-[#20BD5A] active:scale-95 dark:border-slate-700 dark:ring-[#25D366]/25"
+            >
+              <FaWhatsapp className="text-[1.75rem]" aria-hidden />
+            </a>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              aria-label={t("openChat")}
+              className="relative size-14 overflow-hidden rounded-full border-2 border-white shadow-lg shadow-purple-500/30 ring-2 ring-accent-purple/40 transition-transform hover:scale-105 active:scale-95 dark:border-slate-700 dark:ring-purple-500/30"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/AiAvatar.png"
+                alt="لينا"
+                className="size-full object-cover object-center"
+              />
+              <span
+                aria-hidden
+                className="absolute -top-0.5 -right-0.5 size-3 rounded-full bg-accent-purple/90 ring-2 ring-white dark:ring-[#0d1117]"
+              />
+            </button>
+          )}
         </div>
       )}
     </>

@@ -73,7 +73,7 @@ export default function CreateMenuModal({
       description: "",
       descriptionAr: "",
       slug: "",
-      currency: "AED",
+      currency: "EGP",
     },
     resolver: yupResolver(
       createMenuSchema(t),

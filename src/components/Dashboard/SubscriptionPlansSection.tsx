@@ -2,12 +2,15 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
 import { HiOutlineArrowRight } from "react-icons/hi";
 import { IoCloseOutline } from "react-icons/io5";
 import LinkTo from "@/components/Global/LinkTo";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
+import { performAuthLogout } from "@/shared/authLogout";
+import { resolveAuthMeSession } from "@/shared/resolveAuthMeSession";
 import { toast } from "react-toastify";
 import {
   formatPhoneForPaymentGateway,
@@ -21,6 +24,7 @@ import SubscriptionPlanCard, {
   SubscriptionPlanCardSkeleton,
 } from "@/components/Dashboard/SubscriptionPlanCard";
 import SubscriptionPaymentMethods from "@/components/Dashboard/SubscriptionPaymentMethods";
+import { RequirePhone } from "@/components/Dashboard/RequirePhone";
 import { translatePlanFeaturesWithMenuLimit } from "@/lib/planFeatureI18n";
 import type { Subscription, SubscriptionResponse } from "@/types/Subscription";
 
@@ -39,6 +43,8 @@ type AuthUser = {
   name?: string;
   email?: string;
   phoneNumber?: string;
+  restaurantName?: string | null;
+  isPhoneVerified?: boolean;
   role?: string;
   user?: {
     subscription?: {
@@ -62,13 +68,12 @@ export default function SubscriptionPlansSection({
   const tRoot = useTranslations("");
   const tLandingPricing = useTranslations("Landing.pricing");
 
-  const authData = useAppSelector((state) => state.auth.data) as unknown as {
-    user: AuthUser;
-  };
-  const user = authData ?? ({} as { user: AuthUser });
-  const profile = user?.user ?? ({} as AuthUser);
+  const authData = useAppSelector((state) => state.auth.data) as {
+    user?: AuthUser;
+  } | null;
+  const profile = authData?.user ?? ({} as AuthUser);
 
-  const isAdmin = (authData?.user as AuthUser | undefined)?.role === "admin";
+  const isAdmin = profile?.role === "admin";
 
   const [plans, setPlans] = useState<Plan[]>([]);
   const [plansLoading, setPlansLoading] = useState(true);
@@ -82,7 +87,15 @@ export default function SubscriptionPlansSection({
   const [proPayLoading, setProPayLoading] = useState(false);
   const [downgradeModalOpen, setDowngradeModalOpen] = useState(false);
   const [downgradeLoading, setDowngradeLoading] = useState(false);
+  const [phoneGateOpen, setPhoneGateOpen] = useState(false);
   const dispatch = useAppDispatch();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("verifyReference")) {
+      setPhoneGateOpen(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!authData?.user || isAdmin) {
@@ -136,12 +149,13 @@ export default function SubscriptionPlansSection({
     } else {
       setSubscriptionInfo(null);
     }
-    const meRes = await axiosGet<{ user?: Record<string, unknown> }>(
-      "/auth/me",
-      locale,
-    );
-    if (meRes.status && meRes.data?.user) {
-      dispatch(SET_ACTIVE_USER({ user: meRes.data.user }));
+    const meResult = await resolveAuthMeSession(locale);
+    if (meResult.outcome === "logout") {
+      await performAuthLogout();
+      return;
+    }
+    if (meResult.outcome === "user") {
+      dispatch(SET_ACTIVE_USER({ user: meResult.user }));
     }
   }, [locale, dispatch]);
 
@@ -163,74 +177,136 @@ export default function SubscriptionPlansSection({
     toast.error(serverMsg ?? t("downgradeError"));
   }, [locale, t, refreshSubscriptionState]);
 
+  const needsPhoneGateForPayment = useCallback(() => {
+    const hasPhone = Boolean(profile?.phoneNumber?.trim());
+    const hasRestaurantName = Boolean(profile?.restaurantName?.trim());
+    const isPhoneVerified = profile?.isPhoneVerified === true;
+    return !hasPhone || !hasRestaurantName || !isPhoneVerified;
+  }, [profile?.phoneNumber, profile?.restaurantName, profile?.isPhoneVerified]);
+
+  const initiateProPayment = useCallback(
+    async (userOverride?: AuthUser) => {
+      const activeUser = userOverride ?? profile;
+      const hasPhone = Boolean(activeUser?.phoneNumber?.trim());
+      const hasRestaurantName = Boolean(activeUser?.restaurantName?.trim());
+      const isPhoneVerified = activeUser?.isPhoneVerified === true;
+
+      if (!userOverride) {
+        if (!hasPhone || !hasRestaurantName || !isPhoneVerified) {
+          setPhoneGateOpen(true);
+          return;
+        }
+      } else if (!hasPhone || !hasRestaurantName || !isPhoneVerified) {
+        return;
+      }
+
+      const nameToSend =
+        (typeof activeUser?.name === "string" ? activeUser.name.trim() : "") ||
+        "";
+      const rawPhone =
+        typeof activeUser?.phoneNumber === "string"
+          ? activeUser.phoneNumber.trim()
+          : "";
+      const phoneToSend = formatPhoneForPaymentGateway(rawPhone);
+      if (!nameToSend || !phoneToSend) {
+        toast.error(t("payProError"));
+        return;
+      }
+      const endpoint =
+        proBillingChoice === "monthly"
+          ? "/payment/subscription/pro-monthly/initiate"
+          : "/payment/subscription/pro-yearly/initiate";
+      setProPayLoading(true);
+      const res = await axiosPost<
+        { name: string; email?: string; mobile: string; currency?: string },
+        {
+          success?: boolean;
+          data?: {
+            redirectUrl?: string;
+            amount?: number;
+            order_id?: string;
+            currency?: string;
+          };
+        }
+      >(endpoint, locale, {
+        name: nameToSend,
+        email: activeUser?.email?.trim() || undefined,
+        mobile: phoneToSend,
+        currency: "EGP",
+      });
+      setProPayLoading(false);
+      if (res?.status && res.data?.data?.redirectUrl) {
+        const amount = Number(res.data.data.amount);
+        const currency = res.data.data.currency || "EGP";
+        if (Number.isFinite(amount) && amount > 0) {
+          sessionStorage.setItem(
+            "gtm_pending_purchase",
+            JSON.stringify({
+              value: amount,
+              currency,
+              orderId: res.data.data.order_id,
+            }),
+          );
+        }
+        toast.info(t("paying"));
+        window.location.href = res.data.data.redirectUrl;
+        return;
+      }
+      const serverMsg = pickFailedRequestMessage(res?.data as unknown);
+      toast.error(serverMsg ?? t("payProError"));
+    },
+    [
+      locale,
+      proBillingChoice,
+      profile,
+      t,
+    ],
+  );
+
   const handleUpgradeToPro = useCallback(async () => {
-    const nameToSend =
-      (typeof profile?.name === "string" ? profile.name.trim() : "") || "";
-    const rawPhone =
-      typeof profile?.phoneNumber === "string"
-        ? profile.phoneNumber.trim()
-        : "";
-    const phoneToSend = formatPhoneForPaymentGateway(rawPhone);
-    if (!nameToSend || !phoneToSend) {
-      toast.error(t("payProError"));
+    if (needsPhoneGateForPayment()) {
+      setPhoneGateOpen(true);
       return;
     }
-    const endpoint =
-      proBillingChoice === "monthly"
-        ? "/payment/subscription/pro-monthly/initiate"
-        : "/payment/subscription/pro-yearly/initiate";
-    setProPayLoading(true);
-    const res = await axiosPost<
-      { name: string; email?: string; mobile: string; currency?: string },
-      {
-        success?: boolean;
-        data?: {
-          redirectUrl?: string;
-          amount?: number;
-          order_id?: string;
-          currency?: string;
-        };
-      }
-    >(endpoint, locale, {
-      name: nameToSend,
-      email: profile?.email?.trim() || undefined,
-      mobile: phoneToSend,
-      currency: "EGP",
-    });
-    setProPayLoading(false);
-    if (res?.status && res.data?.data?.redirectUrl) {
-      const amount = Number(res.data.data.amount);
-      const currency = res.data.data.currency || "EGP";
-      if (Number.isFinite(amount) && amount > 0) {
-        sessionStorage.setItem(
-          "gtm_pending_purchase",
-          JSON.stringify({
-            value: amount,
-            currency,
-            orderId: res.data.data.order_id,
-          }),
-        );
-      }
-      toast.info(t("paying"));
-      window.location.href = res.data.data.redirectUrl;
+    await initiateProPayment();
+  }, [needsPhoneGateForPayment, initiateProPayment]);
+
+  const handlePhoneVerifiedForPayment = useCallback(async () => {
+    const meResult = await resolveAuthMeSession(locale);
+    if (meResult.outcome === "logout") {
+      await performAuthLogout();
       return;
     }
-    const serverMsg = pickFailedRequestMessage(res?.data as unknown);
-    toast.error(serverMsg ?? t("payProError"));
-  }, [
-    locale,
-    proBillingChoice,
-    profile?.name,
-    profile?.email,
-    profile?.phoneNumber,
-    t,
-  ]);
+    if (meResult.outcome !== "user") {
+      return;
+    }
+
+    const freshUser = meResult.user as AuthUser;
+    dispatch(SET_ACTIVE_USER({ user: freshUser }));
+
+    if (freshUser.isPhoneVerified !== true) {
+      return;
+    }
+
+    setPhoneGateOpen(false);
+    await initiateProPayment(freshUser);
+  }, [locale, dispatch, initiateProPayment]);
 
   if (isAdmin) {
     return null;
   }
 
   return (
+    <>
+      {phoneGateOpen && (
+        <RequirePhone
+          enforce
+          requireVerification
+          variant="modal"
+          onVerified={handlePhoneVerifiedForPayment}
+          onCancel={() => setPhoneGateOpen(false)}
+        />
+      )}
     <div className="min-h-[calc(100vh-120px)]">
       {backLink && (
         <div className={isRTL ? "text-right mb-4" : "text-left mb-4"}>
@@ -488,5 +564,6 @@ export default function SubscriptionPlansSection({
         </div>
       )}
     </div>
+    </>
   );
 }

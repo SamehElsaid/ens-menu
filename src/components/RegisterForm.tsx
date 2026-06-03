@@ -137,7 +137,7 @@ export default function RegisterForm() {
     // TODO: اربط هنا API التسجيل
     const dataSend = {
       name: data.fullName,
-      resturantName: data.resturantName,
+      restaurantName: data.resturantName,
       email: data.email,
       phoneNumber: data.phone,
       password: data.password,

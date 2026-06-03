@@ -7,6 +7,7 @@ import {
   encryptDataApi,
 } from "./encryption";
 import { LoginResponse } from "@/types/LoginResponse";
+import { performAuthLogout } from "./authLogout";
 
 interface ApiResponse<T> {
   data?: T;
@@ -86,9 +87,8 @@ const doRefreshAccessToken = async (): Promise<string | null> => {
     return accessToken;
   } catch (err) {
     console.error("Refresh token failed:", err);
-    if ((err as AxiosError).response?.status === 405) {
-      Cookies.remove("sub", { path: "/" });
-      window.location.href = "/";
+    if ((err as AxiosError).response?.status === 401) {
+      await performAuthLogout();
     }
     return null;
   } finally {

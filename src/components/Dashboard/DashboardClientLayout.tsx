@@ -14,8 +14,11 @@ import {
   SuspendedAccountScreen,
   useAccountGateStatus,
 } from "@/components/Dashboard/RequireNotSuspended";
-import { RequirePhone } from "@/components/Dashboard/RequirePhone";
 import OnboardingTour from "@/components/Dashboard/OnboardingTour";
+import {
+  RequirePhone,
+  useProfileGateStatus,
+} from "@/components/Dashboard/RequirePhone";
 import { DashboardTitleProvider } from "@/components/Dashboard/DashboardTitleProvider";
 
 interface MenusResponse {
@@ -41,6 +44,7 @@ export default function DashboardClientLayout({
   const locale = useLocale();
   const [hasMenu, setHasMenu] = useState(false);
   const accountGateStatus = useAccountGateStatus();
+  const profileGateStatus = useProfileGateStatus();
 
   useEffect(() => {
     const redirectToUnauthorized = () => {
@@ -83,18 +87,25 @@ export default function DashboardClientLayout({
         : null
       : children;
 
+  const isAppLoading =
+    accountGateStatus === "loading" || profileGateStatus === "loading";
+
   return (
     <DashboardTitleProvider>
       <AuthUserHydrate />
       <FcmTokenSync />
-      {accountGateStatus === "loading" ? null : accountGateStatus === "suspended" ? (
+      {isAppLoading ? null : accountGateStatus === "suspended" ? (
         <Layout segment={segment} hideSidebar>
           <SuspendedAccountScreen />
+        </Layout>
+      ) : profileGateStatus === "incomplete" ? (
+        <Layout segment={segment} hideSidebar>
+          <RequirePhone enforce requireVerification={false} />
         </Layout>
       ) : (
         <Layout segment={segment}>
           <OnboardingTour />
-          <RequirePhone>{dashboardContent}</RequirePhone>
+          {dashboardContent}
         </Layout>
       )}
     </DashboardTitleProvider>
