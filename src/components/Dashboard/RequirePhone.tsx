@@ -306,16 +306,21 @@ export function RequirePhone({ children }: RequirePhoneProps) {
   };
 
   const handleOpenWhatsapp = () => {
-    if (!deeplink || !pendingReference) return;
+    const reference = pendingReference || verificationReference;
+    if (!deeplink || !reference) return;
 
     const params = new URLSearchParams(searchParams.toString());
-    params.set("verifyReference", pendingReference);
+    params.set("verifyReference", reference);
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     setTimeLeft(VERIFICATION_TIMEOUT_SECONDS);
     setVerificationExpired(false);
-    setVerificationReference(pendingReference);
+    setVerificationReference(reference);
     window.open(deeplink, "_blank", "noopener,noreferrer");
   };
+
+  const canOpenWhatsapp = Boolean(
+    deeplink && (pendingReference || verificationReference),
+  );
 
   const handleRestartVerification = () => {
     const params = new URLSearchParams(searchParams.toString());
@@ -421,42 +426,36 @@ export function RequirePhone({ children }: RequirePhoneProps) {
                     </p>
                   </div>
                 ) : (
-                  <>
-                    <div className="rounded-2xl border border-violet-100 bg-violet-50/70 p-4 text-center dark:border-violet-900/40 dark:bg-violet-950/20">
-                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-                        {t("whatsappReadyTitle")}
-                      </p>
-                      <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                        {t("whatsappReadySubtitle")}
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={handleOpenWhatsapp}
-                      disabled={
-                        startingVerification ||
-                        !deeplink ||
-                        !pendingReference
-                      }
-                      className="group relative w-full overflow-hidden rounded-xl bg-linear-to-r from-accent-purple to-violet-500 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-300/40 transition-all duration-200 hover:shadow-xl hover:shadow-violet-300/50 hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 dark:shadow-violet-900/30 dark:hover:shadow-violet-900/50"
-                    >
-                      <span className="flex items-center justify-center gap-2">
-                        {startingVerification ? (
-                          <>
-                            <ImSpinner8 className="animate-spin text-base" />
-                            {t("startingVerification")}
-                          </>
-                        ) : (
-                          <>
-                            <HiOutlineChatAlt2 className="text-lg" />
-                            {t("openWhatsapp")}
-                          </>
-                        )}
-                      </span>
-                    </button>
-                  </>
+                  <div className="rounded-2xl border border-violet-100 bg-violet-50/70 p-4 text-center dark:border-violet-900/40 dark:bg-violet-950/20">
+                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                      {t("whatsappReadyTitle")}
+                    </p>
+                    <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                      {t("whatsappReadySubtitle")}
+                    </p>
+                  </div>
                 )}
+
+                <button
+                  type="button"
+                  onClick={handleOpenWhatsapp}
+                  disabled={startingVerification || !canOpenWhatsapp}
+                  className="group relative w-full overflow-hidden rounded-xl bg-linear-to-r from-accent-purple to-violet-500 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-300/40 transition-all duration-200 hover:shadow-xl hover:shadow-violet-300/50 hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 dark:shadow-violet-900/30 dark:hover:shadow-violet-900/50"
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    {startingVerification ? (
+                      <>
+                        <ImSpinner8 className="animate-spin text-base" />
+                        {t("startingVerification")}
+                      </>
+                    ) : (
+                      <>
+                        <HiOutlineChatAlt2 className="text-lg" />
+                        {t("openWhatsapp")}
+                      </>
+                    )}
+                  </span>
+                </button>
 
                 {showVerificationRetry && (
                   <button
