@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useRef,
-  forwardRef,
-  useImperativeHandle,
-} from "react";
+import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { getStyledQrOptions } from "@/lib/styledQr";
 
 export type StyledQrCodeHandle = {

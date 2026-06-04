@@ -2701,11 +2701,12 @@
       "default": "افتراضي",
       "underConstruction": "تحت الإنشاء"
     },
+    "headerCta": "اختر التصميم",
     "cards": {
       "defaultHelper": "القالب الافتراضي المقترح لمعظم المستخدمين",
       "templateHelper": "قالب جاهز بتصميم احترافي",
       "buttonActive": "القالب مفعل",
-      "buttonUse": "تفعيل هذا القالب",
+      "buttonUse": "اختر هذا التصميم",
       "preview": "معاينة",
       "customize": "تخصيص",
       "templateNotActive": "هذا القالب غير مفعل. يرجى تفعيله لتخصيصه."

@@ -22,7 +22,7 @@ const axiosInstance = axios.create({
 function getCacheInfo(
   url: string | null,
   width: number | null,
-  height: number | null
+  height: number | null,
 ) {
   const urlStr = String(url || "");
   const urlHash = crypto
@@ -41,17 +41,14 @@ function getCacheInfo(
 function imageResponse(
   buffer: Buffer,
   contentType: string,
-  fromCache: boolean
+  fromCache: boolean,
 ): NextResponse {
   const headers = new Headers();
   headers.set("Content-Type", contentType);
   headers.set("Cache-Control", "public, max-age=31536000, immutable");
   headers.set("Content-Length", String(buffer.length));
   headers.set("X-Image-Cache", fromCache ? "HIT" : "MISS");
-  headers.set(
-    "Content-Disposition",
-    'inline; filename="optimized-image.webp"'
-  );
+  headers.set("Content-Disposition", 'inline; filename="optimized-image.webp"');
   return new NextResponse(new Uint8Array(buffer), { status: 200, headers });
 }
 
@@ -67,7 +64,7 @@ export async function GET(request: Request) {
   if (!url) {
     return NextResponse.json(
       { error: "يرجى تقديم رابط الصورة" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -79,7 +76,7 @@ export async function GET(request: Request) {
   const unsupportedExtensions = [".ico", ".bmp", ".tiff", ".tif"];
   const urlLower = imageUrl.toLowerCase();
   const isUnsupported = unsupportedExtensions.some((ext) =>
-    urlLower.includes(ext)
+    urlLower.includes(ext),
   );
   if (isUnsupported) {
     return NextResponse.redirect(imageUrl, 302);
@@ -106,7 +103,7 @@ export async function GET(request: Request) {
     });
 
     const contentType = String(
-      response.headers["content-type"] || ""
+      response.headers["content-type"] || "",
     ).toLowerCase();
     if (
       contentType.includes("x-icon") ||

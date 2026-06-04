@@ -2792,11 +2792,12 @@
       "default": "Default",
       "underConstruction": "Under construction"
     },
+    "headerCta": "Choose design",
     "cards": {
       "defaultHelper": "Recommended default template for most users",
       "templateHelper": "Ready-made template with a professional design",
       "buttonActive": "Template active",
-      "buttonUse": "Use this template",
+      "buttonUse": "Choose this design",
       "preview": "Preview",
       "customize": "Customize",
       "templateNotActive": "This template is not active. Please activate it to customize it."
