@@ -190,13 +190,23 @@ export default function CreateMenuModal({
       );
 
       if (result.status && result.data) {
-        const createdMenu = normalizeMenuFromApi(result.data);
+        const apiPayload = result.data as Record<string, unknown>;
+        const createdMenu = normalizeMenuFromApi({
+          ...menuData,
+          ...apiPayload,
+          id: apiPayload.menuId ?? apiPayload.id,
+          logo: logoUrl,
+        });
+
         if (!createdMenu) {
+          console.error("Failed to normalize menu from API:", result.data);
           toast.error(t("createError"));
           return;
         }
 
-        pushMenuCreatedEvent();
+        pushMenuCreatedEvent(
+          typeof createdMenu.uuid === "string" ? createdMenu.uuid : undefined,
+        );
         toast.success(t("createSuccess"));
 
         onMenuCreated?.(createdMenu);
@@ -509,13 +519,12 @@ export default function CreateMenuModal({
                         )
                       }
                       onBlur={field.onBlur}
-                      className={`px-4 py-3 font-mono dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:border-transparent ${
-                        slugStatus.available === false
+                      className={`px-4 py-3 font-mono dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:border-transparent ${slugStatus.available === false
                           ? "border-red-300 dark:border-red-600 focus:ring-red-500"
                           : slugStatus.available === true
                             ? "border-green-300 dark:border-green-600 focus:ring-green-500"
                             : "border-gray-300 dark:border-gray-600 focus:ring-primary"
-                      }`}
+                        }`}
                       placeholder={t("slugPlaceholder")}
                       error={errors.slug?.message}
                       icon={

@@ -7,6 +7,7 @@ import { axiosPost } from "@/shared/axiosCall";
 import { _checkFileSize, _checkFileType } from "@/shared/_shared";
 import type { ImportItem } from "@/types/menuImport";
 import type { UploadResponse } from "@/types/Menu";
+import { importRefDomId } from "@/lib/menuImport/importRefDomId";
 import {
   IoTrashOutline,
   IoImageOutline,
@@ -97,7 +98,8 @@ export default function ReviewItemRow({
 
   return (
     <div
-      className={`px-5 py-4 space-y-3 ${hasMissingPrice || hasMissingName || hasPriceConflict ? "bg-amber-50/50 dark:bg-amber-900/10" : hasDuplicate ? "bg-slate-50/80 dark:bg-slate-800/50" : ""}`}
+      id={importRefDomId(item.id)}
+      className={`px-5 py-4 space-y-3 scroll-mt-24 ${hasMissingPrice || hasMissingName || hasPriceConflict ? "bg-amber-50/50 dark:bg-amber-900/10" : hasDuplicate ? "bg-slate-50/80 dark:bg-slate-800/50" : ""}`}
     >
       {item.variants.length === 0 && item.duplicateMeta?.status === "exact_duplicate" && (
         <p className="text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/60 rounded-lg px-3 py-2">
@@ -278,7 +280,11 @@ export default function ReviewItemRow({
       {item.variants.length > 0 && (
         <div className="space-y-2 ps-2 border-s-2 border-slate-100 dark:border-slate-700">
           {item.variants.map((variant) => (
-            <div key={variant.id} className="space-y-2">
+            <div
+              key={variant.id}
+              id={importRefDomId(variant.id)}
+              className="space-y-2 scroll-mt-24"
+            >
               {variant.duplicateMeta?.status === "exact_duplicate" && (
                 <p className="text-xs text-slate-500">{t("duplicateExactSkip")}</p>
               )}

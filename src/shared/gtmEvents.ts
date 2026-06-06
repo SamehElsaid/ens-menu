@@ -27,12 +27,18 @@ export function pushPurchaseEvent({ value, currency }: PurchaseEventData): void 
   });
 }
 
-export function pushMenuCreatedEvent(): void {
+export function pushMenuCreatedEvent(menuUuid?: string): void {
   if (typeof window === "undefined") return;
 
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push({
     event: "menu_created",
+    ...(menuUuid
+      ? {
+          menu_uuid: menuUuid,
+          destination: `/dashboard/${menuUuid}/import`,
+        }
+      : {}),
   });
 }
 

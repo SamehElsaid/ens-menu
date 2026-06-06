@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import LinkTo from "@/components/Global/LinkTo";
@@ -11,6 +12,12 @@ import UploadStep from "./steps/UploadStep";
 import ProcessingStep from "./steps/ProcessingStep";
 import ReviewStep from "./steps/ReviewStep";
 import ImportErrorPanel from "./shared/ImportErrorPanel";
+import FreePlanProductLimitModal from "./shared/FreePlanProductLimitModal";
+import { isFreePlanUser } from "@/lib/subscription";
+import {
+  FREE_PLAN_DEFAULT_MAX_PRODUCTS,
+  getImportProductLimitInfo,
+} from "@/lib/menuImport/freePlanImportLimits";
 import { IoArrowBackOutline } from "react-icons/io5";
 
 export default function MenuImportWizard() {
@@ -23,10 +30,67 @@ export default function MenuImportWizard() {
       : ((params.menu as string[])?.[0] ?? "");
 
   const menu = useAppSelector((state) => state.menuData.menu);
+  const authData = useAppSelector((state) => state.auth.data);
   const currency = menu?.currency ?? "EGP";
+
+  const isFreePlan = isFreePlanUser(authData);
+  const maxProducts =
+    (
+      authData as {
+        user?: { subscription?: { maxProductsPerMenu?: number } };
+      }
+    )?.user?.subscription?.maxProductsPerMenu ?? FREE_PLAN_DEFAULT_MAX_PRODUCTS;
 
   const flow = useMenuImportFlow({ menuId, currency, locale });
   const { state } = flow;
+
+  const [freeLimitModal, setFreeLimitModal] = useState<
+    "info" | "confirm" | null
+  >(null);
+  const [reviewLimitShownFor, setReviewLimitShownFor] = useState<
+    string | null
+  >(null);
+
+  const limitInfo = useMemo(() => {
+    if (!state.draft) return null;
+    return getImportProductLimitInfo(
+      state.draft,
+      menu?.itemsCount ?? 0,
+      maxProducts,
+    );
+  }, [state.draft, menu?.itemsCount, maxProducts]);
+
+  useEffect(() => {
+    if (
+      !isFreePlan ||
+      state.step !== "review" ||
+      !state.draft ||
+      reviewLimitShownFor === state.draft.createdAt
+    ) {
+      return;
+    }
+
+    setReviewLimitShownFor(state.draft.createdAt);
+    setFreeLimitModal("info");
+  }, [isFreePlan, state.step, state.draft, reviewLimitShownFor]);
+
+  const handleOpenConfirm = useCallback(() => {
+    if (isFreePlan && limitInfo) {
+      setFreeLimitModal("confirm");
+      return;
+    }
+    flow.openConfirm();
+  }, [isFreePlan, limitInfo, flow]);
+
+  const handleFreeLimitClose = useCallback(() => {
+    setFreeLimitModal(null);
+  }, []);
+
+  const handleFreeLimitContinue = useCallback(() => {
+    if (!limitInfo || limitInfo.exceedsLimit) return;
+    setFreeLimitModal(null);
+    flow.openConfirm();
+  }, [limitInfo, flow]);
 
   return (
     <div className="space-y-8 pb-10 animate-fadeIn">
@@ -85,7 +149,7 @@ export default function MenuImportWizard() {
               saveError={state.error}
               menuId={menuId}
               onNewUpload={flow.clearFile}
-              onOpenConfirm={flow.openConfirm}
+              onOpenConfirm={handleOpenConfirm}
               onCloseConfirm={flow.closeConfirm}
               onConfirmSave={flow.confirmSave}
               onUpdateCategory={flow.updateCategory}
@@ -113,6 +177,24 @@ export default function MenuImportWizard() {
           )}
         </div>
       </div>
+
+      {freeLimitModal && limitInfo && (
+        <FreePlanProductLimitModal
+          menuId={menuId}
+          maxProducts={limitInfo.maxProducts}
+          currentCount={limitInfo.currentCount}
+          importCount={limitInfo.importCount}
+          totalAfter={limitInfo.totalAfter}
+          exceedsLimit={limitInfo.exceedsLimit}
+          mode={freeLimitModal}
+          onClose={handleFreeLimitClose}
+          onContinue={
+            freeLimitModal === "confirm" && !limitInfo.exceedsLimit
+              ? handleFreeLimitContinue
+              : undefined
+          }
+        />
+      )}
     </div>
   );
 }

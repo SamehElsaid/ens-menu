@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { ImportCategory } from "@/types/menuImport";
+import { importRefDomId } from "@/lib/menuImport/importRefDomId";
 import ReviewItemRow from "./ReviewItemRow";
 import ConfirmationModal from "@/components/Custom/ConfirmationModal";
 import {
@@ -16,6 +17,7 @@ interface ReviewCategoryBlockProps {
   category: ImportCategory;
   currency: string;
   locale: string;
+  scrollTargetRefId?: string | null;
   onUpdateCategory: (patch: Partial<ImportCategory>) => void;
   onUpdateItem: (
     itemId: string,
@@ -43,6 +45,7 @@ export default function ReviewCategoryBlock({
   category,
   currency,
   locale,
+  scrollTargetRefId,
   onUpdateCategory,
   onUpdateItem,
   onUpdateVariant,
@@ -56,7 +59,7 @@ export default function ReviewCategoryBlock({
 }: ReviewCategoryBlockProps) {
   const t = useTranslations("MenuImport");
   const uiLocale = useLocale();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const missingFieldClass =
@@ -68,9 +71,26 @@ export default function ReviewCategoryBlock({
     category.flags.includes("missing_name_en") ||
     category.flags.includes("needs_review");
 
+  useEffect(() => {
+    if (!scrollTargetRefId) return;
+
+    const matches =
+      scrollTargetRefId === category.id ||
+      category.items.some(
+        (item) =>
+          item.id === scrollTargetRefId ||
+          item.variants.some((variant) => variant.id === scrollTargetRefId),
+      );
+
+    if (matches) setCollapsed(false);
+  }, [scrollTargetRefId, category]);
+
   return (
     <>
-      <section className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden">
+      <section
+        id={importRefDomId(category.id)}
+        className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden scroll-mt-24"
+      >
         <div
           className={`flex items-start gap-3 px-5 py-4 border-b border-slate-100 dark:border-slate-700 ${hasMissingName ? "bg-amber-50/50 dark:bg-amber-900/10" : ""}`}
         >

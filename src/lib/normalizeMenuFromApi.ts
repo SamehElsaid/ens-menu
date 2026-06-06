@@ -10,11 +10,12 @@ export function normalizeMenuFromApi(data: unknown): Menu | null {
       ? (record.menu as Record<string, unknown>)
       : record;
 
+  const idRaw = candidate.id ?? candidate.menuId;
   const id =
-    typeof candidate.id === "number"
-      ? candidate.id
-      : typeof candidate.id === "string"
-        ? Number.parseInt(candidate.id, 10)
+    typeof idRaw === "number"
+      ? idRaw
+      : typeof idRaw === "string"
+        ? Number.parseInt(idRaw, 10)
         : NaN;
 
   if (!Number.isFinite(id)) return null;
@@ -29,6 +30,10 @@ export function normalizeMenuFromApi(data: unknown): Menu | null {
   return {
     ...(candidate as Menu),
     id,
+    uuid:
+      typeof candidate.uuid === "string" && candidate.uuid.length > 0
+        ? candidate.uuid
+        : undefined,
     slug,
     nameEn,
     nameAr,

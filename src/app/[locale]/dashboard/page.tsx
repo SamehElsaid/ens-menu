@@ -11,7 +11,6 @@ import { pushFirstMenuCreatedEvent } from "@/shared/gtmEvents";
 import { toast } from "react-toastify";
 import { Menu, MenusResponse } from "@/types/Menu";
 import { useAppDispatch } from "@/store/hooks";
-import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
 import { normalizeMenuFromApi } from "@/lib/normalizeMenuFromApi";
 import { Subscription, SubscriptionResponse } from "@/types/Subscription";
 import {
@@ -131,7 +130,7 @@ export default function DashboardPage() {
     if (newMenu) {
       const normalized = normalizeMenuFromApi(newMenu) ?? newMenu;
       setMenus((prev) => [...prev, normalized]);
-      router.push(`/dashboard/${normalized.slug || normalized.id}`);
+      router.push(menuDashboardPath(normalized, "import"));
     } else {
       fetchMenus();
     }

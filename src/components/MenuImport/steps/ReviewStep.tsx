@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { ImportDraft, ImportError } from "@/types/menuImport";
 import type { SaveBlockingError } from "@/types/menuImport";
@@ -8,6 +9,10 @@ import ConfirmSavePanel from "../review/ConfirmSavePanel";
 import SaveResultPanel from "../review/SaveResultPanel";
 import SaveProgressOverlay from "../shared/SaveProgressOverlay";
 import { countDuplicateStats } from "@/lib/menuImport/duplicateMatch";
+import {
+  focusFirstMissingField,
+  importRefDomId,
+} from "@/lib/menuImport/importRefDomId";
 import { IoAddCircleOutline } from "react-icons/io5";
 
 interface ReviewStepProps {
@@ -98,6 +103,51 @@ export default function ReviewStep({
   const t = useTranslations("MenuImport");
   const locale = useLocale();
   const dupStats = countDuplicateStats(draft);
+  const [scrollTargetRefId, setScrollTargetRefId] = useState<string | null>(
+    null,
+  );
+  const nameErrorIndexRef = useRef(0);
+
+  const scrollToNameError = (index?: number) => {
+    if (blockingNameErrors.length === 0) return;
+
+    const idx =
+      index ??
+      nameErrorIndexRef.current % blockingNameErrors.length;
+    if (index === undefined) {
+      nameErrorIndexRef.current = idx + 1;
+    }
+
+    const refId = blockingNameErrors[idx]?.refId;
+    if (!refId) return;
+
+    setScrollTargetRefId(refId);
+
+    requestAnimationFrame(() => {
+      window.setTimeout(() => {
+        const el = document.getElementById(importRefDomId(refId));
+        if (!el) return;
+
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        focusFirstMissingField(el);
+
+        el.classList.add(
+          "ring-2",
+          "ring-primary",
+          "ring-offset-2",
+          "rounded-2xl",
+        );
+        window.setTimeout(() => {
+          el.classList.remove(
+            "ring-2",
+            "ring-primary",
+            "ring-offset-2",
+            "rounded-2xl",
+          );
+        }, 2000);
+      }, 80);
+    });
+  };
 
   if (saveResult) {
     return (
@@ -150,11 +200,15 @@ export default function ReviewStep({
             </span>
           )}
           {draft.stats.missingNameCount > 0 && (
-            <span className="px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 font-medium">
+            <button
+              type="button"
+              onClick={() => scrollToNameError()}
+              className="px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 font-medium hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors cursor-pointer"
+            >
               {t("statMissingNames", {
                 count: draft.stats.missingNameCount,
               })}
-            </span>
+            </button>
           )}
         </div>
       </div>
@@ -180,9 +234,13 @@ export default function ReviewStep({
             </div>
           )}
           {blockingNameErrors.length > 0 && (
-            <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-sm text-amber-800 dark:text-amber-200">
+            <button
+              type="button"
+              onClick={() => scrollToNameError(0)}
+              className="w-full text-start p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-sm text-amber-800 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors cursor-pointer"
+            >
               {t("missingNameBlock", { count: blockingNameErrors.length })}
-            </div>
+            </button>
           )}
           {unresolvedPriceConflicts.length > 0 && (
             <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-sm text-amber-800 dark:text-amber-200">
@@ -207,6 +265,7 @@ export default function ReviewStep({
             category={category}
             currency={draft.currency}
             locale={locale}
+            scrollTargetRefId={scrollTargetRefId}
             onUpdateCategory={(patch) => onUpdateCategory(category.id, patch)}
             onUpdateItem={(itemId, patch) =>
               onUpdateItem(category.id, itemId, patch)
