@@ -346,6 +346,57 @@ export default function AddItemModal({
                     <div className="overflow-y-auto p-6 space-y-6">
                         <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
                             <div className="flex items-center gap-2 mb-4">
+                                <IoImageOutline className="text-primary text-lg shrink-0" />
+                                <h3 className="text-base font-semibold text-gray-900 dark:text-white">{t("image")}</h3>
+                            </div>
+                            <label
+                                className={`relative block w-full cursor-pointer rounded-2xl border-2 border-dashed transition-all duration-200 ${
+                                    isDragOver
+                                        ? "border-primary bg-primary/5 dark:bg-primary/10"
+                                        : imagePreview
+                                        ? "border-primary/40 bg-primary/5 dark:bg-primary/10"
+                                        : "border-gray-300 dark:border-gray-600 bg-gray-100/50 dark:bg-gray-600/20 hover:border-primary/40 hover:bg-primary/5 dark:hover:bg-primary/10"
+                                }`}
+                                onDrop={handleDrop}
+                                onDragOver={handleDragOver}
+                                onDragLeave={handleDragLeave}
+                            >
+                                <input
+                                    type="file"
+                                    accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
+                                    onChange={handleImageChange}
+                                    className="hidden"
+                                />
+                                <div className="flex flex-col items-center justify-center py-8 px-6 min-h-[120px]">
+                                    {imagePreview ? (
+                                        <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-inner ring-1 ring-black/5">
+                                            <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    handleRemoveImage();
+                                                }}
+                                                className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity text-white"
+                                                aria-label={t("removeImage")}
+                                            >
+                                                <IoCloseOutline className="text-2xl" />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="w-12 h-12 rounded-2xl bg-gray-200/80 dark:bg-gray-600/50 flex items-center justify-center mb-2">
+                                                <IoCloudUploadOutline className="text-2xl text-gray-500 dark:text-gray-400" />
+                                            </div>
+                                            <span className="text-sm font-medium text-gray-600 dark:text-gray-400 text-center">{t("imageHint")}</span>
+                                        </>
+                                    )}
+                                </div>
+                            </label>
+                        </section>
+
+                        <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
+                            <div className="flex items-center gap-2 mb-4">
                                 <IoPricetagOutline className="text-primary text-lg shrink-0" />
                                 <h3 className="text-base font-semibold text-gray-900 dark:text-white">{t("nameEn")} / {t("nameAr")}</h3>
                             </div>
@@ -605,57 +656,6 @@ export default function AddItemModal({
                                     </div>
                                 )}
                             />
-                        </section>
-
-                        <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
-                            <div className="flex items-center gap-2 mb-4">
-                                <IoImageOutline className="text-primary text-lg shrink-0" />
-                                <h3 className="text-base font-semibold text-gray-900 dark:text-white">{t("image")}</h3>
-                            </div>
-                            <label
-                                className={`relative block w-full cursor-pointer rounded-2xl border-2 border-dashed transition-all duration-200 ${
-                                    isDragOver
-                                        ? "border-primary bg-primary/5 dark:bg-primary/10"
-                                        : imagePreview
-                                        ? "border-primary/40 bg-primary/5 dark:bg-primary/10"
-                                        : "border-gray-300 dark:border-gray-600 bg-gray-100/50 dark:bg-gray-600/20 hover:border-primary/40 hover:bg-primary/5 dark:hover:bg-primary/10"
-                                }`}
-                                onDrop={handleDrop}
-                                onDragOver={handleDragOver}
-                                onDragLeave={handleDragLeave}
-                            >
-                                <input
-                                    type="file"
-                                    accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
-                                    onChange={handleImageChange}
-                                    className="hidden"
-                                />
-                                <div className="flex flex-col items-center justify-center py-8 px-6 min-h-[120px]">
-                                    {imagePreview ? (
-                                        <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-inner ring-1 ring-black/5">
-                                            <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
-                                            <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    handleRemoveImage();
-                                                }}
-                                                className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity text-white"
-                                                aria-label={t("removeImage")}
-                                            >
-                                                <IoCloseOutline className="text-2xl" />
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <div className="w-12 h-12 rounded-2xl bg-gray-200/80 dark:bg-gray-600/50 flex items-center justify-center mb-2">
-                                                <IoCloudUploadOutline className="text-2xl text-gray-500 dark:text-gray-400" />
-                                            </div>
-                                            <span className="text-sm font-medium text-gray-600 dark:text-gray-400 text-center">{t("imageHint")}</span>
-                                        </>
-                                    )}
-                                </div>
-                            </label>
                         </section>
                     </div>
 

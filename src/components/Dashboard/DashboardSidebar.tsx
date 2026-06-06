@@ -136,9 +136,25 @@ export function DashboardSidebar({
                     <item.icon className="text-xl" />
                     {t(item.label)}
                   </span>
-                  {item.badge && (
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold">
-                      {item.badge}
+                  {(item.badges?.length || item.badge) && (
+                    <span className="flex items-center gap-1 shrink-0">
+                      {item.badges?.map((badge) => (
+                        <span
+                          key={badge.label}
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                            badge.variant === "new"
+                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
+                              : "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                          }`}
+                        >
+                          {t(badge.label)}
+                        </span>
+                      ))}
+                      {item.badge && (
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold">
+                          {item.badge}
+                        </span>
+                      )}
                     </span>
                   )}
                 </LinkTo>

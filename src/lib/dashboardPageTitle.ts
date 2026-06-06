@@ -13,6 +13,7 @@ export type DashboardTitleRef = {
 const NESTED_PATH_TITLES: Record<string, DashboardTitleRef> = {
   "settings/design": { namespace: "settingsDesignPage", key: "title" },
   "settings/media": { namespace: "settingsMediaPage", key: "title" },
+  import: { namespace: "MenuImport", key: "pageTitle" },
 };
 
 /** /dashboard/:segment when segment is not a menu slug */
