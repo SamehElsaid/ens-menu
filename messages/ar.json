@@ -2038,6 +2038,9 @@
     "viewCalls": "سجل المكالمات",
     "viewCallsTitle": "سجل المكالمات",
     "agentCallsTitle": "مكالمات الموظف",
+    "callDetailsTitle": "تفاصيل المكالمة",
+    "backToCallsList": "العودة للقائمة",
+    "viewCallDetails": "عرض التفاصيل",
     "callsCount": "{count} مكالمة مسجّلة",
     "noNotes": "لا توجد ملاحظات",
     "deleteCall": "حذف",
@@ -2112,6 +2115,7 @@
     "columns": {
       "name": "العميل",
       "phone": "الهاتف",
+      "date": "التاريخ",
       "plan": "الخطة",
       "menus": "المنيو",
       "lastCall": "آخر مكالمة",

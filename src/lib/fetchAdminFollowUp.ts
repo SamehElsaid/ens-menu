@@ -207,6 +207,35 @@ export function formatFollowUpPurpose(
   return purpose;
 }
 
+export function formatFollowUpDate(dateStr: string, locale: string): string {
+  try {
+    return new Date(dateStr).toLocaleDateString(
+      locale === "ar" ? "ar-EG" : "en-US",
+      {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      },
+    );
+  } catch {
+    return dateStr.slice(0, 10);
+  }
+}
+
+export function getFollowUpCallDisplayName(call: FollowUpCall): string {
+  return (
+    call.customerName?.trim() ||
+    call.userName?.trim() ||
+    `#${call.userId}`
+  );
+}
+
+export function getFollowUpCallDisplayPhone(
+  call: FollowUpCall,
+): string | null {
+  return call.phoneNumber?.trim() || call.otherContactNumbers?.trim() || null;
+}
+
 export function formatFollowUpDateTime(
   dateStr: string,
   locale: string,

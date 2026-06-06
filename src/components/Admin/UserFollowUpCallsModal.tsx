@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { IoCloseOutline } from "react-icons/io5";
+import { IoArrowBack, IoCloseOutline } from "react-icons/io5";
 import { FaSpinner } from "react-icons/fa";
+import FollowUpAgentCallsSummaryList from "@/components/Admin/FollowUpAgentCallsSummaryList";
 import FollowUpCallsList from "@/components/Admin/FollowUpCallsList";
 import LogFollowUpCallModal from "@/components/Admin/LogFollowUpCallModal";
 import ConfirmationModal from "@/components/Custom/ConfirmationModal";
@@ -11,6 +12,7 @@ import PhoneDisplay from "@/components/Global/PhoneDisplay";
 import {
   deleteFollowUpCall,
   fetchFollowUpCalls,
+  getFollowUpCallDisplayName,
   updateFollowUpCall,
   type FollowUpCallsFilters,
 } from "@/lib/fetchAdminFollowUp";
@@ -49,16 +51,25 @@ export default function UserFollowUpCallsModal({
   const [deleteTarget, setDeleteTarget] = useState<FollowUpCall | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [activeLogModal, setActiveLogModal] = useState<ActiveLogModal>(null);
+  const [selectedCall, setSelectedCall] = useState<FollowUpCall | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const isAgentView = Boolean(adminName);
+  const showingAgentDetail = isAgentView && Boolean(selectedCall);
 
-  const modalTitle = isAgentView ? t("agentCallsTitle") : t("viewCallsTitle");
+  const modalTitle = showingAgentDetail
+    ? t("callDetailsTitle")
+    : isAgentView
+      ? t("agentCallsTitle")
+      : t("viewCallsTitle");
 
   const subtitle = useMemo(() => {
+    if (showingAgentDetail && selectedCall) {
+      return getFollowUpCallDisplayName(selectedCall);
+    }
     if (isAgentView) return adminName;
     return userName;
-  }, [adminName, isAgentView, userName]);
+  }, [adminName, isAgentView, selectedCall, showingAgentDetail, userName]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -75,13 +86,14 @@ export default function UserFollowUpCallsModal({
       void load();
     } else {
       setActiveLogModal(null);
+      setSelectedCall(null);
     }
   }, [open, load]);
 
   const resolveCallContext = (call: FollowUpCall) => ({
     userId: call.userId,
     userName: call.userName ?? userName ?? `#${call.userId}`,
-    phoneNumber: phoneNumber ?? null,
+    phoneNumber: call.phoneNumber ?? phoneNumber ?? null,
   });
 
   const handleDelete = async () => {
@@ -91,7 +103,11 @@ export default function UserFollowUpCallsModal({
       const result = await deleteFollowUpCall(locale, deleteTarget.id);
       if (result.ok) {
         toast.success(t("deleteCallSuccess"));
+        const deletedId = deleteTarget.id;
         setDeleteTarget(null);
+        if (selectedCall?.id === deletedId) {
+          setSelectedCall(null);
+        }
         await load();
         onChanged?.();
       } else {
@@ -112,6 +128,9 @@ export default function UserFollowUpCallsModal({
       if (result) {
         toast.success(t("updateCallSuccess"));
         setActiveLogModal(null);
+        if (selectedCall?.id === callId) {
+          setSelectedCall(result.call);
+        }
         await load();
         onChanged?.();
       } else {
@@ -145,6 +164,18 @@ export default function UserFollowUpCallsModal({
         >
           <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-6 py-4 dark:border-slate-800">
             <div className="min-w-0">
+              {showingAgentDetail && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedCall(null)}
+                  className="mb-2 inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-primary dark:text-slate-400"
+                >
+                  <IoArrowBack
+                    className={locale === "ar" ? "rotate-180" : undefined}
+                  />
+                  {t("backToCallsList")}
+                </button>
+              )}
               <h2
                 id="follow-up-calls-title"
                 className="text-lg font-semibold text-slate-900 dark:text-slate-100"
@@ -166,7 +197,7 @@ export default function UserFollowUpCallsModal({
                   {t("noPhone")}
                 </p>
               ) : null}
-              {!loading && (
+              {!loading && !showingAgentDetail && (
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                   {t("callsCount", { count: calls.length })}
                 </p>
@@ -187,6 +218,19 @@ export default function UserFollowUpCallsModal({
               <div className="flex justify-center py-12">
                 <FaSpinner className="animate-spin text-2xl text-primary" />
               </div>
+            ) : isAgentView && !selectedCall ? (
+              <FollowUpAgentCallsSummaryList
+                calls={calls}
+                onSelect={setSelectedCall}
+              />
+            ) : isAgentView && selectedCall ? (
+              <FollowUpCallsList
+                calls={[selectedCall]}
+                detailed
+                showCustomer
+                onDelete={(call) => setDeleteTarget(call)}
+                onEdit={(call) => setActiveLogModal({ kind: "edit", call })}
+              />
             ) : (
               <FollowUpCallsList
                 calls={calls}

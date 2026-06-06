@@ -27,6 +27,7 @@ export interface FollowUpCall {
   id: string;
   userId: number;
   userName?: string;
+  phoneNumber?: string | null;
   adminId?: number;
   adminName?: string;
   outcome: FollowUpOutcome;

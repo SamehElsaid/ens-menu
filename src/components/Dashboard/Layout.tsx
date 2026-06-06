@@ -19,7 +19,7 @@ export default function Layout({
   const showSidebar = (segment || isAdmin) && !hideSidebar;
 
   return (
-    <div className="min-h-screen bg-[#f6f8fb] text-slate-800 w-full ">
+    <div className="min-h-screen bg-[#f6f8fb] text-slate-800 dark:text-slate-100 w-full ">
       <div className="flex min-h-screen bg-[#f6f8fb]  dark:bg-[#0d1117]">
         {showSidebar && (
           <DashboardSidebar

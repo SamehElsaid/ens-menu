@@ -22,6 +22,19 @@ type RawUser = {
   createdAt: string;
 };
 
+const DEMO_USER_PHONES: Record<number, string | null> = {
+  101: "+201234567890",
+  102: "+201112223344",
+  103: "+201555666777",
+  104: null,
+};
+
+function enrichMockCall(call: FollowUpCall): FollowUpCall {
+  if (call.phoneNumber) return call;
+  const phone = DEMO_USER_PHONES[call.userId];
+  return phone ? { ...call, phoneNumber: phone } : call;
+}
+
 function readStoredCalls(): FollowUpCall[] {
   if (typeof window === "undefined") return getSeedCalls();
   try {
@@ -350,7 +363,7 @@ export function getMockFollowUpCalls(filters?: {
   }
   return calls.sort(
     (a, b) => new Date(b.calledAt).getTime() - new Date(a.calledAt).getTime(),
-  );
+  ).map(enrichMockCall);
 }
 
 export function deleteMockFollowUpCall(callId: string): boolean {

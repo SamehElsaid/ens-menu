@@ -118,6 +118,9 @@ export default function AdminFollowUpsPage() {
     }
   };
 
+  const mutedTextClass = "text-slate-500 dark:text-slate-400";
+  const dashClass = "text-slate-400 dark:text-slate-500";
+
   const columnDefs = useMemo<ColDef<FollowUpQueueUser>[]>(
     () => [
       {
@@ -145,7 +148,7 @@ export default function AdminFollowUpsPage() {
         width: 140,
         cellRenderer: (params: ICellRendererParams<FollowUpQueueUser>) => {
           const phone = params.data?.phoneNumber;
-          if (!phone) return <span className="text-slate-400">—</span>;
+          if (!phone) return <span className={dashClass}>—</span>;
           return (
             <PhoneDisplay
               value={phone}
@@ -170,9 +173,9 @@ export default function AdminFollowUpsPage() {
         width: 150,
         cellRenderer: (params: ICellRendererParams<FollowUpQueueUser>) => {
           const call = params.data?.lastCall;
-          if (!call) return <span className="text-slate-400">—</span>;
+          if (!call) return <span className={dashClass}>—</span>;
           return (
-            <span className="text-sm">
+            <span className="text-sm text-slate-700 dark:text-slate-300">
               {formatFollowUpDateTime(call.calledAt, locale).slice(0, 12)}
             </span>
           );
@@ -184,7 +187,7 @@ export default function AdminFollowUpsPage() {
         width: 120,
         cellRenderer: (params: ICellRendererParams<FollowUpQueueUser>) => {
           const date = params.data?.nextFollowUpAt;
-          if (!date) return <span className="text-slate-400">—</span>;
+          if (!date) return <span className={dashClass}>—</span>;
           const overdue = new Date(date).getTime() < Date.now();
           return (
             <span
@@ -220,7 +223,7 @@ export default function AdminFollowUpsPage() {
               <button
                 type="button"
                 onClick={() => setLogTarget(row)}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-primary/20"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
               >
                 <IoCallOutline />
                 {t("logCall")}
@@ -230,17 +233,20 @@ export default function AdminFollowUpsPage() {
         },
       },
     ],
-    [locale, router, t],
+    [dashClass, locale, router, t],
   );
 
   return (
-    <div className="space-y-6 py-5 animate-fadeIn" dir={textDir}>
+    <div
+      className="space-y-6 py-5 animate-fadeIn text-slate-800 dark:text-slate-100"
+      dir={textDir}
+    >
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <button
             type="button"
             onClick={() => router.push("/admin")}
-            className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-primary mb-2"
+            className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-primary mb-2"
           >
             <IoArrowBack
               className={locale === "ar" ? "rotate-180" : undefined}
@@ -257,7 +263,7 @@ export default function AdminFollowUpsPage() {
         <button
           type="button"
           onClick={() => void load()}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
         >
           <IoRefreshOutline />
           {t("refresh")}
@@ -271,23 +277,23 @@ export default function AdminFollowUpsPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 flex-1 min-w-[280px]">
               <CardDashBoard>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
+                <p className={`text-xs ${mutedTextClass} mb-1`}>
                   {t("report.callsToday")}
                 </p>
-                <p className="text-2xl font-bold tabular-nums">
+                <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
                   {report.callsToday}
                 </p>
               </CardDashBoard>
               <CardDashBoard>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
+                <p className={`text-xs ${mutedTextClass} mb-1`}>
                   {t("report.callsWeek")}
                 </p>
-                <p className="text-2xl font-bold tabular-nums">
+                <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
                   {report.callsThisWeek}
                 </p>
               </CardDashBoard>
               <CardDashBoard>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
+                <p className={`text-xs ${mutedTextClass} mb-1`}>
                   {t("report.overdue")}
                 </p>
                 <p className="text-2xl font-bold tabular-nums text-red-600 dark:text-red-400">
@@ -295,10 +301,10 @@ export default function AdminFollowUpsPage() {
                 </p>
               </CardDashBoard>
               <CardDashBoard>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
+                <p className={`text-xs ${mutedTextClass} mb-1`}>
                   {t("report.answeredRate")}
                 </p>
-                <p className="text-2xl font-bold tabular-nums">
+                <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
                   {report.answeredRate}%
                 </p>
               </CardDashBoard>

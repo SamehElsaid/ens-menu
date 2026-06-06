@@ -2129,6 +2129,9 @@
     "viewCalls": "Call history",
     "viewCallsTitle": "Call history",
     "agentCallsTitle": "Employee calls",
+    "callDetailsTitle": "Call details",
+    "backToCallsList": "Back to list",
+    "viewCallDetails": "View details",
     "callsCount": "{count} logged call(s)",
     "noNotes": "No notes",
     "deleteCall": "Delete",
@@ -2203,6 +2206,7 @@
     "columns": {
       "name": "Customer",
       "phone": "Phone",
+      "date": "Date",
       "plan": "Plan",
       "menus": "Menus",
       "lastCall": "Last call",
