@@ -22,7 +22,6 @@ function LoadImage({
 }): React.ReactNode {
   // function to resize image using canvas and return Blob URL
 
-  
   const resizeUrl =
     height && width
       ? `/api/resize?url=${resolveMenuItemImageSrc(src)}&width=${width}&height=${height}`

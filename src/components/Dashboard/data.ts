@@ -18,11 +18,13 @@ import {
   IoStatsChartOutline,
   IoTimeOutline,
   IoCallOutline,
+  IoSparklesOutline,
 } from "react-icons/io5";
 export type NavItem = {
   label: string;
   icon: IconType;
   badge?: string;
+  badges?: Array<{ label: string; variant: "new" | "beta" }>;
   active?: boolean;
   key?: string;
   link?: string;
@@ -45,6 +47,21 @@ export const cashierNavSections: NavSection[] = [
         icon: FaChartLine,
         key: "overview",
         link: "",
+      },
+    ],
+  },
+  {
+    title: "Menu Import",
+    items: [
+      {
+        label: "menuImport",
+        icon: IoSparklesOutline,
+        key: "import",
+        link: "import",
+        badges: [
+          { label: "badgeNew", variant: "new" },
+          { label: "badgeBeta", variant: "beta" },
+        ],
       },
     ],
   },
@@ -111,6 +128,21 @@ export const navSections: NavSection[] = [
         icon: FaCreditCard,
         key: "subscription",
         link: "subscription",
+      },
+    ],
+  },
+  {
+    title: "Menu Import",
+    items: [
+      {
+        label: "menuImport",
+        icon: IoSparklesOutline,
+        key: "import",
+        link: "import",
+        badges: [
+          { label: "badgeNew", variant: "new" },
+          { label: "badgeBeta", variant: "beta" },
+        ],
       },
     ],
   },

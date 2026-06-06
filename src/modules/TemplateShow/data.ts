@@ -162,4 +162,20 @@ export const templatesInfo: TemplateInfo[] = [
     slug: "oceanic",
     colors: ["#0ea5e9", "#0891b2"],
   },
+  {
+    id: "pharaonic",
+    name: "Pharaonic Template",
+    nameAr: "القالب الفرعوني",
+    image: "/images/temp/pheronic.png",
+    description:
+      "Egyptian temple-inspired menu with gold accents, mystery reveals, and mobile-first UX",
+    descriptionAr:
+      "قائمة بطابع معبد مصري مع لمسات ذهبية، كشف تدريجي، وتجربة موبايل مميزة",
+    isNew: true,
+    canEdit: true,
+    customizeHeroTexts: true,
+    slug: "pharaonic",
+    colors: ["#C9A227", "#0E7C86"],
+    defaultColors: ["#C9A227", "#0E7C86"],
+  },
 ];

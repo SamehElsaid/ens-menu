@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { axiosGet, axiosDelete, axiosPatch } from "@/shared/axiosCall";
 import LinkTo from "@/components/Global/LinkTo";
 import CreateMenuModal from "@/components/Dashboard/CreateMenuModal";
@@ -9,6 +10,9 @@ import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import { pushFirstMenuCreatedEvent } from "@/shared/gtmEvents";
 import { toast } from "react-toastify";
 import { Menu, MenusResponse } from "@/types/Menu";
+import { useAppDispatch } from "@/store/hooks";
+import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
+import { normalizeMenuFromApi } from "@/lib/normalizeMenuFromApi";
 import { Subscription, SubscriptionResponse } from "@/types/Subscription";
 import {
   IoRestaurant,
@@ -30,13 +34,14 @@ import {
 import LoadImage from "@/components/ImageLoad";
 import {
   isOnboardingCompleted,
-  ONBOARDING_REFRESH_EVENT,
   setOnboardingPhase,
 } from "@/lib/onboarding/onboardingStorage";
 
 export default function DashboardPage() {
   const t = useTranslations("Menus");
   const locale = useLocale();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
   const [menus, setMenus] = useState<Menu[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -116,16 +121,16 @@ export default function DashboardPage() {
   };
 
   const handleMenuCreated = (newMenu?: Menu) => {
-    if (menus.length === 0) {
+    const isFirstMenu = menus.length === 0;
+
+    if (isFirstMenu) {
       pushFirstMenuCreatedEvent();
     }
 
     if (newMenu) {
-      setMenus((prev) => [...prev, newMenu]);
-      if (!isOnboardingCompleted()) {
-        setOnboardingPhase("go-to-menu");
-        window.dispatchEvent(new Event(ONBOARDING_REFRESH_EVENT));
-      }
+      const normalized = normalizeMenuFromApi(newMenu) ?? newMenu;
+      setMenus((prev) => [...prev, normalized]);
+      router.push(`/dashboard/${normalized.slug || normalized.id}`);
     } else {
       fetchMenus();
     }

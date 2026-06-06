@@ -8,6 +8,7 @@ import { axiosGet } from "@/shared/axiosCall";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import AddItemModal from "@/components/Dashboard/AddItemModal";
 import DeleteItemConfirm from "@/components/Dashboard/DeleteItemConfirm";
+import MenuImportEntryButton from "@/components/MenuImport/MenuImportEntryButton";
 import DataTable from "@/components/Custom/DataTable";
 import LinkTo from "@/components/Global/LinkTo";
 import LoadImage from "@/components/ImageLoad";
@@ -26,6 +27,7 @@ import {
   IoTrashOutline,
   IoSearchOutline,
   IoRefreshOutline,
+  IoCameraOutline,
 } from "react-icons/io5";
 
 export default function ItemsPage() {
@@ -47,6 +49,7 @@ export default function ItemsPage() {
   const [refreshing, setRefreshing] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
+  const [totalItems, setTotalItems] = useState<number>(0);
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchInput, setSearchInput] = useState("");
   const [categoryFilterId, setCategoryFilterId] = useState<string>("");
@@ -95,9 +98,14 @@ export default function ItemsPage() {
         const raw = result.data as { items?: Item[] };
         const list = raw?.items ?? [];
         setItems(list);
-        setTotalPages(
-          (result.data as unknown as { pagination?: { totalPages: number } })
-            .pagination?.totalPages ?? 0,
+        const pagination = (
+          result.data as unknown as {
+            pagination?: { totalPages?: number; totalItems?: number; total?: number };
+          }
+        ).pagination;
+        setTotalPages(pagination?.totalPages ?? 0);
+        setTotalItems(
+          pagination?.totalItems ?? pagination?.total ?? list.length,
         );
       }
     } finally {
@@ -206,26 +214,39 @@ export default function ItemsPage() {
       {
         headerName: t("image"),
         field: "imageUrl",
-        width: 80,
+        width: 96,
         sortable: false,
         cellRenderer: (params: ICellRendererParams<Item>) => {
           const item = params.data;
           if (!item) return null;
           const src = getImageUrl(item);
           return (
-            <div className="w-12 h-12 rounded-lg bg-slate-100 dark:bg-slate-800 overflow-hidden flex items-center justify-center">
+            <div className="flex items-center justify-center h-full py-1">
               {src ? (
-                <LoadImage
-                  src={src}
-                  alt={getName(item)}
-                  className="w-full h-full object-cover"
-                  width={48}
-                  height={48}
-                />
+                <div className="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden ring-1 ring-slate-200/80 dark:ring-slate-700">
+                  <LoadImage
+                    src={src}
+                    alt={getName(item)}
+                    className="w-full h-full object-cover"
+                    width={56}
+                    height={56}
+                  />
+                </div>
               ) : (
-                <span className="text-slate-400 dark:text-slate-500 text-lg">
-                  —
-                </span>
+                <button
+                  type="button"
+                  title={t("addImage")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEdit(item);
+                  }}
+                  className="group w-14 h-14 rounded-xl border-2 border-dashed border-primary/35 bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/15 hover:border-primary/60 flex flex-col items-center justify-center gap-0.5 transition-all hover:scale-[1.03] active:scale-[0.98]"
+                >
+                  <IoCameraOutline className="text-base text-primary group-hover:scale-110 transition-transform" />
+                  <span className="text-[9px] font-semibold text-primary leading-none">
+                    {t("addImage")}
+                  </span>
+                </button>
               )}
             </div>
           );
@@ -374,6 +395,7 @@ export default function ItemsPage() {
           >
             {tStaff("backToOverview")}
           </LinkTo>
+          <MenuImportEntryButton menuId={menuId} variant="secondary" />
           <button
             id="onboarding-add-item"
             onClick={() => {
@@ -476,6 +498,27 @@ export default function ItemsPage() {
         </div>
       </div>
 
+      {!loading && totalItems > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <span className="text-sm text-slate-500 dark:text-slate-400">
+              {t("totalItemsLabel")}
+            </span>
+            <span className="text-lg font-bold text-slate-900 dark:text-slate-100 tabular-nums">
+              {totalItems}
+            </span>
+          </div>
+          {items.some((item) => !getImageUrl(item)) && (
+            <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/5 border border-dashed border-primary/30">
+              <IoCameraOutline className="text-primary text-lg shrink-0" />
+              <span className="text-sm text-primary font-medium">
+                {t("missingImagesHint")}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
       <div id="onboarding-items-table">
       <DataTable<Item>
         rowData={items}
@@ -490,6 +533,12 @@ export default function ItemsPage() {
         onPageChange={(p) => setPage(p)}
       />
       </div>
+
+      {!loading && items.length === 0 && (
+        <div className="mt-6">
+          <MenuImportEntryButton menuId={menuId} variant="card" />
+        </div>
+      )}
 
       {(showAddModal || editingItem) && menuId && (
         <AddItemModal

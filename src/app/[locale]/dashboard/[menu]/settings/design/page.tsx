@@ -7,8 +7,8 @@ import LoadImage from "@/components/ImageLoad";
 import { templatesInfo } from "@/modules/TemplateShow/data";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import TemplateDesignCustomizePanel from "@/components/Settings/TemplateDesignCustomizePanel";
-import { FiEye, FiSettings } from "react-icons/fi";
-import { HiOutlineHand } from "react-icons/hi";
+import { FiEye, FiSettings, FiChevronDown } from "react-icons/fi";
+import { HiOutlineHand, HiOutlineColorSwatch } from "react-icons/hi";
 import { axiosPatch } from "@/shared/axiosCall";
 import type { Menu } from "@/types/Menu";
 import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
@@ -159,27 +159,48 @@ export default function DesignPage() {
     );
   }
 
+  const scrollToTemplatePicker = () => {
+    document
+      .getElementById("onboarding-design-templates")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <div className="space-y-8 mb-2">
       {/* Page header */}
       <header
         id="onboarding-design-header"
-        className={isRTL ? "text-right" : "text-left"}
+        className={`flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between ${
+          isRTL ? "text-right sm:flex-row-reverse" : "text-left"
+        }`}
       >
-        <PageTitleWithHelp>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-0">
-            {t("title")}
-          </h1>
-        </PageTitleWithHelp>
-        <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 max-w-2xl">
-          {t("subtitle")}
-        </p>
+        <div className="min-w-0 flex-1">
+          <PageTitleWithHelp>
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-0">
+              {t("title")}
+            </h1>
+          </PageTitleWithHelp>
+          <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 max-w-2xl mt-2">
+            {t("subtitle")}
+          </p>
+        </div>
+        <button
+          type="button"
+          id="onboarding-choose-design-cta"
+          onClick={scrollToTemplatePicker}
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-primary/90 dark:hover:bg-primary/80 sm:text-sm"
+        >
+          <HiOutlineColorSwatch className="text-base shrink-0" />
+          {t("headerCta")}
+          <FiChevronDown className="text-sm shrink-0 opacity-90" />
+        </button>
       </header>
 
       {/* Templates grid */}
       <section
         id="onboarding-design-templates"
-        className="bg-slate-50/60 dark:bg-slate-800/60 rounded-3xl border border-slate-100 dark:border-slate-700 p-4 md:p-6 lg:p-8"
+        aria-label={t("headerCta")}
+        className="bg-slate-50/60 dark:bg-slate-800/60 rounded-3xl border border-slate-100 dark:border-slate-700 p-4 md:p-6 lg:p-8 scroll-mt-24"
       >
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {templatesForMenu.map((template, templateIndex) => {

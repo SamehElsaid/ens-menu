@@ -27,6 +27,7 @@ import {
   IoCloudUploadOutline,
 } from "react-icons/io5";
 import CustomBtn from "../Custom/CustomBtn";
+import { normalizeMenuFromApi } from "@/lib/normalizeMenuFromApi";
 
 interface CreateMenuModalProps {
   onClose: () => void;
@@ -189,10 +190,16 @@ export default function CreateMenuModal({
       );
 
       if (result.status && result.data) {
+        const createdMenu = normalizeMenuFromApi(result.data);
+        if (!createdMenu) {
+          toast.error(t("createError"));
+          return;
+        }
+
         pushMenuCreatedEvent();
         toast.success(t("createSuccess"));
 
-        onMenuCreated?.(result.data);
+        onMenuCreated?.(createdMenu);
 
         if (onRefresh) {
           onRefresh();

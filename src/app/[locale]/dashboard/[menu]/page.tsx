@@ -3,6 +3,7 @@
 import { useAppSelector } from "@/store/hooks";
 import { redirect, useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import LinkTo from "@/components/Global/LinkTo";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import {
@@ -38,6 +39,7 @@ import { useDashboardSession } from "@/hooks/useDashboardSession";
 import { isFreePlanUser } from "@/lib/subscription";
 import { ONBOARDING_REFRESH_EVENT } from "@/lib/onboarding/onboardingStorage";
 import { publicMenuLinkUrl, publicMenuQrUrl } from "@/lib/publicMenuUrl";
+import MenuImportEntryButton from "@/components/MenuImport/MenuImportEntryButton";
 
 type ActivityEntry = {
   id: string;
@@ -78,6 +80,7 @@ export default function DashboardMenuPage() {
   const locale = useLocale();
   const t = useTranslations("menuOverview");
   const params = useParams();
+  const router = useRouter();
   const menuSlugOrId =
     typeof params.menu === "string"
       ? params.menu
@@ -107,6 +110,15 @@ export default function DashboardMenuPage() {
       window.dispatchEvent(new Event(ONBOARDING_REFRESH_EVENT));
     }
   }, [menuLoading, menu]);
+
+  useEffect(() => {
+    if (!menuSlugOrId) return;
+    const key = `menu-overview-visited-${menuSlugOrId}`;
+    if (!localStorage.getItem(key)) {
+      localStorage.setItem(key, "1");
+      router.replace(`/dashboard/${menuSlugOrId}/import`);
+    }
+  }, [menuSlugOrId, router]);
 
   useEffect(() => {
     if (!menuSlugOrId) return;
@@ -221,6 +233,9 @@ export default function DashboardMenuPage() {
   const tabViewMenu =
     "bg-emerald-500 text-white hover:bg-emerald-600 shadow-md shadow-emerald-500/25 border border-emerald-400/30";
 
+  const isEmptyMenu =
+    (menu.categoriesCount ?? 0) === 0 && (menu.itemsCount ?? 0) === 0;
+
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Title + subtitle + tabs */}
@@ -317,7 +332,17 @@ export default function DashboardMenuPage() {
             {t("viewMenu")}
           </a>
         </nav>
+
+        {!isCashierStaff && (
+          <div className="mt-6 flex flex-wrap gap-3">
+            <MenuImportEntryButton menuId={menuSlugOrId} variant="secondary" />
+          </div>
+        )}
       </header>
+
+      {isEmptyMenu && !isCashierStaff && (
+        <MenuImportEntryButton menuId={menuSlugOrId} variant="card" />
+      )}
 
       {/* Stats cards */}
       <section

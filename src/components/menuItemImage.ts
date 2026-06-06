@@ -6,7 +6,7 @@ export const DEFAULT_MENU_ITEM_IMAGE_SRC = placeholder.src;
 function resolveAssetUrl(trimmed: string): string {
   const publicBaseUrl = process.env.NEXT_PUBLIC_BASE_URL;
   const imageResizeUrl = process.env.NEXT_PUBLIC_IMAGE_RESIZE_URL;
-  const baseApi = process.env.NEXT_PUBLIC_DEV  ? imageResizeUrl : publicBaseUrl;
+  const baseApi = process.env.NEXT_PUBLIC_DEV ? imageResizeUrl : publicBaseUrl;
   const baseHost = baseApi?.replace(/\/api\/?$/, "") ?? "";
 
   if (trimmed.startsWith("data:")) {
