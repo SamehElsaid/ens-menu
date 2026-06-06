@@ -13,11 +13,13 @@ import { IoPeopleOutline, IoStatsChartOutline } from "react-icons/io5";
 type FollowUpTeamPerformanceProps = {
   report: FollowUpReportSummary;
   dir?: "rtl" | "ltr";
+  onAgentClick?: (adminName: string) => void;
 };
 
 export default function FollowUpTeamPerformance({
   report,
   dir = "ltr",
+  onAgentClick,
 }: FollowUpTeamPerformanceProps) {
   const t = useTranslations("adminFollowUps.teamReport");
   const tFollowUps = useTranslations("adminFollowUps");
@@ -68,6 +70,11 @@ export default function FollowUpTeamPerformance({
             items={rankedItems}
             dir={dir}
             emptyMessage={t("noTeamData")}
+            onItemClick={
+              onAgentClick
+                ? (item) => onAgentClick(String(item.label))
+                : undefined
+            }
           />
         </AdminSectionCard>
 
@@ -131,11 +138,33 @@ export default function FollowUpTeamPerformance({
                     key={row.adminName}
                     className="border-b border-slate-100 dark:border-slate-800 last:border-0"
                   >
-                    <td className={`py-3 font-medium text-slate-900 dark:text-slate-100 ${isRTL ? "text-right" : "text-left"}`}>
-                      {row.adminName}
+                    <td className={`py-3 font-medium ${isRTL ? "text-right" : "text-left"}`}>
+                      {onAgentClick ? (
+                        <button
+                          type="button"
+                          onClick={() => onAgentClick(row.adminName)}
+                          className="text-primary hover:underline"
+                        >
+                          {row.adminName}
+                        </button>
+                      ) : (
+                        <span className="text-slate-900 dark:text-slate-100">
+                          {row.adminName}
+                        </span>
+                      )}
                     </td>
                     <td className="py-3 text-center tabular-nums font-semibold text-primary">
-                      {row.totalCalls}
+                      {onAgentClick ? (
+                        <button
+                          type="button"
+                          onClick={() => onAgentClick(row.adminName)}
+                          className="hover:underline"
+                        >
+                          {row.totalCalls}
+                        </button>
+                      ) : (
+                        row.totalCalls
+                      )}
                     </td>
                     <td className="py-3 text-center tabular-nums">
                       <span

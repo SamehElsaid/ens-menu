@@ -4,12 +4,15 @@ import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
   createFollowUpCall,
+  deleteFollowUpCall,
   fetchFollowUpCalls,
+  updateFollowUpCall,
 } from "@/lib/fetchAdminFollowUp";
 import type { FollowUpCall } from "@/types/AdminFollowUp";
 import CallNowPhoneModal from "@/components/Admin/CallNowPhoneModal";
 import FollowUpCallsList from "@/components/Admin/FollowUpCallsList";
 import LogFollowUpCallModal from "@/components/Admin/LogFollowUpCallModal";
+import ConfirmationModal from "@/components/Custom/ConfirmationModal";
 import { toast } from "react-toastify";
 import { IoCallOutline } from "react-icons/io5";
 
@@ -18,6 +21,11 @@ type UserFollowUpTimelineProps = {
   userName: string;
   phoneNumber: string | null;
 };
+
+type ActiveLogModal =
+  | { kind: "create" }
+  | { kind: "edit"; call: FollowUpCall }
+  | null;
 
 export default function UserFollowUpTimeline({
   userId,
@@ -30,9 +38,11 @@ export default function UserFollowUpTimeline({
 
   const [calls, setCalls] = useState<FollowUpCall[]>([]);
   const [loading, setLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [activeLogModal, setActiveLogModal] = useState<ActiveLogModal>(null);
   const [callNowOpen, setCallNowOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<FollowUpCall | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -45,23 +55,62 @@ export default function UserFollowUpTimeline({
     void load();
   }, [load]);
 
-  const handleSubmit = async (
+  const handleCreate = async (
     payload: Parameters<typeof createFollowUpCall>[1],
   ) => {
     setSubmitting(true);
     try {
       await createFollowUpCall(locale, payload, userName);
       toast.success(t("callSaved"));
-      setModalOpen(false);
+      setActiveLogModal(null);
       await load();
     } finally {
       setSubmitting(false);
     }
   };
 
+  const handleUpdate = async (
+    callId: string,
+    payload: Parameters<typeof updateFollowUpCall>[2],
+  ) => {
+    setSubmitting(true);
+    try {
+      const result = await updateFollowUpCall(locale, callId, payload);
+      if (result) {
+        toast.success(t("updateCallSuccess"));
+        setActiveLogModal(null);
+        await load();
+      } else {
+        toast.error(t("updateCallError"));
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      const result = await deleteFollowUpCall(locale, deleteTarget.id);
+      if (result.ok) {
+        toast.success(t("deleteCallSuccess"));
+        setDeleteTarget(null);
+        await load();
+      } else {
+        toast.error(t("deleteCallError"));
+      }
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const editingCall =
+    activeLogModal?.kind === "edit" ? activeLogModal.call : null;
+
   return (
     <div dir={textDir}>
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
           {t("timelineTitle")}
         </h2>
@@ -78,8 +127,8 @@ export default function UserFollowUpTimeline({
           )}
           <button
             type="button"
-            onClick={() => setModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-sm font-medium hover:bg-primary/90"
+            onClick={() => setActiveLogModal({ kind: "create" })}
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
           >
             {t("logCall")}
           </button>
@@ -87,7 +136,7 @@ export default function UserFollowUpTimeline({
       </div>
 
       {loading ? (
-        <div className="space-y-3 animate-pulse">
+        <div className="animate-pulse space-y-3">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
@@ -96,7 +145,11 @@ export default function UserFollowUpTimeline({
           ))}
         </div>
       ) : (
-        <FollowUpCallsList calls={calls} />
+        <FollowUpCallsList
+          calls={calls}
+          onDelete={(call) => setDeleteTarget(call)}
+          onEdit={(call) => setActiveLogModal({ kind: "edit", call })}
+        />
       )}
 
       {phoneNumber && (
@@ -108,14 +161,30 @@ export default function UserFollowUpTimeline({
         />
       )}
 
-      <LogFollowUpCallModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        userId={userId}
-        userName={userName}
-        phoneNumber={phoneNumber}
-        onSubmit={handleSubmit}
-        submitting={submitting}
+      {activeLogModal && (
+        <LogFollowUpCallModal
+          open
+          onClose={() => setActiveLogModal(null)}
+          userId={userId}
+          userName={userName}
+          phoneNumber={phoneNumber}
+          editingCall={editingCall}
+          onSubmit={handleCreate}
+          onUpdate={handleUpdate}
+          submitting={submitting}
+        />
+      )}
+
+      <ConfirmationModal
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => !deleting && setDeleteTarget(null)}
+        onConfirm={() => void handleDelete()}
+        title={t("deleteCallTitle")}
+        message={t("deleteCallMessage")}
+        confirmText={t("deleteCall")}
+        cancelText={t("cancel")}
+        isLoading={deleting}
+        loadingText={t("deletingCall")}
       />
     </div>
   );

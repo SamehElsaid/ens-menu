@@ -22,6 +22,7 @@ import {
   createFollowUpCall,
   fetchFollowUpQueue,
   fetchFollowUpReport,
+  followUpReportPeriodStart,
   formatFollowUpDateTime,
 } from "@/lib/fetchAdminFollowUp";
 import type {
@@ -77,6 +78,7 @@ export default function AdminFollowUpsPage() {
 
   const [logTarget, setLogTarget] = useState<FollowUpQueueUser | null>(null);
   const [callsTarget, setCallsTarget] = useState<FollowUpQueueUser | null>(null);
+  const [agentTarget, setAgentTarget] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -319,7 +321,11 @@ export default function AdminFollowUpsPage() {
             </div>
           </div>
 
-          <FollowUpTeamPerformance report={report} dir={textDir} />
+          <FollowUpTeamPerformance
+            report={report}
+            dir={textDir}
+            onAgentClick={(adminName) => setAgentTarget(adminName)}
+          />
         </>
       )}
 
@@ -378,9 +384,24 @@ export default function AdminFollowUpsPage() {
         <UserFollowUpCallsModal
           open
           onClose={() => setCallsTarget(null)}
-          userId={callsTarget.id}
+          onChanged={() => void load()}
+          filters={{ userId: callsTarget.id }}
           userName={callsTarget.name}
           phoneNumber={callsTarget.phoneNumber}
+        />
+      )}
+
+      {agentTarget && (
+        <UserFollowUpCallsModal
+          open
+          onClose={() => setAgentTarget(null)}
+          onChanged={() => void load()}
+          filters={{
+            adminName: agentTarget,
+            from: followUpReportPeriodStart(reportPeriod),
+          }}
+          adminName={agentTarget}
+          showCustomer
         />
       )}
 

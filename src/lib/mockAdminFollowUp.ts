@@ -326,12 +326,19 @@ export function buildMockQueueFromUsers(
 
 export function getMockFollowUpCalls(filters?: {
   userId?: number;
+  adminName?: string;
   from?: string;
   to?: string;
 }): FollowUpCall[] {
   let calls = readStoredCalls();
   if (filters?.userId) {
     calls = calls.filter((c) => c.userId === filters.userId);
+  }
+  if (filters?.adminName?.trim()) {
+    const name = filters.adminName.trim().toLowerCase();
+    calls = calls.filter(
+      (c) => (c.adminName ?? "").trim().toLowerCase() === name,
+    );
   }
   if (filters?.from) {
     const from = new Date(filters.from).getTime();
@@ -344,6 +351,52 @@ export function getMockFollowUpCalls(filters?: {
   return calls.sort(
     (a, b) => new Date(b.calledAt).getTime() - new Date(a.calledAt).getTime(),
   );
+}
+
+export function deleteMockFollowUpCall(callId: string): boolean {
+  const calls = readStoredCalls();
+  const next = calls.filter((c) => c.id !== callId);
+  if (next.length === calls.length) return false;
+  writeStoredCalls(next);
+  return true;
+}
+
+export function updateMockFollowUpCall(
+  callId: string,
+  payload: {
+    outcome: FollowUpCall["outcome"];
+    purpose?: FollowUpCall["purpose"];
+    notes?: string;
+    nextFollowUpAt?: string | null;
+    agentName?: string;
+    customerName?: string;
+    governorate?: string;
+    cafeName?: string;
+    otherContactNumbers?: string;
+  },
+): FollowUpCall | null {
+  const calls = readStoredCalls();
+  const index = calls.findIndex((c) => c.id === callId);
+  if (index < 0) return null;
+
+  const current = calls[index];
+  const updated: FollowUpCall = {
+    ...current,
+    outcome: payload.outcome,
+    purpose: payload.purpose,
+    notes: payload.notes,
+    nextFollowUpAt: payload.nextFollowUpAt ?? null,
+    adminName: payload.agentName?.trim() || current.adminName,
+    customerName: payload.customerName?.trim() || undefined,
+    governorate: payload.governorate?.trim() || undefined,
+    cafeName: payload.cafeName?.trim() || undefined,
+    otherContactNumbers: payload.otherContactNumbers?.trim() || undefined,
+  };
+
+  const next = [...calls];
+  next[index] = updated;
+  writeStoredCalls(next);
+  return updated;
 }
 
 export function createMockFollowUpCall(
@@ -361,6 +414,10 @@ export function createMockFollowUpCall(
     notes: payload.notes,
     calledAt: new Date().toISOString(),
     nextFollowUpAt: payload.nextFollowUpAt ?? null,
+    customerName: payload.customerName?.trim() || undefined,
+    governorate: payload.governorate?.trim() || undefined,
+    cafeName: payload.cafeName?.trim() || undefined,
+    otherContactNumbers: payload.otherContactNumbers?.trim() || undefined,
     _isDemoData: true,
   };
   writeStoredCalls([entry, ...calls]);

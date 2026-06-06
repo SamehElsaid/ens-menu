@@ -83,10 +83,12 @@ export function AdminRankedList({
   items,
   dir = "ltr",
   emptyMessage,
+  onItemClick,
 }: {
   items: { id: string | number; label: string; count: number }[];
   dir?: "rtl" | "ltr";
   emptyMessage?: string;
+  onItemClick?: (item: { id: string | number; label: string; count: number }) => void;
 }) {
   const isRTL = dir === "rtl";
   const max = items.length > 0 ? items[0].count : 1;
@@ -104,23 +106,33 @@ export function AdminRankedList({
       {items.map((item, index) => (
         <li key={item.id}>
           <div
-            className={`flex items-center justify-between gap-3 mb-1.5 ${isRTL ? "flex-row-reverse" : ""}`}
+            className={`mb-1.5 flex items-center justify-between gap-3 ${isRTL ? "flex-row-reverse" : ""}`}
           >
             <div
-              className={`flex items-center gap-2 min-w-0 flex-1 ${isRTL ? "flex-row-reverse" : ""}`}
+              className={`flex min-w-0 flex-1 items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
             >
-              <span className="shrink-0 w-6 h-6 rounded-full bg-primary/10 dark:bg-primary/20 text-primary text-xs font-bold flex items-center justify-center">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary dark:bg-primary/20">
                 {index + 1}
               </span>
-              <span className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">
-                {item.label}
-              </span>
+              {onItemClick ? (
+                <button
+                  type="button"
+                  onClick={() => onItemClick(item)}
+                  className="truncate text-start text-sm font-medium text-primary hover:underline"
+                >
+                  {item.label}
+                </button>
+              ) : (
+                <span className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">
+                  {item.label}
+                </span>
+              )}
             </div>
-            <span className="text-sm font-bold text-primary tabular-nums shrink-0">
+            <span className="shrink-0 text-sm font-bold tabular-nums text-primary">
               {item.count.toLocaleString()}
             </span>
           </div>
-          <div className="h-1.5 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
+          <div className="h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
             <div
               className="h-full rounded-full bg-primary transition-all duration-500"
               style={{

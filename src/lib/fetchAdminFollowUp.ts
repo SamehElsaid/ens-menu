@@ -1,18 +1,22 @@
-import { axiosGet, axiosPost } from "@/shared/axiosCall";
+import { axiosDelete, axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
 import {
   buildMockQueueFromUsers,
   createMockFollowUpCall,
+  deleteMockFollowUpCall,
   getDemoQueueUsers,
   getMockFollowUpCalls,
   getMockFollowUpReport,
+  updateMockFollowUpCall,
 } from "@/lib/mockAdminFollowUp";
 import type {
   CreateFollowUpCallPayload,
   FollowUpCall,
   FollowUpCallsResponse,
+  FollowUpPurpose,
   FollowUpQueueResponse,
   FollowUpQueueSegment,
   FollowUpReportSummary,
+  UpdateFollowUpCallPayload,
 } from "@/types/AdminFollowUp";
 
 type AdminUserRow = {
@@ -63,9 +67,23 @@ export async function fetchFollowUpQueue(
   };
 }
 
+export type FollowUpCallsFilters = {
+  userId?: number;
+  adminName?: string;
+  from?: string;
+  to?: string;
+};
+
+export function followUpReportPeriodStart(period: "7d" | "30d"): string {
+  const date = new Date();
+  date.setDate(date.getDate() - (period === "30d" ? 30 : 7));
+  date.setHours(0, 0, 0, 0);
+  return date.toISOString();
+}
+
 export async function fetchFollowUpCalls(
   locale: string,
-  filters?: { userId?: number; from?: string; to?: string },
+  filters?: FollowUpCallsFilters,
 ): Promise<FollowUpCallsResponse> {
   const result = await axiosGet<FollowUpCallsResponse>(
     "/admin/follow-ups/calls",
@@ -104,6 +122,55 @@ export async function createFollowUpCall(
   };
 }
 
+export async function deleteFollowUpCall(
+  locale: string,
+  callId: string,
+): Promise<{ ok: boolean; isDemo: boolean }> {
+  const result = await axiosDelete(`/admin/follow-ups/calls/${callId}`, locale);
+
+  if (result.status) {
+    return { ok: true, isDemo: false };
+  }
+
+  const deleted = deleteMockFollowUpCall(callId);
+  return { ok: deleted, isDemo: true };
+}
+
+export async function updateFollowUpCall(
+  locale: string,
+  callId: string,
+  payload: UpdateFollowUpCallPayload,
+): Promise<{ call: FollowUpCall; isDemo: boolean } | null> {
+  const result = await axiosPatch<
+    UpdateFollowUpCallPayload,
+    { call?: FollowUpCall }
+  >(`/admin/follow-ups/calls/${callId}`, locale, payload);
+
+  if (result.status && result.data?.call) {
+    return { call: result.data.call, isDemo: false };
+  }
+
+  const updated = updateMockFollowUpCall(callId, payload);
+  if (!updated) return null;
+  return { call: updated, isDemo: true };
+}
+
+const KNOWN_PURPOSES = new Set<FollowUpPurpose>([
+  "onboarding",
+  "free_plan",
+  "upgrade_pro",
+  "renewal",
+  "support",
+  "other",
+]);
+
+export function parseFollowUpPurpose(value?: string): FollowUpPurpose {
+  if (value && KNOWN_PURPOSES.has(value as FollowUpPurpose)) {
+    return value as FollowUpPurpose;
+  }
+  return "other";
+}
+
 export async function fetchFollowUpReport(
   locale: string,
   period: "7d" | "30d" = "7d",
@@ -128,6 +195,7 @@ export function formatFollowUpPurpose(
 ): string {
   const legacyKeys = [
     "onboarding",
+    "free_plan",
     "upgrade_pro",
     "renewal",
     "support",
