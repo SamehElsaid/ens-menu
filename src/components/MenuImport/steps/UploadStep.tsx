@@ -15,10 +15,11 @@ import ImagePreviewCard from "../upload/ImagePreviewCard";
 interface UploadStepProps {
   file: File | null;
   previewUrl: string | null;
-  onFileSelect: (file: File) => void;
+  onFileSelect: (file: File) => void | Promise<void>;
   onClear: () => void;
   onAnalyze: () => void;
   isProcessing: boolean;
+  isPreparing?: boolean;
 }
 
 export default function UploadStep({
@@ -28,12 +29,13 @@ export default function UploadStep({
   onClear,
   onAnalyze,
   isProcessing,
+  isPreparing = false,
 }: UploadStepProps) {
   const t = useTranslations("MenuImport");
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
-  const validateAndSet = (selected: File) => {
+  const validateAndSet = async (selected: File) => {
     if (
       !_checkFileType(selected, [...MENU_IMPORT_ACCEPTED_TYPES])
     ) {
@@ -44,7 +46,7 @@ export default function UploadStep({
       toast.error(t("invalidFileSize", { max: MENU_IMPORT_MAX_FILE_SIZE_MB }));
       return;
     }
-    onFileSelect(selected);
+    await onFileSelect(selected);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,12 +89,23 @@ export default function UploadStep({
             setIsDragOver(true);
           }}
           onDragLeave={() => setIsDragOver(false)}
-          className={`relative flex flex-col items-center justify-center gap-4 p-10 sm:p-14 rounded-2xl border-2 border-dashed cursor-pointer transition-all ${
-            isDragOver
-              ? "border-primary bg-primary/5 dark:bg-primary/10 scale-[1.01]"
-              : "border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 hover:border-primary/50 hover:bg-primary/5"
+          className={`relative flex flex-col items-center justify-center gap-4 p-10 sm:p-14 rounded-2xl border-2 border-dashed transition-all ${
+            isPreparing
+              ? "border-primary/50 bg-primary/5 cursor-wait"
+              : `cursor-pointer ${
+                  isDragOver
+                    ? "border-primary bg-primary/5 dark:bg-primary/10 scale-[1.01]"
+                    : "border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 hover:border-primary/50 hover:bg-primary/5"
+                }`
           }`}
         >
+          {isPreparing && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/70 dark:bg-slate-900/70">
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                {t("preparingImage")}
+              </p>
+            </div>
+          )}
           <div className="w-16 h-16 rounded-2xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
             <IoCloudUploadOutline className="text-3xl text-primary" />
           </div>
@@ -137,7 +150,7 @@ export default function UploadStep({
       <div className="flex justify-center pt-2">
         <button
           type="button"
-          disabled={!file || isProcessing}
+          disabled={!file || isProcessing || isPreparing}
           onClick={onAnalyze}
           className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary text-white rounded-xl font-semibold shadow-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >

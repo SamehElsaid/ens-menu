@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { toast } from "react-toastify";
 import LinkTo from "@/components/Global/LinkTo";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import { useAppSelector } from "@/store/hooks";
@@ -18,6 +19,12 @@ import {
   FREE_PLAN_DEFAULT_MAX_PRODUCTS,
   getImportProductLimitInfo,
 } from "@/lib/menuImport/freePlanImportLimits";
+import { resizeImageToMaxSize } from "@/lib/menuImport/resizeImageToMaxSize";
+import {
+  MENU_IMPORT_COMPRESSED_TARGET_BYTES,
+  MENU_IMPORT_COMPRESS_THRESHOLD_BYTES,
+} from "@/lib/menuImport/constants";
+import { formatImageSizeLog } from "@/lib/menuImport/formatImageSize";
 import { IoArrowBackOutline } from "react-icons/io5";
 
 export default function MenuImportWizard() {
@@ -50,6 +57,7 @@ export default function MenuImportWizard() {
   const [reviewLimitShownFor, setReviewLimitShownFor] = useState<
     string | null
   >(null);
+  const [isPreparingImage, setIsPreparingImage] = useState(false);
 
   const limitInfo = useMemo(() => {
     if (!state.draft) return null;
@@ -73,6 +81,43 @@ export default function MenuImportWizard() {
     setReviewLimitShownFor(state.draft.createdAt);
     setFreeLimitModal("info");
   }, [isFreePlan, state.step, state.draft, reviewLimitShownFor]);
+
+  const handleFileSelect = useCallback(
+    async (file: File) => {
+      setIsPreparingImage(true);
+      try {
+        console.log("[MenuImport] Image before client prepare:", {
+          fileName: file.name,
+          mimeType: file.type,
+          ...formatImageSizeLog(file.size),
+        });
+
+        const resized = await resizeImageToMaxSize(
+          file,
+          MENU_IMPORT_COMPRESSED_TARGET_BYTES,
+          MENU_IMPORT_COMPRESS_THRESHOLD_BYTES,
+        );
+
+        if (resized.size < file.size) {
+          console.log("[MenuImport] Image after client prepare:", {
+            fileName: resized.name,
+            mimeType: resized.type,
+            ...formatImageSizeLog(resized.size),
+          });
+        }
+
+        flow.setFile(resized);
+        if (resized.size < file.size) {
+          // toast.info(t("imageResized"));
+        }
+      } catch {
+        toast.error(t("imageResizeFailed"));
+      } finally {
+        setIsPreparingImage(false);
+      }
+    },
+    [flow, t],
+  );
 
   const handleOpenConfirm = useCallback(() => {
     if (isFreePlan && limitInfo) {
@@ -122,10 +167,11 @@ export default function MenuImportWizard() {
             <UploadStep
               file={state.file}
               previewUrl={state.previewUrl}
-              onFileSelect={flow.setFile}
+              onFileSelect={handleFileSelect}
               onClear={flow.clearFile}
               onAnalyze={flow.startAnalysis}
               isProcessing={state.isProcessing}
+              isPreparing={isPreparingImage}
             />
           )}
 

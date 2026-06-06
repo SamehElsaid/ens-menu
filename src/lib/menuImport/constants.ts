@@ -1,5 +1,15 @@
 export const MENU_IMPORT_MAX_FILE_SIZE_MB = 10;
 
+/** Compress when the image exceeds this size */
+export const MENU_IMPORT_COMPRESS_THRESHOLD_MB = 2;
+export const MENU_IMPORT_COMPRESS_THRESHOLD_BYTES =
+  MENU_IMPORT_COMPRESS_THRESHOLD_MB * 1024 * 1024;
+
+/** Target size after compression before upload/analysis */
+export const MENU_IMPORT_COMPRESSED_TARGET_MB = 1.5;
+export const MENU_IMPORT_COMPRESSED_TARGET_BYTES =
+  MENU_IMPORT_COMPRESSED_TARGET_MB * 1024 * 1024;
+
 export const MENU_IMPORT_ACCEPTED_TYPES = [
   "image/png",
   "image/jpeg",

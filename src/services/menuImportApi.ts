@@ -6,9 +6,8 @@ import type {
   MenuImportApiResponse,
   SaveMenuImportResponse,
 } from "@/types/menuImport";
-import {
-  MENU_IMPORT_API_TIMEOUT_MS,
-} from "@/lib/menuImport/constants";
+import { MENU_IMPORT_API_TIMEOUT_MS } from "@/lib/menuImport/constants";
+import { formatImageSizeLog } from "@/lib/menuImport/formatImageSize";
 import type { MenuSnapshot } from "@/lib/menuImport/menuSnapshot";
 import { collectAllBlockingErrors } from "@/lib/menuImport/draftSaveUtils";
 import {
@@ -24,6 +23,14 @@ export async function analyzeMenuImage(
   menuId: string,
   locale: string,
 ): Promise<MenuImportApiResponse> {
+  console.log("[MenuImport] Image before upload:", {
+    menuId,
+    locale,
+    fileName: file.name,
+    mimeType: file.type,
+    ...formatImageSizeLog(file.size),
+  });
+
   const formData = new FormData();
   formData.append("file", file);
   formData.append("menuId", menuId);
