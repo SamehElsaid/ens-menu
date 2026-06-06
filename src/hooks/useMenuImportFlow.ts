@@ -544,26 +544,13 @@ export function useMenuImportFlow({
       const result = await saveMenuImportDraft(menuId, locale, state.draft);
       dispatch({ type: "SAVE_SUCCESS", result });
     } catch (error) {
-      const mapped = mapSaveImportError(error);
-      if (mapped.code === "save_timeout") {
-        dispatch({
-          type: "SAVE_FAIL",
-          error: {
-            code: "save_failed",
-            message: "save_timeout_long",
-          },
-        });
-      } else if (mapped.response) {
-        dispatch({ type: "SAVE_FAIL", result: mapped.response });
-      } else {
-        dispatch({
-          type: "SAVE_FAIL",
-          error: {
-            code: mapped.code === "timeout" ? "timeout" : "save_failed",
-            message: mapped.code,
-          },
-        });
-      }
+      dispatch({
+        type: "SAVE_FAIL",
+        error: {
+          code: "save_failed",
+          message: mapSaveImportError(error).code,
+        },
+      });
     }
   }, [state.draft, menuId, locale]);
 

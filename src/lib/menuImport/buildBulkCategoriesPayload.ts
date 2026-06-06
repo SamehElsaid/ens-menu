@@ -3,8 +3,14 @@ import type {
   BulkImportItem,
   ExpandedSaveItem,
   ImportDraft,
+  SaveImportErrorEntry,
+  SaveMenuImportResponse,
 } from "@/types/menuImport";
-import { expandItemForSave } from "./draftSaveUtils";
+import {
+  collectAllBlockingErrors,
+  countExpandedItems,
+  expandItemForSave,
+} from "./draftSaveUtils";
 
 function shouldIncludeSaveItem(saveItem: ExpandedSaveItem): boolean {
   const meta = saveItem.duplicateMeta;
@@ -14,10 +20,15 @@ function shouldIncludeSaveItem(saveItem: ExpandedSaveItem): boolean {
 }
 
 function toBulkItem(saveItem: ExpandedSaveItem): BulkImportItem {
+  const descriptionAr = saveItem.descriptionAr?.trim();
+  const descriptionEn = saveItem.descriptionEn?.trim();
+
   return {
     id: saveItem.refId,
     nameAr: saveItem.nameAr.trim() || saveItem.nameEn.trim(),
     nameEn: saveItem.nameEn.trim() || saveItem.nameAr.trim(),
+    ...(descriptionAr ? { descriptionAr } : {}),
+    ...(descriptionEn ? { descriptionEn } : {}),
     price: saveItem.price,
     isAvailable: saveItem.isAvailable,
   };
@@ -96,5 +107,112 @@ export function countBulkSaveStats(draft: ImportDraft) {
     itemsAdded,
     itemsUpdated,
     itemsSkippedDuplicate,
+  };
+}
+
+function buildSummary(
+  draft: ImportDraft,
+  counts: {
+    categoriesAdded: number;
+    categoriesReused: number;
+    categoriesFailed: number;
+    itemsAdded: number;
+    itemsUpdated: number;
+    itemsSkippedDuplicate: number;
+    itemsFailed: number;
+  },
+) {
+  const categoriesRequested = draft.categories.filter((c) => c.items.length > 0)
+    .length;
+  const itemsRequested = countExpandedItems(draft);
+
+  return {
+    categoriesRequested,
+    categoriesSaved: counts.categoriesAdded + counts.categoriesReused,
+    categoriesFailed: counts.categoriesFailed,
+    itemsRequested,
+    itemsSaved: counts.itemsAdded + counts.itemsUpdated,
+    itemsFailed: counts.itemsFailed,
+    categoriesAdded: counts.categoriesAdded,
+    categoriesReused: counts.categoriesReused,
+    itemsAdded: counts.itemsAdded,
+    itemsSkippedDuplicate: counts.itemsSkippedDuplicate,
+    itemsUpdated: counts.itemsUpdated,
+  };
+}
+
+function emptySummary(draft: ImportDraft) {
+  return buildSummary(draft, {
+    categoriesAdded: 0,
+    categoriesReused: 0,
+    categoriesFailed: 0,
+    itemsAdded: 0,
+    itemsUpdated: 0,
+    itemsSkippedDuplicate: 0,
+    itemsFailed: 0,
+  });
+}
+
+export function buildMenuImportSaveResponse(
+  draft: ImportDraft,
+  options: {
+    ok: boolean;
+    partial?: boolean;
+    stats?: ReturnType<typeof countBulkSaveStats>;
+    errors?: SaveImportErrorEntry[];
+    blockingErrors?: ReturnType<typeof collectAllBlockingErrors>;
+    failed?: boolean;
+  },
+): SaveMenuImportResponse {
+  const stats = options.stats ?? countBulkSaveStats(draft);
+
+  if (options.blockingErrors?.length) {
+    return {
+      ok: false,
+      partial: false,
+      summary: emptySummary(draft),
+      errors: [],
+      blockingErrors: options.blockingErrors,
+    };
+  }
+
+  if (options.ok) {
+    return {
+      ok: true,
+      summary: buildSummary(draft, {
+        categoriesAdded: stats.categoriesInPayload,
+        categoriesReused: 0,
+        categoriesFailed: 0,
+        itemsAdded: stats.itemsAdded,
+        itemsUpdated: stats.itemsUpdated,
+        itemsSkippedDuplicate: stats.itemsSkippedDuplicate,
+        itemsFailed: 0,
+      }),
+      errors: options.errors ?? [],
+    };
+  }
+
+  if (options.failed) {
+    return {
+      ok: false,
+      partial: false,
+      summary: buildSummary(draft, {
+        categoriesAdded: 0,
+        categoriesReused: 0,
+        categoriesFailed: stats.categoriesInPayload,
+        itemsAdded: 0,
+        itemsUpdated: 0,
+        itemsSkippedDuplicate: stats.itemsSkippedDuplicate,
+        itemsFailed: stats.itemsInPayload,
+      }),
+      errors: options.errors ?? [],
+    };
+  }
+
+  return {
+    ok: false,
+    partial: options.partial ?? false,
+    summary: emptySummary(draft),
+    errors: options.errors ?? [],
   };
 }

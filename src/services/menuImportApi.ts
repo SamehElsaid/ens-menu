@@ -1,17 +1,22 @@
 import axios from "axios";
+import { axiosPost } from "@/shared/axiosCall";
 import type {
+  BulkImportCategory,
   ImportDraft,
   MenuImportApiResponse,
   SaveMenuImportResponse,
 } from "@/types/menuImport";
 import {
   MENU_IMPORT_API_TIMEOUT_MS,
-  MENU_IMPORT_SAVE_TIMEOUT_MS,
 } from "@/lib/menuImport/constants";
 import type { MenuSnapshot } from "@/lib/menuImport/menuSnapshot";
+import { collectAllBlockingErrors } from "@/lib/menuImport/draftSaveUtils";
+import {
+  buildMenuImportSaveResponse,
+  countBulkSaveStats,
+} from "@/lib/menuImport/buildBulkCategoriesPayload";
 
 const MENU_IMPORT_API_URL = "/api/menu-import";
-const MENU_IMPORT_SAVE_URL = "/api/menu-import/save";
 const MENU_IMPORT_EXISTING_URL = "/api/menu-import/existing";
 
 export async function analyzeMenuImage(
@@ -53,15 +58,48 @@ export async function saveMenuImportDraft(
   locale: string,
   draft: ImportDraft,
 ): Promise<SaveMenuImportResponse> {
-  const response = await axios.post<SaveMenuImportResponse>(
-    MENU_IMPORT_SAVE_URL,
-    { menuId, locale, draft },
-    {
-      timeout: MENU_IMPORT_SAVE_TIMEOUT_MS,
-      headers: { Accept: "application/json" },
-    },
+  const blockingErrors = collectAllBlockingErrors(draft);
+  if (blockingErrors.length > 0) {
+    return buildMenuImportSaveResponse(draft, { ok: false, blockingErrors });
+  }
+
+  const stats = countBulkSaveStats(draft);
+
+  if (stats.payload.length === 0) {
+    return buildMenuImportSaveResponse(draft, { ok: true, stats });
+  }
+
+  console.log("[MenuImport] Bulk save payload:", stats.payload);
+
+  const result = await axiosPost<BulkImportCategory[], unknown>(
+    `/menus/${menuId}/categories/bulk`,
+    locale,
+    stats.payload,
   );
-  return response.data;
+
+  console.log("[MenuImport] Bulk save response:", result);
+
+  if (result.status) {
+    return buildMenuImportSaveResponse(draft, { ok: true, stats });
+  }
+
+  const message =
+    typeof result.data === "object" && result.data !== null
+      ? JSON.stringify(result.data).slice(0, 500)
+      : String(result.data ?? "").slice(0, 500);
+
+  return buildMenuImportSaveResponse(draft, {
+    ok: false,
+    failed: true,
+    stats,
+    errors: [
+      {
+        type: "category",
+        reason: "bulk_save_failed",
+        message,
+      },
+    ],
+  });
 }
 
 export function mapMenuImportApiError(error: unknown): {

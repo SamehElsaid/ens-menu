@@ -2699,6 +2699,8 @@
     "missingPrice": "بدون سعر",
     "nameAr": "الاسم (عربي)",
     "nameEn": "الاسم (إنجليزي)",
+    "descriptionAr": "الوصف (عربي)",
+    "descriptionEn": "الوصف (إنجليزي)",
     "price": "السعر",
     "variantLabel": "الحجم / النوع",
     "addItem": "إضافة صنف",
