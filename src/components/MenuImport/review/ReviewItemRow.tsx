@@ -221,6 +221,22 @@ export default function ReviewItemRow({
             }`}
             dir="ltr"
           />
+          <textarea
+            value={item.descriptionAr ?? ""}
+            onChange={(e) => onUpdate({ descriptionAr: e.target.value })}
+            placeholder={t("descriptionAr")}
+            rows={2}
+            className={`w-full px-3 py-2 rounded-lg border text-sm resize-y min-h-[4.5rem] ${normalFieldClass}`}
+            dir="rtl"
+          />
+          <textarea
+            value={item.descriptionEn ?? ""}
+            onChange={(e) => onUpdate({ descriptionEn: e.target.value })}
+            placeholder={t("descriptionEn")}
+            rows={2}
+            className={`w-full px-3 py-2 rounded-lg border text-sm resize-y min-h-[4.5rem] ${normalFieldClass}`}
+            dir="ltr"
+          />
         </div>
 
         {item.variants.length === 0 && (

@@ -3,14 +3,11 @@ import { decryptData } from "@/shared/encryption";
 import type {
   ImportDraft,
   SaveMenuImportResponse,
-  SaveImportErrorEntry,
 } from "@/types/menuImport";
-import {
-  collectAllBlockingErrors,
-  countExpandedItems,
-} from "./draftSaveUtils";
+import { collectAllBlockingErrors } from "./draftSaveUtils";
 import { refreshServerAccessToken } from "@/lib/server/refreshAccessToken";
 import {
+  buildMenuImportSaveResponse,
   countBulkSaveStats,
 } from "./buildBulkCategoriesPayload";
 
@@ -46,49 +43,6 @@ async function parseJsonResponse(response: Response): Promise<unknown> {
   }
 }
 
-function buildSummary(
-  draft: ImportDraft,
-  counts: {
-    categoriesAdded: number;
-    categoriesReused: number;
-    categoriesFailed: number;
-    itemsAdded: number;
-    itemsUpdated: number;
-    itemsSkippedDuplicate: number;
-    itemsFailed: number;
-  },
-) {
-  const categoriesRequested = draft.categories.filter((c) => c.items.length > 0)
-    .length;
-  const itemsRequested = countExpandedItems(draft);
-
-  return {
-    categoriesRequested,
-    categoriesSaved: counts.categoriesAdded + counts.categoriesReused,
-    categoriesFailed: counts.categoriesFailed,
-    itemsRequested,
-    itemsSaved: counts.itemsAdded + counts.itemsUpdated,
-    itemsFailed: counts.itemsFailed,
-    categoriesAdded: counts.categoriesAdded,
-    categoriesReused: counts.categoriesReused,
-    itemsAdded: counts.itemsAdded,
-    itemsSkippedDuplicate: counts.itemsSkippedDuplicate,
-    itemsUpdated: counts.itemsUpdated,
-  };
-}
-
-function emptySummary(draft: ImportDraft) {
-  return buildSummary(draft, {
-    categoriesAdded: 0,
-    categoriesReused: 0,
-    categoriesFailed: 0,
-    itemsAdded: 0,
-    itemsUpdated: 0,
-    itemsSkippedDuplicate: 0,
-    itemsFailed: 0,
-  });
-}
-
 export async function executeMenuImportSave(
   draft: ImportDraft,
   menuId: string,
@@ -98,20 +52,12 @@ export async function executeMenuImportSave(
 ): Promise<SaveMenuImportResponse & { refreshedSub?: string }> {
   const blockingErrors = collectAllBlockingErrors(draft);
   if (blockingErrors.length > 0) {
-    return {
-      ok: false,
-      partial: false,
-      summary: emptySummary(draft),
-      errors: [],
-      blockingErrors,
-    };
+    return buildMenuImportSaveResponse(draft, { ok: false, blockingErrors });
   }
 
   if (!authToken) {
-    return {
+    return buildMenuImportSaveResponse(draft, {
       ok: false,
-      partial: false,
-      summary: emptySummary(draft),
       errors: [
         {
           type: "category",
@@ -119,27 +65,14 @@ export async function executeMenuImportSave(
           message: "Missing auth token",
         },
       ],
-    };
+    });
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL as string;
   const stats = countBulkSaveStats(draft);
-  const payload = stats.payload;
 
-  if (payload.length === 0) {
-    return {
-      ok: true,
-      summary: buildSummary(draft, {
-        categoriesAdded: 0,
-        categoriesReused: 0,
-        categoriesFailed: 0,
-        itemsAdded: 0,
-        itemsUpdated: 0,
-        itemsSkippedDuplicate: stats.itemsSkippedDuplicate,
-        itemsFailed: 0,
-      }),
-      errors: [],
-    };
+  if (stats.payload.length === 0) {
+    return buildMenuImportSaveResponse(draft, { ok: true, stats });
   }
 
   let currentToken = authToken;
@@ -167,14 +100,14 @@ export async function executeMenuImportSave(
     return response;
   };
 
-  console.log("[MenuImport] Bulk save payload:", payload);
+  console.log("[MenuImport] Bulk save payload:", stats.payload);
 
   try {
     const bulkRes = await authorizedFetch(
       `${baseUrl}/menus/${menuId}/categories/bulk`,
       {
         method: "POST",
-        body: JSON.stringify(payload),
+        body: JSON.stringify(stats.payload),
       },
     );
 
@@ -185,60 +118,45 @@ export async function executeMenuImportSave(
     });
 
     if (!bulkRes.ok) {
-      const errors: SaveImportErrorEntry[] = [
-        {
-          type: "category",
-          reason: bulkRes.status === 405 ? "token_expired" : "bulk_save_failed",
-          message:
-            typeof bulkParsed === "object" && bulkParsed !== null
-              ? JSON.stringify(bulkParsed).slice(0, 500)
-              : String(bulkParsed ?? "").slice(0, 500),
-        },
-      ];
+      const message =
+        typeof bulkParsed === "object" && bulkParsed !== null
+          ? JSON.stringify(bulkParsed).slice(0, 500)
+          : String(bulkParsed ?? "").slice(0, 500);
 
       return {
-        ok: false,
-        partial: false,
-        summary: buildSummary(draft, {
-          categoriesAdded: 0,
-          categoriesReused: 0,
-          categoriesFailed: stats.categoriesInPayload,
-          itemsAdded: 0,
-          itemsUpdated: 0,
-          itemsSkippedDuplicate: stats.itemsSkippedDuplicate,
-          itemsFailed: stats.itemsInPayload,
+        ...buildMenuImportSaveResponse(draft, {
+          ok: false,
+          failed: true,
+          stats,
+          errors: [
+            {
+              type: "category",
+              reason:
+                bulkRes.status === 405 ? "token_expired" : "bulk_save_failed",
+              message,
+            },
+          ],
         }),
-        errors,
         ...(refreshedSub ? { refreshedSub } : {}),
       };
     }
 
     return {
-      ok: true,
-      summary: buildSummary(draft, {
-        categoriesAdded: stats.categoriesInPayload,
-        categoriesReused: 0,
-        categoriesFailed: 0,
-        itemsAdded: stats.itemsAdded,
-        itemsUpdated: stats.itemsUpdated,
-        itemsSkippedDuplicate: stats.itemsSkippedDuplicate,
-        itemsFailed: 0,
-      }),
-      errors: [],
+      ...buildMenuImportSaveResponse(draft, { ok: true, stats }),
       ...(refreshedSub ? { refreshedSub } : {}),
     };
   } catch (err) {
     return {
-      ok: false,
-      partial: false,
-      summary: emptySummary(draft),
-      errors: [
-        {
-          type: "category",
-          reason: "network_error",
-          message: err instanceof Error ? err.message : "Unknown error",
-        },
-      ],
+      ...buildMenuImportSaveResponse(draft, {
+        ok: false,
+        errors: [
+          {
+            type: "category",
+            reason: "network_error",
+            message: err instanceof Error ? err.message : "Unknown error",
+          },
+        ],
+      }),
       ...(refreshedSub ? { refreshedSub } : {}),
     };
   }

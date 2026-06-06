@@ -2726,6 +2726,8 @@
     "missingPrice": "No price",
     "nameAr": "Name (Arabic)",
     "nameEn": "Name (English)",
+    "descriptionAr": "Description (Arabic)",
+    "descriptionEn": "Description (English)",
     "price": "Price",
     "variantLabel": "Size / type",
     "addItem": "Add item",

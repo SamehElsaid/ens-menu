@@ -167,6 +167,8 @@ export interface BulkImportItem {
   id: string;
   nameAr: string;
   nameEn: string;
+  descriptionAr?: string;
+  descriptionEn?: string;
   price: number;
   isAvailable: boolean;
 }
