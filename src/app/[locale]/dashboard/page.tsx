@@ -28,6 +28,7 @@ import {
   IoCalendarOutline,
 } from "react-icons/io5";
 import LoadImage from "@/components/ImageLoad";
+import { getMenuDashboardRef, menuDashboardPath } from "@/lib/menuDashboardPath";
 import {
   isOnboardingCompleted,
   ONBOARDING_REFRESH_EVENT,
@@ -311,7 +312,7 @@ export default function DashboardPage() {
             subscription={subscription}
             currentCount={menus.length}
             locale={locale}
-            upgradeMenuId={menus[0]?.id}
+            upgradeMenuRef={getMenuDashboardRef(menus[0])}
             onClose={() => setShowLimitModal(false)}
           />
         )}
@@ -472,7 +473,7 @@ export default function DashboardPage() {
             <div className="px-6 py-3 bg-slate-50/50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex items-center gap-3">
               <LinkTo
                 id={index === 0 ? "onboarding-manage-menu" : undefined}
-                href={`/dashboard/${menu.id}`}
+                href={menuDashboardPath(menu)}
                 className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition-all"
               >
                 <IoSettingsOutline className="text-base" />
@@ -509,7 +510,7 @@ export default function DashboardPage() {
           subscription={subscription}
           currentCount={menus.length}
           locale={locale}
-          upgradeMenuId={menus[0]?.id}
+          upgradeMenuRef={getMenuDashboardRef(menus[0])}
           onClose={() => setShowLimitModal(false)}
         />
       )}
@@ -565,7 +566,7 @@ export default function DashboardPage() {
                 {t("cancel")}
               </button>
               <LinkTo
-                href={`/dashboard/${switchMenuTarget.id}/personal`}
+                href={menuDashboardPath(switchMenuTarget, "personal")}
                 className="order-1 flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-amber-500 to-orange-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-amber-600 hover:to-orange-600 hover:shadow-lg sm:order-2 sm:w-auto"
               >
                 <IoRocketOutline className="text-lg" />
@@ -668,14 +669,14 @@ function LimitReachedModal({
   subscription,
   currentCount,
   locale,
-  upgradeMenuId,
+  upgradeMenuRef,
   onClose,
 }: {
   t: ReturnType<typeof useTranslations<"Menus">>;
   subscription: Subscription | null;
   currentCount: number;
   locale: string;
-  upgradeMenuId?: number;
+  upgradeMenuRef?: string;
   onClose: () => void;
 }) {
   const maxMenus = subscription?.maxMenus ?? 1;
@@ -728,8 +729,8 @@ function LimitReachedModal({
             </button>
             <LinkTo
               href={
-                upgradeMenuId != null
-                  ? `/dashboard/${upgradeMenuId}/subscription`
+                upgradeMenuRef
+                  ? `/dashboard/${upgradeMenuRef}/subscription`
                   : "/pricing"
               }
               className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-linear-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg"

@@ -24,9 +24,11 @@ import SubscriptionPlanCard, {
   SubscriptionPlanCardSkeleton,
 } from "@/components/Dashboard/SubscriptionPlanCard";
 import SubscriptionPaymentMethods from "@/components/Dashboard/SubscriptionPaymentMethods";
+import SubscriptionVoucherSection from "@/components/Dashboard/SubscriptionVoucherSection";
 import { RequirePhone } from "@/components/Dashboard/RequirePhone";
 import { translatePlanFeaturesWithMenuLimit } from "@/lib/planFeatureI18n";
 import type { Subscription, SubscriptionResponse } from "@/types/Subscription";
+import type { VoucherValidationResult } from "@/types/Voucher";
 
 const WHATSAPP_URL = "https://wa.me/201500800050";
 
@@ -88,6 +90,10 @@ export default function SubscriptionPlansSection({
   const [downgradeModalOpen, setDowngradeModalOpen] = useState(false);
   const [downgradeLoading, setDowngradeLoading] = useState(false);
   const [phoneGateOpen, setPhoneGateOpen] = useState(false);
+  const [appliedVoucherCode, setAppliedVoucherCode] = useState<string | null>(null);
+  const [voucherValidation, setVoucherValidation] =
+    useState<VoucherValidationResult | null>(null);
+  const [voucherRedeemLoading, setVoucherRedeemLoading] = useState(false);
   const dispatch = useAppDispatch();
   const searchParams = useSearchParams();
 
@@ -139,6 +145,61 @@ export default function SubscriptionPlansSection({
   const currentPlanNameResolved =
     subscriptionInfo?.planName ?? profile?.user?.subscription?.planName ?? "";
 
+  const isProUser =
+    Boolean(currentPlanNameResolved) &&
+    String(currentPlanNameResolved).toLowerCase() === "pro";
+
+  const currentPlanIndex = plans.findIndex(
+    (p) =>
+      String(p.name).toLowerCase() ===
+      String(currentPlanNameResolved).toLowerCase(),
+  );
+  const proPlanIndex = plans.findIndex(
+    (p) => String(p.name).toLowerCase() === "pro",
+  );
+  const canUpgradeToPro =
+    currentPlanIndex >= 0 &&
+    proPlanIndex > currentPlanIndex &&
+    proPlanIndex >= 0;
+
+  const hasDiscountVoucher =
+    Boolean(appliedVoucherCode) &&
+    voucherValidation?.voucher.type === "discount";
+  const hasDurationVoucher =
+    Boolean(appliedVoucherCode) &&
+    voucherValidation?.voucher.type === "duration";
+
+  const voucherDiscountedPrice = hasDiscountVoucher
+    ? voucherValidation?.discountedPrice ?? null
+    : null;
+  const voucherDiscountAmount = hasDiscountVoucher
+    ? voucherValidation?.discountAmount ?? null
+    : null;
+  const voucherDurationHint =
+    hasDurationVoucher && canUpgradeToPro
+      ? t("voucherUseRedeemButton")
+      : null;
+
+  const activeSubscriptionBillingCycle = (() => {
+    const cycle = String(subscriptionInfo?.billingCycle ?? "").toLowerCase();
+    if (cycle === "yearly") return "yearly" as const;
+    if (cycle === "monthly") return "monthly" as const;
+    return null;
+  })();
+
+  useEffect(() => {
+    setAppliedVoucherCode(null);
+    setVoucherValidation(null);
+  }, [proBillingChoice]);
+
+  const handleVoucherApplied = useCallback(
+    (code: string, result: VoucherValidationResult | null) => {
+      setAppliedVoucherCode(code || null);
+      setVoucherValidation(result);
+    },
+    [],
+  );
+
   const refreshSubscriptionState = useCallback(async () => {
     const subRes = await axiosGet<SubscriptionResponse>(
       "/user/subscription",
@@ -158,6 +219,29 @@ export default function SubscriptionPlansSection({
       dispatch(SET_ACTIVE_USER({ user: meResult.user }));
     }
   }, [locale, dispatch]);
+
+  const handleRedeemDurationVoucher = useCallback(async () => {
+    if (!appliedVoucherCode) return;
+    setVoucherRedeemLoading(true);
+    const res = await axiosPost<
+      { code: string },
+      { success?: boolean; data?: { extended?: boolean }; message?: string }
+    >("/vouchers/redeem-duration", locale, { code: appliedVoucherCode });
+    setVoucherRedeemLoading(false);
+    if (res?.status) {
+      toast.success(
+        res.data?.data?.extended
+          ? t("voucherRedeemExtended")
+          : t("voucherRedeemSuccess"),
+      );
+      setAppliedVoucherCode(null);
+      setVoucherValidation(null);
+      await refreshSubscriptionState();
+      return;
+    }
+    const serverMsg = pickFailedRequestMessage(res?.data as unknown);
+    toast.error(serverMsg ?? t("voucherInvalid"));
+  }, [appliedVoucherCode, locale, t, refreshSubscriptionState]);
 
   const handleConfirmDowngrade = useCallback(async () => {
     setDowngradeLoading(true);
@@ -218,14 +302,21 @@ export default function SubscriptionPlansSection({
           : "/payment/subscription/pro-yearly/initiate";
       setProPayLoading(true);
       const res = await axiosPost<
-        { name: string; email?: string; mobile: string; currency?: string },
+        {
+          name: string;
+          email?: string;
+          mobile: string;
+          currency?: string;
+          voucherCode?: string;
+        },
         {
           success?: boolean;
           data?: {
-            redirectUrl?: string;
+            redirectUrl?: string | null;
             amount?: number;
             order_id?: string;
             currency?: string;
+            subscriptionActivated?: boolean;
           };
         }
       >(endpoint, locale, {
@@ -233,8 +324,19 @@ export default function SubscriptionPlansSection({
         email: activeUser?.email?.trim() || undefined,
         mobile: phoneToSend,
         currency: "EGP",
+        ...(appliedVoucherCode &&
+        voucherValidation?.voucher.type === "discount"
+          ? { voucherCode: appliedVoucherCode }
+          : {}),
       });
       setProPayLoading(false);
+      if (res?.status && res.data?.data?.subscriptionActivated) {
+        toast.success(t("voucherRedeemSuccess"));
+        setAppliedVoucherCode(null);
+        setVoucherValidation(null);
+        await refreshSubscriptionState();
+        return;
+      }
       if (res?.status && res.data?.data?.redirectUrl) {
         const amount = Number(res.data.data.amount);
         const currency = res.data.data.currency || "EGP";
@@ -260,16 +362,22 @@ export default function SubscriptionPlansSection({
       proBillingChoice,
       profile,
       t,
+      appliedVoucherCode,
+      voucherValidation,
+      refreshSubscriptionState,
     ],
   );
 
   const handleUpgradeToPro = useCallback(async () => {
+    if (hasDurationVoucher) {
+      return;
+    }
     if (needsPhoneGateForPayment()) {
       setPhoneGateOpen(true);
       return;
     }
     await initiateProPayment();
-  }, [needsPhoneGateForPayment, initiateProPayment]);
+  }, [needsPhoneGateForPayment, initiateProPayment, hasDurationVoucher]);
 
   const handlePhoneVerifiedForPayment = useCallback(async () => {
     const meResult = await resolveAuthMeSession(locale);
@@ -347,6 +455,26 @@ export default function SubscriptionPlansSection({
           currentPlanName={currentPlanNameResolved}
           className="mb-6"
         />
+
+        <div className="mb-8">
+          <SubscriptionVoucherSection
+            locale={locale}
+            isRTL={isRTL}
+            billingCycle={proBillingChoice}
+            onBillingChange={setProBillingChoice}
+            showBillingChoice={false}
+            showBillingHint={canUpgradeToPro}
+            isProUser={isProUser}
+            canUpgradeToPro={canUpgradeToPro}
+            currencyLabel={tLandingPricing("currencyEgp")}
+            appliedCode={appliedVoucherCode}
+            validation={voucherValidation}
+            onApplied={handleVoucherApplied}
+            onRedeemDuration={() => handleRedeemDurationVoucher()}
+            redeemLoading={voucherRedeemLoading}
+            disabled={proPayLoading}
+          />
+        </div>
 
         {plansLoading ? (
           <div className="grid gap-6 md:grid-cols-3 md:items-stretch">
@@ -457,6 +585,20 @@ export default function SubscriptionPlansSection({
                     contactForDetailsLabel={t("contactForDetails")}
                     contactWhatsAppLabel={t("contactWhatsApp")}
                     currencyEgp={tLandingPricing("currencyEgp")}
+                    voucherDiscountedPrice={
+                      isProPlan && canUpgrade ? voucherDiscountedPrice : null
+                    }
+                    voucherDiscountAmount={
+                      isProPlan && canUpgrade ? voucherDiscountAmount : null
+                    }
+                    voucherDurationHint={
+                      isProPlan && canUpgrade ? voucherDurationHint : null
+                    }
+                    activeBillingCycle={
+                      isProPlan && isCurrentPlan
+                        ? activeSubscriptionBillingCycle
+                        : null
+                    }
                     monthlyPriceFormatted={(price) =>
                       t("monthlyPriceFormatted", {
                         price,

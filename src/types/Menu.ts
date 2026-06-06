@@ -28,6 +28,7 @@ export interface MenuTable {
 
 export interface Menu {
   id: number;
+  uuid?: string;
   nameAr: string;
   nameEn: string;
   descriptionAr?: string;

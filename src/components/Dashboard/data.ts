@@ -16,6 +16,7 @@ import {
   IoPricetagOutline,
   IoSettingsOutline,
   IoStatsChartOutline,
+  IoTicketOutline,
   IoTimeOutline,
   IoCallOutline,
 } from "react-icons/io5";
@@ -242,6 +243,12 @@ export const adminNavSections: NavSection[] = [
         icon: IoPricetagOutline,
         key: "promo",
         link: "promo",
+      },
+      {
+        label: "vouchers",
+        icon: IoTicketOutline,
+        key: "promo",
+        link: "vouchers",
       },
       {
         label: "knowledgeManagement",

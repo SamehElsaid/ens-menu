@@ -8,16 +8,16 @@ const SUB_COOKIE_OPTS = {
   path: "/",
 };
 
-/** After /staff-auth/me, persist menu id so the header can link to /dashboard/:id from any page. */
-export function patchSubCookieWithStaffMenuId(menuId: number): void {
-  if (menuId == null || Number.isNaN(menuId)) return;
+/** After /staff-auth/me, persist menu UUID so the header can link to /dashboard/:uuid from any page. */
+export function patchSubCookieWithStaffMenuUuid(menuUuid: string): void {
+  if (!menuUuid) return;
   const sub = Cookies.get("sub");
   if (!sub) return;
   try {
     const d = decryptData(sub) as Record<string, unknown>;
     if (d.role !== "staff") return;
-    if (d.menuId != null && String(d.menuId) !== "") return;
-    Cookies.set("sub", encryptData({ ...d, menuId }), SUB_COOKIE_OPTS);
+    if (d.menuUuid != null && String(d.menuUuid) !== "") return;
+    Cookies.set("sub", encryptData({ ...d, menuUuid }), SUB_COOKIE_OPTS);
   } catch {
     /* noop */
   }

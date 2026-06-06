@@ -12,6 +12,7 @@ import {
 } from "react-icons/fi";
 import { HiOutlineSparkles } from "react-icons/hi";
 import LinkTo from "@/components/Global/LinkTo";
+import { getMenuDashboardRef, menuDashboardPath } from "@/lib/menuDashboardPath";
 import { useAppSelector } from "@/store/hooks";
 import { templatesInfo } from "@/modules/TemplateShow/data";
 import { toast } from "react-toastify";
@@ -97,7 +98,8 @@ export default function TemplateDesignCustomizePanel({
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { menu } = useAppSelector((state) => state.menuData);
-  const designListPath = `/dashboard/${menu?.id}/settings/design`;
+  const menuApiRef = getMenuDashboardRef(menu);
+  const designListPath = menuDashboardPath(menu, "settings", "design");
 
   const template = useMemo(
     () => templatesInfo.find((tpl) => tpl.slug === tempSlug),
@@ -184,9 +186,9 @@ export default function TemplateDesignCustomizePanel({
     colorSlots >= 2 ? gradientEnd : gradientStart;
 
   useEffect(() => {
-    if (!menu?.id) return;
+    if (!menuApiRef) return;
 
-    axiosGet<CustomizationResponse>(`/menus/${menu.id}/customizations`, locale)
+    axiosGet<CustomizationResponse>(`/menus/${menuApiRef}/customizations`, locale)
       .then((res) => {
         if (!res.status || !res.data) return;
 
@@ -215,7 +217,7 @@ export default function TemplateDesignCustomizePanel({
       .finally(() => {
         setLoading(false);
       });
-  }, [locale, menu?.id, template?.slug, colorSlots]);
+  }, [locale, menuApiRef, template?.slug, colorSlots]);
 
   const handleSelectPalette = (palette: ColorPalette) => {
     setSelectedPaletteId(palette.id);
@@ -289,7 +291,7 @@ export default function TemplateDesignCustomizePanel({
   };
 
   const handleSave = async () => {
-    if (!menu?.id) {
+    if (!menuApiRef) {
       toast.error(
         locale === "ar"
           ? "لا توجد قائمة محددة لحفظ التخصيص عليها."
@@ -316,7 +318,7 @@ export default function TemplateDesignCustomizePanel({
     setIsSaving(true);
     try {
       const result = await axiosPatch<typeof payload, unknown>(
-        `/menus/${menu.id}/customizations`,
+        `/menus/${menuApiRef}/customizations`,
         locale,
         payload,
       );

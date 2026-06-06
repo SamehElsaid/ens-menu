@@ -23,29 +23,24 @@ export function getAuthHintsFromEncryptedSub(sub: string): {
   token?: string;
   staffJobRole?: string;
   /** Cashier: persisted from login or patched after /staff-auth/me. */
-  menuId?: number;
+  menuUuid?: string;
 } | null {
   try {
     const d = decryptData(sub) as {
       role?: string;
       token?: string;
       staffJobRole?: string;
-      menuId?: number | string;
+      menuUuid?: string;
     };
     const token = typeof d.token === "string" ? d.token : undefined;
     const payload = token ? decodeJwtPayload(token) : null;
     const effectiveRole = payload?.role ?? d.role;
     const staffJobRole = d.staffJobRole ?? payload?.staffJobRole;
-    const rawMenuId = d.menuId;
-    const menuIdNum =
-      rawMenuId !== undefined && rawMenuId !== null && String(rawMenuId) !== ""
-        ? Number(rawMenuId)
+    const menuUuid =
+      typeof d.menuUuid === "string" && d.menuUuid.length > 0
+        ? d.menuUuid
         : undefined;
-    const menuId =
-      menuIdNum !== undefined && !Number.isNaN(menuIdNum)
-        ? menuIdNum
-        : undefined;
-    return { effectiveRole, token, staffJobRole, menuId };
+    return { effectiveRole, token, staffJobRole, menuUuid };
   } catch {
     return null;
   }

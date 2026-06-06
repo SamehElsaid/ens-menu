@@ -17,6 +17,8 @@ type ProPlanPriceSelectorProps = {
   /** Compact layout for comparison table header */
   compact?: boolean;
   className?: string;
+  voucherOriginalPrice?: number | null;
+  voucherDiscountedPrice?: number | null;
 };
 
 export function formatEgpPrice(value: number): string {
@@ -34,18 +36,28 @@ export default function ProPlanPriceSelector({
   size = "default",
   compact = false,
   className = "",
+  voucherOriginalPrice,
+  voucherDiscountedPrice,
 }: ProPlanPriceSelectorProps) {
   const tProfile = useTranslations("personalProfile");
   const tLanding = useTranslations("Landing.pricing");
 
   const monthlyDisplay = firstMonthlyPrice ?? priceMonthly;
   const yearlyDisplay = firstYearlyPrice ?? priceYearly;
+  const baseDisplay =
+    billingChoice === "monthly" ? monthlyDisplay : yearlyDisplay;
+  const hasVoucherDiscount =
+    voucherDiscountedPrice != null &&
+    voucherOriginalPrice != null &&
+    voucherDiscountedPrice < voucherOriginalPrice;
   const showFirstMonthOffer =
+    !hasVoucherDiscount &&
     billingChoice === "monthly" &&
     firstMonthlyPrice != null &&
     firstMonthlyPrice > 0 &&
     firstMonthlyPrice < priceMonthly;
   const showFirstYearOffer =
+    !hasVoucherDiscount &&
     billingChoice === "yearly" &&
     firstYearlyPrice != null &&
     firstYearlyPrice > 0 &&
@@ -89,21 +101,52 @@ export default function ProPlanPriceSelector({
         ))}
       </div>
       <div className={compact ? "text-center" : undefined}>
-        <span className={priceClass}>
-          {formatEgpPrice(
-            billingChoice === "monthly" ? monthlyDisplay : yearlyDisplay,
-          )}
-        </span>
-        <span
-          className={`text-slate-500 dark:text-slate-400 ms-1 ${
-            compact ? "text-[10px] sm:text-xs" : "text-sm"
-          }`}
-        >
-          {tLanding("currencyEgp")}
-          {billingChoice === "monthly"
-            ? tLanding("perMonth")
-            : tLanding("perYear")}
-        </span>
+        {hasVoucherDiscount ? (
+          <div className="space-y-1">
+            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+              <span className={priceClass}>
+                {formatEgpPrice(voucherDiscountedPrice!)}
+              </span>
+              <span
+                className={`text-slate-500 dark:text-slate-400 ms-1 ${
+                  compact ? "text-[10px] sm:text-xs" : "text-sm"
+                }`}
+              >
+                {tLanding("currencyEgp")}
+                {billingChoice === "monthly"
+                  ? tLanding("perMonth")
+                  : tLanding("perYear")}
+              </span>
+            </div>
+            <p
+              className={`text-slate-500 dark:text-slate-400 line-through ${
+                compact ? "text-[10px] sm:text-xs" : "text-sm"
+              }`}
+            >
+              {formatEgpPrice(voucherOriginalPrice!)}{" "}
+              {tLanding("currencyEgp")}
+              {billingChoice === "monthly"
+                ? tLanding("perMonth")
+                : tLanding("perYear")}
+            </p>
+          </div>
+        ) : (
+          <>
+            <span className={priceClass}>
+              {formatEgpPrice(baseDisplay)}
+            </span>
+            <span
+              className={`text-slate-500 dark:text-slate-400 ms-1 ${
+                compact ? "text-[10px] sm:text-xs" : "text-sm"
+              }`}
+            >
+              {tLanding("currencyEgp")}
+              {billingChoice === "monthly"
+                ? tLanding("perMonth")
+                : tLanding("perYear")}
+            </span>
+          </>
+        )}
       </div>
       {showFirstMonthOffer && (
         <p

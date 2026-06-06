@@ -18,6 +18,7 @@ import {
   HiOutlineX,
 } from "react-icons/hi";
 import LinkTo from "@/components/Global/LinkTo";
+import { getMenuDashboardRef, menuDashboardPath } from "@/lib/menuDashboardPath";
 import CustomInput from "@/components/Custom/CustomInput";
 import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
 import { useAppDispatch } from "@/store/hooks";
@@ -88,7 +89,8 @@ export default function PersonalProfile({
   const authData = useAppSelector((state) => state.auth.data) as unknown as {
     user: AuthUser;
   };
-  const menuId = useAppSelector((state) => state.menuData.menu?.id);
+  const menu = useAppSelector((state) => state.menuData.menu);
+  const menuRef = getMenuDashboardRef(menu);
   const user = authData ?? ({} as AuthUser);
   const profile = user?.user ?? ({} as AuthUser);
 
@@ -371,7 +373,7 @@ export default function PersonalProfile({
     }
   };
 
-  const defaultBackLink = backLink ?? `/dashboard/${menuId ?? ""}/settings`;
+  const defaultBackLink = backLink ?? menuDashboardPath(menu, "settings");
   const defaultBackLinkText = backLinkText ?? t("backToProfile");
 
   const currentPlanNameResolved =
@@ -760,10 +762,10 @@ export default function PersonalProfile({
               currentPlanName={currentPlanNameResolved}
               className="mb-5"
             />
-            {menuId && (
+            {menuRef && (
               <LinkTo
                 id="onboarding-personal-subscription-link"
-                href={`/dashboard/${menuId}/subscription`}
+                href={menuDashboardPath(menu, "subscription")}
                 className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary/90 dark:hover:bg-primary/80 transition-colors shadow-sm"
               >
                 {t("manageSubscriptionAndPricing")}

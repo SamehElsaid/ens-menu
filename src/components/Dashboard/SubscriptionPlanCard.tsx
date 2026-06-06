@@ -46,6 +46,11 @@ type SubscriptionPlanCardProps = {
   currencyEgp: string;
   monthlyPriceFormatted: (price: string) => string;
   yearlyPriceFormatted: (price: string) => string;
+  voucherDiscountedPrice?: number | null;
+  voucherDiscountAmount?: number | null;
+  voucherDurationHint?: string | null;
+  /** When Pro is current plan — show one price line matching active subscription */
+  activeBillingCycle?: "monthly" | "yearly" | null;
   className?: string;
   children?: ReactNode;
 };
@@ -106,9 +111,23 @@ export default function SubscriptionPlanCard({
   currencyEgp,
   monthlyPriceFormatted,
   yearlyPriceFormatted,
+  voucherDiscountedPrice,
+  voucherDiscountAmount,
+  voucherDurationHint,
+  activeBillingCycle,
   className = "",
   children,
 }: SubscriptionPlanCardProps) {
+  const voucherOriginalPrice =
+    voucherDiscountedPrice != null &&
+    voucherDiscountAmount != null &&
+    voucherDiscountAmount > 0
+      ? voucherDiscountedPrice + voucherDiscountAmount
+      : null;
+
+  const resolvedActiveBilling: "monthly" | "yearly" =
+    activeBillingCycle === "yearly" ? "yearly" : "monthly";
+
   return (
     <article
       className={[
@@ -186,21 +205,24 @@ export default function SubscriptionPlanCard({
             firstYearlyPrice={plan.firstYearlyPrice}
             isRTL={isRTL}
             size="large"
+            voucherOriginalPrice={voucherOriginalPrice}
+            voucherDiscountedPrice={voucherDiscountedPrice}
           />
         ) : isProPlan ? (
           <div className="space-y-1">
-            {plan.priceMonthly > 0 && (
+            {resolvedActiveBilling === "monthly" && plan.priceMonthly > 0 ? (
               <p className="text-2xl font-black text-slate-900 dark:text-white tabular-nums">
                 {monthlyPriceFormatted(
                   formatEgpPrice(plan.firstMonthlyPrice ?? plan.priceMonthly),
                 )}
               </p>
-            )}
-            {plan.priceYearly > 0 && (
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                {yearlyPriceFormatted(formatEgpPrice(plan.priceYearly))}
+            ) : plan.priceYearly > 0 ? (
+              <p className="text-2xl font-black text-slate-900 dark:text-white tabular-nums">
+                {yearlyPriceFormatted(
+                  formatEgpPrice(plan.firstYearlyPrice ?? plan.priceYearly),
+                )}
               </p>
-            )}
+            ) : null}
           </div>
         ) : (
           <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -221,15 +243,22 @@ export default function SubscriptionPlanCard({
           </span>
         )}
         {canUpgrade && (
-          <button
-            type="button"
-            onClick={onUpgrade}
-            disabled={proPayLoading}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-sm font-semibold text-white shadow-md shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <HiArrowUp className="h-4 w-4 shrink-0" />
-            {proPayLoading ? payingLabel : upgradeLabel}
-          </button>
+          <>
+            {voucherDurationHint && (
+              <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-center text-xs text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+                {voucherDurationHint}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={onUpgrade}
+              disabled={proPayLoading || Boolean(voucherDurationHint)}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-sm font-semibold text-white shadow-md shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <HiArrowUp className="h-4 w-4 shrink-0" />
+              {proPayLoading ? payingLabel : upgradeLabel}
+            </button>
+          </>
         )}
         {canDowngrade && (
           <button

@@ -21,6 +21,7 @@ import {
   IoPersonOutline,
   IoStatsChart,
   IoPricetagOutline,
+  IoTicketOutline,
 } from "react-icons/io5";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import {
@@ -156,6 +157,14 @@ export default function AdminPage() {
       icon: IoPricetagOutline,
       color: "amber",
       href: "/admin/promo",
+      permission: "promo" as AdminPermissionKey,
+    },
+    {
+      id: "vouchers",
+      label: t("vouchers"),
+      icon: IoTicketOutline,
+      color: "orange",
+      href: "/admin/vouchers",
       permission: "promo" as AdminPermissionKey,
     },
     {

@@ -12,6 +12,7 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import LoadImage from "./ImageLoad";
 import { IoRestaurantOutline } from "react-icons/io5";
+import { getMenuDashboardRef, menuDashboardPath } from "@/lib/menuDashboardPath";
 import { useDashboardSession } from "@/hooks/useDashboardSession";
 import { axiosPost } from "@/shared/axiosCall";
 import {
@@ -55,23 +56,20 @@ function UserDropDown() {
   const isDashboardMenuRoute = /^\/dashboard\/[^/]+/.test(pathname);
   const showRestaurantLink = isDashboardMenuRoute && Boolean(publicMenuUrl);
 
-  /** `menuId` stored in encrypted cookie at staff login or patched after /staff-auth/me. */
+  /** Menu ref stored in encrypted cookie at staff login or patched after /staff-auth/me. */
   const subCookie = Cookies.get("sub");
-  const cashierMenuIdFromCookie = subCookie
-    ? getAuthHintsFromEncryptedSub(subCookie)?.menuId
-    : undefined;
-
-  const cashierMenuIdFromPath = pathname.match(/^\/dashboard\/([^/]+)/)?.[1];
+  const subHints = subCookie ? getAuthHintsFromEncryptedSub(subCookie) : null;
+  const cashierMenuUuidFromCookie = subHints?.menuUuid;
+  const cashierMenuRefFromPath = pathname.match(/^\/dashboard\/([^/]+)/)?.[1];
   const cashierDashboardHref =
-    menu?.id != null
-      ? `/dashboard/${menu.id}`
-      : cashierMenuIdFromPath
-        ? `/dashboard/${cashierMenuIdFromPath}`
-        : cashierMenuIdFromCookie != null &&
-            !Number.isNaN(cashierMenuIdFromCookie)
-          ? `/dashboard/${cashierMenuIdFromCookie}`
-          : session?.menuId != null && !Number.isNaN(session.menuId)
-            ? `/dashboard/${session.menuId}`
+    getMenuDashboardRef(menu)
+      ? menuDashboardPath(menu)
+      : cashierMenuRefFromPath
+        ? `/dashboard/${cashierMenuRefFromPath}`
+        : cashierMenuUuidFromCookie
+          ? `/dashboard/${cashierMenuUuidFromCookie}`
+          : session?.menuUuid
+            ? `/dashboard/${session.menuUuid}`
             : null;
 
   const profileMenuItems = useMemo(() => {

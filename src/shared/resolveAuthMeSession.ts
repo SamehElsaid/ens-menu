@@ -4,7 +4,7 @@ import {
   getAuthHintsFromEncryptedSub,
   isUserNotFoundApiBody,
 } from "@/shared/jwtPayload";
-import { patchSubCookieWithStaffMenuId } from "@/shared/staffSubCookie";
+import { patchSubCookieWithStaffMenuUuid } from "@/shared/staffSubCookie";
 
 type AuthMeResponse = { user?: Record<string, unknown> };
 type StaffMeResponse = {
@@ -12,7 +12,7 @@ type StaffMeResponse = {
     email?: string;
     name?: string;
   };
-  menu?: { id?: number };
+  menu?: { id?: number; uuid?: string };
 };
 
 export type ResolvedAuthUser = {
@@ -43,9 +43,9 @@ async function resolveStaffMe(locale: string): Promise<ResolveAuthMeResult> {
     return { outcome: "logout" };
   }
   if (res.status && res.data?.staff) {
-    const mid = res.data.menu?.id;
-    if (typeof mid === "number" && !Number.isNaN(mid)) {
-      patchSubCookieWithStaffMenuId(mid);
+    const menuUuid = res.data.menu?.uuid;
+    if (typeof menuUuid === "string" && menuUuid.length > 0) {
+      patchSubCookieWithStaffMenuUuid(menuUuid);
     }
     return { outcome: "user", user: staffToUser(res.data.staff) };
   }

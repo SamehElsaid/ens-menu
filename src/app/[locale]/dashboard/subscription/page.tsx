@@ -7,6 +7,7 @@ import { axiosGet } from "@/shared/axiosCall";
 import { Menu, MenusResponse } from "@/types/Menu";
 import Loader from "@/components/Global/Loader";
 import SubscriptionPaymentMethods from "@/components/Dashboard/SubscriptionPaymentMethods";
+import { getMenuDashboardRef } from "@/lib/menuDashboardPath";
 
 export default function SubscriptionUpgradeRedirectPage() {
   const locale = useLocale();
@@ -19,8 +20,9 @@ export default function SubscriptionUpgradeRedirectPage() {
         const menus = Array.isArray(result.data)
           ? result.data
           : (result.data.menus ?? []);
-        if (menus[0]?.id != null) {
-          router.replace(`/dashboard/${menus[0].id}/subscription`);
+        const menuRef = getMenuDashboardRef(menus[0]);
+        if (menuRef) {
+          router.replace(`/dashboard/${menuRef}/subscription`);
           return;
         }
       }

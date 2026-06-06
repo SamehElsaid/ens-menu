@@ -15,6 +15,7 @@ import LinkTo from "@/components/Global/LinkTo";
 import { FaEnvelope } from "react-icons/fa";
 import { TbLockPassword } from "react-icons/tb";
 import { IoRestaurantOutline } from "react-icons/io5";
+import { getMenuDashboardRef, menuDashboardPath } from "@/lib/menuDashboardPath";
 
 type StaffLoginFormValues = {
   menuSlug: string;
@@ -31,7 +32,7 @@ type StaffLoginApiResponse = {
     email?: string;
     role?: string;
   };
-  menu?: { id?: number; slug?: string };
+  menu?: { id?: number; uuid?: string; slug?: string };
 };
 
 function normalizeStaffJobRole(role: unknown): string {
@@ -78,7 +79,7 @@ export default function StaffLoginForm() {
       true,
     );
 
-    if (!result.status || !result.data?.accessToken || !result.data?.menu?.id) {
+    if (!result.status || !result.data?.accessToken || !result.data?.menu) {
       const msg =
         (result.data as { message?: string })?.message ||
         t("staffLoginFailed");
@@ -96,13 +97,19 @@ export default function StaffLoginForm() {
       return;
     }
 
+    const menuRef = getMenuDashboardRef(menu as { id?: number; uuid?: string });
+    if (!menuRef) {
+      setApiError(t("staffLoginFailed"));
+      setLoading(false);
+      return;
+    }
+
     const saveTokens = {
       token: accessToken,
       refreshToken: refreshToken ?? "",
       role: "staff",
       staffJobRole: job,
-      /** Lets the header link back to the cashier dashboard from any page (e.g. home). */
-      menuId: menu.id,
+      menuUuid: menuRef,
     };
 
     Cookies.set("sub", encryptData(saveTokens), {
@@ -123,7 +130,7 @@ export default function StaffLoginForm() {
       }),
     );
 
-    router.push(`/dashboard/${menu.id}`);
+    router.push(menuDashboardPath(menu as { id?: number; uuid?: string }));
   };
 
   return (

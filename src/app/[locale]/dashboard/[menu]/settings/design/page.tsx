@@ -22,6 +22,7 @@ import {
   ONBOARDING_REFRESH_EVENT,
   setOnboardingPhase,
 } from "@/lib/onboarding/onboardingStorage";
+import { menuRefFromRouteParam } from "@/lib/menuDashboardPath";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 
 const customizeButtonClassName =
@@ -37,8 +38,12 @@ export default function DesignPage() {
   const dispatch = useAppDispatch();
   const { menu } = useAppSelector((state) => state.menuData);
   const resolvedMenuId =
-    menu?.id ??
-    (routeParams?.menu ? Number(routeParams.menu) : undefined);
+    menuRefFromRouteParam(routeParams?.menu) ||
+    (typeof menu?.uuid === "string" && menu.uuid.length > 0
+      ? menu.uuid
+      : menu?.id != null
+        ? String(menu.id)
+        : undefined);
   const templatesForMenu = templatesInfo.filter((template) => {
     if (template.showInPickerOnlyWhenThemeMatches) {
       return menu?.theme === template.id;

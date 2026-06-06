@@ -89,6 +89,10 @@ export function adminRouteToPermission(
     return "users";
   }
 
+  if (segment === "vouchers") {
+    return "promo";
+  }
+
   return allowed.includes(segment as AdminPermissionKey)
     ? (segment as AdminPermissionKey)
     : null;
