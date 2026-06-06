@@ -7,6 +7,7 @@ import {
   AdminSectionCard,
 } from "@/components/Admin/AdminAnalyticsWidgets";
 import type { FollowUpReportSummary } from "@/types/AdminFollowUp";
+import { formatFollowUpPurpose } from "@/lib/fetchAdminFollowUp";
 import { IoPeopleOutline, IoStatsChartOutline } from "react-icons/io5";
 
 type FollowUpTeamPerformanceProps = {
@@ -19,6 +20,7 @@ export default function FollowUpTeamPerformance({
   dir = "ltr",
 }: FollowUpTeamPerformanceProps) {
   const t = useTranslations("adminFollowUps.teamReport");
+  const tFollowUps = useTranslations("adminFollowUps");
   const isRTL = dir === "rtl";
 
   const teamStats = report.teamStats ?? [];
@@ -33,7 +35,7 @@ export default function FollowUpTeamPerformance({
     .sort((a, b) => b.count - a.count)
     .map((item) => ({
       id: item.purpose,
-      label: t(`purposes.${item.purpose}`),
+      label: formatFollowUpPurpose(item.purpose, tFollowUps),
       count: item.count,
     }));
 

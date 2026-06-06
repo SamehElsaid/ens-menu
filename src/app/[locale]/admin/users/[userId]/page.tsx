@@ -451,7 +451,7 @@ export default function UserDetailsPage() {
 
   const textDir = isRTL ? "rtl" : "ltr";
   return (
-    <div className="space-y-6 pb-8" dir={textDir}>
+    <div className="space-y-6 pb-8 text-slate-800 dark:text-slate-100" dir={textDir}>
       {/* Header Section */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
@@ -537,7 +537,7 @@ export default function UserDetailsPage() {
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
               {t("analytics.menusCount")}
             </p>
-            <p className="text-2xl font-bold tabular-nums">
+            <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
               {userAnalytics.menusCount}
             </p>
           </div>
@@ -545,7 +545,7 @@ export default function UserDetailsPage() {
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
               {t("analytics.activeMenus")}
             </p>
-            <p className="text-2xl font-bold tabular-nums">
+            <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
               {userAnalytics.activeMenus}
             </p>
           </div>
@@ -553,7 +553,7 @@ export default function UserDetailsPage() {
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
               {t("analytics.totalItems")}
             </p>
-            <p className="text-2xl font-bold tabular-nums">
+            <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
               {userAnalytics.totalItems}
             </p>
           </div>
@@ -561,7 +561,7 @@ export default function UserDetailsPage() {
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
               {t("analytics.activeItems")}
             </p>
-            <p className="text-2xl font-bold tabular-nums">
+            <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
               {userAnalytics.activeItems}
             </p>
           </div>
@@ -569,7 +569,7 @@ export default function UserDetailsPage() {
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
               {t("analytics.daysSinceLogin")}
             </p>
-            <p className="text-2xl font-bold tabular-nums">
+            <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
               {userAnalytics.daysSinceLogin ?? t("analytics.neverLoggedIn")}
             </p>
           </div>

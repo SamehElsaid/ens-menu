@@ -7,11 +7,14 @@ import type { ColDef, ICellRendererParams } from "ag-grid-community";
 import {
   IoArrowBack,
   IoCallOutline,
+  IoListOutline,
   IoRefreshOutline,
+  IoSearchOutline,
 } from "react-icons/io5";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import DataTable from "@/components/Custom/DataTable";
 import LogFollowUpCallModal from "@/components/Admin/LogFollowUpCallModal";
+import UserFollowUpCallsModal from "@/components/Admin/UserFollowUpCallsModal";
 import PhoneDisplay from "@/components/Global/PhoneDisplay";
 import { DemoDataBanner } from "@/components/Admin/AdminAnalyticsWidgets";
 import FollowUpTeamPerformance from "@/components/Admin/FollowUpTeamPerformance";
@@ -38,6 +41,25 @@ const SEGMENTS: FollowUpQueueSegment[] = [
   "pro",
 ];
 
+function digitsOnly(value: string): string {
+  return value.replace(/\D/g, "");
+}
+
+function matchesQueueSearch(user: FollowUpQueueUser, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+
+  if (user.name.toLowerCase().includes(q)) return true;
+
+  const phone = user.phoneNumber ?? "";
+  if (phone.toLowerCase().includes(q)) return true;
+
+  const qDigits = digitsOnly(q);
+  if (qDigits && digitsOnly(phone).includes(qDigits)) return true;
+
+  return false;
+}
+
 export default function AdminFollowUpsPage() {
   const locale = useLocale();
   const t = useTranslations("adminFollowUps");
@@ -54,7 +76,9 @@ export default function AdminFollowUpsPage() {
   > | null>(null);
 
   const [logTarget, setLogTarget] = useState<FollowUpQueueUser | null>(null);
+  const [callsTarget, setCallsTarget] = useState<FollowUpQueueUser | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -71,6 +95,11 @@ export default function AdminFollowUpsPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const filteredQueue = useMemo(
+    () => queue.filter((user) => matchesQueueSearch(user, searchQuery)),
+    [queue, searchQuery],
+  );
 
   const handleLogSubmit = async (
     payload: Parameters<typeof createFollowUpCall>[1],
@@ -170,21 +199,31 @@ export default function AdminFollowUpsPage() {
       },
       {
         headerName: t("columns.actions"),
-        width: 130,
+        width: 220,
         sortable: false,
         pinned: locale === "ar" ? "left" : "right",
         cellRenderer: (params: ICellRendererParams<FollowUpQueueUser>) => {
           const row = params.data;
           if (!row) return null;
           return (
-            <button
-              type="button"
-              onClick={() => setLogTarget(row)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20"
-            >
-              <IoCallOutline />
-              {t("logCall")}
-            </button>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setCallsTarget(row)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+              >
+                <IoListOutline />
+                {t("viewCalls")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setLogTarget(row)}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-primary/20"
+              >
+                <IoCallOutline />
+                {t("logCall")}
+              </button>
+            </div>
           );
         },
       },
@@ -305,14 +344,45 @@ export default function AdminFollowUpsPage() {
         <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
           {t("queueTitle")}
         </h2>
-        <DataTable<FollowUpQueueUser>
-          rowData={queue}
-          columnDefs={columnDefs}
-          loading={loading}
-          locale={locale}
-          showRowNumbers
-        />
+        <div className="relative mb-4">
+          <IoSearchOutline
+            className={`pointer-events-none absolute top-1/2 -translate-y-1/2 text-lg text-slate-400 ${locale === "ar" ? "right-3" : "left-3"}`}
+          />
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t("queueSearchPlaceholder")}
+            dir={textDir}
+            className={`w-full rounded-xl border border-slate-200 bg-white py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 ${
+              locale === "ar" ? "pr-10 pl-4 text-start" : "pl-10 pr-4"
+            }`}
+          />
+        </div>
+        {!loading && searchQuery.trim() && filteredQueue.length === 0 ? (
+          <p className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+            {t("queueNoResults")}
+          </p>
+        ) : (
+          <DataTable<FollowUpQueueUser>
+            rowData={filteredQueue}
+            columnDefs={columnDefs}
+            loading={loading}
+            locale={locale}
+            showRowNumbers
+          />
+        )}
       </CardDashBoard>
+
+      {callsTarget && (
+        <UserFollowUpCallsModal
+          open
+          onClose={() => setCallsTarget(null)}
+          userId={callsTarget.id}
+          userName={callsTarget.name}
+          phoneNumber={callsTarget.phoneNumber}
+        />
+      )}
 
       {logTarget && (
         <LogFollowUpCallModal

@@ -22,6 +22,9 @@ export type FollowUpPurpose =
   | "support"
   | "other";
 
+/** @deprecated Legacy enum keys — purpose is now free text. */
+export type LegacyFollowUpPurpose = FollowUpPurpose;
+
 export interface FollowUpCall {
   id: string;
   userId: number;
@@ -29,7 +32,7 @@ export interface FollowUpCall {
   adminId?: number;
   adminName?: string;
   outcome: FollowUpOutcome;
-  purpose?: FollowUpPurpose;
+  purpose?: string;
   notes?: string;
   calledAt: string;
   nextFollowUpAt?: string | null;
@@ -83,13 +86,13 @@ export interface FollowUpReportSummary {
   callsByAdmin: { adminName: string; count: number }[];
   teamStats: FollowUpAgentReportRow[];
   outcomesBreakdown: { outcome: FollowUpOutcome; count: number }[];
-  purposesBreakdown: { purpose: FollowUpPurpose; count: number }[];
+  purposesBreakdown: { purpose: string; count: number }[];
 }
 
 export interface CreateFollowUpCallPayload {
   userId: number;
   outcome: FollowUpOutcome;
-  purpose?: FollowUpPurpose;
+  purpose?: string;
   notes?: string;
   nextFollowUpAt?: string | null;
   /** Name of the ENS team member who made the call */

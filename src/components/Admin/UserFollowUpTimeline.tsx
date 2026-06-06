@@ -5,12 +5,11 @@ import { useLocale, useTranslations } from "next-intl";
 import {
   createFollowUpCall,
   fetchFollowUpCalls,
-  formatFollowUpDateTime,
 } from "@/lib/fetchAdminFollowUp";
 import type { FollowUpCall } from "@/types/AdminFollowUp";
 import CallNowPhoneModal from "@/components/Admin/CallNowPhoneModal";
+import FollowUpCallsList from "@/components/Admin/FollowUpCallsList";
 import LogFollowUpCallModal from "@/components/Admin/LogFollowUpCallModal";
-import PhoneDisplay from "@/components/Global/PhoneDisplay";
 import { toast } from "react-toastify";
 import { IoCallOutline } from "react-icons/io5";
 
@@ -71,7 +70,7 @@ export default function UserFollowUpTimeline({
             <button
               type="button"
               onClick={() => setCallNowOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               <IoCallOutline />
               {t("callNow")}
@@ -96,51 +95,8 @@ export default function UserFollowUpTimeline({
             />
           ))}
         </div>
-      ) : calls.length === 0 ? (
-        <p className="text-sm text-slate-500 dark:text-slate-400 py-6 text-center">
-          {t("noCallsYet")}
-        </p>
       ) : (
-        <ul className="space-y-3">
-          {calls.map((call) => (
-            <li
-              key={call.id}
-              className="rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 p-4"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
-                <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                  {t(`outcomes.${call.outcome}`)}
-                  {call.purpose && (
-                    <span className="font-normal text-slate-500 dark:text-slate-400">
-                      {" · "}
-                      {t(`purposes.${call.purpose}`)}
-                    </span>
-                  )}
-                </span>
-                <span className="text-xs text-slate-500 dark:text-slate-400 tabular-nums">
-                  {formatFollowUpDateTime(call.calledAt, locale)}
-                </span>
-              </div>
-              {call.notes && (
-                <p className="text-sm text-slate-600 dark:text-slate-300 mb-1">
-                  {call.notes}
-                </p>
-              )}
-              <div className="flex flex-wrap gap-3 text-xs text-slate-500 dark:text-slate-400">
-                {call.adminName && (
-                  <span>
-                    {t("agentName")}: {call.adminName}
-                  </span>
-                )}
-                {call.nextFollowUpAt && (
-                  <span>
-                    {t("nextFollowUp")}: {call.nextFollowUpAt}
-                  </span>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
+        <FollowUpCallsList calls={calls} />
       )}
 
       {phoneNumber && (

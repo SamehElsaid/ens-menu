@@ -122,6 +122,23 @@ export async function fetchFollowUpReport(
   return getMockFollowUpReport(period);
 }
 
+export function formatFollowUpPurpose(
+  purpose: string,
+  t: (key: string) => string,
+): string {
+  const legacyKeys = [
+    "onboarding",
+    "upgrade_pro",
+    "renewal",
+    "support",
+    "other",
+  ] as const;
+  if (legacyKeys.includes(purpose as (typeof legacyKeys)[number])) {
+    return t(`purposes.${purpose}`);
+  }
+  return purpose;
+}
+
 export function formatFollowUpDateTime(
   dateStr: string,
   locale: string,
