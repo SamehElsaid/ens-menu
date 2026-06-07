@@ -1185,6 +1185,45 @@ textarea {
   animation: template-scroll 10s linear infinite;
 }
 
+@keyframes trusted-by-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes trusted-by-marquee-rtl {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.trusted-by-marquee-track {
+  animation: trusted-by-marquee 42s linear infinite;
+  width: max-content;
+}
+
+.trusted-by-marquee-track--rtl {
+  animation: trusted-by-marquee-rtl 42s linear infinite;
+  width: max-content;
+}
+
+.trusted-by-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trusted-by-marquee-track,
+  .trusted-by-marquee-track--rtl {
+    animation: none;
+  }
+}
+
 .react-datepicker__day-name {
   font-size: 8px !important;
 }

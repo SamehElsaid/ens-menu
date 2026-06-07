@@ -978,6 +978,12 @@
     }
   },
   "hello": "مرحباً",
+  "trustedBySection": {
+    "badge": "من كل أنحاء العالم",
+    "title": "عملاءنا الذين يثقون بنا",
+    "subtitle": "مطاعم وكافيهات تستخدم ENSmenu يومياً",
+    "logosAriaLabel": "شعارات عملائنا"
+  },
   "heroSection": {
     "badge": "ابدأ مجاناً الآن ",
     "linaAlt": "شخصية Lina - مساعد ENSmenu",
@@ -2319,6 +2325,14 @@
     "proUsers": "مستخدمون Pro",
     "freeUsers": "مستخدمون Free",
     "usersWithoutMenu": "بدون منيو",
+    "usersOnHomepage": "في الصفحة الرئيسية",
+    "homepageFeatured": "في الهوم",
+    "addToHomepageSuccess": "تم إضافة شعار المنيو للصفحة الرئيسية",
+    "addToHomepageError": "فشل إضافة الشعار للصفحة الرئيسية",
+    "alreadyOnHomepage": "الشعار موجود بالفعل في الصفحة الرئيسية",
+    "noMenuForHomepage": "لا يوجد منيو بشعار لهذا المستخدم",
+    "removeFromHomepageSuccess": "تم إزالة الشعار من الصفحة الرئيسية",
+    "removeFromHomepageError": "فشل إزالة الشعار من الصفحة الرئيسية",
     "filters": {
       "label": "تصفية",
       "all": "الكل",
@@ -2328,7 +2342,8 @@
       "free": "Free",
       "pro": "Pro",
       "no-menu": "بدون منيو",
-      "inactive": "غير نشط 30+ يوم"
+      "inactive": "غير نشط 30+ يوم",
+      "on-homepage": "في الصفحة الرئيسية"
     },
     "columns": {
       "name": "الاسم",
@@ -2339,6 +2354,7 @@
       "createdAt": "تاريخ التسجيل",
       "lastLogin": "آخر دخول",
       "status": "الحالة",
+      "homepage": "الصفحة الرئيسية",
       "actions": "إجراءات",
       "role": "الدور"
     },
@@ -2350,7 +2366,9 @@
       "view": "عرض",
       "suspend": "إيقاف",
       "reactivate": "تفعيل",
-      "delete": "حذف"
+      "delete": "حذف",
+      "addToHomepage": "إضافة للهوم",
+      "removeFromHomepage": "إزالة من الهوم"
     },
     "cancel": "إلغاء",
     "deleteConfirmTitle": "حذف المستخدم",
@@ -2440,7 +2458,17 @@
         "confirmActivateMessage": "هل أنت متأكد من تفعيل القائمة «{menuName}»؟",
         "activateSuccess": "تم تفعيل القائمة بنجاح",
         "deactivateSuccess": "تم إيقاف القائمة بنجاح",
-        "updateError": "فشل تحديث حالة القائمة"
+        "updateError": "فشل تحديث حالة القائمة",
+        "addToHomepage": "إضافة للصفحة الرئيسية",
+        "addToHomepageLoading": "جاري الإضافة...",
+        "addToHomepageSuccess": "تم إضافة شعار المنيو للصفحة الرئيسية",
+        "addToHomepageError": "فشل إضافة الشعار للصفحة الرئيسية",
+        "alreadyOnHomepage": "الشعار موجود بالفعل في الصفحة الرئيسية",
+        "noMenuForHomepage": "لا يوجد منيو بشعار لهذا المستخدم",
+        "removeFromHomepage": "إزالة من الصفحة الرئيسية",
+        "removeFromHomepageLoading": "جاري الإزالة...",
+        "removeFromHomepageSuccess": "تم إزالة الشعار من الصفحة الرئيسية",
+        "removeFromHomepageError": "فشل إزالة الشعار من الصفحة الرئيسية"
       },
       "loading": "جاري التحميل...",
       "error": "فشل تحميل بيانات المستخدم",

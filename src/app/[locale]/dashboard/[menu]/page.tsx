@@ -102,9 +102,6 @@ export default function DashboardMenuPage() {
   const menuQrRef = useRef<StyledQrCodeHandle>(null);
   const qrCenterLogoSrc = !isFreePlan ? (menu?.logo ?? null) : null;
 
-
-
-
   useEffect(() => {
     if (!menuLoading && menu) {
       window.dispatchEvent(new Event(ONBOARDING_REFRESH_EVENT));
@@ -189,9 +186,6 @@ export default function DashboardMenuPage() {
 
   const textDir = locale === "ar" ? "rtl" : "ltr";
 
-
-
-
   if (menuLoading || !menu) {
     return (
       <div className="space-y-6 animate-fadeIn">
@@ -254,7 +248,7 @@ export default function DashboardMenuPage() {
 
         <nav
           id="onboarding-overview-nav"
-          className={`flex flex-wrap gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
+          className={`flex flex-wrap gap-2 `}
           aria-label={t("fullMenuManagement")}
         >
           <LinkTo
@@ -443,7 +437,10 @@ export default function DashboardMenuPage() {
                 </p>
               </div>
               <div className="flex items-center gap-2 rounded-xl bg-primary/5 dark:bg-primary/10 px-4 py-2 w-full justify-center">
-                <BsQrCode className="text-primary text-base shrink-0" aria-hidden />
+                <BsQrCode
+                  className="text-primary text-base shrink-0"
+                  aria-hidden
+                />
                 <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
                   {t("scanCountLabel")}
                 </span>
@@ -580,10 +577,11 @@ export default function DashboardMenuPage() {
                     {entry.name || "—"}
                   </span>
                   <span
-                    className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${entry.type === "category"
+                    className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${
+                      entry.type === "category"
                         ? "bg-primary/10 dark:bg-primary/20 text-primary"
                         : "bg-slate-200/80 dark:bg-slate-600 text-slate-600 dark:text-slate-300"
-                      }`}
+                    }`}
                   >
                     {entry.type === "product" ? t("product") : t("category")}
                   </span>

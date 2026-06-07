@@ -85,7 +85,7 @@ export default function SubscriptionPlansSection({
   const [subscriptionInfoLoading, setSubscriptionInfoLoading] = useState(true);
   const [proBillingChoice, setProBillingChoice] = useState<
     "monthly" | "yearly"
-  >("yearly");
+  >("monthly");
   const [proPayLoading, setProPayLoading] = useState(false);
   const [downgradeModalOpen, setDowngradeModalOpen] = useState(false);
   const [downgradeLoading, setDowngradeLoading] = useState(false);

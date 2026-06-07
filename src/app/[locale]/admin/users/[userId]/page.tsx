@@ -8,7 +8,7 @@ import { IoArrowBack } from "react-icons/io5";
 import { FaTimesCircle, FaTimes } from "react-icons/fa";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import ConfirmationModal from "@/components/Custom/ConfirmationModal";
-import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
+import { axiosGet, axiosPatch, axiosPost, axiosDelete } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import UserFollowUpTimeline from "@/components/Admin/UserFollowUpTimeline";
 import PhoneDisplay from "@/components/Global/PhoneDisplay";
@@ -71,6 +71,8 @@ interface UserDetailsResponse {
   user: User;
   menus: Menu[];
   subscriptions: Subscription[];
+  featuredOnHomepage?: boolean;
+  featuredMenuId?: number | null;
 }
 
 export default function UserDetailsPage() {
@@ -110,6 +112,8 @@ export default function UserDetailsPage() {
   const [suspendSubmitting, setSuspendSubmitting] = useState(false);
   const [reactivateConfirmOpen, setReactivateConfirmOpen] = useState(false);
   const [accountActionLoading, setAccountActionLoading] = useState(false);
+  const [featureOnHomepageLoading, setFeatureOnHomepageLoading] =
+    useState(false);
 
   const fetchUserDetails = useCallback(async () => {
     try {
@@ -270,6 +274,61 @@ export default function UserDetailsPage() {
       setAccountActionLoading(false);
     }
   }, [userId, locale, tAccount, fetchUserDetails]);
+
+  const handleFeatureOnHomepage = useCallback(async () => {
+    setFeatureOnHomepageLoading(true);
+    try {
+      const result = await axiosPost<
+        Record<string, never>,
+        { success?: boolean; message?: string }
+      >(`/admin/users/${userId}/feature-on-homepage`, locale, {});
+
+      if (result.status) {
+        toast.success(t("lists.addToHomepageSuccess"));
+        fetchUserDetails();
+        return;
+      }
+
+      if (result.statusCode === 409) {
+        toast.info(t("lists.alreadyOnHomepage"));
+        return;
+      }
+      if (result.statusCode === 400) {
+        toast.error(t("lists.noMenuForHomepage"));
+        return;
+      }
+
+      toast.error(t("lists.addToHomepageError"));
+    } catch (err) {
+      console.error("Error featuring user on homepage:", err);
+      toast.error(t("lists.addToHomepageError"));
+    } finally {
+      setFeatureOnHomepageLoading(false);
+    }
+  }, [userId, locale, t, fetchUserDetails]);
+
+  const handleRemoveFromHomepage = useCallback(async () => {
+    setFeatureOnHomepageLoading(true);
+    try {
+      const result = await axiosDelete<{ success?: boolean }>(
+        `/admin/users/${userId}/feature-on-homepage`,
+        locale,
+      );
+
+      if (result.status) {
+        toast.success(t("lists.removeFromHomepageSuccess"));
+        fetchUserDetails();
+        return;
+      }
+
+      toast.error(t("lists.removeFromHomepageError"));
+    } catch (err) {
+      console.error("Error removing user from homepage:", err);
+      toast.error(t("lists.removeFromHomepageError"));
+    } finally {
+      setFeatureOnHomepageLoading(false);
+    }
+  }, [userId, locale, t, fetchUserDetails]);
 
   const getBillingCycleLabel = (cycle: string) => {
     if (cycle.toLowerCase() === "free") return t("free");
@@ -1128,9 +1187,48 @@ export default function UserDetailsPage() {
 
       {/* Lists Section */}
       <CardDashBoard>
-        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-6">
-          {t("lists.title")} ({menus.length})
-        </h2>
+        <div
+          className={`mb-6 flex flex-wrap items-center justify-between gap-3 ${isRTL ? "flex-row-reverse" : ""}`}
+        >
+          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+            {t("lists.title")} ({menus.length})
+          </h2>
+          {menus.length > 0 ? (
+            userData?.featuredOnHomepage ? (
+              <button
+                type="button"
+                onClick={handleRemoveFromHomepage}
+                disabled={featureOnHomepageLoading}
+                className="px-4 py-2.5 rounded-xl bg-orange-600 text-white text-sm font-semibold hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              >
+                {featureOnHomepageLoading ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    {t("lists.removeFromHomepageLoading")}
+                  </>
+                ) : (
+                  t("lists.removeFromHomepage")
+                )}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleFeatureOnHomepage}
+                disabled={featureOnHomepageLoading}
+                className="px-4 py-2.5 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              >
+                {featureOnHomepageLoading ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    {t("lists.addToHomepageLoading")}
+                  </>
+                ) : (
+                  t("lists.addToHomepage")
+                )}
+              </button>
+            )
+          ) : null}
+        </div>
         {menus.length > 0 ? (
           <div className="space-y-4">
             {menus.map((menu) => (

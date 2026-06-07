@@ -1070,6 +1070,12 @@
     "errorsImagesOnly": "Only image files are allowed."
   },
   "hello": "Hello",
+  "trustedBySection": {
+    "badge": "Worldwide",
+    "title": "Trusted by hundreds of customers from all over the world",
+    "subtitle": "Restaurants and cafés using ENSmenu every day",
+    "logosAriaLabel": "Our clients logos"
+  },
   "heroSection": {
     "badge": "Start Now for Free",
     "linaAlt": "Lina - ENSmenu assistant",
@@ -2410,6 +2416,14 @@
     "proUsers": "Pro users",
     "freeUsers": "Free users",
     "usersWithoutMenu": "No menu",
+    "usersOnHomepage": "On homepage",
+    "homepageFeatured": "On home",
+    "addToHomepageSuccess": "Menu logo added to homepage",
+    "addToHomepageError": "Failed to add logo to homepage",
+    "alreadyOnHomepage": "Logo is already on the homepage",
+    "noMenuForHomepage": "This user has no menu with a logo",
+    "removeFromHomepageSuccess": "Logo removed from homepage",
+    "removeFromHomepageError": "Failed to remove logo from homepage",
     "filters": {
       "label": "Filter",
       "all": "All",
@@ -2419,7 +2433,8 @@
       "free": "Free",
       "pro": "Pro",
       "no-menu": "No menu",
-      "inactive": "Inactive 30+ days"
+      "inactive": "Inactive 30+ days",
+      "on-homepage": "On homepage"
     },
     "columns": {
       "name": "Name",
@@ -2431,6 +2446,7 @@
       "createdAt": "Registered",
       "lastLogin": "Last login",
       "status": "Status",
+      "homepage": "Homepage",
       "actions": "Actions"
     },
     "status": {
@@ -2441,7 +2457,9 @@
       "view": "View",
       "suspend": "Suspend",
       "reactivate": "Reactivate",
-      "delete": "Delete"
+      "delete": "Delete",
+      "addToHomepage": "Add to home",
+      "removeFromHomepage": "Remove from home"
     },
     "cancel": "Cancel",
     "deleteConfirmTitle": "Delete user",
@@ -2531,7 +2549,17 @@
         "confirmActivateMessage": "Are you sure you want to activate the menu «{menuName}»?",
         "activateSuccess": "Menu activated successfully",
         "deactivateSuccess": "Menu stopped successfully",
-        "updateError": "Failed to update menu status"
+        "updateError": "Failed to update menu status",
+        "addToHomepage": "Add to homepage",
+        "addToHomepageLoading": "Adding...",
+        "addToHomepageSuccess": "Menu logo added to homepage",
+        "addToHomepageError": "Failed to add logo to homepage",
+        "alreadyOnHomepage": "Logo is already on the homepage",
+        "noMenuForHomepage": "This user has no menu with a logo",
+        "removeFromHomepage": "Remove from homepage",
+        "removeFromHomepageLoading": "Removing...",
+        "removeFromHomepageSuccess": "Logo removed from homepage",
+        "removeFromHomepageError": "Failed to remove logo from homepage"
       },
       "loading": "Loading...",
       "error": "Failed to load user data",
