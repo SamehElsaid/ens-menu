@@ -2409,7 +2409,7 @@
     "back": "Back",
     "search": "Search",
     "reset": "Reset",
-    "searchPlaceholder": "Search by name, email, or phone number…",
+    "searchPlaceholder": "Search by name, email, phone, menu name, or slug…",
     "suspendedUsers": "Suspended Users",
     "activeUsers": "Active Users",
     "totalUsers": "Total Users",
