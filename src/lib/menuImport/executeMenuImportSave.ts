@@ -123,6 +123,12 @@ export async function executeMenuImportSave(
           ? JSON.stringify(bulkParsed).slice(0, 500)
           : String(bulkParsed ?? "").slice(0, 500);
 
+      const errorData =
+        typeof bulkParsed === "object" && bulkParsed !== null
+          ? (bulkParsed as { code?: string; error?: string; errorEn?: string })
+          : undefined;
+      const isBulkImportLimit = errorData?.code === "BULK_IMPORT_LIMIT";
+
       return {
         ...buildMenuImportSaveResponse(draft, {
           ok: false,
@@ -131,9 +137,14 @@ export async function executeMenuImportSave(
           errors: [
             {
               type: "category",
-              reason:
-                bulkRes.status === 405 ? "token_expired" : "bulk_save_failed",
-              message,
+              reason: isBulkImportLimit
+                ? "bulk_import_limit"
+                : bulkRes.status === 405
+                  ? "token_expired"
+                  : "bulk_save_failed",
+              message: isBulkImportLimit
+                ? (errorData?.error ?? errorData?.errorEn ?? message)
+                : message,
             },
           ],
         }),

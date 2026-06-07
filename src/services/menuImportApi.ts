@@ -90,6 +90,11 @@ export async function saveMenuImportDraft(
     return buildMenuImportSaveResponse(draft, { ok: true, stats });
   }
 
+  const errorData = result.data as
+    | { code?: string; error?: string; errorEn?: string }
+    | undefined;
+  const isBulkImportLimit = errorData?.code === "BULK_IMPORT_LIMIT";
+
   const message =
     typeof result.data === "object" && result.data !== null
       ? JSON.stringify(result.data).slice(0, 500)
@@ -102,8 +107,10 @@ export async function saveMenuImportDraft(
     errors: [
       {
         type: "category",
-        reason: "bulk_save_failed",
-        message,
+        reason: isBulkImportLimit ? "bulk_import_limit" : "bulk_save_failed",
+        message: isBulkImportLimit
+          ? (errorData?.error ?? errorData?.errorEn ?? message)
+          : message,
       },
     ],
   });

@@ -27,6 +27,8 @@ function reasonLabel(
     "network_error",
     "invalid_response",
     "duplicate_skipped",
+    "bulk_import_limit",
+    "bulk_save_failed",
   ] as const;
   if (known.includes(reason as (typeof known)[number])) {
     return t(`saveReason_${reason}` as "saveReason_create_failed");
@@ -59,6 +61,10 @@ export default function SaveResultPanel({
     summary.itemsAdded === 0 &&
     summary.itemsUpdated === 0 &&
     summary.itemsSkippedDuplicate > 0;
+
+  const hasBulkImportLimit = errors.some(
+    (err) => err.reason === "bulk_import_limit",
+  );
 
   return (
     <div className="max-w-lg mx-auto text-center py-8 space-y-6">
@@ -185,6 +191,14 @@ export default function SaveResultPanel({
       )}
 
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        {hasBulkImportLimit && (
+          <LinkTo
+            href={`/dashboard/${menuId}/subscription`}
+            className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-primary text-white font-semibold hover:opacity-90"
+          >
+            {t("freePlanLimitUpgrade")}
+          </LinkTo>
+        )}
         <LinkTo
           href={`/dashboard/${menuId}/items`}
           className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-primary text-white font-semibold hover:opacity-90"

@@ -21,7 +21,13 @@ import {
 import { formatImageSizeLog } from "@/lib/menuImport/formatImageSize";
 import { IoArrowBackOutline } from "react-icons/io5";
 
-export default function MenuImportWizard() {
+interface MenuImportWizardProps {
+  onCheckCanUse?: () => Promise<boolean>;
+}
+
+export default function MenuImportWizard({
+  onCheckCanUse,
+}: MenuImportWizardProps) {
   const t = useTranslations("MenuImport");
   const locale = useLocale() as "ar" | "en";
   const params = useParams();
@@ -79,6 +85,21 @@ export default function MenuImportWizard() {
     flow.openConfirm();
   }, [flow]);
 
+  const guardCanUse = useCallback(async (): Promise<boolean> => {
+    if (!onCheckCanUse) return true;
+    return onCheckCanUse();
+  }, [onCheckCanUse]);
+
+  const handleAnalyze = useCallback(async () => {
+    if (!(await guardCanUse())) return;
+    await flow.startAnalysis();
+  }, [flow, guardCanUse]);
+
+  const handleNewUpload = useCallback(async () => {
+    if (!(await guardCanUse())) return;
+    flow.clearFile();
+  }, [flow, guardCanUse]);
+
   return (
     <div className="space-y-8 pb-10 animate-fadeIn">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -111,7 +132,7 @@ export default function MenuImportWizard() {
               previewUrl={state.previewUrl}
               onFileSelect={handleFileSelect}
               onClear={flow.clearFile}
-              onAnalyze={flow.startAnalysis}
+              onAnalyze={handleAnalyze}
               isProcessing={state.isProcessing}
               isPreparing={isPreparingImage}
             />
@@ -136,7 +157,7 @@ export default function MenuImportWizard() {
               saveResult={state.saveResult}
               saveError={state.error}
               menuId={menuId}
-              onNewUpload={flow.clearFile}
+              onNewUpload={handleNewUpload}
               onOpenConfirm={handleOpenConfirm}
               onCloseConfirm={flow.closeConfirm}
               onConfirmSave={flow.confirmSave}
@@ -160,7 +181,7 @@ export default function MenuImportWizard() {
             <ImportErrorPanel
               error={state.error}
               onRetry={flow.retryAnalysis}
-              onChangeImage={flow.clearFile}
+              onChangeImage={handleNewUpload}
             />
           )}
         </div>

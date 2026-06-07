@@ -2816,7 +2816,9 @@
     "saveReason_token_expired": "انتهت الجلسة",
     "saveReason_network_error": "خطأ شبكة",
     "saveReason_invalid_response": "استجابة غير متوقعة",
-    "saveReason_duplicate_skipped": "مكرر — تم التخطي"
+    "saveReason_duplicate_skipped": "مكرر — تم التخطي",
+    "saveReason_bulk_import_limit": "انتهت محاولة الاستيراد المجانية — رقِّ إلى Pro",
+    "saveReason_bulk_save_failed": "فشل حفظ الاستيراد"
   },
   "menuOverview": {
     "fullMenuManagement": "إدارة القائمة بالكامل",

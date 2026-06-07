@@ -1,12 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { axiosGet } from "@/shared/axiosCall";
 import MenuImportWizard from "@/components/MenuImport/MenuImportWizard";
 import LinkTo from "@/components/Global/LinkTo";
 import { IoWarningOutline, IoArrowBackOutline } from "react-icons/io5";
+
+type BulkImportCanUseResponse = {
+  canuse: boolean;
+  used?: number;
+  limit?: number;
+  remaining?: number;
+};
 
 export default function MenuImportPage() {
   const params = useParams();
@@ -19,6 +26,33 @@ export default function MenuImportPage() {
 
   const [loading, setLoading] = useState(true);
   const [canUse, setCanUse] = useState<boolean | null>(null);
+  const [checkError, setCheckError] = useState(false);
+
+  const refreshCanUse = useCallback(async (): Promise<boolean> => {
+    if (!menuId) return false;
+
+    try {
+      const response = await axiosGet<BulkImportCanUseResponse>(
+        `/menus/${menuId}/categories/bulk/canuse`,
+        locale,
+      );
+
+      if (response.status && response.data) {
+        setCanUse(response.data.canuse);
+        setCheckError(false);
+        return response.data.canuse;
+      }
+
+      setCanUse(null);
+      setCheckError(true);
+      return false;
+    } catch (err) {
+      console.error("[MenuImportPage] Failed to check canuse limit:", err);
+      setCanUse(null);
+      setCheckError(true);
+      return false;
+    }
+  }, [menuId, locale]);
 
   useEffect(() => {
     if (!menuId) return;
@@ -26,27 +60,9 @@ export default function MenuImportPage() {
     let isMounted = true;
 
     const checkLimit = async () => {
-      try {
-        const response = await axiosGet<{ canuse: boolean }>(
-          `/menus/${menuId}/categories/bulk/canuse`,
-          locale
-        );
-        if (isMounted) {
-          if (response.status && response.data) {
-            setCanUse(response.data.canuse);
-          } else {
-            setCanUse(false);
-          }
-        }
-      } catch (err) {
-        console.error("[MenuImportPage] Failed to check canuse limit:", err);
-        if (isMounted) {
-          setCanUse(false);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+      await refreshCanUse();
+      if (isMounted) {
+        setLoading(false);
       }
     };
 
@@ -55,7 +71,7 @@ export default function MenuImportPage() {
     return () => {
       isMounted = false;
     };
-  }, [menuId, locale]);
+  }, [menuId, refreshCanUse]);
 
   if (loading) {
     return (
@@ -67,6 +83,25 @@ export default function MenuImportPage() {
         <p className="mt-4 text-sm text-slate-500 dark:text-slate-400 font-medium">
           {locale === "ar" ? "جاري التحقق من الاشتراك..." : "Verifying subscription status..."}
         </p>
+      </div>
+    );
+  }
+
+  if (checkError) {
+    return (
+      <div className="max-w-md mx-auto my-12 px-6 sm:px-8 py-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-3xl border border-slate-100 dark:border-slate-700 shadow-xl text-center">
+        <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
+          {locale === "ar"
+            ? "تعذّر التحقق من صلاحية الاستيراد. حاول مرة أخرى."
+            : "Could not verify import eligibility. Please try again."}
+        </p>
+        <LinkTo
+          href={`/dashboard/${menuId}`}
+          className="inline-flex items-center justify-center px-6 py-3 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-2xl font-medium text-sm hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all gap-1.5"
+        >
+          <IoArrowBackOutline className={`${locale === "ar" ? "rotate-180" : ""} text-base`} />
+          {t("backToOverview")}
+        </LinkTo>
       </div>
     );
   }
@@ -109,5 +144,5 @@ export default function MenuImportPage() {
     );
   }
 
-  return <MenuImportWizard />;
+  return <MenuImportWizard onCheckCanUse={refreshCanUse} />;
 }

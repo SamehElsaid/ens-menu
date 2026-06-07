@@ -2907,7 +2907,9 @@
     "saveReason_token_expired": "Session expired",
     "saveReason_network_error": "Network error",
     "saveReason_invalid_response": "Unexpected response",
-    "saveReason_duplicate_skipped": "Duplicate — skipped"
+    "saveReason_duplicate_skipped": "Duplicate — skipped",
+    "saveReason_bulk_import_limit": "Free import limit reached — upgrade to Pro",
+    "saveReason_bulk_save_failed": "Bulk save failed"
   },
   "menuOverview": {
     "fullMenuManagement": "Full Menu Management",
