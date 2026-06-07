@@ -11,7 +11,7 @@ import CardDashBoard from "@/components/Card/CardDashBoard";
 import DataTable from "@/components/Custom/DataTable";
 import ConfirmationModal from "@/components/Custom/ConfirmationModal";
 import CustomInput from "@/components/Custom/CustomInput";
-import { axiosGet, axiosPatch, axiosDelete } from "@/shared/axiosCall";
+import { axiosGet, axiosPatch, axiosDelete, axiosPost } from "@/shared/axiosCall";
 import { formatAdminDate } from "@/lib/fetchAdminAnalytics";
 import { toast } from "react-toastify";
 
@@ -23,7 +23,8 @@ type UserFilter =
     | "free"
     | "pro"
     | "no-menu"
-    | "inactive";
+    | "inactive"
+    | "on-homepage";
 
 interface User {
     id: number;
@@ -43,6 +44,7 @@ interface User {
     endDate: string | null;
     billingCycle: string;
     menusCount: number;
+    featuredOnHomepage?: boolean | number;
 }
 
 interface UsersResponse {
@@ -60,6 +62,7 @@ interface UsersResponse {
         freeUsers?: number;
         proUsers?: number;
         usersWithoutMenu?: number;
+        usersOnHomepage?: number;
     };
 }
 
@@ -74,7 +77,7 @@ export default function UsersPage() {
 
     const initialFilter = (searchParams.get("filter") as UserFilter) || "all";
     const [planFilter, setPlanFilter] = useState<UserFilter>(
-        ["all", "active", "suspended", "trial", "free", "pro", "no-menu", "inactive"].includes(
+        ["all", "active", "suspended", "trial", "free", "pro", "no-menu", "inactive", "on-homepage"].includes(
             initialFilter,
         )
             ? initialFilter
@@ -93,6 +96,7 @@ export default function UsersPage() {
     const [freeUsers, setFreeUsers] = useState(0);
     const [proUsers, setProUsers] = useState(0);
     const [usersWithoutMenu, setUsersWithoutMenu] = useState(0);
+    const [usersOnHomepage, setUsersOnHomepage] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
     const [loadingUserId, setLoadingUserId] = useState<number | null>(null);
     const [deleteModal, setDeleteModal] = useState<{
@@ -151,6 +155,7 @@ export default function UsersPage() {
                 setFreeUsers(result.data.stats?.freeUsers ?? 0);
                 setProUsers(result.data.stats?.proUsers ?? 0);
                 setUsersWithoutMenu(result.data.stats?.usersWithoutMenu ?? 0);
+                setUsersOnHomepage(result.data.stats?.usersOnHomepage ?? 0);
             } else {
                 toast.error(t("error"));
             }
@@ -173,6 +178,7 @@ export default function UsersPage() {
             "pro",
             "no-menu",
             "inactive",
+            "on-homepage",
         ].includes(urlFilter)
             ? urlFilter
             : "all";
@@ -245,7 +251,75 @@ export default function UsersPage() {
         "trial",
         "no-menu",
         "inactive",
+        "on-homepage",
     ];
+
+    const isFeaturedOnHomepage = (user: User) =>
+        user.featuredOnHomepage === true || user.featuredOnHomepage === 1;
+
+    const handleRemoveFromHomepage = useCallback(
+        async (user: User) => {
+            setLoadingUserId(user.id);
+            try {
+                const result = await axiosDelete<{ success?: boolean }>(
+                    `/admin/users/${user.id}/feature-on-homepage`,
+                    locale,
+                );
+
+                if (result.status) {
+                    toast.success(t("removeFromHomepageSuccess"));
+                    if (planFilter === "on-homepage" && users.length === 1 && page > 1) {
+                        setPage(page - 1);
+                    } else {
+                        fetchUsers(page, searchQuery, planFilter);
+                    }
+                } else {
+                    toast.error(t("removeFromHomepageError"));
+                }
+            } catch (err) {
+                console.error("Error removing user from homepage:", err);
+                toast.error(t("removeFromHomepageError"));
+            } finally {
+                setLoadingUserId(null);
+            }
+        },
+        [locale, t, fetchUsers, page, searchQuery, planFilter, users.length],
+    );
+
+    const handleAddToHomepage = useCallback(
+        async (user: User) => {
+            setLoadingUserId(user.id);
+            try {
+                const result = await axiosPost<
+                    Record<string, never>,
+                    { success?: boolean }
+                >(`/admin/users/${user.id}/feature-on-homepage`, locale, {});
+
+                if (result.status) {
+                    toast.success(t("addToHomepageSuccess"));
+                    fetchUsers(page, searchQuery, planFilter);
+                    return;
+                }
+
+                if (result.statusCode === 409) {
+                    toast.info(t("alreadyOnHomepage"));
+                    return;
+                }
+                if (result.statusCode === 400) {
+                    toast.error(t("noMenuForHomepage"));
+                    return;
+                }
+
+                toast.error(t("addToHomepageError"));
+            } catch (err) {
+                console.error("Error adding user to homepage:", err);
+                toast.error(t("addToHomepageError"));
+            } finally {
+                setLoadingUserId(null);
+            }
+        },
+        [locale, t, fetchUsers, page, searchQuery, planFilter],
+    );
 
     const handleConfirmSuspend = useCallback(async () => {
         if (!suspendModal.user) return;
@@ -418,12 +492,28 @@ export default function UsersPage() {
                 },
             },
             {
+                headerName: t("columns.homepage"),
+                width: 110,
+                cellRenderer: (params: { data: User }) => {
+                    const featured = isFeaturedOnHomepage(params.data);
+                    return featured ? (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300">
+                            {t("homepageFeatured")}
+                        </span>
+                    ) : (
+                        <span className="text-xs text-slate-400">—</span>
+                    );
+                },
+            },
+            {
                 headerName: t("columns.actions"),
-                width: 260,
+                width: 360,
                 cellRenderer: (params: { data: User }) => {
                     const user = params.data;
                     const isActive = !user.isSuspended;
                     const isLoading = loadingUserId === user.id;
+                    const featured = isFeaturedOnHomepage(user);
+                    const hasMenu = (user.menusCount ?? 0) > 0;
                     return (
                         <div className={`flex items-center gap-1.5 flex-wrap ${isRTL ? "flex-row-reverse" : ""}`}>
                             <button
@@ -433,6 +523,33 @@ export default function UsersPage() {
                             >
                                 {t("actions.view")}
                             </button>
+                            {featured ? (
+                                <button
+                                    type="button"
+                                    onClick={() => handleRemoveFromHomepage(user)}
+                                    disabled={isLoading}
+                                    className="px-3 py-1.5 bg-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-lg transition-colors inline-flex items-center gap-1"
+                                >
+                                    {isLoading ? (
+                                        <FaSpinner className="animate-spin text-xs" />
+                                    ) : (
+                                        t("actions.removeFromHomepage")
+                                    )}
+                                </button>
+                            ) : hasMenu ? (
+                                <button
+                                    type="button"
+                                    onClick={() => handleAddToHomepage(user)}
+                                    disabled={isLoading}
+                                    className="px-3 py-1.5 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-lg transition-colors inline-flex items-center gap-1"
+                                >
+                                    {isLoading ? (
+                                        <FaSpinner className="animate-spin text-xs" />
+                                    ) : (
+                                        t("actions.addToHomepage")
+                                    )}
+                                </button>
+                            ) : null}
                             <button
                                 onClick={() =>
                                     isActive
@@ -470,7 +587,7 @@ export default function UsersPage() {
                 },
             },
         ],
-        [t, isRTL, router, loadingUserId]
+        [t, isRTL, router, loadingUserId, handleAddToHomepage, handleRemoveFromHomepage]
     );
 
     const statCards: {
@@ -535,6 +652,15 @@ export default function UsersPage() {
             borderColor: "border-amber-200 dark:border-amber-500/20",
             iconBg: "bg-amber-50 dark:bg-amber-500/10",
             iconColor: "text-amber-600 dark:text-amber-400",
+        },
+        {
+            filter: "on-homepage",
+            label: t("usersOnHomepage"),
+            value: usersOnHomepage,
+            icon: FaUserCheck,
+            borderColor: "border-violet-200 dark:border-violet-500/20",
+            iconBg: "bg-violet-50 dark:bg-violet-500/10",
+            iconColor: "text-violet-600 dark:text-violet-400",
         },
     ];
 

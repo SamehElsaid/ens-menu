@@ -258,7 +258,7 @@ export default function PricingComparisonPage() {
   const isRTL = locale === "ar";
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [proBillingChoice, setProBillingChoice] =
-    useState<ProBillingChoice>("yearly");
+    useState<ProBillingChoice>("monthly");
   const { proPlan } = usePlans();
   const subscriptionUpgradeHref = useSubscriptionUpgradeHref();
 
