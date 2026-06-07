@@ -19,6 +19,7 @@ import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { axiosPatch, axiosPost } from "@/shared/axiosCall";
+import { _resizeImage } from "@/shared/_shared";
 import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
 import { toast } from "react-toastify";
 import type { Menu, UploadResponse } from "@/types/Menu";
@@ -131,7 +132,7 @@ export default function SettingsPage() {
     );
   }
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -156,19 +157,20 @@ export default function SettingsPage() {
       return;
     }
 
-    if (file.size > 2 * 1024 * 1024) {
+    const resized = await _resizeImage(file);
+    if (resized.size > 2 * 1024 * 1024) {
       toast.error(tMenus("logoSizeError"));
       return;
     }
 
-    setLogoFile(file);
+    setLogoFile(resized);
     setLogoDirty(true);
 
     const reader = new FileReader();
     reader.onloadend = () => {
       setLogoPreview(reader.result as string);
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(resized);
   };
 
   const handleRemoveLogo = () => {

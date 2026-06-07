@@ -2759,6 +2759,8 @@
     "duplicateResolutionUpdate": "سيتم تحديث السعر عند الحفظ",
     "duplicateResolutionSkip": "سيتم تخطي هذا الصنف",
     "unresolvedPriceConflicts": "{count} أصناف بها تعارض سعر — اختر تحديث أو تخطي",
+    "freeLimitReachedTitle": "انتهت الباقة المجانية",
+    "freeLimitReachedDescription": "لقد انتهيت من الباقة المجانية، يرجى الاشتراك للاستمرار في استخدام ميزة الاستيراد.",
     "freePlanLimitTitle": "حد الباقة المجانية",
     "freePlanLimitDescription": "الباقة المجانية تسمح بحد أقصى {max} منتج لكل منيو. لديك حالياً {current} منتج.",
     "freePlanLimitImport": "هذا الاستيراد سيضيف {import} منتج (الإجمالي {total}).",

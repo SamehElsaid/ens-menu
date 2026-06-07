@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import { axiosPost } from "@/shared/axiosCall";
-import { _checkFileSize, _checkFileType } from "@/shared/_shared";
+import { _checkFileSize, _checkFileType, _resizeImage } from "@/shared/_shared";
 import type { ImportItem } from "@/types/menuImport";
 import type { UploadResponse } from "@/types/Menu";
 import { importRefDomId } from "@/lib/menuImport/importRefDomId";
@@ -76,13 +76,14 @@ export default function ReviewItemRow({
     "border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800";
 
   const handleImageUpload = async (file: File) => {
-    if (!_checkFileType(file) || !_checkFileSize(file, 2)) {
+    const resized = await _resizeImage(file);
+    if (!_checkFileType(resized) || !_checkFileSize(resized, 2)) {
       toast.error(t("invalidFileSize", { max: 2 }));
       return;
     }
     const formData = new FormData();
     formData.append("type", "categories");
-    formData.append("file", file);
+    formData.append("file", resized);
     const result = await axiosPost<FormData, UploadResponse>(
       "/upload",
       locale,

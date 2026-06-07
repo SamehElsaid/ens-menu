@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useLocale, useTranslations } from "next-intl";
 import { axiosPost, axiosPatch } from "@/shared/axiosCall";
+import { _resizeImage } from "@/shared/_shared";
 import CustomInput from "@/components/Custom/CustomInput";
 import { toast } from "react-toastify";
 import { Category } from "@/types/Menu";
@@ -155,7 +156,7 @@ export default function AddCategoryModal({
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -164,15 +165,16 @@ export default function AddCategoryModal({
       toast.error(t("imageFormatError"));
       return;
     }
-    if (file.size > 2 * 1024 * 1024) {
+    const resized = await _resizeImage(file);
+    if (resized.size > 2 * 1024 * 1024) {
       toast.error(t("imageSizeError"));
       return;
     }
 
-    setImage(file);
+    setImage(resized);
     const reader = new FileReader();
     reader.onloadend = () => setImagePreview(reader.result as string);
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(resized);
     e.target.value = "";
   };
 
@@ -181,7 +183,7 @@ export default function AddCategoryModal({
     setImagePreview(null);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
     const file = e.dataTransfer.files?.[0];
@@ -191,14 +193,15 @@ export default function AddCategoryModal({
       toast.error(t("imageFormatError"));
       return;
     }
-    if (file.size > 2 * 1024 * 1024) {
+    const resized = await _resizeImage(file);
+    if (resized.size > 2 * 1024 * 1024) {
       toast.error(t("imageSizeError"));
       return;
     }
-    setImage(file);
+    setImage(resized);
     const reader = new FileReader();
     reader.onloadend = () => setImagePreview(reader.result as string);
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(resized);
   };
 
   const handleDragOver = (e: React.DragEvent) => {

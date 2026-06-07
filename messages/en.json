@@ -2850,6 +2850,8 @@
     "duplicateResolutionUpdate": "Price will be updated on save",
     "duplicateResolutionSkip": "This item will be skipped",
     "unresolvedPriceConflicts": "{count} items have price conflicts — choose update or skip",
+    "freeLimitReachedTitle": "Free package finished",
+    "freeLimitReachedDescription": "You have completed your free package. Please subscribe to continue importing menus using AI.",
     "freePlanLimitTitle": "Free plan product limit",
     "freePlanLimitDescription": "The free plan allows up to {max} products per menu. You currently have {current} products.",
     "freePlanLimitImport": "This import will add {import} products (total {total}).",

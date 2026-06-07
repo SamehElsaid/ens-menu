@@ -6,6 +6,7 @@ import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLocale, useTranslations } from "next-intl";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
+import { _resizeImage } from "@/shared/_shared";
 import { pushMenuCreatedEvent } from "@/shared/gtmEvents";
 import CurrencySelector from "@/components/Global/CurrencySelector";
 import CustomInput from "@/components/Custom/CustomInput";
@@ -228,7 +229,7 @@ export default function CreateMenuModal({
     setValue("slug", suggestion);
   };
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -237,19 +238,20 @@ export default function CreateMenuModal({
       return;
     }
 
-    if (file.size > 2 * 1024 * 1024) {
+    const resized = await _resizeImage(file);
+    if (resized.size > 2 * 1024 * 1024) {
       toast.error(t("logoSizeError"));
       return;
     }
 
     setLogoError(null);
-    setLogo(file);
+    setLogo(resized);
 
     const reader = new FileReader();
     reader.onloadend = () => {
       setLogoPreview(reader.result as string);
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(resized);
   };
 
   const handleRemoveLogo = () => {

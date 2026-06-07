@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { axiosPost } from '@/shared/axiosCall'
+import { _resizeImage } from '@/shared/_shared'
 import SunEditor from 'suneditor-react'
 
 interface ImageUploadResult {
@@ -65,18 +66,23 @@ const Editor = ({ initialTemplateName, type, setValue, trigger, refresh, loading
         }}
         defaultValue={templateName}
         onImageUploadBefore={(files, _info, uploadHandler) => {
-          const formData = new FormData()
-          formData.append('image', files[0])
-          axiosPost<FormData, { image: string }>('/structure/image/', locale, formData).then(res => {
-            if (res.status && res.data) {
-              console.log(res.data)
-              const result: ImageUploadResult = {
-                result: [{ url: res.data.image, name: files[0].name, size: files[0].size }]
+          _resizeImage(files[0]).then(resized => {
+            const formData = new FormData()
+            formData.append('image', resized)
+            axiosPost<FormData, { image: string }>('/structure/image/', locale, formData).then(res => {
+              if (res.status && res.data) {
+                console.log(res.data)
+                const result: ImageUploadResult = {
+                  result: [{ url: res.data.image, name: resized.name, size: resized.size }]
+                }
+                uploadHandler(result)
+              } else {
+                uploadHandler({ result: [] })
               }
-              uploadHandler(result)
-            } else {
-              uploadHandler({ result: [] })
-            }
+            })
+          }).catch(err => {
+            console.error(err)
+            uploadHandler({ result: [] })
           })
           return undefined
         }}

@@ -21,6 +21,7 @@ import LinkTo from "@/components/Global/LinkTo";
 import { getMenuDashboardRef, menuDashboardPath } from "@/lib/menuDashboardPath";
 import CustomInput from "@/components/Custom/CustomInput";
 import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
+import { _resizeImage } from "@/shared/_shared";
 import { useAppDispatch } from "@/store/hooks";
 import { REMOVE_USER, SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
 import { toast } from "react-toastify";
@@ -218,12 +219,14 @@ export default function PersonalProfile({
     { value: "female", label: t("genderFemale") },
   ];
 
-  const processFile = useCallback((file: File | null) => {
-    if (!file || file.size > MAX_AVATAR_SIZE_BYTES) return;
-    setProfileImageFile(file);
+  const processFile = useCallback(async (file: File | null) => {
+    if (!file) return;
+    const resized = await _resizeImage(file);
+    if (resized.size > MAX_AVATAR_SIZE_BYTES) return;
+    setProfileImageFile(resized);
     setProfileImage((prev) => {
       if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
-      return URL.createObjectURL(file);
+      return URL.createObjectURL(resized);
     });
   }, []);
 
@@ -231,7 +234,7 @@ export default function PersonalProfile({
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0] ?? null;
       e.target.value = "";
-      processFile(file);
+      void processFile(file);
     },
     [processFile],
   );
@@ -254,7 +257,7 @@ export default function PersonalProfile({
       e.stopPropagation();
       setDragOver(false);
       const file = e.dataTransfer.files?.[0];
-      if (file && file.type.startsWith("image/")) processFile(file);
+      if (file && file.type.startsWith("image/")) void processFile(file);
     },
     [processFile],
   );
