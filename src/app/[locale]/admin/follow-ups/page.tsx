@@ -153,7 +153,10 @@ export default function AdminFollowUpsPage() {
             <PhoneDisplay
               value={phone}
               className="text-primary hover:underline"
-              as="a"
+              copyOnClick
+              title={t("copyPhone")}
+              onCopied={() => toast.success(t("phoneCopied"))}
+              onCopyFailed={() => toast.error(t("copyFailed"))}
             />
           );
         },
