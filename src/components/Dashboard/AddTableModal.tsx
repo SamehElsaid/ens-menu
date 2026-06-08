@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useLocale, useTranslations } from "next-intl";
 import { axiosPost, axiosPatch } from "@/shared/axiosCall";
@@ -16,7 +16,15 @@ import {
 } from "react-icons/io5";
 import CustomBtn from "../Custom/CustomBtn";
 import { MdOutlineTableBar } from "react-icons/md";
-import { useParams } from "next/navigation";
+const TABLE_NUMBER_MAX = 50;
+const TABLE_NUMBER_PATTERN = /^[a-zA-Z0-9\u0600-\u06FF][a-zA-Z0-9\u0600-\u06FF\s\-_]*$/;
+
+function sanitizeTableNumberInput(raw: string): string {
+  return raw
+    .replace(/[\u064B-\u065F\u0670\u0640]/g, "")
+    .replace(/[^a-zA-Z0-9\u0600-\u06FF\s\-_]/g, "")
+    .slice(0, TABLE_NUMBER_MAX);
+}
 
 export interface AddTableFormData {
   tableNumber: string;
@@ -74,23 +82,13 @@ export default function AddTableModal({
     return () => window.removeEventListener("keydown", handleEscape);
   }, [onClose, isSaving]);
 
-  const params = useParams();
-  const menuIdParam = params.menu as string;
-
-
-
   const onSubmit = async (data: AddTableFormData) => {
     try {
       setIsSaving(true);
 
-      const payload: {
-        tableNumber: string;
-        isActive: boolean;
-        menuId: number;
-      } = {
-        tableNumber: data.tableNumber.trim(),
+      const payload = {
+        tableNumber: sanitizeTableNumberInput(data.tableNumber).trim(),
         isActive: data.isActive,
-        menuId: Number(menuIdParam),
       };
 
       if (isEdit && table) {
@@ -186,15 +184,26 @@ export default function AddTableModal({
                     rules={{
                       required: t("tableNumberRequired"),
                       maxLength: {
-                        value: 50,
+                        value: TABLE_NUMBER_MAX,
                         message: t("tableNumberMax"),
                       },
+                      validate: (value) =>
+                        TABLE_NUMBER_PATTERN.test(value.trim()) ||
+                        t("tableNumberInvalid"),
                     }}
                     render={({ field }) => (
                       <CustomInput
                         type="text"
+                        inputMode="text"
+                        autoComplete="off"
                         value={field.value}
-                        onChange={(e) => field.onChange(e.target.value)}
+                        onChange={(e) =>
+                          field.onChange(
+                            sanitizeTableNumberInput(
+                              (e as ChangeEvent<HTMLInputElement>).target.value,
+                            ),
+                          )
+                        }
                         onBlur={field.onBlur}
                         className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                         placeholder={t("tableNumberPlaceholder")}

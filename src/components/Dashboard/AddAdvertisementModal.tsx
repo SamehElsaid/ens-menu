@@ -190,8 +190,12 @@ export default function AddAdvertisementModal({
           return;
         }
         imageUrl = uploadResult.data.url;
-      } else if (ad?.imageUrl) {
-        imageUrl = ad.imageUrl;
+      } else {
+        const existingImage =
+          ad?.imageUrl ?? (ad as { image?: string } | null)?.image ?? null;
+        if (existingImage) {
+          imageUrl = existingImage;
+        }
       }
 
       // For new advertisements, image is required
@@ -209,6 +213,12 @@ export default function AddAdvertisementModal({
         linkUrl: data.linkUrl ?? undefined,
         imageUrl,
         image: imageUrl,
+        ...(isEdit
+          ? {
+              position:
+                (ad as { position?: string } | null)?.position ?? "banner",
+            }
+          : { position: "banner" }),
       };
 
       if (isEdit && ad?.id != null) {

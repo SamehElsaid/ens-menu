@@ -471,7 +471,7 @@ export default function DashboardMenuPage() {
           className="lg:col-span-2 space-y-4"
           role="list"
         >
-          <LinkTo
+          <a
             href={menuLinkUrl || "#"}
             target="_blank"
             rel="noopener noreferrer"
@@ -489,7 +489,7 @@ export default function DashboardMenuPage() {
             <div className="w-11 h-11 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/20 dark:group-hover:bg-emerald-500/30 group-hover:scale-105 transition-all duration-200">
               <IoLinkOutline className="text-xl" />
             </div>
-          </LinkTo>
+          </a>
           {!isCashierStaff && (
             <LinkTo
               href={`/dashboard/${menuSlugOrId}/settings`}
