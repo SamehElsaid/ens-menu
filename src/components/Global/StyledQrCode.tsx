@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
-import { getStyledQrOptions } from "@/lib/styledQr";
+import { resolveMenuItemImageSrc } from "@/components/menuItemImage";
+import { getStyledQrOptions, DEFAULT_QR_CENTER_LOGO } from "@/lib/styledQr";
 
 export type StyledQrCodeHandle = {
   download: (filename: string) => Promise<void>;
@@ -14,6 +15,35 @@ type Props = {
   displaySize?: number;
   centerLogoSrc?: string | null;
 };
+
+async function resolveQrCenterLogo(
+  centerLogoSrc: string | null | undefined,
+): Promise<string> {
+  const candidate = centerLogoSrc?.trim()
+    ? resolveMenuItemImageSrc(centerLogoSrc)
+    : DEFAULT_QR_CENTER_LOGO;
+
+  if (
+    candidate === DEFAULT_QR_CENTER_LOGO ||
+    candidate.startsWith("/") ||
+    candidate.startsWith("data:")
+  ) {
+    return candidate;
+  }
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error("center-logo-unavailable"));
+      img.src = candidate;
+    });
+    return candidate;
+  } catch {
+    return DEFAULT_QR_CENTER_LOGO;
+  }
+}
 
 export const StyledQrCode = forwardRef<StyledQrCodeHandle, Props>(
   function StyledQrCode(
@@ -44,9 +74,12 @@ export const StyledQrCode = forwardRef<StyledQrCodeHandle, Props>(
         const { default: QRCodeStyling } = await import("qr-code-styling");
         if (cancelled || !containerRef.current) return;
 
+        const safeCenterLogo = await resolveQrCenterLogo(centerLogoSrc);
+        if (cancelled || !containerRef.current) return;
+
         el.innerHTML = "";
         const qr = new QRCodeStyling(
-          getStyledQrOptions({ value, size, centerLogoSrc }),
+          getStyledQrOptions({ value, size, centerLogoSrc: safeCenterLogo }),
         );
         instanceRef.current = qr;
         qr.append(el);
@@ -104,12 +137,13 @@ export async function downloadStyledQrPng(params: {
 
   document.body.appendChild(container);
   try {
+    const safeCenterLogo = await resolveQrCenterLogo(params.centerLogoSrc);
     const { default: QRCodeStyling } = await import("qr-code-styling");
     const qr = new QRCodeStyling(
       getStyledQrOptions({
         value: params.value,
         size,
-        centerLogoSrc: params.centerLogoSrc,
+        centerLogoSrc: safeCenterLogo,
       }),
     );
     qr.append(container);

@@ -18,7 +18,10 @@ import {
   HiOutlineX,
 } from "react-icons/hi";
 import LinkTo from "@/components/Global/LinkTo";
-import { getMenuDashboardRef, menuDashboardPath } from "@/lib/menuDashboardPath";
+import {
+  getMenuDashboardRef,
+  menuDashboardPath,
+} from "@/lib/menuDashboardPath";
 import CustomInput from "@/components/Custom/CustomInput";
 import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
 import { _resizeImage } from "@/shared/_shared";
@@ -491,8 +494,7 @@ export default function PersonalProfile({
                     {t("dragDropOrClick")}
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    PNG, JPG, GIF ·{" "}
-                    {t("maxFileSize")}
+                    PNG, JPG, GIF · {t("maxFileSize")}
                   </p>
                 </div>
                 <button

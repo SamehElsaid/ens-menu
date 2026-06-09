@@ -68,15 +68,25 @@ export default function AddAdvertisementModal({
       linkUrl: "",
     },
     resolver: yupResolver(
-      createAdvertisementSchema(t)
+      createAdvertisementSchema(t),
     ) as unknown as Resolver<AddAdvertisementFormData>,
     mode: "onChange",
   });
 
-  const handleImageUrlChange = useCallback((image: File | null | string) => {
-    setValue("imageUrl", image ? typeof image === "string" ? image : URL.createObjectURL(image) : "");
-    trigger("imageUrl");
-  }, [setValue, trigger]);
+  const handleImageUrlChange = useCallback(
+    (image: File | null | string) => {
+      setValue(
+        "imageUrl",
+        image
+          ? typeof image === "string"
+            ? image
+            : URL.createObjectURL(image)
+          : "",
+      );
+      trigger("imageUrl");
+    },
+    [setValue, trigger],
+  );
 
   useEffect(() => {
     if (ad) {
@@ -95,7 +105,6 @@ export default function AddAdvertisementModal({
       reset();
       setImagePreview(null);
       setImage(null);
-
     }
   }, [ad, reset, handleImageUrlChange]);
 
@@ -181,7 +190,7 @@ export default function AddAdvertisementModal({
           "/upload",
           locale,
           formData,
-          true
+          true,
         );
 
         if (!uploadResult.status || !uploadResult.data?.url) {
@@ -226,7 +235,7 @@ export default function AddAdvertisementModal({
         const result = await axiosPatch<typeof payload, Advertisement>(
           updateUrl,
           locale,
-          payload
+          payload,
         );
         if (result.status && result.data) {
           toast.success(t("editSuccess"));
@@ -242,7 +251,7 @@ export default function AddAdvertisementModal({
         const result = await axiosPost<typeof payload, Advertisement>(
           createUrl,
           locale,
-          payload
+          payload,
         );
         if (result.status && result.data) {
           toast.success(t("createSuccess"));
@@ -377,7 +386,7 @@ export default function AddAdvertisementModal({
                         onChange={(e) =>
                           field.onChange(
                             (e as React.ChangeEvent<HTMLInputElement>).target
-                              .value
+                              .value,
                           )
                         }
                         onBlur={field.onBlur}
@@ -403,7 +412,7 @@ export default function AddAdvertisementModal({
                         onChange={(e) =>
                           field.onChange(
                             (e as React.ChangeEvent<HTMLInputElement>).target
-                              .value
+                              .value,
                           )
                         }
                         onBlur={field.onBlur}
@@ -421,19 +430,20 @@ export default function AddAdvertisementModal({
               <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
                 {t("sectionMedia")}
               </h3>
-             
+
               <div className="grid grid-cols-1  gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {t("image")} *
                   </label>
                   <label
-                    className={`relative ${errors.imageUrl?.message ? "border-red-500 bg-red-50" : ""} block w-full cursor-pointer rounded-2xl border-2 border-dashed transition-all duration-200 ${isDragOver
-                      ? "border-primary bg-primary/5 dark:bg-primary/10"
-                      : imagePreview
-                        ? "border-primary/40 bg-primary/5 dark:bg-primary/10"
-                        : "border-gray-300 dark:border-gray-600 bg-gray-100/50 dark:bg-gray-600/20 hover:border-primary/40 hover:bg-primary/5 dark:hover:bg-primary/10"
-                      }`}
+                    className={`relative ${errors.imageUrl?.message ? "border-red-500 bg-red-50" : ""} block w-full cursor-pointer rounded-2xl border-2 border-dashed transition-all duration-200 ${
+                      isDragOver
+                        ? "border-primary bg-primary/5 dark:bg-primary/10"
+                        : imagePreview
+                          ? "border-primary/40 bg-primary/5 dark:bg-primary/10"
+                          : "border-gray-300 dark:border-gray-600 bg-gray-100/50 dark:bg-gray-600/20 hover:border-primary/40 hover:bg-primary/5 dark:hover:bg-primary/10"
+                    }`}
                     onDrop={handleDrop}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
@@ -478,7 +488,9 @@ export default function AddAdvertisementModal({
                     </div>
                   </label>
                   <UnmountClosed isOpened={Boolean(errors.imageUrl?.message)}>
-                    <p className="text-xs text-red-500 mt-1">{errors.imageUrl?.message}</p>
+                    <p className="text-xs text-red-500 mt-1">
+                      {errors.imageUrl?.message}
+                    </p>
                   </UnmountClosed>
                 </div>
                 <div>
@@ -532,4 +544,3 @@ export default function AddAdvertisementModal({
     </div>
   );
 }
-

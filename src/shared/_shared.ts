@@ -15,7 +15,7 @@ export const _checkFileSize = (file: File, size: number = 10) => {
 
 export const _checkFileType = (
   file: File,
-  types: string[] = ["image/png", "image/webp", "image/jpeg", "image/jpg"]
+  types: string[] = ["image/png", "image/webp", "image/jpeg", "image/jpg"],
 ) => {
   if (!types.includes(file.type)) {
     return false;
@@ -36,7 +36,6 @@ export const timeStringToDate = (time: string) => {
   return date;
 };
 
-
 export const convetDateToTimeString = (date: Date) => {
   return date.toTimeString().slice(0, 5);
 };
@@ -44,12 +43,16 @@ export const convetDateToTimeString = (date: Date) => {
 export const _resizeImage = async (
   file: File,
   maxBytes: number = 1.5 * 1024 * 1024,
-  thresholdBytes: number = 2 * 1024 * 1024
+  thresholdBytes: number = 2 * 1024 * 1024,
 ): Promise<File> => {
   if (file.size <= thresholdBytes) return file;
 
   // Check if we are in browser environment and have canvas support
-  if (typeof window === "undefined" || !window.createImageBitmap || !window.HTMLCanvasElement) {
+  if (
+    typeof window === "undefined" ||
+    !window.createImageBitmap ||
+    !window.HTMLCanvasElement
+  ) {
     return file;
   }
 
@@ -120,4 +123,4 @@ export const _resizeImage = async (
     console.error("[_resizeImage] Error during compression:", error);
     return file;
   }
-};
+};

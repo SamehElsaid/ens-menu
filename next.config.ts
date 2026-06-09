@@ -16,6 +16,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
@@ -23,6 +24,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "www.easykash.net",
         pathname: "/assets/images/**",
+      },
+      {
+        protocol: "https",
+        hostname: "ensapi.ensbot.net",
+      },
+      {
+        protocol: "https",
+        hostname: "api.ensmenu.com",
       },
     ],
   },

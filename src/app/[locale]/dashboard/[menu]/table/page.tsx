@@ -33,7 +33,11 @@ import {
   IoTrashOutline,
 } from "react-icons/io5";
 
-import { publicMenuQrUrl } from "@/lib/publicMenuUrl";
+import {
+  publicMenuQrUrl,
+  resolvePublicMenuSlug,
+} from "@/lib/publicMenuUrl";
+import { resolveMenuItemImageSrc } from "@/components/menuItemImage";
 
 function tablePublicMenuUrl(
   slug: string | undefined | null,
@@ -54,11 +58,15 @@ export default function TablesPage() {
   const tStaff = useTranslations("Staff");
   const locale = useLocale();
   const params = useParams();
-  const menuSlug = useAppSelector((s) => s.menuData.menu?.slug);
-  const menuLogo = useAppSelector((s) => s.menuData.menu?.logo);
+  const menuRecord = useAppSelector((s) => s.menuData.menu);
+  const menuSlug = resolvePublicMenuSlug(menuRecord?.slug, menuRecord?.id);
+  const menuLogo = menuRecord?.logo;
   const userData = useAppSelector((s) => s.auth.data);
   const isFreePlan = isFreePlanUser(userData);
-  const qrCenterLogoSrc = !isFreePlan ? (menuLogo ?? null) : null;
+  const qrCenterLogoSrc =
+    !isFreePlan && menuLogo?.trim()
+      ? resolveMenuItemImageSrc(menuLogo)
+      : null;
   const menuId =
     typeof params.menu === "string"
       ? params.menu

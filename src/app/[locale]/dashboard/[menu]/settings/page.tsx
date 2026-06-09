@@ -210,9 +210,7 @@ export default function SettingsPage() {
 
         if (!uploadResult.status || !uploadResult.data?.url) {
           console.error("Logo upload error:", uploadResult.data);
-          toast.error(
-            tSettings("logoUploadFailed"),
-          );
+          toast.error(tSettings("logoUploadFailed"));
           return;
         }
 
