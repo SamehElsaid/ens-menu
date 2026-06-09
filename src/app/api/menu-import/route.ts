@@ -31,7 +31,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (!menuId) {
-      return NextResponse.json({ error: "menuId is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "menuId is required" },
+        { status: 400 },
+      );
     }
 
     if (
@@ -144,4 +147,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "internal_error" }, { status: 500 });
   }
 }
-

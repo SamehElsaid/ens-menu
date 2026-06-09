@@ -20,7 +20,9 @@ export function normalizeMenuFromApi(data: unknown): Menu | null {
 
   if (!Number.isFinite(id)) return null;
 
-  const slug = String(candidate.slug ?? id);
+  const slug =
+    (typeof candidate.slug === "string" && candidate.slug.trim()) ||
+    String(id);
   const nameEn =
     (candidate.nameEn as string | undefined) ??
     (candidate.name as string | undefined) ??
@@ -54,7 +56,13 @@ export function menuMatchesRouteKey(
   routeKey: string | null,
 ): boolean {
   if (!menu || !routeKey) return false;
-  return menu.slug === routeKey || String(menu.id) === routeKey;
+  const key = routeKey.trim();
+  const uuid = menu.uuid?.trim();
+  return (
+    menu.slug === key ||
+    String(menu.id) === key ||
+    (uuid != null && uuid.toLowerCase() === key.toLowerCase())
+  );
 }
 
 export function extractDashboardMenuRouteKey(pathname: string): string | null {

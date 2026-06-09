@@ -2,12 +2,30 @@
 export const MENU_QR_ENTRY_PARAM = "src";
 export const MENU_QR_ENTRY_VALUE = "qr";
 
+const DEFAULT_MENU_HOST_SUFFIX = ".ensmenu.com";
+
+function menuHostSuffix(): string {
+  const fromEnv = process.env.NEXT_PUBLIC_MENU_URL?.trim();
+  return fromEnv || DEFAULT_MENU_HOST_SUFFIX;
+}
+
+/** Normalized slug for public URLs (empty / whitespace → unusable). */
+export function resolvePublicMenuSlug(
+  slug: string | undefined | null,
+  menuId?: number | string | null,
+): string {
+  const trimmed = slug?.trim();
+  if (trimmed) return trimmed;
+  if (menuId != null && String(menuId).trim()) {
+    return String(menuId).trim();
+  }
+  return "";
+}
+
 export function buildPublicMenuBaseUrl(slug: string | undefined | null): string {
-  if (!slug) return "";
-  return `https://${slug}${process.env.NEXT_PUBLIC_MENU_URL || ""}`.replace(
-    /^https:\/\//,
-    "https://",
-  );
+  const normalized = resolvePublicMenuSlug(slug);
+  if (!normalized) return "";
+  return `https://${normalized}${menuHostSuffix()}`;
 }
 
 export function appendQueryParams(

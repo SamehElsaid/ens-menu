@@ -38,7 +38,12 @@ import {
 import { useDashboardSession } from "@/hooks/useDashboardSession";
 import { isFreePlanUser } from "@/lib/subscription";
 import { ONBOARDING_REFRESH_EVENT } from "@/lib/onboarding/onboardingStorage";
-import { publicMenuLinkUrl, publicMenuQrUrl } from "@/lib/publicMenuUrl";
+import {
+  publicMenuLinkUrl,
+  publicMenuQrUrl,
+  resolvePublicMenuSlug,
+} from "@/lib/publicMenuUrl";
+import { resolveMenuItemImageSrc } from "@/components/menuItemImage";
 import MenuImportEntryButton from "@/components/MenuImport/MenuImportEntryButton";
 
 type ActivityEntry = {
@@ -97,10 +102,14 @@ export default function DashboardMenuPage() {
   const [recentCategories, setRecentCategories] = useState<Category[]>([]);
   const [activityLoading, setActivityLoading] = useState(true);
 
-  const menuLinkUrl = menu?.slug ? publicMenuLinkUrl(menu.slug) : "";
-  const menuQrUrl = menu?.slug ? publicMenuQrUrl(menu.slug) : "";
+  const publicSlug = resolvePublicMenuSlug(menu?.slug, menu?.id);
+  const menuLinkUrl = publicSlug ? publicMenuLinkUrl(publicSlug) : "";
+  const menuQrUrl = publicSlug ? publicMenuQrUrl(publicSlug) : "";
   const menuQrRef = useRef<StyledQrCodeHandle>(null);
-  const qrCenterLogoSrc = !isFreePlan ? (menu?.logo ?? null) : null;
+  const qrCenterLogoSrc =
+    !isFreePlan && menu?.logo?.trim()
+      ? resolveMenuItemImageSrc(menu.logo)
+      : null;
 
   useEffect(() => {
     if (!menuLoading && menu) {

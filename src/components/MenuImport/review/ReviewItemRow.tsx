@@ -102,11 +102,12 @@ export default function ReviewItemRow({
       id={importRefDomId(item.id)}
       className={`px-5 py-4 space-y-3 scroll-mt-24 ${hasMissingPrice || hasMissingName || hasPriceConflict ? "bg-amber-50/50 dark:bg-amber-900/10" : hasDuplicate ? "bg-slate-50/80 dark:bg-slate-800/50" : ""}`}
     >
-      {item.variants.length === 0 && item.duplicateMeta?.status === "exact_duplicate" && (
-        <p className="text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/60 rounded-lg px-3 py-2">
-          {t("duplicateExactSkip")}
-        </p>
-      )}
+      {item.variants.length === 0 &&
+        item.duplicateMeta?.status === "exact_duplicate" && (
+          <p className="text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/60 rounded-lg px-3 py-2">
+            {t("duplicateExactSkip")}
+          </p>
+        )}
 
       {item.variants.length === 0 &&
         item.flags.includes("price_conflict") &&
@@ -287,82 +288,85 @@ export default function ReviewItemRow({
               className="space-y-2 scroll-mt-24"
             >
               {variant.duplicateMeta?.status === "exact_duplicate" && (
-                <p className="text-xs text-slate-500">{t("duplicateExactSkip")}</p>
+                <p className="text-xs text-slate-500">
+                  {t("duplicateExactSkip")}
+                </p>
               )}
-              {variant.flags.includes("price_conflict") && variant.duplicateMeta && (
-                <div className="rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 px-2 py-2 space-y-2">
-                  <p className="text-xs text-amber-900 dark:text-amber-200">
-                    {t("duplicatePriceConflict", {
-                      existing: variant.duplicateMeta.existingPrice ?? 0,
-                      newPrice: variant.price ?? 0,
-                      currency,
-                    })}
-                  </p>
-                  {!variant.duplicateMeta.resolution ? (
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          onResolveDuplicate("update_price", variant.id)
-                        }
-                        className="text-xs px-2 py-1 rounded-lg bg-primary text-white"
-                      >
-                        {t("duplicateUpdatePrice")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onResolveDuplicate("skip", variant.id)}
-                        className="text-xs px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-600"
-                      >
-                        {t("duplicateSkip")}
-                      </button>
-                    </div>
-                  ) : null}
-                </div>
-              )}
+              {variant.flags.includes("price_conflict") &&
+                variant.duplicateMeta && (
+                  <div className="rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 px-2 py-2 space-y-2">
+                    <p className="text-xs text-amber-900 dark:text-amber-200">
+                      {t("duplicatePriceConflict", {
+                        existing: variant.duplicateMeta.existingPrice ?? 0,
+                        newPrice: variant.price ?? 0,
+                        currency,
+                      })}
+                    </p>
+                    {!variant.duplicateMeta.resolution ? (
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            onResolveDuplicate("update_price", variant.id)
+                          }
+                          className="text-xs px-2 py-1 rounded-lg bg-primary text-white"
+                        >
+                          {t("duplicateUpdatePrice")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onResolveDuplicate("skip", variant.id)}
+                          className="text-xs px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-600"
+                        >
+                          {t("duplicateSkip")}
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                )}
               <div className="flex flex-wrap items-center gap-2">
-              <input
-                type="text"
-                value={variant.label}
-                onChange={(e) =>
-                  onUpdateVariant(variant.id, { label: e.target.value })
-                }
-                placeholder={t("variantLabel")}
-                className={`flex-1 min-w-[100px] px-2 py-1.5 rounded-lg border text-sm ${
-                  variant.flags.includes("missing_name_ar") ||
-                  variant.flags.includes("missing_name_en")
-                    ? missingFieldClass
-                    : "border-slate-200 dark:border-slate-600"
-                }`}
-              />
-              <input
-                type="number"
-                min={0}
-                step="0.01"
-                value={variant.price ?? ""}
-                onChange={(e) =>
-                  onUpdateVariant(variant.id, {
-                    price:
-                      e.target.value === ""
-                        ? null
-                        : Number.parseFloat(e.target.value),
-                  })
-                }
-                placeholder={t("price")}
-                className={`w-24 px-2 py-1.5 rounded-lg border text-sm tabular-nums ${
-                  variant.price === null
-                    ? "border-amber-400 bg-amber-50 dark:bg-amber-900/20"
-                    : "border-slate-200 dark:border-slate-600"
-                }`}
-              />
-              <span className="text-xs text-slate-500">{currency}</span>
-              <button
-                type="button"
-                onClick={() => onRemoveVariant(variant.id)}
-                className="p-1 text-slate-400 hover:text-red-500"
-              >
-                <IoCloseOutline />
-              </button>
+                <input
+                  type="text"
+                  value={variant.label}
+                  onChange={(e) =>
+                    onUpdateVariant(variant.id, { label: e.target.value })
+                  }
+                  placeholder={t("variantLabel")}
+                  className={`flex-1 min-w-[100px] px-2 py-1.5 rounded-lg border text-sm ${
+                    variant.flags.includes("missing_name_ar") ||
+                    variant.flags.includes("missing_name_en")
+                      ? missingFieldClass
+                      : "border-slate-200 dark:border-slate-600"
+                  }`}
+                />
+                <input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={variant.price ?? ""}
+                  onChange={(e) =>
+                    onUpdateVariant(variant.id, {
+                      price:
+                        e.target.value === ""
+                          ? null
+                          : Number.parseFloat(e.target.value),
+                    })
+                  }
+                  placeholder={t("price")}
+                  className={`w-24 px-2 py-1.5 rounded-lg border text-sm tabular-nums ${
+                    variant.price === null
+                      ? "border-amber-400 bg-amber-50 dark:bg-amber-900/20"
+                      : "border-slate-200 dark:border-slate-600"
+                  }`}
+                />
+                <span className="text-xs text-slate-500">{currency}</span>
+                <button
+                  type="button"
+                  onClick={() => onRemoveVariant(variant.id)}
+                  className="p-1 text-slate-400 hover:text-red-500"
+                >
+                  <IoCloseOutline />
+                </button>
               </div>
             </div>
           ))}

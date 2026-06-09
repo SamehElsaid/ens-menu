@@ -104,7 +104,7 @@ export default function AddCategoryModal({
           "/upload",
           locale,
           formData,
-          true
+          true,
         );
 
         if (!uploadResult.status || !uploadResult.data?.url) {
@@ -126,7 +126,7 @@ export default function AddCategoryModal({
         const result = await axiosPatch<typeof payload, Category>(
           `/menus/${menuId}/categories/${category.id}`,
           locale,
-          payload
+          payload,
         );
         if (result.status && result.data) {
           toast.success(t("editSuccess"));
@@ -139,7 +139,7 @@ export default function AddCategoryModal({
         const result = await axiosPost<typeof payload, Category>(
           `/menus/${menuId}/categories`,
           locale,
-          payload
+          payload,
         );
         if (result.status && result.data) {
           toast.success(t("createSuccess"));
@@ -232,7 +232,10 @@ export default function AddCategoryModal({
                 <BiCategory className="text-primary text-2xl" />
               </div>
               <div>
-                <h2 id="add-category-title" className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
+                <h2
+                  id="add-category-title"
+                  className="text-xl font-bold text-gray-900 dark:text-white tracking-tight"
+                >
                   {isEdit ? t("editTitle") : t("title")}
                 </h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
@@ -252,7 +255,10 @@ export default function AddCategoryModal({
           </div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col min-h-0 flex-1">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col min-h-0 flex-1"
+        >
           <div className="overflow-y-auto p-6 space-y-6">
             {/* Names section */}
             <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
@@ -325,10 +331,11 @@ export default function AddCategoryModal({
                     <button
                       type="button"
                       onClick={() => field.onChange(true)}
-                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${field.value === true
-                        ? "bg-white dark:bg-gray-700 text-primary shadow-sm border border-gray-200/80 dark:border-gray-600 ring-1 ring-primary/20"
-                        : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                        }`}
+                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                        field.value === true
+                          ? "bg-white dark:bg-gray-700 text-primary shadow-sm border border-gray-200/80 dark:border-gray-600 ring-1 ring-primary/20"
+                          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                      }`}
                     >
                       <IoCheckmarkCircle className="text-lg" />
                       {t("active")}
@@ -336,10 +343,11 @@ export default function AddCategoryModal({
                     <button
                       type="button"
                       onClick={() => field.onChange(false)}
-                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${field.value === false
-                        ? "bg-white dark:bg-gray-700 text-red-600 dark:text-red-400 shadow-sm border border-gray-200/80 dark:border-gray-600 ring-1 ring-red-500/20"
-                        : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                        }`}
+                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                        field.value === false
+                          ? "bg-white dark:bg-gray-700 text-red-600 dark:text-red-400 shadow-sm border border-gray-200/80 dark:border-gray-600 ring-1 ring-red-500/20"
+                          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                      }`}
                     >
                       <IoRemoveCircle className="text-lg" />
                       {t("inactive")}
@@ -359,12 +367,13 @@ export default function AddCategoryModal({
               </div>
               <div className="flex flex-col items-center gap-4">
                 <label
-                  className={`relative block w-full cursor-pointer rounded-2xl border-2 border-dashed transition-all duration-200 ${isDragOver
-                    ? "border-primary bg-primary/5 dark:bg-primary/10"
-                    : imagePreview
-                      ? "border-primary/40 bg-primary/5 dark:bg-primary/10"
-                      : "border-gray-300 dark:border-gray-600 bg-gray-100/50 dark:bg-gray-600/20 hover:border-primary/40 hover:bg-primary/5 dark:hover:bg-primary/10"
-                    }`}
+                  className={`relative block w-full cursor-pointer rounded-2xl border-2 border-dashed transition-all duration-200 ${
+                    isDragOver
+                      ? "border-primary bg-primary/5 dark:bg-primary/10"
+                      : imagePreview
+                        ? "border-primary/40 bg-primary/5 dark:bg-primary/10"
+                        : "border-gray-300 dark:border-gray-600 bg-gray-100/50 dark:bg-gray-600/20 hover:border-primary/40 hover:bg-primary/5 dark:hover:bg-primary/10"
+                  }`}
                   onDrop={handleDrop}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
