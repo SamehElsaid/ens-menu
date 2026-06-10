@@ -178,4 +178,52 @@ export const templatesInfo: TemplateInfo[] = [
     colors: ["#C9A227", "#0E7C86"],
     defaultColors: ["#C9A227", "#0E7C86"],
   },
+  {
+    id: "arcane",
+    name: "Arcane Template",
+    nameAr: "قالب أركين",
+    image: "/images/temp/arcaneTemp.png",
+    description:
+      "Bold red and white cafe menu with corporate styling and smooth animations",
+    descriptionAr:
+      "قائمة كافيه بألوان أحمر وأبيض جريئة مع تصميم احترافي ورسوم متحركة",
+    isNew: true,
+    canEdit: true,
+    customizeHeroTexts: false,
+    slug: "arcane",
+    colors: ["#D1282A", "#991B1B"],
+    defaultColors: ["#D1282A", "#991B1B"],
+  },
+  {
+    id: "music",
+    name: "Music Template",
+    nameAr: "قالب الموسيقى",
+    image: "/images/temp/music.png",
+    description:
+      "Vinyl-inspired menu with mood-driven colors, genres, and a cinematic hero",
+    descriptionAr:
+      "قائمة بطابع موسيقي مع ألوان ديناميكية، تصنيفات أنماط، وهيرو سينمائي",
+    isNew: true,
+    canEdit: true,
+    customizeHeroTexts: false,
+    slug: "music",
+    colors: ["#4338CA", "#06B6D4"],
+    defaultColors: ["#4338CA", "#06B6D4"],
+  },
+  {
+    id: "retro",
+    name: "Retro Coffee Template",
+    nameAr: "قالب القهوة الكلاسيكي",
+    image: "/images/temp/retroTemp.png",
+    description:
+      "Warm retro cafe menu with paper textures, category tabs, and cozy styling",
+    descriptionAr:
+      "قائمة كافيه كلاسيكية دافئة مع خامات ورقية، تبويبات تصنيفات، وأسلوب مريح",
+    isNew: true,
+    canEdit: false,
+    customizeHeroTexts: false,
+    slug: "retro",
+    colors: ["#C67115", "#84623E"],
+    defaultColors: ["#C67115", "#84623E"],
+  },
 ];
