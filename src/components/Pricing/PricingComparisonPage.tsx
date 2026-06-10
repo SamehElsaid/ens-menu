@@ -28,6 +28,12 @@ const STATIC_PRO_MONTHLY_EGP = 499;
 const STATIC_PRO_YEARLY_EGP = 5988;
 const FAQ_IDS = ["faq1", "faq2", "faq3"] as const;
 
+const MENU_IMPORT_BULLET_KEYS = [
+  "menuImportBulletUpload",
+  "menuImportBulletAnalyze",
+  "menuImportBulletPublish",
+] as const;
+
 const PAYMENT_METHODS = [
   {
     id: "visa",
@@ -134,6 +140,46 @@ function yesNoIcon(
           aria-hidden
         />,
       );
+}
+
+function PlanMenuImportFeature({
+  title,
+  bullets,
+  premium,
+}: {
+  title: string;
+  bullets: string[];
+  premium: boolean;
+}) {
+  const checkClass = premium
+    ? "text-violet-500 dark:text-violet-400"
+    : "text-emerald-500 dark:text-emerald-400";
+
+  return (
+    <li className="text-sm font-medium text-slate-700 dark:text-slate-300">
+      <div className="flex items-start gap-2.5">
+        <HiCheck
+          className={`mt-0.5 h-4 w-4 shrink-0 sm:h-5 sm:w-5 ${checkClass}`}
+          aria-hidden
+        />
+        <span className="leading-snug">{title}</span>
+      </div>
+      <ul className="mt-1.5 space-y-1 ps-6 sm:ps-7">
+        {bullets.map((bullet) => (
+          <li
+            key={bullet}
+            className="flex items-start gap-2 text-xs leading-snug text-slate-500 dark:text-slate-400 sm:text-[13px]"
+          >
+            <span
+              className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-slate-400 dark:bg-slate-500"
+              aria-hidden
+            />
+            <span>{bullet}</span>
+          </li>
+        ))}
+      </ul>
+    </li>
+  );
 }
 
 function renderCell(value: CellVal, tYes: string, tNo: string): ReactNode {
@@ -281,7 +327,11 @@ export default function PricingComparisonPage() {
 
   const proFeatures = useMemo(() => {
     const base = translatePlanFeaturesWithMenuLimit(
-      [t("staticProFeature1"), t("staticProFeature2"), t("staticProFeature3")],
+      [
+        t("staticProFeature1"),
+        t("staticProFeature2"),
+        t("staticProFeature3"),
+      ],
       STATIC_PRO_PLAN.maxMenus,
       tProfile,
     );
@@ -293,6 +343,11 @@ export default function PricingComparisonPage() {
       t("proStaffMobileAppBullet"),
     ];
   }, [tProfile, tLanding, t]);
+
+  const menuImportBullets = useMemo(
+    () => MENU_IMPORT_BULLET_KEYS.map((key) => t(key)),
+    [t],
+  );
 
   const tYes = t("yes");
   const tNo = t("no");
@@ -318,6 +373,12 @@ export default function PricingComparisonPage() {
     },
     {
       label: t("rowGuestMenu"),
+      free: true,
+      pro: true,
+      custom: true,
+    },
+    {
+      label: t("rowMenuImport"),
       free: true,
       pro: true,
       custom: true,
@@ -758,22 +819,43 @@ export default function PricingComparisonPage() {
                   )}
                 </div>
                 <ul className="mt-5 flex-1 space-y-2.5 sm:space-y-3">
-                  {card.features.map((feat, idx) => (
-                    <li
-                      key={idx}
-                      className="flex items-start gap-2.5 text-sm font-medium text-slate-700 dark:text-slate-300"
-                    >
-                      <HiCheck
-                        className={`mt-0.5 h-4 w-4 shrink-0 sm:h-5 sm:w-5 ${
-                          card.premium
-                            ? "text-violet-500 dark:text-violet-400"
-                            : "text-emerald-500 dark:text-emerald-400"
-                        }`}
-                        aria-hidden
-                      />
-                      {feat}
-                    </li>
-                  ))}
+                  {card.features.flatMap((feat, idx) => {
+                    const items: ReactNode[] = [];
+                    const menuImportAt = card.id === "free" ? 2 : 3;
+
+                    if (
+                      (card.id === "free" || card.id === "pro") &&
+                      idx === menuImportAt
+                    ) {
+                      items.push(
+                        <PlanMenuImportFeature
+                          key="menu-import"
+                          title={t("menuImportFeatureTitle")}
+                          bullets={menuImportBullets}
+                          premium={card.premium}
+                        />,
+                      );
+                    }
+
+                    items.push(
+                      <li
+                        key={idx}
+                        className="flex items-start gap-2.5 text-sm font-medium text-slate-700 dark:text-slate-300"
+                      >
+                        <HiCheck
+                          className={`mt-0.5 h-4 w-4 shrink-0 sm:h-5 sm:w-5 ${
+                            card.premium
+                              ? "text-violet-500 dark:text-violet-400"
+                              : "text-emerald-500 dark:text-emerald-400"
+                          }`}
+                          aria-hidden
+                        />
+                        {feat}
+                      </li>,
+                    );
+
+                    return items;
+                  })}
                 </ul>
                 <div className="mt-6 sm:mt-8">
                   {card.cta.external ? (

@@ -692,12 +692,13 @@
     "oneMenu": "One menu",
     "threeMenus": "3 menus",
     "menusLimitFeature": "{count, plural, one {# menu} other {# menus}}",
-    "products50": "50 products",
-    "products200": "200 products per menu",
+    "products50": "unlimited",
+    "products200": "unlimited per menu",
     "ads": "Advertisements",
     "noModifications": "No modifications",
     "controlAds": "Control over advertisements",
     "fullModifications": "Full modifications",
+    "aiMenuImport": "Import your menu easily with AI",
     "contactForDetails": "Contact us for more details",
     "youAreOnFreePlan": "You are on the Free Plan",
     "upgradePlan": "Upgrade Plan",
@@ -1240,6 +1241,32 @@
       "title": "Ready to streamline your work?",
       "button": "Download the App for Free"
     },
+    "newAiFeatures": {
+      "eyebrow": "New",
+      "title": "AI that builds your menu with you",
+      "subtitle": "Two new features to save time — import your menu from an image or PDF, and a smart assistant that guides you step by step.",
+      "badgeNew": "New",
+      "cta": "Try the features for free",
+      "items": {
+        "aiMenuImport": {
+          "title": "Import your menu easily with AI",
+          "description": "Turn your paper menu into an organized digital menu in minutes.",
+          "bullets": {
+            "0": "Upload an image or PDF of your current menu",
+            "1": "Auto-detect items and prices (Arabic/English)",
+            "2": "Organize sections, review edits, then publish"
+          }
+        },
+        "aiAssistant": {
+          "title": "AI assistant",
+          "description": "An in-platform assistant to help you set up your menu and answer questions instantly.",
+          "bullets": {
+            "0": "Smart guidance while building your menu and settings",
+            "1": "Available on Free and Pro plans"
+          }
+        }
+      }
+    },
     "features": {
       "title": "Why Choose Smart Menu?",
       "description": "We provide everything you need to create a professional digital menu for your restaurant or cafe",
@@ -1407,7 +1434,8 @@
       "proExtraFeatures": {
         "staffSystem": "Add staff (team) system",
         "tablesSystem": "Add tables and QR links system"
-      }
+      },
+      "badgeNew": "New"
     },
     "cta": {
       "title": "Ready to Transform Your Restaurant?",
@@ -1490,6 +1518,11 @@
     "billingProShort": "Monthly or yearly",
     "rowBillingCycle": "Billing cycle",
     "rowGuestMenu": "Guest-facing digital menu",
+    "rowMenuImport": "AI menu import",
+    "menuImportFeatureTitle": "Import your menu easily with AI",
+    "menuImportBulletUpload": "Upload an image or PDF of your menu",
+    "menuImportBulletAnalyze": "Detect items & prices (Arabic/English)",
+    "menuImportBulletPublish": "Auto-sections, review & publish",
     "rowTableOrderingQr": "Table ordering (QR)",
     "cellAllIncluded": "Included",
     "rowDashboard": "Web dashboard",
@@ -1541,11 +1574,11 @@
     "faq2a": "You keep your data, but limits (menus, products, features) apply to the lower plan. You may need to pause extra menus until you are within the limit.",
     "faq3q": "Do you offer refunds?",
     "faq3a": "Refund rules depend on how you subscribed. Check the terms at purchase time or ask sales on WhatsApp.",
-    "staticFreeFeature1": "50 products",
-    "staticFreeFeature2": "No modifications",
+    "staticFreeFeature1": "Unlimited products",
+    "staticFreeFeature2": "No modifications Colors",
     "staticFreeFeatureAI": "Free AI — limited speed & intelligence",
-    "staticProFeature1": "200 products per menu",
-    "staticProFeature2": "Includes modifications",
+    "staticProFeature1": "Unlimited products per menu",
+    "staticProFeature2": "Includes modifications Colors",
     "staticProFeature3": "Ad controls",
     "staticProFeatureAI": "Premium AI — unlimited speed & intelligence"
   },

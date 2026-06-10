@@ -9,19 +9,21 @@ const FEATURE_MAP: Record<string, string> = {
   "تحكم في الإعلانات": "controlAds",
   "شامل التعديلات": "fullModifications",
   "منيو واحد": "oneMenu",
-  "50 منتج": "products50",
-  "بدون تعديلات": "noModifications",
+  " غير محدودة": "unlimited",
+  "بدون تعديلات": "noModifications Colors",
   "إعلانات": "ads",
   "اعلانات": "ads",
+  "استورد المنيو بسهولة باستخدام الذكاء الاصطناعي": "aiMenuImport",
   // English (if stored in DB)
   "3 menus": "threeMenus",
-  "200 products per menu": "products200",
+  "unlimited per menu": "unlimited",
   "control over advertisements": "controlAds",
   "full modifications": "fullModifications",
   "one menu": "oneMenu",
-  "50 products": "products50",
-  "no modifications": "noModifications",
+  "unlimited": "unlimited",
+  "no modifications Colors": "noModifications",
   advertisements: "ads",
+  "import your menu easily with ai": "aiMenuImport",
 };
 
 function normalizeFeatureLine(raw: string): string {
