@@ -162,7 +162,10 @@ export default function TemplateDesignCustomizePanel({
     readyPalettes[0]?.id ?? "primary",
   );
   const [customColors, setCustomColors] = useState<string[]>(() =>
-    Array.from({ length: colorSlots }, () => ""),
+    Array.from(
+      { length: colorSlots },
+      (_, index) => initialColors[index] ?? initialColors[0] ?? "",
+    ),
   );
   const [showColorPicker, setShowColorPicker] = useState<string | null>(null);
   const [texts, setTexts] = useState<TextsState>({ ...INITIAL_TEXTS });
