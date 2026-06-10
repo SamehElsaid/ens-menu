@@ -465,6 +465,15 @@ export default function UsersPage() {
         field: "name",
         flex: 1,
         minWidth: 150,
+        cellRenderer: (params: { data: User; value: string }) => (
+          <button
+            type="button"
+            onClick={() => router.push(`/admin/users/${params.data.id}`)}
+            className="text-primary hover:underline font-medium text-start"
+          >
+            {params.value}
+          </button>
+        ),
       },
       {
         headerName: t("columns.email"),

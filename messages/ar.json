@@ -2428,6 +2428,7 @@
       "basicInfo": {
         "title": "المعلومات الأساسية",
         "name": "الاسم",
+        "restaurantName": "اسم المطعم / الكافيه",
         "plan": "الخطة",
         "emailStatus": "حالة البريد",
         "email": "البريد الإلكتروني",
@@ -2507,6 +2508,164 @@
         "suspendError": "فشل إيقاف المستخدم",
         "reactivateSuccess": "تم إعادة تفعيل المستخدم بنجاح",
         "reactivateError": "فشل إعادة تفعيل المستخدم"
+      },
+      "customerSections": {
+        "lastActivity": "آخر نشاط",
+        "accountStatus": {
+          "active": "نشط",
+          "blocked": "محظور",
+          "deleted": "محذوف",
+          "suspended": "موقوف"
+        },
+        "profile": {
+          "edit": "تعديل بيانات العميل",
+          "save": "حفظ",
+          "saveSuccess": "تم تحديث البيانات بنجاح",
+          "saveError": "فشل تحديث البيانات"
+        },
+        "block": {
+          "block": "حظر العميل",
+          "unblock": "إلغاء الحظر",
+          "reasonLabel": "سبب الحظر",
+          "reasonPlaceholder": "سبب الحظر (اختياري)",
+          "blockSuccess": "تم حظر العميل",
+          "unblockSuccess": "تم إلغاء الحظر",
+          "error": "فشل تحديث حالة الحظر"
+        },
+        "softDelete": {
+          "action": "حذف الحساب",
+          "title": "حذف الحساب (Soft Delete)",
+          "message": "سيتم إيقاف الحساب وإخفاؤه. يمكن استعادته لاحقاً.",
+          "success": "تم حذف الحساب",
+          "error": "فشل حذف الحساب"
+        },
+        "restore": {
+          "action": "استعادة الحساب",
+          "success": "تم استعادة الحساب",
+          "error": "فشل استعادة الحساب"
+        },
+        "resetLink": {
+          "send": "إرسال رابط Reset Password",
+          "sending": "جاري الإرسال...",
+          "success": "تم إرسال رابط إعادة التعيين",
+          "error": "فشل إرسال الرابط"
+        },
+        "orders": {
+          "title": "طلبات العميل",
+          "loading": "جاري التحميل...",
+          "empty": "لا توجد طلبات",
+          "totalOrders": "إجمالي الطلبات",
+          "totalPaid": "إجمالي المدفوع",
+          "lastOrder": "آخر طلب",
+          "plan": "الخطة",
+          "status": "الحالة",
+          "amount": "المبلغ",
+          "date": "التاريخ",
+          "actions": "إجراءات",
+          "viewDetails": "التفاصيل",
+          "orderDetails": "تفاصيل الطلب"
+        },
+        "addresses": {
+          "title": "العناوين",
+          "loading": "جاري التحميل...",
+          "empty": "لا توجد عناوين",
+          "add": "إضافة عنوان",
+          "edit": "تعديل عنوان",
+          "label": "التسمية",
+          "addressLine": "العنوان",
+          "city": "المدينة",
+          "governorate": "المحافظة",
+          "default": "افتراضي",
+          "setDefault": "تعيين كافتراضي",
+          "save": "حفظ",
+          "cancel": "إلغاء",
+          "createSuccess": "تم إضافة العنوان",
+          "updateSuccess": "تم تحديث العنوان",
+          "saveError": "فشل حفظ العنوان",
+          "deleteSuccess": "تم حذف العنوان",
+          "deleteError": "فشل حذف العنوان",
+          "defaultSuccess": "تم تعيين العنوان الافتراضي",
+          "deleteConfirmTitle": "حذف العنوان",
+          "deleteConfirmMessage": "هل أنت متأكد من حذف هذا العنوان؟"
+        },
+        "notes": {
+          "title": "ملاحظات داخلية",
+          "hint": "تظهر للإدارة فقط — مثل: عميل VIP، يحتاج متابعة",
+          "placeholder": "أضف ملاحظة...",
+          "add": "إضافة",
+          "loading": "جاري التحميل...",
+          "empty": "لا توجد ملاحظات",
+          "addSuccess": "تمت إضافة الملاحظة",
+          "addError": "فشل إضافة الملاحظة",
+          "deleteSuccess": "تم حذف الملاحظة"
+        },
+        "activity": {
+          "title": "سجل النشاط",
+          "loading": "جاري التحميل...",
+          "empty": "لا توجد عمليات مسجلة",
+          "lastLogin": "آخر تسجيل دخول",
+          "lastUpdate": "آخر تعديل على الحساب",
+          "lastOrder": "آخر طلب",
+          "actions": {
+            "profile_updated": "تعديل البيانات",
+            "account_blocked": "حظر الحساب",
+            "account_unblocked": "إلغاء الحظر",
+            "account_soft_deleted": "حذف الحساب",
+            "account_restored": "استعادة الحساب",
+            "password_reset_sent": "إرسال رابط إعادة التعيين",
+            "password_changed_by_admin": "تغيير كلمة المرور",
+            "account_suspended": "إيقاف الحساب",
+            "account_reactivated": "تفعيل الحساب",
+            "address_created": "إضافة عنوان",
+            "address_updated": "تعديل عنوان",
+            "address_deleted": "حذف عنوان",
+            "note_added": "إضافة ملاحظة",
+            "note_deleted": "حذف ملاحظة",
+            "voucher_assigned": "تعيين كوبون",
+            "voucher_blocked": "حظر كوبون",
+            "voucher_unblocked": "إلغاء حظر كوبون",
+            "support_case_created": "إنشاء شكوى",
+            "support_status_updated": "تحديث حالة الشكوى"
+          }
+        },
+        "vouchers": {
+          "title": "الكوبونات والخصومات",
+          "loading": "جاري التحميل...",
+          "assignPlaceholder": "كود الكوبون",
+          "assign": "تعيين للعميل",
+          "assignSuccess": "تم تعيين الكوبون",
+          "assignError": "فشل تعيين الكوبون",
+          "used": "الكوبونات المستخدمة",
+          "blocked": "كوبونات محظورة",
+          "emptyUsed": "لم يستخدم أي كوبون",
+          "emptyBlocked": "لا توجد كوبونات محظورة",
+          "block": "حظر",
+          "unblock": "إلغاء الحظر",
+          "blockHint": "حظر كوبون مستخدم من الاستخدام مرة أخرى",
+          "blockSuccess": "تم حظر الكوبون",
+          "unblockSuccess": "تم إلغاء الحظر"
+        },
+        "support": {
+          "title": "الدعم والشكاوى",
+          "loading": "جاري التحميل...",
+          "empty": "لا توجد شكاوى",
+          "add": "إضافة شكوى",
+          "subject": "الموضوع",
+          "message": "الرسالة",
+          "ticketRef": "رقم التذكرة (اختياري)",
+          "ticket": "التذكرة",
+          "save": "حفظ",
+          "cancel": "إلغاء",
+          "createSuccess": "تم إنشاء الشكوى",
+          "createError": "فشل إنشاء الشكوى",
+          "statusSuccess": "تم تحديث الحالة",
+          "status": {
+            "open": "مفتوحة",
+            "in_progress": "قيد المعالجة",
+            "resolved": "تم الحل",
+            "closed": "مغلقة"
+          }
+        }
       }
     }
   },
