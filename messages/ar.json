@@ -3226,7 +3226,8 @@
     "emptyTitle": "لا توجد مقالات بعد",
     "emptyDescription": "تابعنا لاحقاً للاطلاع على المقالات.",
     "createdAt": "نُشر",
-    "updatedAt": "آخر تحديث"
+    "updatedAt": "آخر تحديث",
+    "backToList": "العودة للمقالات"
   },
   "headerSearch": {
     "label": "البحث في قاعدة المعرفة",

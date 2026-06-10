@@ -3225,7 +3225,8 @@
     "emptyTitle": "No articles yet",
     "emptyDescription": "Check back later for helpful articles.",
     "createdAt": "Published",
-    "updatedAt": "Updated"
+    "updatedAt": "Updated",
+    "backToList": "Back to articles"
   },
   "headerSearch": {
     "label": "Search knowledge base",
