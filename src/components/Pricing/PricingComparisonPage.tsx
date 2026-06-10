@@ -57,14 +57,12 @@ const PAYMENT_METHODS = [
 
 const STATIC_FREE_PLAN = {
   maxMenus: 1,
-  maxProductsPerMenu: 50,
   allowCustomDomain: false,
   hasAds: false,
 } as const;
 
 const STATIC_PRO_PLAN = {
   maxMenus: 4,
-  maxProductsPerMenu: 200,
   allowCustomDomain: true,
   hasAds: true,
 } as const;
@@ -314,8 +312,8 @@ export default function PricingComparisonPage() {
     },
     {
       label: t("rowProducts"),
-      free: STATIC_FREE_PLAN.maxProductsPerMenu,
-      pro: STATIC_PRO_PLAN.maxProductsPerMenu,
+      free: t("limited"),
+      pro: t("limited"),
       custom: t("cellNegotiable"),
     },
     {
