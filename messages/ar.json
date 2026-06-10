@@ -1414,6 +1414,7 @@
     "cellIncluded": "مشمول",
     "cellNotIncluded": "غير مشمول",
     "cellNegotiable": "حسب احتياجك",
+    "limited": "غير محدودة",
     "cellUnlimited": "غير محدود (بالاتفاق)",
     "supportFree": "عبر البريد ومركز المساعدة",
     "supportPro": "أولوية في أوقات العمل",
@@ -3385,7 +3386,8 @@
     "emptyTitle": "لا توجد مقالات بعد",
     "emptyDescription": "تابعنا لاحقاً للاطلاع على المقالات.",
     "createdAt": "نُشر",
-    "updatedAt": "آخر تحديث"
+    "updatedAt": "آخر تحديث",
+    "backToList": "العودة للمقالات"
   },
   "headerSearch": {
     "label": "البحث في قاعدة المعرفة",

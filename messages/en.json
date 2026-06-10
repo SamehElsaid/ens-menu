@@ -1506,6 +1506,7 @@
     "cellIncluded": "Included",
     "cellNotIncluded": "Not included",
     "cellNegotiable": "Tailored to your needs",
+    "limited": "Unlimited",
     "cellUnlimited": "Unlimited (by agreement)",
     "supportFree": "Standard (email & help center)",
     "supportPro": "Priority during business hours",
@@ -3384,7 +3385,8 @@
     "emptyTitle": "No articles yet",
     "emptyDescription": "Check back later for helpful articles.",
     "createdAt": "Published",
-    "updatedAt": "Updated"
+    "updatedAt": "Updated",
+    "backToList": "Back to articles"
   },
   "headerSearch": {
     "label": "Search knowledge base",
