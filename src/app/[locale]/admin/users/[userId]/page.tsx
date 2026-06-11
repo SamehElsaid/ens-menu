@@ -11,7 +11,14 @@ import ConfirmationModal from "@/components/Custom/ConfirmationModal";
 import { axiosGet, axiosPatch, axiosPost, axiosDelete } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import UserFollowUpTimeline from "@/components/Admin/UserFollowUpTimeline";
+import CustomerOrdersSection from "@/components/Admin/CustomerOrdersSection";
+import CustomerAddressesSection from "@/components/Admin/CustomerAddressesSection";
+import CustomerNotesSection from "@/components/Admin/CustomerNotesSection";
+import CustomerActivitySection from "@/components/Admin/CustomerActivitySection";
+import CustomerVouchersSection from "@/components/Admin/CustomerVouchersSection";
+import CustomerSupportSection from "@/components/Admin/CustomerSupportSection";
 import PhoneDisplay from "@/components/Global/PhoneDisplay";
+import type { AccountStatus, UserOrder } from "@/types/AdminCustomer";
 
 interface Plan {
   id: number;
@@ -29,12 +36,19 @@ interface User {
   dateOfBirth: string | null;
   gender: string | null;
   address: string | null;
+  restaurantName?: string | null;
   profileImage: string | null;
   createdAt: string;
   lastLoginAt: string | null;
   isSuspended: boolean;
   suspendedAt: string | null;
   suspendedReason: string | null;
+  isBlocked?: boolean;
+  blockedAt?: string | null;
+  blockedReason?: string | null;
+  deletedAt?: string | null;
+  updatedAt?: string | null;
+  accountStatus?: AccountStatus;
   planName: string;
   subscriptionStatus: string;
   startDate: string;
@@ -79,6 +93,7 @@ export default function UserDetailsPage() {
   const locale = useLocale();
   const t = useTranslations("adminUsers.userDetails");
   const tAccount = useTranslations("adminUsers.userDetails.accountActions");
+  const tCustomer = useTranslations("adminUsers.userDetails.customerSections");
   const router = useRouter();
   const params = useParams();
   const userId =
@@ -114,6 +129,22 @@ export default function UserDetailsPage() {
   const [accountActionLoading, setAccountActionLoading] = useState(false);
   const [featureOnHomepageLoading, setFeatureOnHomepageLoading] =
     useState(false);
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    name: "",
+    email: "",
+    phoneNumber: "",
+    country: "",
+    restaurantName: "",
+  });
+  const [profileSubmitting, setProfileSubmitting] = useState(false);
+  const [blockModalOpen, setBlockModalOpen] = useState(false);
+  const [blockReason, setBlockReason] = useState("");
+  const [blockSubmitting, setBlockSubmitting] = useState(false);
+  const [softDeleteConfirmOpen, setSoftDeleteConfirmOpen] = useState(false);
+  const [softDeleteLoading, setSoftDeleteLoading] = useState(false);
+  const [resetLinkLoading, setResetLinkLoading] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<UserOrder | null>(null);
 
   const fetchUserDetails = useCallback(async () => {
     try {
@@ -329,6 +360,142 @@ export default function UserDetailsPage() {
       setFeatureOnHomepageLoading(false);
     }
   }, [userId, locale, t, fetchUserDetails]);
+
+  const openEditProfile = useCallback(() => {
+    if (!userData?.user) return;
+    setProfileForm({
+      name: userData.user.name ?? "",
+      email: userData.user.email ?? "",
+      phoneNumber: userData.user.phoneNumber ?? "",
+      country: userData.user.country ?? "",
+      restaurantName: userData.user.restaurantName ?? "",
+    });
+    setEditProfileOpen(true);
+  }, [userData?.user]);
+
+  const handleSaveProfile = useCallback(async () => {
+    setProfileSubmitting(true);
+    try {
+      const result = await axiosPatch<typeof profileForm, { success?: boolean }>(
+        `/admin/users/${userId}/profile`,
+        locale,
+        profileForm,
+      );
+      if (result.status) {
+        toast.success(tCustomer("profile.saveSuccess"));
+        setEditProfileOpen(false);
+        fetchUserDetails();
+      } else {
+        toast.error(tCustomer("profile.saveError"));
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(tCustomer("profile.saveError"));
+    } finally {
+      setProfileSubmitting(false);
+    }
+  }, [profileForm, userId, locale, tCustomer, fetchUserDetails]);
+
+  const handleToggleBlock = useCallback(async () => {
+    const isBlocked = !userData?.user?.isBlocked;
+    setBlockSubmitting(true);
+    try {
+      const result = await axiosPatch<
+        { isBlocked: boolean; reason?: string },
+        { success?: boolean }
+      >(`/admin/users/${userId}/block`, locale, {
+        isBlocked,
+        reason: blockReason.trim() || undefined,
+      });
+      if (result.status) {
+        toast.success(
+          isBlocked ? tCustomer("block.blockSuccess") : tCustomer("block.unblockSuccess"),
+        );
+        setBlockModalOpen(false);
+        setBlockReason("");
+        fetchUserDetails();
+      } else {
+        toast.error(tCustomer("block.error"));
+      }
+    } finally {
+      setBlockSubmitting(false);
+    }
+  }, [userData?.user?.isBlocked, userId, locale, blockReason, tCustomer, fetchUserDetails]);
+
+  const handleSoftDelete = useCallback(async () => {
+    setSoftDeleteLoading(true);
+    try {
+      const result = await axiosPost<Record<string, never>, { success?: boolean }>(
+        `/admin/users/${userId}/soft-delete`,
+        locale,
+        {},
+      );
+      if (result.status) {
+        toast.success(tCustomer("softDelete.success"));
+        setSoftDeleteConfirmOpen(false);
+        fetchUserDetails();
+      } else {
+        toast.error(tCustomer("softDelete.error"));
+      }
+    } finally {
+      setSoftDeleteLoading(false);
+    }
+  }, [userId, locale, tCustomer, fetchUserDetails]);
+
+  const handleRestoreUser = useCallback(async () => {
+    setAccountActionLoading(true);
+    try {
+      const result = await axiosPost<Record<string, never>, { success?: boolean }>(
+        `/admin/users/${userId}/restore`,
+        locale,
+        {},
+      );
+      if (result.status) {
+        toast.success(tCustomer("restore.success"));
+        fetchUserDetails();
+      } else {
+        toast.error(tCustomer("restore.error"));
+      }
+    } finally {
+      setAccountActionLoading(false);
+    }
+  }, [userId, locale, tCustomer, fetchUserDetails]);
+
+  const handleSendResetLink = useCallback(async () => {
+    setResetLinkLoading(true);
+    try {
+      const result = await axiosPost<{ locale: string }, { success?: boolean }>(
+        `/admin/users/${userId}/send-reset-password`,
+        locale,
+        { locale },
+      );
+      if (result.status) {
+        toast.success(tCustomer("resetLink.success"));
+      } else {
+        toast.error(tCustomer("resetLink.error"));
+      }
+    } finally {
+      setResetLinkLoading(false);
+    }
+  }, [userId, locale, tCustomer]);
+
+  const getAccountStatusLabel = (status?: AccountStatus) => {
+    if (!status) return t("status.active");
+    return tCustomer(`accountStatus.${status}`);
+  };
+
+  const getAccountStatusClass = (status?: AccountStatus) => {
+    switch (status) {
+      case "deleted":
+        return "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300";
+      case "blocked":
+        return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400";
+      case "suspended":
+        return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+      default:
+        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+    }
+  };
 
   const getBillingCycleLabel = (cycle: string) => {
     if (cycle.toLowerCase() === "free") return t("free");
@@ -864,6 +1031,14 @@ export default function UserDetailsPage() {
           </div>
           <div>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+              {t("basicInfo.restaurantName")}
+            </p>
+            <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+              {user.restaurantName?.trim() || "—"}
+            </p>
+          </div>
+          <div>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
               {t("basicInfo.plan")}
             </p>
             <span
@@ -899,14 +1074,18 @@ export default function UserDetailsPage() {
               {t("basicInfo.status")}
             </p>
             <span
-              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                !user.isSuspended
-                  ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                  : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-              }`}
+              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${getAccountStatusClass(user.accountStatus)}`}
             >
-              {!user.isSuspended ? t("status.active") : t("status.suspended")}
+              {getAccountStatusLabel(user.accountStatus)}
             </span>
+          </div>
+          <div>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+              {tCustomer("lastActivity")}
+            </p>
+            <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+              {formatDate(user.lastLoginAt ?? user.updatedAt ?? null)}
+            </p>
           </div>
           <div>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
@@ -952,15 +1131,35 @@ export default function UserDetailsPage() {
             {tAccount("suspendedReasonLabel")}: {user.suspendedReason}
           </p>
         )}
+        {user.isBlocked && user.blockedReason && (
+          <p className="text-sm text-orange-600 dark:text-orange-400 mb-4">
+            {tCustomer("block.reasonLabel")}: {user.blockedReason}
+          </p>
+        )}
         <div
           className={`flex flex-wrap gap-3 ${isRTL ? "flex-row-reverse" : ""}`}
         >
+          <button
+            type="button"
+            onClick={openEditProfile}
+            className="px-4 py-2.5 rounded-xl bg-slate-700 text-white font-semibold hover:bg-slate-800 transition-colors"
+          >
+            {tCustomer("profile.edit")}
+          </button>
           <button
             type="button"
             onClick={() => setPasswordModalOpen(true)}
             className="px-4 py-2.5 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-colors"
           >
             {tAccount("changePassword")}
+          </button>
+          <button
+            type="button"
+            onClick={handleSendResetLink}
+            disabled={resetLinkLoading}
+            className="px-4 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+          >
+            {resetLinkLoading ? tCustomer("resetLink.sending") : tCustomer("resetLink.send")}
           </button>
           {user.isSuspended ? (
             <button
@@ -978,6 +1177,35 @@ export default function UserDetailsPage() {
               className="px-4 py-2.5 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors"
             >
               {tAccount("suspend")}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setBlockModalOpen(true)}
+            className={`px-4 py-2.5 rounded-xl text-white font-semibold transition-colors ${
+              user.isBlocked
+                ? "bg-amber-600 hover:bg-amber-700"
+                : "bg-orange-600 hover:bg-orange-700"
+            }`}
+          >
+            {user.isBlocked ? tCustomer("block.unblock") : tCustomer("block.block")}
+          </button>
+          {user.deletedAt ? (
+            <button
+              type="button"
+              onClick={handleRestoreUser}
+              disabled={accountActionLoading}
+              className="px-4 py-2.5 rounded-xl bg-teal-600 text-white font-semibold hover:bg-teal-700 disabled:opacity-50 transition-colors"
+            >
+              {tCustomer("restore.action")}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setSoftDeleteConfirmOpen(true)}
+              className="px-4 py-2.5 rounded-xl bg-slate-500 text-white font-semibold hover:bg-slate-600 transition-colors"
+            >
+              {tCustomer("softDelete.action")}
             </button>
           )}
         </div>
@@ -1347,6 +1575,157 @@ export default function UserDetailsPage() {
             />
           );
         })()}
+      <CustomerOrdersSection
+        userId={Number(userId)}
+        onSelectOrder={setSelectedOrder}
+      />
+      <CustomerAddressesSection userId={Number(userId)} />
+      <CustomerNotesSection userId={Number(userId)} />
+      <CustomerVouchersSection userId={Number(userId)} />
+      <CustomerActivitySection userId={Number(userId)} />
+      <CustomerSupportSection userId={Number(userId)} />
+
+      {editProfileOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-md w-full p-6 space-y-3">
+            <h3 className="text-xl font-bold">{tCustomer("profile.edit")}</h3>
+            <input
+              value={profileForm.name}
+              onChange={(e) =>
+                setProfileForm((f) => ({ ...f, name: e.target.value }))
+              }
+              placeholder={t("basicInfo.name")}
+              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+            />
+            <input
+              value={profileForm.restaurantName}
+              onChange={(e) =>
+                setProfileForm((f) => ({ ...f, restaurantName: e.target.value }))
+              }
+              placeholder={t("basicInfo.restaurantName")}
+              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+            />
+            <input
+              value={profileForm.email}
+              onChange={(e) =>
+                setProfileForm((f) => ({ ...f, email: e.target.value }))
+              }
+              placeholder={t("basicInfo.email")}
+              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+              dir="ltr"
+            />
+            <input
+              value={profileForm.phoneNumber}
+              onChange={(e) =>
+                setProfileForm((f) => ({ ...f, phoneNumber: e.target.value }))
+              }
+              placeholder={t("basicInfo.phoneNumber")}
+              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+              dir="ltr"
+            />
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={handleSaveProfile}
+                disabled={profileSubmitting}
+                className="flex-1 py-2 rounded-xl bg-primary text-white font-semibold disabled:opacity-50"
+              >
+                {tCustomer("profile.save")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditProfileOpen(false)}
+                className="flex-1 py-2 rounded-xl border border-slate-200"
+              >
+                {t("lists.cancel")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {blockModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold mb-2">
+              {user.isBlocked ? tCustomer("block.unblock") : tCustomer("block.block")}
+            </h3>
+            {!user.isBlocked && (
+              <textarea
+                rows={3}
+                value={blockReason}
+                onChange={(e) => setBlockReason(e.target.value)}
+                placeholder={tCustomer("block.reasonPlaceholder")}
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 mb-4"
+              />
+            )}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handleToggleBlock}
+                disabled={blockSubmitting}
+                className="flex-1 py-2 rounded-xl bg-orange-600 text-white font-semibold disabled:opacity-50"
+              >
+                {tCustomer("profile.save")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setBlockModalOpen(false)}
+                className="flex-1 py-2 rounded-xl border border-slate-200"
+              >
+                {t("lists.cancel")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ConfirmationModal
+        isOpen={softDeleteConfirmOpen}
+        onClose={() => !softDeleteLoading && setSoftDeleteConfirmOpen(false)}
+        onConfirm={handleSoftDelete}
+        title={tCustomer("softDelete.title")}
+        message={tCustomer("softDelete.message")}
+        confirmText={tCustomer("softDelete.action")}
+        cancelText={t("lists.cancel")}
+        isLoading={softDeleteLoading}
+        loadingText={t("lists.updating")}
+      />
+
+      {selectedOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold mb-4">
+              {tCustomer("orders.orderDetails")}
+            </h3>
+            <dl className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <dt className="text-slate-500">{tCustomer("orders.plan")}</dt>
+                <dd className="font-semibold">{selectedOrder.planName}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-slate-500">{tCustomer("orders.status")}</dt>
+                <dd className="font-semibold capitalize">{selectedOrder.status}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-slate-500">{tCustomer("orders.amount")}</dt>
+                <dd className="font-semibold">{selectedOrder.amount}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-slate-500">{tCustomer("orders.date")}</dt>
+                <dd>{formatDate(selectedOrder.createdAt)}</dd>
+              </div>
+            </dl>
+            <button
+              type="button"
+              onClick={() => setSelectedOrder(null)}
+              className="mt-6 w-full py-2 rounded-xl border border-slate-200"
+            >
+              {t("lists.cancel")}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
