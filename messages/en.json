@@ -2814,6 +2814,7 @@
     "totalAdmins": "Total Administrators",
     "lastLogin": "Last Login",
     "addNewAdmin": "Add New Administrator +",
+    "viewActivityLog": "Activity Log",
     "you": "You",
     "error": "Failed to load administrators",
     "columns": {
@@ -2863,6 +2864,45 @@
       "cancel": "Cancel",
       "createSuccess": "Administrator created successfully",
       "createError": "Failed to create administrator"
+    }
+  },
+  "adminActivityLog": {
+    "title": "Admin Activity Log",
+    "subtitle": "Track who promoted, deleted, or modified administrators and users",
+    "back": "Back to administrators",
+    "error": "Failed to load activity log",
+    "empty": "No activity recorded yet",
+    "filters": {
+      "action": "Action",
+      "targetType": "Target type",
+      "allActions": "All actions",
+      "allTargets": "All targets"
+    },
+    "columns": {
+      "date": "Date",
+      "actor": "Performed by",
+      "action": "Action",
+      "target": "Target",
+      "targetType": "Type",
+      "details": "Details"
+    },
+    "targetTypes": {
+      "admin": "Administrator",
+      "user": "User"
+    },
+    "actions": {
+      "admin_created": "Promoted to admin",
+      "admin_deleted": "Deleted administrator",
+      "admin_permissions_updated": "Updated permissions",
+      "user_deleted": "Permanently deleted user",
+      "user_soft_deleted": "Soft deleted user",
+      "user_restored": "Restored user",
+      "user_subscription_updated": "Updated subscription"
+    },
+    "details": {
+      "subscription": "Plan: {plan} ({cycle})",
+      "fullAccess": "Full access",
+      "limitedPermissions": "{count} sections"
     }
   },
   "adminAppVersion": {

@@ -1,10 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { IoPencilOutline, IoTrashOutline } from "react-icons/io5";
+import { toast } from "react-toastify";
+import CallNowPhoneModal from "@/components/Admin/CallNowPhoneModal";
 import {
   formatFollowUpDateTime,
   formatFollowUpPurpose,
+  getFollowUpCallDisplayPhone,
 } from "@/lib/fetchAdminFollowUp";
 import type { FollowUpCall } from "@/types/AdminFollowUp";
 import PhoneDisplay from "@/components/Global/PhoneDisplay";
@@ -26,6 +30,10 @@ export default function FollowUpCallsList({
 }: FollowUpCallsListProps) {
   const locale = useLocale();
   const t = useTranslations("adminFollowUps");
+  const [phoneModal, setPhoneModal] = useState<{
+    phone: string;
+    name: string;
+  } | null>(null);
 
   if (calls.length === 0) {
     return (
@@ -36,8 +44,16 @@ export default function FollowUpCallsList({
   }
 
   return (
+    <>
     <ul className="space-y-3">
-      {calls.map((call) => (
+      {calls.map((call) => {
+        const displayPhone = getFollowUpCallDisplayPhone(call);
+        const displayName =
+          call.customerName?.trim() ||
+          call.userName?.trim() ||
+          `#${call.userId}`;
+
+        return (
         <li
           key={call.id}
           className="rounded-xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-700 dark:bg-slate-800/50"
@@ -98,6 +114,35 @@ export default function FollowUpCallsList({
 
           {detailed && (
             <dl className="mb-2 grid grid-cols-1 gap-1.5 text-xs sm:grid-cols-2">
+              {displayPhone && (
+                <div className="sm:col-span-2">
+                  <dt className="text-slate-500 dark:text-slate-400">
+                    {t("columns.phone")}
+                  </dt>
+                  <dd className="flex flex-wrap items-center gap-2">
+                    <PhoneDisplay
+                      value={displayPhone}
+                      copyOnClick
+                      className="font-medium text-primary hover:underline"
+                      title={t("copyPhone")}
+                      onCopied={() => toast.success(t("phoneCopied"))}
+                      onCopyFailed={() => toast.error(t("copyFailed"))}
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPhoneModal({
+                          phone: displayPhone,
+                          name: displayName,
+                        })
+                      }
+                      className="text-xs font-medium text-slate-600 underline hover:text-primary dark:text-slate-300"
+                    >
+                      {t("callNow")}
+                    </button>
+                  </dd>
+                </div>
+              )}
               {call.customerName && (
                 <div>
                   <dt className="text-slate-500 dark:text-slate-400">
@@ -248,7 +293,18 @@ export default function FollowUpCallsList({
             </div>
           )}
         </li>
-      ))}
+        );
+      })}
     </ul>
+
+    {phoneModal && (
+      <CallNowPhoneModal
+        open
+        onClose={() => setPhoneModal(null)}
+        phoneNumber={phoneModal.phone}
+        customerName={phoneModal.name}
+      />
+    )}
+    </>
   );
 }

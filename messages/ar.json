@@ -2723,6 +2723,7 @@
     "totalAdmins": "إجمالي المشرفين",
     "lastLogin": "آخر تسجيل دخول",
     "addNewAdmin": "إضافة مشرف جديد +",
+    "viewActivityLog": "سجل النشاط",
     "you": "أنت",
     "error": "فشل تحميل المشرفين",
     "columns": {
@@ -2772,6 +2773,45 @@
       "cancel": "إلغاء",
       "createSuccess": "تم إنشاء المشرف بنجاح",
       "createError": "فشل إنشاء المشرف"
+    }
+  },
+  "adminActivityLog": {
+    "title": "سجل نشاط المشرفين",
+    "subtitle": "تتبع من رقّى من، ومن حذف من، وتعديلات المشرفين والمستخدمين",
+    "back": "العودة للمشرفين",
+    "error": "فشل تحميل سجل النشاط",
+    "empty": "لا يوجد نشاط مسجّل بعد",
+    "filters": {
+      "action": "الإجراء",
+      "targetType": "نوع الهدف",
+      "allActions": "كل الإجراءات",
+      "allTargets": "كل الأهداف"
+    },
+    "columns": {
+      "date": "التاريخ",
+      "actor": "نفّذ بواسطة",
+      "action": "الإجراء",
+      "target": "الهدف",
+      "targetType": "النوع",
+      "details": "التفاصيل"
+    },
+    "targetTypes": {
+      "admin": "مشرف",
+      "user": "مستخدم"
+    },
+    "actions": {
+      "admin_created": "ترقية لمشرف",
+      "admin_deleted": "حذف مشرف",
+      "admin_permissions_updated": "تحديث الصلاحيات",
+      "user_deleted": "حذف نهائي للمستخدم",
+      "user_soft_deleted": "حذف مؤقت للمستخدم",
+      "user_restored": "استعادة مستخدم",
+      "user_subscription_updated": "تحديث الاشتراك"
+    },
+    "details": {
+      "subscription": "الخطة: {plan} ({cycle})",
+      "fullAccess": "صلاحيات كاملة",
+      "limitedPermissions": "{count} أقسام"
     }
   },
   "adminAppVersion": {
