@@ -1,7 +1,28 @@
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
+import ForwardArrow from "@/components/Global/ForwardArrow";
+import { DemoVideoTrigger } from "@/components/HomePage/DemoVideoModal";
+import { buildHeroChatTurns } from "@/lib/mockDemoProducts";
 import HeroBackground from "@/components/HomePage/HeroBackground";
-import HeroLinaImage from "@/components/HomePage/HeroLinaImage";
+import HeroPhoneMockup from "@/components/HomePage/HeroPhoneMockup";
+import {
+  MarketingAccent,
+  MarketingBadge,
+  MarketingButtonLink,
+  MarketingButtonRow,
+  MarketingHeading,
+  MarketingPill,
+  MarketingPillRow,
+  MarketingSection,
+  MarketingSplit,
+  MarketingSplitContent,
+  MarketingSplitVisual,
+  MarketingText,
+} from "@/components/marketing";
+
+const HERO_PILL_KEYS = ["pill1", "pill2", "pill3", "pill4"] as const;
+
+const HERO_VISUAL_CLASS =
+  "hero-lina-chat-visual mx-auto w-full max-w-[min(100%,280px)] sm:max-w-[300px] lg:mx-0 lg:w-[min(100%,400px)] lg:min-w-[320px] lg:max-w-[400px] lg:shrink-0 lg:py-4";
 
 type HeroContentProps = {
   locale: string;
@@ -9,51 +30,72 @@ type HeroContentProps = {
 
 export default async function HeroContent({ locale }: HeroContentProps) {
   const t = await getTranslations({ locale, namespace: "heroSection" });
-  const isRTL = locale === "ar";
+
+  const pills = HERO_PILL_KEYS.map((key) => t(key));
+
+  const chatTurns = buildHeroChatTurns(
+    {
+      item1: t("mockItem1"),
+      item2: t("mockItem2"),
+      item3: t("mockItem3"),
+      item4: t("mockItem4"),
+    },
+    {
+      user1: t("mockChat.user1"),
+      lina1: t("mockChat.lina1"),
+      user2: t("mockChat.user2"),
+      lina2: t("mockChat.lina2"),
+    },
+  );
 
   return (
-    <section
+    <MarketingSection
       id="hero"
-      className="hero-section relative flex min-h-[70vh] items-center overflow-hidden bg-white pt-28  lg:min-h-[92vh] lg:pt-30  dark:bg-[#0d1117]"
+      variant="hero"
+      className="relative overflow-visible! pb-10! sm:pb-12! lg:pb-14!"
     >
       <HeroBackground />
-      <div className="container relative z-10 mx-auto px-6">
 
-        <div className="mx-auto flex-col lg:text-start gap-10 text-center lg:flex-row flex w-full  justify-between  items-center ">
-        <HeroLinaImage alt={t("linaAlt")} />
-         
-          <div>
+      <div className="container relative z-10">
+        <MarketingSplit className="gap-8 sm:gap-10 lg:gap-14">
+          <MarketingSplitContent>
+            <MarketingBadge className="mb-6">{t("badge")}</MarketingBadge>
 
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-purple-100 bg-purple-50 px-5 py-2 text-sm font-bold text-purple-700 shadow-sm dark:border-purple-500/30 dark:bg-purple-500/20 dark:text-purple-400">
-              <span>{t("badge")}</span>
-              <span>🚀</span>
-            </div>
-
-            <h1 className="mb-6 text-2xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-3xl lg:text-4xl dark:text-white">
+            <MarketingHeading as="h1" level="display" className="mb-5">
               {t("title1")}{" "}
-              <span className="bg-linear-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent dark:from-purple-400 dark:to-indigo-400">
-                {t("title2")}
-              </span>
-            </h1>
+              <MarketingAccent>{t("title2")}</MarketingAccent>
+            </MarketingHeading>
 
-            <p className="mb-8 max-w-xl text-base leading-relaxed font-medium text-slate-600 sm:text-lg dark:text-slate-300">
+            <MarketingText variant="subtitle" className="mb-8">
               {t("description")}
-            </p>
+            </MarketingText>
 
-            <div className="mb-4 flex flex-wrap items-center justify-center lg:justify-start gap-4">
-              <Link
-                href="/auth/login"
-                prefetch={false}
-                className="inline-flex items-center gap-3 rounded-full bg-linear-to-r from-purple-600 to-purple-700 px-8 py-4 text-base font-bold text-white shadow-2xl shadow-purple-300/40 transition-transform hover:scale-[1.02] dark:from-purple-500 dark:to-purple-600 dark:shadow-purple-900/50"
-              >
-                <span>{t("cta")}</span>
-                <span aria-hidden>{isRTL ? "←" : "→"}</span>
-              </Link>
-            </div>
-          </div>
+            <MarketingButtonRow className="mb-6">
+              <MarketingButtonLink href="/auth/register" prefetch={false}>
+                {t("cta")}
+                <ForwardArrow />
+              </MarketingButtonLink>
+              <DemoVideoTrigger variant="hero">{t("secondaryCta")}</DemoVideoTrigger>
+            </MarketingButtonRow>
 
-        </div>
+            <MarketingPillRow className="mb-5">
+              {pills.map((pill) => (
+                <MarketingPill key={pill}>{pill}</MarketingPill>
+              ))}
+            </MarketingPillRow>
+
+            <MarketingText variant="caption">{t("trustLine")}</MarketingText>
+          </MarketingSplitContent>
+
+          <MarketingSplitVisual className={HERO_VISUAL_CLASS}>
+            <HeroPhoneMockup
+              businessName={t("businessName")}
+              turns={chatTurns}
+              compact
+            />
+          </MarketingSplitVisual>
+        </MarketingSplit>
       </div>
-    </section>
+    </MarketingSection>
   );
 }

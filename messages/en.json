@@ -50,6 +50,11 @@
       "title": "Contact Us | ENSmenu",
       "description": "Reach the ENSmenu team by phone, email, WhatsApp, or social media.",
       "keywords": "contact ENSmenu, support, WhatsApp, email, digital menu help"
+    },
+    "aboutPage": {
+      "title": "About | ENSMENU — The Future of Smart Menu",
+      "description": "ENSmenu for restaurants, cafés, and hotels — QR menus, smart ordering, and branch management powered by AI.",
+      "keywords": "ENSmenu about, smart menu, smart menu, QR menu, AI ordering, Egypt startup"
     }
   },
   "legalPages": {
@@ -1077,12 +1082,40 @@
     "logosAriaLabel": "Our clients logos"
   },
   "heroSection": {
-    "badge": "Start Now for Free",
+    "badge": "Smart Menu",
     "linaAlt": "Lina - ENSmenu assistant",
-    "title1": "Transform your restaurant into a",
-    "title2": "Smart Electronic Menu",
-    "description": "An interactive digital menu with modern design, enables your customers to browse the food menu easily and clearly by scanning a QR code only",
-    "cta": "Start Now for Free",
+    "title1": "Smart menus & ordering",
+    "title2": "for restaurants, cafés & hotels",
+    "description": "For restaurants, cafés, and hotels — QR menus, faster orders, and a better guest experience. Live in minutes.",
+    "cta": "Start Free",
+    "secondaryCta": "Watch demo",
+    "trustLine": "100% free forever · No credit card · No limits",
+    "pill1": "Smart Ordering",
+    "pill2": "AI Suggestions",
+    "pill3": "Multi-language",
+    "pill4": "QR Experience",
+    "mockScan": "Scan to open menu",
+    "mockAiLabel": "Lina suggests",
+    "mockMenuTitle": "Menu",
+    "mockAiHint": "Guest favorite — add to order?",
+    "mockItem1": "Grilled Chicken",
+    "mockItem2": "Fresh Juice",
+    "mockItem3": "Cheesecake",
+    "mockAdd": "Add",
+    "mockChat": {
+      "assistantName": "Lina",
+      "status": "Smart ordering",
+      "inputPlaceholder": "Ask Lina…",
+      "user1": "I'd like something light",
+      "lina1": "I'd recommend cheesecake and fresh juice 👌",
+      "user2": "Anything spicy?",
+      "lina2": "Try spicy grilled chicken with potato wedges 🔥",
+      "addToCart": "Add to cart",
+      "subtotalLine": "Subtotal: {amount}",
+      "itemsInCart": "{count} items added",
+      "addedToCart": "Added to cart"
+    },
+    "mockItem4": "Potato Wedges",
     "watchDemo": "Watch Demo",
     "androidTitle": "Smoother Experience via Android App",
     "androidDescription": "For business owners seeking peak performance, we provide a dedicated Direct App for instant menu access and one-tap order management, optimized for speed and daily efficiency.",
@@ -1096,6 +1129,113 @@
       "drinks": "Drinks",
       "bakery": "Bakery",
       "desserts": "Desserts"
+    }
+  },
+  "marketingTrustFeatures": {
+    "setup": {
+      "title": "Ready in under 10 minutes"
+    },
+    "mobile": {
+      "title": "Works on mobile and tablet"
+    },
+    "venues": {
+      "title": "Built for restaurants, cafés, and hotels"
+    },
+    "qrOrders": {
+      "title": "Smart QR + live orders"
+    },
+    "arabic": {
+      "title": "Full Arabic support"
+    },
+    "noApp": {
+      "title": "No guest app required"
+    }
+  },
+  "transformSection": {
+    "badge": "From paper to digital",
+    "titleBefore": "Before",
+    "titleAfter": "and after ENSMENU",
+    "subtitle": "Turn a paper menu into a smart QR ordering experience — AI import, instant photos, and live orders in under 10 minutes.",
+    "flowTitle": "How it works",
+    "before": {
+      "label": "Before ENSMENU",
+      "footer": "Traditional experience — lost sales and slower service",
+      "items": {
+        "1": "Hard to update the menu daily",
+        "2": "Constant headaches changing prices",
+        "3": "No food photos on the menu",
+        "4": "No insight into best-selling items",
+        "5": "Orders delayed during rush hour",
+        "6": "Orders sometimes get lost",
+        "7": "No order tracking at all",
+        "8": "Outdated experience — not built for 2026",
+        "9": "Non-interactive guest experience",
+        "10": "Heavy reliance on waiters",
+        "11": "Repeated printing costs",
+        "12": "Hard to manage multiple branches"
+      }
+    },
+    "after": {
+      "label": "After ENSMENU",
+      "footer": "Smart experience — higher sales and happier guests",
+      "items": {
+        "1": "Upload a menu photo — AI extracts items",
+        "2": "Professional food images auto-filled",
+        "3": "Instant branded QR for tables, rooms, and lounges",
+        "4": "Guests scan and order from their phone",
+        "5": "Smart AI recommendations boost basket size",
+        "6": "Live order notifications to your kitchen",
+        "7": "Fewer mistakes, faster service",
+        "8": "Setup in under 10 minutes"
+      }
+    },
+    "steps": {
+      "1": {
+        "title": "Upload menu",
+        "caption": "Snap or upload your paper menu image"
+      },
+      "2": {
+        "title": "AI processes",
+        "caption": "Items, prices, and categories extracted automatically"
+      },
+      "3": {
+        "title": "Photos appear",
+        "caption": "Our food image library fills every dish"
+      },
+      "4": {
+        "title": "QR generated",
+        "caption": "Print-ready QR with your branding"
+      },
+      "5": {
+        "title": "Guest scans",
+        "caption": "Customers open the menu in seconds"
+      },
+      "6": {
+        "title": "Live ordering",
+        "caption": "Notifications and orders flow in real time"
+      }
+    },
+    "visual": {
+      "uploading": "Uploading image…",
+      "uploadComplete": "Image uploaded",
+      "processing": "Analyzing…",
+      "processingComplete": "Analysis successful",
+      "extracting": "Extracting items…",
+      "extractComplete": "Items extracted",
+      "qrDownload": "Download & print",
+      "liveBadge": "Live",
+      "newOrder": "New order — table 7",
+      "scanToOrder": "Scan & order",
+      "notification": "New order from table 7",
+      "tableLabel": "Table",
+      "statusNew": "New",
+      "orderItemsLabel": "Items",
+      "paperMenuAlt": "Worn paper menu on a restaurant table",
+      "restaurantName": "Café Lina",
+      "add": "Add",
+      "item1": "Grilled Chicken",
+      "item2": "Orange Juice",
+      "item3": "Cheesecake"
     }
   },
   "phoneVideoSection": {
@@ -1452,7 +1592,8 @@
     },
     "header": {
       "signIn": "Sign In",
-      "startNow": "Start Now"
+      "startNow": "Start Now",
+      "aiBadge": "Smart Menu"
     },
     "templateShow": {
       "choosePrefix": "Choose the ",
@@ -1462,6 +1603,188 @@
     "mobileApp": {
       "whyOurApp": "Why our app?",
       "livePreview": "Live Preview"
+    },
+    "aboutPage": {
+      "hero": {
+        "badge": "Smart menu vision",
+        "titleBefore": "Building the future of",
+        "titleAccent": "smart menu",
+        "subtitle": "Modern operating system — QR + AI + ordering",
+        "pill1": "Smart QR",
+        "pill2": "AI import",
+        "pill3": "Table & room ordering",
+        "pill4": "Full control",
+        "visualPills": {
+          "liveOrders": "Live orders",
+          "qrTables": "Table QR",
+          "kitchenAlerts": "Kitchen alerts"
+        }
+      },
+      "problem": {
+        "eyebrow": "The problem",
+        "title": "Restaurants, cafés, and hotels",
+        "titleAccent": "still rely on outdated systems",
+        "items": {
+          "paper": {
+            "title": "Outdated paper menus",
+            "hint": "Reprint costs and a flat guest experience"
+          },
+          "prices": {
+            "title": "Stale pricing",
+            "hint": "Prices change faster than menus can keep up"
+          },
+          "ordering": {
+            "title": "Slow ordering",
+            "hint": "Wait times, errors, and disconnected flows"
+          },
+          "photos": {
+            "title": "Missing product photos",
+            "hint": "Guests choose dishes they can’t really see"
+          },
+          "updates": {
+            "title": "Painful updates",
+            "hint": "Every change costs time and team effort"
+          },
+          "waiter": {
+            "title": "Waiter overload",
+            "hint": "Repeated requests slow service and increase mistakes"
+          },
+          "tracking": {
+            "title": "No order visibility",
+            "hint": "Kitchen and floor teams lose sync during rush"
+          },
+          "branches": {
+            "title": "Multi-branch chaos",
+            "hint": "Menus and prices drift across locations"
+          },
+          "outdated": {
+            "title": "Stuck in the past",
+            "hint": "Guest expectations have moved far beyond paper"
+          }
+        }
+      },
+      "why": {
+        "eyebrow": "Why ENSMENU",
+        "title": "Why ENSMENU?",
+        "description": "Built for restaurants, cafés, and hotels — not generic software.",
+        "bento": {
+          "restaurants": {
+            "title": "For restaurants, cafés & hotels",
+            "hint": "Smart table QR, orders, and branch management"
+          },
+          "aiOrdering": {
+            "title": "AI-powered ordering",
+            "hint": "Smart suggestions that grow every basket"
+          },
+          "qrSystem": {
+            "title": "QR ordering system",
+            "hint": "Guests scan, browse, and order from their phone"
+          },
+          "fasterService": {
+            "title": "Faster service",
+            "hint": "Fewer bottlenecks from table to kitchen"
+          },
+          "customerExperience": {
+            "title": "Better guest experience",
+            "hint": "Photos, clarity, and smooth mobile ordering"
+          },
+          "smartRecommendations": {
+            "title": "Smart recommendations",
+            "hint": "Lina AI helps guests discover the right dishes"
+          },
+          "liveOrders": {
+            "title": "Live order flow",
+            "hint": "Real-time notifications to kitchen and staff"
+          },
+          "mobileDashboard": {
+            "title": "Mobile-first dashboard",
+            "hint": "Run your menu from anywhere, on any device"
+          }
+        },
+        "focus": {
+          "setup": "Instant setup without complexity",
+          "import": "AI menu import from photo or PDF",
+          "qr": "QR ordering from the table",
+          "suggestions": "Smart suggestions for guests",
+          "control": "Full menu and order control"
+        },
+        "cards": {
+          "import": {
+            "title": "AI Import",
+            "subtitle": "PDF · Photo · Menu"
+          },
+          "qr": {
+            "title": "Smart QR",
+            "subtitle": "Table · Delivery · Guest"
+          },
+          "control": {
+            "title": "Live Control",
+            "subtitle": "Prices · Items · Staff"
+          }
+        }
+      },
+      "different": {
+        "eyebrow": "What makes us different",
+        "title": "Built for restaurants, cafés & hotels",
+        "items": {
+          "ai": {
+            "title": "AI-powered",
+            "hint": "Import, suggestions, and Lina assistant"
+          },
+          "arabic": {
+            "title": "Arabic-first",
+            "hint": "Native RTL for restaurants and cafés in the region"
+          },
+          "mobile": {
+            "title": "Mobile-first",
+            "hint": "Menus and ordering designed for phones"
+          },
+          "multilang": {
+            "title": "Multi-language",
+            "hint": "Reach guests from different backgrounds"
+          },
+          "smartQr": {
+            "title": "Smart QR",
+            "hint": "Tables, delivery, and seamless guest flows"
+          },
+          "fastSetup": {
+            "title": "Fast setup",
+            "hint": "Live menu in minutes — not weeks"
+          },
+          "restaurants": {
+            "title": "Orders & branch management",
+            "hint": "Staff, tables, room service, and live orders"
+          }
+        }
+      },
+      "vision": {
+        "label": "Vision",
+        "text": "Make smart menu accessible to every restaurant, café, and hotel."
+      },
+      "mission": {
+        "label": "Mission",
+        "text": "Turn the menu from a static paper into a living, AI-powered digital experience."
+      },
+      "builtInEgypt": "Built in Egypt — for modern restaurants, cafés, and hotels.",
+      "trust": {
+        "eyebrow": "Why ENSMENU",
+        "title": "Capabilities you can rely on from day one"
+      },
+      "cta": {
+        "badge": "Start now",
+        "titleBefore": "Launch your",
+        "titleAccent": "smart menu today",
+        "subtitle": "QR menus, AI import, and smart ordering — start free.",
+        "primary": "Create free account",
+        "secondary": "Explore pricing",
+        "menu": {
+          "restaurantName": "Café Lina",
+          "add": "Add",
+          "item1": "Grilled chicken",
+          "item2": "Fresh juice",
+          "item3": "Cheesecake"
+        }
+      }
     }
   },
   "PricingPage": {

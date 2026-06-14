@@ -4,58 +4,136 @@ import { LogoProps } from "@/types/types";
 import { BsQrCode } from "react-icons/bs";
 import LinkTo from "./LinkTo";
 
-export const Logo = ({
+type LogoSize = NonNullable<LogoProps["size"]>;
+type LogoVariant = NonNullable<LogoProps["variant"]>;
+
+const SIZE_CONFIG: Record<
+  LogoSize,
+  {
+    iconSize: number;
+    gap: string;
+    align: string;
+    maxWidth: string;
+    line: string;
+    text: string;
+    showIcon: boolean;
+  }
+> = {
+  header: {
+    iconSize: 18,
+    gap: "gap-1.5",
+    align: "items-start text-start",
+    maxWidth: "max-w-36",
+    line: "h-0.5 -mt-px",
+    text: "text-sm leading-none",
+    showIcon: true,
+  },
+  micro: {
+    iconSize: 22,
+    gap: "gap-2",
+    align: "items-start text-start",
+    maxWidth: "max-w-[min(48vw,11rem)]",
+    line: "h-1 -mt-0.5",
+    text: "text-base leading-tight",
+    showIcon: true,
+  },
+  compact: {
+    iconSize: 28,
+    gap: "gap-2.5",
+    align: "items-start text-start",
+    maxWidth: "max-w-[min(72vw,320px)]",
+    line: "h-1 -mt-0.5",
+    text: "text-lg leading-tight lg:text-xl",
+    showIcon: true,
+  },
+  default: {
+    iconSize: 40,
+    gap: "gap-4",
+    align: "items-center text-center",
+    maxWidth: "max-w-[min(72vw,320px)]",
+    line: "h-1 -mt-0.5",
+    text: "text-2xl leading-tight lg:text-xl xl:text-3xl",
+    showIcon: true,
+  },
+  small: {
+    iconSize: 0,
+    gap: "gap-4",
+    align: "items-center text-center",
+    maxWidth: "max-w-[min(72vw,320px)]",
+    line: "h-1 -mt-0.5",
+    text: "text-2xl leading-tight lg:text-xl xl:text-3xl",
+    showIcon: false,
+  },
+};
+
+const VARIANT_STYLES: Record<
+  LogoVariant,
+  { gradient: string; icon: string; line: string }
+> = {
+  default: {
+    gradient:
+      "bg-gradient-to-r from-slate-900 via-purple-600 to-slate-900 dark:from-white dark:via-purple-400 dark:to-white",
+    icon: "text-purple-600 dark:text-purple-400",
+    line: "bg-purple-600 opacity-40 shadow-[0_0_10px_rgba(124,58,237,0.5)] dark:bg-purple-400",
+  },
+  white: {
+    gradient: "bg-gradient-to-r from-gray-200 via-white to-gray-200",
+    icon: "text-white",
+    line: "bg-white opacity-60 shadow-[0_0_10px_rgba(255,255,255,0.3)]",
+  },
+};
+
+function LogoTitle({ pageTitle }: { pageTitle?: string }) {
+  if (pageTitle) {
+    return (
+      <span className="inline-flex max-w-full items-center gap-x-1.5">
+        <span className="shrink-0">ENSmenu</span>
+        <span className="hidden shrink-0 font-bold text-slate-400 sm:inline">-</span>
+        <span className="hidden truncate font-semibold text-slate-700 sm:inline sm:max-w-56 dark:text-slate-200">
+          {pageTitle}
+        </span>
+      </span>
+    );
+  }
+
+  return <>ENSMENU</>;
+}
+
+export function Logo({
   variant = "default",
   size = "default",
   pageTitle,
-}: LogoProps) => {
-  const gradientClasses =
-    variant === "white"
-      ? "bg-gradient-to-r from-gray-200 via-white to-gray-200"
-      : "bg-gradient-to-r from-slate-900 via-purple-600 to-slate-900 dark:from-white dark:via-purple-400 dark:to-white";
-
-  const iconClasses =
-    variant === "white" ? "text-white" : "text-purple-600 dark:text-purple-400";
-
-  const lineClasses =
-    variant === "white"
-      ? "bg-white opacity-60 shadow-[0_0_10px_rgba(255,255,255,0.3)]"
-      : "bg-purple-600 shadow-[0_0_10px_rgba(124,58,237,0.5)] dark:bg-purple-400 opacity-40";
+  className = "",
+}: LogoProps) {
+  const config = SIZE_CONFIG[size];
+  const styles = VARIANT_STYLES[variant];
+  const textClass = pageTitle
+    ? "text-lg leading-tight lg:text-base xl:text-xl"
+    : config.text;
 
   return (
     <LinkTo
       href="/"
-      className="flex items-center gap-4 group cursor-pointer scale-100 origin-right"
+      className={`site-logo flex max-h-10 items-center ${config.gap} group cursor-pointer scale-100 ${size === "header" ? "site-logo--header" : ""} ${className}`}
     >
-      {size === "small" ? null : (
-        <div className={`animate-logo-spin ${iconClasses}`}>
-          <BsQrCode size={40} />
+      {config.showIcon && (
+        <div className={`animate-logo-spin ${styles.icon}`}>
+          <BsQrCode size={config.iconSize} />
         </div>
       )}
-      <div className="relative flex flex-col items-center max-w-[min(72vw,320px)]">
+
+      <div
+        className={`relative flex ${config.maxWidth} flex-col ${config.align}`}
+      >
         <div
-          className={`text-center font-black tracking-tighter bg-clip-text text-transparent ${gradientClasses} bg-size-[200%_auto] ${
-            pageTitle
-              ? "text-lg lg:text-base xl:text-xl leading-tight"
-              : "text-2xl lg:text-xl xl:text-3xl"
-          }`}
+          className={`bg-size-[200%_auto] bg-clip-text font-black tracking-tighter text-transparent ${styles.gradient} ${textClass}`}
         >
-          {pageTitle ? (
-            <span className="inline-flex flex-wrap items-center justify-center gap-x-1.5 gap-y-0">
-              <span>ENSmenu</span>
-              <span className="text-slate-400 font-bold">-</span>
-              <span className="text-slate-700 dark:text-slate-200 font-semibold truncate max-w-[11rem] sm:max-w-[14rem]">
-                {pageTitle}
-              </span>
-            </span>
-          ) : (
-            "ENSMENU"
-          )}
+          <LogoTitle pageTitle={pageTitle} />
         </div>
-        <div className={`w-full h-1 -mt-0.5 rounded-full ${lineClasses}`} />
+        <div className={`w-full rounded-full ${config.line} ${styles.line}`} />
       </div>
     </LinkTo>
   );
-};
+}
 
 export default Logo;

@@ -1,12 +1,12 @@
 import type { ImportDraft } from "@/types/menuImport";
 import { countBulkSaveStats } from "./buildBulkCategoriesPayload";
 
-export const FREE_PLAN_DEFAULT_MAX_PRODUCTS = 50;
+export const FREE_PLAN_DEFAULT_MAX_PRODUCTS = -1;
 
 export function getImportProductLimitInfo(
   draft: ImportDraft,
   currentItemCount: number,
-  maxProductsPerMenu: number = FREE_PLAN_DEFAULT_MAX_PRODUCTS,
+  _maxProductsPerMenu: number = FREE_PLAN_DEFAULT_MAX_PRODUCTS,
 ) {
   const importCount = countBulkSaveStats(draft).itemsInPayload;
   const totalAfter = currentItemCount + importCount;
@@ -14,9 +14,9 @@ export function getImportProductLimitInfo(
   return {
     importCount,
     currentCount: currentItemCount,
-    maxProducts: maxProductsPerMenu,
+    maxProducts: -1,
     totalAfter,
-    exceedsLimit: totalAfter > maxProductsPerMenu,
-    remaining: Math.max(0, maxProductsPerMenu - currentItemCount),
+    exceedsLimit: false,
+    remaining: -1,
   };
 }
