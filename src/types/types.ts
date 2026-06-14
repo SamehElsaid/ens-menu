@@ -62,11 +62,15 @@ export interface NavLink {
 
 export interface ContactInfo {
   icon: React.ComponentType<{ className?: string }>;
-  type: "phone" | "email" | "address";
+  type: "phone" | "email" | "location" | "linaWhatsapp";
   value: string;
   href?: string;
   dir?: "ltr" | "rtl";
   labelKey?: string;
+  subLabelKey?: string;
+  whatsappHref?: string;
+  mapEmbedUrl?: string;
+  externalMapUrl?: string;
 }
 
 export interface FAQItemType {
