@@ -102,6 +102,7 @@ export function buildActivityEntriesFromSources(
 
   for (const cat of data.categories) {
     const name = localizedName(locale, cat.nameAr, cat.nameEn);
+
     entries.push(
       makeEntry({
         id: `category-created-${cat.id}`,
@@ -110,8 +111,10 @@ export function buildActivityEntriesFromSources(
         entityType: "category",
         entityName: name,
         date: cat.createdAt ?? cat.updatedAt ?? null,
+        isUndated: false,
       }),
     );
+
     if (isMeaningfulUpdate(cat.createdAt, cat.updatedAt)) {
       entries.push(
         makeEntry({
@@ -121,6 +124,7 @@ export function buildActivityEntriesFromSources(
           entityType: "category",
           entityName: name,
           date: cat.updatedAt ?? null,
+          isUndated: false,
         }),
       );
     }
@@ -136,6 +140,7 @@ export function buildActivityEntriesFromSources(
         entityType: "item",
         entityName: name,
         date: item.createdAt ?? item.updatedAt ?? null,
+        isUndated: false,
       }),
     );
     if (isMeaningfulUpdate(item.createdAt, item.updatedAt)) {
@@ -147,6 +152,7 @@ export function buildActivityEntriesFromSources(
           entityType: "item",
           entityName: name,
           date: item.updatedAt ?? null,
+          isUndated: false,
         }),
       );
     }
@@ -162,6 +168,7 @@ export function buildActivityEntriesFromSources(
         entityType: "staff",
         entityName: name,
         date: member.createdAt ?? null,
+        isUndated: false,
       }),
     );
   }
@@ -176,6 +183,7 @@ export function buildActivityEntriesFromSources(
         entityType: "table",
         entityName: number,
         date: table.createdAt ?? null,
+        isUndated: false,
       }),
     );
   }
@@ -191,6 +199,7 @@ export function buildActivityEntriesFromSources(
         entityType: "ad",
         entityName: title,
         date: ad.createdAt ?? ad.updatedAt ?? null,
+        isUndated: false,
       }),
     );
     if (isMeaningfulUpdate(ad.createdAt, ad.updatedAt)) {
@@ -202,6 +211,7 @@ export function buildActivityEntriesFromSources(
           entityType: "ad",
           entityName: title,
           date: ad.updatedAt ?? null,
+          isUndated: false,
         }),
       );
     }
@@ -216,6 +226,7 @@ export function buildActivityEntriesFromSources(
         entityType: "settings",
         entityName: null,
         date: data.menu.updatedAt ?? null,
+        isUndated: false,
       }),
     );
   }

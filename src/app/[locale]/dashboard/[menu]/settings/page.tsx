@@ -389,7 +389,7 @@ export default function SettingsPage() {
               <div className="relative">
                 <div className="w-28 h-28 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center bg-slate-50 dark:bg-slate-800/60 overflow-hidden">
                   {logoPreview || initialLogo ? (
-                    // eslint-disable-next-line @next/next/no-img-element
+                     
                     <ImageLoad
                       width={100}
                       height={100}
