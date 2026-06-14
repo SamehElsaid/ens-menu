@@ -116,7 +116,7 @@
         {
           "id": "contact",
           "heading": "Contact",
-          "body": "For privacy questions or data requests, contact us at:\n• Email: info@ensmenu.com\n• Websites: ensmenu.com and ens.eg\n\nThe ENSMENU team — part of ENS.EG — is here to help."
+          "body": "For privacy questions or data requests, contact us at:\n• Email: info@ensmenu.com\n• WhatsApp: +20 150 080 0050\n\nThe ENSMENU team — part of ENS.EG — is here to help."
         }
       ]
     },
@@ -133,8 +133,8 @@
         },
         {
           "id": "service",
-          "heading": "Service description",
-          "body": "ENSMENU provides a cloud hospitality platform including:\n• Digital menus and QR menus for restaurants, cafés, and hotels\n• AI menu import from images and files\n• Smart table ordering via QR\n• Dashboard to manage items, branches, and tables\n• Staff notifications for new orders\n• Cloud hosting to display menus to guests\n\nAvailable features depend on your plan (free, Pro, or custom)."
+          "heading": "Terms and Conditions | ENSMENU",
+          "body": "ENSMENU provides a complete solution for creating and managing digital menus:\n• Digital menus and QR menus for restaurants, cafés, and hotels\n• AI menu import from images and files\n• Smart table ordering via QR\n• Dashboard to manage items, branches, and tables\n• Staff notifications for new orders\n• Share your digital menu with guests via a custom link or QR code\n\nAvailable features may vary depending on your plan (free, Pro, or custom)."
         },
         {
           "id": "accounts",
@@ -184,7 +184,7 @@
         {
           "id": "contact",
           "heading": "Contact",
-          "body": "For legal inquiries or support related to these terms:\n• Email: info@ensmenu.com\n• Websites: ensmenu.com and ens.eg\n\nENSMENU — a product of ENS.EG — smart hospitality for Egypt and the Arab region."
+          "body": "For legal inquiries or support related to these terms:\n• Email: info@ensmenu.com\n• WhatsApp: +20 150 080 0050\n\nENSMENU — a product of ENS.EG — smart hospitality for Egypt and the Arab region."
         }
       ]
     }
@@ -1878,7 +1878,10 @@
       "followUs": "Social",
       "linkPricing": "Pricing",
       "linkKnowledge": "Knowledge Base",
-      "linkContact": "Contact us"
+      "linkContact": "Contact us",
+      "email": "Email",
+      "whatsapp": "WhatsApp",
+      "supportTagline": "The ENSMENU team — part of ENS.EG — is here to help."
     },
     "header": {
       "signIn": "Sign In",
@@ -2487,8 +2490,8 @@
     "currentlyAvailable": "Currently available",
     "isAvailable": "Available",
     "action": "Action",
-    "available": "Yes",
-    "unavailable": "No",
+    "available": "Available",
+    "unavailable": "Unavailable",
     "edit": "Edit",
     "delete": "Delete",
     "search": "Search",

@@ -21,6 +21,7 @@ import { HiOutlineSparkles } from "react-icons/hi2";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { ds } from "@/lib/designSystem";
+import LegalContactBody from "@/components/Legal/LegalContactBody";
 
 export type LegalSection = {
   id: string;
@@ -42,6 +43,7 @@ type LegalPageViewProps = {
   updatedLabel: string;
   tocLabel: string;
   contactCta: string;
+  showStickyCta?: boolean;
 };
 
 const SECTION_ICONS: Record<string, ComponentType<{ className?: string }>> = {
@@ -168,26 +170,30 @@ function LegalSectionCard({
             {section.heading}
           </h2>
           <div className="mt-3 space-y-2.5 text-[14px] leading-relaxed text-slate-600 dark:text-slate-300 sm:text-[15px]">
-            {section.body.split("\n").map((line) => {
-              const trimmed = line.trim();
-              if (!trimmed) return null;
-              const isBullet = trimmed.startsWith("•");
-              return (
-                <p
-                  key={trimmed}
-                  className={cn(isBullet && "flex gap-2 text-start")}
-                >
-                  {isBullet ? (
-                    <>
-                      <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-purple-500" aria-hidden />
-                      <span>{trimmed.slice(1).trim()}</span>
-                    </>
-                  ) : (
-                    trimmed
-                  )}
-                </p>
-              );
-            })}
+            {section.id === "contact" ? (
+              <LegalContactBody body={section.body} />
+            ) : (
+              section.body.split("\n").map((line) => {
+                const trimmed = line.trim();
+                if (!trimmed) return null;
+                const isBullet = trimmed.startsWith("•");
+                return (
+                  <p
+                    key={trimmed}
+                    className={cn(isBullet && "flex gap-2 text-start")}
+                  >
+                    {isBullet ? (
+                      <>
+                        <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-purple-500" aria-hidden />
+                        <span>{trimmed.slice(1).trim()}</span>
+                      </>
+                    ) : (
+                      trimmed
+                    )}
+                  </p>
+                );
+              })
+            )}
           </div>
         </div>
       </div>
@@ -201,6 +207,7 @@ export default function LegalPageView({
   updatedLabel,
   tocLabel,
   contactCta,
+  showStickyCta = true,
 }: LegalPageViewProps) {
   const progress = useScrollProgress();
   const sectionIds = doc.sections.map((s) => s.id);
@@ -339,15 +346,17 @@ export default function LegalPageView({
         </div>
       </div>
 
-      <div className="legal-page__sticky-cta pointer-events-none fixed inset-x-0 bottom-4 z-40 flex justify-center px-4 sm:bottom-6">
-        <Link
-          href="/contact"
-          prefetch={false}
-          className="pointer-events-auto inline-flex w-full max-w-md items-center justify-center rounded-full bg-purple-600 px-6 py-3.5 text-sm font-semibold text-white shadow-[0_10px_40px_-10px_rgba(124,58,237,0.65)] transition-transform hover:scale-[1.02] sm:w-auto sm:min-w-[14rem] dark:bg-purple-500"
-        >
-          {contactCta}
-        </Link>
-      </div>
+      {showStickyCta ? (
+        <div className="legal-page__sticky-cta pointer-events-none fixed inset-x-0 bottom-4 z-40 flex justify-center px-4 sm:bottom-6">
+          <Link
+            href="/contact"
+            prefetch={false}
+            className="pointer-events-auto inline-flex w-full max-w-md items-center justify-center rounded-full bg-purple-600 px-6 py-3.5 text-sm font-semibold text-white shadow-[0_10px_40px_-10px_rgba(124,58,237,0.65)] transition-transform hover:scale-[1.02] sm:w-auto sm:min-w-[14rem] dark:bg-purple-500"
+          >
+            {contactCta}
+          </Link>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -44,11 +44,6 @@ export default function ImportErrorPanel({
         <p className="text-slate-500 dark:text-slate-400 text-sm">
           {t(messageKey)}
         </p>
-        {error.detail && (
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 break-all">
-            {error.detail.slice(0, 200)}
-          </p>
-        )}
       </div>
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
         <button

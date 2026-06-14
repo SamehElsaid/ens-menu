@@ -14,6 +14,11 @@ import {
 } from "react-icons/fa";
 
 import { ContactInfo, NavLink } from "@/types/types";
+import {
+  ENSMENU_SUPPORT_EMAIL,
+  ENSMENU_WHATSAPP_DISPLAY,
+  ENSMENU_WHATSAPP_URL,
+} from "@/lib/contactConstants";
 
 type TranslationFunction = (key: string) => string;
 
@@ -65,8 +70,16 @@ export const getContactInfo = (t: TranslationFunction): ContactInfo[] => [
     icon: FiMail,
     type: "email",
     labelKey: "email",
-    value: "info@ensmenu.com",
-    href: "mailto:info@ensmenu.com",
+    value: ENSMENU_SUPPORT_EMAIL,
+    href: `mailto:${ENSMENU_SUPPORT_EMAIL}`,
+  },
+  {
+    icon: FaWhatsapp,
+    type: "whatsapp",
+    labelKey: "whatsapp",
+    value: ENSMENU_WHATSAPP_DISPLAY,
+    href: ENSMENU_WHATSAPP_URL,
+    dir: "ltr",
   },
   {
     icon: FiMapPin,

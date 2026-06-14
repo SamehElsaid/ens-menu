@@ -37,6 +37,7 @@ export default async function TermsAndConditionsPage({ params }: Props) {
         updatedLabel={formatLegalUpdatedLabel(locale, t("updatedPrefix"))}
         tocLabel={t("tocLabel")}
         contactCta={t("contactCta")}
+        showStickyCta={false}
       />
       <FooterSection />
     </>

@@ -97,19 +97,41 @@ const FooterSection = () => {
                   return null;
                 }
 
+                const label =
+                  (info.type === "email" || info.type === "whatsapp") &&
+                  info.labelKey
+                    ? t(info.labelKey)
+                    : null;
+
                 return (
                   <li key={idx}>
                     <a
                       href={info.href}
                       dir={info.dir}
+                      target={info.type === "whatsapp" ? "_blank" : undefined}
+                      rel={
+                        info.type === "whatsapp"
+                          ? "noopener noreferrer"
+                          : undefined
+                      }
                       className={`${ds.link.footer} block`}
                     >
-                      {info.value}
+                      {label ? (
+                        <>
+                          {label}:{" "}
+                          <span dir={info.dir}>{info.value}</span>
+                        </>
+                      ) : (
+                        info.value
+                      )}
                     </a>
                   </li>
                 );
               })}
             </ul>
+            <p className="mt-3 max-w-xs text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+              {t("supportTagline")}
+            </p>
           </div>
         </div>
 
