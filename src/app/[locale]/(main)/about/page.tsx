@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import AboutPageView from "@/components/HomePage/AboutPageView";
-import FooterSection from "@/components/HomePage/Footer";
 import { buildSeoMetadata } from "@/lib/seo";
 
 type PageProps = { params: Promise<{ locale: string }> };
@@ -22,10 +21,5 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default function AboutPage() {
-  return (
-    <>
-      <AboutPageView />
-      <FooterSection />
-    </>
-  );
+  return <AboutPageView />;
 }
