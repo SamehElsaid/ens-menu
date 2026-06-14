@@ -5598,18 +5598,21 @@ body.recaptcha-modal-open {
 }
 
 @media (max-width: 1023px) {
-  .site-layout:has(.legal-page) {
+  .site-layout:has(.legal-page),
+  .site-layout:has(.pricing-page) {
     min-height: auto;
     height: auto;
   }
 
-  .site-layout:has(.legal-page) .home-main {
+  .site-layout:has(.legal-page) .home-main,
+  .site-layout:has(.pricing-page) .home-main {
     flex: 0 0 auto;
     overflow: visible;
     -webkit-overflow-scrolling: touch;
   }
 
-  .legal-page {
+  .legal-page,
+  .pricing-page {
     overflow: visible;
   }
 
@@ -5623,13 +5626,19 @@ body.recaptcha-modal-open {
   .legal-page__sticky-cta {
     bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
   }
+
+  .pricing-mobile-sticky-cta {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  }
 }
 
-.site-layout:has(.legal-page) .home-main {
+.site-layout:has(.legal-page) .home-main,
+.site-layout:has(.pricing-page) .home-main {
   padding-bottom: 0;
 }
 
-.site-layout:has(.legal-page) .site-global-footer {
+.site-layout:has(.legal-page) .site-global-footer,
+.site-layout:has(.pricing-page) .site-global-footer {
   margin-top: 0;
 }
 
