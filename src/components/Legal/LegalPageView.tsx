@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ComponentType } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ComponentType,
+} from "react";
 import {
   FiActivity,
   FiAlertTriangle,
@@ -66,6 +72,8 @@ const SECTION_ICONS: Record<string, ComponentType<{ className?: string }>> = {
   ip: FiFileText,
   changes: FiActivity,
 };
+
+const LEGAL_HEADER_OFFSET = 112;
 
 function useScrollProgress() {
   const [progress, setProgress] = useState(0);
@@ -179,7 +187,10 @@ function LegalSectionCard({
                 >
                   {isBullet ? (
                     <>
-                      <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-purple-500" aria-hidden />
+                      <span
+                        className="mt-2 h-1 w-1 shrink-0 rounded-full bg-purple-500"
+                        aria-hidden
+                      />
                       <span>{trimmed.slice(1).trim()}</span>
                     </>
                   ) : (
@@ -206,20 +217,66 @@ export default function LegalPageView({
   const sectionIds = doc.sections.map((s) => s.id);
   const activeId = useActiveSection(sectionIds);
   const mobileTocRef = useRef<HTMLDivElement>(null);
+  const userScrollLockRef = useRef(false);
+  const userScrollTimerRef = useRef<number | undefined>(undefined);
 
   const scrollToSection = useCallback((id: string) => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    userScrollLockRef.current = true;
+    const top =
+      el.getBoundingClientRect().top + window.scrollY - LEGAL_HEADER_OFFSET;
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+
+    window.setTimeout(() => {
+      userScrollLockRef.current = false;
+    }, 700);
+  }, []);
+
+  const syncMobileToc = useCallback((sectionId: string) => {
+    const container = mobileTocRef.current;
+    if (!container) return;
+
+    const node = container.querySelector(
+      `[data-section="${sectionId}"]`,
+    ) as HTMLElement | null;
+    if (!node) return;
+
+    const targetLeft =
+      node.offsetLeft - (container.clientWidth - node.offsetWidth) / 2;
+    container.scrollTo({
+      left: Math.max(0, targetLeft),
+      behavior: userScrollLockRef.current ? "auto" : "smooth",
+    });
   }, []);
 
   useEffect(() => {
-    const node = mobileTocRef.current?.querySelector(`[data-section="${activeId}"]`);
-    node?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-  }, [activeId]);
+    const markUserScroll = () => {
+      userScrollLockRef.current = true;
+      window.clearTimeout(userScrollTimerRef.current);
+      userScrollTimerRef.current = window.setTimeout(() => {
+        userScrollLockRef.current = false;
+      }, 150);
+    };
+
+    window.addEventListener("scroll", markUserScroll, { passive: true });
+    window.addEventListener("touchmove", markUserScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", markUserScroll);
+      window.removeEventListener("touchmove", markUserScroll);
+      window.clearTimeout(userScrollTimerRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!activeId) return;
+    syncMobileToc(activeId);
+  }, [activeId, syncMobileToc]);
 
   return (
-    <div className="legal-page relative min-h-screen bg-gradient-app pb-24 lg:pb-20">
+    <div className="legal-page relative min-h-0 bg-gradient-app pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] lg:min-h-screen lg:pb-20">
       <div
         className="legal-page__progress pointer-events-none fixed inset-x-0 top-[4.25rem] z-40 h-0.5 bg-transparent sm:top-[4.5rem]"
         aria-hidden
@@ -230,7 +287,10 @@ export default function LegalPageView({
         />
       </div>
 
-      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+      <div
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+        aria-hidden
+      >
         <div className="absolute -start-24 top-20 h-72 w-72 rounded-full bg-purple-500/12 blur-3xl dark:bg-purple-600/10" />
         <div className="absolute -end-16 top-[38%] h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl dark:bg-indigo-600/8" />
         <div className="absolute bottom-0 start-1/3 h-56 w-56 rounded-full bg-violet-400/8 blur-3xl" />
@@ -256,8 +316,15 @@ export default function LegalPageView({
             <span className={ds.badgeDot} aria-hidden />
             {doc.badge}
           </span>
-          <h1 className={cn(ds.type.display, "mx-auto max-w-2xl")}>{doc.title}</h1>
-          <p className={cn(ds.type.subtitle, "mx-auto mt-4 max-w-2xl text-center")}>
+          <h1 className={cn(ds.type.display, "mx-auto max-w-2xl")}>
+            {doc.title}
+          </h1>
+          <p
+            className={cn(
+              ds.type.subtitle,
+              "mx-auto mt-4 max-w-2xl text-center",
+            )}
+          >
             {doc.subtitle}
           </p>
           <p className="mt-4 text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -298,7 +365,7 @@ export default function LegalPageView({
           <div className="min-w-0">
             <div
               ref={mobileTocRef}
-              className="legal-page__toc-mobile -mx-1 mb-6 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] lg:hidden [&::-webkit-scrollbar]:hidden"
+              className="legal-page__toc-mobile -mx-1 mb-6 flex gap-2 overflow-x-auto overscroll-x-contain px-1 pb-1 [scrollbar-width:none] [touch-action:pan-x] lg:hidden [&::-webkit-scrollbar]:hidden"
               role="navigation"
               aria-label={tocLabel}
             >
@@ -322,7 +389,11 @@ export default function LegalPageView({
 
             <div className="space-y-4 sm:space-y-5">
               {doc.sections.map((section, index) => (
-                <LegalSectionCard key={section.id} section={section} index={index} />
+                <LegalSectionCard
+                  key={section.id}
+                  section={section}
+                  index={index}
+                />
               ))}
             </div>
 
@@ -337,16 +408,6 @@ export default function LegalPageView({
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="legal-page__sticky-cta pointer-events-none fixed inset-x-0 bottom-4 z-40 flex justify-center px-4 sm:bottom-6">
-        <Link
-          href="/contact"
-          prefetch={false}
-          className="pointer-events-auto inline-flex w-full max-w-md items-center justify-center rounded-full bg-purple-600 px-6 py-3.5 text-sm font-semibold text-white shadow-[0_10px_40px_-10px_rgba(124,58,237,0.65)] transition-transform hover:scale-[1.02] sm:w-auto sm:min-w-[14rem] dark:bg-purple-500"
-        >
-          {contactCta}
-        </Link>
       </div>
     </div>
   );

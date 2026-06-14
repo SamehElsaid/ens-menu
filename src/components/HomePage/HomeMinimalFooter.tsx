@@ -20,6 +20,7 @@ export default function HomeMinimalFooter() {
   );
 
   const links = [
+    { name: t("linkAbout"), path: "/about" as const },
     { name: t("linkContact"), path: "/contact" as const },
     { name: t("privacy"), path: "/privacy-policy" as const },
     { name: t("terms"), path: "/terms-and-conditions" as const },

@@ -6,7 +6,6 @@ import HeroContent from "@/components/HomePage/HeroContent";
 import TransformShowcaseSection from "@/components/HomePage/TransformShowcaseSection";
 import TrustedBySection from "@/components/HomePage/TrustedBySection";
 import SectionSkeleton from "@/components/HomePage/SectionSkeleton";
-import ChatWidget from "@/components/ChatWidget";
 
 const dynamicSection = (factory: () => Promise<unknown>, height: string) =>
   dynamic(() => factory() as Promise<{ default: React.ComponentType }>, {
@@ -34,11 +33,6 @@ const HowItWorks = dynamicSection(
 );
 
 const FAQ = dynamicSection(() => import("@/components/HomePage/FAQ"), "420px");
-
-const FooterSection = dynamicSection(
-  () => import("@/components/HomePage/Footer"),
-  "320px",
-);
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -70,7 +64,6 @@ async function Page({ params }: Props) {
       <Features />
       {/* <HowItWorks /> */}
       <FAQ />
-      <FooterSection />
     </>
   );
 }

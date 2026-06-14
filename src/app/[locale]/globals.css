@@ -319,7 +319,6 @@ body:has(.register-page) {
   }
 }
 
-
 @keyframes menu-import-progress-shimmer {
   0% {
     filter: brightness(1);
@@ -405,7 +404,7 @@ body:has(.register-page) {
 
 @keyframes menu-import-connector-travel {
   0% {
-  inset-inline-start: 0;
+    inset-inline-start: 0;
     opacity: 0;
   }
   15% {
@@ -501,7 +500,6 @@ body:has(.register-page) {
   }
 }
 
-
 @keyframes menu-import-ai-grid-shift {
   0% {
     background-position: 0 0;
@@ -532,7 +530,6 @@ body:has(.register-page) {
     box-shadow: inset 0 0 14px 0 rgb(124 58 237 / 0.14);
   }
 }
-
 
 @keyframes menu-import-check-pop-in {
   0% {
@@ -810,7 +807,8 @@ body:has(.register-page) {
   --ds-section-py-lg: 4rem;
   --ds-radius-card: 1rem;
   --ds-radius-phone: 2rem;
-  --ds-shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 4px 16px rgb(15 23 42 / 0.04);
+  --ds-shadow-card:
+    0 1px 2px rgb(15 23 42 / 0.04), 0 4px 16px rgb(15 23 42 / 0.04);
   --ds-shadow-elevated: 0 8px 30px rgb(15 23 42 / 0.06);
   --ds-glow: rgb(124 58 237 / 0.1);
 }
@@ -820,8 +818,6 @@ body:has(.register-page) {
   --foreground: #f1f5f9;
   color-scheme: dark;
 }
-
-
 
 button {
   @apply cursor-pointer;
@@ -929,358 +925,363 @@ html.experience-scroll {
   }
 }
 
-  .experience-home {
-    isolation: isolate;
-  }
+.experience-home {
+  isolation: isolate;
+}
 
+.hero-chat-typing span {
+  animation: hero-typing-dot 1.2s ease-in-out infinite;
+}
+
+.hero-chat-typing span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.hero-chat-typing span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.hero-chat-animate-in {
+  animation: hero-chat-fade-up 0.38s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
   .hero-chat-typing span {
-    animation: hero-typing-dot 1.2s ease-in-out infinite;
-  }
-
-  .hero-chat-typing span:nth-child(2) {
-    animation-delay: 0.15s;
-  }
-
-  .hero-chat-typing span:nth-child(3) {
-    animation-delay: 0.3s;
+    animation: none;
   }
 
   .hero-chat-animate-in {
-    animation: hero-chat-fade-up 0.38s cubic-bezier(0.4, 0, 0.2, 1) both;
+    animation: none;
+  }
+}
+
+.menu-import-accent-underline {
+  position: relative;
+  white-space: nowrap;
+}
+
+.menu-import-accent-underline::after {
+  content: "";
+  position: absolute;
+  inset-inline: -3px;
+  bottom: -2px;
+  height: 7px;
+  border-bottom: 2px solid rgb(192 132 252 / 0.55);
+  border-radius: 9999px;
+  transform: rotate(-1deg);
+  z-index: -1;
+}
+
+.menu-import-rail-fill {
+  transition: width 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.menu-import-progress-bar {
+  width: 0;
+  animation: menu-import-progress 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.menu-import-progress-shimmer {
+  animation: menu-import-progress-shimmer 2.4s ease-in-out 0.4s infinite;
+}
+
+.menu-import-progress-fill {
+  will-change: width;
+  transition: width 80ms linear;
+}
+
+.menu-import-progress-sheen {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(255 255 255 / 0.45) 45%,
+    rgb(255 255 255 / 0.15) 55%,
+    transparent 100%
+  );
+  animation: menu-import-progress-sheen-slide 1.8s ease-in-out infinite;
+}
+
+[dir="rtl"] .menu-import-progress-sheen {
+  animation-direction: reverse;
+}
+
+.menu-import-progress-track--active {
+  box-shadow: inset 0 0 0 1px rgb(124 58 237 / 0.08);
+}
+
+.menu-import-global-progress--active .menu-import-progress-sheen {
+  opacity: 0.75;
+}
+
+.menu-import-icon-active .menu-import-step-icon {
+  animation: menu-import-icon-upload 1.6s ease-in-out infinite;
+}
+
+.menu-import-icon-complete .menu-import-step-icon {
+  animation: menu-import-icon-complete-pop 0.45s cubic-bezier(0.4, 0, 0.2, 1)
+    forwards;
+}
+
+.menu-import-check-reveal {
+  animation: menu-import-icon-complete-pop 0.45s cubic-bezier(0.4, 0, 0.2, 1)
+    forwards;
+}
+
+.menu-import-status-label--complete {
+  animation: menu-import-status-reveal 0.45s cubic-bezier(0.4, 0, 0.2, 1)
+    forwards;
+}
+
+.menu-import-loading-dots span {
+  display: inline-block;
+  height: 3px;
+  width: 3px;
+  border-radius: 9999px;
+  background: currentColor;
+  animation: menu-import-loading-dot 1.2s ease-in-out infinite;
+}
+
+.menu-import-loading-dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.menu-import-loading-dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.menu-import-ai-core--active {
+  animation: menu-import-step-glow 2s ease-in-out infinite;
+}
+
+.menu-import-focus-step--active {
+  animation: menu-import-focus-enter 0.52s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.menu-import-step-glow {
+  animation: menu-import-step-glow 2.4s ease-in-out infinite;
+}
+
+.menu-import-ai-ring {
+  animation: menu-import-ai-ring-spin 4s linear infinite;
+}
+
+.menu-import-connector-dot {
+  animation: menu-import-connector-travel 1.5s ease-in-out infinite;
+}
+
+.menu-import-connector-dot-vertical {
+  animation: menu-import-connector-travel-vertical 1.5s ease-in-out infinite;
+}
+
+.menu-import-connector-glow {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(167 139 250 / 0.22),
+    transparent
+  );
+  animation: menu-import-connector-glow-pulse 2.2s ease-in-out infinite;
+}
+
+.menu-import-connector-trail {
+  animation: menu-import-connector-trail-move 1.5s ease-in-out infinite;
+}
+
+.menu-import-global-progress {
+  box-shadow: 0 0 12px 0 rgb(124 58 237 / 0.2);
+  animation: menu-import-global-progress-glow 2.8s ease-in-out infinite;
+}
+
+.menu-import-ai-grid {
+  background-image:
+    linear-gradient(rgb(124 58 237 / 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(124 58 237 / 0.06) 1px, transparent 1px);
+  background-size: 8px 8px;
+  animation: menu-import-ai-grid-shift 3s linear infinite;
+}
+
+.menu-import-ai-orbit {
+  animation: menu-import-ai-orbit-pulse 2.6s ease-in-out infinite;
+}
+
+.menu-import-progress-glow {
+  animation: menu-import-progress-glow-pulse 2s ease-in-out infinite;
+}
+
+.menu-import-step-card--current:hover {
+  border-color: rgb(233 213 255 / 0.9);
+}
+
+.menu-import-check-pop {
+  animation: menu-import-check-pop-in 0.45s cubic-bezier(0.4, 0, 0.2, 1)
+    forwards;
+}
+
+.menu-import-photo-row {
+  animation: menu-import-photo-row-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.menu-import-stand-float {
+  animation: menu-import-stand-float 3.5s ease-in-out infinite;
+}
+
+.menu-import-phone-glow {
+  animation: menu-import-phone-glow-pulse 2.8s ease-in-out infinite;
+}
+
+.menu-import-scan-beam {
+  animation: menu-import-scan-beam-pulse 2.2s ease-in-out infinite;
+}
+
+.menu-import-wood-surface {
+  background: linear-gradient(
+    90deg,
+    rgb(120 53 15 / 0.14) 0%,
+    rgb(146 64 14 / 0.22) 25%,
+    rgb(120 53 15 / 0.16) 50%,
+    rgb(146 64 14 / 0.2) 75%,
+    rgb(120 53 15 / 0.14) 100%
+  );
+  box-shadow: inset 0 1px 2px rgb(120 53 15 / 0.08);
+}
+
+.menu-import-order-toast--delay {
+  animation: menu-import-order-toast-delayed 2.4s cubic-bezier(0.4, 0, 0.2, 1)
+    forwards;
+}
+
+.menu-import-step-badge--current {
+  animation: menu-import-badge-pulse 2s ease-in-out infinite;
+}
+
+.menu-import-live-dot {
+  animation: menu-import-live-pulse 1.6s ease-in-out infinite;
+}
+
+.menu-import-order-toast {
+  animation: menu-import-order-pop 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.menu-import-finale-ambient {
+  animation: menu-import-finale-glow 3s ease-in-out infinite;
+}
+
+.menu-import-story-visible .menu-import-step:not(.menu-import-step--focus),
+.menu-import-story-visible .menu-import-highlight {
+  animation: menu-import-step-in 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+.menu-import-step-card {
+  transition:
+    transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.32s ease,
+    background-color 0.32s ease;
+}
+
+.menu-import-step-card:hover {
+  transform: translateY(-3px) scale(1.005);
+  box-shadow:
+    0 12px 32px -16px rgb(124 58 237 / 0.14),
+    0 4px 12px -6px rgb(15 23 42 / 0.05);
+}
+
+.menu-import-step-card--finale {
+  box-shadow:
+    0 12px 40px -16px rgb(124 58 237 / 0.22),
+    0 4px 14px -8px rgb(15 23 42 / 0.06);
+}
+
+.menu-import-step-card--finale:hover {
+  box-shadow:
+    0 16px 44px -14px rgb(124 58 237 / 0.28),
+    0 6px 18px -10px rgb(15 23 42 / 0.07);
+}
+
+.menu-import-qr-btn {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background-color 0.25s ease;
+}
+
+.menu-import-qr-btn:hover {
+  background: rgb(250 245 255);
+  box-shadow: 0 3px 12px -5px rgb(124 58 237 / 0.22);
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-import-step-card:hover {
+    transform: none;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .hero-chat-typing span {
-      animation: none;
-    }
-
-    .hero-chat-animate-in {
-      animation: none;
-    }
+  .menu-import-step--timeline:not(.menu-import-step--current),
+  .menu-import-step--timeline.menu-import-step--current {
+    transform: none;
   }
 
-  .menu-import-accent-underline {
-    position: relative;
-    white-space: nowrap;
+  .menu-import-step--timeline.menu-import-step--current.menu-import-step--finale
+    .menu-import-phone-shell {
+    animation: none;
+    transform: none;
   }
+}
 
-  .menu-import-accent-underline::after {
-    content: "";
-    position: absolute;
-    inset-inline: -3px;
-    bottom: -2px;
-    height: 7px;
-    border-bottom: 2px solid rgb(192 132 252 / 0.55);
-    border-radius: 9999px;
-    transform: rotate(-1deg);
-    z-index: -1;
-  }
-
-  .menu-import-rail-fill {
-    transition: width 0.65s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .menu-import-progress-bar {
-    width: 0;
-    animation: menu-import-progress 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+@media (prefers-reduced-motion: reduce) {
+  .menu-import-progress-shimmer,
+  .menu-import-progress-sheen,
+  .menu-import-icon-active .menu-import-step-icon,
+  .menu-import-icon-complete .menu-import-step-icon,
+  .menu-import-check-reveal,
+  .menu-import-status-label--complete,
+  .menu-import-loading-dots span,
+  .menu-import-focus-step--active,
+  .menu-import-ai-core--active,
+  .menu-import-step-glow,
+  .menu-import-ai-ring,
+  .menu-import-ai-orbit,
+  .menu-import-ai-grid,
+  .menu-import-progress-glow,
+  .menu-import-connector-dot,
+  .menu-import-connector-dot-vertical,
+  .menu-import-connector-glow,
+  .menu-import-connector-trail,
+  .menu-import-global-progress,
+  .menu-import-step-badge--current,
+  .menu-import-check-pop,
+  .menu-import-photo-row,
+  .menu-import-product-row--in,
+  .menu-import-stand-float,
+  .menu-import-phone-glow,
+  .menu-import-scan-beam,
+  .menu-import-live-dot,
+  .menu-import-order-toast,
+  .menu-import-order-toast--delay,
+  .menu-import-finale-ambient,
+  .menu-import-scan-line,
+  .menu-import-story-visible .menu-import-step,
+  .menu-import-story-visible .menu-import-highlight {
+    animation: none;
+    opacity: 1;
   }
 
   .menu-import-progress-shimmer {
-    animation: menu-import-progress-shimmer 2.4s ease-in-out 0.4s infinite;
+    animation: none;
   }
 
-  .menu-import-progress-fill {
-    will-change: width;
-    transition: width 80ms linear;
+  .menu-import-step--timeline:not(.menu-import-step--current),
+  .menu-import-step--timeline.menu-import-step--current {
+    transform: none;
+    opacity: 1;
   }
 
-  .menu-import-progress-sheen {
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgb(255 255 255 / 0.45) 45%,
-      rgb(255 255 255 / 0.15) 55%,
-      transparent 100%
-    );
-    animation: menu-import-progress-sheen-slide 1.8s ease-in-out infinite;
+  .menu-import-step--timeline.menu-import-step--current.menu-import-step--finale
+    .menu-import-phone-shell {
+    animation: none;
   }
-
-  [dir="rtl"] .menu-import-progress-sheen {
-    animation-direction: reverse;
-  }
-
-  .menu-import-progress-track--active {
-    box-shadow: inset 0 0 0 1px rgb(124 58 237 / 0.08);
-  }
-
-  .menu-import-global-progress--active .menu-import-progress-sheen {
-    opacity: 0.75;
-  }
-
-  .menu-import-icon-active .menu-import-step-icon {
-    animation: menu-import-icon-upload 1.6s ease-in-out infinite;
-  }
-
-  .menu-import-icon-complete .menu-import-step-icon {
-    animation: menu-import-icon-complete-pop 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  }
-
-  .menu-import-check-reveal {
-    animation: menu-import-icon-complete-pop 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  }
-
-  .menu-import-status-label--complete {
-    animation: menu-import-status-reveal 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  }
-
-  .menu-import-loading-dots span {
-    display: inline-block;
-    height: 3px;
-    width: 3px;
-    border-radius: 9999px;
-    background: currentColor;
-    animation: menu-import-loading-dot 1.2s ease-in-out infinite;
-  }
-
-  .menu-import-loading-dots span:nth-child(2) {
-    animation-delay: 0.15s;
-  }
-
-  .menu-import-loading-dots span:nth-child(3) {
-    animation-delay: 0.3s;
-  }
-
-  .menu-import-ai-core--active {
-    animation: menu-import-step-glow 2s ease-in-out infinite;
-  }
-
-  .menu-import-focus-step--active {
-    animation: menu-import-focus-enter 0.52s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  }
-
-  .menu-import-step-glow {
-    animation: menu-import-step-glow 2.4s ease-in-out infinite;
-  }
-
-  .menu-import-ai-ring {
-    animation: menu-import-ai-ring-spin 4s linear infinite;
-  }
-
-  .menu-import-connector-dot {
-    animation: menu-import-connector-travel 1.5s ease-in-out infinite;
-  }
-
-  .menu-import-connector-dot-vertical {
-    animation: menu-import-connector-travel-vertical 1.5s ease-in-out infinite;
-  }
-
-  .menu-import-connector-glow {
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgb(167 139 250 / 0.22),
-      transparent
-    );
-    animation: menu-import-connector-glow-pulse 2.2s ease-in-out infinite;
-  }
-
-  .menu-import-connector-trail {
-    animation: menu-import-connector-trail-move 1.5s ease-in-out infinite;
-  }
-
-  .menu-import-global-progress {
-    box-shadow: 0 0 12px 0 rgb(124 58 237 / 0.2);
-    animation: menu-import-global-progress-glow 2.8s ease-in-out infinite;
-  }
-
-  .menu-import-ai-grid {
-    background-image:
-      linear-gradient(rgb(124 58 237 / 0.06) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(124 58 237 / 0.06) 1px, transparent 1px);
-    background-size: 8px 8px;
-    animation: menu-import-ai-grid-shift 3s linear infinite;
-  }
-
-  .menu-import-ai-orbit {
-    animation: menu-import-ai-orbit-pulse 2.6s ease-in-out infinite;
-  }
-
-  .menu-import-progress-glow {
-    animation: menu-import-progress-glow-pulse 2s ease-in-out infinite;
-  }
-
-  .menu-import-step-card--current:hover {
-    border-color: rgb(233 213 255 / 0.9);
-  }
-
-  .menu-import-check-pop {
-    animation: menu-import-check-pop-in 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  }
-
-  .menu-import-photo-row {
-    animation: menu-import-photo-row-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  }
-
-  .menu-import-stand-float {
-    animation: menu-import-stand-float 3.5s ease-in-out infinite;
-  }
-
-  .menu-import-phone-glow {
-    animation: menu-import-phone-glow-pulse 2.8s ease-in-out infinite;
-  }
-
-  .menu-import-scan-beam {
-    animation: menu-import-scan-beam-pulse 2.2s ease-in-out infinite;
-  }
-
-  .menu-import-wood-surface {
-    background: linear-gradient(
-      90deg,
-      rgb(120 53 15 / 0.14) 0%,
-      rgb(146 64 14 / 0.22) 25%,
-      rgb(120 53 15 / 0.16) 50%,
-      rgb(146 64 14 / 0.2) 75%,
-      rgb(120 53 15 / 0.14) 100%
-    );
-    box-shadow: inset 0 1px 2px rgb(120 53 15 / 0.08);
-  }
-
-  .menu-import-order-toast--delay {
-    animation: menu-import-order-toast-delayed 2.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  }
-
-  .menu-import-step-badge--current {
-    animation: menu-import-badge-pulse 2s ease-in-out infinite;
-  }
-
-  .menu-import-live-dot {
-    animation: menu-import-live-pulse 1.6s ease-in-out infinite;
-  }
-
-  .menu-import-order-toast {
-    animation: menu-import-order-pop 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  }
-
-  .menu-import-finale-ambient {
-    animation: menu-import-finale-glow 3s ease-in-out infinite;
-  }
-
-  .menu-import-story-visible .menu-import-step:not(.menu-import-step--focus),
-  .menu-import-story-visible .menu-import-highlight {
-    animation: menu-import-step-in 0.5s ease-out forwards;
-    opacity: 0;
-  }
-
-  .menu-import-step-card {
-    transition:
-      transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-      box-shadow 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-      border-color 0.32s ease,
-      background-color 0.32s ease;
-  }
-
-  .menu-import-step-card:hover {
-    transform: translateY(-3px) scale(1.005);
-    box-shadow:
-      0 12px 32px -16px rgb(124 58 237 / 0.14),
-      0 4px 12px -6px rgb(15 23 42 / 0.05);
-  }
-
-  .menu-import-step-card--finale {
-    box-shadow:
-      0 12px 40px -16px rgb(124 58 237 / 0.22),
-      0 4px 14px -8px rgb(15 23 42 / 0.06);
-  }
-
-  .menu-import-step-card--finale:hover {
-    box-shadow:
-      0 16px 44px -14px rgb(124 58 237 / 0.28),
-      0 6px 18px -10px rgb(15 23 42 / 0.07);
-  }
-
-  .menu-import-qr-btn {
-    transition:
-      transform 0.25s ease,
-      box-shadow 0.25s ease,
-      background-color 0.25s ease;
-  }
-
-  .menu-import-qr-btn:hover {
-    background: rgb(250 245 255);
-    box-shadow: 0 3px 12px -5px rgb(124 58 237 / 0.22);
-    transform: translateY(-1px);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .menu-import-step-card:hover {
-      transform: none;
-    }
-
-    .menu-import-step--timeline:not(.menu-import-step--current),
-    .menu-import-step--timeline.menu-import-step--current {
-      transform: none;
-    }
-
-    .menu-import-step--timeline.menu-import-step--current.menu-import-step--finale
-      .menu-import-phone-shell {
-      animation: none;
-      transform: none;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .menu-import-progress-shimmer,
-    .menu-import-progress-sheen,
-    .menu-import-icon-active .menu-import-step-icon,
-    .menu-import-icon-complete .menu-import-step-icon,
-    .menu-import-check-reveal,
-    .menu-import-status-label--complete,
-    .menu-import-loading-dots span,
-    .menu-import-focus-step--active,
-    .menu-import-ai-core--active,
-    .menu-import-step-glow,
-    .menu-import-ai-ring,
-    .menu-import-ai-orbit,
-    .menu-import-ai-grid,
-    .menu-import-progress-glow,
-    .menu-import-connector-dot,
-    .menu-import-connector-dot-vertical,
-    .menu-import-connector-glow,
-    .menu-import-connector-trail,
-    .menu-import-global-progress,
-    .menu-import-step-badge--current,
-    .menu-import-check-pop,
-    .menu-import-photo-row,
-    .menu-import-product-row--in,
-    .menu-import-stand-float,
-    .menu-import-phone-glow,
-    .menu-import-scan-beam,
-    .menu-import-live-dot,
-    .menu-import-order-toast,
-    .menu-import-order-toast--delay,
-    .menu-import-finale-ambient,
-    .menu-import-scan-line,
-    .menu-import-story-visible .menu-import-step,
-    .menu-import-story-visible .menu-import-highlight {
-      animation: none;
-      opacity: 1;
-    }
-
-    .menu-import-progress-shimmer {
-      animation: none;
-    }
-
-    .menu-import-step--timeline:not(.menu-import-step--current),
-    .menu-import-step--timeline.menu-import-step--current {
-      transform: none;
-      opacity: 1;
-    }
-
-    .menu-import-step--timeline.menu-import-step--current.menu-import-step--finale
-      .menu-import-phone-shell {
-      animation: none;
-    }
-  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   html.experience-scroll {
@@ -2480,15 +2481,13 @@ textarea {
   }
 }
 
-
-/* From Uiverse.io by milley69 */ 
+/* From Uiverse.io by milley69 */
 .loading svg polyline {
   fill: none;
   stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-
 
 .loading svg polyline#back {
   fill: none;
@@ -2566,7 +2565,6 @@ textarea {
 .menu-import-steps-timeline {
   scroll-snap-type: x mandatory;
   scroll-padding-inline: 50%;
-  padding: 0.5rem calc(50% - (var(--menu-import-step-w) / 2)) 0.85rem;
   -webkit-overflow-scrolling: touch;
   overflow-anchor: none;
   touch-action: pan-x;
@@ -2667,14 +2665,17 @@ textarea {
       0 0 0 1px rgb(100 116 139 / 0.18);
   }
 
-  .menu-import-step--timeline.menu-import-step--current .menu-import-phone-shell-frame {
+  .menu-import-step--timeline.menu-import-step--current
+    .menu-import-phone-shell-frame {
     box-shadow:
       0 14px 34px -16px rgb(124 58 237 / 0.24),
       0 10px 28px -16px rgb(15 23 42 / 0.42),
       0 0 0 1px rgb(167 139 250 / 0.16);
   }
 
-  .dark .menu-import-step--timeline.menu-import-step--current .menu-import-phone-shell-frame {
+  .dark
+    .menu-import-step--timeline.menu-import-step--current
+    .menu-import-phone-shell-frame {
     box-shadow:
       0 14px 34px -16px rgb(124 58 237 / 0.28),
       0 10px 28px -16px rgb(0 0 0 / 0.45),
@@ -2708,11 +2709,13 @@ textarea {
   animation: menu-import-phone-float 4.2s ease-in-out infinite;
 }
 
-.menu-import-step--timeline:not(.menu-import-step--current) .menu-import-phone-shell-frame {
+.menu-import-step--timeline:not(.menu-import-step--current)
+  .menu-import-phone-shell-frame {
   box-shadow: 0 8px 22px -14px rgb(15 23 42 / 0.35);
 }
 
-.menu-import-step--timeline.menu-import-step--current .menu-import-phone-shell-frame {
+.menu-import-step--timeline.menu-import-step--current
+  .menu-import-phone-shell-frame {
   box-shadow:
     0 16px 36px -18px rgb(124 58 237 / 0.22),
     0 10px 28px -16px rgb(15 23 42 / 0.45);
@@ -2785,9 +2788,9 @@ textarea {
 }
 
 .menu-import-product-row--in {
-  animation: menu-import-product-row-in 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: menu-import-product-row-in 0.45s cubic-bezier(0.4, 0, 0.2, 1)
+    forwards;
 }
-
 
 .menu-import-story-panel {
   overflow-anchor: none;
@@ -3013,7 +3016,11 @@ textarea {
 
   .transform-paper-table {
     background:
-      radial-gradient(ellipse 90% 70% at 50% 0%, rgb(251 191 36 / 0.14), transparent 62%),
+      radial-gradient(
+        ellipse 90% 70% at 50% 0%,
+        rgb(251 191 36 / 0.14),
+        transparent 62%
+      ),
       linear-gradient(155deg, #4a3428 0%, #5c4033 38%, #3d2b1f 100%);
   }
 
@@ -3040,7 +3047,8 @@ textarea {
   }
 
   .transform-panel--before:hover .transform-paper-sheet {
-    transform: perspective(920px) rotateX(3deg) rotateZ(-1.5deg) translateY(-3px);
+    transform: perspective(920px) rotateX(3deg) rotateZ(-1.5deg)
+      translateY(-3px);
   }
 
   .transform-paper-image {
@@ -3113,7 +3121,9 @@ textarea {
         rgb(79 70 229 / 0.12),
         rgb(124 58 237 / 0.06)
       );
-    background-size: 100% 100%, 200% 200%;
+    background-size:
+      100% 100%,
+      200% 200%;
     animation: transform-stat-gradient-shift 8s ease-in-out infinite;
   }
 
@@ -3131,7 +3141,9 @@ textarea {
         rgb(79 70 229 / 0.16),
         rgb(124 58 237 / 0.1)
       );
-    background-size: 100% 100%, 200% 200%;
+    background-size:
+      100% 100%,
+      200% 200%;
   }
 
   .transform-stat-featured-shine {
@@ -3285,11 +3297,21 @@ textarea {
 }
 
 .home-cta-btn-primary {
-  background: linear-gradient(135deg, rgb(124 58 237) 0%, rgb(109 40 217) 50%, rgb(91 33 182) 100%);
+  background: linear-gradient(
+    135deg,
+    rgb(124 58 237) 0%,
+    rgb(109 40 217) 50%,
+    rgb(91 33 182) 100%
+  );
 }
 
 .home-cta-btn-primary:hover {
-  background: linear-gradient(135deg, rgb(139 92 246) 0%, rgb(124 58 237) 50%, rgb(109 40 217) 100%);
+  background: linear-gradient(
+    135deg,
+    rgb(139 92 246) 0%,
+    rgb(124 58 237) 50%,
+    rgb(109 40 217) 100%
+  );
 }
 
 .home-cta-feature,
@@ -4180,8 +4202,16 @@ textarea {
 
 .about-hero-mesh {
   background:
-    radial-gradient(ellipse 70% 55% at 20% 15%, rgb(124 58 237 / 0.12), transparent 60%),
-    radial-gradient(ellipse 60% 50% at 85% 75%, rgb(99 102 241 / 0.1), transparent 55%);
+    radial-gradient(
+      ellipse 70% 55% at 20% 15%,
+      rgb(124 58 237 / 0.12),
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 60% 50% at 85% 75%,
+      rgb(99 102 241 / 0.1),
+      transparent 55%
+    );
   animation: about-hero-mesh-shift 8s ease-in-out infinite;
 }
 
@@ -5565,6 +5595,42 @@ body.recaptcha-modal-open {
 .legal-page__sticky-cta a:focus-visible {
   outline: 2px solid rgb(124 58 237 / 0.6);
   outline-offset: 2px;
+}
+
+@media (max-width: 1023px) {
+  .site-layout:has(.legal-page) {
+    min-height: auto;
+    height: auto;
+  }
+
+  .site-layout:has(.legal-page) .home-main {
+    flex: 0 0 auto;
+    overflow: visible;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .legal-page {
+    overflow: visible;
+  }
+
+  .legal-page__toc-mobile {
+    touch-action: pan-x;
+    overscroll-behavior-x: contain;
+    overscroll-behavior-y: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .legal-page__sticky-cta {
+    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+.site-layout:has(.legal-page) .home-main {
+  padding-bottom: 0;
+}
+
+.site-layout:has(.legal-page) .site-global-footer {
+  margin-top: 0;
 }
 
 .ensmenu-onboarding-popover.driver-popover-rtl .driver-popover-title,

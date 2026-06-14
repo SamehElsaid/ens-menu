@@ -6,7 +6,6 @@ import TemplateDescription from "@/components/mobile-app/TemplateDescription";
 import FaqSection from "@/components/mobile-app/FaqApp";
 import FeaturesApp from "@/components/mobile-app/FeaturesApp";
 import WorkflowApp from "@/components/mobile-app/WorkflowApp";
-import FooterSection from "@/components/HomePage/Footer";
 import PricingSection from "@/components/HomePage/PricingSection";
 
 type PageProps = { params: Promise<{ locale: string }> };
@@ -34,7 +33,7 @@ export default async function MobileAppPage({ params }: PageProps) {
   });
 
   return (
-    <main className="min-h-screen bg-white dark:bg-[#0d1117]">
+    <div className="min-h-screen bg-white dark:bg-[#0d1117]">
       <HeroSection />
       <WorkflowApp />
 
@@ -57,7 +56,6 @@ export default async function MobileAppPage({ params }: PageProps) {
           {t("button")}
         </a>
       </footer>
-      <FooterSection />
-    </main>
+    </div>
   );
 }

@@ -22,12 +22,7 @@ const FooterSection = () => {
   const socialLinks = useMemo(() => getSocialLinks(), []);
 
   return (
-    <MarketingSection
-      as="footer"
-      id="footer"
-      variant="footer"
-      className="mt-0"
-    >
+    <MarketingSection as="footer" id="footer" variant="footer" className="mt-0">
       <div className={ds.footer.inner}>
         <div className={ds.footer.grid}>
           <div className="text-start sm:col-span-2 lg:col-span-1">

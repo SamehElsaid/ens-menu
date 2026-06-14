@@ -27,7 +27,8 @@ export const ds = {
   split: {
     row: "flex flex-col items-center gap-10 sm:gap-12 lg:flex-row lg:items-center lg:justify-between lg:gap-10 xl:gap-16",
     content: "flow-stack w-full flex-1",
-    visual: "flex w-full shrink-0 items-center justify-center self-center overflow-visible lg:w-auto",
+    visual:
+      "flex w-full shrink-0 items-center justify-center self-center overflow-visible lg:w-auto",
   },
 
   /** Typography scale */

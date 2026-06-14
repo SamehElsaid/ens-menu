@@ -1114,26 +1114,7 @@
       "desserts": "حلويات"
     }
   },
-  "marketingTrustFeatures": {
-    "setup": {
-      "title": "جاهز في أقل من 10 دقائق"
-    },
-    "mobile": {
-      "title": "يعمل على الهاتف والتابلت"
-    },
-    "venues": {
-      "title": "مصمم للمطاعم والكافيهات والفنادق"
-    },
-    "qrOrders": {
-      "title": "QR ذكي + طلبات مباشرة"
-    },
-    "arabic": {
-      "title": "دعم كامل للعربية"
-    },
-    "noApp": {
-      "title": "بدون تطبيق للضيوف"
-    }
-  },
+
   "transformSection": {
     "badge": "من الورق إلى الرقمي",
     "titleBefore": "قبل",
@@ -1776,6 +1757,7 @@
       "privacy": "سياسة الخصوصية",
       "terms": "الشروط والأحكام",
       "followUs": "تابعنا",
+      "linkAbout": "من نحن",
       "linkPricing": "الأسعار",
       "linkKnowledge": "قاعدة المعرفة",
       "linkContact": "تواصل معنا"
