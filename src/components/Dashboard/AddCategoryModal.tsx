@@ -3,6 +3,9 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
+import type { PexelsPhoto } from "@/types/pexels";
+import { getPexelsPhotoUrl } from "@/lib/menuImport/pexelsImportImage";
+import PexelsImagePickerModal from "@/components/MenuImport/review/PexelsImagePickerModal";
 import { useLocale, useTranslations } from "next-intl";
 import { axiosPost, axiosPatch } from "@/shared/axiosCall";
 import { _resizeImage } from "@/shared/_shared";
@@ -15,7 +18,6 @@ import {
   IoImageOutline,
   IoPricetagOutline,
   IoAddCircleOutline,
-  IoCloudUploadOutline,
   IoEllipseSharp,
   IoCheckmarkCircle,
   IoRemoveCircle,
@@ -47,13 +49,18 @@ export default function AddCategoryModal({
   const isEdit = Boolean(category?.id);
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [pexelsModalOpen, setPexelsModalOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const {
     control,
     handleSubmit,
+    watch,
     formState: { errors },
     reset,
   } = useForm<AddCategoryFormData>({
@@ -75,12 +82,19 @@ export default function AddCategoryModal({
       const url = category.imageUrl ?? category.image ?? "";
       setImagePreview(url || null);
       setImage(null);
+      setSelectedImageUrl(null);
     } else {
       reset({ nameAr: "", nameEn: "", isActive: true });
       setImagePreview(null);
       setImage(null);
+      setSelectedImageUrl(null);
     }
   }, [category, reset]);
+
+  const nameAr = watch("nameAr");
+  const nameEn = watch("nameEn");
+  const defaultImageSearchQuery = (nameAr || nameEn || "").trim();
+  const isImageBusy = isImageLoading || isCreating;
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -113,6 +127,8 @@ export default function AddCategoryModal({
           return;
         }
         imageUrl = uploadResult.data.url;
+      } else if (selectedImageUrl) {
+        imageUrl = selectedImageUrl;
       }
 
       const payload = {
@@ -156,31 +172,48 @@ export default function AddCategoryModal({
     }
   };
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const applyImageFile = async (file: File) => {
     const validTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
     if (!validTypes.includes(file.type)) {
       toast.error(t("imageFormatError"));
       return;
     }
-    const resized = await _resizeImage(file);
-    if (resized.size > 2 * 1024 * 1024) {
-      toast.error(t("imageSizeError"));
-      return;
-    }
 
-    setImage(resized);
-    const reader = new FileReader();
-    reader.onloadend = () => setImagePreview(reader.result as string);
-    reader.readAsDataURL(resized);
+    setIsImageLoading(true);
+    try {
+      const resized = await _resizeImage(file);
+      if (resized.size > 2 * 1024 * 1024) {
+        toast.error(t("imageSizeError"));
+        return;
+      }
+      setImage(resized);
+      setSelectedImageUrl(null);
+      const reader = new FileReader();
+      reader.onloadend = () => setImagePreview(reader.result as string);
+      reader.readAsDataURL(resized);
+    } finally {
+      setIsImageLoading(false);
+    }
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await applyImageFile(file);
     e.target.value = "";
+  };
+
+  const handlePexelsPhotoSelect = async (photo: PexelsPhoto) => {
+    const url = getPexelsPhotoUrl(photo);
+    setImage(null);
+    setSelectedImageUrl(url);
+    setImagePreview(url);
   };
 
   const handleRemoveImage = () => {
     setImage(null);
     setImagePreview(null);
+    setSelectedImageUrl(null);
   };
 
   const handleDrop = async (e: React.DragEvent) => {
@@ -188,20 +221,7 @@ export default function AddCategoryModal({
     setIsDragOver(false);
     const file = e.dataTransfer.files?.[0];
     if (!file) return;
-    const validTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
-    if (!validTypes.includes(file.type)) {
-      toast.error(t("imageFormatError"));
-      return;
-    }
-    const resized = await _resizeImage(file);
-    if (resized.size > 2 * 1024 * 1024) {
-      toast.error(t("imageSizeError"));
-      return;
-    }
-    setImage(resized);
-    const reader = new FileReader();
-    reader.onloadend = () => setImagePreview(reader.result as string);
-    reader.readAsDataURL(resized);
+    await applyImageFile(file);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -260,6 +280,80 @@ export default function AddCategoryModal({
           className="flex flex-col min-h-0 flex-1"
         >
           <div className="overflow-y-auto p-6 space-y-6">
+            {/* Image section */}
+            <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
+              <div className="flex items-center gap-2 mb-4">
+                <IoImageOutline className="text-primary text-lg shrink-0" />
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                  {t("image")}
+                </h3>
+              </div>
+              <div
+                className={`relative rounded-2xl border-2 border-dashed transition-all duration-200 ${
+                  isDragOver
+                    ? "border-primary bg-primary/5 dark:bg-primary/10"
+                    : imagePreview
+                      ? "border-primary/40 bg-primary/5 dark:bg-primary/10"
+                      : "border-gray-300 dark:border-gray-600 bg-gray-100/50 dark:bg-gray-600/20"
+                }`}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+              >
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
+                  onChange={handleImageChange}
+                  className="hidden"
+                  disabled={isImageBusy}
+                />
+                <button
+                  type="button"
+                  disabled={isImageBusy}
+                  onClick={() => setPexelsModalOpen(true)}
+                  className="flex w-full flex-col items-center justify-center py-10 px-6 min-h-[160px] disabled:opacity-70"
+                >
+                  {imagePreview ? (
+                    <div className="relative w-28 h-28 rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-inner ring-1 ring-black/5">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                      {isImageLoading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                          <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <>
+                      <div className="w-14 h-14 rounded-2xl bg-gray-200/80 dark:bg-gray-600/50 flex items-center justify-center mb-3">
+                        <IoImageOutline className="text-3xl text-primary" />
+                      </div>
+                      <span className="text-sm font-medium text-primary text-center">
+                        {t("searchImage")}
+                      </span>
+                      <span className="mt-1 text-xs text-gray-500 dark:text-gray-400 text-center">
+                        {t("imageHint")}
+                      </span>
+                    </>
+                  )}
+                </button>
+                {imagePreview && !isImageBusy && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="absolute top-3 end-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
+                    aria-label={t("removeImage")}
+                  >
+                    <IoCloseOutline className="text-lg" />
+                  </button>
+                )}
+              </div>
+            </section>
+
             {/* Names section */}
             <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
               <div className="flex items-center gap-2 mb-4">
@@ -356,80 +450,6 @@ export default function AddCategoryModal({
                 )}
               />
             </section>
-
-            {/* Image section */}
-            <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
-              <div className="flex items-center gap-2 mb-4">
-                <IoImageOutline className="text-primary text-lg shrink-0" />
-                <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-                  {t("image")}
-                </h3>
-              </div>
-              <div className="flex flex-col items-center gap-4">
-                <label
-                  className={`relative block w-full cursor-pointer rounded-2xl border-2 border-dashed transition-all duration-200 ${
-                    isDragOver
-                      ? "border-primary bg-primary/5 dark:bg-primary/10"
-                      : imagePreview
-                        ? "border-primary/40 bg-primary/5 dark:bg-primary/10"
-                        : "border-gray-300 dark:border-gray-600 bg-gray-100/50 dark:bg-gray-600/20 hover:border-primary/40 hover:bg-primary/5 dark:hover:bg-primary/10"
-                  }`}
-                  onDrop={handleDrop}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                >
-                  <input
-                    type="file"
-                    accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
-                  <div className="flex flex-col items-center justify-center py-10 px-6 min-h-[160px]">
-                    {imagePreview ? (
-                      <div className="relative w-28 h-28 rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-inner ring-1 ring-black/5">
-                        <img
-                          src={imagePreview}
-                          alt="Preview"
-                          className="w-full h-full object-contain"
-                        />
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleRemoveImage();
-                          }}
-                          className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity text-white"
-                          aria-label={t("removeImage")}
-                        >
-                          <IoCloseOutline className="text-3xl" />
-                        </button>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="w-14 h-14 rounded-2xl bg-gray-200/80 dark:bg-gray-600/50 flex items-center justify-center mb-3">
-                          <IoCloudUploadOutline className="text-3xl text-gray-500 dark:text-gray-400" />
-                        </div>
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400 text-center">
-                          {isDragOver ? t("uploadImage") : t("imageHint")}
-                        </span>
-                        <span className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                          PNG, JPG, WebP · max 2MB
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </label>
-                {imagePreview && (
-                  <button
-                    type="button"
-                    onClick={handleRemoveImage}
-                    className="text-sm text-red-600 dark:text-red-400 hover:underline font-medium"
-                  >
-                    {t("removeImage")}
-                  </button>
-                )}
-              </div>
-            </section>
           </div>
 
           {/* Footer */}
@@ -457,6 +477,19 @@ export default function AddCategoryModal({
           </div>
         </form>
       </div>
+
+      <PexelsImagePickerModal
+        open={pexelsModalOpen}
+        defaultQuery={defaultImageSearchQuery}
+        isUploading={isImageBusy}
+        overlayClassName="z-[60]"
+        onClose={() => setPexelsModalOpen(false)}
+        onUploadFromDevice={() => {
+          setPexelsModalOpen(false);
+          fileRef.current?.click();
+        }}
+        onSelectPhoto={handlePexelsPhotoSelect}
+      />
     </div>
   );
 }

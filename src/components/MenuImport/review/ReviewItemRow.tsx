@@ -1,16 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import type { ImportItem } from "@/types/menuImport";
 import type { PexelsPhoto } from "@/types/pexels";
 import LoadImage from "@/components/ImageLoad";
 import {
-  fetchFirstPexelsImageUrl,
   getPexelsPhotoUrl,
   getPexelsSearchQuery,
-  shouldAutoFetchImportItemImage,
   uploadImportItemImageFile,
 } from "@/lib/menuImport/pexelsImportImage";
 import { importRefDomId } from "@/lib/menuImport/importRefDomId";
@@ -27,7 +25,6 @@ interface ReviewItemRowProps {
   currency: string;
   locale: string;
   uiLocale: string;
-  isAutoFetchingImage?: boolean;
   onUpdate: (patch: Partial<ImportItem>) => void;
   onUpdateVariant: (
     variantId: string,
@@ -55,15 +52,12 @@ export default function ReviewItemRow({
   onRemoveVariant,
   onImageChange,
   onResolveDuplicate,
-  isAutoFetchingImage: isAutoFetchingFromBatch = false,
 }: ReviewItemRowProps) {
   const t = useTranslations("MenuImport");
   const fileRef = useRef<HTMLInputElement>(null);
   const [isImageLoading, setIsImageLoading] = useState(false);
-  const [isAutoFetchingLocal, setIsAutoFetchingLocal] = useState(false);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
   const [pexelsModalOpen, setPexelsModalOpen] = useState(false);
-  const autoFetchGenerationRef = useRef(0);
 
   const IMAGE_VALID_TYPES = [
     "image/png",
@@ -139,46 +133,11 @@ export default function ReviewItemRow({
 
   const defaultImageSearchQuery = getPexelsSearchQuery(item);
 
-  useEffect(() => {
-    if (item.imageUrl || isAutoFetchingFromBatch) return;
-    if (!shouldAutoFetchImportItemImage(item)) {
-      setIsAutoFetchingLocal(false);
-      return;
-    }
-
-    const generation = ++autoFetchGenerationRef.current;
-    setIsAutoFetchingLocal(true);
-
-    void fetchFirstPexelsImageUrl(item)
-      .then((imageUrl) => {
-        if (generation !== autoFetchGenerationRef.current) return;
-        if (imageUrl) onImageChange(imageUrl);
-      })
-      .finally(() => {
-        if (generation === autoFetchGenerationRef.current) {
-          setIsAutoFetchingLocal(false);
-        }
-      });
-
-    return () => {
-      autoFetchGenerationRef.current += 1;
-    };
-  }, [
-    item.id,
-    item.imageUrl,
-    item.nameEn,
-    item.nameAr,
-    item.duplicateMeta?.status,
-    item.variants.length,
-    isAutoFetchingFromBatch,
-    onImageChange,
-  ]);
-
   const ITEM_THUMB_SIZE = 72;
 
   const displayImageUrl = item.imageUrl ?? localPreview;
-  const isImageBusy =
-    isImageLoading || isAutoFetchingFromBatch || isAutoFetchingLocal;
+  const showLoadingOverlay = !displayImageUrl && isImageLoading;
+  const isImageBusy = isImageLoading;
   const showResizedThumb =
     Boolean(displayImageUrl) &&
     !displayImageUrl!.startsWith("data:") &&
@@ -274,13 +233,11 @@ export default function ReviewItemRow({
                 </span>
               </>
             )}
-            {isImageBusy && (
+            {showLoadingOverlay && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/55 backdrop-blur-[1px]">
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 <span className="text-[8px] font-semibold text-white mt-1 leading-none px-1 text-center">
-                  {isAutoFetchingLocal && !isImageLoading
-                    ? t("autoFetchingImage")
-                    : t("uploadingImage")}
+                  {t("uploadingImage")}
                 </span>
               </div>
             )}

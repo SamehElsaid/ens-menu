@@ -3,6 +3,9 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
+import type { PexelsPhoto } from "@/types/pexels";
+import { getPexelsPhotoUrl } from "@/lib/menuImport/pexelsImportImage";
+import PexelsImagePickerModal from "@/components/MenuImport/review/PexelsImagePickerModal";
 import { useLocale, useTranslations } from "next-intl";
 import { axiosPost, axiosPatch, axiosGet } from "@/shared/axiosCall";
 import { _resizeImage } from "@/shared/_shared";
@@ -14,7 +17,6 @@ import {
   IoImageOutline,
   IoPricetagOutline,
   IoAddCircleOutline,
-  IoCloudUploadOutline,
   IoEllipseSharp,
   IoCheckmarkCircle,
   IoRemoveCircle,
@@ -55,17 +57,22 @@ export default function AddItemModal({
   const isEdit = Boolean(item?.id);
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [pexelsModalOpen, setPexelsModalOpen] = useState(false);
   const [categoriesLocal, setCategoriesLocal] = useState<Category[]>([]);
   const categories = categoriesProp ?? categoriesLocal;
   const modalRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const tItems = useTranslations("Items");
 
   const {
     control,
     handleSubmit,
+    watch,
     formState: { errors },
     reset,
   } = useForm<AddItemFormData>({
@@ -149,6 +156,7 @@ export default function AddItemModal({
       const url = item.imageUrl ?? item.image ?? "";
       setImagePreview(url || null);
       setImage(null);
+      setSelectedImageUrl(null);
     } else {
       reset({
         nameAr: "",
@@ -163,8 +171,14 @@ export default function AddItemModal({
       });
       setImagePreview(null);
       setImage(null);
+      setSelectedImageUrl(null);
     }
   }, [item, reset]);
+
+  const nameAr = watch("nameAr");
+  const nameEn = watch("nameEn");
+  const defaultImageSearchQuery = (nameAr || nameEn || "").trim();
+  const isImageBusy = isImageLoading || isCreating;
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -197,6 +211,8 @@ export default function AddItemModal({
           return;
         }
         imageUrl = uploadResult.data.url;
+      } else if (selectedImageUrl) {
+        imageUrl = selectedImageUrl;
       }
 
       const payload = {
@@ -250,29 +266,48 @@ export default function AddItemModal({
     }
   };
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const applyImageFile = async (file: File) => {
     const validTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
     if (!validTypes.includes(file.type)) {
       toast.error(t("imageFormatError"));
       return;
     }
-    const resized = await _resizeImage(file);
-    if (resized.size > 2 * 1024 * 1024) {
-      toast.error(t("imageSizeError"));
-      return;
+
+    setIsImageLoading(true);
+    try {
+      const resized = await _resizeImage(file);
+      if (resized.size > 2 * 1024 * 1024) {
+        toast.error(t("imageSizeError"));
+        return;
+      }
+      setImage(resized);
+      setSelectedImageUrl(null);
+      const reader = new FileReader();
+      reader.onloadend = () => setImagePreview(reader.result as string);
+      reader.readAsDataURL(resized);
+    } finally {
+      setIsImageLoading(false);
     }
-    setImage(resized);
-    const reader = new FileReader();
-    reader.onloadend = () => setImagePreview(reader.result as string);
-    reader.readAsDataURL(resized);
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await applyImageFile(file);
     e.target.value = "";
+  };
+
+  const handlePexelsPhotoSelect = async (photo: PexelsPhoto) => {
+    const url = getPexelsPhotoUrl(photo);
+    setImage(null);
+    setSelectedImageUrl(url);
+    setImagePreview(url);
   };
 
   const handleRemoveImage = () => {
     setImage(null);
     setImagePreview(null);
+    setSelectedImageUrl(null);
   };
 
   const handleDrop = async (e: React.DragEvent) => {
@@ -280,20 +315,7 @@ export default function AddItemModal({
     setIsDragOver(false);
     const file = e.dataTransfer.files?.[0];
     if (!file) return;
-    const validTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
-    if (!validTypes.includes(file.type)) {
-      toast.error(t("imageFormatError"));
-      return;
-    }
-    const resized = await _resizeImage(file);
-    if (resized.size > 2 * 1024 * 1024) {
-      toast.error(t("imageSizeError"));
-      return;
-    }
-    setImage(resized);
-    const reader = new FileReader();
-    reader.onloadend = () => setImagePreview(reader.result as string);
-    reader.readAsDataURL(resized);
+    await applyImageFile(file);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -360,56 +382,70 @@ export default function AddItemModal({
                   {t("image")}
                 </h3>
               </div>
-              <label
-                className={`relative block w-full cursor-pointer rounded-2xl border-2 border-dashed transition-all duration-200 ${
+              <div
+                className={`relative rounded-2xl border-2 border-dashed transition-all duration-200 ${
                   isDragOver
                     ? "border-primary bg-primary/5 dark:bg-primary/10"
                     : imagePreview
                       ? "border-primary/40 bg-primary/5 dark:bg-primary/10"
-                      : "border-gray-300 dark:border-gray-600 bg-gray-100/50 dark:bg-gray-600/20 hover:border-primary/40 hover:bg-primary/5 dark:hover:bg-primary/10"
+                      : "border-gray-300 dark:border-gray-600 bg-gray-100/50 dark:bg-gray-600/20"
                 }`}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
               >
                 <input
+                  ref={fileRef}
                   type="file"
                   accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
                   onChange={handleImageChange}
                   className="hidden"
+                  disabled={isImageBusy}
                 />
-                <div className="flex flex-col items-center justify-center py-8 px-6 min-h-[120px]">
+                <button
+                  type="button"
+                  disabled={isImageBusy}
+                  onClick={() => setPexelsModalOpen(true)}
+                  className="flex w-full flex-col items-center justify-center py-8 px-6 min-h-[120px] disabled:opacity-70"
+                >
                   {imagePreview ? (
                     <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-inner ring-1 ring-black/5">
                       <img
                         src={imagePreview}
                         alt="Preview"
-                        className="w-full h-full object-contain"
+                        className="w-full h-full object-cover"
                       />
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleRemoveImage();
-                        }}
-                        className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity text-white"
-                        aria-label={t("removeImage")}
-                      >
-                        <IoCloseOutline className="text-2xl" />
-                      </button>
+                      {isImageLoading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                          <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <>
                       <div className="w-12 h-12 rounded-2xl bg-gray-200/80 dark:bg-gray-600/50 flex items-center justify-center mb-2">
-                        <IoCloudUploadOutline className="text-2xl text-gray-500 dark:text-gray-400" />
+                        <IoImageOutline className="text-2xl text-primary" />
                       </div>
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400 text-center">
+                      <span className="text-sm font-medium text-primary text-center">
+                        {t("searchImage")}
+                      </span>
+                      <span className="mt-1 text-xs text-gray-500 dark:text-gray-400 text-center">
                         {t("imageHint")}
                       </span>
                     </>
                   )}
-                </div>
-              </label>
+                </button>
+                {imagePreview && !isImageBusy && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="absolute top-3 end-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
+                    aria-label={t("removeImage")}
+                  >
+                    <IoCloseOutline className="text-lg" />
+                  </button>
+                )}
+              </div>
             </section>
 
             <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
@@ -700,6 +736,19 @@ export default function AddItemModal({
           </div>
         </form>
       </div>
+
+      <PexelsImagePickerModal
+        open={pexelsModalOpen}
+        defaultQuery={defaultImageSearchQuery}
+        isUploading={isImageBusy}
+        overlayClassName="z-[60]"
+        onClose={() => setPexelsModalOpen(false)}
+        onUploadFromDevice={() => {
+          setPexelsModalOpen(false);
+          fileRef.current?.click();
+        }}
+        onSelectPhoto={handlePexelsPhotoSelect}
+      />
     </div>
   );
 }

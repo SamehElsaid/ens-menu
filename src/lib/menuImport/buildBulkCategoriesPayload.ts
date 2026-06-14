@@ -64,6 +64,9 @@ export function buildBulkCategoriesPayload(
       id: category.id,
       nameAr: category.nameAr.trim() || category.nameEn.trim(),
       nameEn: category.nameEn.trim() || category.nameAr.trim(),
+      ...(category.imageUrl
+        ? { imageUrl: category.imageUrl, image: category.imageUrl }
+        : {}),
       items,
     });
   }

@@ -261,12 +261,18 @@ function computeStats(categories: ImportCategory[]): ImportDraftStats {
       itemCount++;
       variantCount += item.variants.length;
       warningCount += item.flags.length;
-      missingPriceCount += item.flags.includes("missing_price") ? 1 : 0;
       missingNameCount += countNameFlags(item.flags);
-      for (const variant of item.variants) {
-        warningCount += variant.flags.length;
-        if (variant.flags.includes("missing_price")) missingPriceCount++;
-        missingNameCount += countNameFlags(variant.flags);
+
+      if (item.variants.length > 0) {
+        for (const variant of item.variants) {
+          warningCount += variant.flags.length;
+          missingNameCount += countNameFlags(variant.flags);
+          if (variant.price === null || !Number.isFinite(variant.price)) {
+            missingPriceCount++;
+          }
+        }
+      } else if (item.price === null || !Number.isFinite(item.price)) {
+        missingPriceCount++;
       }
     }
   }

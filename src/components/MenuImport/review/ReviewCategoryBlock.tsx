@@ -1,16 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { toast } from "react-toastify";
 import type { ImportCategory } from "@/types/menuImport";
+import type { PexelsPhoto } from "@/types/pexels";
+import LoadImage from "@/components/ImageLoad";
+import {
+  getCategoryPexelsSearchQuery,
+  getPexelsPhotoUrl,
+  uploadImportItemImageFile,
+} from "@/lib/menuImport/pexelsImportImage";
 import { importRefDomId } from "@/lib/menuImport/importRefDomId";
 import ReviewItemRow from "./ReviewItemRow";
+import PexelsImagePickerModal from "./PexelsImagePickerModal";
 import ConfirmationModal from "@/components/Custom/ConfirmationModal";
 import {
   IoChevronDownOutline,
   IoChevronUpOutline,
   IoTrashOutline,
   IoAddCircleOutline,
+  IoImageOutline,
+  IoCloseOutline,
 } from "react-icons/io5";
 
 interface ReviewCategoryBlockProps {
@@ -18,7 +29,6 @@ interface ReviewCategoryBlockProps {
   currency: string;
   locale: string;
   scrollTargetRefId?: string | null;
-  autoFetchingItemIds?: Set<string>;
   onUpdateCategory: (patch: Partial<ImportCategory>) => void;
   onUpdateItem: (
     itemId: string,
@@ -47,7 +57,6 @@ export default function ReviewCategoryBlock({
   currency,
   locale,
   scrollTargetRefId,
-  autoFetchingItemIds,
   onUpdateCategory,
   onUpdateItem,
   onUpdateVariant,
@@ -61,8 +70,21 @@ export default function ReviewCategoryBlock({
 }: ReviewCategoryBlockProps) {
   const t = useTranslations("MenuImport");
   const uiLocale = useLocale();
+  const fileRef = useRef<HTMLInputElement>(null);
   const [collapsed, setCollapsed] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
+  const [pexelsModalOpen, setPexelsModalOpen] = useState(false);
+
+  const IMAGE_VALID_TYPES = [
+    "image/png",
+    "image/jpeg",
+    "image/jpg",
+    "image/webp",
+  ] as const;
+
+  const CATEGORY_THUMB_SIZE = 72;
 
   const missingFieldClass =
     "border-amber-400 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-600";
@@ -87,6 +109,53 @@ export default function ReviewCategoryBlock({
     if (matches) setCollapsed(false);
   }, [scrollTargetRefId, category]);
 
+  const uploadImageFile = async (file: File) => {
+    if (
+      !IMAGE_VALID_TYPES.includes(file.type as (typeof IMAGE_VALID_TYPES)[number])
+    ) {
+      toast.error(t("invalidFileType"));
+      return;
+    }
+
+    setIsImageLoading(true);
+    try {
+      const previewUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error("preview_failed"));
+        reader.readAsDataURL(file);
+      });
+      setLocalPreview(previewUrl);
+
+      const imageUrl = await uploadImportItemImageFile(file, locale);
+      if (imageUrl) {
+        onUpdateCategory({ imageUrl });
+        setLocalPreview(null);
+      } else {
+        toast.error(t("imageUploadError"));
+        setLocalPreview(null);
+      }
+    } catch {
+      toast.error(t("imageUploadError"));
+      setLocalPreview(null);
+    } finally {
+      setIsImageLoading(false);
+    }
+  };
+
+  const handlePexelsPhotoSelect = async (photo: PexelsPhoto) => {
+    onUpdateCategory({ imageUrl: getPexelsPhotoUrl(photo) });
+    setLocalPreview(null);
+  };
+
+  const defaultImageSearchQuery = getCategoryPexelsSearchQuery(category);
+  const displayImageUrl = category.imageUrl ?? localPreview;
+  const isImageBusy = isImageLoading;
+  const showResizedThumb =
+    Boolean(displayImageUrl) &&
+    !displayImageUrl!.startsWith("data:") &&
+    !displayImageUrl!.startsWith("blob:");
+
   return (
     <>
       <section
@@ -107,6 +176,79 @@ export default function ReviewCategoryBlock({
               <IoChevronUpOutline className="text-xl" />
             )}
           </button>
+          <div className="flex items-start gap-3 shrink-0">
+            <button
+              type="button"
+              disabled={isImageBusy}
+              onClick={() => setPexelsModalOpen(true)}
+              className={`relative w-[4.5rem] h-[4.5rem] rounded-xl flex flex-col items-center justify-center overflow-hidden shrink-0 transition-all hover:scale-[1.03] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-80 ${
+                displayImageUrl
+                  ? "border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 hover:border-primary"
+                  : "border-2 border-dashed border-primary/35 bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/15 hover:border-primary/60"
+              }`}
+            >
+              {displayImageUrl ? (
+                showResizedThumb ? (
+                  <LoadImage
+                    src={displayImageUrl}
+                    alt=""
+                    width={CATEGORY_THUMB_SIZE}
+                    height={CATEGORY_THUMB_SIZE}
+                    cover
+                    disableLazy
+                    className="h-full w-full object-cover"
+                    wrapperClassName="!block h-full w-full"
+                  />
+                ) : (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={displayImageUrl}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                )
+              ) : (
+                <>
+                  <IoImageOutline className="text-lg text-primary" />
+                  <span className="text-[9px] font-semibold text-primary mt-0.5 leading-none">
+                    {t("addImage")}
+                  </span>
+                </>
+              )}
+              {isImageLoading && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/55 backdrop-blur-[1px]">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span className="text-[8px] font-semibold text-white mt-1 leading-none px-1 text-center">
+                    {t("uploadingImage")}
+                  </span>
+                </div>
+              )}
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
+              className="hidden"
+              disabled={isImageBusy}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) void uploadImageFile(f);
+                e.target.value = "";
+              }}
+            />
+            {displayImageUrl && !isImageBusy && (
+              <button
+                type="button"
+                onClick={() => {
+                  setLocalPreview(null);
+                  onUpdateCategory({ imageUrl: undefined });
+                }}
+                className="text-xs text-slate-400 hover:text-red-500"
+              >
+                <IoCloseOutline />
+              </button>
+            )}
+          </div>
           <div className="flex-1 min-w-0 space-y-2">
             {category.matchedCategoryId && (
               <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
@@ -163,7 +305,6 @@ export default function ReviewCategoryBlock({
                 currency={currency}
                 locale={locale}
                 uiLocale={uiLocale}
-                isAutoFetchingImage={autoFetchingItemIds?.has(item.id) ?? false}
                 onUpdate={(patch) => onUpdateItem(item.id, patch)}
                 onUpdateVariant={(variantId, patch) =>
                   onUpdateVariant(item.id, variantId, patch)
@@ -197,6 +338,18 @@ export default function ReviewCategoryBlock({
           </div>
         )}
       </section>
+
+      <PexelsImagePickerModal
+        open={pexelsModalOpen}
+        defaultQuery={defaultImageSearchQuery}
+        isUploading={isImageBusy}
+        onClose={() => setPexelsModalOpen(false)}
+        onUploadFromDevice={() => {
+          setPexelsModalOpen(false);
+          fileRef.current?.click();
+        }}
+        onSelectPhoto={handlePexelsPhotoSelect}
+      />
 
       {confirmDelete && (
         <ConfirmationModal

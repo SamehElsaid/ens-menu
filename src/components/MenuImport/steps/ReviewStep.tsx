@@ -15,7 +15,6 @@ import {
 } from "@/lib/menuImport/duplicateMatch";
 import { expandItemForSave } from "@/lib/menuImport/draftSaveUtils";
 import { scrollToImportRef } from "@/lib/menuImport/importRefDomId";
-import { useAutoFetchImportItemImages } from "@/hooks/useAutoFetchImportItemImages";
 import { IoAddCircleOutline } from "react-icons/io5";
 
 const STAT_BADGE_NEUTRAL =
@@ -113,13 +112,6 @@ export default function ReviewStep({
   const t = useTranslations("MenuImport");
   const locale = useLocale();
   const dupStats = countDuplicateStats(draft);
-  const { autoFetchingItemIds } = useAutoFetchImportItemImages({
-    draft,
-    duplicatesLoading,
-    enabled: !saveResult && !isSaving,
-    onItemImage: (categoryId, itemId, imageUrl) =>
-      onItemImage(categoryId, itemId, imageUrl),
-  });
   const [scrollTargetRefId, setScrollTargetRefId] = useState<string | null>(
     null,
   );
@@ -255,7 +247,7 @@ export default function ReviewStep({
               {t("statPriceConflicts", { count: dupStats.priceConflicts })}
             </button>
           )}
-          {draft.stats.missingPriceCount > 0 && (
+          {blockingPriceErrors.length > 0 && (
             <button
               type="button"
               onClick={() =>
@@ -263,15 +255,15 @@ export default function ReviewStep({
                   focusMissing: true,
                 })
               }
-              title={t("statClickHint")}
+              title={t("missingPriceBlockHint")}
               className={STAT_BADGE_WARNING}
             >
               {t("statMissingPrices", {
-                count: draft.stats.missingPriceCount,
+                count: blockingPriceErrors.length,
               })}
             </button>
           )}
-          {draft.stats.missingNameCount > 0 && (
+          {blockingNameErrors.length > 0 && (
             <button
               type="button"
               onClick={() =>
@@ -279,11 +271,11 @@ export default function ReviewStep({
                   focusMissing: true,
                 })
               }
-              title={t("statClickHint")}
+              title={t("missingNameBlockHint")}
               className={STAT_BADGE_WARNING}
             >
               {t("statMissingNames", {
-                count: draft.stats.missingNameCount,
+                count: blockingNameErrors.length,
               })}
             </button>
           )}
@@ -315,7 +307,12 @@ export default function ReviewStep({
               }
               className={WARNING_BLOCK}
             >
-              {t("missingPriceBlock", { count: blockingPriceErrors.length })}
+              <span className="block">
+                {t("missingPriceBlock", { count: blockingPriceErrors.length })}
+              </span>
+              <span className="mt-1 block text-xs font-medium text-amber-700/90 dark:text-amber-300/90">
+                {t("missingPriceBlockHint")}
+              </span>
             </button>
           )}
           {blockingNameErrors.length > 0 && (
@@ -328,7 +325,12 @@ export default function ReviewStep({
               }
               className={WARNING_BLOCK}
             >
-              {t("missingNameBlock", { count: blockingNameErrors.length })}
+              <span className="block">
+                {t("missingNameBlock", { count: blockingNameErrors.length })}
+              </span>
+              <span className="mt-1 block text-xs font-medium text-amber-700/90 dark:text-amber-300/90">
+                {t("missingNameBlockHint")}
+              </span>
             </button>
           )}
           {unresolvedPriceConflicts.length > 0 && (
@@ -364,7 +366,6 @@ export default function ReviewStep({
             currency={draft.currency}
             locale={locale}
             scrollTargetRefId={scrollTargetRefId}
-            autoFetchingItemIds={autoFetchingItemIds}
             onUpdateCategory={(patch) => onUpdateCategory(category.id, patch)}
             onUpdateItem={(itemId, patch) =>
               onUpdateItem(category.id, itemId, patch)

@@ -13,6 +13,8 @@ import {
 
 const PEXELS_THUMB_WIDTH = 160;
 const PEXELS_THUMB_HEIGHT = 160;
+const SEARCH_DEBOUNCE_MS = 700;
+const MIN_SEARCH_QUERY_LENGTH = 2;
 
 interface PexelsImagePickerModalProps {
   open: boolean;
@@ -21,6 +23,7 @@ interface PexelsImagePickerModalProps {
   onClose: () => void;
   onUploadFromDevice: () => void;
   onSelectPhoto: (photo: PexelsPhoto) => Promise<void>;
+  overlayClassName?: string;
 }
 
 export default function PexelsImagePickerModal({
@@ -30,24 +33,30 @@ export default function PexelsImagePickerModal({
   onClose,
   onUploadFromDevice,
   onSelectPhoto,
+  overlayClassName,
 }: PexelsImagePickerModalProps) {
   const t = useTranslations("MenuImport");
   const [query, setQuery] = useState(defaultQuery);
   const [photos, setPhotos] = useState<PexelsPhoto[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [searchCompleted, setSearchCompleted] = useState(false);
   const [selectingId, setSelectingId] = useState<number | null>(null);
 
-  const runSearch = useCallback(async (searchQuery: string) => {
+  const runSearch = useCallback(async (searchQuery: string, signal?: AbortSignal) => {
     const trimmed = searchQuery.trim();
-    if (!trimmed) {
+    if (!trimmed || trimmed.length < MIN_SEARCH_QUERY_LENGTH) {
       setPhotos([]);
+      setSearchCompleted(false);
       return;
     }
 
     setIsSearching(true);
+    setSearchCompleted(false);
     try {
       const params = new URLSearchParams({ query: trimmed, per_page: "15" });
-      const response = await fetch(`/api/pexels/search?${params.toString()}`);
+      const response = await fetch(`/api/pexels/search?${params.toString()}`, {
+        signal,
+      });
       const data = (await response.json()) as PexelsSearchResponse & {
         error?: string;
       };
@@ -59,13 +68,17 @@ export default function PexelsImagePickerModal({
             : t("pexelsSearchError"),
         );
         setPhotos([]);
+        setSearchCompleted(true);
         return;
       }
 
       setPhotos(data.photos ?? []);
-    } catch {
+      setSearchCompleted(true);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
       toast.error(t("pexelsSearchError"));
       setPhotos([]);
+      setSearchCompleted(true);
     } finally {
       setIsSearching(false);
     }
@@ -74,26 +87,36 @@ export default function PexelsImagePickerModal({
   useEffect(() => {
     if (!open) {
       setPhotos([]);
+      setQuery("");
+      setSearchCompleted(false);
       return;
     }
     setQuery(defaultQuery);
+    setSearchCompleted(false);
   }, [open, defaultQuery]);
 
   useEffect(() => {
     if (!open) return;
 
-    const searchQuery = query.trim() || defaultQuery.trim();
-    if (!searchQuery) {
+    const trimmed = query.trim();
+    if (!trimmed || trimmed.length < MIN_SEARCH_QUERY_LENGTH) {
       setPhotos([]);
+      setIsSearching(false);
+      setSearchCompleted(false);
       return;
     }
 
+    setSearchCompleted(false);
+    const controller = new AbortController();
     const timer = window.setTimeout(() => {
-      void runSearch(searchQuery);
-    }, 400);
+      void runSearch(trimmed, controller.signal);
+    }, SEARCH_DEBOUNCE_MS);
 
-    return () => window.clearTimeout(timer);
-  }, [open, query, defaultQuery, runSearch]);
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [open, query, runSearch]);
 
   useEffect(() => {
     if (!open) return;
@@ -124,9 +147,14 @@ export default function PexelsImagePickerModal({
     }
   };
 
+  const trimmedQuery = query.trim();
+  const isQueryReady = trimmedQuery.length >= MIN_SEARCH_QUERY_LENGTH;
+  const showSearchLoading = isSearching || (isQueryReady && !searchCompleted);
+  const showNoResults = searchCompleted && photos.length === 0 && isQueryReady;
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm sm:items-center sm:p-4"
+      className={`fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm p-0 sm:items-center sm:p-4 ${overlayClassName ?? ""}`}
       onClick={(event) => {
         if (
           event.target === event.currentTarget &&
@@ -140,10 +168,10 @@ export default function PexelsImagePickerModal({
       <div
         role="dialog"
         aria-modal="true"
-        className="flex max-h-[min(92dvh,720px)] w-full flex-col overflow-hidden rounded-t-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800 sm:max-w-2xl sm:rounded-2xl animate-[fadeIn_0.2s_ease-out]"
+        className="flex w-full max-h-[min(92dvh,720px)] flex-col overflow-hidden rounded-t-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800 sm:max-w-2xl sm:rounded-2xl animate-[fadeIn_0.2s_ease-out]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-3 border-b border-slate-200 px-4 py-4 dark:border-slate-700 sm:px-6">
+        <div className="shrink-0 flex items-start justify-between gap-3 border-b border-slate-200 px-4 py-4 dark:border-slate-700 sm:px-6">
           <div>
             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
               {t("pexelsSearchTitle")}
@@ -162,7 +190,7 @@ export default function PexelsImagePickerModal({
           </button>
         </div>
 
-        <div className="border-b border-slate-200 px-4 py-3 dark:border-slate-700 sm:px-6">
+        <div className="shrink-0 border-b border-slate-200 px-4 py-3 dark:border-slate-700 sm:px-6">
           <div className="relative">
             <IoSearchOutline className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
@@ -176,15 +204,19 @@ export default function PexelsImagePickerModal({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6">
-          {isSearching ? (
+        <div className="min-h-0 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 max-h-[min(calc(92dvh-12rem),560px)]">
+          {showSearchLoading ? (
             <div className="flex min-h-[220px] items-center justify-center gap-3 text-sm text-slate-500 dark:text-slate-400">
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
               {t("pexelsSearching")}
             </div>
+          ) : showNoResults ? (
+            <div className="flex min-h-[220px] items-center justify-center text-sm text-slate-500 dark:text-slate-400">
+              {t("pexelsNoResults")}
+            </div>
           ) : photos.length === 0 ? (
             <div className="flex min-h-[220px] items-center justify-center text-sm text-slate-500 dark:text-slate-400">
-              {query.trim() ? t("pexelsNoResults") : t("pexelsSearchPlaceholder")}
+              {t("pexelsSearchPlaceholder")}
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -208,7 +240,7 @@ export default function PexelsImagePickerModal({
                       className="h-full w-full object-cover transition-transform group-hover:scale-105"
                       wrapperClassName="!block h-full w-full"
                     />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-2 py-2 text-start">
+                    <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/70 to-transparent px-2 py-2 text-start">
                       <span className="line-clamp-1 text-[10px] font-medium text-white">
                         {photo.photographer}
                       </span>
@@ -228,7 +260,7 @@ export default function PexelsImagePickerModal({
           )}
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-slate-200 px-4 py-4 dark:border-slate-700 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div className="shrink-0 flex flex-col gap-3 border-t border-slate-200 px-4 py-3 dark:border-slate-700 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
           <a
             href="https://www.pexels.com"
             target="_blank"

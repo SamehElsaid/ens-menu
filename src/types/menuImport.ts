@@ -54,6 +54,7 @@ export interface ImportCategory {
   id: ImportId;
   nameAr: string;
   nameEn: string;
+  imageUrl?: string;
   items: ImportItem[];
   flags: ImportFlag[];
   isCollapsed?: boolean;
@@ -179,5 +180,7 @@ export interface BulkImportCategory {
   id: string;
   nameAr: string;
   nameEn: string;
+  imageUrl?: string;
+  image?: string;
   items: BulkImportItem[];
 }

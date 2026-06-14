@@ -210,18 +210,18 @@ export function recomputeDraftStats(draft: ImportDraft): ImportDraftStats {
       const flags = refreshItemFlags(item);
       item.flags = flags;
       warningCount += flags.length;
-      missingPriceCount += flags.includes("missing_price") ? 1 : 0;
       missingNameCount += countNameFlags(flags);
 
       for (const variant of item.variants) {
         const vFlags = refreshVariantFlags(variant);
         variant.flags = vFlags;
         warningCount += vFlags.length;
-        if (vFlags.includes("missing_price")) missingPriceCount++;
         missingNameCount += countNameFlags(vFlags);
       }
     }
   }
+
+  missingPriceCount = collectBlockingPriceErrors(draft).length;
 
   const expandedItemCount = countExpandedItems(draft);
 
