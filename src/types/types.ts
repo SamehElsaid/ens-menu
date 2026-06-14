@@ -6,58 +6,6 @@ export interface LinkProps {
   icon: IconType;
 }
 
-export interface CountryRaw {
-  id: string;
-  sortname: string;
-  name_en: string;
-  name_ar: string;
-  phonecode: string;
-}
-
-export interface StateRaw {
-  id: string;
-  name_en: string;
-  name_ar: string;
-  country_id: string;
-}
-
-export interface PaginatedResponse {
-  data?: {
-    data: unknown[];
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-    isPrevious: boolean;
-    isNext: boolean;
-  };
-}
-
-export interface CityRaw {
-  id: string;
-  name_en: string;
-  name_ar: string;
-  state_id: string;
-}
-
-export interface MenuItem {
-  name: string;
-  price: string;
-  image: string;
-  desc: string;
-  category: "drinks" | "bakery" | "food" | "desserts";
-}
-
-export interface MenuItemLocalized {
-  nameAr: string;
-  nameEn: string;
-  price: string;
-  image: string;
-  descAr: string;
-  descEn: string;
-  category: "drinks" | "bakery" | "food" | "desserts";
-}
-
 export interface Template {
   id: number;
   titleAr: string;
@@ -135,7 +83,8 @@ export interface FAQItemProps {
 
 export interface LogoProps {
   variant?: "default" | "white";
-  size?: "default" | "small";
+  size?: "default" | "small" | "compact" | "micro" | "header";
+  className?: string;
   /** Appended as "ENSmenu - {pageTitle}" in the dashboard header */
   pageTitle?: string;
 }

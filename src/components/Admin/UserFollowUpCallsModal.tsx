@@ -8,11 +8,13 @@ import FollowUpAgentCallsSummaryList from "@/components/Admin/FollowUpAgentCalls
 import FollowUpCallsList from "@/components/Admin/FollowUpCallsList";
 import LogFollowUpCallModal from "@/components/Admin/LogFollowUpCallModal";
 import ConfirmationModal from "@/components/Custom/ConfirmationModal";
+import CallNowPhoneModal from "@/components/Admin/CallNowPhoneModal";
 import PhoneDisplay from "@/components/Global/PhoneDisplay";
 import {
   deleteFollowUpCall,
   fetchFollowUpCalls,
   getFollowUpCallDisplayName,
+  getFollowUpCallDisplayPhone,
   updateFollowUpCall,
   type FollowUpCallsFilters,
 } from "@/lib/fetchAdminFollowUp";
@@ -53,9 +55,13 @@ export default function UserFollowUpCallsModal({
   const [activeLogModal, setActiveLogModal] = useState<ActiveLogModal>(null);
   const [selectedCall, setSelectedCall] = useState<FollowUpCall | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [callNowOpen, setCallNowOpen] = useState(false);
 
   const isAgentView = Boolean(adminName);
   const showingAgentDetail = isAgentView && Boolean(selectedCall);
+  const selectedCallPhone = selectedCall
+    ? getFollowUpCallDisplayPhone(selectedCall)
+    : null;
 
   const modalTitle = showingAgentDetail
     ? t("callDetailsTitle")
@@ -87,8 +93,13 @@ export default function UserFollowUpCallsModal({
     } else {
       setActiveLogModal(null);
       setSelectedCall(null);
+      setCallNowOpen(false);
     }
   }, [open, load]);
+
+  useEffect(() => {
+    setCallNowOpen(false);
+  }, [selectedCall?.id]);
 
   const resolveCallContext = (call: FollowUpCall) => ({
     userId: call.userId,
@@ -187,7 +198,29 @@ export default function UserFollowUpCallsModal({
                   {subtitle}
                 </p>
               )}
-              {!isAgentView && phoneNumber ? (
+              {showingAgentDetail && selectedCallPhone ? (
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <PhoneDisplay
+                    value={selectedCallPhone}
+                    copyOnClick
+                    className="text-sm text-primary hover:underline"
+                    title={t("copyPhone")}
+                    onCopied={() => toast.success(t("phoneCopied"))}
+                    onCopyFailed={() => toast.error(t("copyFailed"))}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setCallNowOpen(true)}
+                    className="text-xs font-medium text-slate-600 underline hover:text-primary dark:text-slate-300"
+                  >
+                    {t("callNow")}
+                  </button>
+                </div>
+              ) : showingAgentDetail ? (
+                <p className="mt-0.5 text-sm text-slate-400 dark:text-slate-500">
+                  {t("noPhone")}
+                </p>
+              ) : !isAgentView && phoneNumber ? (
                 <PhoneDisplay
                   value={phoneNumber}
                   className="mt-0.5 text-sm text-slate-500 dark:text-slate-400"
@@ -279,6 +312,17 @@ export default function UserFollowUpCallsModal({
         isLoading={deleting}
         loadingText={t("deletingCall")}
       />
+
+      {selectedCallPhone && (
+        <CallNowPhoneModal
+          open={callNowOpen}
+          onClose={() => setCallNowOpen(false)}
+          phoneNumber={selectedCallPhone}
+          customerName={
+            selectedCall ? getFollowUpCallDisplayName(selectedCall) : undefined
+          }
+        />
+      )}
     </>
   );
 }

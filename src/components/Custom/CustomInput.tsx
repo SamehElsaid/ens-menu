@@ -2,7 +2,7 @@
 
 import "react-phone-number-input/style.css";
 import "react-datepicker/dist/react-datepicker.css";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, useRef, useState } from "react";
 import { UnmountClosed } from "react-collapse";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { IoIosArrowDown } from "react-icons/io";
@@ -10,7 +10,6 @@ import PhoneInput from "react-phone-number-input";
 import ar from "react-phone-number-input/locale/ar";
 import en from "react-phone-number-input/locale/en";
 import Select, {
-  components,
   GroupBase,
   OptionsOrGroups,
   SingleValue,
@@ -19,8 +18,6 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import { ar as arLocale } from "date-fns/locale/ar";
 import { enUS as enLocale } from "date-fns/locale/en-US";
 import { useLocale, useTranslations } from "next-intl";
-import { axiosGet } from "@/shared/axiosCall";
-import { CountryRaw, PaginatedResponse } from "@/types/types";
 import { format } from "date-fns";
 
 registerLocale("ar", arLocale);
@@ -46,9 +43,6 @@ interface CustomInputProps {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => void;
   disabled?: boolean;
-  apiUrl?: string;
-  querySearch?: string;
-  triggerApiUrl?: string;
   reset?: () => void;
   rows?: number;
   disabledPreviousDates?: boolean;
@@ -70,9 +64,6 @@ export default function CustomInput({
   color: _color = "main",
   size = "normal",
   setOpen,
-  apiUrl,
-  querySearch,
-  triggerApiUrl = "",
   reset,
   disabledPreviousDates = false,
   ...props
@@ -83,26 +74,6 @@ export default function CustomInput({
   const phoneRef = useRef(null);
   const t = useTranslations();
   const locale = useLocale();
-  const [options, setOptions] = useState<OptionType[]>([]);
-  const [loadingOptions, setLoadingOptions] = useState<boolean>(false);
-  const [isSearching] = useState<boolean>(querySearch ? true : false);
-  const [searchValue, setSearchValue] = useState<string>("");
-  const [page, setPage] = useState<number>(1);
-  const [config, setConfig] = useState<{
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-    isPrevious: boolean;
-    isNext: boolean;
-  }>({
-    page: 1,
-    limit: 10,
-    total: 0,
-    totalPages: 0,
-    isPrevious: false,
-    isNext: false,
-  });
   void _color;
 
   const formatDate = (date?: Date | null) => {
@@ -119,55 +90,6 @@ export default function CustomInput({
       locale: locale === "ar" ? arLocale : enLocale,
     });
   };
-  useEffect(() => {
-    if (apiUrl && querySearch) {
-      setLoadingOptions(true);
-      setOptions([]);
-
-      const value = (props?.value as OptionType)?.label || searchValue || "";
-      axiosGet<CountryRaw[]>(
-        apiUrl +
-          `?${querySearch}=${value}&page=${page}${
-            triggerApiUrl ? `&${triggerApiUrl}` : ""
-          }`,
-        locale,
-      )
-        .then((res) => {
-          if (res.status && res.data) {
-            const data = res.data as PaginatedResponse;
-            const options: OptionType[] =
-              data?.data?.data?.map((item: unknown) => ({
-                label:
-                  locale === "ar"
-                    ? (item as { name_ar: string }).name_ar
-                    : (item as { name_en: string }).name_en,
-                value: (item as { id: string }).id,
-              })) || [];
-            setOptions(options);
-
-            setConfig({
-              page: data?.data?.page || 1,
-              limit: data?.data?.limit || 10,
-              total: data?.data?.total || 0,
-              totalPages: data?.data?.totalPages || 0,
-              isPrevious: data?.data?.isPrevious || false,
-              isNext: data?.data?.isNext || false,
-            });
-          }
-        })
-        .finally(() => {
-          setLoadingOptions(false);
-        });
-    }
-  }, [
-    apiUrl,
-    querySearch,
-    props.value,
-    locale,
-    searchValue,
-    page,
-    triggerApiUrl,
-  ]);
 
   return (
     <>
@@ -229,12 +151,9 @@ export default function CustomInput({
               classNamePrefix={`cursor-text ${size == "small" ? "small" : ""} ${
                 error ? "error" : ""
               } select`}
-              isSearchable={
-                isSearching || (props?.isSearchable as boolean) || false
-              }
+              isSearchable={(props?.isSearchable as boolean) || false}
               name={id}
               inputId={id}
-              isLoading={loadingOptions}
               isClearable={true}
               noOptionsMessage={() => (
                 <div className="text-accent-purple">{t("auth.noOptions")}</div>
@@ -244,21 +163,12 @@ export default function CustomInput({
               )}
               placeholder={t("auth.selectPlaceholder")}
               options={
-                (props.options as OptionsOrGroups<
+                props.options as OptionsOrGroups<
                   OptionType,
                   GroupBase<OptionType>
-                >) ||
-                options.concat(
-                  config.isNext
-                    ? [{ label: t("auth.seeMore"), value: "seeMore" }]
-                    : [],
-                )
+                >
               }
               value={props?.value as SingleValue<OptionType>}
-              onInputChange={(input) => {
-                setSearchValue(input);
-                setPage(1);
-              }}
               onChange={(newValue, actionMeta) => {
                 if (actionMeta.action === "clear") {
                   reset?.();
@@ -266,32 +176,6 @@ export default function CustomInput({
                 props.onChange?.(
                   newValue as unknown as ChangeEvent<HTMLInputElement>,
                 );
-              }}
-              components={{
-                Option: (props) => {
-                  const safeInnerProps = { ...props.innerProps };
-                  safeInnerProps.onMouseDown = (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  };
-                  safeInnerProps.onClick = (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setLoadingOptions(true);
-                    setPage((prev) => prev + 1);
-                  };
-                  if (props.data.value === "seeMore") {
-                    return (
-                      <div
-                        {...safeInnerProps}
-                        className="px-3 py-2 text-accent-purple font-medium text-center cursor-pointer"
-                      >
-                        {t("auth.seeMore")}
-                      </div>
-                    );
-                  }
-                  return <components.Option {...props} />;
-                },
               }}
             />
           </div>

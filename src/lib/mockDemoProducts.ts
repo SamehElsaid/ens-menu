@@ -11,10 +11,10 @@ export const MOCK_DEMO_PRODUCT_IDS = [
 export type MockDemoProductId = (typeof MOCK_DEMO_PRODUCT_IDS)[number];
 
 export const mockDemoProductImages: Record<MockDemoProductId, string> = {
-  grilledChicken: "/images/demo/grilled-chicken.jpg",
-  orangeJuice: "/images/demo/orange-juice.jpg",
-  cheesecake: "/images/demo/cheesecake.jpg",
-  potatoWedges: "/images/demo/potato-wedges.jpg",
+  grilledChicken: "/images/hero/chicken.jpg",
+  orangeJuice: "/images/hero/juice.jpg",
+  cheesecake: "/images/hero/cheesecake.jpg",
+  potatoWedges: "/images/hero/wedges.jpg",
 };
 
 export const mockDemoProductPrices: Record<MockDemoProductId, number> = {

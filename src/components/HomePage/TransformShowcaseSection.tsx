@@ -12,6 +12,10 @@ import { getMarketingTrustFeatures } from "@/lib/marketingTrustFeatures";
 import { ds } from "@/lib/designSystem";
 import { isRtlLocale } from "@/lib/localeDirection";
 
+const FLOW_STEP_KEYS = [1, 2, 3, 4, 5, 6] as const;
+const BEFORE_ITEM_KEYS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
+const AFTER_ITEM_KEYS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
+
 type TransformShowcaseSectionProps = {
   locale: string;
 };
@@ -32,21 +36,19 @@ export default async function TransformShowcaseSection({
     isRtl,
   ).map(({ name, price, image }) => ({ name, price, image }));
 
-  const steps = [1, 2, 3, 4, 5, 6].map((n) => ({
+  const steps = FLOW_STEP_KEYS.map((n) => ({
     title: t(`steps.${n}.title`),
     caption: t(`steps.${n}.caption`),
   }));
 
-  const beforeItems = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) =>
-    t(`before.items.${n}`),
-  );
-  const afterItems = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => t(`after.items.${n}`));
+  const beforeItems = BEFORE_ITEM_KEYS.map((n) => t(`before.items.${n}`));
+  const afterItems = AFTER_ITEM_KEYS.map((n) => t(`after.items.${n}`));
 
   return (
     <MarketingSection
       id="transform"
       variant="default"
-      className="transform-section !overflow-visible"
+      className="transform-section overflow-visible!"
     >
       <div className="home-section-shell">
         <header className="mx-auto mb-6 max-w-3xl text-center sm:mb-8">
@@ -104,7 +106,11 @@ export default async function TransformShowcaseSection({
         </div>
 
         <div className="mt-8 sm:mt-10">
-          <MarketingTrustFeatures features={trustFeatures} variant="light" columns={3} />
+          <MarketingTrustFeatures
+            features={trustFeatures}
+            variant="light"
+            columns={3}
+          />
         </div>
       </div>
     </MarketingSection>

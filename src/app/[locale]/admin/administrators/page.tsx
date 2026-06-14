@@ -5,7 +5,8 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { ColDef } from "ag-grid-community";
 import { IoArrowBack, IoAddOutline } from "react-icons/io5";
-import { FaSpinner, FaUserShield, FaClock } from "react-icons/fa";
+import { FaSpinner, FaUserShield, FaClock, FaHistory } from "react-icons/fa";
+import LinkTo from "@/components/Global/LinkTo";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import DataTable from "@/components/Custom/DataTable";
 import { axiosGet, axiosDelete } from "@/shared/axiosCall";
@@ -351,7 +352,14 @@ export default function AdministratorsPage() {
 
             {/* Add New Administrator Button */}
             {canManageAdmins && (
-                <div className={`flex ${isRTL ? "justify-start" : "justify-end"}`}>
+                <div className={`flex flex-wrap items-center gap-3 ${isRTL ? "justify-start" : "justify-end"}`}>
+                    <LinkTo
+                        href="/admin/administrators/log"
+                        className="flex items-center gap-2 px-5 py-3 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 rounded-xl font-semibold transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+                    >
+                        <FaHistory className="text-base" />
+                        <span>{t("viewActivityLog")}</span>
+                    </LinkTo>
                     <button
                         onClick={() => setShowAddModal(true)}
                         className="flex items-center gap-2 px-6 py-3 bg-linear-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"

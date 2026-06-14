@@ -12,9 +12,4 @@ export {
   MarketingButtonRow,
 } from "./MarketingButton";
 export { MarketingPill, MarketingPillRow } from "./MarketingPill";
-export { default as MarketingCard } from "./MarketingCard";
 export { default as MarketingTrustFeatures } from "./MarketingTrustFeatures";
-export {
-  MARKETING_TRUST_FEATURE_IDS,
-  type MarketingTrustFeature,
-} from "@/lib/marketingTrustFeatureIds";

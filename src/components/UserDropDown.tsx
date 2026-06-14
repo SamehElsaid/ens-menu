@@ -19,14 +19,7 @@ import {
   finalizeFcmLogout,
   resolveFcmTokenForLogout,
 } from "@/shared/syncFcmToken";
-
-function buildPublicMenuUrl(slug: string | undefined | null): string {
-  if (!slug) return "";
-  return `https://${slug}${process.env.NEXT_PUBLIC_MENU_URL || ""}`.replace(
-    /^https:\/\//,
-    "https://",
-  );
-}
+import { publicMenuLinkUrl } from "@/lib/publicMenuUrl";
 
 function UserDropDown() {
   const dispatch = useAppDispatch();
@@ -52,7 +45,7 @@ function UserDropDown() {
   const isCashier =
     session?.role === "staff" && session?.staffJobRole === "cashier";
 
-  const publicMenuUrl = buildPublicMenuUrl(menuSlug);
+  const publicMenuUrl = publicMenuLinkUrl(menuSlug);
   const isDashboardMenuRoute = /^\/dashboard\/[^/]+/.test(pathname);
   const showRestaurantLink = isDashboardMenuRoute && Boolean(publicMenuUrl);
 

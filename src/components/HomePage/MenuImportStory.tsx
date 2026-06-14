@@ -3,6 +3,7 @@
 import {
   createContext,
   Fragment,
+  useCallback,
   useContext,
   useEffect,
   useLayoutEffect,
@@ -14,6 +15,8 @@ import {
 import {
   FiBell,
   FiCheck,
+  FiChevronLeft,
+  FiChevronRight,
   FiClock,
   FiDownload,
   FiImage,
@@ -123,7 +126,281 @@ function easeInOutCubic(t: number): number {
 
 const SYNCED_PROGRESS_TARGET = 100;
 const SYNCED_PROGRESS_DURATION_MS = 2600;
-const MENU_IMPORT_STEP_INTERVAL_MS = 3000;
+/** Advance after progress animation finishes (+ small read buffer). */
+const STEP_ADVANCE_MS = SYNCED_PROGRESS_DURATION_MS + 600;
+const USER_INTERACTION_PAUSE_MS = 12_000;
+const SCROLL_EASE = "cubic-bezier(0.32, 0.72, 0, 1)";
+const DRAG_SWIPE_THRESHOLD_PX = 36;
+const TIMELINE_DRAGGING_CLASS = "menu-import-steps-timeline--dragging";
+const PROGRAMMATIC_SCROLL_LOCK_MS = 560;
+
+function prefersReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function centerTimelineStep(
+  container: HTMLElement,
+  step: HTMLElement,
+  behavior: ScrollBehavior,
+) {
+  const maxScroll = Math.max(0, container.scrollWidth - container.clientWidth);
+  if (maxScroll <= 0) return;
+
+  const containerRect = container.getBoundingClientRect();
+  const stepRect = step.getBoundingClientRect();
+  const target =
+    container.scrollLeft +
+    (stepRect.left + stepRect.width / 2) -
+    (containerRect.left + containerRect.width / 2);
+
+  container.scrollTo({
+    left: Math.max(0, Math.min(maxScroll, target)),
+    behavior,
+  });
+}
+
+function findCenteredStepIndex(
+  container: HTMLElement,
+  steps: Array<HTMLElement | null>,
+): number {
+  const containerRect = container.getBoundingClientRect();
+  const containerCenter = containerRect.left + containerRect.width / 2;
+
+  let bestIndex = 0;
+  let bestDistance = Number.POSITIVE_INFINITY;
+
+  steps.forEach((step, index) => {
+    if (!step) return;
+    const rect = step.getBoundingClientRect();
+    const stepCenter = rect.left + rect.width / 2;
+    const distance = Math.abs(stepCenter - containerCenter);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      bestIndex = index;
+    }
+  });
+
+  return bestIndex + 1;
+}
+
+function resolveStepAfterDrag(
+  container: HTMLElement,
+  steps: Array<HTMLElement | null>,
+  dragDelta: number,
+  stepCount: number,
+  activeStep: number,
+): number {
+  if (Math.abs(dragDelta) < DRAG_SWIPE_THRESHOLD_PX) {
+    return findCenteredStepIndex(container, steps);
+  }
+
+  const direction = dragDelta > 0 ? 1 : -1;
+  return Math.max(1, Math.min(stepCount, activeStep + direction));
+}
+
+function lockProgrammaticScroll(
+  programmaticScrollRef: React.RefObject<boolean>,
+  durationMs = PROGRAMMATIC_SCROLL_LOCK_MS,
+) {
+  programmaticScrollRef.current = true;
+  window.setTimeout(() => {
+    programmaticScrollRef.current = false;
+  }, durationMs);
+}
+
+function useTimelineDrag({
+  timelineRef,
+  stepRefs,
+  stepCount,
+  activeStepRef,
+  onStepResolved,
+  pauseAutoplay,
+  programmaticScrollRef,
+  isDraggingRef,
+  skipAutoScrollRef,
+}: {
+  timelineRef: React.RefObject<HTMLDivElement | null>;
+  stepRefs: React.RefObject<Array<HTMLElement | null>>;
+  stepCount: number;
+  activeStepRef: React.RefObject<number>;
+  onStepResolved: (step: number) => void;
+  pauseAutoplay: () => void;
+  programmaticScrollRef: React.RefObject<boolean>;
+  isDraggingRef: React.RefObject<boolean>;
+  skipAutoScrollRef: React.RefObject<boolean>;
+}) {
+  const dragRef = useRef({
+    active: false,
+    pointerId: -1,
+    startX: 0,
+    lastX: 0,
+  });
+  const [isDragging, setIsDragging] = useState(false);
+
+  const beginDrag = useCallback((container: HTMLElement, event: PointerEvent) => {
+    dragRef.current = {
+      active: true,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      lastX: event.clientX,
+    };
+    isDraggingRef.current = true;
+    setIsDragging(true);
+    pauseAutoplay();
+    programmaticScrollRef.current = true;
+    container.classList.add(TIMELINE_DRAGGING_CLASS);
+    container.style.scrollSnapType = "none";
+    container.style.scrollBehavior = "auto";
+    container.setPointerCapture(event.pointerId);
+  }, [isDraggingRef, pauseAutoplay, programmaticScrollRef]);
+
+  const finishDrag = useCallback(
+    (container: HTMLElement, event: PointerEvent) => {
+      if (!dragRef.current.active || event.pointerId !== dragRef.current.pointerId) {
+        return;
+      }
+
+      const totalDrag = dragRef.current.startX - event.clientX;
+      dragRef.current.active = false;
+      isDraggingRef.current = false;
+
+      if (container.hasPointerCapture(event.pointerId)) {
+        container.releasePointerCapture(event.pointerId);
+      }
+
+      const targetStep = resolveStepAfterDrag(
+        container,
+        stepRefs.current,
+        totalDrag,
+        stepCount,
+        activeStepRef.current,
+      );
+      const stepEl = stepRefs.current[targetStep - 1];
+      const behavior: ScrollBehavior = prefersReducedMotion() ? "auto" : "smooth";
+
+      lockProgrammaticScroll(programmaticScrollRef, behavior === "smooth" ? PROGRAMMATIC_SCROLL_LOCK_MS : 0);
+      skipAutoScrollRef.current = true;
+      onStepResolved(targetStep);
+
+      if (stepEl) {
+        centerTimelineStep(container, stepEl, behavior);
+      }
+
+      window.setTimeout(() => {
+        container.classList.remove(TIMELINE_DRAGGING_CLASS);
+        container.style.removeProperty("scroll-snap-type");
+        container.style.removeProperty("scroll-behavior");
+        skipAutoScrollRef.current = false;
+        setIsDragging(false);
+      }, behavior === "smooth" ? PROGRAMMATIC_SCROLL_LOCK_MS : 0);
+    },
+    [activeStepRef, onStepResolved, programmaticScrollRef, skipAutoScrollRef, stepCount, stepRefs, isDraggingRef],
+  );
+
+  const settleFromScroll = useCallback(() => {
+    const container = timelineRef.current;
+    if (
+      !container ||
+      dragRef.current.active ||
+      isDraggingRef.current ||
+      programmaticScrollRef.current ||
+      container.classList.contains(TIMELINE_DRAGGING_CLASS)
+    ) {
+      return;
+    }
+
+    const nearest = findCenteredStepIndex(container, stepRefs.current);
+    if (nearest !== activeStepRef.current) {
+      onStepResolved(nearest);
+    }
+  }, [activeStepRef, isDraggingRef, onStepResolved, programmaticScrollRef, stepRefs, timelineRef]);
+
+  useEffect(() => {
+    const container = timelineRef.current;
+    if (!container) return;
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.button !== 0) return;
+      if (event.pointerType === "touch") return;
+      if ((event.target as HTMLElement).closest("button,a,input,textarea,select")) {
+        return;
+      }
+
+      beginDrag(container, event);
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (!dragRef.current.active || event.pointerId !== dragRef.current.pointerId) {
+        return;
+      }
+
+      event.preventDefault();
+      const delta = event.clientX - dragRef.current.lastX;
+      container.scrollBy({ left: -delta, behavior: "auto" });
+      dragRef.current.lastX = event.clientX;
+    };
+
+    const endDrag = (event: PointerEvent) => {
+      finishDrag(container, event);
+    };
+
+    container.addEventListener("pointerdown", onPointerDown);
+    container.addEventListener("pointermove", onPointerMove);
+    container.addEventListener("pointerup", endDrag);
+    container.addEventListener("pointercancel", endDrag);
+
+    return () => {
+      container.removeEventListener("pointerdown", onPointerDown);
+      container.removeEventListener("pointermove", onPointerMove);
+      container.removeEventListener("pointerup", endDrag);
+      container.removeEventListener("pointercancel", endDrag);
+    };
+  }, [
+    beginDrag,
+    finishDrag,
+    timelineRef,
+  ]);
+
+  useEffect(() => {
+    const container = timelineRef.current;
+    if (!container) return;
+
+    const onUserScroll = () => {
+      if (
+        dragRef.current.active ||
+        isDraggingRef.current ||
+        programmaticScrollRef.current ||
+        container.classList.contains(TIMELINE_DRAGGING_CLASS)
+      ) {
+        return;
+      }
+      pauseAutoplay();
+    };
+
+    container.addEventListener("scroll", onUserScroll, { passive: true });
+
+    const onScrollEnd = () => {
+      if (
+        dragRef.current.active ||
+        isDraggingRef.current ||
+        programmaticScrollRef.current ||
+        container.classList.contains(TIMELINE_DRAGGING_CLASS)
+      ) {
+        return;
+      }
+      settleFromScroll();
+    };
+
+    container.addEventListener("scrollend", onScrollEnd);
+
+    return () => {
+      container.removeEventListener("scroll", onUserScroll);
+      container.removeEventListener("scrollend", onScrollEnd);
+    };
+  }, [isDraggingRef, pauseAutoplay, programmaticScrollRef, settleFromScroll, timelineRef]);
+
+  return { isDragging };
+}
 
 function useSyncedPercent(current: boolean, passed: boolean) {
   const [value, setValue] = useState(passed ? SYNCED_PROGRESS_TARGET : 0);
@@ -942,7 +1219,7 @@ function StoryStep({
       ref={stepRef}
       className={cn(
         "menu-import-step menu-import-step--timeline flex w-[var(--menu-import-step-w)] max-w-[var(--menu-import-step-w)] shrink-0 snap-center snap-always flex-col",
-        "transition-[transform,opacity] duration-[680ms] ease-[cubic-bezier(0.4,0,0.2,1)]",
+        "transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]",
         current && "menu-import-step--current z-[1]",
         isFinale && "menu-import-step--finale",
       )}
@@ -1034,11 +1311,59 @@ export default function MenuImportStory({
   const rootRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const stepRefs = useRef<(HTMLElement | null)[]>([]);
+  const programmaticScrollRef = useRef(false);
+  const isDraggingRef = useRef(false);
+  const skipAutoScrollRef = useRef(false);
+  const activeStepRef = useRef(1);
+  const pauseUntilRef = useRef(0);
   const [activeStep, setActiveStep] = useState(1);
   const [visible, setVisible] = useState(false);
   const globalProgressTarget = (activeStep / stepCount) * 100;
   const globalProgressWidth = useSmoothTarget(globalProgressTarget);
   const isProcessingStep = activeStep >= 1 && activeStep <= 3;
+
+  activeStepRef.current = activeStep;
+
+  const pauseAutoplay = useCallback((durationMs = USER_INTERACTION_PAUSE_MS) => {
+    pauseUntilRef.current = Date.now() + durationMs;
+  }, []);
+
+  const resolveTimelineStep = useCallback(
+    (step: number) => {
+      setActiveStep(step);
+      pauseAutoplay();
+    },
+    [pauseAutoplay],
+  );
+
+  const { isDragging: _isDragging } = useTimelineDrag({
+    timelineRef,
+    stepRefs,
+    stepCount,
+    activeStepRef,
+    onStepResolved: resolveTimelineStep,
+    pauseAutoplay,
+    programmaticScrollRef,
+    isDraggingRef,
+    skipAutoScrollRef,
+  });
+
+  const goToStep = useCallback(
+    (step: number) => {
+      const next = Math.max(1, Math.min(stepCount, step));
+      setActiveStep(next);
+      pauseAutoplay();
+    },
+    [pauseAutoplay, stepCount],
+  );
+
+  const goToPrevStep = useCallback(() => {
+    goToStep(activeStep <= 1 ? stepCount : activeStep - 1);
+  }, [activeStep, goToStep, stepCount]);
+
+  const goToNextStep = useCallback(() => {
+    goToStep(activeStep >= stepCount ? 1 : activeStep + 1);
+  }, [activeStep, goToStep, stepCount]);
 
   usePreserveScrollPosition(activeStep, visible);
 
@@ -1053,7 +1378,7 @@ export default function MenuImportStory({
           observer.disconnect();
         }
       },
-      { threshold: 0.15 },
+      { threshold: 0.15, rootMargin: "0px 0px -5% 0px" },
     );
 
     observer.observe(node);
@@ -1063,47 +1388,47 @@ export default function MenuImportStory({
   useEffect(() => {
     if (!visible) return;
 
-    let step = 1;
-    setActiveStep(1);
+    const tick = () => {
+      if (document.hidden || Date.now() < pauseUntilRef.current) return;
+      setActiveStep((prev) => (prev >= stepCount ? 1 : prev + 1));
+    };
 
-    const interval = window.setInterval(() => {
-      step += 1;
-      if (step > stepCount) {
-        window.clearInterval(interval);
-        setActiveStep(stepCount);
-        return;
-      }
-      setActiveStep(step);
-    }, MENU_IMPORT_STEP_INTERVAL_MS);
-
+    const interval = window.setInterval(tick, STEP_ADVANCE_MS);
     return () => window.clearInterval(interval);
   }, [visible, stepCount]);
 
   useEffect(() => {
+    const onVisibility = () => {
+      if (document.hidden) pauseAutoplay(STEP_ADVANCE_MS);
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, [pauseAutoplay]);
+
+  useEffect(() => {
     const container = timelineRef.current;
     const step = stepRefs.current[activeStep - 1];
-    if (!container || !step) return;
+    if (!container || !step || !visible || isDraggingRef.current || skipAutoScrollRef.current) {
+      return;
+    }
 
-    const reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const behavior: ScrollBehavior = prefersReducedMotion() ? "auto" : "smooth";
 
-    const centerStep = () => {
-      const containerRect = container.getBoundingClientRect();
-      const stepRect = step.getBoundingClientRect();
-      const delta =
-        stepRect.left +
-        stepRect.width / 2 -
-        (containerRect.left + containerRect.width / 2);
-      container.scrollBy({
-        left: delta,
-        behavior: reducedMotion ? "auto" : "smooth",
-      });
+    lockProgrammaticScroll(
+      programmaticScrollRef,
+      behavior === "smooth" ? PROGRAMMATIC_SCROLL_LOCK_MS : 0,
+    );
+    centerTimelineStep(container, step, behavior);
+
+    const raf = requestAnimationFrame(() => {
+      if (!isDraggingRef.current) {
+        centerTimelineStep(container, step, behavior);
+      }
+    });
+
+    return () => {
+      cancelAnimationFrame(raf);
     };
-
-    centerStep();
-    const raf = requestAnimationFrame(centerStep);
-    return () => cancelAnimationFrame(raf);
   }, [activeStep, visible]);
 
   const stepVisuals = useMemo(
@@ -1183,6 +1508,7 @@ export default function MenuImportStory({
     <div
       ref={rootRef}
       className={cn("w-full", visible && "menu-import-story-visible")}
+      style={{ overflowAnchor: "none" }}
     >
       <div
         className={cn(
@@ -1198,9 +1524,13 @@ export default function MenuImportStory({
           <div
             className={cn(
               "menu-import-global-progress relative h-full rounded-full bg-gradient-to-r from-purple-400/80 via-violet-500/90 to-purple-400/80 rtl:bg-gradient-to-l lg:h-px",
+              "transition-[width] duration-700 ease-[var(--menu-import-scroll-ease,linear)]",
               isProcessingStep && "menu-import-global-progress--active",
             )}
-            style={{ width: `${globalProgressWidth}%` }}
+            style={{
+              width: `${globalProgressWidth}%`,
+              transitionTimingFunction: SCROLL_EASE,
+            }}
           >
             {isProcessingStep && (
               <span
@@ -1211,23 +1541,55 @@ export default function MenuImportStory({
           </div>
         </div>
 
-        <div
-          aria-hidden
-          className="mb-2.5 flex items-center justify-center gap-1.5"
-        >
-          {steps.map((step, index) => (
-            <span
-              key={step.title}
-              className={cn(
-                "h-1 rounded-full transition-all duration-500",
-                activeStep === index + 1
-                  ? "w-5 bg-purple-500"
-                  : activeStep > index + 1
-                    ? "w-2 bg-purple-300 dark:bg-purple-500/50"
-                    : "w-2 bg-slate-200 dark:bg-slate-700",
-              )}
-            />
-          ))}
+        <div className="mb-2.5 flex items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={goToPrevStep}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-600 transition-colors hover:border-purple-200 hover:text-purple-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-purple-500/30 dark:hover:text-purple-400"
+            aria-label="Previous step"
+          >
+            <FiChevronLeft size={16} className="rtl:rotate-180" />
+          </button>
+
+          <div
+            className="flex items-center justify-center gap-1.5"
+            role="tablist"
+            aria-label="Menu import steps"
+          >
+            {steps.map((step, index) => {
+              const stepNumber = index + 1;
+              const isCurrent = activeStep === stepNumber;
+              const isComplete = activeStep > stepNumber;
+
+              return (
+                <button
+                  key={step.title}
+                  type="button"
+                  role="tab"
+                  aria-selected={isCurrent}
+                  aria-label={`${step.title}${isComplete ? ", completed" : isCurrent ? ", current" : ""}`}
+                  onClick={() => goToStep(stepNumber)}
+                  className={cn(
+                    "h-1.5 rounded-full transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]",
+                    isCurrent
+                      ? "w-6 bg-purple-500"
+                      : isComplete
+                        ? "w-2 bg-purple-300 hover:bg-purple-400 dark:bg-purple-500/50"
+                        : "w-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600",
+                  )}
+                />
+              );
+            })}
+          </div>
+
+          <button
+            type="button"
+            onClick={goToNextStep}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-600 transition-colors hover:border-purple-200 hover:text-purple-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-purple-500/30 dark:hover:text-purple-400"
+            aria-label="Next step"
+          >
+            <FiChevronRight size={16} className="rtl:rotate-180" />
+          </button>
         </div>
 
         <div className="menu-import-story-timeline relative mx-auto w-full max-w-[min(100%,72rem)] overflow-hidden">
@@ -1241,7 +1603,7 @@ export default function MenuImportStory({
           />
           <div
             ref={timelineRef}
-            className="menu-import-steps-timeline flex flex-nowrap items-stretch overflow-x-auto overflow-y-visible overscroll-x-contain scroll-smooth py-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="menu-import-steps-timeline flex flex-nowrap items-stretch overflow-x-auto overflow-y-visible overscroll-x-contain py-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {steps.map((step, index) => (
               <Fragment key={`flow-${step.title}`}>

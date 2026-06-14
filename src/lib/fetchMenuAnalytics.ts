@@ -1,5 +1,10 @@
 import { axiosGet } from "@/shared/axiosCall";
 import { getMockMenuAnalytics } from "@/lib/mockMenuAnalytics";
+import {
+  emptyMenuAnalyticsResponse,
+  shouldUseAdminMockFallback,
+} from "@/lib/adminMockFallback";
+import { formatAppChartDay } from "@/lib/formatDateTime";
 import type {
   MenuAnalyticsPeriod,
   MenuAnalyticsResponse,
@@ -23,18 +28,15 @@ export async function fetchMenuAnalytics(
     return result.data;
   }
 
-  return getMockMenuAnalytics(locale, menuViews ?? 0, period, currency ?? "EGP");
+  if (shouldUseAdminMockFallback()) {
+    return getMockMenuAnalytics(locale, menuViews ?? 0, period, currency ?? "EGP");
+  }
+
+  return emptyMenuAnalyticsResponse(period, currency ?? "EGP");
 }
 
 export function formatMenuChartDate(dateStr: string, locale: string): string {
-  try {
-    return new Date(dateStr).toLocaleDateString(
-      locale === "ar" ? "ar-EG" : "en-US",
-      { weekday: "short", day: "numeric" },
-    );
-  } catch {
-    return dateStr.slice(5, 10);
-  }
+  return formatAppChartDay(dateStr, locale);
 }
 
 export function formatMenuCurrency(

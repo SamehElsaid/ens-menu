@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import { getTranslations } from "next-intl/server";
 import { buildSeoMetadata } from "@/lib/seo";
 import HeroContent from "@/components/HomePage/HeroContent";
+import TransformShowcaseSection from "@/components/HomePage/TransformShowcaseSection";
 import TrustedBySection from "@/components/HomePage/TrustedBySection";
 import SectionSkeleton from "@/components/HomePage/SectionSkeleton";
 import ChatWidget from "@/components/ChatWidget";
@@ -62,14 +63,14 @@ async function Page({ params }: Props) {
   return (
     <>
       <HeroContent locale={locale} />
-      <TemplateShow />
-      <TrustedBySection />
+      <TransformShowcaseSection locale={locale} />
+      {/* <TemplateShow /> */}
+      {/* <TrustedBySection /> */}
       <PhoneVideoSection />
       <Features />
-      <HowItWorks />
+      {/* <HowItWorks /> */}
       <FAQ />
       <FooterSection />
-      {/* <HeroPhoneDesktopPortal /> */}
     </>
   );
 }

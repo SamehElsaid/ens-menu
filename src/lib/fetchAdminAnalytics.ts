@@ -1,5 +1,10 @@
 import { axiosGet } from "@/shared/axiosCall";
 import { getMockAdminAnalytics } from "@/lib/mockAdminAnalytics";
+import {
+  emptyAdminAnalyticsResponse,
+  shouldUseAdminMockFallback,
+} from "@/lib/adminMockFallback";
+import { formatAppChartDay, formatAppDate } from "@/lib/formatDateTime";
 import type {
   AdminAnalyticsPeriod,
   AdminAnalyticsResponse,
@@ -22,7 +27,11 @@ export async function fetchAdminAnalytics(
     return result.data;
   }
 
-  return getMockAdminAnalytics(period, locale);
+  if (shouldUseAdminMockFallback()) {
+    return getMockAdminAnalytics(period, locale);
+  }
+
+  return emptyAdminAnalyticsResponse();
 }
 
 export async function fetchAdminAdminsCount(locale: string): Promise<number> {
@@ -72,26 +81,11 @@ export function formatAdminDate(
   dateStr: string | null | undefined,
   locale: string,
 ): string {
-  if (!dateStr) return "—";
-  try {
-    return new Date(dateStr).toLocaleDateString(
-      locale === "ar" ? "ar-EG" : "en-US",
-      { year: "numeric", month: "short", day: "numeric" },
-    );
-  } catch {
-    return "—";
-  }
+  return formatAppDate(dateStr, locale);
 }
 
 export function formatChartDate(dateStr: string, locale: string): string {
-  try {
-    return new Date(dateStr).toLocaleDateString(
-      locale === "ar" ? "ar-EG" : "en-US",
-      { weekday: "short", day: "numeric" },
-    );
-  } catch {
-    return dateStr.slice(5, 10);
-  }
+  return formatAppChartDay(dateStr, locale);
 }
 
 export function computeCtr(clicks: number, impressions: number): number {

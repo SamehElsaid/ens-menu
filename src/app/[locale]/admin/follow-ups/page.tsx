@@ -109,7 +109,11 @@ export default function AdminFollowUpsPage() {
     if (!logTarget) return;
     setSubmitting(true);
     try {
-      await createFollowUpCall(locale, payload, logTarget.name);
+      const result = await createFollowUpCall(locale, payload, logTarget.name);
+      if (!result.call) {
+        toast.error(t("callSaveError"));
+        return;
+      }
       toast.success(t("callSaved"));
       setLogTarget(null);
       await load();

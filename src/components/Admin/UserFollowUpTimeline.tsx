@@ -60,7 +60,11 @@ export default function UserFollowUpTimeline({
   ) => {
     setSubmitting(true);
     try {
-      await createFollowUpCall(locale, payload, userName);
+      const result = await createFollowUpCall(locale, payload, userName);
+      if (!result.call) {
+        toast.error(t("callSaveError"));
+        return;
+      }
       toast.success(t("callSaved"));
       setActiveLogModal(null);
       await load();

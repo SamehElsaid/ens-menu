@@ -52,7 +52,3 @@ export async function fetchHomepageFeaturedLogosClient(): Promise<
     return [];
   }
 }
-
-export async function fetchHomepageFeaturedLogos(): Promise<HomepageFeaturedLogo[]> {
-  return fetchHomepageFeaturedLogosClient();
-}

@@ -1,4 +1,4 @@
-import SafeLink from "@/components/Global/SafeLink";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { ds } from "@/lib/designSystem";
 
@@ -29,14 +29,14 @@ export function MarketingButtonLink({
   children,
 }: MarketingButtonLinkProps) {
   return (
-    <SafeLink
+    <Link
       href={href}
       prefetch={prefetch}
       onClick={onClick}
       className={cn(ds.btn.base, variantClass[variant], className)}
     >
       {children}
-    </SafeLink>
+    </Link>
   );
 }
 

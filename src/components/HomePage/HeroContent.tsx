@@ -19,6 +19,11 @@ import {
   MarketingText,
 } from "@/components/marketing";
 
+const HERO_PILL_KEYS = ["pill1", "pill2", "pill3", "pill4"] as const;
+
+const HERO_VISUAL_CLASS =
+  "hero-lina-chat-visual mx-auto w-full max-w-[min(100%,280px)] sm:max-w-[300px] lg:mx-0 lg:w-[min(100%,400px)] lg:min-w-[320px] lg:max-w-[400px] lg:shrink-0 lg:py-4";
+
 type HeroContentProps = {
   locale: string;
 };
@@ -26,7 +31,7 @@ type HeroContentProps = {
 export default async function HeroContent({ locale }: HeroContentProps) {
   const t = await getTranslations({ locale, namespace: "heroSection" });
 
-  const pills = [t("pill1"), t("pill2"), t("pill3"), t("pill4")];
+  const pills = HERO_PILL_KEYS.map((key) => t(key));
 
   const chatTurns = buildHeroChatTurns(
     {
@@ -47,7 +52,7 @@ export default async function HeroContent({ locale }: HeroContentProps) {
     <MarketingSection
       id="hero"
       variant="hero"
-      className="relative !overflow-visible !pb-10 sm:!pb-12 lg:!pb-14"
+      className="relative overflow-visible! pb-10! sm:pb-12! lg:pb-14!"
     >
       <HeroBackground />
 
@@ -82,7 +87,7 @@ export default async function HeroContent({ locale }: HeroContentProps) {
             <MarketingText variant="caption">{t("trustLine")}</MarketingText>
           </MarketingSplitContent>
 
-          <MarketingSplitVisual className="hero-lina-chat-visual mx-auto w-full max-w-[min(100%,280px)] sm:max-w-[300px] lg:mx-0 lg:w-[min(100%,400px)] lg:min-w-[320px] lg:max-w-[400px] lg:shrink-0 lg:py-4">
+          <MarketingSplitVisual className={HERO_VISUAL_CLASS}>
             <HeroPhoneMockup
               businessName={t("businessName")}
               turns={chatTurns}
