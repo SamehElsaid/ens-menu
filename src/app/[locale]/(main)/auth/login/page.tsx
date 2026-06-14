@@ -65,7 +65,7 @@ export default async function LoginPage({ params }: Props) {
                       </p>
                     </div>
                     <Suspense fallback={null}>
-                      <LoginForm promoText={promoText} promoEnabled={promoEnabled} />
+                      <LoginForm />
                     </Suspense>
                   </div>
                 </div>

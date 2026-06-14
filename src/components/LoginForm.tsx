@@ -20,8 +20,10 @@ import { useEffect, useRef, useState } from "react";
 import { LoginResponse } from "@/types/LoginResponse";
 import GoogleSignInButton from "@/components/Auth/GoogleSignInButton";
 import { syncFcmToken } from "@/shared/syncFcmToken";
-import Loader from "./Global/Loader";
-import CustomRecaptcha from "./Auth/CustomRecaptcha";
+import CustomRecaptcha, {
+  type RecaptchaGateHandle,
+} from "./Auth/CustomRecaptcha";
+import { cn } from "@/lib/cn";
 
 const REMEMBER_EMAIL_KEY = "ensmenu_remember_email";
 
