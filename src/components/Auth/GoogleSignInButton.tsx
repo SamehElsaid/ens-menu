@@ -8,27 +8,23 @@ import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 import { useAppDispatch } from "@/store/hooks";
 import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
+import { withNewUserOnboardingFlag } from "@/lib/aiImportOnboarding";
 import { axiosPost } from "@/shared/axiosCall";
 import { pushSignUpEvent } from "@/shared/gtmEvents";
 import { encryptData } from "@/shared/encryption";
 import { LoginResponse } from "@/types/LoginResponse";
 import { resolvePostLoginPath } from "@/lib/authRedirect";
-
-// Must be set at BUILD time in production (e.g. in Vercel/Netlify env vars).
 const hasGoogleClientId = !!(
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
   process.env.NEXT_PUBLIC_GOOGLE_AUTH_URL
 );
 
 type GoogleSignInButtonProps = {
-  /** Translation key for divider text, e.g. "auth.orLoginWith" or "auth.orRegisterWith". Omit to hide divider. */
   dividerLabel?: string;
-  /** Aria label for the button */
   ariaLabel?: string;
-  /** Optional custom class for the wrapper */
   className?: string;
-  /** Post-login redirect path (without locale), e.g. from ?redirect= query param */
   redirectParam?: string | null;
+  variant?: "icon" | "full";
 };
 
 export default function GoogleSignInButton({
@@ -36,6 +32,7 @@ export default function GoogleSignInButton({
   ariaLabel,
   className = "",
   redirectParam = null,
+  variant = "icon",
 }: GoogleSignInButtonProps) {
   const t = useTranslations("");
   const dispatch = useAppDispatch();
@@ -80,7 +77,8 @@ export default function GoogleSignInButton({
           redirectParam,
         );
         if (user) {
-          dispatch(SET_ACTIVE_USER({ user }));
+          const nextUser = isNew ? withNewUserOnboardingFlag(user) : user;
+          dispatch(SET_ACTIVE_USER({ user: nextUser }));
         }
       } else {
         const errMsg = (response.data as { error?: string })?.error;
@@ -112,29 +110,53 @@ export default function GoogleSignInButton({
   return (
     <div className={className}>
       {dividerLabel && (
-        <div className="flex items-center gap-4 w-full mb-4">
-          <div className="h-px flex-1 bg-slate-100 dark:bg-slate-700" />
-          <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+        <div className="auth-social-divider auth-social-divider--subtle mb-3.5 flex w-full items-center gap-2.5">
+          <span
+            aria-hidden
+            className="h-px flex-1 bg-slate-200/70 dark:bg-slate-700/60"
+          />
+          <span className="shrink-0 text-[10px] font-normal text-slate-400/90 dark:text-slate-500/90">
             {t(dividerLabel)}
           </span>
-          <div className="h-px flex-1 bg-slate-100 dark:bg-slate-700" />
+          <span
+            aria-hidden
+            className="h-px flex-1 bg-slate-200/70 dark:bg-slate-700/60"
+          />
         </div>
       )}
-      <div className="flex justify-center">
+
+      {variant === "full" ? (
         <button
           type="button"
           onClick={() => googleLogin()}
           disabled={loading}
-          className="w-14 h-14 text-xl hover:bg-accent-purple/10! dark:hover:bg-accent-purple/20! rounded-full glass-input flex items-center justify-center transition-all shadow-sm dark:border dark:border-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="login-google-btn flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200/90 bg-white px-4 py-2.5 text-[13px] font-medium text-slate-600 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50/90 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600/80 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:bg-slate-800/90"
           aria-label={ariaLabel || t("auth.loginWithGoogle")}
         >
           {loading ? (
-            <span className="w-5 h-5 border-2 border-accent-purple border-t-transparent rounded-full animate-spin" />
+            <span className="size-4 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" />
           ) : (
-            <FaGoogle className="text-accent-purple" />
+            <FaGoogle className="size-3.5 text-[#4285F4]" aria-hidden />
           )}
+          <span>{t("auth.continueWithGoogle")}</span>
         </button>
-      </div>
+      ) : (
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={() => googleLogin()}
+            disabled={loading}
+            className="flex h-[3.25rem] w-[3.25rem] items-center justify-center rounded-full border border-slate-200/80 bg-white text-xl shadow-sm transition-all hover:-translate-y-0.5 hover:border-purple-200/80 hover:bg-purple-50/80 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700/80 dark:bg-slate-900/60 dark:hover:border-purple-500/30 dark:hover:bg-purple-500/10"
+            aria-label={ariaLabel || t("auth.loginWithGoogle")}
+          >
+            {loading ? (
+              <span className="size-5 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" />
+            ) : (
+              <FaGoogle className="text-purple-600" />
+            )}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -10,7 +10,8 @@ import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import { pushFirstMenuCreatedEvent } from "@/shared/gtmEvents";
 import { toast } from "react-toastify";
 import { Menu, MenusResponse } from "@/types/Menu";
-import { useAppDispatch } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { shouldShowAiImportOnboarding } from "@/lib/aiImportOnboarding";
 import { normalizeMenuFromApi } from "@/lib/normalizeMenuFromApi";
 import { Subscription, SubscriptionResponse } from "@/types/Subscription";
 import {
@@ -31,17 +32,15 @@ import {
   IoCalendarOutline,
 } from "react-icons/io5";
 import LoadImage from "@/components/ImageLoad";
+import MenusMobileList from "@/components/Dashboard/mobile/MenusMobileList";
 import { getMenuDashboardRef, menuDashboardPath } from "@/lib/menuDashboardPath";
-import {
-  isOnboardingCompleted,
-  setOnboardingPhase,
-} from "@/lib/onboarding/onboardingStorage";
 
 export default function DashboardPage() {
   const t = useTranslations("Menus");
   const locale = useLocale();
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const authData = useAppSelector((state) => state.auth.data);
   const [menus, setMenus] = useState<Menu[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -98,11 +97,6 @@ export default function DashboardPage() {
     fetchSubscription();
   }, [fetchSubscription]);
 
-  useEffect(() => {
-    if (showCreateModal) {
-      window.dispatchEvent(new Event("ensmenu-onboarding-refresh"));
-    }
-  }, [showCreateModal]);
 
   useEffect(() => {
     if (!deleteTarget) setDeleteConfirmText("");
@@ -113,9 +107,6 @@ export default function DashboardPage() {
     if (menus.length >= maxMenus) {
       setShowLimitModal(true);
     } else {
-      if (!isOnboardingCompleted()) {
-        setOnboardingPhase("create-menu-modal");
-      }
       setShowCreateModal(true);
     }
   };
@@ -130,7 +121,10 @@ export default function DashboardPage() {
     if (newMenu) {
       const normalized = normalizeMenuFromApi(newMenu) ?? newMenu;
       setMenus((prev) => [...prev, normalized]);
-      router.push(menuDashboardPath(normalized, "import"));
+      const nextPath = shouldShowAiImportOnboarding(authData)
+        ? menuDashboardPath(normalized, "import")
+        : menuDashboardPath(normalized);
+      router.push(nextPath);
     } else {
       fetchMenus();
     }
@@ -172,6 +166,9 @@ export default function DashboardPage() {
       ? menu.descriptionAr || menu.descriptionEn
       : menu.descriptionEn || menu.descriptionAr;
   };
+
+  const getMenuPublicUrl = (menu: Menu) =>
+    `//${menu.slug}${process.env.NEXT_PUBLIC_MENU_URL ?? ""}`;
 
   const formatDate = (dateStr: string) => {
     try {
@@ -268,7 +265,7 @@ export default function DashboardPage() {
   // Loading State
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+      <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4 sm:min-h-[60vh]">
         <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
         <p className="text-slate-500 font-medium">{t("loading")}</p>
       </div>
@@ -328,29 +325,42 @@ export default function DashboardPage() {
   return (
     <>
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 ">
-        <div>
+      <div className="menus-page-header mb-5 flex flex-col gap-3 text-start sm:mb-8 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div className="min-w-0">
           <PageTitleWithHelp>
-            <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
+            <h1 className="text-xl font-bold text-slate-800 sm:text-3xl dark:text-slate-100">
               {t("title")}
             </h1>
           </PageTitleWithHelp>
-          <p className="text-slate-500 mt-1 dark:text-slate-400">
+          <p className="mt-0.5 text-sm text-slate-500 sm:mt-1 dark:text-slate-400">
             {t("subtitle")}
           </p>
         </div>
         <button
           id="onboarding-create-menu"
           onClick={handleCreateClick}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-primary to-primary/80 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+          className="inline-flex w-full max-w-[280px] items-center justify-center gap-2 rounded-xl bg-linear-to-r from-primary to-primary/80 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg active:scale-[0.98] sm:w-auto sm:max-w-none sm:px-6 sm:py-3 sm:text-base"
         >
-          <IoAddCircleOutline className="text-xl" />
+          <IoAddCircleOutline className="text-lg sm:text-xl" />
           {t("createMenu")}
         </button>
       </div>
 
-      {/* Menus Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 ">
+      <MenusMobileList
+        menus={menus}
+        locale={locale}
+        getMenuName={getMenuName}
+        getMenuDescription={getMenuDescription}
+        formatDate={formatDate}
+        togglingId={togglingId}
+        getMenuPublicUrl={getMenuPublicUrl}
+        getDashboardPath={(menu) => menuDashboardPath(menu)}
+        onToggleActive={handleToggleActive}
+        onDelete={setDeleteTarget}
+      />
+
+      {/* Menus Grid — desktop/tablet */}
+      <div className="hidden grid-cols-1 gap-6 md:grid md:grid-cols-2 xl:grid-cols-3">
         {menus.map((menu, index) => (
           <div
             key={`menu-${menu.id}-${index}`}
@@ -464,11 +474,10 @@ export default function DashboardPage() {
               </div>
 
               {/* Slug URL */}
-              <div className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-300 mt-2">
-                <IoGlobeOutline className="text-sm shrink-0" />
-                <span className="font-mono truncate">
-                  {menu.slug}
-                  {process.env.NEXT_PUBLIC_MENU_URL}
+              <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-300">
+                <IoGlobeOutline className="shrink-0 text-sm" />
+                <span className="truncate font-mono" dir="ltr">
+                  {getMenuPublicUrl(menu).replace(/^\/\//, "")}
                 </span>
               </div>
             </div>
@@ -484,7 +493,7 @@ export default function DashboardPage() {
                 {t("menuCard.manage")}
               </LinkTo>
               <a
-                href={`//${menu.slug}${process.env.NEXT_PUBLIC_MENU_URL}`}
+                href={getMenuPublicUrl(menu)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-sm font-semibold hover:border-primary/30 dark:hover:border-primary/50 hover:text-primary dark:hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/15 transition-all"

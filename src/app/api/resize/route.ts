@@ -23,6 +23,7 @@ function getCacheInfo(
   url: string | null,
   width: number | null,
   height: number | null,
+  fit?: string | null,
 ) {
   const urlStr = String(url || "");
   const urlHash = crypto
@@ -31,7 +32,9 @@ function getCacheInfo(
     .digest("hex")
     .substring(0, 12);
   const sizeKey =
-    width || height ? `${width || "auto"}x${height || "auto"}` : "original";
+    width || height
+      ? `${width || "auto"}x${height || "auto"}_${fit === "cover" ? "cover" : "inside"}`
+      : "original";
   const filename = `img_${urlHash}_${sizeKey}.webp`;
   const filePath = path.join(CACHE_DIR, filename);
   return { filename, filePath };
@@ -58,6 +61,7 @@ export async function GET(request: Request) {
   const url = searchParams.get("url");
   const width = searchParams.get("width");
   const height = searchParams.get("height");
+  const fitParam = searchParams.get("fit");
   const nocache = searchParams.get("nocache");
 
   // التحقق من وجود الرابط
@@ -83,7 +87,12 @@ export async function GET(request: Request) {
   }
 
   // الحصول على معلومات الملف في الكاش
-  const { filePath } = getCacheInfo(imageUrl, imageWidth, imageHeight);
+  const { filePath } = getCacheInfo(
+    imageUrl,
+    imageWidth,
+    imageHeight,
+    fitParam,
+  );
 
   // --- المرحلة الأولى: محاولة القراءة من الكاش (المسار الأسرع) ---
   if (nocache !== "true") {
@@ -121,9 +130,11 @@ export async function GET(request: Request) {
 
     // التحجيم إذا طلب المستخدم
     if (imageWidth || imageHeight) {
+      const resizeFit = fitParam === "cover" ? "cover" : "inside";
       pipeline.resize(imageWidth ?? undefined, imageHeight ?? undefined, {
-        fit: "inside",
-        withoutEnlargement: true,
+        fit: resizeFit,
+        position: "centre",
+        withoutEnlargement: resizeFit === "inside",
         fastShrinkOnLoad: true,
       });
     }

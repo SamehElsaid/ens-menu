@@ -300,15 +300,20 @@ export default function ReviewStep({
         {t("addCategory")}
       </button>
 
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
-        <button
-          type="button"
-          onClick={onNewUpload}
-          disabled={isSaving}
-          className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
-        >
-          {t("newUpload")}
-        </button>
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+        <div className="flex flex-col items-stretch gap-2 max-w-md">
+          <button
+            type="button"
+            onClick={onNewUpload}
+            disabled={isSaving}
+            className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 w-full sm:w-auto"
+          >
+            {t("newUpload")}
+          </button>
+          <p className="text-xs sm:text-[13px] leading-relaxed text-slate-500 dark:text-slate-400 text-purple-950/50 dark:text-purple-200/45 px-0.5">
+            {t("reuploadHint")}
+          </p>
+        </div>
         <button
           type="button"
           disabled={!canProceedToConfirm || isSaving}

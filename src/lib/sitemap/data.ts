@@ -15,7 +15,6 @@ const MAIN_PATHS = [
   "",
   "about",
   "Pricing",
-  "faq",
   "contact",
   "mobile-app",
   "privacy-policy",

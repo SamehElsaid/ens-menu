@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { generateToken } from "../../../firebase/firebase-confing";
 import { syncFcmToken } from "@/shared/syncFcmToken";
 import {
   IoNotificationsOutline,
@@ -32,6 +33,7 @@ export function NotificationPermissionCard() {
     setPermission(result as PermissionState);
     if (result === "granted") {
       setJustGranted(true);
+      await generateToken();
       await syncFcmToken(locale);
       setTimeout(() => setDismissed(true), 1800);
     }

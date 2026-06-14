@@ -14,23 +14,16 @@ export default function ChatMessage({ message }: Props) {
 
   return (
     <div
-      className={`flex gap-2 sm:gap-3 ${isUser ? "flex-row-reverse" : "flex-row"}`}
+      className={`flex gap-2 sm:gap-3 ${isUser ? "flex-row justify-end" : "flex-row justify-start"}`}
     >
-      {isUser ? (
-        <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-accent-purple to-deep-indigo text-white shadow-md shadow-purple-500/20 sm:size-9">
-          <FiUser size={14} className="sm:hidden" />
-          <FiUser size={15} className="hidden sm:block" />
-        </div>
-      ) : (
-        <LenaAvatar size={32} className="sm:hidden" />
-      )}
+      {!isUser && <LenaAvatar size={32} className="sm:hidden" />}
       {!isUser && <LenaAvatar size={36} className="hidden sm:block" />}
 
       <div
-        className={`min-w-0 max-w-[88%] px-3 py-2.5 text-[13px] sm:max-w-[84%] sm:px-3.5 sm:py-3 sm:text-[13.5px] ${
+        className={`min-w-0 max-w-[88%] px-3 py-2.5 text-start text-[13px] sm:max-w-[84%] sm:px-3.5 sm:py-3 sm:text-[13.5px] ${
           isUser
-            ? "rounded-2xl rounded-br-md bg-linear-to-br from-accent-purple to-deep-indigo leading-relaxed text-white shadow-md shadow-purple-500/25"
-            : "rounded-2xl rounded-bl-md border border-slate-100/90 bg-white leading-[1.65] text-slate-700 shadow-sm sm:leading-[1.7] dark:border-slate-700/70 dark:bg-[#161b22] dark:text-slate-200"
+            ? "rounded-2xl rounded-ee-md bg-linear-to-br from-accent-purple to-deep-indigo leading-relaxed text-white shadow-md shadow-purple-500/25"
+            : "rounded-2xl rounded-es-md border border-slate-100/90 bg-white leading-[1.65] text-slate-700 shadow-sm sm:leading-[1.7] dark:border-slate-700/70 dark:bg-[#161b22] dark:text-slate-200"
         }`}
       >
         {isUser ? (
@@ -41,6 +34,13 @@ export default function ChatMessage({ message }: Props) {
           )
         )}
       </div>
+
+      {isUser ? (
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-accent-purple to-deep-indigo text-white shadow-md shadow-purple-500/20 sm:size-9">
+          <FiUser size={14} className="sm:hidden" />
+          <FiUser size={15} className="hidden sm:block" />
+        </div>
+      ) : null}
     </div>
   );
 }

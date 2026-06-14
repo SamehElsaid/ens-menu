@@ -17,6 +17,16 @@ import { ContactInfo, NavLink } from "@/types/types";
 
 type TranslationFunction = (key: string) => string;
 
+export const ENSMENU_MAP_COORDS = {
+  lat: 30.790922,
+  lng: 30.979344,
+} as const;
+
+export const ENSMENU_MAP_EMBED_URL = `https://maps.google.com/maps?q=${ENSMENU_MAP_COORDS.lat},${ENSMENU_MAP_COORDS.lng}&z=17&hl=en&output=embed`;
+
+export const ENSMENU_MAP_EXTERNAL_URL =
+  "https://www.google.com/maps/@30.790922,30.979344,119m/data=!3m1!1e3?hl=en&entry=ttu";
+
 export const getContactInfo = (t: TranslationFunction): ContactInfo[] => [
   {
     icon: FiPhone,
@@ -24,14 +34,31 @@ export const getContactInfo = (t: TranslationFunction): ContactInfo[] => [
     labelKey: "phoneUae",
     value: "+971586551491",
     href: "tel:+971586551491",
+    whatsappHref: "https://wa.me/971586551491",
     dir: "ltr",
   },
   {
     icon: FiSmartphone,
     type: "phone",
-    labelKey: "phoneEgypt",
-    value: "01500800050",
+    subLabelKey: "sales",
+    value: "+201500800050",
     href: "tel:+201500800050",
+    whatsappHref: "https://wa.me/201500800050",
+    dir: "ltr",
+  },
+  {
+    icon: FaWhatsapp,
+    type: "linaWhatsapp",
+    subLabelKey: "linaWhatsapp",
+    value: "",
+  },
+  {
+    icon: FiPhone,
+    type: "phone",
+    subLabelKey: "techSupport",
+    value: "+201553841793",
+    href: "tel:+201553841793",
+    whatsappHref: "https://wa.me/201553841793",
     dir: "ltr",
   },
   {
@@ -43,9 +70,11 @@ export const getContactInfo = (t: TranslationFunction): ContactInfo[] => [
   },
   {
     icon: FiMapPin,
-    type: "address",
-    labelKey: "address",
-    value: t("UnitedArabEmirates"),
+    type: "location",
+    labelKey: "location",
+    value: t("location"),
+    mapEmbedUrl: ENSMENU_MAP_EMBED_URL,
+    externalMapUrl: ENSMENU_MAP_EXTERNAL_URL,
   },
 ];
 
@@ -88,4 +117,10 @@ export const getNavLinks = (headerT: TranslationFunction): NavLink[] => [
     name: headerT("contact"),
     path: "/contact",
   },
+];
+
+export const getFooterNavLinks = (t: TranslationFunction): NavLink[] => [
+  { name: t("linkPricing"), path: "/Pricing" },
+  { name: t("linkKnowledge"), path: "/knowledge-base" },
+  { name: t("linkContact"), path: "/contact" },
 ];

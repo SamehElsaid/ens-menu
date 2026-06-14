@@ -1,23 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { axiosGet } from "@/shared/axiosCall";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import AddCategoryModal from "@/components/Dashboard/AddCategoryModal";
 import DeleteCategoryConfirm from "@/components/Dashboard/DeleteCategoryConfirm";
-import DataTable from "@/components/Custom/DataTable";
+import CategoriesCardGrid from "@/components/Dashboard/CategoriesCardGrid";
+import MobileFloatingAddButton from "@/components/Dashboard/mobile/MobileFloatingAddButton";
 import LinkTo from "@/components/Global/LinkTo";
-import LoadImage from "@/components/ImageLoad";
 import { Category } from "@/types/Menu";
-import {
-  IoAddCircleOutline,
-  IoEllipseSharp,
-  IoCreateOutline,
-  IoTrashOutline,
-} from "react-icons/io5";
+import { IoAddCircleOutline, IoSearchOutline, IoRefreshOutline } from "react-icons/io5";
 
 export default function CategoriesPage() {
   const t = useTranslations("Categories");
@@ -39,13 +33,18 @@ export default function CategoriesPage() {
   const [refreshing, setRefreshing] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
+  const [searchInput, setSearchInput] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
 
   const fetchCategories = useCallback(async () => {
     if (!menuId) return;
     try {
       setLoading(true);
+      const searchParam = appliedSearch.trim()
+        ? `&search=${encodeURIComponent(appliedSearch.trim())}`
+        : "";
       const result = await axiosGet<Category[] | { categories: Category[] }>(
-        `/menus/${menuId}/categories?page=${page}&limit=10`,
+        `/menus/${menuId}/categories?page=${page}&limit=12${searchParam}`,
         locale,
       );
       if (result.status && result.data) {
@@ -62,7 +61,7 @@ export default function CategoriesPage() {
     } finally {
       setLoading(false);
     }
-  }, [menuId, locale, page]);
+  }, [menuId, locale, page, appliedSearch]);
 
   useEffect(() => {
     fetchCategories();
@@ -75,6 +74,17 @@ export default function CategoriesPage() {
   );
   const getImageUrl = (cat: Category) => cat.imageUrl ?? cat.image ?? "";
 
+  const handleSearch = useCallback(() => {
+    setAppliedSearch(searchInput);
+    setPage(1);
+  }, [searchInput]);
+
+  const handleReset = useCallback(() => {
+    setSearchInput("");
+    setAppliedSearch("");
+    setPage(1);
+  }, []);
+
   const handleEdit = useCallback((cat: Category) => {
     setEditingCategory(cat);
   }, []);
@@ -86,113 +96,15 @@ export default function CategoriesPage() {
     setRefreshing((r) => r + 1);
   }, []);
 
+  const openAddModal = useCallback(() => {
+    setEditingCategory(null);
+    setShowAddModal(true);
+  }, []);
+
   const closeAddModal = useCallback(() => {
     setShowAddModal(false);
     setEditingCategory(null);
   }, []);
-
-  const columnDefs = useMemo<ColDef<Category>[]>(
-    () => [
-      {
-        headerName: t("image"),
-        field: "imageUrl",
-        width: 100,
-        sortable: false,
-        cellRenderer: (params: ICellRendererParams<Category>) => {
-          const cat = params.data;
-          if (!cat) return null;
-          const src = getImageUrl(cat);
-          return (
-            <div className="w-12 h-12 rounded-lg bg-slate-100 dark:bg-slate-800 overflow-hidden flex items-center justify-center">
-              {src ? (
-                <LoadImage
-                  src={src}
-                  alt={getName(cat)}
-                  className="w-full h-full object-cover"
-                  width={48}
-                  height={48}
-                />
-              ) : (
-                <span className="text-slate-400 dark:text-slate-500 text-lg">
-                  —
-                </span>
-              )}
-            </div>
-          );
-        },
-      },
-      {
-        headerName: t("name"),
-        cellRenderer: (params: ICellRendererParams<Category>) => (
-          <h3 className="text-xl capitalize font-medium text-slate-800 dark:text-slate-100">
-            {params.data ? getName(params.data) : ""}
-          </h3>
-        ),
-        flex: 1,
-        minWidth: 150,
-      },
-      {
-        headerName: t("status"),
-        field: "isActive",
-        width: 120,
-        cellRenderer: (params: ICellRendererParams<Category>) => {
-          const cat = params.data;
-          if (!cat) return null;
-          const active = cat.isActive;
-          return (
-            <span
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
-                active
-                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-                  : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
-              }`}
-            >
-              <IoEllipseSharp
-                className={`text-[8px] ${active ? "text-green-500 dark:text-green-400" : "text-amber-500 dark:text-amber-400"}`}
-              />
-              {active ? t("active") : t("inactive")}
-            </span>
-          );
-        },
-      },
-      {
-        headerName: t("action"),
-        width: 120,
-        sortable: false,
-        cellRenderer: (params: ICellRendererParams<Category>) => {
-          const cat = params.data;
-          if (!cat) return null;
-          return (
-            <div className="flex items-center gap-2 h-full">
-              <button
-                type="button"
-                title={t("edit")}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEdit(cat);
-                }}
-                className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-primary/30 dark:hover:border-primary/50 hover:text-primary transition-colors"
-              >
-                <IoCreateOutline className="text-lg" />
-              </button>
-              <button
-                type="button"
-                title={t("delete")}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(cat);
-                }}
-                className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-red-50 dark:hover:bg-red-900/30 hover:border-red-200 dark:hover:border-red-800 hover:text-red-600 dark:hover:text-red-300 transition-colors"
-              >
-                <IoTrashOutline className="text-lg" />
-              </button>
-            </div>
-          );
-        },
-      },
-    ],
-    [t, getName, handleEdit, handleDelete],
-  );
 
   return (
     <>
@@ -202,7 +114,7 @@ export default function CategoriesPage() {
       >
         <div>
           <PageTitleWithHelp>
-            <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100">
               {t("title")}
             </h1>
           </PageTitleWithHelp>
@@ -218,11 +130,8 @@ export default function CategoriesPage() {
             {tStaff("backToOverview")}
           </LinkTo>
           <button
-            onClick={() => {
-              setEditingCategory(null);
-              setShowAddModal(true);
-            }}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold shadow-lg hover:opacity-90 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            onClick={openAddModal}
+            className="hidden md:inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold shadow-lg hover:opacity-90 transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             <IoAddCircleOutline className="text-xl" />
             {t("addCategory")}
@@ -230,20 +139,73 @@ export default function CategoriesPage() {
         </div>
       </div>
 
-      <div id="onboarding-categories-table">
-      <DataTable<Category>
-        rowData={categories}
-        columnDefs={columnDefs}
-        loading={loading}
-        locale={locale}
-        showRowNumbers={true}
-        pagination={true}
-        paginationPageSize={10}
-        page={page}
-        totalPages={totalPages}
-        onPageChange={(page) => setPage(page)}
-      />
+      <div
+        id="onboarding-categories-filters"
+        className="mb-6 p-5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm"
+      >
+        <div className="flex flex-wrap items-end gap-4">
+          <div
+            className="flex-1 min-w-[200px]"
+            dir={locale === "ar" ? "rtl" : "ltr"}
+          >
+            <label className="block text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2">
+              {t("search")}
+            </label>
+            <div className="relative">
+              <IoSearchOutline
+                className={`absolute top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-xl pointer-events-none ${locale === "ar" ? "right-3" : "left-3"}`}
+              />
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                placeholder={t("searchByName")}
+                className={`w-full h-11 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-shadow ${locale === "ar" ? "pr-10 pl-4" : "pl-10 pr-4"}`}
+              />
+            </div>
+          </div>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center shrink-0">
+            <button
+              type="button"
+              onClick={handleSearch}
+              className="h-11 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 bg-primary text-white rounded-xl font-semibold shadow-md hover:opacity-90 hover:shadow-lg transition-all"
+            >
+              <IoSearchOutline className="text-lg" />
+              {t("search")}
+            </button>
+            <button
+              type="button"
+              onClick={handleReset}
+              className="h-11 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 rounded-xl border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            >
+              <IoRefreshOutline className="text-lg" />
+              {t("reset")}
+            </button>
+          </div>
+        </div>
       </div>
+
+      <div id="onboarding-categories-table">
+        <CategoriesCardGrid
+          categories={categories}
+          loading={loading}
+          locale={locale}
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          isSearching={appliedSearch.trim().length > 0}
+          getName={getName}
+          getImageUrl={getImageUrl}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      </div>
+
+      <MobileFloatingAddButton
+        label={t("mobileFabLabel")}
+        onClick={openAddModal}
+      />
 
       {(showAddModal || editingCategory) && menuId && (
         <AddCategoryModal

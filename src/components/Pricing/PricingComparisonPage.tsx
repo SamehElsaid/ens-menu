@@ -1,14 +1,15 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { Fragment, useState } from "react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import ProPlanPriceSelector, {
   type ProBillingChoice,
 } from "@/components/Pricing/ProPlanPriceSelector";
-import { translatePlanFeaturesWithMenuLimit } from "@/lib/planFeatureI18n";
+import PricingMobilePlanCards from "@/components/Pricing/PricingMobilePlanCards";
+import type { CellVal, ComparisonRow } from "@/components/Pricing/pricingComparisonTypes";
 import { usePlans } from "@/hooks/usePlans";
 import useSubscriptionUpgradeHref from "@/hooks/useSubscriptionUpgradeHref";
 import { BsQrCode } from "react-icons/bs";
@@ -18,15 +19,12 @@ import {
   HiX,
   HiLightningBolt,
   HiStar,
-  HiChevronDown,
-  HiInformationCircle,
   HiShieldCheck,
 } from "react-icons/hi";
 
 const WHATSAPP_URL = "https://wa.me/201500800050";
 const STATIC_PRO_MONTHLY_EGP = 499;
 const STATIC_PRO_YEARLY_EGP = 5988;
-const FAQ_IDS = ["faq1", "faq2", "faq3"] as const;
 
 const PAYMENT_METHODS = [
   {
@@ -68,30 +66,15 @@ const STATIC_PRO_PLAN = {
 } as const;
 
 const CUSTOM_TABLE_FEATURE_KEYS = [
-  "onlineOrdering",
-  "deliveryMaps",
-  "newLanguages",
-] as const;
-
-const CUSTOM_CARD_FEATURE_KEYS = [
   "waiterRequest",
   "billRequest",
-  "onlineOrdering",
   "deliveryMaps",
   "newLanguages",
   "onlinePayment",
 ] as const;
 
-type CellVal = boolean | string | number;
-type ComparisonRow = {
-  label: string;
-  free: CellVal;
-  pro: CellVal;
-  custom: CellVal;
-};
-
 const COL_PRO =
-  "relative overflow-hidden border-x border-violet-200/80 dark:border-violet-500/18 bg-gradient-to-b from-violet-500/[0.05] via-fuchsia-500/[0.03] to-violet-600/[0.045] dark:from-violet-500/10 dark:via-fuchsia-500/06 dark:to-violet-950/22 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] px-2 align-middle sm:px-5";
+  "pricing-pro-col-glow relative overflow-hidden border-x border-violet-200/80 dark:border-violet-500/18 bg-gradient-to-b from-violet-500/[0.06] via-fuchsia-500/[0.04] to-violet-600/[0.05] dark:from-violet-500/12 dark:via-fuchsia-500/08 dark:to-violet-950/24 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] px-2 align-middle sm:px-5";
 
 const COL_SEP = "border-r border-slate-200/85 dark:border-slate-700/80";
 
@@ -121,16 +104,16 @@ function yesNoIcon(
   );
   return value
     ? wrap(
-        "rounded-full bg-emerald-100/90 p-1 dark:bg-emerald-500/15",
+        "rounded-full bg-emerald-100/95 p-1 ring-1 ring-emerald-200/70 dark:bg-emerald-500/15 dark:ring-emerald-500/25",
         <HiCheck
-          className="h-3.5 w-3.5 text-emerald-600 sm:h-4 sm:w-4 dark:text-emerald-400"
+          className="pricing-check-pop h-3.5 w-3.5 text-emerald-700 sm:h-4 sm:w-4 dark:text-emerald-300"
           aria-hidden
         />,
       )
     : wrap(
-        "rounded-full bg-red-100 p-1 dark:bg-red-500/20",
+        "rounded-full bg-rose-50/90 p-1 ring-1 ring-rose-100/80 dark:bg-rose-500/10 dark:ring-rose-500/20",
         <HiX
-          className="h-3.5 w-3.5 text-red-600 sm:h-4 sm:w-4 dark:text-red-400"
+          className="h-3.5 w-3.5 text-rose-400 sm:h-4 sm:w-4 dark:text-rose-400/80"
           aria-hidden
         />,
       );
@@ -144,6 +127,80 @@ function renderCell(value: CellVal, tYes: string, tNo: string): ReactNode {
     <span className="inline-block max-w-full hyphens-auto break-words text-center text-[11px] font-medium leading-snug text-slate-600 sm:text-sm dark:text-slate-400">
       {value}
     </span>
+  );
+}
+
+type PlanCtaVariant = "free" | "pro" | "custom";
+
+function PlanColumnCta({
+  href,
+  label,
+  variant,
+  external = false,
+  className = "",
+}: {
+  href: string;
+  label: string;
+  variant: PlanCtaVariant;
+  external?: boolean;
+  className?: string;
+}) {
+  const base =
+    "w-full rounded-xl py-2.5 text-[11px] font-bold transition active:scale-[0.98] sm:py-3 sm:text-xs";
+
+  if (external) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`flex items-center justify-center gap-1.5 bg-emerald-600 text-white shadow-sm hover:bg-emerald-500 ${base} ${className}`}
+      >
+        <HiOutlineChat className="h-4 w-4 shrink-0" aria-hidden />
+        {label}
+      </a>
+    );
+  }
+
+  if (variant === "pro") {
+    return (
+      <Link
+        href={href}
+        className={`flex items-center justify-center gap-1.5 bg-linear-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/35 ring-1 ring-violet-400/25 hover:scale-[1.02] hover:shadow-violet-500/45 ${base} ${className}`}
+      >
+        <HiStar className="text-amber-200" aria-hidden />
+        {label}
+      </Link>
+    );
+  }
+
+  return (
+    <Link
+      href={href}
+      className={`block text-center border border-slate-300 bg-slate-50 text-slate-900 hover:bg-slate-100 dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/14 ${base} ${className}`}
+    >
+      {label}
+    </Link>
+  );
+}
+
+function PlanColumnShell({
+  children,
+  align = "start",
+  className = "",
+}: {
+  children: React.ReactNode;
+  align?: "start" | "center";
+  className?: string;
+}) {
+  return (
+    <div
+      className={`flex flex-col ${
+        align === "center" ? "items-center text-center" : "text-start"
+      } ${className}`}
+    >
+      {children}
+    </div>
   );
 }
 
@@ -179,82 +236,12 @@ function HeroMenuMockup() {
   );
 }
 
-function PricingFaqItem({
-  id,
-  isOpen,
-  onToggle,
-  isRTL,
-}: {
-  id: (typeof FAQ_IDS)[number];
-  isOpen: boolean;
-  onToggle: () => void;
-  isRTL: boolean;
-}) {
-  const t = useTranslations("PricingPage");
-
-  return (
-    <div
-      className={`overflow-hidden rounded-2xl border transition-colors sm:rounded-2xl ${
-        isOpen
-          ? "border-violet-200/90 bg-violet-50/40 dark:border-violet-500/25 dark:bg-violet-500/08"
-          : "border-slate-200/90 bg-white hover:border-violet-200/70 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-violet-500/20"
-      }`}
-    >
-      <button
-        type="button"
-        id={`pricing-faq-${id}`}
-        aria-expanded={isOpen}
-        aria-controls={`pricing-faq-panel-${id}`}
-        onClick={onToggle}
-        className={`flex w-full items-center justify-between gap-3 px-5 py-4 text-start sm:px-6 sm:py-5 ${
-          isRTL ? "flex-row-reverse text-end" : ""
-        }`}
-      >
-        <span
-          className={`flex-1 text-base font-bold sm:text-lg ${
-            isOpen
-              ? "text-violet-700 dark:text-violet-300"
-              : "text-slate-900 dark:text-white"
-          }`}
-        >
-          {t(`${id}q`)}
-        </span>
-        <span
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all ${
-            isOpen
-              ? "rotate-180 bg-violet-600 text-white dark:bg-violet-500"
-              : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
-          }`}
-          aria-hidden
-        >
-          <HiChevronDown className="h-5 w-5" />
-        </span>
-      </button>
-      <div
-        id={`pricing-faq-panel-${id}`}
-        role="region"
-        aria-labelledby={`pricing-faq-${id}`}
-        className={`grid transition-[grid-template-rows] duration-300 ease-out ${
-          isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-        }`}
-      >
-        <div className="overflow-hidden">
-          <p className="px-5 pb-4 text-xs leading-relaxed text-slate-600 sm:px-6 sm:pb-5 sm:text-sm dark:text-slate-400">
-            {t(`${id}a`)}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function PricingComparisonPage() {
   const t = useTranslations("PricingPage");
   const tLanding = useTranslations("Landing.pricing");
   const tProfile = useTranslations("personalProfile");
   const locale = useLocale();
   const isRTL = locale === "ar";
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [proBillingChoice, setProBillingChoice] =
     useState<ProBillingChoice>("monthly");
   const { proPlan } = usePlans();
@@ -265,124 +252,160 @@ export default function PricingComparisonPage() {
   const proFirstMonthlyPrice = proPlan?.firstMonthlyPrice;
   const proFirstYearlyPrice = proPlan?.firstYearlyPrice;
 
-  const freeFeatures = useMemo(
-    () =>
-      translatePlanFeaturesWithMenuLimit(
-        [
-          t("staticFreeFeature1"),
-          t("staticFreeFeature2"),
-          t("staticFreeFeatureAI"),
-        ],
-        STATIC_FREE_PLAN.maxMenus,
-        tProfile,
-      ),
-    [t, tProfile],
-  );
-
-  const proFeatures = useMemo(() => {
-    const base = translatePlanFeaturesWithMenuLimit(
-      [t("staticProFeature1"), t("staticProFeature2"), t("staticProFeature3")],
-      STATIC_PRO_PLAN.maxMenus,
-      tProfile,
-    );
-    return [
-      ...base,
-      t("staticProFeatureAI"),
-      tLanding("proExtraFeatures.staffSystem"),
-      tLanding("proExtraFeatures.tablesSystem"),
-      t("proStaffMobileAppBullet"),
-    ];
-  }, [tProfile, tLanding, t]);
-
   const tYes = t("yes");
   const tNo = t("no");
+  const tBasic = t("cellBasic");
 
-  const rows: ComparisonRow[] = [
+  const baseRows: ComparisonRow[] = [
     {
+      id: "rowBillingCycle",
       label: t("rowBillingCycle"),
       free: t("billingFree"),
       pro: t("billingProShort"),
       custom: t("billingCustom"),
     },
     {
+      id: "rowMenus",
       label: t("rowMenus"),
       free: STATIC_FREE_PLAN.maxMenus,
       pro: STATIC_PRO_PLAN.maxMenus,
       custom: t("cellUnlimited"),
     },
     {
+      id: "rowProducts",
       label: t("rowProducts"),
       free: t("limited"),
       pro: t("limited"),
       custom: t("cellNegotiable"),
     },
     {
+      id: "rowSmartQr",
+      label: t("rowSmartQr"),
+      free: true,
+      pro: true,
+      custom: true,
+    },
+    {
+      id: "rowGuestMenu",
       label: t("rowGuestMenu"),
       free: true,
       pro: true,
       custom: true,
     },
     {
+      id: "rowAiMenuImport",
+      label: t("rowAiMenuImport"),
+      free: tBasic,
+      pro: true,
+      custom: true,
+    },
+    {
+      id: "rowAiSuggestions",
+      label: t("rowAiSuggestions"),
+      free: true,
+      pro: true,
+      custom: true,
+    },
+    {
+      id: "rowAiWaiter",
+      label: t("rowAiWaiter"),
+      free: t("aiFree"),
+      pro: t("aiPro"),
+      custom: t("aiCustom"),
+    },
+    {
+      id: "rowTableOrderingQr",
       label: t("rowTableOrderingQr"),
       free: false,
       pro: true,
       custom: true,
     },
     {
+      id: "rowLiveNotifications",
+      label: t("rowLiveNotifications"),
+      free: false,
+      pro: true,
+      custom: true,
+    },
+    {
+      id: "rowPhotoLibrary",
+      label: t("rowPhotoLibrary"),
+      free: true,
+      pro: true,
+      custom: true,
+    },
+    {
+      id: "rowMultiLanguage",
+      label: t("rowMultiLanguage"),
+      free: false,
+      pro: true,
+      custom: true,
+    },
+    {
+      id: "rowDashboard",
       label: t("rowDashboard"),
       free: true,
       pro: true,
       custom: true,
     },
     {
-      label: t("rowPlatformUpdates"),
-      free: true,
-      pro: true,
-      custom: true,
-    },
-    {
-      label: t("rowHostingSecurity"),
-      free: true,
-      pro: true,
-      custom: true,
-    },
-    {
-      label: t("rowAds"),
-      free: STATIC_FREE_PLAN.hasAds,
-      pro: STATIC_PRO_PLAN.hasAds,
-      custom: true,
-    },
-    {
+      id: "rowStaffTables",
       label: t("rowStaffTables"),
       free: false,
       pro: true,
       custom: true,
     },
     {
+      id: "rowStaffMobileApp",
       label: t("rowStaffMobileApp"),
       free: false,
       pro: true,
       custom: true,
     },
     {
-      label: t("rowAI"),
-      free: t("aiFree"),
-      pro: t("aiPro"),
-      custom: t("aiCustom"),
+      id: "rowStaffNotifications",
+      label: t("rowStaffNotifications"),
+      free: false,
+      pro: true,
+      custom: true,
     },
     {
+      id: "rowPlatformUpdates",
+      label: t("rowPlatformUpdates"),
+      free: true,
+      pro: true,
+      custom: true,
+    },
+    {
+      id: "rowHostingSecurity",
+      label: t("rowHostingSecurity"),
+      free: true,
+      pro: true,
+      custom: true,
+    },
+    {
+      id: "rowAds",
+      label: t("rowAds"),
+      free: STATIC_FREE_PLAN.hasAds,
+      pro: STATIC_PRO_PLAN.hasAds,
+      custom: true,
+    },
+    {
+      id: "rowDesign",
       label: t("rowDesign"),
       free: t("designFree"),
       pro: t("designPro"),
       custom: t("designCustom"),
     },
     {
+      id: "rowSupport",
       label: t("rowSupport"),
       free: t("supportFree"),
       pro: t("supportPro"),
       custom: t("supportCustom"),
     },
     ...CUSTOM_TABLE_FEATURE_KEYS.map((key) => ({
+      id: `customFeature.${key}`,
       label: tLanding(`customFeatures.${key}`),
       free: false,
       pro: false,
@@ -390,59 +413,72 @@ export default function PricingComparisonPage() {
     })),
   ];
 
+  const customFeatureIds = CUSTOM_TABLE_FEATURE_KEYS.map(
+    (key) => `customFeature.${key}`,
+  );
+
+  const orderedRowIds = [
+    // Core features
+    "rowBillingCycle",
+    "rowMenus",
+    "rowProducts",
+    "rowGuestMenu",
+    "rowSmartQr",
+    "rowDashboard",
+    "rowPhotoLibrary",
+    "rowHostingSecurity",
+    "rowPlatformUpdates",
+
+    // AI features
+    "rowAiMenuImport",
+    "rowAiSuggestions",
+    "rowAiWaiter",
+
+    // Live ordering & workflow
+    "rowTableOrderingQr",
+    "rowLiveNotifications",
+    "rowStaffNotifications",
+    "rowStaffTables",
+    "rowStaffMobileApp",
+    "rowMultiLanguage",
+
+    // Premium / business
+    "rowDesign",
+    "rowAds",
+    "rowSupport",
+
+    // Advanced custom-only add-ons
+    ...customFeatureIds,
+  ] as const;
+
+  const rowsById = new Map(baseRows.map((row) => [row.id, row] as const));
+  const rows = orderedRowIds
+    .map((id) => rowsById.get(id))
+    .filter((row): row is ComparisonRow => Boolean(row));
+
+  const desktopSections: Array<{ startId: string; title: string }> = [
+    { startId: "rowBillingCycle", title: t("sectionCoreFeatures") },
+    { startId: "rowAiMenuImport", title: t("sectionAiFeatures") },
+    { startId: "rowTableOrderingQr", title: t("sectionLiveOrdering") },
+    { startId: "rowDesign", title: t("sectionPremiumFeatures") },
+    { startId: "customFeature.waiterRequest", title: t("sectionAdvancedBusiness") },
+  ];
+  const desktopSectionByStartId = new Map<string, string>(
+    desktopSections.map((section) => [section.startId, section.title]),
+  );
+
+  const freeHighlights = [
+    t("freeHighlightForever"),
+    t("freeHighlightNoCard"),
+    t("freeHighlightFast"),
+  ] as const;
+
   const cellBase = "px-2 py-3.5 text-center align-middle sm:px-4 sm:py-4";
   const cellProText = "text-slate-800 dark:text-slate-100";
 
-  const planCards = [
-    {
-      id: "free",
-      title: tLanding("planFree"),
-      desc: t("staticFreeDescription"),
-      price: tProfile("freePrice"),
-      priceNote: "",
-      features: freeFeatures,
-      premium: false,
-      cta: {
-        href: "/auth/register" as const,
-        label: t("ctaRegister"),
-        external: false,
-      },
-    },
-    {
-      id: "pro",
-      title: tLanding("planPro"),
-      desc: t("staticProDescription"),
-      features: proFeatures,
-      premium: true,
-      cta: {
-        href: subscriptionUpgradeHref,
-        label: t("ctaUpgrade"),
-        external: false,
-      },
-    },
-    {
-      id: "custom",
-      title: tLanding("planCustom"),
-      desc: tLanding("customDescription"),
-      price: tLanding("customPrice"),
-      priceNote: null,
-      features: CUSTOM_CARD_FEATURE_KEYS.map((k) =>
-        tLanding(`customFeatures.${k}`),
-      ),
-      premium: false,
-      cta: { href: WHATSAPP_URL, label: t("ctaContact"), external: true },
-    },
-  ];
-
-  const notes = [
-    { key: "noteProAnnual", icon: HiStar },
-    { key: "noteLimits", icon: HiInformationCircle },
-    { key: "noteCustom", icon: HiOutlineChat },
-  ] as const;
-
   return (
     <div
-      className="pricing-page relative overflow-hidden bg-[#f8f9fc]  dark:bg-[#070a0f]  py-30"
+      className="pricing-page relative overflow-hidden bg-[#f8f9fc] pb-28 pt-14 dark:bg-[#070a0f] md:pb-32 md:pt-24 lg:py-32"
       dir={isRTL ? "rtl" : "ltr"}
     >
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -450,44 +486,84 @@ export default function PricingComparisonPage() {
         <div className="absolute top-1/3 end-0 h-64 w-64 rounded-full bg-fuchsia-200/15 blur-3xl dark:bg-fuchsia-900/10" />
       </div>
 
-      <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-6xl px-5 sm:px-6 lg:px-8">
         {/* Hero */}
-        <div className=" mb-12 grid items-center gap-10 lg:mb-16 lg:grid-cols-2 lg:gap-14">
-          <div className=" text-center lg:text-start">
+        <div className="mb-10 grid items-center gap-8 md:mb-14 lg:mb-20 lg:grid-cols-2 lg:gap-16">
+          <div className="text-center lg:text-start">
             <div className="pricing-hero-text">
-              <div className="pricing-hero-line mb-4 inline-flex items-center gap-2 rounded-full border border-violet-200/70 bg-violet-50/90 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-violet-800 dark:border-violet-500/20 dark:bg-violet-950/35 dark:text-violet-200 sm:text-xs">
+              <div className="pricing-hero-line mb-4 inline-flex items-center gap-2 rounded-full border border-violet-200/70 bg-violet-50/90 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-widest text-violet-800 dark:border-violet-500/20 dark:bg-violet-950/35 dark:text-violet-200 sm:text-xs">
                 <HiLightningBolt className="shrink-0 opacity-80" aria-hidden />
                 {t("eyebrow")}
               </div>
-              <h1 className="pricing-hero-line text-3xl font-black tracking-tight text-slate-900 dark:text-white sm:text-5xl lg:text-[3.25rem] lg:leading-[1.1]">
+              <h1 className="pricing-hero-line text-[1.75rem] font-black leading-[1.15] tracking-tight text-slate-900 dark:text-white sm:text-4xl lg:text-[3.25rem] lg:leading-[1.1]">
                 {t("title")}
               </h1>
-              <p className="pricing-hero-line mx-auto mt-4 max-w-xl text-base leading-relaxed text-slate-600 dark:text-slate-400 sm:mt-5 sm:text-lg lg:mx-0">
+              <p className="pricing-hero-line mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-slate-600 dark:text-slate-400 sm:mt-5 sm:text-lg lg:mx-0">
                 {t("subtitle")}
               </p>
+              <div className="pricing-hero-line mt-5 flex flex-wrap justify-center gap-2 lg:justify-start">
+                {freeHighlights.map((item) => (
+                  <span
+                    key={item}
+                    className="rounded-full border border-purple-100/90 bg-white/80 px-3 py-1.5 text-xs font-semibold text-purple-700 shadow-sm shadow-purple-500/5 dark:border-purple-500/20 dark:bg-purple-500/10 dark:text-purple-200"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+              <div className="pricing-hero-line mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start md:hidden">
+                <Link
+                  href="/auth/register"
+                  className="inline-flex min-h-[48px] items-center justify-center rounded-2xl bg-linear-to-br from-violet-500 to-indigo-600 px-6 py-3.5 text-base font-bold text-white shadow-lg shadow-violet-500/25"
+                >
+                  {t("ctaRegister")}
+                </Link>
+                <Link
+                  href={subscriptionUpgradeHref}
+                  className="inline-flex min-h-[48px] items-center justify-center rounded-2xl border border-slate-300 bg-white px-6 py-3.5 text-base font-bold text-slate-900 dark:border-white/15 dark:bg-white/10 dark:text-white"
+                >
+                  {t("ctaUpgrade")}
+                </Link>
+              </div>
             </div>
           </div>
-          <div className=" hidden sm:block">
+          <div className="hidden sm:block">
             <HeroMenuMockup />
           </div>
         </div>
 
-        {/* Comparison table */}
+        {/* Plans — mobile cards / desktop table */}
         <section
           className="relative max-w-full"
           aria-labelledby="pricing-compare-heading"
         >
-          <h2 id="pricing-compare-heading" className="sr-only">
+          <h2
+            id="pricing-compare-heading"
+            className="mb-5 text-center text-xl font-black text-slate-900 dark:text-white md:mb-8 md:text-2xl lg:sr-only"
+          >
             {t("compareTitle")}
           </h2>
 
+          <PricingMobilePlanCards
+            rows={rows}
+            proBillingChoice={proBillingChoice}
+            onBillingChange={setProBillingChoice}
+            proPriceMonthly={proPriceMonthly}
+            proPriceYearly={proPriceYearly}
+            proFirstMonthlyPrice={proFirstMonthlyPrice}
+            proFirstYearlyPrice={proFirstYearlyPrice}
+            isRTL={isRTL}
+            subscriptionUpgradeHref={subscriptionUpgradeHref}
+            freeHighlights={freeHighlights}
+          />
+
           <div
-            className="pointer-events-none absolute -inset-px rounded-3xl bg-linear-to-br from-violet-400/6 via-transparent to-fuchsia-400/5 dark:from-violet-500/10 dark:to-fuchsia-500/06"
+            className="pointer-events-none absolute -inset-px hidden rounded-3xl bg-linear-to-br from-violet-400/6 via-transparent to-fuchsia-400/5 dark:from-violet-500/10 dark:to-fuchsia-500/06 md:block"
             aria-hidden
           />
 
-          <div className="-mx-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:overflow-visible sm:px-0">
-            <div className="relative min-w-[min(100%,36rem)] overflow-hidden rounded-2xl border border-slate-200/90 bg-white/95 shadow-md shadow-slate-900/4 backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80 dark:shadow-black/25 sm:min-w-0 sm:rounded-3xl">
+          <div className="hidden md:block">
+            <div className="pricing-compare-table-wrap relative overflow-hidden rounded-3xl border border-slate-200/90 bg-white/95 backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80">
               <table className="w-full table-fixed border-collapse text-[11px] sm:text-sm">
                 <colgroup>
                   <col style={{ width: "27%" }} />
@@ -505,59 +581,66 @@ export default function PricingComparisonPage() {
                       </h3>
                     </th>
                     <th
-                      className={`${cellBase} py-8 align-bottom sm:py-10 ${COL_SEP} bg-white/60 dark:bg-slate-900/30`}
+                      className={`${cellBase} align-top py-6 sm:px-4 sm:py-8 ${COL_SEP} bg-white/60 dark:bg-slate-900/30`}
                     >
-                      <div className="mb-1.5 break-words font-semibold text-slate-500 dark:text-slate-400 sm:mb-2 sm:text-base">
-                        {tLanding("planFree")}
-                      </div>
-                      <div className="text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">
-                        {tProfile("freePrice")}
-                      </div>
+                      <PlanColumnShell>
+                        <div className="mb-1.5 break-words font-semibold text-slate-500 dark:text-slate-400 sm:mb-2 sm:text-base">
+                          {tLanding("planFree")}
+                        </div>
+                        <div className="text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">
+                          {tProfile("freePrice")}
+                        </div>
+                      </PlanColumnShell>
                     </th>
                     <th
-                      className={`${COL_PRO} ${cellBase} z-[1] py-9 text-center align-bottom sm:py-11`}
+                      className={`${COL_PRO} ${cellBase} z-[1] align-top py-7 sm:px-4 sm:py-9`}
                     >
                       <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-violet-400/18 via-fuchsia-400/10 to-transparent blur-xl dark:from-violet-500/12 dark:via-fuchsia-500/08" />
-                      <div className="relative flex flex-col items-center">
-                        <span className="mb-2 inline-flex rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-tight text-white shadow-sm shadow-violet-500/20 sm:mb-2.5 sm:px-3 sm:text-[10px] sm:shadow-violet-500/25">
-                          {tLanding("popular")}
-                        </span>
-                        <div className="mb-1.5 break-words text-sm font-semibold text-violet-700 dark:text-violet-300 sm:text-base">
-                          {tLanding("planPro")}
+                      <PlanColumnShell align="center" className="relative w-full">
+                        <div className="flex w-full max-w-[12rem] flex-col items-center">
+                          <span className="mb-2 inline-flex rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-tight text-white shadow-sm shadow-violet-500/20 sm:mb-2.5 sm:px-3 sm:text-[10px] sm:shadow-violet-500/25">
+                            {tLanding("popular")}
+                          </span>
+                          <div className="mb-1.5 break-words text-sm font-semibold text-violet-700 dark:text-violet-300 sm:text-base">
+                            {t("planProName")}
+                          </div>
+                          <div className="relative w-full">
+                            <div
+                              className="absolute -inset-x-6 -top-2 bottom-0 rounded-full bg-gradient-to-t from-transparent via-violet-300/20 to-fuchsia-300/25 opacity-80 blur-xl dark:via-violet-500/12 dark:to-fuchsia-500/10"
+                              aria-hidden
+                            />
+                            <ProPlanPriceSelector
+                              billingChoice={proBillingChoice}
+                              onBillingChange={setProBillingChoice}
+                              priceMonthly={proPriceMonthly}
+                              priceYearly={proPriceYearly}
+                              firstMonthlyPrice={proFirstMonthlyPrice}
+                              firstYearlyPrice={proFirstYearlyPrice}
+                              isRTL={isRTL}
+                              compact
+                              className="relative"
+                            />
+                          </div>
                         </div>
-                        <div className="relative inline-block w-full max-w-[12rem]">
-                          <div
-                            className="absolute -inset-x-6 -top-2 bottom-0 rounded-full bg-gradient-to-t from-transparent via-violet-300/20 to-fuchsia-300/25 opacity-80 blur-xl dark:via-violet-500/12 dark:to-fuchsia-500/10"
-                            aria-hidden
-                          />
-                          <ProPlanPriceSelector
-                            billingChoice={proBillingChoice}
-                            onBillingChange={setProBillingChoice}
-                            priceMonthly={proPriceMonthly}
-                            priceYearly={proPriceYearly}
-                            firstMonthlyPrice={proFirstMonthlyPrice}
-                            firstYearlyPrice={proFirstYearlyPrice}
-                            isRTL={isRTL}
-                            compact
-                            className="relative"
-                          />
-                        </div>
-                      </div>
+                      </PlanColumnShell>
                     </th>
                     <th
-                      className={`${cellBase} bg-white/50 py-8 align-bottom dark:bg-slate-900/25 sm:py-10`}
+                      className={`${cellBase} align-top bg-white/50 py-6 dark:bg-slate-900/25 sm:px-4 sm:py-8`}
                     >
-                      <div className="mb-1.5 break-words font-semibold text-slate-900 dark:text-white sm:mb-2 sm:text-base">
-                        {tLanding("planCustom")}
-                      </div>
-                      <div className="break-words text-base font-bold text-slate-500 dark:text-slate-400 sm:text-lg">
-                        {tLanding("customPrice")}
-                      </div>
+                      <PlanColumnShell>
+                        <div className="mb-1.5 break-words font-semibold text-slate-900 dark:text-white sm:mb-2 sm:text-base">
+                          {tLanding("planCustom")}
+                        </div>
+                        <div className="break-words text-base font-bold text-slate-500 dark:text-slate-400 sm:text-lg">
+                          {tLanding("customPrice")}
+                        </div>
+                      </PlanColumnShell>
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {rows.map((row, idx) => {
+                    const sectionTitle = desktopSectionByStartId.get(row.id);
                     const alt = idx % 2 === 1;
                     const rowTintFree = alt
                       ? "bg-slate-50/80 dark:bg-slate-800/28"
@@ -571,30 +654,76 @@ export default function PricingComparisonPage() {
                       "before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-slate-900/[0.025] dark:before:bg-black/12";
 
                     return (
-                      <tr
-                        key={row.label}
-                        className="pricing-row-item border-b border-slate-100/90 last:border-b-0 dark:border-slate-800/55"
-                      >
-                        <th
-                          className={`${cellBase} hyphens-auto break-words text-start text-[11px] font-semibold leading-snug text-slate-700 dark:text-slate-300 sm:px-5 sm:text-sm ${COL_SEP} ${rowTintFree}`}
-                        >
-                          {row.label}
-                        </th>
-                        <td className={`${cellBase} ${COL_SEP} ${rowTintFree}`}>
-                          {renderCell(row.free, tYes, tNo)}
-                        </td>
-                        <td
-                          className={`${COL_PRO} ${cellBase} z-[1] font-semibold sm:px-5 [&_span]:text-slate-800 dark:[&_span]:text-slate-200 ${alt ? proStripeAlt : proStripe} ${cellProText}`}
-                        >
-                          {renderCell(row.pro, tYes, tNo)}
-                        </td>
-                        <td className={`${cellBase} ${rowTintCustom}`}>
-                          {renderCell(row.custom, tYes, tNo)}
-                        </td>
-                      </tr>
+                      <Fragment key={row.id}>
+                        {sectionTitle ? (
+                          <tr className="border-b border-slate-200/70 dark:border-slate-700/70">
+                            <th
+                              colSpan={4}
+                              className="bg-slate-100/75 px-4 py-2.5 text-start text-[10px] font-bold uppercase tracking-[0.08em] text-slate-600 dark:bg-slate-800/45 dark:text-slate-300 sm:px-6 sm:text-[11px]"
+                            >
+                              {sectionTitle}
+                            </th>
+                          </tr>
+                        ) : null}
+                        <tr className="pricing-row-item border-b border-slate-100/90 last:border-b-0 dark:border-slate-800/55">
+                          <th
+                            className={`${cellBase} ${STICKY_FEATURE} hyphens-auto break-words text-start text-[11px] font-semibold leading-snug text-slate-700 dark:text-slate-300 sm:px-5 sm:text-sm ${COL_SEP} ${rowTintFree}`}
+                          >
+                            {row.label}
+                          </th>
+                          <td className={`${cellBase} ${COL_SEP} ${rowTintFree}`}>
+                            {renderCell(row.free, tYes, tNo)}
+                          </td>
+                          <td
+                            className={`${COL_PRO} ${cellBase} z-[1] font-semibold sm:px-5 [&_span]:text-slate-800 dark:[&_span]:text-slate-200 ${alt ? proStripeAlt : proStripe} ${cellProText}`}
+                          >
+                            {renderCell(row.pro, tYes, tNo)}
+                          </td>
+                          <td className={`${cellBase} ${rowTintCustom}`}>
+                            {renderCell(row.custom, tYes, tNo)}
+                          </td>
+                        </tr>
+                      </Fragment>
                     );
                   })}
                 </tbody>
+                <tfoot>
+                  <tr className="border-t border-slate-200/90 dark:border-slate-700/75">
+                    <th
+                      className={`${cellBase} py-6 sm:px-5 sm:py-7 ${COL_SEP} bg-slate-50/50 dark:bg-slate-900/50`}
+                      aria-hidden
+                    />
+                    <td
+                      className={`${cellBase} py-6 sm:px-4 sm:py-7 ${COL_SEP} bg-white/60 dark:bg-slate-900/30`}
+                    >
+                      <PlanColumnCta
+                        href="/auth/register"
+                        label={t("ctaRegister")}
+                        variant="free"
+                      />
+                    </td>
+                    <td
+                      className={`${COL_PRO} ${cellBase} z-[1] py-6 sm:px-4 sm:py-7`}
+                    >
+                      <PlanColumnCta
+                        href={subscriptionUpgradeHref}
+                        label={t("ctaUpgrade")}
+                        variant="pro"
+                        className="mx-auto w-full max-w-[12rem]"
+                      />
+                    </td>
+                    <td
+                      className={`${cellBase} bg-white/50 py-6 dark:bg-slate-900/25 sm:px-4 sm:py-7`}
+                    >
+                      <PlanColumnCta
+                        href={WHATSAPP_URL}
+                        label={t("ctaContact")}
+                        variant="custom"
+                        external
+                      />
+                    </td>
+                  </tr>
+                </tfoot>
               </table>
             </div>
           </div>
@@ -602,7 +731,7 @@ export default function PricingComparisonPage() {
 
         {/* Payment methods */}
         <section
-          className="mt-10 sm:mt-12"
+          className="mt-10 sm:mt-14 lg:mt-20"
           aria-labelledby="pricing-payment-heading"
         >
           <div className="rounded-2xl border border-slate-200/90 bg-white/90 p-5 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/70 sm:rounded-3xl sm:p-7">
@@ -655,178 +784,15 @@ export default function PricingComparisonPage() {
             </div>
           </div>
         </section>
+      </div>
 
-        {/* CTA strip */}
-        <section className="relative z-2 mx-auto mt-14 max-w-5xl sm:mt-20">
-          <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-md dark:rounded-3xl dark:border-slate-700/80 dark:bg-linear-to-b dark:from-slate-900 dark:to-slate-950 dark:p-8 dark:shadow-xl dark:shadow-black/30 dark:ring-1 dark:ring-violet-500/15 sm:p-9">
-            <p className="mb-5 text-center text-sm font-medium leading-relaxed text-slate-600 sm:mb-7 dark:text-slate-400">
-              {t("ctaStripIntro")}
-            </p>
-            <div className=" flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-stretch sm:justify-center sm:gap-4">
-              <div className=" order-1 sm:order-2 sm:flex-1 sm:max-w-xs">
-                <Link
-                  href={subscriptionUpgradeHref}
-                  className="flex h-full min-h-12 items-center justify-center gap-2 rounded-xl bg-linear-to-br from-violet-500 to-indigo-600 px-6 py-3.5 text-center text-sm font-bold text-white shadow-md shadow-violet-500/25 transition hover:scale-[1.02] hover:shadow-violet-500/35 active:scale-[0.98]"
-                >
-                  <HiStar className="text-amber-200" aria-hidden />
-                  {t("ctaUpgrade")}
-                </Link>
-              </div>
-              <div className=" order-2 sm:order-1 sm:flex-1 sm:max-w-xs">
-                <Link
-                  href="/auth/register"
-                  className="flex h-full min-h-12 items-center justify-center rounded-xl border border-slate-300 bg-slate-50 px-6 py-3.5 text-center text-sm font-bold text-slate-900 transition hover:bg-slate-100 dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/14"
-                >
-                  {t("ctaRegister")}
-                </Link>
-              </div>
-              <div className=" order-3 sm:flex-1 sm:max-w-xs">
-                <a
-                  href={WHATSAPP_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex h-full min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3.5 text-center text-sm font-bold text-white transition hover:scale-[1.02] hover:bg-emerald-500 active:scale-[0.98]"
-                >
-                  <HiOutlineChat className="h-5 w-5 shrink-0" aria-hidden />
-                  {t("ctaContact")}
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Plan cards */}
-        <section
-          className="mt-16 sm:mt-20 lg:mt-24"
-          aria-labelledby="pricing-plans-heading"
+      <div className="pricing-mobile-sticky-cta fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/90 bg-white/95 p-4 backdrop-blur-md dark:border-slate-800 dark:bg-[#070a0f]/95 md:hidden">
+        <Link
+          href="/auth/register"
+          className="flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-linear-to-br from-violet-500 to-indigo-600 text-base font-bold text-white shadow-lg shadow-violet-500/25"
         >
-          <h2
-            id="pricing-plans-heading"
-            className="mb-8 text-center text-2xl font-black text-slate-900 dark:text-white sm:text-3xl"
-          >
-            {tLanding("title")}
-          </h2>
-          <div className="grid gap-6 sm:gap-8 lg:grid-cols-3">
-            {planCards.map((card) => (
-              <article
-                key={card.id}
-                className={`relative flex flex-col rounded-2xl border p-6 transition-all sm:rounded-3xl sm:p-8 ${
-                  card.premium
-                    ? "border-violet-200/80 bg-violet-50/50 shadow-lg shadow-violet-500/10 hover:-translate-y-1 dark:border-violet-500/20 dark:bg-violet-500/[0.07] lg:scale-[1.02]"
-                    : "border-slate-200/80 bg-white shadow-sm hover:-translate-y-0.5 dark:border-slate-800 dark:bg-slate-900/60"
-                }`}
-              >
-                {card.premium && (
-                  <span className="absolute -top-3 start-1/2 -translate-x-1/2 rounded-full bg-linear-to-r from-violet-500 to-indigo-500 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
-                    {tLanding("popular")}
-                  </span>
-                )}
-                <h3
-                  className={`text-lg font-black sm:text-xl ${
-                    card.premium
-                      ? "text-violet-700 dark:text-violet-300"
-                      : "text-slate-900 dark:text-white"
-                  } ${card.premium ? "mt-2" : ""}`}
-                >
-                  {card.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                  {card.desc}
-                </p>
-                <div className="mt-5 border-b border-slate-200/80 pb-5 dark:border-slate-700/60">
-                  {card.id === "pro" ? (
-                    <ProPlanPriceSelector
-                      billingChoice={proBillingChoice}
-                      onBillingChange={setProBillingChoice}
-                      priceMonthly={proPriceMonthly}
-                      priceYearly={proPriceYearly}
-                      firstMonthlyPrice={proFirstMonthlyPrice}
-                      firstYearlyPrice={proFirstYearlyPrice}
-                      isRTL={isRTL}
-                    />
-                  ) : (
-                    <>
-                      <span className="text-3xl font-black text-slate-900 dark:text-white">
-                        {"price" in card ? card.price : ""}
-                      </span>
-                      {"priceNote" in card && card.priceNote && (
-                        <span className="ms-1 text-sm font-medium text-slate-500 dark:text-slate-400">
-                          {card.priceNote}
-                        </span>
-                      )}
-                    </>
-                  )}
-                </div>
-                <ul className="mt-5 flex-1 space-y-2.5 sm:space-y-3">
-                  {card.features.map((feat, idx) => (
-                    <li
-                      key={idx}
-                      className="flex items-start gap-2.5 text-sm font-medium text-slate-700 dark:text-slate-300"
-                    >
-                      <HiCheck
-                        className={`mt-0.5 h-4 w-4 shrink-0 sm:h-5 sm:w-5 ${
-                          card.premium
-                            ? "text-violet-500 dark:text-violet-400"
-                            : "text-emerald-500 dark:text-emerald-400"
-                        }`}
-                        aria-hidden
-                      />
-                      {feat}
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-6 sm:mt-8">
-                  {card.cta.external ? (
-                    <a
-                      href={card.cta.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3.5 text-sm font-bold text-white transition hover:bg-emerald-500"
-                    >
-                      <HiOutlineChat className="h-5 w-5" aria-hidden />
-                      {card.cta.label}
-                    </a>
-                  ) : (
-                    <Link
-                      href={card.cta.href}
-                      className={`block w-full rounded-xl py-3.5 text-center text-sm font-bold transition ${
-                        card.premium
-                          ? "bg-linear-to-br from-violet-500 to-indigo-600 text-white shadow-md shadow-violet-500/20 hover:shadow-violet-500/30"
-                          : "border border-slate-300 bg-slate-50 text-slate-900 hover:bg-slate-100 dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/14"
-                      }`}
-                    >
-                      {card.cta.label}
-                    </Link>
-                  )}
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        {/* FAQ */}
-        <section
-          className="mx-auto mt-16 max-w-3xl sm:mt-20"
-          aria-labelledby="pricing-faq-heading"
-        >
-          <h2
-            id="pricing-faq-heading"
-            className="mb-6 text-center text-2xl font-black text-slate-900 dark:text-white sm:mb-8 sm:text-3xl"
-          >
-            {t("faqTitle")}
-          </h2>
-          <div className="space-y-3">
-            {FAQ_IDS.map((id, idx) => (
-              <PricingFaqItem
-                key={id}
-                id={id}
-                isOpen={openFaq === idx}
-                onToggle={() => setOpenFaq(openFaq === idx ? null : idx)}
-                isRTL={isRTL}
-              />
-            ))}
-          </div>
-        </section>
+          {t("mobileStickyCta")}
+        </Link>
       </div>
     </div>
   );

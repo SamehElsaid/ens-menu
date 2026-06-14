@@ -111,6 +111,36 @@ export function Logo({
     ? "text-lg leading-tight lg:text-base xl:text-xl"
     : config.text;
 
+  const iconSize =
+    size === "header"
+      ? 18
+      : size === "micro"
+        ? 22
+        : size === "compact"
+          ? 28
+          : 40;
+  const gapClass =
+    size === "header"
+      ? "gap-1.5"
+      : size === "micro"
+        ? "gap-2"
+        : size === "compact"
+          ? "gap-2.5"
+          : "gap-4";
+  const textAlignClass =
+    size === "header" ||
+    size === "compact" ||
+    size === "micro"
+      ? "items-start text-start"
+      : "items-center text-center";
+  const textMaxWidthClass =
+    size === "header"
+      ? "max-w-[9rem]"
+      : size === "micro"
+        ? "max-w-[min(48vw,11rem)]"
+        : "max-w-[min(72vw,320px)]";
+  const lineHeightClass = size === "header" ? "h-0.5 -mt-px" : "h-1 -mt-0.5";
+
   return (
     <LinkTo
       href="/"

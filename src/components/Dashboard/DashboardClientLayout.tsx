@@ -14,7 +14,6 @@ import {
   SuspendedAccountScreen,
   useAccountGateStatus,
 } from "@/components/Dashboard/RequireNotSuspended";
-import OnboardingTour from "@/components/Dashboard/OnboardingTour";
 import {
   RequirePhone,
   useProfileGateStatus,
@@ -166,7 +165,6 @@ export default function DashboardClientLayout({
         </Layout>
       ) : (
         <Layout segment={sidebarSegment}>
-          <OnboardingTour />
           {dashboardContent}
         </Layout>
       )}

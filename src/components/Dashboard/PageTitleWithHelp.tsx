@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import OnboardingPageHelp from "./OnboardingPageHelp";
 
 type PageTitleWithHelpProps = {
   children: ReactNode;
@@ -13,9 +12,6 @@ export default function PageTitleWithHelp({
   className = "",
 }: PageTitleWithHelpProps) {
   return (
-    <div className={`flex items-center gap-2 ${className}`.trim()}>
-      {children}
-      <OnboardingPageHelp />
-    </div>
+    <div className={className.trim() || undefined}>{children}</div>
   );
 }

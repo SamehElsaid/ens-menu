@@ -1,30 +1,20 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { axiosGet } from "@/shared/axiosCall";
+import { useAppSelector } from "@/store/hooks";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import AddItemModal from "@/components/Dashboard/AddItemModal";
 import DeleteItemConfirm from "@/components/Dashboard/DeleteItemConfirm";
 import MenuImportEntryButton from "@/components/MenuImport/MenuImportEntryButton";
-import DataTable from "@/components/Custom/DataTable";
+import ItemsCardGrid from "@/components/Dashboard/ItemsCardGrid";
+import MobileFloatingAddButton from "@/components/Dashboard/mobile/MobileFloatingAddButton";
 import LinkTo from "@/components/Global/LinkTo";
-import LoadImage from "@/components/ImageLoad";
 import { Item, Category } from "@/types/Menu";
-import { usePathname } from "@/i18n/navigation";
-import {
-  getOnboardingPhase,
-  isOnboardingCompleted,
-  ONBOARDING_REFRESH_EVENT,
-  setOnboardingPhase,
-} from "@/lib/onboarding/onboardingStorage";
 import {
   IoAddCircleOutline,
-  IoEllipseSharp,
-  IoCreateOutline,
-  IoTrashOutline,
   IoSearchOutline,
   IoRefreshOutline,
   IoCameraOutline,
@@ -39,7 +29,8 @@ export default function ItemsPage() {
     typeof params.menu === "string"
       ? params.menu
       : ((params.menu as string[])?.[0] ?? "");
-  const pathname = usePathname();
+  const menuCurrency =
+    useAppSelector((s) => s.menuData.menu?.currency) ?? "EGP";
 
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,7 +44,7 @@ export default function ItemsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchInput, setSearchInput] = useState("");
   const [categoryFilterId, setCategoryFilterId] = useState<string>("");
-  const [availableFilter, setAvailableFilter] = useState<string>(""); // "" | "true" | "false"
+  const [availableFilter, setAvailableFilter] = useState<string>("");
   const [appliedSearch, setAppliedSearch] = useState("");
   const [appliedCategoryId, setAppliedCategoryId] = useState<string>("");
   const [appliedAvailableFilter, setAppliedAvailableFilter] =
@@ -91,7 +82,7 @@ export default function ItemsPage() {
         ? `&available=${appliedAvailableFilter}`
         : "";
       const result = await axiosGet<Item[] | { items: Item[] }>(
-        `/menus/${menuId}/items?page=${page}&limit=10${searchParam}${categoryParam}${availableParam}`,
+        `/menus/${menuId}/items?page=${page}&limit=12${searchParam}${categoryParam}${availableParam}`,
         locale,
       );
       if (result.status && result.data) {
@@ -159,6 +150,11 @@ export default function ItemsPage() {
     [locale],
   );
 
+  const isFiltered =
+    appliedSearch.trim().length > 0 ||
+    appliedCategoryId.length > 0 ||
+    appliedAvailableFilter.length > 0;
+
   const handleSearch = useCallback(() => {
     setAppliedSearch(searchInput);
     setAppliedCategoryId(categoryFilterId);
@@ -183,194 +179,23 @@ export default function ItemsPage() {
     setDeletingItem(item);
   }, []);
 
-  useEffect(() => {
-    if (isOnboardingCompleted()) return;
-    const phase = getOnboardingPhase();
-    if (phase === "go-to-menu" && pathname.includes("/items")) {
-      setOnboardingPhase("add-item");
-      window.dispatchEvent(new Event(ONBOARDING_REFRESH_EVENT));
-    }
-  }, [pathname]);
-
   const refreshList = useCallback(() => {
     setRefreshing((r) => r + 1);
   }, []);
 
   const handleItemSaved = useCallback(() => {
     refreshList();
-    if (!isOnboardingCompleted()) {
-      setOnboardingPhase("go-to-design");
-      window.dispatchEvent(new Event(ONBOARDING_REFRESH_EVENT));
-    }
   }, [refreshList]);
+
+  const openAddModal = useCallback(() => {
+    setEditingItem(null);
+    setShowAddModal(true);
+  }, []);
 
   const closeAddModal = useCallback(() => {
     setShowAddModal(false);
     setEditingItem(null);
   }, []);
-
-  const columnDefs = useMemo<ColDef<Item>[]>(
-    () => [
-      {
-        headerName: t("image"),
-        field: "imageUrl",
-        width: 96,
-        sortable: false,
-        cellRenderer: (params: ICellRendererParams<Item>) => {
-          const item = params.data;
-          if (!item) return null;
-          const src = getImageUrl(item);
-          return (
-            <div className="flex items-center justify-center h-full py-1">
-              {src ? (
-                <div className="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden ring-1 ring-slate-200/80 dark:ring-slate-700">
-                  <LoadImage
-                    src={src}
-                    alt={getName(item)}
-                    className="w-full h-full object-cover"
-                    width={56}
-                    height={56}
-                  />
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  title={t("addImage")}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleEdit(item);
-                  }}
-                  className="group w-14 h-14 rounded-xl border-2 border-dashed border-primary/35 bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/15 hover:border-primary/60 flex flex-col items-center justify-center gap-0.5 transition-all hover:scale-[1.03] active:scale-[0.98]"
-                >
-                  <IoCameraOutline className="text-base text-primary group-hover:scale-110 transition-transform" />
-                  <span className="text-[9px] font-semibold text-primary leading-none">
-                    {t("addImage")}
-                  </span>
-                </button>
-              )}
-            </div>
-          );
-        },
-      },
-      {
-        headerName: t("name"),
-        minWidth: 140,
-        flex: 1,
-        cellRenderer: (params: ICellRendererParams<Item>) => {
-          const item = params.data;
-          if (!item) return null;
-          const name = getName(item);
-          return (
-            <span
-              className="font-medium text-slate-800 dark:text-slate-100"
-              dir={locale === "ar" ? "rtl" : "ltr"}
-            >
-              {name}
-            </span>
-          );
-        },
-      },
-      {
-        headerName: t("category"),
-        width: 120,
-        cellRenderer: (params: ICellRendererParams<Item>) => (
-          <span className="text-slate-700 dark:text-slate-300">
-            {params.data ? getCategoryName(params.data) : "—"}
-          </span>
-        ),
-      },
-      {
-        headerName: t("price"),
-        width: 90,
-        field: "price",
-        cellRenderer: (params: ICellRendererParams<Item>) => (
-          <span className="font-medium text-slate-800 dark:text-slate-100">
-            {params.data?.price ?? "—"}
-          </span>
-        ),
-      },
-      {
-        headerName: t("originalPrice"),
-        width: 100,
-        field: "originalPrice",
-        cellRenderer: (params: ICellRendererParams<Item>) => (
-          <span className="text-slate-600 dark:text-slate-400">
-            {params.data?.originalPrice ?? "—"}
-          </span>
-        ),
-      },
-      {
-        headerName: t("discountPercent"),
-        width: 90,
-        field: "discountPercent",
-        cellRenderer: (params: ICellRendererParams<Item>) => {
-          const p = params.data?.discountPercent;
-          return <span>{p != null ? `${p}%` : "—"}</span>;
-        },
-      },
-      {
-        headerName: t("currentlyAvailable"),
-        width: 120,
-        field: "available",
-        cellRenderer: (params: ICellRendererParams<Item>) => {
-          const item = params.data;
-          if (!item) return null;
-          const available = item.available;
-          return (
-            <span
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
-                available
-                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-                  : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
-              }`}
-            >
-              <IoEllipseSharp
-                className={`text-[8px] ${available ? "text-green-500 dark:text-green-400" : "text-amber-500 dark:text-amber-400"}`}
-              />
-              {available ? t("available") : t("unavailable")}
-            </span>
-          );
-        },
-      },
-      {
-        headerName: t("action"),
-        width: 120,
-        sortable: false,
-        pinned: locale === "ar" ? "left" : "right",
-        cellRenderer: (params: ICellRendererParams<Item>) => {
-          const item = params.data;
-          if (!item) return null;
-          return (
-            <div className="flex items-center gap-2 h-full">
-              <button
-                type="button"
-                title={t("edit")}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEdit(item);
-                }}
-                className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-primary/30 dark:hover:border-primary/50 hover:text-primary transition-colors"
-              >
-                <IoCreateOutline className="text-lg" />
-              </button>
-              <button
-                type="button"
-                title={t("delete")}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(item);
-                }}
-                className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-red-50 dark:hover:bg-red-900/30 hover:border-red-200 dark:hover:border-red-800 hover:text-red-600 dark:hover:text-red-300 transition-colors"
-              >
-                <IoTrashOutline className="text-lg" />
-              </button>
-            </div>
-          );
-        },
-      },
-    ],
-    [t, locale, getName, getCategoryName, handleEdit, handleDelete],
-  );
 
   return (
     <>
@@ -380,7 +205,7 @@ export default function ItemsPage() {
       >
         <div>
           <PageTitleWithHelp>
-            <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100">
               {t("title")}
             </h1>
           </PageTitleWithHelp>
@@ -398,11 +223,8 @@ export default function ItemsPage() {
           <MenuImportEntryButton menuId={menuId} variant="secondary" />
           <button
             id="onboarding-add-item"
-            onClick={() => {
-              setEditingItem(null);
-              setShowAddModal(true);
-            }}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold shadow-lg hover:opacity-90 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            onClick={openAddModal}
+            className="hidden md:inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold shadow-lg hover:opacity-90 transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             <IoAddCircleOutline className="text-xl" />
             {t("addItem")}
@@ -431,9 +253,7 @@ export default function ItemsPage() {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                placeholder={
-                  t("searchByName")
-                }
+                placeholder={t("searchByName")}
                 className={`w-full h-11 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-shadow ${locale === "ar" ? "pr-10 pl-4" : "pl-10 pr-4"}`}
               />
             </div>
@@ -477,11 +297,11 @@ export default function ItemsPage() {
               <option value="false">{t("unavailable")}</option>
             </select>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center shrink-0">
             <button
               type="button"
               onClick={handleSearch}
-              className="h-11 inline-flex items-center gap-2 px-5 bg-primary text-white rounded-xl font-semibold shadow-md hover:opacity-90 hover:shadow-lg transition-all"
+              className="h-11 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 bg-primary text-white rounded-xl font-semibold shadow-md hover:opacity-90 hover:shadow-lg transition-all"
             >
               <IoSearchOutline className="text-lg" />
               {t("search")}
@@ -489,7 +309,7 @@ export default function ItemsPage() {
             <button
               type="button"
               onClick={handleReset}
-              className="h-11 inline-flex items-center gap-2 px-5 rounded-xl border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+              className="h-11 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 rounded-xl border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
             >
               <IoRefreshOutline className="text-lg" />
               {t("reset")}
@@ -520,22 +340,31 @@ export default function ItemsPage() {
       )}
 
       <div id="onboarding-items-table">
-      <DataTable<Item>
-        rowData={items}
-        columnDefs={columnDefs}
-        loading={loading}
-        locale={locale}
-        showRowNumbers={true}
-        pagination={true}
-        paginationPageSize={10}
-        page={page}
-        totalPages={totalPages}
-        onPageChange={(p) => setPage(p)}
-      />
+        <ItemsCardGrid
+          items={items}
+          loading={loading}
+          locale={locale}
+          currency={menuCurrency}
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          isFiltered={isFiltered}
+          getName={getName}
+          getCategoryName={getCategoryName}
+          getImageUrl={getImageUrl}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
       </div>
 
-      {!loading && items.length === 0 && (
-        <div className="mt-6">
+      <MobileFloatingAddButton
+        id="onboarding-add-item-mobile"
+        label={t("mobileFabLabel")}
+        onClick={openAddModal}
+      />
+
+      {!loading && items.length === 0 && !isFiltered && (
+        <div className="mt-4 md:mt-6">
           <MenuImportEntryButton menuId={menuId} variant="card" />
         </div>
       )}

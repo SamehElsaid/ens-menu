@@ -1,28 +1,22 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { axiosGet } from "@/shared/axiosCall";
+import { axiosGet, axiosPatch } from "@/shared/axiosCall";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import AddStaffModal from "@/components/Dashboard/AddStaffModal";
 import DeleteStaffConfirm from "@/components/Dashboard/DeleteStaffConfirm";
-import DataTable from "@/components/Custom/DataTable";
+import StaffCardGrid from "@/components/Dashboard/staff/StaffCardGrid";
 import LinkTo from "@/components/Global/LinkTo";
 import { MenuStaff } from "@/types/Menu";
-import {
-  IoAddCircleOutline,
-  IoEllipseSharp,
-  IoCreateOutline,
-  IoTrashOutline,
-} from "react-icons/io5";
+import { IoAddCircleOutline, IoArrowBackOutline } from "react-icons/io5";
 import { useAppSelector } from "@/store/hooks";
 import { isFreePlanUser } from "@/lib/subscription";
+import { toast } from "react-toastify";
 
 export default function StaffPage() {
   const t = useTranslations("Staff");
-  const emptyCell = t("emptyCell");
   const locale = useLocale();
   const params = useParams();
   const menuId =
@@ -38,6 +32,7 @@ export default function StaffPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingStaff, setEditingStaff] = useState<MenuStaff | null>(null);
   const [deletingStaff, setDeletingStaff] = useState<MenuStaff | null>(null);
+  const [togglingId, setTogglingId] = useState<number | null>(null);
   const [refreshing, setRefreshing] = useState(0);
 
   const fetchStaff = useCallback(async () => {
@@ -87,124 +82,58 @@ export default function StaffPage() {
     setEditingStaff(null);
   }, []);
 
-  const columnDefs = useMemo<ColDef<MenuStaff>[]>(
-    () => [
-      {
-        headerName: t("name"),
-        field: "name",
-        flex: 1,
-        minWidth: 120,
-        cellRenderer: (params: ICellRendererParams<MenuStaff>) => (
-          <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100">
-            {params.data?.name ?? emptyCell}
-          </h3>
-        ),
-      },
-      {
-        headerName: t("role"),
-        field: "role",
-        width: 140,
-        minWidth: 120,
-        valueFormatter: (p) => {
-          const r = String(p.value ?? "")
-            .trim()
-            .toLowerCase();
-          if (r === "cashier" || r === "casher") return t("roleCashier");
-          if (r === "waiter") return t("roleWaiter");
-          return p.value ? String(p.value) : emptyCell;
-        },
-      },
-      {
-        headerName: t("email"),
-        field: "email",
-        flex: 1,
-        minWidth: 160,
-        valueFormatter: (p) => (p.value ? String(p.value) : emptyCell),
-      },
-      {
-        headerName: t("status"),
-        field: "isActive",
-        width: 120,
-        cellRenderer: (params: ICellRendererParams<MenuStaff>) => {
-          const row = params.data;
-          if (!row) return null;
-          const active = row.isActive;
-          return (
-            <span
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
-                active
-                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-                  : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
-              }`}
-            >
-              <IoEllipseSharp
-                className={`text-[8px] ${active ? "text-green-500 dark:text-green-400" : "text-amber-500 dark:text-amber-400"}`}
-              />
-              {active ? t("active") : t("inactive")}
-            </span>
+  const openAddModal = useCallback(() => {
+    setEditingStaff(null);
+    setShowAddModal(true);
+  }, []);
+
+  const handleToggleActive = useCallback(
+    async (staff: MenuStaff) => {
+      if (!menuId || togglingId !== null) return;
+      setTogglingId(staff.id);
+      try {
+        const result = await axiosPatch<
+          { isActive: boolean },
+          { message?: string }
+        >(`/menus/${menuId}/staff/${staff.id}`, locale, {
+          isActive: !staff.isActive,
+        });
+        if (result.status) {
+          toast.success(
+            staff.isActive ? t("disableSuccess") : t("enableSuccess"),
           );
-        },
-      },
-      {
-        headerName: t("action"),
-        width: 120,
-        sortable: false,
-        cellRenderer: (params: ICellRendererParams<MenuStaff>) => {
-          const row = params.data;
-          if (!row) return null;
-          return (
-            <div className="flex items-center gap-2 h-full">
-              <button
-                type="button"
-                title={t("edit")}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEdit(row);
-                }}
-                className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-primary/30 dark:hover:border-primary/50 hover:text-primary transition-colors"
-              >
-                <IoCreateOutline className="text-lg" />
-              </button>
-              <button
-                type="button"
-                title={t("delete")}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(row);
-                }}
-                className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-red-50 dark:hover:bg-red-900/30 hover:border-red-200 dark:hover:border-red-800 hover:text-red-600 dark:hover:text-red-300 transition-colors"
-              >
-                <IoTrashOutline className="text-lg" />
-              </button>
-            </div>
-          );
-        },
-      },
-    ],
-    [t, emptyCell, handleEdit, handleDelete],
+          refreshList();
+        } else {
+          toast.error(t("toggleError"));
+        }
+      } catch {
+        toast.error(t("toggleError"));
+      } finally {
+        setTogglingId(null);
+      }
+    },
+    [menuId, locale, togglingId, t, refreshList],
   );
 
   if (isFreePlan) {
-    const title = t("proOnlyTitle");
-    const description = t("proOnlyDescription");
-    const buttonLabel = t("upgradeShort");
-
     return (
       <div
         id="onboarding-staff-upgrade"
-        className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4"
+        className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4 text-center md:min-h-[60vh] md:gap-4"
       >
         <PageTitleWithHelp className="justify-center">
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100">
-            {title}
+          <h1 className="text-xl font-bold text-slate-800 sm:text-2xl md:text-3xl dark:text-slate-100">
+            {t("proOnlyTitle")}
           </h1>
         </PageTitleWithHelp>
-        <p className="max-w-md text-slate-500 dark:text-slate-400">{description}</p>
+        <p className="max-w-md text-sm text-slate-500 md:text-base dark:text-slate-400">
+          {t("proOnlyDescription")}
+        </p>
         <LinkTo
           href={`/dashboard/${menuId}/subscription`}
-          className="mt-4 inline-flex items-center justify-center gap-2 px-8 py-3 bg-linear-to-r from-primary to-primary/80 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+          className="mt-2 inline-flex items-center justify-center gap-2 rounded-2xl bg-linear-to-r from-primary to-primary/80 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] md:mt-4 md:px-8"
         >
-          {buttonLabel}
+          {t("upgradeShort")}
         </LinkTo>
       </div>
     );
@@ -214,49 +143,59 @@ export default function StaffPage() {
     <>
       <div
         id="onboarding-staff-header"
-        className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8"
+        className="dashboard-staff-header mb-5 min-w-0 md:mb-6"
       >
-        <div>
-          <PageTitleWithHelp>
-            <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
-              {t("title")}
-            </h1>
-          </PageTitleWithHelp>
-          <p className="text-slate-500 mt-1 dark:text-slate-400">
-            {t("subtitle")}
-          </p>
-        </div>
-        <div id="onboarding-staff-actions" className="flex flex-wrap items-center gap-3">
-          <LinkTo
-            href={`/dashboard/${menuId}`}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-primary/30 dark:hover:border-primary/50 text-sm font-medium transition-all"
-          >
-            {t("backToOverview")}
-          </LinkTo>
+        <LinkTo
+          href={`/dashboard/${menuId}`}
+          className="mb-3 inline-flex items-center gap-1 text-xs font-medium text-slate-500 transition-colors hover:text-primary dark:text-slate-400 dark:hover:text-primary"
+        >
+          <IoArrowBackOutline className="text-sm rtl:rotate-180" aria-hidden />
+          {t("backToOverview")}
+        </LinkTo>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div className="min-w-0 flex-1">
+            <PageTitleWithHelp>
+              <h1 className="text-xl font-bold text-slate-800 sm:text-2xl md:text-3xl dark:text-slate-100">
+                {t("title")}
+              </h1>
+            </PageTitleWithHelp>
+            <p className="mt-0.5 text-sm text-slate-500 md:mt-1 dark:text-slate-400">
+              {t("subtitle")}
+            </p>
+            {!loading && staffList.length > 0 && (
+              <p className="mt-2 text-xs font-medium text-slate-400 dark:text-slate-500">
+                {t("totalStaffLabel")}:{" "}
+                <span className="font-bold tabular-nums text-slate-700 dark:text-slate-300">
+                  {staffList.length}
+                </span>
+              </p>
+            )}
+          </div>
+
           <button
+            id="onboarding-staff-actions"
             type="button"
-            onClick={() => {
-              setEditingStaff(null);
-              setShowAddModal(true);
-            }}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold shadow-lg hover:opacity-90 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            onClick={openAddModal}
+            className="inline-flex h-10 shrink-0 items-center justify-center gap-2 self-start rounded-xl bg-primary px-4 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] sm:h-11 sm:px-5"
           >
-            <IoAddCircleOutline className="text-xl" />
+            <IoAddCircleOutline className="text-lg" aria-hidden />
             {t("addStaff")}
           </button>
         </div>
       </div>
 
-      <div id="onboarding-staff-table">
-      <DataTable<MenuStaff>
-        rowData={staffList}
-        columnDefs={columnDefs}
-        loading={loading}
-        locale={locale}
-        showRowNumbers={true}
-        pagination={true}
-        paginationPageSize={10}
-      />
+      <div id="onboarding-staff-table" className="dashboard-staff-page min-w-0 pb-6">
+        <StaffCardGrid
+          staffList={staffList}
+          loading={loading}
+          locale={locale}
+          togglingId={togglingId}
+          onEdit={handleEdit}
+          onToggleActive={handleToggleActive}
+          onDelete={handleDelete}
+          onAdd={openAddModal}
+        />
       </div>
 
       {(showAddModal || editingStaff) && menuId && (
@@ -277,7 +216,6 @@ export default function StaffPage() {
           onDeleted={refreshList}
         />
       )}
-      <div className="pb-10" />
     </>
   );
 }

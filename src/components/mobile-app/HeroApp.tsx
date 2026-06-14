@@ -98,7 +98,7 @@ const AppLandingHero = () => {
           </div>
 
           {/* Phone Mockup Right */}
-          <div className="lg:w-2/5 w-full relative flex justify-center">
+          <div className="relative hidden w-full justify-center lg:flex lg:w-2/5">
             <div className="relative w-[260px] sm:w-[300px] md:w-[330px] mx-auto">
               <div className="pointer-events-none absolute inset-0 -m-10 bg-linear-to-br from-violet-500/25 via-transparent to-blue-500/20 blur-3xl rounded-full -z-10" />
 
@@ -149,7 +149,7 @@ const AppLandingHero = () => {
                     {t("floatingCards.responseLabel")}
                   </p>
                   <p className="text-sm font-black text-slate-900 dark:text-white leading-tight">
-                    0.2s <span className="text-emerald-500 text-xs">↗ 99%</span>
+                    {t("floatingCards.responseText")}
                   </p>
                 </div>
               </div>

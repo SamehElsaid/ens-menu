@@ -10,8 +10,16 @@ const LanguageToggle: React.FC<LanguageToggleProps> = ({
   pathname,
 }) => {
   const toggleLanguage = () => {
+    const targetLocale = locale === "ar" ? "en" : "ar";
     const cleanPath = pathname.replace(/^\/(ar|en)/, "") || "/";
-    window.location.href = `/${locale === "ar" ? "en" : "ar"}${cleanPath}`;
+    const targetPath = `/${targetLocale}${cleanPath === "/" ? "" : cleanPath}`;
+    const currentPath = window.location.pathname;
+
+    if (currentPath === targetPath || currentPath === `${targetPath}/`) {
+      return;
+    }
+
+    window.location.href = targetPath;
   };
 
   return (

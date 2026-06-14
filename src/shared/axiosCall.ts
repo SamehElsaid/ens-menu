@@ -111,6 +111,7 @@ export const axiosGet = async <T>(
   token?: string,
   params?: Record<string, unknown>,
   close?: boolean,
+  silent?: boolean,
 ): Promise<ApiResponse<T>> => {
   const authToken = Cookies.get("sub") ?? "";
   const tokenDecrypted = decryptData(authToken) as DecryptedToken;
@@ -123,13 +124,14 @@ export const axiosGet = async <T>(
   );
 
   try {
-    const header: AxiosRequestConfig = {
+    const header: AxiosRequestConfig & { silent?: boolean } = {
       headers: {
         Authorization: `Bearer ${token || tokenDecrypted?.token}`,
         "Accept-Language": locale,
         "X-API-KEY": apiKeyEncrypt,
       },
       params,
+      silent,
     };
     if (close) {
       delete header.headers?.Authorization;
@@ -146,7 +148,7 @@ export const axiosGet = async <T>(
       // كل الطلبات اللي تجي 405 تستنى على نفس الـ refresh
       const newToken = await getRefreshTokenPromise();
       if (newToken) {
-        return axiosGet(url, locale, token, params, close);
+        return axiosGet(url, locale, token, params, close, silent);
       }
     }
     return {

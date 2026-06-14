@@ -123,6 +123,73 @@ function HeaderActions({
   );
 }
 
+function BrandBlock({
+  aiBadge,
+  showBadge = true,
+  logoSize = "compact",
+}: {
+  aiBadge: string;
+  showBadge?: boolean;
+  logoSize?: "compact" | "header";
+}) {
+  const isMobileLogo = logoSize === "header";
+
+  return (
+    <div className="site-header__brand flex min-w-0 flex-col items-start gap-0.5 text-start">
+      <Logo
+        size={logoSize}
+        className={isMobileLogo ? "site-header__logo shrink-0" : undefined}
+      />
+      {showBadge && (
+        <p
+          className={`brand-tagline-shimmer mt-0.5 font-medium leading-snug tracking-wide ${
+            isMobileLogo
+              ? "max-w-[11rem] text-[9px]"
+              : "max-w-[13rem] text-[10px] sm:text-[11px]"
+          }`}
+        >
+          {aiBadge}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function HeaderActions({
+  locale,
+  pathname,
+  isLoggedIn,
+  tHeader,
+}: {
+  locale: string;
+  pathname: string;
+  isLoggedIn: boolean;
+  tHeader: ReturnType<typeof useTranslations>;
+}) {
+  if (isLoggedIn) {
+    return (
+      <div className="flex items-center gap-1">
+        <DarkModeToggle />
+        <LanguageToggle locale={locale} pathname={pathname} />
+        <UserDropDown />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1 sm:gap-1.5">
+      <MarketingButtonLink href="/auth/register" variant="compact" prefetch={false}>
+        {tHeader("startNow")}
+      </MarketingButtonLink>
+      <MarketingButtonLink href="/auth/login" variant="ghost" prefetch={false}>
+        {tHeader("signIn")}
+      </MarketingButtonLink>
+      <DarkModeToggle />
+      <LanguageToggle locale={locale} pathname={pathname} />
+    </div>
+  );
+}
+
 function Header() {
   const pathname = usePathname();
   const locale = useLocale();
@@ -267,7 +334,7 @@ function Header() {
                 className="flex w-full items-center justify-center rounded-full bg-purple-600 px-4 py-2.5 text-[13px] font-medium text-white"
               >
                 {tHeader("startNow")}
-              </Link>
+              </SafeLink>
             </div>
           )}
 

@@ -110,6 +110,79 @@ export function countBulkSaveStats(draft: ImportDraft) {
   };
 }
 
+export interface ConfirmSavePreview {
+  categoriesInPayload: number;
+  itemsInPayload: number;
+  itemsAdded: number;
+  itemsUpdated: number;
+  itemsSkippedDuplicate: number;
+  variantCount: number;
+  missingPriceCount: number;
+  avgPrice: number | null;
+  minPrice: number | null;
+  maxPrice: number | null;
+  categoryBreakdown: { id: string; name: string; count: number }[];
+}
+
+export function computeConfirmSavePreview(
+  draft: ImportDraft,
+): ConfirmSavePreview {
+  const bulk = countBulkSaveStats(draft);
+  const prices: number[] = [];
+
+  for (const category of bulk.payload) {
+    for (const item of category.items) {
+      if (item.price != null && Number.isFinite(item.price)) {
+        prices.push(item.price);
+      }
+    }
+  }
+
+  const categoryBreakdownRaw = bulk.payload
+    .map((category) => ({
+      id: category.id,
+      name:
+        (draft.locale === "ar" ? category.nameAr : category.nameEn) ||
+        category.nameAr ||
+        category.nameEn,
+      count: category.items.length,
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  const categoryBreakdownMerged = new Map<
+    string,
+    { id: string; name: string; count: number }
+  >();
+  for (const category of categoryBreakdownRaw) {
+    const mergeKey = category.name.trim().toLowerCase();
+    const existing = categoryBreakdownMerged.get(mergeKey);
+    if (existing) {
+      existing.count += category.count;
+    } else {
+      categoryBreakdownMerged.set(mergeKey, { ...category });
+    }
+  }
+  const categoryBreakdown = [...categoryBreakdownMerged.values()].sort(
+    (a, b) => b.count - a.count,
+  );
+
+  return {
+    categoriesInPayload: bulk.categoriesInPayload,
+    itemsInPayload: bulk.itemsInPayload,
+    itemsAdded: bulk.itemsAdded,
+    itemsUpdated: bulk.itemsUpdated,
+    itemsSkippedDuplicate: bulk.itemsSkippedDuplicate,
+    variantCount: draft.stats.variantCount,
+    missingPriceCount: draft.stats.missingPriceCount,
+    avgPrice: prices.length
+      ? prices.reduce((sum, price) => sum + price, 0) / prices.length
+      : null,
+    minPrice: prices.length ? Math.min(...prices) : null,
+    maxPrice: prices.length ? Math.max(...prices) : null,
+    categoryBreakdown,
+  };
+}
+
 function buildSummary(
   draft: ImportDraft,
   counts: {

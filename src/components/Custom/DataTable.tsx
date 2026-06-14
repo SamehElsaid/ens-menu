@@ -43,6 +43,9 @@ export interface DataTableProps<T extends object> {
   loading?: boolean;
   installLoading?: boolean;
   onPageChange?: (page: number) => void;
+  /** Shrink grid to row content instead of a fixed viewport height. */
+  fitContent?: boolean;
+  rowHeight?: number;
 }
 
 export default function DataTable<T extends object>({
@@ -64,6 +67,8 @@ export default function DataTable<T extends object>({
   installLoading = true,
   locale: propLocale,
   onPageChange,
+  fitContent = false,
+  rowHeight,
 }: DataTableProps<T>) {
   const nextIntlLocale = useLocale();
   const t = useTranslations("DataTable");
@@ -584,17 +589,21 @@ export default function DataTable<T extends object>({
         <div
           className={`ag-theme-alpine ${isServerPagination ? "server-pagination" : ""}`}
           style={{
-            ...(height === "auto" || !height
-              ? {
-                  // Calculate height for paginationPageSize rows
-                  // Header (48px) + (paginationPageSize rows * ~52px per row) + Pagination (~60px)
-                  height: `${48 + paginationPageSize * 52 + 60}px`,
-                  minHeight: "400px",
-                }
-              : {
-                  height: typeof height === "number" ? `${height}px` : height,
-                }),
-            minWidth: "100%",
+            ...(fitContent
+              ? { minWidth: "100%" }
+              : height === "auto" || !height
+                ? {
+                    // Calculate height for paginationPageSize rows
+                    // Header (48px) + (paginationPageSize rows * ~52px per row) + Pagination (~60px)
+                    height: `${48 + paginationPageSize * 52 + 60}px`,
+                    minHeight: "400px",
+                    minWidth: "100%",
+                  }
+                : {
+                    height:
+                      typeof height === "number" ? `${height}px` : height,
+                    minWidth: "100%",
+                  }),
           }}
         >
           <AgGridReact<T>
@@ -622,8 +631,9 @@ export default function DataTable<T extends object>({
             }
             localeText={isRTL ? AG_GRID_LOCALE_EG : AG_GRID_LOCALE_EN}
             enableRtl={isRTL}
-            suppressHorizontalScroll={false}
-            domLayout="normal"
+            suppressHorizontalScroll={fitContent}
+            domLayout={fitContent ? "autoHeight" : "normal"}
+            rowHeight={rowHeight}
           />
         </div>
 

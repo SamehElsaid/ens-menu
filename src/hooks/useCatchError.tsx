@@ -67,6 +67,9 @@ export default function useCatchError() {
         return response;
       },
       function (error: AxiosError) {
+        if ((error.config as { silent?: boolean } | undefined)?.silent) {
+          return Promise.reject(error);
+        }
         const status = error.response?.status ?? 500;
         const requestUrl = error.config?.url ?? "";
         // Staff JWT on /auth/me returns 404 "user not found" — handled by hydrate fallback; do not toast.

@@ -59,6 +59,15 @@ function resolveAssetUrl(trimmed: string): string {
     return trimmed;
   }
 
+  // Marketing / public folder assets — same origin, not the API host.
+  if (
+    trimmed.startsWith("/images/") ||
+    trimmed.startsWith("/payment/") ||
+    trimmed.startsWith("/favicon")
+  ) {
+    return trimmed;
+  }
+
   if (!baseHost) return trimmed;
 
   if (trimmed.startsWith(baseHost)) {

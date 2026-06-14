@@ -5,7 +5,6 @@ import Cookies from "js-cookie";
 import { useLocale } from "next-intl";
 import { performAuthLogout } from "@/shared/authLogout";
 import { resolveAuthMeSession } from "@/shared/resolveAuthMeSession";
-import { syncFcmToken } from "@/shared/syncFcmToken";
 
 type UserProfile = {
   user?: {
@@ -41,7 +40,6 @@ function useIsLogin() {
           return;
         } else if (result) {
           dispatch(SET_ACTIVE_USER(result as UserProfile));
-          void syncFcmToken(locale);
         }
         const time = setTimeout(() => {
           setLogin(false);
