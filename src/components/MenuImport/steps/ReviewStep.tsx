@@ -15,6 +15,7 @@ import {
 } from "@/lib/menuImport/duplicateMatch";
 import { expandItemForSave } from "@/lib/menuImport/draftSaveUtils";
 import { scrollToImportRef } from "@/lib/menuImport/importRefDomId";
+import { useAutoFetchImportItemImages } from "@/hooks/useAutoFetchImportItemImages";
 import { IoAddCircleOutline } from "react-icons/io5";
 
 const STAT_BADGE_NEUTRAL =
@@ -112,6 +113,13 @@ export default function ReviewStep({
   const t = useTranslations("MenuImport");
   const locale = useLocale();
   const dupStats = countDuplicateStats(draft);
+  const { autoFetchingItemIds } = useAutoFetchImportItemImages({
+    draft,
+    duplicatesLoading,
+    enabled: !saveResult && !isSaving,
+    onItemImage: (categoryId, itemId, imageUrl) =>
+      onItemImage(categoryId, itemId, imageUrl),
+  });
   const [scrollTargetRefId, setScrollTargetRefId] = useState<string | null>(
     null,
   );
@@ -200,6 +208,7 @@ export default function ReviewStep({
           <button
             type="button"
             onClick={() => scrollToRefGroup(categoryRefIds, "categories")}
+            title={t("statClickHint")}
             className={STAT_BADGE_NEUTRAL}
           >
             {t("statCategories", { count: draft.stats.categoryCount })}
@@ -207,6 +216,7 @@ export default function ReviewStep({
           <button
             type="button"
             onClick={() => scrollToRefGroup(itemRefIds, "items")}
+            title={t("statClickHint")}
             className={STAT_BADGE_NEUTRAL}
           >
             {t("statItems", { count: draft.stats.itemCount })}
@@ -214,6 +224,7 @@ export default function ReviewStep({
           <button
             type="button"
             onClick={() => scrollToRefGroup(expandedItemRefIds, "expandedItems")}
+            title={t("statClickHint")}
             className={STAT_BADGE_NEUTRAL}
           >
             {t("statExpandedItems", {
@@ -226,6 +237,7 @@ export default function ReviewStep({
               onClick={() =>
                 scrollToRefGroup(exactDuplicateRefIds, "exactDuplicates")
               }
+              title={t("statClickHint")}
               className={STAT_BADGE_NEUTRAL}
             >
               {t("statDuplicates", { count: dupStats.exactDuplicates })}
@@ -237,6 +249,7 @@ export default function ReviewStep({
               onClick={() =>
                 scrollToRefGroup(priceConflictRefIds, "priceConflicts")
               }
+              title={t("statClickHint")}
               className={STAT_BADGE_WARNING}
             >
               {t("statPriceConflicts", { count: dupStats.priceConflicts })}
@@ -250,6 +263,7 @@ export default function ReviewStep({
                   focusMissing: true,
                 })
               }
+              title={t("statClickHint")}
               className={STAT_BADGE_WARNING}
             >
               {t("statMissingPrices", {
@@ -265,6 +279,7 @@ export default function ReviewStep({
                   focusMissing: true,
                 })
               }
+              title={t("statClickHint")}
               className={STAT_BADGE_WARNING}
             >
               {t("statMissingNames", {
@@ -349,6 +364,7 @@ export default function ReviewStep({
             currency={draft.currency}
             locale={locale}
             scrollTargetRefId={scrollTargetRefId}
+            autoFetchingItemIds={autoFetchingItemIds}
             onUpdateCategory={(patch) => onUpdateCategory(category.id, patch)}
             onUpdateItem={(itemId, patch) =>
               onUpdateItem(category.id, itemId, patch)

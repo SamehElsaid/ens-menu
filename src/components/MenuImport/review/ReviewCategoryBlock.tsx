@@ -18,6 +18,7 @@ interface ReviewCategoryBlockProps {
   currency: string;
   locale: string;
   scrollTargetRefId?: string | null;
+  autoFetchingItemIds?: Set<string>;
   onUpdateCategory: (patch: Partial<ImportCategory>) => void;
   onUpdateItem: (
     itemId: string,
@@ -46,6 +47,7 @@ export default function ReviewCategoryBlock({
   currency,
   locale,
   scrollTargetRefId,
+  autoFetchingItemIds,
   onUpdateCategory,
   onUpdateItem,
   onUpdateVariant,
@@ -161,6 +163,7 @@ export default function ReviewCategoryBlock({
                 currency={currency}
                 locale={locale}
                 uiLocale={uiLocale}
+                isAutoFetchingImage={autoFetchingItemIds?.has(item.id) ?? false}
                 onUpdate={(patch) => onUpdateItem(item.id, patch)}
                 onUpdateVariant={(variantId, patch) =>
                   onUpdateVariant(item.id, variantId, patch)

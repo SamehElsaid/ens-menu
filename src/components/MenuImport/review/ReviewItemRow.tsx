@@ -1,12 +1,20 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
-import { axiosPost } from "@/shared/axiosCall";
-import { _resizeImage } from "@/shared/_shared";
 import type { ImportItem } from "@/types/menuImport";
+import type { PexelsPhoto } from "@/types/pexels";
+import LoadImage from "@/components/ImageLoad";
+import {
+  fetchFirstPexelsImageUrl,
+  getPexelsPhotoUrl,
+  getPexelsSearchQuery,
+  shouldAutoFetchImportItemImage,
+  uploadImportItemImageFile,
+} from "@/lib/menuImport/pexelsImportImage";
 import { importRefDomId } from "@/lib/menuImport/importRefDomId";
+import PexelsImagePickerModal from "./PexelsImagePickerModal";
 import {
   IoTrashOutline,
   IoImageOutline,
@@ -19,6 +27,7 @@ interface ReviewItemRowProps {
   currency: string;
   locale: string;
   uiLocale: string;
+  isAutoFetchingImage?: boolean;
   onUpdate: (patch: Partial<ImportItem>) => void;
   onUpdateVariant: (
     variantId: string,
@@ -46,11 +55,15 @@ export default function ReviewItemRow({
   onRemoveVariant,
   onImageChange,
   onResolveDuplicate,
+  isAutoFetchingImage: isAutoFetchingFromBatch = false,
 }: ReviewItemRowProps) {
   const t = useTranslations("MenuImport");
   const fileRef = useRef<HTMLInputElement>(null);
   const [isImageLoading, setIsImageLoading] = useState(false);
+  const [isAutoFetchingLocal, setIsAutoFetchingLocal] = useState(false);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
+  const [pexelsModalOpen, setPexelsModalOpen] = useState(false);
+  const autoFetchGenerationRef = useRef(0);
 
   const IMAGE_VALID_TYPES = [
     "image/png",
@@ -58,7 +71,7 @@ export default function ReviewItemRow({
     "image/jpg",
     "image/webp",
   ] as const;
-  const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+
   const hasMissingPrice =
     item.flags.includes("missing_price") ||
     item.variants.some((v) => v.flags.includes("missing_price"));
@@ -84,7 +97,7 @@ export default function ReviewItemRow({
   const normalFieldClass =
     "border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800";
 
-  const handleImageUpload = async (file: File) => {
+  const uploadImageFile = async (file: File) => {
     if (!IMAGE_VALID_TYPES.includes(file.type as (typeof IMAGE_VALID_TYPES)[number])) {
       toast.error(t("invalidFileType"));
       return;
@@ -92,30 +105,17 @@ export default function ReviewItemRow({
 
     setIsImageLoading(true);
     try {
-      const resized = await _resizeImage(file);
-      if (resized.size > MAX_IMAGE_BYTES) {
-        toast.error(t("invalidFileSize", { max: 2 }));
-        return;
-      }
-
       const previewUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result as string);
         reader.onerror = () => reject(new Error("preview_failed"));
-        reader.readAsDataURL(resized);
+        reader.readAsDataURL(file);
       });
       setLocalPreview(previewUrl);
 
-      const formData = new FormData();
-      formData.append("image", resized);
-      const result = await axiosPost<FormData, { image: string }>(
-        "/structure/image/",
-        locale,
-        formData,
-        true,
-      );
-      if (result.status && result.data?.image) {
-        onImageChange(result.data.image);
+      const imageUrl = await uploadImportItemImageFile(file, locale);
+      if (imageUrl) {
+        onImageChange(imageUrl);
         setLocalPreview(null);
       } else {
         toast.error(t("imageUploadError"));
@@ -129,7 +129,60 @@ export default function ReviewItemRow({
     }
   };
 
+  const handleImageUpload = async (file: File) => {
+    await uploadImageFile(file);
+  };
+
+  const handlePexelsPhotoSelect = async (photo: PexelsPhoto) => {
+    onImageChange(getPexelsPhotoUrl(photo));
+  };
+
+  const defaultImageSearchQuery = getPexelsSearchQuery(item);
+
+  useEffect(() => {
+    if (item.imageUrl || isAutoFetchingFromBatch) return;
+    if (!shouldAutoFetchImportItemImage(item)) {
+      setIsAutoFetchingLocal(false);
+      return;
+    }
+
+    const generation = ++autoFetchGenerationRef.current;
+    setIsAutoFetchingLocal(true);
+
+    void fetchFirstPexelsImageUrl(item)
+      .then((imageUrl) => {
+        if (generation !== autoFetchGenerationRef.current) return;
+        if (imageUrl) onImageChange(imageUrl);
+      })
+      .finally(() => {
+        if (generation === autoFetchGenerationRef.current) {
+          setIsAutoFetchingLocal(false);
+        }
+      });
+
+    return () => {
+      autoFetchGenerationRef.current += 1;
+    };
+  }, [
+    item.id,
+    item.imageUrl,
+    item.nameEn,
+    item.nameAr,
+    item.duplicateMeta?.status,
+    item.variants.length,
+    isAutoFetchingFromBatch,
+    onImageChange,
+  ]);
+
+  const ITEM_THUMB_SIZE = 72;
+
   const displayImageUrl = item.imageUrl ?? localPreview;
+  const isImageBusy =
+    isImageLoading || isAutoFetchingFromBatch || isAutoFetchingLocal;
+  const showResizedThumb =
+    Boolean(displayImageUrl) &&
+    !displayImageUrl!.startsWith("data:") &&
+    !displayImageUrl!.startsWith("blob:");
 
   return (
     <div
@@ -185,8 +238,8 @@ export default function ReviewItemRow({
         <div className="flex items-start gap-3 shrink-0">
           <button
             type="button"
-            disabled={isImageLoading}
-            onClick={() => fileRef.current?.click()}
+            disabled={isImageBusy}
+            onClick={() => setPexelsModalOpen(true)}
             className={`relative w-[4.5rem] h-[4.5rem] rounded-xl flex flex-col items-center justify-center overflow-hidden shrink-0 transition-all hover:scale-[1.03] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-80 ${
               displayImageUrl
                 ? "border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 hover:border-primary"
@@ -194,12 +247,25 @@ export default function ReviewItemRow({
             }`}
           >
             {displayImageUrl ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={displayImageUrl}
-                alt=""
-                className="w-full h-full object-cover"
-              />
+              showResizedThumb ? (
+                <LoadImage
+                  src={displayImageUrl}
+                  alt=""
+                  width={ITEM_THUMB_SIZE}
+                  height={ITEM_THUMB_SIZE}
+                  cover
+                  disableLazy
+                  className="h-full w-full object-cover"
+                  wrapperClassName="!block h-full w-full"
+                />
+              ) : (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={displayImageUrl}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              )
             ) : (
               <>
                 <IoImageOutline className="text-lg text-primary" />
@@ -208,11 +274,13 @@ export default function ReviewItemRow({
                 </span>
               </>
             )}
-            {isImageLoading && (
+            {isImageBusy && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/55 backdrop-blur-[1px]">
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 <span className="text-[8px] font-semibold text-white mt-1 leading-none px-1 text-center">
-                  {t("uploadingImage")}
+                  {isAutoFetchingLocal && !isImageLoading
+                    ? t("autoFetchingImage")
+                    : t("uploadingImage")}
                 </span>
               </div>
             )}
@@ -222,14 +290,14 @@ export default function ReviewItemRow({
             type="file"
             accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
             className="hidden"
-            disabled={isImageLoading}
+            disabled={isImageBusy}
             onChange={(e) => {
               const f = e.target.files?.[0];
               if (f) void handleImageUpload(f);
               e.target.value = "";
             }}
           />
-          {displayImageUrl && !isImageLoading && (
+          {displayImageUrl && !isImageBusy && (
             <button
               type="button"
               onClick={() => {
@@ -438,6 +506,18 @@ export default function ReviewItemRow({
           {t("addVariant")}
         </button>
       )}
+
+      <PexelsImagePickerModal
+        open={pexelsModalOpen}
+        defaultQuery={defaultImageSearchQuery}
+        isUploading={isImageBusy}
+        onClose={() => setPexelsModalOpen(false)}
+        onUploadFromDevice={() => {
+          setPexelsModalOpen(false);
+          fileRef.current?.click();
+        }}
+        onSelectPhoto={handlePexelsPhotoSelect}
+      />
     </div>
   );
 }
