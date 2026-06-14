@@ -10,6 +10,7 @@ import Logo from "../Global/Logo";
 import { homeLinks } from "@/modules/Header";
 import LanguageToggle from "./LanguageTogle";
 import DarkModeToggle from "./DarkModeToggle";
+import { MarketingButtonLink } from "@/components/marketing";
 
 const SCROLL_THRESHOLD = 16;
 const NAVBAR_SCROLL_OFFSET = 72;
@@ -57,69 +58,6 @@ function NavLink({ href, children, onClick, className = navLinkClass }: NavLinkP
     <Link href={href} prefetch={false} onClick={onClick} className={className}>
       {children}
     </Link>
-  );
-}
-
-function BrandBlock({
-  aiBadge,
-  logoSize = "compact",
-}: {
-  aiBadge: string;
-  logoSize?: "compact" | "header";
-}) {
-  const isMobileLogo = logoSize === "header";
-
-  return (
-    <div className="site-header__brand flex min-w-0 flex-col items-start gap-0.5 text-start">
-      <Logo
-        size={logoSize}
-        className={isMobileLogo ? "site-header__logo shrink-0" : undefined}
-      />
-      <p
-        className={`brand-tagline-shimmer mt-0.5 font-medium leading-snug tracking-wide ${
-          isMobileLogo
-            ? "max-w-44 text-[9px]"
-            : "max-w-52 text-[10px] sm:text-[11px]"
-        }`}
-      >
-        {aiBadge}
-      </p>
-    </div>
-  );
-}
-
-function HeaderActions({
-  locale,
-  pathname,
-  isLoggedIn,
-  tHeader,
-}: {
-  locale: string;
-  pathname: string;
-  isLoggedIn: boolean;
-  tHeader: ReturnType<typeof useTranslations>;
-}) {
-  if (isLoggedIn) {
-    return (
-      <div className="flex items-center gap-1">
-        <DarkModeToggle />
-        <LanguageToggle locale={locale} pathname={pathname} />
-        <UserDropDown />
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex items-center gap-1 sm:gap-1.5">
-      <Link href="/auth/register" prefetch={false} className={authBtn.compact}>
-        {tHeader("startNow")}
-      </Link>
-      <Link href="/auth/login" prefetch={false} className={authBtn.ghost}>
-        {tHeader("signIn")}
-      </Link>
-      <DarkModeToggle />
-      <LanguageToggle locale={locale} pathname={pathname} />
-    </div>
   );
 }
 
