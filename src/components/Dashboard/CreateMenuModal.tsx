@@ -55,6 +55,16 @@ function isValidLogoFile(file: File): boolean {
   return LOGO_EXTENSIONS.test(file.name);
 }
 
+function parseSlugAvailability(
+  data: SlugCheckResponse | undefined,
+): boolean | null {
+  if (!data) return null;
+  if (typeof data.available === "boolean") return data.available;
+  const isAvailable = (data as { isAvailable?: boolean }).isAvailable;
+  if (typeof isAvailable === "boolean") return isAvailable;
+  return null;
+}
+
 export default function CreateMenuModal({
   onClose,
   onRefresh,
@@ -67,7 +77,7 @@ export default function CreateMenuModal({
     control,
     handleSubmit,
     setValue,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<CreateMenuSchema>({
     defaultValues: {
       name: "",
@@ -115,20 +125,13 @@ export default function CreateMenuModal({
           undefined,
           { slug: slugValue },
         );
-        if (result.status && result.data) {
-          setSlugStatus({
-            checking: false,
-            available: result.data.available ?? false,
-            suggestions: result.data.suggestions ?? [],
-          });
-        } else {
-          const errorData = result.data as SlugCheckResponse | undefined;
-          setSlugStatus({
-            checking: false,
-            available: errorData?.available ?? null,
-            suggestions: [],
-          });
-        }
+        const payload = result.data as SlugCheckResponse | undefined;
+        const available = parseSlugAvailability(payload);
+        setSlugStatus({
+          checking: false,
+          available,
+          suggestions: payload?.suggestions ?? [],
+        });
       } catch (error) {
         console.error("Error checking slug:", error);
         setSlugStatus({ checking: false, available: null, suggestions: [] });
@@ -624,8 +627,15 @@ export default function CreateMenuModal({
             <div className="w-fit!">
               <CustomBtn
                 id="onboarding-create-submit"
+                type="submit"
                 loading={isCreating}
-                disabled={isCreating || !slugStatus.available || !logo}
+                disabled={
+                  isCreating ||
+                  !logo ||
+                  !isValid ||
+                  slugStatus.checking ||
+                  slugStatus.available === false
+                }
               >
                 <div className="flex items-center justify-center gap-2">
                   <IoAddCircleOutline className="text-xl" /> {t("create")}

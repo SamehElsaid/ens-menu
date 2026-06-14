@@ -490,7 +490,7 @@ export default function AddItemModal({
                           )
                         }
                         onBlur={field.onBlur}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                         placeholder={t("optionalPlaceholder")}
                         error={errors.descriptionEn?.message}
                       />
@@ -516,7 +516,7 @@ export default function AddItemModal({
                           )
                         }
                         onBlur={field.onBlur}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                         placeholder="اختياري"
                         dir="rtl"
                         error={errors.descriptionAr?.message}
@@ -600,7 +600,7 @@ export default function AddItemModal({
                         value={field.value}
                         onChange={(e) => field.onChange(e.target.value)}
                         onBlur={field.onBlur}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                         placeholder={t("optionalPlaceholder")}
                       />
                     )}
@@ -622,7 +622,7 @@ export default function AddItemModal({
                         value={field.value}
                         onChange={(e) => field.onChange(e.target.value)}
                         onBlur={field.onBlur}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                         placeholder="0"
                       />
                     )}

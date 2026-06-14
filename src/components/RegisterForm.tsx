@@ -2,7 +2,7 @@
 
 import { Controller, Resolver, useForm } from "react-hook-form";
 import CustomInput from "@/components/Custom/CustomInput";
-import { FiHome, FiLoader, FiMail, FiPhone, FiUser } from "react-icons/fi";
+import { FiHome, FiMail, FiPhone, FiUser } from "react-icons/fi";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLocale, useTranslations } from "next-intl";
 import { registerSchema, RegisterSchema } from "@/schemas/registerSchema";
@@ -113,35 +113,55 @@ function RegisterSection({
 export default function RegisterForm({ steps = [] }: RegisterFormProps) {
   const t = useTranslations("");
   const locale = useLocale();
+  const [checkingField, setCheckingField] = useState({
+    email: false,
+    phone: false,
+  });
+
+  const setFieldChecking = useCallback(
+    (field: "email" | "phone", checking: boolean) => {
+      setCheckingField((prev) =>
+        prev[field] === checking ? prev : { ...prev, [field]: checking },
+      );
+    },
+    [],
+  );
 
   const checkEmailAvailableDebounced = useCallback(
     (email: string): Promise<boolean> =>
       new Promise((resolve) => {
         if (emailCheckTimeout) clearTimeout(emailCheckTimeout);
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          setFieldChecking("email", false);
           resolve(true);
           return;
         }
         if (lastCheckedAvailableEmail === email) {
+          setFieldChecking("email", false);
           resolve(true);
           return;
         }
+        setFieldChecking("email", true);
         emailCheckTimeout = setTimeout(async () => {
           emailCheckTimeout = null;
-          const res = await axiosGet<{ isAvailable?: boolean }>(
-            "/auth/check-availability",
-            locale,
-            undefined,
-            { email },
-            true,
-          );
-          const available =
-            res.status === true && res.data?.isAvailable === true;
-          if (available) lastCheckedAvailableEmail = email;
-          resolve(available);
+          try {
+            const res = await axiosGet<{ isAvailable?: boolean }>(
+              "/auth/check-availability",
+              locale,
+              undefined,
+              { email },
+              true,
+            );
+            const available =
+              res.status === true && res.data?.isAvailable === true;
+            if (available) lastCheckedAvailableEmail = email;
+            resolve(available);
+          } finally {
+            setFieldChecking("email", false);
+          }
         }, 400);
       }),
-    [locale],
+    [locale, setFieldChecking],
   );
 
   const checkPhoneAvailableDebounced = useCallback(
@@ -149,36 +169,43 @@ export default function RegisterForm({ steps = [] }: RegisterFormProps) {
       new Promise((resolve) => {
         if (phoneCheckTimeout) clearTimeout(phoneCheckTimeout);
         if (!phone || !/^\+?[0-9]{8,15}$/.test(phone)) {
+          setFieldChecking("phone", false);
           resolve(true);
           return;
         }
         if (lastCheckedAvailablePhone === phone) {
+          setFieldChecking("phone", false);
           resolve(true);
           return;
         }
+        setFieldChecking("phone", true);
         phoneCheckTimeout = setTimeout(async () => {
           phoneCheckTimeout = null;
-          const res = await axiosGet<{ isAvailable?: boolean }>(
-            "/auth/check-availability",
-            locale,
-            undefined,
-            { phoneNumber: phone },
-            true,
-          );
-          const available =
-            res.status === true && res.data?.isAvailable === true;
-          if (available) lastCheckedAvailablePhone = phone;
-          resolve(available);
+          try {
+            const res = await axiosGet<{ isAvailable?: boolean }>(
+              "/auth/check-availability",
+              locale,
+              undefined,
+              { phoneNumber: phone },
+              true,
+            );
+            const available =
+              res.status === true && res.data?.isAvailable === true;
+            if (available) lastCheckedAvailablePhone = phone;
+            resolve(available);
+          } finally {
+            setFieldChecking("phone", false);
+          }
         }, 400);
       }),
-    [locale],
+    [locale, setFieldChecking],
   );
 
   const {
     control,
     handleSubmit,
     watch,
-    formState: { errors },
+    formState: { errors, validatingFields },
   } = useForm<RegisterSchema>({
     defaultValues: {
       fullName: "",
@@ -228,12 +255,16 @@ export default function RegisterForm({ steps = [] }: RegisterFormProps) {
   const dispatch = useAppDispatch();
 
   const onSubmit = async (data: RegisterSchema) => {
+    setLoading(true);
+
     if (!recaptchaVerified) {
       const verified = await recaptchaRef.current?.promptVerification();
-      if (!verified) return;
+      if (!verified) {
+        setLoading(false);
+        return;
+      }
     }
 
-    setLoading(true);
     const dataSend = {
       name: data.fullName,
       restaurantName: data.resturantName,
@@ -335,6 +366,8 @@ export default function RegisterForm({ steps = [] }: RegisterFormProps) {
               icon={<FiMail size={15} />}
               label={messages.email}
               error={errors.email?.message}
+              loading={checkingField.email || Boolean(validatingFields.email)}
+              loadingLabel={t("auth.checkingAvailability")}
               value={value}
               onChange={onChange}
               size="small"
@@ -354,6 +387,8 @@ export default function RegisterForm({ steps = [] }: RegisterFormProps) {
               icon={<FiPhone size={15} />}
               label={messages.phone}
               error={errors.phone?.message}
+              loading={checkingField.phone || Boolean(validatingFields.phone)}
+              loadingLabel={t("auth.checkingAvailability")}
               value={value}
               onChange={onChange}
               size="small"
@@ -435,14 +470,20 @@ export default function RegisterForm({ steps = [] }: RegisterFormProps) {
         <button
           type="submit"
           disabled={loading}
-          className="register-submit-btn relative mt-2 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-[15px] font-semibold text-white transition-all duration-300 enabled:hover:-translate-y-0.5 enabled:hover:shadow-[0_16px_40px_-12px_rgba(124,58,237,0.55)] disabled:cursor-not-allowed disabled:opacity-55"
+          className={cn(
+            "register-submit-btn relative mt-2 flex w-full items-center justify-center gap-2.5 rounded-xl px-4 py-3 text-[15px] font-semibold text-white transition-all duration-300 enabled:hover:-translate-y-0.5 enabled:hover:shadow-[0_16px_40px_-12px_rgba(124,58,237,0.55)] disabled:cursor-not-allowed",
+            loading
+              ? "register-submit-btn--loading"
+              : "disabled:opacity-55",
+          )}
         >
-          <span className={cn(loading && "opacity-0")}>{messages.register}</span>
-          {loading && (
-            <FiLoader
-              className="absolute size-5 animate-spin"
-              aria-hidden
-            />
+          {loading ? (
+            <>
+              <span className="register-submit-btn__spinner" aria-hidden />
+              <span>{t("auth.loading")}</span>
+            </>
+          ) : (
+            messages.register
           )}
         </button>
       </RegisterSection>
