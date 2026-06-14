@@ -333,6 +333,7 @@
     "countryRequired": "البلد مطلوب",
     "countryInvalid": "يرجى اختيار بلد صحيح",
     "loading": "جاري التحميل...",
+    "checkingAvailability": "جاري التحقق...",
     "noOptions": "لا توجد خيارات",
     "seeMore": "عرض المزيد →",
     "state": "المحافظة",
@@ -406,6 +407,13 @@
     "recaptchaModalTitle": "تحقق سريع",
     "recaptchaModalSubtitle": "خطوة واحدة لحماية حسابك — ثم نكمل التسجيل مباشرة.",
     "recaptchaModalClose": "إغلاق"
+  },
+  "registerPage": {
+    "sections": {
+      "account": "بيانات الحساب",
+      "business": "بيانات النشاط",
+      "launch": "كلمة المرور والإطلاق"
+    }
   },
   "form": {
     "personalInformation": "المعلومات الشخصية",

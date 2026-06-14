@@ -46,6 +46,8 @@ interface CustomInputProps {
   reset?: () => void;
   rows?: number;
   disabledPreviousDates?: boolean;
+  loading?: boolean;
+  loadingLabel?: string;
   [key: string]: unknown;
 }
 type OptionType = {
@@ -66,6 +68,8 @@ export default function CustomInput({
   setOpen,
   reset,
   disabledPreviousDates = false,
+  loading = false,
+  loadingLabel,
   ...props
 }: CustomInputProps) {
   const [focus, setFocus] = useState<boolean>(false);
@@ -75,6 +79,15 @@ export default function CustomInput({
   const t = useTranslations();
   const locale = useLocale();
   void _color;
+
+  const checkingLabel = loadingLabel ?? t("auth.checkingAvailability");
+
+  const fieldLoadingHint = (
+    <p className="field-loading-hint" role="status" aria-live="polite">
+      <span className="field-loading-hint__spinner" aria-hidden />
+      <span>{checkingLabel}</span>
+    </p>
+  );
 
   const formatDate = (date?: Date | null) => {
     if (!date) return "";
@@ -180,26 +193,29 @@ export default function CustomInput({
             />
           </div>
         ) : type === "tel" ? (
-          <div className="">
-            <PhoneInput
-              labels={locales[locale as keyof typeof locales]}
-              style={{
-                border: props?.value === undefined && "1px solid #00cfe8",
-              }}
-              ref={phoneRef}
-              defaultCountry={"EG"}
-              className={`phoneNumber ${Boolean(error) ? "error" : ""} ${
-                active ? "main" : ""
-              } ${props?.value === undefined ? "error" : ""} `}
-              placeholder="123-456-7890"
-              {...props}
-              value={props?.value as string | undefined}
-              onChange={
-                props.onChange as unknown as (
-                  value?: string | undefined,
-                ) => void
-              }
-            />
+          <div>
+            <div className="relative">
+              <PhoneInput
+                labels={locales[locale as keyof typeof locales]}
+                style={{
+                  border: props?.value === undefined && "1px solid #00cfe8",
+                }}
+                ref={phoneRef}
+                defaultCountry={"EG"}
+                className={`phoneNumber ${loading ? "phoneNumber--checking" : ""} ${Boolean(error) ? "error" : ""} ${
+                  active ? "main" : ""
+                } ${props?.value === undefined ? "error" : ""} `}
+                placeholder="123-456-7890"
+                {...props}
+                value={props?.value as string | undefined}
+                onChange={
+                  props.onChange as unknown as (
+                    value?: string | undefined,
+                  ) => void
+                }
+              />
+            </div>
+            {loading && fieldLoadingHint}
           </div>
         ) : type === "date" || type === "time" ? (
           <div className="relative w-full">
@@ -343,7 +359,7 @@ export default function CustomInput({
                     type === "color" ? "bg-background-two" : ""
                   } border-accent-purple/20 focus:border-accent-purple focus:ring-2 focus:ring-accent-purple/20 disabled:opacity-80 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600 dark:placeholder:text-slate-400 dark:focus:border-accent-purple dark:focus:ring-accent-purple/20 ${
                     className || ""
-                  } ${
+                  } ${loading ? "register-field-input--checking" : ""} ${
                     error
                       ? "border-red-500 focus:border-red-500 focus:ring-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-500/50 dark:focus:border-red-500 dark:focus:ring-red-900/30"
                       : ""
@@ -372,6 +388,8 @@ export default function CustomInput({
             )}
           </div>
         )}
+
+        {loading && type !== "tel" && fieldLoadingHint}
 
         <UnmountClosed isOpened={Boolean(error)}>
           <p className="text-xs text-red-500 dark:text-red-400 mt-1">{error}</p>

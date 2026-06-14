@@ -336,6 +336,7 @@
     "countryRequired": "Country is required",
     "countryInvalid": "Please select a valid country",
     "loading": "Loading...",
+    "checkingAvailability": "Checking...",
     "noOptions": "No options found",
     "seeMore": "See more →",
     "state": "State",
@@ -406,6 +407,13 @@
     "recaptchaModalTitle": "Quick security check",
     "recaptchaModalSubtitle": "One step to protect your account — then we'll finish signup.",
     "recaptchaModalClose": "Close"
+  },
+  "registerPage": {
+    "sections": {
+      "account": "Account details",
+      "business": "Business details",
+      "launch": "Password & launch"
+    }
   },
   "form": {
     "personalInformation": "Personal Information",

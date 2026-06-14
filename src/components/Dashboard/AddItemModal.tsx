@@ -18,12 +18,9 @@ import {
   IoEllipseSharp,
   IoCheckmarkCircle,
   IoRemoveCircle,
-  IoLockClosedOutline,
 } from "react-icons/io5";
 import CustomBtn from "../Custom/CustomBtn";
 import { MdOutlineFastfood } from "react-icons/md";
-import { useAppSelector } from "@/store/hooks";
-import LinkTo from "@/components/Global/LinkTo";
 
 export interface AddItemFormData {
   nameAr: string;
@@ -63,10 +60,6 @@ export default function AddItemModal({
   const [categoriesLocal, setCategoriesLocal] = useState<Category[]>([]);
   const categories = categoriesProp ?? categoriesLocal;
   const modalRef = useRef<HTMLDivElement>(null);
-  const userData = useAppSelector((state) => state.auth.data);
-  const planId = (userData as { user?: { subscription?: { planId?: number } } })
-    ?.user?.subscription?.planId;
-  const isFreePlan = planId === 1;
 
   const tItems = useTranslations("Items");
 
@@ -473,32 +466,10 @@ export default function AddItemModal({
               </div>
             </section>
 
-            <section
-              className={`rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50 ${isFreePlan ? "relative opacity-90" : ""}`}
-            >
-              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4 inline-flex items-center gap-2">
+            <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
                 {t("descriptionEn")} / {t("descriptionAr")}
-                {isFreePlan && (
-                  <IoLockClosedOutline
-                    className="text-amber-500 dark:text-amber-400 text-lg"
-                    title={tItems("freePlanMessage")}
-                  />
-                )}
               </h3>
-              {isFreePlan && (
-                <div className="mb-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 flex flex-col sm:flex-row sm:items-center gap-3">
-                  <p className="text-sm text-amber-800 dark:text-amber-200 flex-1">
-                    {tItems("freePlanMessage")}
-                  </p>
-                  <LinkTo
-                    href={`/dashboard/${menuId}/subscription`}
-                    className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-semibold text-sm transition-colors"
-                  >
-                    <IoLockClosedOutline className="text-base" />
-                    {tItems("subscribeNow")}
-                  </LinkTo>
-                </div>
-              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -519,8 +490,7 @@ export default function AddItemModal({
                           )
                         }
                         onBlur={field.onBlur}
-                        disabled={isFreePlan}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                         placeholder={t("optionalPlaceholder")}
                         error={errors.descriptionEn?.message}
                       />
@@ -546,8 +516,7 @@ export default function AddItemModal({
                           )
                         }
                         onBlur={field.onBlur}
-                        disabled={isFreePlan}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                         placeholder="اختياري"
                         dir="rtl"
                         error={errors.descriptionAr?.message}
@@ -616,12 +585,9 @@ export default function AddItemModal({
                     )}
                   />
                 </div>
-                <div className={isFreePlan ? "opacity-90" : ""}>
-                  <label className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {t("originalPrice")}
-                    {isFreePlan && (
-                      <IoLockClosedOutline className="text-amber-500 dark:text-amber-400 text-sm" />
-                    )}
                   </label>
                   <Controller
                     name="originalPrice"
@@ -634,19 +600,15 @@ export default function AddItemModal({
                         value={field.value}
                         onChange={(e) => field.onChange(e.target.value)}
                         onBlur={field.onBlur}
-                        disabled={isFreePlan}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                         placeholder={t("optionalPlaceholder")}
                       />
                     )}
                   />
                 </div>
-                <div className={isFreePlan ? "opacity-90" : ""}>
-                  <label className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {t("discountPercent")}
-                    {isFreePlan && (
-                      <IoLockClosedOutline className="text-amber-500 dark:text-amber-400 text-sm" />
-                    )}
                   </label>
                   <Controller
                     name="discountPercent"
@@ -660,24 +622,12 @@ export default function AddItemModal({
                         value={field.value}
                         onChange={(e) => field.onChange(e.target.value)}
                         onBlur={field.onBlur}
-                        disabled={isFreePlan}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                         placeholder="0"
                       />
                     )}
                   />
                 </div>
-                {isFreePlan && (
-                  <div className="md:col-span-2 flex justify-end">
-                    <LinkTo
-                      href={`/dashboard/${menuId}/subscription`}
-                      className="inline-flex items-center gap-2 px-5 py-3 bg-primary hover:bg-primary/90 text-white rounded-xl font-semibold shadow-md transition-colors"
-                    >
-                      <IoLockClosedOutline className="text-lg" />
-                      {tItems("subscribeNow")}
-                    </LinkTo>
-                  </div>
-                )}
               </div>
             </section>
 

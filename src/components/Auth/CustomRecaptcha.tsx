@@ -321,11 +321,21 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
                     </p>
                   </div>
 
-                  <div className="relative mt-4 flex justify-center rounded-xl border border-slate-100 bg-slate-50/80 p-3 dark:border-slate-800 dark:bg-slate-950/50">
+                  <div
+                    className="relative mt-4 flex justify-center rounded-xl border border-slate-100 bg-slate-50/80 p-3 dark:border-slate-800 dark:bg-slate-950/50"
+                    onPointerDown={() => {
+                      if (status === "idle") setLoading(true);
+                    }}
+                  >
                     {widget}
-                    {isBoot && (
-                      <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-slate-50/90 dark:bg-slate-950/80">
-                        <span className="recaptcha-modal__loader size-5 rounded-full border-2 border-purple-200 border-t-purple-600 dark:border-purple-900 dark:border-t-purple-400" />
+                    {(isBoot || loading) && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2.5 rounded-xl bg-white/95 backdrop-blur-[2px] dark:bg-slate-950/92">
+                        <span className="recaptcha-modal__loader rounded-full border-[3px] border-purple-200 border-t-purple-600 dark:border-purple-900 dark:border-t-purple-400" />
+                        <p className="px-4 text-center text-[13px] font-semibold text-purple-700 dark:text-purple-300">
+                          {isBoot
+                            ? t("auth.recaptchaBoot")
+                            : t("auth.recaptchaVerifying")}
+                        </p>
                       </div>
                     )}
                   </div>

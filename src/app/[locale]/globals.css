@@ -5248,7 +5248,103 @@ body.recaptcha-modal-open {
   }
 }
 
+/* ── Field availability checking (register / auth forms) ── */
+
+.field-loading-badge {
+  position: absolute;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3125rem 0.625rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow:
+    0 4px 14px rgb(124 58 237 / 0.45),
+    0 0 0 1px rgb(255 255 255 / 0.12) inset;
+  pointer-events: none;
+  inset-inline-end: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.field-loading-badge__spinner {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+  border: 2px solid rgb(255 255 255 / 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: recaptcha-spin 0.65s linear infinite;
+}
+
+.field-loading-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.375rem;
+  padding: 0.375rem 0.625rem;
+  border-radius: 0.5rem;
+  background: rgb(124 58 237 / 0.08);
+  border: 1px solid rgb(124 58 237 / 0.22);
+  color: #6d28d9;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.dark .field-loading-hint {
+  background: rgb(124 58 237 / 0.15);
+  border-color: rgb(139 92 246 / 0.35);
+  color: #c4b5fd;
+}
+
+.field-loading-hint__spinner {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  border: 2.5px solid rgb(124 58 237 / 0.25);
+  border-top-color: #7c3aed;
+  border-radius: 50%;
+  animation: recaptcha-spin 0.65s linear infinite;
+}
+
+.dark .field-loading-hint__spinner {
+  border-color: rgb(196 181 253 / 0.25);
+  border-top-color: #c4b5fd;
+}
+
+.phoneNumber--checking,
+.register-field-input--checking {
+  border-color: rgb(124 58 237 / 0.55) !important;
+  box-shadow: 0 0 0 3px rgb(124 58 237 / 0.18) !important;
+}
+
+.register-submit-btn--loading {
+  opacity: 1 !important;
+  cursor: wait !important;
+  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 50%, #4f46e5 100%) !important;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.12) inset,
+    0 10px 28px -10px rgb(124 58 237 / 0.55) !important;
+}
+
+.register-submit-btn__spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  border: 2.5px solid rgb(255 255 255 / 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: recaptcha-spin 0.65s linear infinite;
+}
+
 .recaptcha-modal__loader {
+  width: 2rem;
+  height: 2rem;
   animation: recaptcha-spin 0.75s linear infinite;
 }
 
