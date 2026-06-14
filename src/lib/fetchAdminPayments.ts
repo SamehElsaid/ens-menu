@@ -1,5 +1,10 @@
 import { axiosGet } from "@/shared/axiosCall";
 import { getMockAdminPayments } from "@/lib/mockAdminPayments";
+import {
+  emptyAdminPaymentsResponse,
+  shouldUseAdminMockFallback,
+} from "@/lib/adminMockFallback";
+import { formatAppDateTime } from "@/lib/formatDateTime";
 import type {
   AdminPaymentsPeriod,
   AdminPaymentsResponse,
@@ -45,33 +50,26 @@ export async function fetchAdminPayments(
     return result.data;
   }
 
-  return getMockAdminPayments(locale, {
-    page: params.page,
-    limit: params.limit,
-    status: params.status,
-    period: params.period,
-    search: params.search,
-    source: params.source,
-    subscriptionStatus: params.subscriptionStatus,
-  });
+  if (shouldUseAdminMockFallback()) {
+    return getMockAdminPayments(locale, {
+      page: params.page,
+      limit: params.limit,
+      status: params.status,
+      period: params.period,
+      search: params.search,
+      source: params.source,
+      subscriptionStatus: params.subscriptionStatus,
+    });
+  }
+
+  return emptyAdminPaymentsResponse(params.page ?? 1, params.limit ?? 10);
 }
 
 export function formatPaymentDate(
   dateStr: string | null | undefined,
   locale: string,
 ): string {
-  if (!dateStr) return "—";
-  try {
-    return new Date(dateStr).toLocaleString(locale === "ar" ? "ar-EG" : "en-GB", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return "—";
-  }
+  return formatAppDateTime(dateStr, locale);
 }
 
 export function formatPaymentAmount(amount: number, currency: string): string {

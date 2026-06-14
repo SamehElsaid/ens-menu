@@ -2183,6 +2183,7 @@
     "cancel": "Cancel",
     "close": "Close",
     "callSaved": "Call logged successfully",
+    "callSaveError": "Could not save call. Please try again.",
     "noPhone": "No phone number",
     "outcome": "Outcome",
     "purpose": "Purpose",

@@ -19,7 +19,6 @@ import { useEffect, useRef, useState } from "react";
 import { LoginResponse } from "@/types/LoginResponse";
 import GoogleSignInButton from "@/components/Auth/GoogleSignInButton";
 import { syncFcmToken } from "@/shared/syncFcmToken";
-import ReCAPTCHA from "react-google-recaptcha";
 import Loader from "./Global/Loader";
 import CustomRecaptcha from "./Auth/CustomRecaptcha";
 

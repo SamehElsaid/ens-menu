@@ -82,7 +82,7 @@ function Header() {
 
   const handleInPageNav = (
     e: React.MouseEvent<HTMLAnchorElement>,
-    href: string
+    href: string,
   ) => {
     handleNavClick();
     if (!href.startsWith("/#")) return;
@@ -109,7 +109,6 @@ function Header() {
         {/* Logo */}
         <Logo />
 
-
         {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center gap-10 lg:gap-5 xl:gap-10">
           {navLinks.map((link) => (
@@ -134,7 +133,6 @@ function Header() {
 
           {/* Knowledge Search */}
           <HeaderSearch />
-
 
           {/* Auth Buttons */}
           {profile.loading === "yes" ? (

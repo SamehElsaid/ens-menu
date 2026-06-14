@@ -18,6 +18,13 @@ import type {
   FollowUpReportSummary,
   UpdateFollowUpCallPayload,
 } from "@/types/AdminFollowUp";
+import { formatAppDate, formatAppDateTime } from "@/lib/formatDateTime";
+import {
+  emptyFollowUpCallsResponse,
+  emptyFollowUpQueueResponse,
+  emptyFollowUpReportSummary,
+  shouldUseAdminMockFallback,
+} from "@/lib/adminMockFallback";
 
 type AdminUserRow = {
   id: number;
@@ -42,6 +49,10 @@ async function loadUsersForQueue(
     return { users: result.data.users, fromApi: true };
   }
 
+  if (!shouldUseAdminMockFallback()) {
+    return { users: [], fromApi: false };
+  }
+
   return { users: getDemoQueueUsers(locale), fromApi: false };
 }
 
@@ -60,11 +71,15 @@ export async function fetchFollowUpQueue(
     return result.data;
   }
 
-  const { users, fromApi } = await loadUsersForQueue(locale);
-  return {
-    _isDemoData: !fromApi,
-    users: buildMockQueueFromUsers(users, segment),
-  };
+  if (shouldUseAdminMockFallback()) {
+    const { users, fromApi } = await loadUsersForQueue(locale);
+    return {
+      _isDemoData: !fromApi,
+      users: buildMockQueueFromUsers(users, segment),
+    };
+  }
+
+  return emptyFollowUpQueueResponse();
 }
 
 export type FollowUpCallsFilters = {
@@ -96,17 +111,21 @@ export async function fetchFollowUpCalls(
     return result.data;
   }
 
-  return {
-    _isDemoData: true,
-    calls: getMockFollowUpCalls(filters),
-  };
+  if (shouldUseAdminMockFallback()) {
+    return {
+      _isDemoData: true,
+      calls: getMockFollowUpCalls(filters),
+    };
+  }
+
+  return emptyFollowUpCallsResponse();
 }
 
 export async function createFollowUpCall(
   locale: string,
   payload: CreateFollowUpCallPayload,
   userName?: string,
-): Promise<{ call: FollowUpCall; isDemo: boolean }> {
+): Promise<{ call: FollowUpCall | null; isDemo: boolean }> {
   const result = await axiosPost<
     CreateFollowUpCallPayload,
     { call?: FollowUpCall }
@@ -116,10 +135,14 @@ export async function createFollowUpCall(
     return { call: result.data.call, isDemo: false };
   }
 
-  return {
-    call: createMockFollowUpCall(payload, userName),
-    isDemo: true,
-  };
+  if (shouldUseAdminMockFallback()) {
+    return {
+      call: createMockFollowUpCall(payload, userName),
+      isDemo: true,
+    };
+  }
+
+  return { call: null, isDemo: false };
 }
 
 export async function deleteFollowUpCall(
@@ -132,8 +155,12 @@ export async function deleteFollowUpCall(
     return { ok: true, isDemo: false };
   }
 
-  const deleted = deleteMockFollowUpCall(callId);
-  return { ok: deleted, isDemo: true };
+  if (shouldUseAdminMockFallback()) {
+    const deleted = deleteMockFollowUpCall(callId);
+    return { ok: deleted, isDemo: true };
+  }
+
+  return { ok: false, isDemo: false };
 }
 
 export async function updateFollowUpCall(
@@ -150,9 +177,13 @@ export async function updateFollowUpCall(
     return { call: result.data.call, isDemo: false };
   }
 
-  const updated = updateMockFollowUpCall(callId, payload);
-  if (!updated) return null;
-  return { call: updated, isDemo: true };
+  if (shouldUseAdminMockFallback()) {
+    const updated = updateMockFollowUpCall(callId, payload);
+    if (!updated) return null;
+    return { call: updated, isDemo: true };
+  }
+
+  return null;
 }
 
 const KNOWN_PURPOSES = new Set<FollowUpPurpose>([
@@ -186,7 +217,11 @@ export async function fetchFollowUpReport(
     return result.data;
   }
 
-  return getMockFollowUpReport(period);
+  if (shouldUseAdminMockFallback()) {
+    return getMockFollowUpReport(period);
+  }
+
+  return emptyFollowUpReportSummary(period);
 }
 
 export function formatFollowUpPurpose(
@@ -208,18 +243,7 @@ export function formatFollowUpPurpose(
 }
 
 export function formatFollowUpDate(dateStr: string, locale: string): string {
-  try {
-    return new Date(dateStr).toLocaleDateString(
-      locale === "ar" ? "ar-EG" : "en-US",
-      {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      },
-    );
-  } catch {
-    return dateStr.slice(0, 10);
-  }
+  return formatAppDate(dateStr, locale, dateStr.slice(0, 10));
 }
 
 export function getFollowUpCallDisplayName(call: FollowUpCall): string {
@@ -240,18 +264,5 @@ export function formatFollowUpDateTime(
   dateStr: string,
   locale: string,
 ): string {
-  try {
-    return new Date(dateStr).toLocaleString(
-      locale === "ar" ? "ar-EG" : "en-US",
-      {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      },
-    );
-  } catch {
-    return dateStr;
-  }
+  return formatAppDateTime(dateStr, locale, dateStr);
 }

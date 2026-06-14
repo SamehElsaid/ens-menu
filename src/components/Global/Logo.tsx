@@ -23,10 +23,11 @@ export const Logo = ({
       : "bg-purple-600 shadow-[0_0_10px_rgba(124,58,237,0.5)] dark:bg-purple-400 opacity-40";
 
   return (
-    <LinkTo href="/" className="flex items-center gap-4 group cursor-pointer scale-100 origin-right">
-      {size === "small" ? (
-        null
-      ) : (
+    <LinkTo
+      href="/"
+      className="flex items-center gap-4 group cursor-pointer scale-100 origin-right"
+    >
+      {size === "small" ? null : (
         <div className={`animate-logo-spin ${iconClasses}`}>
           <BsQrCode size={40} />
         </div>

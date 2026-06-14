@@ -69,7 +69,6 @@ async function Page({ params }: Props) {
       <HowItWorks />
       <FAQ />
       <FooterSection />
-      {/* <HeroPhoneDesktopPortal /> */}
     </>
   );
 }
