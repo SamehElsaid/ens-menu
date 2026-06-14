@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import FooterSection from "@/components/HomePage/Footer";
-import LegalDocumentView, {
+import LegalPageView, {
   type LegalDocument,
-} from "@/components/Legal/LegalDocumentView";
+} from "@/components/Legal/LegalPageView";
+import { formatLegalUpdatedLabel } from "@/components/Legal/formatLegalUpdatedLabel";
 import { buildSeoMetadata } from "@/lib/seo";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -30,10 +31,12 @@ export default async function PrivacyPolicyPage({ params }: Props) {
 
   return (
     <>
-      <LegalDocumentView
+      <LegalPageView
         doc={doc}
         backToHome={t("backToHome")}
-        locale={locale}
+        updatedLabel={formatLegalUpdatedLabel(locale, t("updatedPrefix"))}
+        tocLabel={t("tocLabel")}
+        contactCta={t("contactCta")}
       />
       <FooterSection />
     </>
