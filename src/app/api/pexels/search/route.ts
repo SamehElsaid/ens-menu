@@ -4,7 +4,7 @@ import type { PexelsSearchResponse } from "@/types/pexels";
 const PEXELS_SEARCH_URL = "https://api.pexels.com/v1/search";
 
 export async function GET(request: NextRequest) {
-  const apiKey = process.env.PEXELS_API_KEY;
+  const apiKey = process.env.PEXELS_API_KEY; 
   if (!apiKey) {
     return NextResponse.json(
       { error: "pexels_not_configured" },
