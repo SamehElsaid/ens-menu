@@ -1,18 +1,9 @@
 "use client";
 
-import SettingNavigationSwiper from "@/components/SettingNavigationSwiper";
-import { useState } from "react";
-
 export default function SettingsClientLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [loading, setLoading] = useState<boolean>(false);
-  return (
-    <div>
-      <SettingNavigationSwiper setLoading={setLoading} loading={loading} />
-      {children}
-    </div>
-  );
+  return <>{children}</>;
 }

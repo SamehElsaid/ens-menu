@@ -147,7 +147,7 @@ const FeaturesApp = () => {
           </div>
 
           {/* RIGHT — Phone mockup with screenshot */}
-          <div className="w-full lg:w-1/2 lg:sticky lg:top-32">
+          <div className="hidden w-full lg:block lg:w-1/2 lg:sticky lg:top-32">
             <div className="relative bg-linear-to-br from-violet-50 via-white to-indigo-50 dark:from-violet-500/5 dark:via-slate-900 dark:to-indigo-500/5 rounded-[2.5rem] p-8 sm:p-12 overflow-hidden border border-slate-200/60 dark:border-slate-700/60 shadow-2xl shadow-violet-500/10">
               {/* Decorative blobs */}
               <div className="pointer-events-none absolute -top-16 -right-16 size-56 rounded-full bg-violet-400/20 blur-3xl" />

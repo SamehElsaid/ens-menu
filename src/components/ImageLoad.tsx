@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import "react-lazy-load-image-component/src/effects/blur.css";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import placeholder from "@/components/img/30690.png";
@@ -10,6 +11,8 @@ function LoadImage({
   width,
   height,
   disableLazy = false,
+  cover = false,
+  wrapperClassName = "",
   ...props
 }: {
   src: string;
@@ -18,27 +21,34 @@ function LoadImage({
   width?: number;
   height?: number;
   disableLazy?: boolean;
+  cover?: boolean;
+  wrapperClassName?: string;
   [key: string]: unknown;
-}): React.ReactNode {
-  // function to resize image using canvas and return Blob URL
+}): ReactNode {
+  const resolvedSrc = resolveMenuItemImageSrc(src);
 
-  const resizeUrl =
-    height && width
-      ? `/api/resize?url=${resolveMenuItemImageSrc(src)}&width=${width}&height=${height}`
-      : src;
+  let imageSrc = resolvedSrc;
+  if (width && height) {
+    const params = new URLSearchParams({
+      url: resolvedSrc,
+      width: String(width),
+      height: String(height),
+    });
+    if (cover) params.set("fit", "cover");
+    imageSrc = `/api/resize?${params.toString()}`;
+  }
 
   return (
-    <>
-      <LazyLoadImage
-        src={resizeUrl}
-        alt={alt}
-        className={className}
-        placeholderSrc={placeholder.src}
-        effect="blur"
-        visibleByDefault={disableLazy}
-        {...props}
-      />
-    </>
+    <LazyLoadImage
+      src={imageSrc}
+      alt={alt}
+      className={className}
+      wrapperClassName={wrapperClassName}
+      placeholderSrc={placeholder.src}
+      effect="blur"
+      visibleByDefault={disableLazy}
+      {...props}
+    />
   );
 }
 

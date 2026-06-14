@@ -1,8 +1,10 @@
 "use client";
+
 import { Controller, Resolver, useForm } from "react-hook-form";
 import CustomInput from "@/components/Custom/CustomInput";
 import { FaEnvelope } from "react-icons/fa";
 import { TbLockPassword } from "react-icons/tb";
+import { FiCheck, FiLoader } from "react-icons/fi";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLocale, useTranslations } from "next-intl";
 import { loginSchema, LoginSchema } from "@/schemas/loginSchema";
@@ -13,25 +15,25 @@ import { resolvePostLoginPath } from "@/lib/authRedirect";
 import LinkTo from "./Global/LinkTo";
 import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
 import { useAppDispatch } from "@/store/hooks";
-import CustomBtn from "./Custom/CustomBtn";
 import { axiosPost } from "@/shared/axiosCall";
 import { useEffect, useRef, useState } from "react";
 import { LoginResponse } from "@/types/LoginResponse";
 import GoogleSignInButton from "@/components/Auth/GoogleSignInButton";
 import { syncFcmToken } from "@/shared/syncFcmToken";
-import ReCAPTCHA from "react-google-recaptcha";
-import Loader from "./Global/Loader";
-import CustomRecaptcha from "./Auth/CustomRecaptcha";
+import CustomRecaptcha, {
+  type RecaptchaGateHandle,
+} from "@/components/Auth/CustomRecaptcha";
+import { cn } from "@/lib/cn";
 
-const RECAPTCHA_WIDTH = 304;
-const RECAPTCHA_HEIGHT = 78;
+const REMEMBER_EMAIL_KEY = "ensmenu_remember_email";
 
-export default function LoginForm({ promoText, promoEnabled }: { promoText: string, promoEnabled: boolean }) {
+export default function LoginForm() {
   const t = useTranslations("");
   const dispatch = useAppDispatch();
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LoginSchema>({
     defaultValues: {
@@ -52,48 +54,48 @@ export default function LoginForm({ promoText, promoEnabled }: { promoText: stri
   const searchParams = useSearchParams();
   const redirectParam = searchParams.get("redirect");
   const [loading, setLoading] = useState(false);
-  const [loadingLoader, setLoadingLoader] = useState(true);
   const [recaptchaVerified, setRecaptchaVerified] = useState(false);
-  const [recaptchaScale, setRecaptchaScale] = useState(1);
+  const [rememberMe, setRememberMe] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
-  const recaptchaContainerRef = useRef<HTMLDivElement>(null);
+  const recaptchaRef = useRef<RecaptchaGateHandle>(null);
 
   useEffect(() => {
-    const container = recaptchaContainerRef.current;
-    if (!container) return;
-
-    const updateScale = () => {
-      const availableWidth = container.getBoundingClientRect().width;
-      setRecaptchaScale(
-        availableWidth < RECAPTCHA_WIDTH ? availableWidth / RECAPTCHA_WIDTH : 1,
-      );
-    };
-
-    updateScale();
-
-    const observer = new ResizeObserver(updateScale);
-    observer.observe(container);
-    return () => observer.disconnect();
-  }, []);
+    try {
+      const savedEmail = localStorage.getItem(REMEMBER_EMAIL_KEY);
+      if (savedEmail) {
+        setValue("email", savedEmail);
+        setRememberMe(true);
+      }
+    } catch {
+      // localStorage unavailable
+    }
+  }, [setValue]);
 
   const onSubmit = async (data: LoginSchema) => {
     if (!recaptchaVerified) {
-      return;
+      const verified = await recaptchaRef.current?.promptVerification();
+      if (!verified) return;
     }
 
     setLoading(true);
     setApiError(null);
 
-    const response = await axiosPost<LoginSchema, LoginResponse & { message?: string }>(
-      "/auth/login",
-      locale,
-      data,
-      false,
-      true,
-    );
-    if (response.status && response.data) {
-      // toast.success(t("auth.loginSuccess"));
+    try {
+      if (rememberMe) {
+        localStorage.setItem(REMEMBER_EMAIL_KEY, data.email);
+      } else {
+        localStorage.removeItem(REMEMBER_EMAIL_KEY);
+      }
+    } catch {
+      // ignore storage errors
+    }
 
+    const response = await axiosPost<
+      LoginSchema,
+      LoginResponse & { message?: string }
+    >("/auth/login", locale, data, false, true);
+
+    if (response.status && response.data) {
       const { accessToken, refreshToken, user } = response.data;
 
       const saveTokens = {
@@ -105,13 +107,12 @@ export default function LoginForm({ promoText, promoEnabled }: { promoText: stri
       const encryptedData = encryptData(saveTokens);
 
       Cookies.set("sub", encryptedData, {
-        expires: 3,
+        expires: rememberMe ? 14 : 3,
         sameSite: "Lax",
         secure: true,
         path: "/",
       });
 
-      // Sync FCM token right after login (check match, update if needed)
       void syncFcmToken(locale);
 
       window.location.href = resolvePostLoginPath(
@@ -134,118 +135,148 @@ export default function LoginForm({ promoText, promoEnabled }: { promoText: stri
         t("auth.invalidCredentials");
       setApiError(errorMessage);
       setLoading(false);
+      recaptchaRef.current?.reset();
+      setRecaptchaVerified(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-      <Controller
-        control={control}
-        name="email"
-        render={({ field: { value, onChange } }) => (
-          <CustomInput
-            type="email"
-            placeholder={messages.email}
-            id="email"
-            icon={<FaEnvelope />}
-            label={messages.email}
-            error={errors.email?.message}
-            value={value}
-            onChange={(e) => {
-              setApiError(null);
-              onChange(e);
-            }}
-            className="bg-white/80 text-slate-900 placeholder:text-slate-400 dark:bg-slate-900/60 dark:text-slate-100 dark:placeholder:text-slate-400 dark:border-slate-700"
-          />
-        )}
-      />
-
-
-      <Controller
-        control={control}
-        name="password"
-        render={({ field: { value, onChange } }) => (
-          <>
-            <h2 className="text-xs font-medium text-accent-purple dark:text-purple-400 text-end mb-0.5">
-              <LinkTo
-                href="/auth/reset-password"
-                className="w-fit ms-auto block hover:text-accent-purple/80 transition-all duration-200"
-              >
-                {t("auth.forgotPassword")}
-              </LinkTo>
-            </h2>
+    <form onSubmit={handleSubmit(onSubmit)} className="login-form">
+      <div className="login-form__fields space-y-3">
+        <Controller
+          control={control}
+          name="email"
+          render={({ field: { value, onChange } }) => (
             <CustomInput
-              type="password"
-              placeholder={messages.password}
-              id="password"
-              icon={<TbLockPassword />}
-              label={messages.password}
-              error={errors.password?.message}
+              type="email"
+              placeholder={messages.email}
+              id="login-email"
+              icon={<FaEnvelope size={14} />}
+              label={messages.email}
+              error={errors.email?.message}
               value={value}
               onChange={(e) => {
                 setApiError(null);
                 onChange(e);
               }}
-              className="bg-white/80 text-slate-900 placeholder:text-slate-400 dark:bg-slate-900/60 dark:text-slate-100 dark:placeholder:text-slate-400 dark:border-slate-700"
+              size="small"
+              className="login-field-input"
             />
-          </>
+          )}
+        />
 
-        )}
-      />
+        <div className="login-form__password-group space-y-1.5">
+          <label
+            htmlFor="login-password"
+            className="block text-[12px] font-medium text-slate-600 dark:text-slate-400"
+          >
+            {messages.password}
+          </label>
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { value, onChange } }) => (
+              <CustomInput
+                type="password"
+                placeholder={messages.password}
+                id="login-password"
+                icon={<TbLockPassword size={15} />}
+                error={errors.password?.message}
+                value={value}
+                onChange={(e) => {
+                  setApiError(null);
+                  onChange(e);
+                }}
+                size="small"
+                className="login-field-input"
+              />
+            )}
+          />
+          <LinkTo
+            href="/auth/reset-password"
+            className="login-forgot-link inline-block pt-0.5 text-start text-[12px] font-medium text-purple-600 transition-colors hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300"
+          >
+            {t("auth.forgotPassword")}
+          </LinkTo>
+        </div>
+      </div>
 
+      <label className="login-remember-me mt-3 flex cursor-pointer items-center gap-2.5 text-start">
+        <input
+          type="checkbox"
+          checked={rememberMe}
+          onChange={(e) => setRememberMe(e.target.checked)}
+          className="login-remember-me__input sr-only"
+        />
+        <span
+          aria-hidden
+          className={cn(
+            "login-remember-me__box flex size-[18px] shrink-0 items-center justify-center rounded-[6px] border-2 transition-all duration-200",
+            rememberMe
+              ? "border-purple-600 bg-purple-600 shadow-[0_0_0_3px_rgba(124,58,237,0.2)] dark:border-purple-500 dark:bg-purple-500"
+              : "border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-900",
+          )}
+        >
+          <FiCheck
+            className={cn(
+              "size-3 text-white transition-all duration-200",
+              rememberMe ? "scale-100 opacity-100" : "scale-75 opacity-0",
+            )}
+          />
+        </span>
+        <span className="text-[13px] font-medium text-slate-600 dark:text-slate-400">
+          {t("auth.rememberMe")}
+        </span>
+      </label>
 
-
+      {/* Silent captcha — modal only on submit */}
       <CustomRecaptcha
-        className="mt-10"
+        ref={recaptchaRef}
+        mode="on-demand"
+        silent
         onVerifiedChange={setRecaptchaVerified}
       />
 
       {apiError && (
         <div
           role="alert"
-          className="flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm font-medium text-red-800 dark:border-red-500/50 dark:bg-red-950/40 dark:text-red-300"
+          className="login-form__error mt-3 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-[13px] font-medium text-red-800 dark:border-red-500/35 dark:bg-red-950/40 dark:text-red-300"
         >
-          <svg
-            className="h-5 w-5 shrink-0 text-red-500"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-            aria-hidden
-          >
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
-              clipRule="evenodd"
-            />
-          </svg>
           {apiError}
         </div>
       )}
 
-      <div className="flex w-full mt-3">
-        <CustomBtn
-          text={t("auth.login")}
-          type="submit"
-          disabled={!recaptchaVerified}
-          loading={loading}
-        />
-      </div>
-      <div className="mt-12 flex flex-col items-center">
-        <GoogleSignInButton
-          dividerLabel="auth.orLoginWith"
-          redirectParam={redirectParam}
-        />
-      </div>
-      <div className="flex items-center justify-center mt-6">
+      <button
+        type="submit"
+        disabled={loading}
+        className="login-submit-btn mt-4 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-[14px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <span className={cn("relative z-1", loading && "opacity-0")}>
+          {messages.login}
+        </span>
+        {loading && (
+          <FiLoader className="absolute size-5 animate-spin" aria-hidden />
+        )}
+      </button>
+
+      <GoogleSignInButton
+        dividerLabel="auth.orLoginWith"
+        redirectParam={redirectParam}
+        variant="full"
+        className="mt-4 sm:mt-5"
+      />
+
+      <p className="mt-3 text-center text-[13px] text-slate-500 sm:mt-4 dark:text-slate-400">
         <LinkTo
           href="/auth/register"
-          className="text-sm font-medium text-center text-slate-700 dark:text-slate-300 hover:text-accent-purple/80 transition-all duration-200"
+          className="font-medium text-slate-600 transition-colors hover:text-purple-600 dark:text-slate-300 dark:hover:text-purple-400"
         >
           {t("auth.dontHaveAccount")}{" "}
-          <span className="font-bold underline text-accent-purple">
+          <span className="font-semibold text-purple-600 dark:text-purple-400">
             {t("auth.register")}
           </span>
         </LinkTo>
-      </div>
+      </p>
     </form>
   );
 }

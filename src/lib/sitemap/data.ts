@@ -13,8 +13,8 @@ export const MENUS_PER_SITEMAP_PAGE = Math.floor(
 /** Indexable marketing paths (no auth/dashboard). Folder names match app routes. */
 const MAIN_PATHS = [
   "",
+  "about",
   "Pricing",
-  "faq",
   "contact",
   "mobile-app",
   "privacy-policy",

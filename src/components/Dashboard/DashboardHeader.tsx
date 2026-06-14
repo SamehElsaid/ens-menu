@@ -26,36 +26,37 @@ export function DashboardHeader({
   const pageTitle = useDashboardTitle();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 px-4 py-4 backdrop-blur sm:px-8 dark:bg-[#0d1117]/70 dark:border-purple-900">
-      <div className="flex  items-center gap-1 justify-between">
-        <div className="flex items-center gap-1">
+    <header className="dashboard-header sticky top-0 z-40 border-b border-slate-200 bg-white/95 px-3 py-2.5 backdrop-blur sm:px-8 sm:py-4 dark:border-purple-900/80 dark:bg-[#0d1117]/90">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-1">
           {showSidebarToggle && (
             <button
               type="button"
               onClick={() => setIsMenuOpen((prev: boolean) => !prev)}
-              className="rounded-full flex items-center justify-center w-10 h-10 border border-slate-200 dark:border-purple-900 bg-white dark:bg-[#0d1117]/70  text-slate-500 dark:text-slate-300 transition hover:text-primary hover:border-secondary lg:hidden"
+              className="flex size-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-secondary hover:text-primary lg:hidden dark:border-purple-900 dark:bg-[#0d1117]/70 dark:text-slate-300"
               aria-label={tCommon("openMenu")}
             >
               <FiMenu className="text-lg" />
             </button>
           )}
-          {/* <LinkTo href="/chat" className="rounded-full flex items-center justify-center w-10 h-10 border border-slate-200 bg-white  text-slate-500 transition hover:text-primary hover:border-secondary">
-            <IoChatbubblesOutline className="text-lg" />
-          </LinkTo> */}
           <LanguageToggle locale={locale} pathname={pathname} />
         </div>
-        <div className="flex items-center gap-1">
-          {/* <LinkTo href="/" className=" text-lg font-bold text-primary">Logo</LinkTo> */}
-          <Logo pageTitle={!isAdmin ? pageTitle : undefined} />
+
+        <div className="flex shrink-0 items-center justify-center">
+          <Logo
+            pageTitle={!isAdmin ? pageTitle : undefined}
+            size="header"
+            className="dashboard-header__logo max-h-[42px] sm:hidden"
+          />
+          <Logo
+            pageTitle={!isAdmin ? pageTitle : undefined}
+            className="dashboard-header__logo hidden sm:flex"
+          />
         </div>
-        <div className="flex items-center gap-1 ">
+
+        <div className="flex items-center justify-end gap-1">
           <HeaderSearch />
           <DarkModeToggle />
-
-          {/* <button className="rounded-full flex items-center justify-center w-10 h-10 border border-slate-200 bg-white  text-slate-500 transition hover:text-primary hover:border-secondary">
-            <FiBell className="text-lg" />
-          </button> */}
-
           <UserDropDown />
         </div>
       </div>

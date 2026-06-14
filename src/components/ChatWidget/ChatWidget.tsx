@@ -5,7 +5,10 @@ import { createPortal } from "react-dom";
 import { FiSend, FiX } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
 import { ALLOWED_CONTACT } from "@/lib/lena/assistantConfig";
+import { isRtlLocale } from "@/lib/localeDirection";
+import { cn } from "@/lib/cn";
 import { useLocale, useTranslations } from "next-intl";
+import { usePathname } from "next/navigation";
 import { useChatSession } from "@/hooks/useChatSession";
 import {
   sendChatMessage,
@@ -41,7 +44,9 @@ export default function ChatWidget() {
   const [welcomeShown, setWelcomeShown] = useState(false);
   const sessionId = useChatSession();
   const locale = useLocale();
-  const isRTL = locale === "ar";
+  const pathname = usePathname();
+  const isAuthPage = pathname?.includes("/auth/");
+  const isRtl = isRtlLocale(locale);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [mounted, setMounted] = useState(false);
@@ -199,8 +204,7 @@ export default function ChatWidget() {
             role="dialog"
             aria-label="محادثة لينا"
             aria-modal="true"
-            dir={isRTL ? "rtl" : "ltr"}
-            className="animate-chat-panel-in fixed inset-x-0 bottom-0 z-101 flex h-[min(92dvh,720px)] max-h-[92dvh] min-h-0 w-full flex-col overflow-hidden rounded-t-[1.35rem] border border-b-0 border-slate-200/80 bg-white shadow-[0_-12px_48px_rgba(0,0,0,0.18)] dark:border-slate-700/80 dark:bg-[#0d1117] sm:inset-x-auto sm:top-20 sm:right-6 sm:bottom-6 sm:h-auto sm:max-h-[calc(100dvh-6.5rem)] sm:w-[min(420px,calc(100vw-2rem))] sm:rounded-2xl sm:border sm:shadow-[0_25px_60px_-12px_rgba(0,0,0,0.22)]"
+            className="animate-chat-panel-in fixed inset-x-0 bottom-0 z-101 flex h-[min(92dvh,720px)] max-h-[92dvh] min-h-0 w-full flex-col overflow-hidden rounded-t-[1.35rem] border border-b-0 border-slate-200/80 bg-white shadow-[0_-12px_48px_rgba(0,0,0,0.18)] dark:border-slate-700/80 dark:bg-[#0d1117] sm:inset-x-auto sm:top-20 sm:end-6 sm:bottom-6 sm:h-auto sm:max-h-[calc(100dvh-6.5rem)] sm:w-[min(420px,calc(100vw-2rem))] sm:rounded-2xl sm:border sm:shadow-[0_25px_60px_-12px_rgba(0,0,0,0.22)]"
           >
             {/* Mobile drag handle */}
             <div
@@ -263,7 +267,6 @@ export default function ChatWidget() {
                   messageKey={lastAssistantMessage?.id}
                   suggestions={suggestions}
                   onSelect={sendMessage}
-                  isRTL={isRTL}
                 />
               )}
 
@@ -287,7 +290,7 @@ export default function ChatWidget() {
                   onKeyDown={handleKeyDown}
                   disabled={loading}
                   placeholder="اكتب رسالتك..."
-                  className="max-h-24 min-h-11 flex-1 resize-none bg-transparent px-2 py-2.5 text-base leading-snug text-slate-800 outline-none placeholder:text-slate-400 disabled:opacity-50 sm:max-h-28 sm:min-h-[42px] sm:text-sm dark:text-slate-200 dark:placeholder:text-slate-500"
+                  className="max-h-24 min-h-11 flex-1 resize-none bg-transparent px-2 py-2.5 text-start text-base leading-snug text-slate-800 outline-none placeholder:text-slate-400 disabled:opacity-50 sm:max-h-28 sm:min-h-[42px] sm:text-sm dark:text-slate-200 dark:placeholder:text-slate-500"
                 />
                 <button
                   type="button"
@@ -309,11 +312,22 @@ export default function ChatWidget() {
       )}
 
       {!open && (
-        <div className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-4 z-102 size-14 overflow-visible sm:bottom-6 sm:right-6">
+        <div
+          className={cn(
+            "chat-widget-fab fixed z-102 overflow-visible sm:bottom-6",
+            isAuthPage
+              ? "bottom-[max(5.25rem,env(safe-area-inset-bottom))] size-12 sm:size-14"
+              : "bottom-[max(1rem,env(safe-area-inset-bottom))] size-14",
+            isRtl ? "start-4 sm:start-6" : "end-4 sm:end-6",
+          )}
+        >
           {teaserVisible && (
             <div
               role="status"
-              className="animate-contact-picker-in pointer-events-auto absolute bottom-[calc(100%+0.75rem)] right-0 w-[min(260px,calc(100vw-5.5rem))]"
+              className={cn(
+                "animate-contact-picker-in pointer-events-auto absolute bottom-[calc(100%+0.75rem)] w-[min(260px,calc(100vw-5.5rem))]",
+                isRtl ? "start-0" : "end-0",
+              )}
             >
               <button
                 type="button"
@@ -329,7 +343,7 @@ export default function ChatWidget() {
                 type="button"
                 onClick={() => setTeaserVisible(false)}
                 aria-label={t("dismissTeaser")}
-                className="absolute -top-1.5 -left-1.5 flex size-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                className="absolute -top-1.5 -start-1.5 flex size-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300"
               >
                 <FiX size={12} />
               </button>
@@ -337,15 +351,28 @@ export default function ChatWidget() {
           )}
 
           {TEMP_WHATSAPP_FAB ? (
-            <a
-              href={ALLOWED_CONTACT.whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={t("contactWhatsApp")}
-              className="relative flex size-14 items-center justify-center rounded-full border-2 border-white bg-[#25D366] text-white shadow-lg shadow-[#25D366]/35 ring-2 ring-[#25D366]/30 transition-transform hover:scale-105 hover:bg-[#20BD5A] active:scale-95 dark:border-slate-700 dark:ring-[#25D366]/25"
-            >
-              <FaWhatsapp className="text-[1.75rem]" aria-hidden />
-            </a>
+            <div className="whatsapp-fab-wrap animate-whatsapp-fab-in">
+              <span className="whatsapp-fab-ripple" aria-hidden />
+              <span
+                className="whatsapp-fab-ripple whatsapp-fab-ripple--delay"
+                aria-hidden
+              />
+              <a
+                href={ALLOWED_CONTACT.whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={t("contactWhatsApp")}
+                className={cn(
+                  "whatsapp-fab-btn relative flex items-center justify-center rounded-full border-2 border-white bg-[#25D366] text-white dark:border-slate-700",
+                  isAuthPage ? "size-12 sm:size-14" : "size-14",
+                )}
+              >
+                <FaWhatsapp
+                  className={isAuthPage ? "text-2xl sm:text-[1.75rem]" : "text-[1.75rem]"}
+                  aria-hidden
+                />
+              </a>
+            </div>
           ) : (
             <button
               type="button"

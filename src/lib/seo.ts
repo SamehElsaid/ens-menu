@@ -44,7 +44,7 @@ export function buildSeoMetadata({
   const enPath = path ? `/en/${path}` : "/en";
 
   return {
-    title,
+    title: { absolute: title },
     description,
     keywords: mergedKeywords.split(",").map((k) => k.trim()).filter(Boolean),
     robots,

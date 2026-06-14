@@ -14,14 +14,6 @@ import type { Menu } from "@/types/Menu";
 import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
 import { FaCheck, FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
-import {
-  completeOnboarding,
-  getOnboardingPhase,
-  isOnboardingCompleted,
-  markTourSeen,
-  ONBOARDING_REFRESH_EVENT,
-  setOnboardingPhase,
-} from "@/lib/onboarding/onboardingStorage";
 import { menuRefFromRouteParam } from "@/lib/menuDashboardPath";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 
@@ -67,17 +59,9 @@ export default function DesignPage() {
     }
   }, [menu?.theme]);
 
-  useEffect(() => {
-    if (isOnboardingCompleted()) return;
-    if (getOnboardingPhase() === "go-to-design") {
-      setOnboardingPhase("choose-design");
-      window.dispatchEvent(new Event(ONBOARDING_REFRESH_EVENT));
-    }
-  }, []);
-
   const handleSelectTemplate = async (
     templateId: string,
-    options?: { silentOnboarding?: boolean; skipLoadingUi?: boolean },
+    options?: { skipLoadingUi?: boolean },
   ): Promise<boolean> => {
     if (!resolvedMenuId) {
       return false;
@@ -103,11 +87,6 @@ export default function DesignPage() {
               theme: templateId,
             }),
           );
-        }
-        if (!options?.silentOnboarding && !isOnboardingCompleted()) {
-          markTourSeen("settings-design");
-          completeOnboarding();
-          toast.success(t("onboardingComplete"));
         }
         return true;
       }
@@ -136,7 +115,6 @@ export default function DesignPage() {
     try {
       if (template.id !== activeTemplateId) {
         const activated = await handleSelectTemplate(template.id, {
-          silentOnboarding: true,
           skipLoadingUi: true,
         });
         if (!activated) {

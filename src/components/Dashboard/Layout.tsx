@@ -19,8 +19,8 @@ export default function Layout({
   const showSidebar = (segment || isAdmin) && !hideSidebar;
 
   return (
-    <div className="min-h-screen bg-[#f6f8fb] text-slate-800 dark:text-slate-100 w-full ">
-      <div className="flex min-h-screen bg-[#f6f8fb]  dark:bg-[#0d1117]">
+    <div className="w-full bg-[#f6f8fb] text-slate-800 dark:bg-[#0d1117] dark:text-slate-100 lg:min-h-screen">
+      <div className="flex w-full bg-[#f6f8fb] dark:bg-[#0d1117] lg:min-h-screen">
         {showSidebar && (
           <DashboardSidebar
             isMenuOpen={isMenuOpen}
@@ -30,7 +30,7 @@ export default function Layout({
           />
         )}
         <main
-          className={` flex-1 ms-auto ${showSidebar ? "lg:max-w-[calc(100%-270px)]" : "lg:max-w-full"} w-full`}
+          className={` flex-1 ms-auto ${showSidebar ? "lg:max-w-[calc(100%-288px)]" : "lg:max-w-full"} w-full`}
         >
           <DashboardHeader
             setIsMenuOpen={setIsMenuOpen}
@@ -38,7 +38,7 @@ export default function Layout({
             isAdmin={isAdmin}
             hideSidebar={hideSidebar}
           />
-          <div className="max-w-[1500px] px-6 mx-auto mt-6">
+          <div className="mx-auto mt-4 max-w-[1500px] px-4 pb-8 pt-1 sm:mt-6 sm:px-6 sm:pb-10">
             <DashboardContentSection>{children}</DashboardContentSection>
           </div>
         </main>

@@ -12,8 +12,8 @@ import {
   IoLinkOutline,
   IoDownloadOutline,
   IoSettingsOutline,
-  IoChevronForwardOutline,
   IoOpenOutline,
+  IoReceiptOutline,
   IoTimeOutline,
   IoEyeOutline,
   IoStatsChartOutline,
@@ -27,17 +27,15 @@ import {
 } from "react-icons/md";
 import { FiSettings } from "react-icons/fi";
 import { BsQrCode } from "react-icons/bs";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { axiosGet } from "@/shared/axiosCall";
-import type { Category, Item } from "@/types/Menu";
-import ViewTime from "@/shared/ViewTime";
+import { useEffect, useRef } from "react";
+import Cookies from "js-cookie";
+import { shouldShowAiImportOnboarding } from "@/lib/aiImportOnboarding";
 import {
   StyledQrCode,
   type StyledQrCodeHandle,
 } from "@/components/Global/StyledQrCode";
 import { useDashboardSession } from "@/hooks/useDashboardSession";
 import { isFreePlanUser } from "@/lib/subscription";
-import { ONBOARDING_REFRESH_EVENT } from "@/lib/onboarding/onboardingStorage";
 import {
   publicMenuLinkUrl,
   publicMenuQrUrl,
@@ -45,13 +43,8 @@ import {
 } from "@/lib/publicMenuUrl";
 import { resolveMenuItemImageSrc } from "@/components/menuItemImage";
 import MenuImportEntryButton from "@/components/MenuImport/MenuImportEntryButton";
-
-type ActivityEntry = {
-  id: string;
-  type: "product" | "category";
-  name: string;
-  date: string;
-};
+import RecentActivityList from "@/components/Dashboard/activity/RecentActivityList";
+import { useMenuActivityLog } from "@/hooks/useMenuActivityLog";
 
 function StatCardSkeleton() {
   return (
@@ -96,11 +89,13 @@ export default function DashboardMenuPage() {
   const isCashierStaff =
     dashboardSession?.role === "staff" &&
     dashboardSession?.staffJobRole === "cashier";
-  const isFreePlan = isFreePlanUser(userData);
+  const isFreePlan = !userData || isFreePlanUser(userData);
 
-  const [recentItems, setRecentItems] = useState<Item[]>([]);
-  const [recentCategories, setRecentCategories] = useState<Category[]>([]);
-  const [activityLoading, setActivityLoading] = useState(true);
+  const { entries: latestActivity, loading: activityLoading } =
+    useMenuActivityLog(menuSlugOrId, {
+      limit: 5,
+      includeProSources: Boolean(userData) && !isFreePlan,
+    });
 
   const publicSlug = resolvePublicMenuSlug(menu?.slug, menu?.id);
   const menuLinkUrl = publicSlug ? publicMenuLinkUrl(publicSlug) : "";
@@ -111,82 +106,13 @@ export default function DashboardMenuPage() {
       ? resolveMenuItemImageSrc(menu.logo)
       : null;
 
-  useEffect(() => {
-    if (!menuLoading && menu) {
-      window.dispatchEvent(new Event(ONBOARDING_REFRESH_EVENT));
-    }
-  }, [menuLoading, menu]);
+  const isAuthHydrating = !userData && Boolean(Cookies.get("sub"));
 
   useEffect(() => {
-    if (!menuSlugOrId) return;
-    const key = `menu-overview-visited-${menuSlugOrId}`;
-    if (!localStorage.getItem(key)) {
-      localStorage.setItem(key, "1");
-      router.replace(`/dashboard/${menuSlugOrId}/import`);
-    }
-  }, [menuSlugOrId, router]);
-
-  useEffect(() => {
-    if (!menuSlugOrId) return;
-    const fetchActivity = async () => {
-      setActivityLoading(true);
-      try {
-        const itemsRes = await axiosGet<{ items?: Item[] }>(
-          `/menus/${menuSlugOrId}/items?page=1&limit=20`,
-          locale,
-        );
-        const categoriesRes = await axiosGet<
-          { categories?: Category[] } | Category[]
-        >(`/menus/${menuSlugOrId}/categories?page=1&limit=20`, locale);
-
-        if (itemsRes.status && itemsRes.data) {
-          const list = (itemsRes.data as { items?: Item[] }).items ?? [];
-          setRecentItems(list);
-        }
-        if (categoriesRes.status && categoriesRes.data) {
-          const raw = categoriesRes.data as { categories?: Category[] };
-          const list = Array.isArray(categoriesRes.data)
-            ? categoriesRes.data
-            : (raw?.categories ?? []);
-          setRecentCategories(list);
-        }
-      } catch {
-        setRecentItems([]);
-        setRecentCategories([]);
-      } finally {
-        setActivityLoading(false);
-      }
-    };
-    fetchActivity();
-  }, [menuSlugOrId, locale]);
-
-  const latestActivity = useMemo<ActivityEntry[]>(() => {
-    const productEntries: ActivityEntry[] = recentItems.map((item) => ({
-      id: `item-${item.id}`,
-      type: "product",
-      name:
-        locale === "ar"
-          ? item.nameAr || item.nameEn || ""
-          : item.nameEn || item.nameAr || "",
-      date: item.createdAt ?? "",
-    }));
-    const categoryEntries: ActivityEntry[] = recentCategories.map((cat) => ({
-      id: `cat-${cat.id}`,
-      type: "category",
-      name:
-        locale === "ar"
-          ? cat.nameAr || cat.nameEn || ""
-          : cat.nameEn || cat.nameAr || "",
-      date: cat.createdAt ?? "",
-    }));
-    const combined = [...productEntries, ...categoryEntries].filter(
-      (e) => e.date,
-    );
-    combined.sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-    );
-    return combined.slice(0, 10);
-  }, [recentItems, recentCategories, locale]);
+    if (!menuSlugOrId || isAuthHydrating) return;
+    if (!shouldShowAiImportOnboarding(userData)) return;
+    router.replace(`/dashboard/${menuSlugOrId}/import`);
+  }, [menuSlugOrId, router, userData, isAuthHydrating]);
 
   const handleDownloadQr = () => {
     if (!menuQrUrl) return;
@@ -298,7 +224,14 @@ export default function DashboardMenuPage() {
             <MdOutlineTableBar className="text-lg shrink-0" />
             {t("tables")}
           </LinkTo>
-          {isCashierStaff && (
+          <LinkTo
+            href={`/dashboard/${menuSlugOrId}/orders`}
+            className={`${tabBase} ${tabInactive}`}
+          >
+            <IoReceiptOutline className="text-lg shrink-0" />
+            {t("tableOrders")}
+          </LinkTo>
+          {!isCashierStaff && (
             <LinkTo
               href={`/dashboard/${menuSlugOrId}/history`}
               className={`${tabBase} ${tabInactive}`}
@@ -551,74 +484,12 @@ export default function DashboardMenuPage() {
         >
           {t("latestActivity")}
         </h2>
-        {activityLoading ? (
-          <ul className="space-y-2">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <li key={i}>
-                <ActivityRowSkeleton />
-              </li>
-            ))}
-          </ul>
-        ) : latestActivity.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 mb-3">
-              <IoListOutline className="text-2xl" />
-            </div>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">
-              {t("noRecentActivity")}
-            </p>
-            <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">
-              {t("activityHint")}
-            </p>
-          </div>
-        ) : (
-          <ul className="space-y-2">
-            {latestActivity.map((entry, index) => (
-              <li
-                key={entry.id}
-                className={`flex items-center justify-between gap-4 p-3 rounded-xl bg-slate-50/80 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 border border-transparent hover:border-slate-200 dark:hover:border-slate-600 transition-all duration-200 ${isRTL ? "flex-row-reverse" : ""}`}
-                style={{ animationDelay: `${index * 30}ms` }}
-              >
-                <div
-                  className={`flex items-center gap-3 min-w-0 flex-1 ${isRTL ? "flex-row-reverse" : ""}`}
-                >
-                  <span className="font-medium text-slate-800 dark:text-slate-200 truncate">
-                    {entry.name || "—"}
-                  </span>
-                  <span
-                    className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${
-                      entry.type === "category"
-                        ? "bg-primary/10 dark:bg-primary/20 text-primary"
-                        : "bg-slate-200/80 dark:bg-slate-600 text-slate-600 dark:text-slate-300"
-                    }`}
-                  >
-                    {entry.type === "product" ? t("product") : t("category")}
-                  </span>
-                </div>
-                <div
-                  className={`flex items-center gap-3 shrink-0 ${isRTL ? "flex-row-reverse" : ""}`}
-                >
-                  <span className="text-slate-500 dark:text-slate-400 text-xs md:text-sm">
-                    <ViewTime data={entry.date} />
-                  </span>
-                  <LinkTo
-                    href={
-                      entry.type === "product"
-                        ? `/dashboard/${menuSlugOrId}/items`
-                        : `/dashboard/${menuSlugOrId}/categories`
-                    }
-                    className="inline-flex items-center gap-1 text-primary text-sm font-medium hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-slate-800 rounded"
-                  >
-                    {t("view")}
-                    <IoChevronForwardOutline
-                      className={`text-sm shrink-0 ${isRTL ? "rotate-180" : ""}`}
-                    />
-                  </LinkTo>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
+        <RecentActivityList
+          entries={latestActivity}
+          loading={activityLoading}
+          menuSlugOrId={menuSlugOrId}
+          isRTL={isRTL}
+        />
       </section>
     </div>
   );

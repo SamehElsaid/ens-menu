@@ -20,6 +20,8 @@ interface UploadStepProps {
   onAnalyze: () => void;
   isProcessing: boolean;
   isPreparing?: boolean;
+  showSkip?: boolean;
+  onSkip?: () => void;
 }
 
 export default function UploadStep({
@@ -30,6 +32,8 @@ export default function UploadStep({
   onAnalyze,
   isProcessing,
   isPreparing = false,
+  showSkip = false,
+  onSkip,
 }: UploadStepProps) {
   const t = useTranslations("MenuImport");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -147,7 +151,7 @@ export default function UploadStep({
         ))}
       </ul>
 
-      <div className="flex justify-center pt-2">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
         <button
           type="button"
           disabled={!file || isProcessing || isPreparing}
@@ -156,6 +160,16 @@ export default function UploadStep({
         >
           {t("startAnalysis")}
         </button>
+        {showSkip && onSkip && (
+          <button
+            type="button"
+            disabled={isProcessing || isPreparing}
+            onClick={onSkip}
+            className="inline-flex items-center gap-2 px-6 py-3 text-slate-600 dark:text-slate-300 hover:text-primary font-medium transition-colors disabled:opacity-50"
+          >
+            {t("skipOnboarding")}
+          </button>
+        )}
       </div>
     </div>
   );

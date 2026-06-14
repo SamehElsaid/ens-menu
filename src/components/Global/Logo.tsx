@@ -8,6 +8,7 @@ export const Logo = ({
   variant = "default",
   size = "default",
   pageTitle,
+  className = "",
 }: LogoProps) => {
   const gradientClasses =
     variant === "white"
@@ -22,28 +23,69 @@ export const Logo = ({
       ? "bg-white opacity-60 shadow-[0_0_10px_rgba(255,255,255,0.3)]"
       : "bg-purple-600 shadow-[0_0_10px_rgba(124,58,237,0.5)] dark:bg-purple-400 opacity-40";
 
+  const iconSize =
+    size === "header"
+      ? 18
+      : size === "micro"
+        ? 22
+        : size === "compact"
+          ? 28
+          : 40;
+  const gapClass =
+    size === "header"
+      ? "gap-1.5"
+      : size === "micro"
+        ? "gap-2"
+        : size === "compact"
+          ? "gap-2.5"
+          : "gap-4";
+  const textAlignClass =
+    size === "header" ||
+    size === "compact" ||
+    size === "micro"
+      ? "items-start text-start"
+      : "items-center text-center";
+  const textMaxWidthClass =
+    size === "header"
+      ? "max-w-[9rem]"
+      : size === "micro"
+        ? "max-w-[min(48vw,11rem)]"
+        : "max-w-[min(72vw,320px)]";
+  const lineHeightClass = size === "header" ? "h-0.5 -mt-px" : "h-1 -mt-0.5";
+
   return (
-    <LinkTo href="/" className="flex items-center gap-4 group cursor-pointer scale-100 origin-right">
+    <LinkTo
+      href="/"
+      className={`site-logo flex max-h-10 items-center ${gapClass} group cursor-pointer scale-100 ${size === "header" ? "site-logo--header" : ""} ${className}`}
+    >
       {size === "small" ? (
         null
       ) : (
         <div className={`animate-logo-spin ${iconClasses}`}>
-          <BsQrCode size={40} />
+          <BsQrCode size={iconSize} />
         </div>
       )}
-      <div className="relative flex flex-col items-center max-w-[min(72vw,320px)]">
+      <div className={`relative flex ${textMaxWidthClass} flex-col ${textAlignClass}`}>
         <div
-          className={`text-center font-black tracking-tighter bg-clip-text text-transparent ${gradientClasses} bg-size-[200%_auto] ${
+          className={`font-black tracking-tighter bg-clip-text text-transparent ${gradientClasses} bg-size-[200%_auto] ${
             pageTitle
               ? "text-lg lg:text-base xl:text-xl leading-tight"
-              : "text-2xl lg:text-xl xl:text-3xl"
+              : size === "header"
+                ? "text-sm leading-none"
+                : size === "micro"
+                  ? "text-base leading-tight"
+                  : size === "compact"
+                    ? "text-lg lg:text-xl leading-tight"
+                    : "text-2xl lg:text-xl xl:text-3xl"
           }`}
         >
           {pageTitle ? (
-            <span className="inline-flex flex-wrap items-center justify-center gap-x-1.5 gap-y-0">
-              <span>ENSmenu</span>
-              <span className="text-slate-400 font-bold">-</span>
-              <span className="text-slate-700 dark:text-slate-200 font-semibold truncate max-w-[11rem] sm:max-w-[14rem]">
+            <span className="inline-flex max-w-full items-center gap-x-1.5">
+              <span className="shrink-0">ENSmenu</span>
+              <span className="hidden shrink-0 font-bold text-slate-400 sm:inline">
+                -
+              </span>
+              <span className="hidden truncate font-semibold text-slate-700 dark:text-slate-200 sm:inline sm:max-w-[14rem]">
                 {pageTitle}
               </span>
             </span>
@@ -51,7 +93,7 @@ export const Logo = ({
             "ENSMENU"
           )}
         </div>
-        <div className={`w-full h-1 -mt-0.5 rounded-full ${lineClasses}`} />
+        <div className={`w-full rounded-full ${lineHeightClass} ${lineClasses}`} />
       </div>
     </LinkTo>
   );

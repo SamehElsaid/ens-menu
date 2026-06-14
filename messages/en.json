@@ -1,40 +1,40 @@
 {
   "meta": {
-    "siteName": "ENSmenu",
+    "siteName": "ENSMENU",
     "coreKeywords": "free, electronic menu, QR code",
     "home": {
-      "title": "ENSmenu | Free Electronic Menu & QR Code for Restaurants",
-      "description": "Create a free electronic menu with QR code for your restaurant or cafe. Mobile-friendly digital menus your customers will love.",
-      "keywords": "digital menu, restaurant menu, cafe menu, QR code menu, online menu, food menu, table ordering, contactless menu, menu builder, ENSmenu"
+      "title": "ENSMENU | Smart Menu — Restaurants, Cafés & Hotels",
+      "description": "Modern hospitality operating system powered by AI. QR menus, faster orders, and management for restaurants, cafés, and hotels.",
+      "keywords": "smart menu, digital menu, restaurant menu, cafe menu, hotel menu, QR code menu, table ordering, AI menu, ENSmenu"
     },
     "mobileAppPage": {
-      "title": "ENSmenu App | Electronic Menu & Order Management",
+      "title": "ENSMENU App | Electronic Menu & Order Management",
       "description": "Download the ENSmenu app to run your free electronic menu, QR code orders, and staff workflow.",
       "keywords": "restaurant app, menu app, order management, cashier, ENSmenu"
     },
     "auth": {
-      "loginTitle": "Login | ENSmenu",
+      "loginTitle": "Login | ENSMENU",
       "loginDescription": "Sign in to manage your free electronic menu and QR code on ENSmenu.",
       "loginKeywords": "login, sign in, ENSmenu account, digital menu login",
-      "registerTitle": "Create Account | ENSmenu",
+      "registerTitle": "Create Account | ENSMENU",
       "registerDescription": "Create a free account and launch your electronic menu with QR code in minutes.",
       "registerKeywords": "register, create account, sign up, ENSmenu, digital menu",
-      "resetPasswordTitle": "Reset Password | ENSmenu",
+      "resetPasswordTitle": "Reset Password | ENSMENU",
       "resetPasswordDescription": "Reset your ENSmenu password for your electronic menu account.",
       "resetPasswordKeywords": "reset password, forgot password, recover account, ENSmenu",
-      "staffLoginTitle": "Staff login | ENSmenu",
+      "staffLoginTitle": "Staff login | ENSMENU",
       "staffLoginDescription": "Staff login to manage electronic menu orders and QR code tables.",
       "staffLoginKeywords": "staff login, cashier, ENSmenu dashboard"
     },
     "legalPrivacy": {
-      "title": "Privacy Policy | ENSmenu",
-      "description": "How ENSmenu protects data for your free electronic menu and QR code platform.",
-      "keywords": "privacy policy, ENSmenu, personal data, digital menu, data protection"
+      "title": "Privacy Policy | ENSMENU",
+      "description": "ENSMENU privacy policy for digital menus, QR ordering, and AI import for restaurants, cafés, and hotels.",
+      "keywords": "privacy policy, ENSMENU, digital menu, QR menu, restaurants, cafés, hotels, smart menu, AI menu, data protection"
     },
     "legalTerms": {
-      "title": "Terms and Conditions | ENSmenu",
-      "description": "Terms for using ENSmenu to create a free electronic menu and QR code for restaurants and cafes.",
-      "keywords": "terms of use, ENSmenu, user agreement, digital menu, SaaS"
+      "title": "Terms and Conditions | ENSMENU",
+      "description": "ENSMENU terms for smart menus, QR ordering, and AI-powered hospitality for restaurants, cafés, and hotels.",
+      "keywords": "terms and conditions, ENSMENU, digital menu, QR menu, restaurants, smart menu, AI menu, user agreement"
     },
     "faqPage": {
       "title": "FAQ | Free Electronic Menu & QR Code",
@@ -42,95 +42,149 @@
       "keywords": "FAQ, ENSmenu, QR menu, help, support, digital menu"
     },
     "pricingPage": {
-      "title": "Plans & Pricing | Free Electronic Menu",
-      "description": "Compare free and Pro plans: electronic menu, QR code, menus, products, and features.",
-      "keywords": "ENSmenu pricing, plans, subscription, digital menu plans, Pro plan"
+      "title": "Plans & Pricing | Smart Menu",
+      "description": "Compare free and Pro plans for restaurants, cafés, and hotels — QR menus, AI ordering, and order management.",
+      "keywords": "ENSmenu pricing, smart menu, digital menu, Pro plan, hotel menu"
     },
     "contactPage": {
-      "title": "Contact Us | ENSmenu",
-      "description": "Reach the ENSmenu team by phone, email, WhatsApp, or social media.",
-      "keywords": "contact ENSmenu, support, WhatsApp, email, digital menu help"
+      "title": "Contact Us | ENSMENU",
+      "description": "Talk to ENSmenu — help launching smart menus for restaurants, cafés, and hotels.",
+      "keywords": "contact ENSmenu, restaurant support, WhatsApp, hotel menu help"
+    },
+    "aboutPage": {
+      "title": "About | ENSMENU — The Future of Smart Menu",
+      "description": "ENSmenu for restaurants, cafés, and hotels — QR menus, smart ordering, and branch management powered by AI.",
+      "keywords": "ENSmenu about, smart menu, smart menu, QR menu, AI ordering, Egypt startup"
     }
   },
   "legalPages": {
     "backToHome": "Back to home",
+    "updatedPrefix": "Last updated:",
+    "tocLabel": "Contents",
+    "contactCta": "Contact us",
     "privacy": {
       "title": "Privacy Policy",
-      "updated": "Last updated: April 2026",
+      "subtitle": "We respect your privacy and are committed to protecting data for ENSMENU users and the businesses that use our platform.",
+      "badge": "Data protection",
+      "closingCard": "We are building a modern, secure hospitality platform for everyone.",
       "sections": [
         {
+          "id": "intro",
           "heading": "Introduction",
-          "body": "ENSmenu (\"we\") respects your privacy. This policy explains how we collect, use, and protect information when you use our website, applications, and digital menu services (the \"Service\"). By using the Service, you acknowledge the practices described here."
+          "body": "ENSMENU is an Egyptian cloud platform owned by ENS.EG, operating via ens.eg and ensmenu.com, built for restaurants, cafés, hotels, and hospitality businesses.\n\nWe collect data only to operate the platform and deliver smart menus, QR ordering, notifications, and AI menu import — not for unrelated commercial purposes.\n\nBy using ENSMENU you acknowledge the practices described in this policy."
         },
         {
+          "id": "data-collected",
           "heading": "Data we collect",
-          "body": "We may collect:\n• Account data: such as your name or business name, email, and phone number when you register or contact us.\n• Usage data: such as browser type, pages visited, timestamps, and session identifiers to improve performance and security.\n• Menu content: text, images, and prices you upload to build your digital menu.\n• Technical data: error logs and device information when needed to diagnose issues."
+          "body": "We may collect the following when you register or use the platform:\n• Name\n• Email address\n• Phone number\n• Business data (trade name, type, address, branches)\n• Menu data (categories, items, prices, descriptions, modifiers)\n• Item images, logos, and backgrounds\n• Usage data within the dashboard and public menu\n• IP addresses, browser, and device information\n• System logs and technical error records\n• Order data (table, items, time, status)\n• Cookies"
         },
         {
-          "heading": "Legal basis and purposes",
-          "body": "We process data to provide, operate, and improve the Service; authenticate accounts; communicate with you about your account or support; comply with legal obligations; and protect the rights and safety of our users and platform."
+          "id": "data-use",
+          "heading": "How we use data",
+          "body": "We use collected data to:\n• Operate the platform and display digital menus and QR orders\n• Improve performance, load times, and service stability\n• Provide customer support\n• Send staff and admin notifications (new orders, account updates)\n• Protect accounts and prevent unauthorised access\n• Prevent abuse, fraud, and harmful content\n• Develop new features for hospitality businesses\n• Improve AI menu import models (without selling your data to third parties)"
         },
         {
-          "heading": "Sharing with third parties",
-          "body": "We may use infrastructure, hosting, analytics, or support providers who act under agreements and protect your data. We do not sell your personal information. We may disclose information if required by law or to protect the integrity and security of the Service."
+          "id": "data-protection",
+          "heading": "Data protection",
+          "body": "We protect your data through:\n• HTTPS encryption between browser and servers\n• Reasonable security measures on cloud infrastructure\n• Limiting data access on a need-to-know basis\n• Periodic review of systems and permissions\n\nWe do not sell your personal or business data to third parties for marketing."
         },
         {
-          "heading": "Security and retention",
-          "body": "We apply reasonable technical and organisational measures to protect data. No system is completely secure; please use a strong password and do not share login credentials. We retain data for as long as needed to provide the Service and meet legal requirements, then delete or anonymise it where permitted."
+          "id": "ai",
+          "heading": "Artificial intelligence",
+          "body": "ENSMENU offers AI menu import. When you upload menu images or files, they may be analysed automatically to extract categories, items, prices, and descriptions.\n\nPlease note:\n• AI may sometimes misread text or prices\n• You must review imported data and correct it before publishing\n• Once you confirm and publish content, you are responsible for menu accuracy\n• ENSMENU is not liable for incorrect content you confirmed and published after review"
         },
         {
+          "id": "cookies",
+          "heading": "Cookies",
+          "body": "We use cookies and local storage to:\n• Keep your login session active\n• Remember language and theme (light/dark)\n• Save basic usage preferences\n• Measure performance and improve user experience\n\nYou can configure your browser to refuse some cookies; this may affect certain platform features."
+        },
+        {
+          "id": "data-sharing",
+          "heading": "Data sharing",
+          "body": "ENSMENU does not sell customer or business data to third parties.\n\nWe may share limited data only with:\n• Payment providers for subscriptions and billing\n• Cloud hosting providers to operate the platform\n• Authorities when legally required or under court order\n\nThese providers are bound to protect data within the scope of their service."
+        },
+        {
+          "id": "user-responsibility",
+          "heading": "User responsibility",
+          "body": "You are responsible for:\n• Content you upload (text, images, prices)\n• Copyright and intellectual property of images and materials used\n• Legality of menu items and prices shown to customers\n• Not publishing prohibited, misleading, or infringing content\n\nYour business bears full responsibility for what visitors see via your ENSMENU menu."
+        },
+        {
+          "id": "user-rights",
           "heading": "Your rights",
-          "body": "Depending on applicable law, you may have the right to access, rectify, erase, restrict, or object to processing, and to withdraw consent where processing is consent-based. Contact us through the support channels shown on the website for requests."
+          "body": "Under applicable law you may:\n• Request correction of your account or business data\n• Request deletion of your account and associated data\n• Request a copy of personal data we hold about you\n• Contact support for any privacy-related inquiry\n\nWe aim to respond within a reasonable timeframe."
         },
         {
-          "heading": "Cookies and similar technologies",
-          "body": "We may use cookies or local storage for session, language, and theme preferences, and for performance measurement. You can adjust your browser to refuse some cookies; note that parts of the Service may not work as intended."
-        },
-        {
-          "heading": "Changes",
-          "body": "We may update this policy from time to time. We will show a \"Last updated\" date at the top of this page. Continued use of the Service after changes may constitute acceptance where the law allows."
+          "id": "contact",
+          "heading": "Contact",
+          "body": "For privacy questions or data requests, contact us at:\n• Email: info@ensmenu.com\n• Websites: ensmenu.com and ens.eg\n\nThe ENSMENU team — part of ENS.EG — is here to help."
         }
       ]
     },
     "terms": {
       "title": "Terms and Conditions",
-      "updated": "Last updated: April 2026",
+      "subtitle": "By using ENSMENU you agree to the following terms governing use of the platform and services.",
+      "badge": "User agreement",
+      "closingCard": "Our goal is to build the future of smart hospitality in the Arab region.",
       "sections": [
         {
-          "heading": "Acceptance",
-          "body": "By using ENSmenu you agree to these terms. If you do not agree, please do not use the Service."
+          "id": "acceptance",
+          "heading": "Acceptance of terms",
+          "body": "By using ensmenu.com, ens.eg, ENSMENU apps, or the dashboard, you agree to these Terms and Conditions.\n\nIf you do not agree, please stop using the platform. We may update these terms from time to time; continued use may constitute acceptance of the updated version where permitted by law."
         },
         {
-          "heading": "Description of the Service",
-          "body": "ENSmenu provides tools to create, manage, and display digital menus for restaurants and cafes, including features such as QR linking, subject to the capabilities available on your plan or subscription."
+          "id": "service",
+          "heading": "Service description",
+          "body": "ENSMENU provides a cloud hospitality platform including:\n• Digital menus and QR menus for restaurants, cafés, and hotels\n• AI menu import from images and files\n• Smart table ordering via QR\n• Dashboard to manage items, branches, and tables\n• Staff notifications for new orders\n• Cloud hosting to display menus to guests\n\nAvailable features depend on your plan (free, Pro, or custom)."
         },
         {
-          "heading": "Account and responsibility",
-          "body": "You are responsible for the accuracy of information you provide and for safeguarding your login credentials. You must notify us promptly of any unauthorised use of your account. You must be of legal age to enter into a contract in your jurisdiction."
+          "id": "accounts",
+          "heading": "Accounts",
+          "body": "You are responsible for:\n• Accuracy of registration and business information\n• Keeping your password and login credentials secure\n• All activity under your account\n• Notifying us promptly of suspected unauthorised access\n\nYou must be of legal age to enter a contract in your country to use the platform on behalf of a business."
         },
         {
-          "heading": "Acceptable use",
-          "body": "You must not misuse the Service, attempt to compromise systems or overload infrastructure, publish unlawful or misleading content or content that infringes others' rights, or collect user data without authorisation."
+          "id": "allowed",
+          "heading": "Permitted use",
+          "body": "The platform is intended for lawful commercial use in hospitality, including:\n• Restaurants, cafés, and hotels\n• Quick-service venues and bakeries\n• Hospitality events displaying a digital menu\n\nYou must use ENSMENU in compliance with applicable local and international laws."
         },
         {
-          "heading": "Content and intellectual property",
-          "body": "You retain rights to content you upload (images, text, prices) or you must have permission to use it. You grant us a non-exclusive licence to host and display that content as needed to operate the Service. ENSmenu branding, design, and software remain our property or that of our licensors."
+          "id": "prohibited",
+          "heading": "Prohibited use",
+          "body": "You may not use the platform to:\n• Publish illegal or fraudulent content\n• Create fake restaurants or businesses\n• Phish or impersonate others\n• Upload malware or attempt to compromise systems\n• Send spam or abuse notifications\n• Use copyrighted material without permission\n• Abuse the platform or overload infrastructure"
         },
         {
-          "heading": "Subscriptions and payment",
-          "body": "If the Service is paid or includes upgrades, billing terms shown at purchase apply. Prices and features may change with reasonable notice where required by law."
+          "id": "ai",
+          "heading": "Artificial intelligence",
+          "body": "ENSMENU AI menu import is an assistive tool only, not a substitute for human review.\n\n• Results may contain errors in items, prices, or descriptions\n• You must review every imported field before publishing\n• Once you confirm and publish, you are responsible for displayed content\n• ENSMENU is not liable for financial or operational losses from incorrect menu data you confirmed and published"
         },
         {
-          "heading": "Disclaimer",
-          "body": "The Service is provided \"as is\" and \"as available\" to the fullest extent permitted by law. We do not guarantee uninterrupted or error-free operation, and we disclaim indirect, incidental, or consequential damages except where prohibited by law."
+          "id": "payment",
+          "heading": "Payment and subscriptions",
+          "body": "ENSMENU offers multiple plans:\n• Free plans with limited features\n• Pro subscriptions with advanced features\n• Custom plans for hotels and large chains\n\nPrices and features may change later with reasonable notice where required by law. Subscriptions may be paused or features restricted if payment fails or the paid period ends."
         },
         {
-          "heading": "Suspension and termination",
-          "body": "We may suspend or terminate access for violations of these terms, security, or legal reasons. You may stop using the Service at any time. Provisions that should survive termination (such as intellectual property and liability limits) remain in effect where applicable."
+          "id": "suspension",
+          "heading": "Suspension or deletion",
+          "body": "ENSMENU may suspend or delete accounts that:\n• Violate these terms or applicable laws\n• Publish harmful or misleading content\n• Abuse the platform or threaten its security\n\nYou may request account closure anytime via support. We may retain certain records for legal or security requirements."
         },
         {
-          "heading": "Governing law and disputes",
-          "body": "These terms are governed by the laws applicable to ENSmenu's operations unless otherwise agreed in writing. Competent courts or forums may be determined according to policies in effect at the time of a dispute."
+          "id": "liability",
+          "heading": "Limitation of liability",
+          "body": "ENSMENU is provided \"as is\" and \"as available\". We are not liable for:\n• Internet outages or connectivity provider issues\n• Payment provider failures or transaction delays\n• User-uploaded content (text, images, prices)\n• Temporary downtime for maintenance or updates\n• AI errors after you confirmed and published content manually\n\nWe do not guarantee uninterrupted or error-free service."
+        },
+        {
+          "id": "ip",
+          "heading": "Intellectual property",
+          "body": "ENSMENU branding, design, interfaces, software, and source code belong to ENS.EG or its licensors.\n\nYou retain rights to content you upload, while granting ENSMENU a non-exclusive licence to host and display it to operate the service.\n\nCopying or reselling the platform or its parts without written permission is prohibited."
+        },
+        {
+          "id": "changes",
+          "heading": "Changes",
+          "body": "We may modify these terms or platform features from time to time. The last updated date is shown at the top of this page.\n\nWe recommend reviewing this page periodically. Continued use of ENSMENU after changes means acceptance of updated terms where permitted by law."
+        },
+        {
+          "id": "contact",
+          "heading": "Contact",
+          "body": "For legal inquiries or support related to these terms:\n• Email: info@ensmenu.com\n• Websites: ensmenu.com and ens.eg\n\nENSMENU — a product of ENS.EG — smart hospitality for Egypt and the Arab region."
         }
       ]
     }
@@ -319,9 +373,11 @@
     "ownerLoginLink": "Restaurant owner login",
     "dontHaveAccount": "Don't have an account?",
     "forgotPassword": "Forgot your password?",
+    "rememberMe": "Remember me",
     "orLoginWith": "Or login with",
     "orRegisterWith": "Or register with",
     "loginWithGoogle": "Login with Google",
+    "continueWithGoogle": "Continue with Google",
     "loginFailed": "Login failed",
     "loginWithGoogleFailed": "Google sign-in failed",
     "haveAccount": "Already have an account?",
@@ -345,7 +401,11 @@
     "recaptchaVerifyingHint": "Please wait while we confirm you're human",
     "recaptchaRejected": "Verification failed",
     "recaptchaRejectedHint": "Tap to try again",
-    "recaptchaBoot": "Loading security check..."
+    "recaptchaBoot": "Loading security check...",
+    "recaptchaOnSubmit": "Quick security check when you tap Create account",
+    "recaptchaModalTitle": "Quick security check",
+    "recaptchaModalSubtitle": "One step to protect your account — then we'll finish signup.",
+    "recaptchaModalClose": "Close"
   },
   "form": {
     "personalInformation": "Personal Information",
@@ -1048,9 +1108,9 @@
     "openChat": "Chat with Lina",
     "contactWhatsApp": "Contact on WhatsApp",
     "dismissTeaser": "Dismiss",
-    "teaser1": "Hi 👋 Need help with your digital menu?",
-    "teaser2": "Ask me about pricing and plans ✨",
-    "teaser3": "I can help you get started quickly 🍽️"
+    "teaser1": "Hi 👋 Need help launching your smart menu?",
+    "teaser2": "Ask me about pricing for restaurants, cafés & hotels ✨",
+    "teaser3": "I can help you go live in minutes 🍽️"
   },
   "chat": {
     "appTitle": "WhatsApp Demo",
@@ -1072,17 +1132,65 @@
   "hello": "Hello",
   "trustedBySection": {
     "badge": "Worldwide",
-    "title": "Trusted by hundreds of customers from all over the world",
-    "subtitle": "Restaurants and cafés using ENSmenu every day",
+    "title": "Built for restaurants, cafés, and hotels",
+    "subtitle": "A platform made for daily operations — digital menus and live orders",
     "logosAriaLabel": "Our clients logos"
   },
+  "marketingTrustFeatures": {
+    "setup": {
+      "title": "Ready in under 10 minutes"
+    },
+    "mobile": {
+      "title": "Works on mobile and tablet"
+    },
+    "venues": {
+      "title": "Built for restaurants, cafés, and hotels"
+    },
+    "qrOrders": {
+      "title": "Smart QR + live orders"
+    },
+    "arabic": {
+      "title": "Full Arabic support"
+    },
+    "noApp": {
+      "title": "No guest app required"
+    }
+  },
   "heroSection": {
-    "badge": "Start Now for Free",
+    "badge": "Smart Menu",
     "linaAlt": "Lina - ENSmenu assistant",
-    "title1": "Transform your restaurant into a",
-    "title2": "Smart Electronic Menu",
-    "description": "An interactive digital menu with modern design, enables your customers to browse the food menu easily and clearly by scanning a QR code only",
-    "cta": "Start Now for Free",
+    "title1": "Smart menus & ordering",
+    "title2": "for restaurants, cafés & hotels",
+    "description": "For restaurants, cafés, and hotels — QR menus, faster orders, and a better guest experience. Live in minutes.",
+    "cta": "Start Free",
+    "secondaryCta": "Watch demo",
+    "trustLine": "100% free forever · No credit card · No limits",
+    "pill1": "Smart Ordering",
+    "pill2": "AI Suggestions",
+    "pill3": "Multi-language",
+    "pill4": "QR Experience",
+    "mockScan": "Scan to open menu",
+    "mockAiLabel": "Lina suggests",
+    "mockMenuTitle": "Menu",
+    "mockAiHint": "Guest favorite — add to order?",
+    "mockItem1": "Grilled Chicken",
+    "mockItem2": "Fresh Juice",
+    "mockItem3": "Cheesecake",
+    "mockAdd": "Add",
+    "mockChat": {
+      "assistantName": "Lina",
+      "status": "Smart ordering",
+      "inputPlaceholder": "Ask Lina…",
+      "user1": "I'd like something light",
+      "lina1": "I'd recommend cheesecake and fresh juice 👌",
+      "user2": "Anything spicy?",
+      "lina2": "Try spicy grilled chicken with potato wedges 🔥",
+      "addToCart": "Add to cart",
+      "subtotalLine": "Subtotal: {amount}",
+      "itemsInCart": "{count} items added",
+      "addedToCart": "Added to cart"
+    },
+    "mockItem4": "Potato Wedges",
     "watchDemo": "Watch Demo",
     "androidTitle": "Smoother Experience via Android App",
     "androidDescription": "For business owners seeking peak performance, we provide a dedicated Direct App for instant menu access and one-tap order management, optimized for speed and daily efficiency.",
@@ -1098,13 +1206,415 @@
       "desserts": "Desserts"
     }
   },
+  "homeCtaSection": {
+    "preFooter": {
+      "title": "Launch your smart menu today",
+      "description": "Turn your restaurant, café, or hotel into a modern ordering experience in minutes.",
+      "cta": "Start free now"
+    },
+    "badge": "Ready in under 10 minutes",
+    "title": "Launch your smart menu",
+    "titleAccent": "today",
+    "subtitle": "From table service to room service — go live with AI-powered menus and ordering in under 10 minutes.",
+    "features": {
+      "ai": {
+        "title": "AI upsell suggestions",
+        "description": "Smart recommendations that increase order value automatically."
+      },
+      "qr": {
+        "title": "QR ready to print",
+        "description": "Branded table QR codes — download and print instantly."
+      },
+      "free": {
+        "title": "No credit card",
+        "description": "Start free today. Upgrade only when you're ready."
+      }
+    },
+    "ctaPrimary": "Start free now",
+    "trust": {
+      "label": "Built for day-to-day hospitality operations",
+      "brands": {
+        "1": "Kababgy",
+        "2": "Burger Land",
+        "3": "Café Lina",
+        "4": "Shawarma House"
+      }
+    },
+    "menu": {
+      "restaurantName": "Beit Al-Shami",
+      "add": "Add",
+      "item1": "Grilled Chicken",
+      "item2": "Orange Juice",
+      "item3": "Cheesecake"
+    },
+    "footer": {
+      "tagline": "Modern hospitality operating system — powered by AI.",
+      "navLabel": "Footer navigation"
+    }
+  },
+  "loginPage": {
+    "headline": "Welcome back to",
+    "headlineAccent": "ENSMENU",
+    "subtitle": "Manage your smart menu and QR orders from one place — fast and secure.",
+    "formTitle": "Sign in",
+    "formSubtitle": "Enter your account details to continue",
+    "trust": {
+      "secure": "Secure connection",
+      "cloud": "Cloud 24/7",
+      "fast": "Quick access"
+    },
+    "features": {
+      "qr": "Smart QR menus for restaurants, cafés, and hotels",
+      "orders": "Live orders and instant staff notifications"
+    }
+  },
+  "registerPage": {
+    "headline": "Launch your smart venue",
+    "headlineAccent": "in minutes",
+    "subtitle": "Create your account and go live with AI menus, QR ordering, and live notifications.",
+    "formTitle": "Create account",
+    "formSubtitle": "A few quick steps to get started",
+    "steps": {
+      "account": "Account details",
+      "business": "Venue details",
+      "launch": "Launch"
+    },
+    "sections": {
+      "account": "Account details",
+      "business": "Venue details",
+      "launch": "Password & launch"
+    },
+    "trust": {
+      "free": "Free forever",
+      "noCard": "No credit card",
+      "fast": "Live in 10 minutes",
+      "features": "AI + QR + orders"
+    },
+    "benefits": {
+      "ai": {
+        "title": "AI-powered menu",
+        "description": "Auto-import and smart upsells that grow revenue."
+      },
+      "qr": {
+        "title": "Print-ready QR",
+        "description": "QR codes for tables and rooms — download and print instantly."
+      },
+      "orders": {
+        "title": "Live ordering",
+        "description": "Guests order from their phone — instant kitchen alerts."
+      }
+    },
+    "menu": {
+      "restaurantName": "Café Lina",
+      "add": "Add",
+      "item1": "Grilled Chicken",
+      "item2": "Orange Juice",
+      "item3": "Cheesecake"
+    }
+  },
+  "liveRestaurantSection": {
+    "badge": "Your business after ENSMENU",
+    "title": "Hospitality operations",
+    "titleAccent": "smarter and faster",
+    "subtitle": "Every order, every guest, every moment — from dining room to lounge — managed from one honest dashboard.",
+    "mobileSwipeHint": "Swipe",
+    "mobile": {
+      "title": "Live table orders from QR",
+      "subtitle": "Guests scan QR, order from the menu, and the kitchen receives it instantly.",
+      "steps": {
+        "1": "Scan QR",
+        "2": "Order from menu",
+        "3": "Receive in dashboard"
+      },
+      "features": {
+        "liveUpdates": "Live order updates",
+        "kitchenAlert": "Kitchen alerts",
+        "statusControl": "Order status control"
+      },
+      "mockOrder": {
+        "badge": "New order",
+        "tableLabel": "Table",
+        "tableNumber": "12",
+        "itemsLabel": "Items"
+      }
+    },
+    "features": {
+      "liveTracking": {
+        "title": "Live order tracking",
+        "description": "Every order appears on your dashboard the moment it arrives."
+      },
+      "orderStatus": {
+        "title": "Order status",
+        "description": "Clear workflow: new, in progress, or completed."
+      },
+      "kitchenAlerts": {
+        "title": "Kitchen alerts",
+        "description": "Instant notifications for kitchen and staff on new orders."
+      },
+      "tablesQr": {
+        "title": "Tables & QR",
+        "description": "Link orders to tables and QR scans in one place."
+      },
+      "liveStats": {
+        "title": "Live order stats",
+        "description": "Today's sales, order count, and QR scans — updated in real time."
+      }
+    },
+    "dashboard": {
+      "restaurantName": "The Palm Lounge",
+      "live": "Live",
+      "popularTitle": "Popular today",
+      "opsTitle": "Operations at a glance",
+      "liveOrdersTitle": "Live orders",
+      "statusNew": "New",
+      "statusProgress": "In progress",
+      "statusDone": "Done",
+      "ops": {
+        "1": {
+          "title": "Live order tracking",
+          "description": "The order list refreshes as soon as a guest places an order."
+        },
+        "2": {
+          "title": "Order status",
+          "description": "Update each order's stage for kitchen and cashier."
+        },
+        "3": {
+          "title": "Kitchen alerts",
+          "description": "Visual and sound alerts when an order needs prep."
+        },
+        "4": {
+          "title": "Tables & QR management",
+          "description": "See which table or QR source each order came from."
+        },
+        "5": {
+          "title": "Live order statistics",
+          "description": "Sales, orders, and QR scans in one dashboard view."
+        }
+      },
+      "products": {
+        "1": {
+          "name": "Grilled Chicken",
+          "orders": "24 orders"
+        },
+        "2": {
+          "name": "Orange Juice",
+          "orders": "18 orders"
+        },
+        "3": {
+          "name": "Cheesecake",
+          "orders": "15 orders"
+        }
+      },
+      "orders": {
+        "1": {
+          "id": "Order #1250",
+          "items": "2× Grilled Chicken",
+          "time": "1 min ago",
+          "status": "new"
+        },
+        "2": {
+          "id": "Order #1249",
+          "items": "1× Orange Juice, 1× Wedges",
+          "time": "3 min ago",
+          "status": "progress"
+        },
+        "3": {
+          "id": "Order #1248",
+          "items": "3× Cheesecake",
+          "time": "5 min ago",
+          "status": "done"
+        }
+      }
+    },
+    "alerts": {
+      "qrScan": {
+        "title": "New QR scan",
+        "subtitle": "Pool deck · Table 12 · 4 guests"
+      },
+      "kitchen": {
+        "title": "Kitchen alert",
+        "subtitle": "New order ready to prepare — Table 7"
+      },
+      "newOrder": {
+        "title": "New order — Room 814",
+        "subtitle": "Room service · 2× Cappuccino"
+      }
+    },
+    "trustTagline": "A digital menu in minutes — guests order with no app download"
+  },
+  "transformSection": {
+    "badge": "From paper to digital",
+    "titleBefore": "Before",
+    "titleAfter": "and after ENSMENU",
+    "subtitle": "Turn a paper menu into a smart QR ordering experience — AI import, instant photos, and live orders in under 10 minutes.",
+    "flowTitle": "How it works",
+    "before": {
+      "label": "Before ENSMENU",
+      "footer": "Traditional experience — lost sales and slower service",
+      "items": {
+        "1": "Hard to update the menu daily",
+        "2": "Constant headaches changing prices",
+        "3": "No food photos on the menu",
+        "4": "No insight into best-selling items",
+        "5": "Orders delayed during rush hour",
+        "6": "Orders sometimes get lost",
+        "7": "No order tracking at all",
+        "8": "Outdated experience — not built for 2026",
+        "9": "Non-interactive guest experience",
+        "10": "Heavy reliance on waiters",
+        "11": "Repeated printing costs",
+        "12": "Hard to manage multiple branches"
+      }
+    },
+    "after": {
+      "label": "After ENSMENU",
+      "footer": "Smart experience — higher sales and happier guests",
+      "items": {
+        "1": "Upload a menu photo — AI extracts items",
+        "2": "Professional food images auto-filled",
+        "3": "Instant branded QR for tables, rooms, and lounges",
+        "4": "Guests scan and order from their phone",
+        "5": "Smart AI recommendations boost basket size",
+        "6": "Live order notifications to your kitchen",
+        "7": "Fewer mistakes, faster service",
+        "8": "Setup in under 10 minutes"
+      }
+    },
+    "steps": {
+      "1": {
+        "title": "Upload menu",
+        "caption": "Snap or upload your paper menu image"
+      },
+      "2": {
+        "title": "AI processes",
+        "caption": "Items, prices, and categories extracted automatically"
+      },
+      "3": {
+        "title": "Photos appear",
+        "caption": "Our food image library fills every dish"
+      },
+      "4": {
+        "title": "QR generated",
+        "caption": "Print-ready QR with your branding"
+      },
+      "5": {
+        "title": "Guest scans",
+        "caption": "Customers open the menu in seconds"
+      },
+      "6": {
+        "title": "Live ordering",
+        "caption": "Notifications and orders flow in real time"
+      }
+    },
+    "visual": {
+      "uploading": "Uploading image…",
+      "uploadComplete": "Image uploaded",
+      "processing": "Analyzing…",
+      "processingComplete": "Analysis successful",
+      "extracting": "Extracting items…",
+      "extractComplete": "Items extracted",
+      "qrDownload": "Download & print",
+      "liveBadge": "Live",
+      "newOrder": "New order — table 7",
+      "scanToOrder": "Scan & order",
+      "notification": "New order from table 7",
+      "tableLabel": "Table",
+      "statusNew": "New",
+      "orderItemsLabel": "Items",
+      "paperMenuAlt": "Worn paper menu on a restaurant table",
+      "restaurantName": "Café Lina",
+      "add": "Add",
+      "item1": "Grilled Chicken",
+      "item2": "Orange Juice",
+      "item3": "Cheesecake"
+    }
+  },
+  "menuImportSection": {
+    "badge": "Quick setup",
+    "title1": "Upload your menu photo",
+    "title2": "we handle the rest",
+    "subtitle": "From one image to a live QR on your tables, rooms, or counters — in under 10 minutes.",
+    "steps": {
+      "1": {
+        "title": "Upload photo",
+        "caption": "A clear photo of your paper menu or food list"
+      },
+      "2": {
+        "title": "AI analyzes",
+        "caption": "Extracts items and prices with high accuracy"
+      },
+      "3": {
+        "title": "Photos added automatically",
+        "caption": "A professional photo library fills every dish"
+      },
+      "4": {
+        "title": "Print QR",
+        "caption": "QR ready to print — with your restaurant or hotel branding"
+      },
+      "5": {
+        "title": "Place on your tables",
+        "caption": "Guests scan the code — or order from room service menus"
+      }
+    },
+    "highlights": {
+      "rocket": "Start receiving orders in just minutes",
+      "photos": "Huge photo library — professional images ready",
+      "ai": "Accurate AI that reads, analyzes, and writes for you",
+      "clock": "Under 10 minutes from photo to smart menu"
+    },
+    "visual": {
+      "uploading": "Uploading image…",
+      "uploadComplete": "Image uploaded",
+      "processing": "Analyzing…",
+      "processingComplete": "Analysis successful",
+      "extracting": "Extracting items…",
+      "extractComplete": "Items extracted",
+      "qrDownload": "Download & print",
+      "liveBadge": "Live",
+      "newOrder": "New order",
+      "scanToOrder": "Scan & order",
+      "item1": "Grilled Chicken",
+      "item2": "Orange Juice",
+      "item3": "Cheesecake"
+    }
+  },
+  "experienceHome": {
+    "restaurantName": "Café Lina",
+    "tagline": "Smart dining, warmly served",
+    "arrivalHint": "Scroll to take a seat",
+    "scanTitle": "Scan the table QR",
+    "scanSubtitle": "Your menu opens instantly",
+    "scanning": "Opening menu…",
+    "menuGreeting": "Welcome",
+    "addToOrder": "Add",
+    "categories": {
+      "all": "All",
+      "drinks": "Drinks",
+      "bakery": "Bakery",
+      "food": "Food"
+    },
+    "aiLabel": "Lina suggests",
+    "aiMessage": "The butter croissant pairs beautifully with cappuccino — add both?",
+    "aiAddBoth": "Add both",
+    "cartTitle": "Your order",
+    "cartEmpty": "Tap items to build your order",
+    "cartTotal": "Total",
+    "revealLine1": "This is what your guests feel.",
+    "revealLine2": "Build a live smart-menu experience for your restaurant, café, or hotel in minutes.",
+    "cta": "Start free",
+    "ctaSecondary": "View pricing",
+    "progressAria": "Experience progress",
+    "stripPrivacy": "Privacy Policy",
+    "stripTerms": "Terms and Conditions",
+    "stripContact": "Contact us"
+  },
   "phoneVideoSection": {
     "badge": "Staff app",
     "devicePhone": "Phone",
     "deviceTablet": "Tablet",
     "deviceToggleAria": "Preview device frame",
     "title": "Handle menu orders on your phone",
-    "description": "A staff-facing app for restaurants and cafés to receive customer orders coming from the digital menu, and track each step from intake to handoff in one clear screen.",
+    "description": "A staff app for restaurants, cafés, hotels, and lounges — receive digital menu orders and track every step on one clear screen.",
     "tabItems": {
       "createOrder": {
         "title": "Create order",
@@ -1150,7 +1660,8 @@
       "floatingCards": {
         "liveOrderLabel": "Live Order",
         "liveOrderText": "Table 12 — Ready",
-        "responseLabel": "Response"
+        "responseLabel": "Live sync",
+        "responseText": "Orders update instantly"
       }
     },
     "FaqApp": {
@@ -1241,12 +1752,12 @@
       "button": "Download the App for Free"
     },
     "features": {
-      "title": "Why Choose Smart Menu?",
-      "description": "We provide everything you need to create a professional digital menu for your restaurant or cafe",
+      "title": "Why restaurants, cafés, and hotels choose ENSMENU",
+      "description": "Everything you need to launch a premium digital menu — for restaurants, cafés, and hotels",
       "items": {
         "0": {
           "title": "Lightning Fast",
-          "description": "Create a professional digital menu for your restaurant in minutes, with instant updates anytime"
+          "description": "Launch a polished digital menu in minutes — update prices and items instantly"
         },
         "1": {
           "title": "Advanced Analytics",
@@ -1262,7 +1773,7 @@
         },
         "4": {
           "title": "Multiple Designs",
-          "description": "Choose from a wide range of ready-made templates or customize the design to match your restaurant identity"
+          "description": "Professional templates for fine dining, cafés, hotels, and beach clubs — or fully on-brand"
         },
         "5": {
           "title": "Multi-language Support",
@@ -1272,7 +1783,7 @@
     },
     "howItWorks": {
       "title": "Three Simple Steps to Get Started",
-      "description": "We make it easy for you to transition from your old paper menu to the digital era in minutes.",
+      "description": "Move from paper menus to a smart QR menu in minutes.",
       "steps": {
         "0": {
           "number": "01",
@@ -1282,12 +1793,12 @@
         "1": {
           "number": "02",
           "title": "Customize Your Design",
-          "description": "Choose the colors, logo, and QR style and menu that matches your restaurant's brand identity."
+          "description": "Choose colors, logo, and QR style for your restaurant, café, or hotel."
         },
         "2": {
           "number": "03",
           "title": "Publish the QR Code",
-          "description": "Upload the QR code in high quality and print it on the tables or at the entrance of your restaurant."
+          "description": "Print QR codes for tables, rooms, pool decks, or food-court counters — guests order instantly."
         }
       }
     },
@@ -1410,8 +1921,8 @@
       }
     },
     "cta": {
-      "title": "Ready to Transform Your Restaurant?",
-      "description": "Join hundreds of restaurants that switched to smart menus. Start your free trial today.",
+      "title": "Ready to upgrade your menu and orders?",
+      "description": "Join restaurants, cafés, and hotels already on ENSmenu. Start free today.",
       "button": "Start Now for Free"
     },
     "contactPage": {
@@ -1419,45 +1930,252 @@
       "eyebrow": "Support center",
       "titleBefore": "Let's",
       "titleHighlight": "Connect",
-      "description": "The ENSmenu team is here to help you set up your electronic menu and answer your questions.",
+      "description": "Whether you run a restaurant, café, or hotel — our team helps you launch smart menus and ordering fast.",
       "supportNote": "We reply as quickly as possible by phone or WhatsApp.",
       "whatsappLabel": "WhatsApp support",
       "whatsappDescription": "Fast replies, menu setup help, and direct support from the ENSmenu team.",
-      "detailsTitle": "Contact details",
+      "detailsTitle": "Contact information",
       "socialTitle": "Follow us on social media",
       "whatsappCta": "Message us on WhatsApp",
+      "whatsappResponseTime": "Average response time: under 5 minutes",
       "labels": {
         "phoneUae": "United Arab Emirates",
         "phoneEgypt": "Egypt",
         "email": "Email",
-        "address": "Location"
+        "address": "Location",
+        "location": "Our location"
+      },
+      "phoneTags": {
+        "sales": "Sales",
+        "support": "Support",
+        "techSupport": "Technical Support",
+        "whatsappLine": "WhatsApp"
+      },
+      "linaWhatsapp": {
+        "name": "Lina AI",
+        "subtitle": "Coming soon on WhatsApp",
+        "badge": "Soon",
+        "aiBadge": "AI"
       },
       "actions": {
         "call": "Call",
         "whatsapp": "WhatsApp",
         "email": "Send email",
-        "visit": "Visit page"
+        "visit": "Visit page",
+        "openInGoogleMaps": "Open in Google Maps"
       }
     },
+    "aboutPage": {
+      "hero": {
+        "badge": "Smart menu vision",
+        "titleBefore": "Building the future of",
+        "titleAccent": "smart menu",
+        "subtitle": "Modern operating system — QR + AI + ordering",
+        "pill1": "Smart QR",
+        "pill2": "AI import",
+        "pill3": "Table & room ordering",
+        "pill4": "Full control",
+        "visualPills": {
+          "liveOrders": "Live orders",
+          "qrTables": "Table QR",
+          "kitchenAlerts": "Kitchen alerts"
+        }
+      },
+      "problem": {
+        "eyebrow": "The problem",
+        "title": "Restaurants, cafés, and hotels",
+        "titleAccent": "still rely on outdated systems",
+        "items": {
+          "paper": {
+            "title": "Outdated paper menus",
+            "hint": "Reprint costs and a flat guest experience"
+          },
+          "prices": {
+            "title": "Stale pricing",
+            "hint": "Prices change faster than menus can keep up"
+          },
+          "ordering": {
+            "title": "Slow ordering",
+            "hint": "Wait times, errors, and disconnected flows"
+          },
+          "photos": {
+            "title": "Missing product photos",
+            "hint": "Guests choose dishes they can’t really see"
+          },
+          "updates": {
+            "title": "Painful updates",
+            "hint": "Every change costs time and team effort"
+          },
+          "waiter": {
+            "title": "Waiter overload",
+            "hint": "Repeated requests slow service and increase mistakes"
+          },
+          "tracking": {
+            "title": "No order visibility",
+            "hint": "Kitchen and floor teams lose sync during rush"
+          },
+          "branches": {
+            "title": "Multi-branch chaos",
+            "hint": "Menus and prices drift across locations"
+          },
+          "outdated": {
+            "title": "Stuck in the past",
+            "hint": "Guest expectations have moved far beyond paper"
+          }
+        }
+      },
+      "why": {
+        "eyebrow": "Why ENSMENU",
+        "title": "Why ENSMENU?",
+        "description": "Built for restaurants, cafés, and hotels — not generic software.",
+        "bento": {
+          "restaurants": {
+            "title": "For restaurants, cafés & hotels",
+            "hint": "Smart table QR, orders, and branch management"
+          },
+          "aiOrdering": {
+            "title": "AI-powered ordering",
+            "hint": "Smart suggestions that grow every basket"
+          },
+          "qrSystem": {
+            "title": "QR ordering system",
+            "hint": "Guests scan, browse, and order from their phone"
+          },
+          "fasterService": {
+            "title": "Faster service",
+            "hint": "Fewer bottlenecks from table to kitchen"
+          },
+          "customerExperience": {
+            "title": "Better guest experience",
+            "hint": "Photos, clarity, and smooth mobile ordering"
+          },
+          "smartRecommendations": {
+            "title": "Smart recommendations",
+            "hint": "Lina AI helps guests discover the right dishes"
+          },
+          "liveOrders": {
+            "title": "Live order flow",
+            "hint": "Real-time notifications to kitchen and staff"
+          },
+          "mobileDashboard": {
+            "title": "Mobile-first dashboard",
+            "hint": "Run your menu from anywhere, on any device"
+          }
+        },
+        "focus": {
+          "setup": "Instant setup without complexity",
+          "import": "AI menu import from photo or PDF",
+          "qr": "QR ordering from the table",
+          "suggestions": "Smart suggestions for guests",
+          "control": "Full menu and order control"
+        },
+        "cards": {
+          "import": {
+            "title": "AI Import",
+            "subtitle": "PDF · Photo · Menu"
+          },
+          "qr": {
+            "title": "Smart QR",
+            "subtitle": "Table · Delivery · Guest"
+          },
+          "control": {
+            "title": "Live Control",
+            "subtitle": "Prices · Items · Staff"
+          }
+        }
+      },
+      "different": {
+        "eyebrow": "What makes us different",
+        "title": "Built for restaurants, cafés & hotels",
+        "items": {
+          "ai": {
+            "title": "AI-powered",
+            "hint": "Import, suggestions, and Lina assistant"
+          },
+          "arabic": {
+            "title": "Arabic-first",
+            "hint": "Native RTL for restaurants and cafés in the region"
+          },
+          "mobile": {
+            "title": "Mobile-first",
+            "hint": "Menus and ordering designed for phones"
+          },
+          "multilang": {
+            "title": "Multi-language",
+            "hint": "Reach guests from different backgrounds"
+          },
+          "smartQr": {
+            "title": "Smart QR",
+            "hint": "Tables, delivery, and seamless guest flows"
+          },
+          "fastSetup": {
+            "title": "Fast setup",
+            "hint": "Live menu in minutes — not weeks"
+          },
+          "restaurants": {
+            "title": "Orders & branch management",
+            "hint": "Staff, tables, room service, and live orders"
+          }
+        }
+      },
+      "vision": {
+        "label": "Vision",
+        "text": "Make smart menu accessible to every restaurant, café, and hotel."
+      },
+      "mission": {
+        "label": "Mission",
+        "text": "Turn the menu from a static paper into a living, AI-powered digital experience."
+      },
+      "builtInEgypt": "Built in Egypt — for modern restaurants, cafés, and hotels.",
+      "trust": {
+        "eyebrow": "Why ENSMENU",
+        "title": "Capabilities you can rely on from day one"
+      },
+      "cta": {
+        "badge": "Start now",
+        "titleBefore": "Launch your",
+        "titleAccent": "smart menu today",
+        "subtitle": "QR menus, AI import, and smart ordering — start free.",
+        "primary": "Create free account",
+        "secondary": "Explore pricing",
+        "menu": {
+          "restaurantName": "Café Lina",
+          "add": "Add",
+          "item1": "Grilled chicken",
+          "item2": "Fresh juice",
+          "item3": "Cheesecake"
+        }
+      }
+    },
+    "poweredByEns": {
+      "ariaLabel": "ENS.EG ecosystem signature",
+      "ecosystemLine": "Part of the <ensEg>ENS.EG</ensEg> ecosystem",
+      "tagline": "Building AI-powered experiences for restaurants, cafés, and hotels."
+    },
     "footer": {
-      "description": "ENSmenu — free electronic menu with QR code for restaurants and cafes. Digital menus and a smooth ordering experience for your guests.",
-      "quickLinks": "Quick Links",
-      "contactUs": "Contact Us",
+      "description": "Smart menus, AI ordering, and QR for restaurants, cafés, and hotels.",
+      "tagline": "Smart Menu · AI Ordering · QR Experience",
+      "quickLinks": "Explore",
+      "contactUs": "Contact",
       "location": "Egypt",
       "UnitedArabEmirates": "Egypt",
       "copyright": "All rights reserved.",
       "privacy": "Privacy Policy",
       "terms": "Terms and Conditions",
-      "followUs": "Follow Us"
+      "followUs": "Social",
+      "linkPricing": "Pricing",
+      "linkKnowledge": "Knowledge Base",
+      "linkContact": "Contact us"
     },
     "header": {
       "signIn": "Sign In",
-      "startNow": "Start Now"
+      "startNow": "Start Now",
+      "aiBadge": "Smart Menu"
     },
     "templateShow": {
       "choosePrefix": "Choose the ",
       "chooseHighlight": "Right Template",
-      "subtitle": "A variety of professional templates designed specifically to suit all types of restaurants and cafes"
+      "subtitle": "Premium templates for restaurants, cafés, hotels, lounges, and fine dining"
     },
     "mobileApp": {
       "whyOurApp": "Why our app?",
@@ -1465,13 +2183,18 @@
     }
   },
   "PricingPage": {
-    "eyebrow": "Plans & pricing",
-    "title": "All you need for your restaurant… in one platform",
-    "subtitle": "Start with a free electronic menu and QR code, then expand with orders and table management—without the hassle.",
+    "eyebrow": "Smart Menu",
+    "title": "Everything your restaurant, café, or hotel needs… in one platform",
+    "subtitle": "Launch a smart QR menu with AI — free forever, no credit card, ready in minutes. Upgrade when you need table QR, room service, and full AI power.",
+    "planProName": "Professional",
+    "freeHighlightForever": "100% free forever",
+    "freeHighlightNoCard": "No credit card",
+    "freeHighlightFast": "Ready in minutes",
+    "freePowerNote": "Start with real AI features — not a stripped-down trial.",
     "compareTitle": "Feature comparison",
     "columnFeature": "Feature",
-    "staticFreeDescription": "Ideal to launch a digital menu and try ENSmenu with essential limits.",
-    "staticProDescription": "For growing venues that need more menus, products, branding control, and staff/table ordering.",
+    "staticFreeDescription": "Everything you need to launch a smart QR menu with AI — generous limits, zero payment, zero risk.",
+    "staticProDescription": "For growing restaurants, cafés, and hotels — more menus, branding control, and staff/table ordering.",
     "staticFiguresNote": "The table uses representative limits and a sample Pro yearly price. Your live account may differ.",
     "rowPrice": "Price",
     "rowBilling": "Billing",
@@ -1487,10 +2210,24 @@
     "aiCustom": "Premium — unlimited speed & intelligence",
     "rowDesign": "Design & theme control",
     "rowSupport": "Support level",
+    "sectionCoreFeatures": "Core Features",
+    "sectionAiFeatures": "AI Features",
+    "sectionLiveOrdering": "Live Ordering & Staff Workflow",
+    "sectionPremiumFeatures": "Premium Features",
+    "sectionAdvancedBusiness": "Advanced Business Add-ons",
     "billingProShort": "Monthly or yearly",
     "rowBillingCycle": "Billing cycle",
     "rowGuestMenu": "Guest-facing digital menu",
-    "rowTableOrderingQr": "Table ordering (QR)",
+    "rowTableOrderingQr": "Table ordering via QR",
+    "rowAiMenuImport": "AI menu import (image / PDF)",
+    "rowAiSuggestions": "AI product suggestions",
+    "rowAiWaiter": "AI waiter / chat assistant",
+    "rowLiveNotifications": "Live order notifications",
+    "rowPhotoLibrary": "Product photo library",
+    "rowMultiLanguage": "Multi-language menus",
+    "rowStaffNotifications": "Staff order notifications",
+    "rowSmartQr": "Smart QR guest experience",
+    "cellBasic": "Basic",
     "cellAllIncluded": "Included",
     "rowDashboard": "Web dashboard",
     "rowPlatformUpdates": "Platform updates",
@@ -1500,12 +2237,13 @@
     "cellDash": "—",
     "cellIntegrationsCustom": "Defined in your contract",
     "customPlanExtrasTitle": "Also included on the Custom plan",
-    "ctaStripIntro": "Choose a path and continue in a few clicks.",
+    "ctaStripIntro": "Start free when you're ready — upgrade only when you need more.",
     "billingFree": "No payment required",
     "billingCustom": "Quote & contract",
     "cellIncluded": "Included",
     "cellNotIncluded": "Not included",
     "cellNegotiable": "Tailored to your needs",
+    "limited": "Unlimited",
     "cellUnlimited": "Unlimited (by agreement)",
     "supportFree": "Standard (email & help center)",
     "supportPro": "Priority during business hours",
@@ -1518,6 +2256,10 @@
     "ctaRegister": "Create free account",
     "ctaUpgrade": "Get Pro",
     "ctaContact": "Talk to sales (WhatsApp)",
+    "mobileKeyFeatures": "Key features",
+    "mobileShowMore": "Show all features",
+    "mobileShowLess": "Show less",
+    "mobileStickyCta": "Start free",
     "paymentMethodsTitle": "Accepted payment methods",
     "paymentMethodsDescription": "We accept Visa cards and Egyptian mobile wallets for Pro subscriptions — pay the way that suits you.",
     "paymentMethodsSecureNote": "All payments are processed securely via EasyKash.",
@@ -1540,9 +2282,9 @@
     "faq2a": "You keep your data, but limits (menus, products, features) apply to the lower plan. You may need to pause extra menus until you are within the limit.",
     "faq3q": "Do you offer refunds?",
     "faq3a": "Refund rules depend on how you subscribed. Check the terms at purchase time or ask sales on WhatsApp.",
-    "staticFreeFeature1": "50 products",
-    "staticFreeFeature2": "No modifications",
-    "staticFreeFeatureAI": "Free AI — limited speed & intelligence",
+    "staticFreeFeature1": "50 products + photo library",
+    "staticFreeFeature2": "Smart QR guest menu",
+    "staticFreeFeatureAI": "AI import, suggestions & Lina chat (basic)",
     "staticProFeature1": "200 products per menu",
     "staticProFeature2": "Includes modifications",
     "staticProFeature3": "Ad controls",
@@ -1650,9 +2392,15 @@
     "inactive": "Inactive",
     "edit": "Edit",
     "delete": "Delete",
+    "search": "Search",
+    "reset": "Reset",
+    "searchByName": "Search by name...",
+    "noSearchResults": "No categories match your search",
     "loading": "Loading...",
     "noCategories": "No categories yet",
     "noCategoriesDescription": "Add your first category to organize menu items.",
+    "mobileFabLabel": "Add category",
+    "mobileUploadHint": "Tap to add or change photo",
     "addModal": {
       "title": "Add Category",
       "names": "Names",
@@ -1703,9 +2451,19 @@
     "qrCode": "QR code",
     "qrOpensMenu": "Opens the public menu with this table number",
     "copyMenuLink": "Copy link",
+    "downloadQr": "Download QR",
     "downloadQrImage": "Download QR image",
+    "qrForThisTable": "QR for this table",
+    "manageTable": "Manage / Edit",
+    "addFirstTable": "Add your first table",
     "qrDownloaded": "Image saved",
     "linkCopied": "Link copied",
+    "previewMenu": "Preview menu",
+    "tableCardTitle": "Table {number}",
+    "mobileFabLabel": "Add table",
+    "totalTablesLabel": "Total tables",
+    "noTables": "No tables yet",
+    "noTablesDescription": "Add your first table to generate a QR code for each one.",
     "noMenuUrl": "Set a menu slug in settings to generate links",
     "deleteConfirmTitle": "Delete table",
     "deleteConfirm": "Are you sure you want to delete table « {name} »? This cannot be undone.",
@@ -1804,7 +2562,16 @@
     "proOnlyTitle": "Staff management is available on Pro plans only",
     "proOnlyDescription": "Upgrade to add staff and receive table call notifications.",
     "upgradeShort": "Upgrade",
-    "personalProfileLink": "Personal profile"
+    "personalProfileLink": "Personal profile",
+    "noStaff": "No staff members yet",
+    "noStaffDescription": "Start by adding your first team member to manage this menu.",
+    "addFirstStaff": "Add your first staff member",
+    "totalStaffLabel": "Total staff",
+    "enable": "Enable",
+    "disable": "Disable",
+    "enableSuccess": "Staff member enabled",
+    "disableSuccess": "Staff member disabled",
+    "toggleError": "Could not update staff status"
   },
   "Items": {
     "title": "Items",
@@ -1837,9 +2604,12 @@
     "loading": "Loading...",
     "noItems": "No items yet",
     "noItemsDescription": "Add your first item to this menu.",
+    "noSearchResults": "No items match your search",
     "addImage": "Add photo",
     "totalItemsLabel": "Total items",
     "missingImagesHint": "Some items need photos — tap Add photo",
+    "mobileFabLabel": "Add item",
+    "mobileUploadHint": "Tap to add or change photo",
     "addModal": {
       "title": "Add Item",
       "editTitle": "Edit Item",
@@ -1929,6 +2699,7 @@
       "title": "Advertisements",
       "description": "Manage promotional advertisements for this menu.",
       "addButton": "Add advertisement",
+      "loading": "Loading...",
       "noMenuId": "Please open this page from a specific menu.",
       "columns": {
         "image": "Image",
@@ -1948,7 +2719,12 @@
       },
       "demoDataBanner": "Demo data for preview — will be replaced automatically when the backend is connected.",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "active": "Active",
+      "inactive": "Inactive",
+      "noAds": "No advertisements yet",
+      "noAdsDescription": "Start by adding a promotional ad for your menu.",
+      "addFirstAd": "Add your first ad"
     },
     "deleteConfirmTitle": "Delete Advertisement",
     "deleteConfirm": "Are you sure you want to delete this advertisement? This action cannot be undone.",
@@ -1988,6 +2764,9 @@
     "Profile": "Profile",
     "Menu Control": "Menu Control",
     "Settings": "Settings",
+    "settingsGeneral": "General",
+    "settingsDesign": "Design",
+    "settingsMedia": "Media",
     "Categories": "Categories",
     "Items": "Items",
     "Advertisements": "Advertisements",
@@ -2001,14 +2780,121 @@
     "upgradeWorkspace": "Upgrade your workspace in one click.",
     "drawerMenuTitle": "Menu",
     "history": "Activity log",
+    "orders": "Table orders",
+    "deliveryOrders": "Delivery orders",
+    "badgeSoon": "Soon",
     "menuImport": "AI Menu Import",
     "Menu Import": "Menu Import",
     "badgeNew": "New",
-    "badgeBeta": "Beta"
+    "badgeBeta": "Beta",
+    "badgePro": "PRO",
+    "proUpgradeTitle": "Upgrade to Pro",
+    "proUpgradeDescription": "This feature is available on Pro plans. Upgrade to unlock table ordering, QR tables, and staff order management.",
+    "proUpgradeCta": "View plans",
+    "proUpgradeClose": "Not now",
+    "proFeatureDescription": {
+      "tables": "QR tables and table links are a Pro feature. Upgrade to generate QR codes and manage dine-in ordering.",
+      "orders": "Table order management is a Pro feature. Upgrade to receive, accept, and track live table orders.",
+      "deliveryOrders": "Delivery orders will be available on Pro plans. Upgrade to get early access when we launch.",
+      "staff": "Staff and waiter management is a Pro feature. Upgrade to add team members and route orders to them.",
+      "advertisements": "In-menu advertisements are a Pro feature. Upgrade to create and manage promotional ads."
+    }
+  },
+  "tableOrders": {
+    "proOnlyTitle": "Table orders are available on Pro plans only",
+    "proOnlyDescription": "Upgrade to receive live table orders, manage waiter workflows, and track order status in real time.",
+    "upgradeShort": "Upgrade",
+    "title": "Table orders",
+    "subtitle": "Manage incoming table orders in real time — accept, prepare, and mark as delivered.",
+    "pendingBadge": "{count, plural, one {# pending order} other {# pending orders}}",
+    "searchPlaceholder": "Search by order #, table, or customer…",
+    "loading": "Loading...",
+    "empty": "No table orders yet.",
+    "noSearchResults": "No orders match your search.",
+    "colOrderId": "Order #",
+    "colTable": "Table",
+    "colCustomer": "Customer",
+    "colWaiter": "Waiter",
+    "colStatus": "Status",
+    "colTotal": "Total",
+    "colTime": "Time",
+    "colItems": "Items",
+    "colItemName": "Item",
+    "colQty": "Qty",
+    "colActions": "Actions",
+    "view": "View",
+    "close": "Close",
+    "detailsTitle": "Order details",
+    "detailsWhen": "When",
+    "detailsTable": "Table",
+    "detailsCustomer": "Customer",
+    "detailsTotal": "Total",
+    "itemsTitle": "Items",
+    "itemsEmpty": "No items in this order.",
+    "actionsTitle": "Order timeline",
+    "accept": "Accept",
+    "reject": "Reject",
+    "markPrepared": "Mark prepared",
+    "markDelivered": "Mark delivered",
+    "actionSuccess": "Order updated",
+    "actionError": "Could not update order",
+    "prev": "Previous",
+    "next": "Next",
+    "pageInfo": "Page {page} of {totalPages}",
+    "orderStatus": {
+      "pending": "Pending",
+      "confirmed": "Accepted",
+      "prepared": "Prepared",
+      "delivered": "Delivered",
+      "cancelled": "Rejected"
+    }
+  },
+  "menuActivityLog": {
+    "title": "Activity log",
+    "subtitle": "Generated from your current menu data — categories, products, staff, tables, ads, and settings.",
+    "searchPlaceholder": "Search by name or action…",
+    "empty": "No activity yet.",
+    "emptyHint": "Add categories, products, staff, tables, or ads to see activity here.",
+    "noSearchResults": "No activity matches your search.",
+    "legacyDate": "Older activity",
+    "prev": "Previous",
+    "next": "Next",
+    "pageInfo": "Page {page} of {totalPages}",
+    "actions": {
+      "categoryCreated": "Category created: {name}",
+      "categoryUpdated": "Category updated: {name}",
+      "itemCreated": "Product created: {name}",
+      "itemUpdated": "Product updated: {name}",
+      "staffCreated": "Staff added: {name}",
+      "tableCreated": "Table created: {number}",
+      "adCreated": "Ad created: {title}",
+      "adUpdated": "Ad updated: {title}",
+      "settingsUpdated": "Settings updated"
+    },
+    "categories": {
+      "category": "Category",
+      "item": "Product",
+      "staff": "Staff",
+      "table": "Table",
+      "settings": "Settings",
+      "ad": "Ad",
+      "import": "Import",
+      "qr": "QR",
+      "auth": "Login",
+      "other": "Activity"
+    },
+    "roles": {
+      "owner": "Owner",
+      "staff": "Staff",
+      "admin": "Admin",
+      "cashier": "Cashier",
+      "waiter": "Waiter",
+      "other": "User"
+    }
   },
   "activityHistory": {
     "title": "Activity log",
-    "subtitle": "See who added or changed products, staff, menu settings, and table orders.",
+    "subtitle": "Audit trail of dashboard actions — categories, products, staff, settings, and imports.",
     "cardOrderMeta": "Table {table} - {count, plural, one {# item} other {# items}}",
     "tapForDetails": "Tap for details",
     "detailsTitle": "Order details",
@@ -2519,6 +3405,7 @@
       "basicInfo": {
         "title": "Basic Information",
         "name": "Name",
+        "restaurantName": "Restaurant / café name",
         "plan": "Plan",
         "emailStatus": "Email Status",
         "email": "Email",
@@ -2598,6 +3485,164 @@
         "suspendError": "Failed to suspend user",
         "reactivateSuccess": "User reactivated successfully",
         "reactivateError": "Failed to reactivate user"
+      },
+      "customerSections": {
+        "lastActivity": "Last activity",
+        "accountStatus": {
+          "active": "Active",
+          "blocked": "Blocked",
+          "deleted": "Deleted",
+          "suspended": "Suspended"
+        },
+        "profile": {
+          "edit": "Edit customer profile",
+          "save": "Save",
+          "saveSuccess": "Profile updated successfully",
+          "saveError": "Failed to update profile"
+        },
+        "block": {
+          "block": "Block customer",
+          "unblock": "Unblock customer",
+          "reasonLabel": "Block reason",
+          "reasonPlaceholder": "Block reason (optional)",
+          "blockSuccess": "Customer blocked",
+          "unblockSuccess": "Customer unblocked",
+          "error": "Failed to update block status"
+        },
+        "softDelete": {
+          "action": "Delete account",
+          "title": "Soft delete account",
+          "message": "The account will be suspended and hidden. It can be restored later.",
+          "success": "Account deleted",
+          "error": "Failed to delete account"
+        },
+        "restore": {
+          "action": "Restore account",
+          "success": "Account restored",
+          "error": "Failed to restore account"
+        },
+        "resetLink": {
+          "send": "Send reset password link",
+          "sending": "Sending...",
+          "success": "Reset link sent",
+          "error": "Failed to send reset link"
+        },
+        "orders": {
+          "title": "Customer orders",
+          "loading": "Loading...",
+          "empty": "No orders yet",
+          "totalOrders": "Total orders",
+          "totalPaid": "Total paid",
+          "lastOrder": "Last order",
+          "plan": "Plan",
+          "status": "Status",
+          "amount": "Amount",
+          "date": "Date",
+          "actions": "Actions",
+          "viewDetails": "Details",
+          "orderDetails": "Order details"
+        },
+        "addresses": {
+          "title": "Addresses",
+          "loading": "Loading...",
+          "empty": "No addresses",
+          "add": "Add address",
+          "edit": "Edit address",
+          "label": "Label",
+          "addressLine": "Address",
+          "city": "City",
+          "governorate": "Governorate",
+          "default": "Default",
+          "setDefault": "Set as default",
+          "save": "Save",
+          "cancel": "Cancel",
+          "createSuccess": "Address added",
+          "updateSuccess": "Address updated",
+          "saveError": "Failed to save address",
+          "deleteSuccess": "Address deleted",
+          "deleteError": "Failed to delete address",
+          "defaultSuccess": "Default address updated",
+          "deleteConfirmTitle": "Delete address",
+          "deleteConfirmMessage": "Are you sure you want to delete this address?"
+        },
+        "notes": {
+          "title": "Internal notes",
+          "hint": "Admin only — e.g. VIP customer, needs follow-up",
+          "placeholder": "Add a note...",
+          "add": "Add",
+          "loading": "Loading...",
+          "empty": "No notes yet",
+          "addSuccess": "Note added",
+          "addError": "Failed to add note",
+          "deleteSuccess": "Note deleted"
+        },
+        "activity": {
+          "title": "Activity log",
+          "loading": "Loading...",
+          "empty": "No admin actions recorded",
+          "lastLogin": "Last login",
+          "lastUpdate": "Last account update",
+          "lastOrder": "Last order",
+          "actions": {
+            "profile_updated": "Profile updated",
+            "account_blocked": "Account blocked",
+            "account_unblocked": "Account unblocked",
+            "account_soft_deleted": "Account soft deleted",
+            "account_restored": "Account restored",
+            "password_reset_sent": "Reset link sent",
+            "password_changed_by_admin": "Password changed by admin",
+            "account_suspended": "Account suspended",
+            "account_reactivated": "Account reactivated",
+            "address_created": "Address added",
+            "address_updated": "Address updated",
+            "address_deleted": "Address deleted",
+            "note_added": "Note added",
+            "note_deleted": "Note deleted",
+            "voucher_assigned": "Voucher assigned",
+            "voucher_blocked": "Voucher blocked",
+            "voucher_unblocked": "Voucher unblocked",
+            "support_case_created": "Support case created",
+            "support_status_updated": "Support status updated"
+          }
+        },
+        "vouchers": {
+          "title": "Coupons & discounts",
+          "loading": "Loading...",
+          "assignPlaceholder": "Voucher code",
+          "assign": "Assign to customer",
+          "assignSuccess": "Voucher assigned",
+          "assignError": "Failed to assign voucher",
+          "used": "Used vouchers",
+          "blocked": "Blocked vouchers",
+          "emptyUsed": "No vouchers used",
+          "emptyBlocked": "No blocked vouchers",
+          "block": "Block",
+          "unblock": "Unblock",
+          "blockHint": "Block a used voucher from being used again",
+          "blockSuccess": "Voucher blocked",
+          "unblockSuccess": "Voucher unblocked"
+        },
+        "support": {
+          "title": "Support & complaints",
+          "loading": "Loading...",
+          "empty": "No support cases",
+          "add": "Add case",
+          "subject": "Subject",
+          "message": "Message",
+          "ticketRef": "Ticket reference (optional)",
+          "ticket": "Ticket",
+          "save": "Save",
+          "cancel": "Cancel",
+          "createSuccess": "Support case created",
+          "createError": "Failed to create support case",
+          "statusSuccess": "Status updated",
+          "status": {
+            "open": "Open",
+            "in_progress": "In progress",
+            "resolved": "Resolved",
+            "closed": "Closed"
+          }
+        }
       }
     }
   },
@@ -2796,6 +3841,7 @@
     "tip2": "Avoid shadows and glare",
     "tip3": "Shoot from above when possible",
     "startAnalysis": "Start analysis",
+    "skipOnboarding": "Skip for now",
     "processingTitle": "Analyzing your menu...",
     "processingMsg1": "Reading the image...",
     "processingMsg2": "Extracting items and prices...",
@@ -2837,13 +3883,25 @@
     "cancel": "Cancel",
     "imageUploadError": "Image upload failed",
     "addImage": "Add photo",
-    "newUpload": "Upload new image",
+    "newUpload": "Re-upload image",
+    "reuploadHint": "AI may occasionally misread some items or prices — you can re-upload the image or edit the results manually.",
     "proceedToConfirm": "Continue to confirm",
     "saveMenu": "Save menu",
     "confirmTitle": "Confirm save menu",
     "confirmDescription": "New categories and items will be created in your menu. Review the summary before confirming.",
     "confirmCategories": "New categories",
     "confirmItemsToCreate": "Items to create (after variants)",
+    "confirmAnalyticsTitle": "Quick summary",
+    "confirmItemsReady": "Items ready to save",
+    "confirmVariants": "Sizes / variants",
+    "confirmNewItems": "New items",
+    "confirmPriceUpdates": "Existing price updates",
+    "confirmMissingPriceExcluded": "Missing price (won't save)",
+    "confirmSkippedDuplicates": "Duplicates (will skip)",
+    "confirmAvgPrice": "Average price",
+    "confirmPriceRange": "Price range",
+    "confirmCategoryBreakdown": "Category breakdown",
+    "confirmItemsPerCategory": "{name} · {count}",
     "confirmWarning": "Existing menu content will not be deleted. Items without price will not be saved.",
     "confirmCheckbox": "I reviewed the data and agree to save",
     "backToEdit": "Back to edit",
@@ -2919,6 +3977,7 @@
     "products": "Products",
     "tables": "Tables",
     "activityLog": "Activity log",
+    "tableOrders": "Table orders",
     "staff": "Staff",
     "settings": "Settings",
     "viewMenu": "View Menu",
@@ -2937,7 +3996,7 @@
     "activeItemsRate": "Active items rate",
     "tablesCount": "Tables",
     "topOrderedItems": "Most ordered",
-    "topOrderedItemsHint": "Based on table orders from the activity log",
+    "topOrderedItemsHint": "Based on confirmed table orders",
     "topVisitedItems": "Most visited",
     "topVisitedItemsHint": "Products opened when guests tap the product card",
     "viewsToday": "Views today",
@@ -3009,7 +4068,21 @@
     "addedOn": "Added on {date}",
     "qrUnavailable": "QR unavailable",
     "noRecentActivity": "No recent activity.",
-    "activityHint": "Activity will appear here when you add items or categories."
+    "activityHint": "Derived from your menu records — categories, products, staff, tables, and ads.",
+    "legacyDate": "Older activity",
+    "viewAllActivity": "View full activity log",
+    "activityCategories": {
+      "category": "Category",
+      "item": "Product",
+      "staff": "Staff",
+      "table": "Table",
+      "settings": "Settings",
+      "ad": "Ad",
+      "import": "Import",
+      "qr": "QR",
+      "auth": "Login",
+      "other": "Activity"
+    }
   },
   "menuAnalyticsPage": {
     "title": "Menu analytics",
@@ -3225,7 +4298,8 @@
     "emptyTitle": "No articles yet",
     "emptyDescription": "Check back later for helpful articles.",
     "createdAt": "Published",
-    "updatedAt": "Updated"
+    "updatedAt": "Updated",
+    "backToList": "Back to articles"
   },
   "headerSearch": {
     "label": "Search knowledge base",
@@ -3576,15 +4650,29 @@
       "activityHistoryPage": {
         "header": {
           "title": "Activity log",
-          "description": "Track table calls and orders in real time. Useful for monitoring service during busy hours."
+          "description": "Audit trail of who changed categories, products, staff, settings, and other dashboard actions."
+        },
+        "search": {
+          "title": "Search activity",
+          "description": "Filter by user name or action type to find a specific change."
+        },
+        "table": {
+          "title": "Recent changes",
+          "description": "Each entry shows what changed, who did it, and when."
+        }
+      },
+      "tableOrdersPage": {
+        "header": {
+          "title": "Table orders",
+          "description": "Manage live table orders — accept, reject, mark prepared, and delivered."
         },
         "search": {
           "title": "Search orders",
-          "description": "Filter by order ID or customer details to find a specific call quickly."
+          "description": "Filter by order number, table, or customer name."
         },
         "table": {
-          "title": "Recent activity",
-          "description": "Open any row to see full order details, items, and staff actions."
+          "title": "Incoming orders",
+          "description": "Open any order for full details, items, and status actions."
         }
       },
       "settingsPage": {

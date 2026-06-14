@@ -3,8 +3,11 @@ import { FaChartLine, FaCreditCard, FaUserAlt } from "react-icons/fa";
 
 import { BiCategory } from "react-icons/bi";
 import { FiSettings } from "react-icons/fi";
+import { IoMdColorFill } from "react-icons/io";
+import { RiGlobalFill } from "react-icons/ri";
 import { HiSpeakerphone } from "react-icons/hi";
 import {
+  MdOutlineDeliveryDining,
   MdOutlineFastfood,
   MdOutlineTableBar,
   MdPeopleOutline,
@@ -14,6 +17,7 @@ import {
   IoLibraryOutline,
   IoPhonePortraitOutline,
   IoPricetagOutline,
+  IoReceiptOutline,
   IoSettingsOutline,
   IoStatsChartOutline,
   IoTicketOutline,
@@ -21,27 +25,41 @@ import {
   IoCallOutline,
   IoSparklesOutline,
 } from "react-icons/io5";
+
 export type NavItem = {
   label: string;
   icon: IconType;
   badge?: string;
-  badges?: Array<{ label: string; variant: "new" | "beta" }>;
+  /** Resolved at runtime in the sidebar (e.g. pending table orders). */
+  dynamicBadge?: "pendingOrders";
+  badges?: Array<{ label: string; variant: "new" | "beta" | "soon" }>;
+  /** Visual cluster within a section (e.g. table ordering). */
+  subgroup?: string;
+  /** Requires Pro plan — locked for free accounts in sidebar. */
+  proFeature?: boolean;
+  /** Non-clickable placeholder (e.g. coming soon). */
+  comingSoon?: boolean;
   active?: boolean;
   key?: string;
   link?: string;
   parentLink?: string;
   dependentParent?: boolean;
+  /** Match route exactly (e.g. settings root vs. settings/design). */
+  exactMatch?: boolean;
+  navId?: string;
+  children?: NavItem[];
 };
 
 export type NavSection = {
-  title: string;
+  /** Internal key for React lists */
+  id: string;
   items: NavItem[];
 };
 
-/** Cashier staff: operational pages + activity log — no settings, staff management, profile, or ads. */
+/** Cashier staff: operational pages — no profile, subscription, settings, staff, or ads. */
 export const cashierNavSections: NavSection[] = [
   {
-    title: "Overview",
+    id: "overview",
     items: [
       {
         label: "Overview",
@@ -52,7 +70,7 @@ export const cashierNavSections: NavSection[] = [
     ],
   },
   {
-    title: "Menu Import",
+    id: "import",
     items: [
       {
         label: "menuImport",
@@ -67,7 +85,7 @@ export const cashierNavSections: NavSection[] = [
     ],
   },
   {
-    title: "Menu Control",
+    id: "menu",
     items: [
       {
         label: "Categories",
@@ -86,7 +104,32 @@ export const cashierNavSections: NavSection[] = [
         icon: MdOutlineTableBar,
         key: "tables",
         link: "table",
+        subgroup: "tableOps",
+        proFeature: true,
       },
+      {
+        label: "orders",
+        icon: IoReceiptOutline,
+        key: "orders",
+        link: "orders",
+        subgroup: "tableOps",
+        proFeature: true,
+        dynamicBadge: "pendingOrders",
+      },
+      {
+        label: "deliveryOrders",
+        icon: MdOutlineDeliveryDining,
+        key: "delivery-orders",
+        subgroup: "tableOps",
+        proFeature: true,
+        comingSoon: true,
+        badges: [{ label: "badgeSoon", variant: "soon" }],
+      },
+    ],
+  },
+  {
+    id: "activity",
+    items: [
       {
         label: "history",
         icon: IoTimeOutline,
@@ -99,7 +142,7 @@ export const cashierNavSections: NavSection[] = [
 
 export const navSections: NavSection[] = [
   {
-    title: "Overview",
+    id: "overview",
     items: [
       {
         label: "Overview",
@@ -116,7 +159,7 @@ export const navSections: NavSection[] = [
     ],
   },
   {
-    title: "Profile",
+    id: "account",
     items: [
       {
         label: "Personal",
@@ -133,7 +176,7 @@ export const navSections: NavSection[] = [
     ],
   },
   {
-    title: "Menu Import",
+    id: "import",
     items: [
       {
         label: "menuImport",
@@ -148,7 +191,7 @@ export const navSections: NavSection[] = [
     ],
   },
   {
-    title: "Menu Control",
+    id: "menu",
     items: [
       {
         label: "Categories",
@@ -167,30 +210,73 @@ export const navSections: NavSection[] = [
         icon: MdOutlineTableBar,
         key: "tables",
         link: "table",
+        subgroup: "tableOps",
+        proFeature: true,
+      },
+      {
+        label: "orders",
+        icon: IoReceiptOutline,
+        key: "orders",
+        link: "orders",
+        subgroup: "tableOps",
+        proFeature: true,
+        dynamicBadge: "pendingOrders",
+      },
+      {
+        label: "deliveryOrders",
+        icon: MdOutlineDeliveryDining,
+        key: "delivery-orders",
+        subgroup: "tableOps",
+        proFeature: true,
+        comingSoon: true,
+        badges: [{ label: "badgeSoon", variant: "soon" }],
       },
       {
         label: "staff",
         icon: MdPeopleOutline,
         key: "staff",
         link: "staff",
+        proFeature: true,
       },
-    ],
-  },
-  {
-    title: "Settings",
-    items: [
       {
         label: "Advertisements",
         icon: HiSpeakerphone,
         key: "advertisements",
         link: "advertisements",
+        proFeature: true,
       },
+    ],
+  },
+  {
+    id: "settings",
+    items: [
       {
-        label: "Settings",
+        label: "settingsGeneral",
         icon: FiSettings,
         key: "settings",
         link: "settings",
+        exactMatch: true,
+        navId: "onboarding-sidebar-settings-general",
       },
+      {
+        label: "settingsDesign",
+        icon: IoMdColorFill,
+        key: "settings-design",
+        link: "settings/design",
+        navId: "onboarding-sidebar-settings-design",
+      },
+      {
+        label: "settingsMedia",
+        icon: RiGlobalFill,
+        key: "settings-media",
+        link: "settings/media",
+        navId: "onboarding-sidebar-settings-media",
+      },
+    ],
+  },
+  {
+    id: "activity",
+    items: [
       {
         label: "history",
         icon: IoTimeOutline,
@@ -203,7 +289,7 @@ export const navSections: NavSection[] = [
 
 export const adminNavSections: NavSection[] = [
   {
-    title: "Overview",
+    id: "overview",
     items: [
       {
         label: "Overview",
@@ -220,7 +306,7 @@ export const adminNavSections: NavSection[] = [
     ],
   },
   {
-    title: "Profile",
+    id: "account",
     items: [
       {
         label: "Personal",
@@ -231,7 +317,7 @@ export const adminNavSections: NavSection[] = [
     ],
   },
   {
-    title: "control Panel",
+    id: "admin",
     items: [
       { label: "users", icon: FaUserAlt, key: "users", link: "users" },
       {

@@ -70,14 +70,6 @@ export default function MenuAnalyticsPage() {
             {isFreePlan ? t("freeSubtitle") : t("subtitle")}
           </p>
         </div>
-        {isFreePlan && (
-          <LinkTo
-            href={`/dashboard/${menuSlugOrId}/subscription`}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-medium text-sm hover:bg-primary/90 transition-all shrink-0"
-          >
-            {t("upgradeToPro")}
-          </LinkTo>
-        )}
       </header>
 
       <MenuProAnalytics

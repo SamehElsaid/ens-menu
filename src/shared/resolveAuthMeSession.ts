@@ -20,6 +20,7 @@ export type ResolvedAuthUser = {
   name?: string;
   role?: string;
   profileImage?: string;
+  onboardingCompleted?: boolean;
   [key: string]: unknown;
 };
 

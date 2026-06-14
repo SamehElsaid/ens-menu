@@ -182,9 +182,7 @@ function UserDropDown() {
         </button>
 
         <div
-          className={`absolute ${
-            locale === "ar" ? "left-0" : "right-0"
-          } mt-2 w-64 rounded-2xl border border-purple-100 dark:border-purple-500/30 bg-white dark:bg-slate-800 shadow-2xl backdrop-blur-xl duration-200 z-60 ${
+          className={`absolute end-0 mt-2 w-64 rounded-2xl border border-purple-100 dark:border-purple-500/30 bg-white dark:bg-slate-800 shadow-2xl backdrop-blur-xl duration-200 z-60 ${
             isProfileMenuOpen
               ? "visible translate-y-0 opacity-100"
               : "invisible -translate-y-2 opacity-0"
@@ -253,7 +251,7 @@ function UserDropDown() {
             <button
               type="button"
               onClick={handleLogout}
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium text-red-600 dark:text-red-400 transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-500/20"
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-start text-sm font-medium text-red-600 dark:text-red-400 transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-500/20"
             >
               <span className="text-base">
                 <FiLogOut />

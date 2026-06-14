@@ -36,7 +36,6 @@ import {
 import { useRouter } from "@/i18n/navigation";
 import Cookies from "js-cookie";
 import type { Subscription, SubscriptionResponse } from "@/types/Subscription";
-import { ONBOARDING_REFRESH_EVENT } from "@/lib/onboarding/onboardingStorage";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import CurrentPlanSummary from "@/components/Dashboard/CurrentPlanSummary";
 
@@ -202,11 +201,6 @@ export default function PersonalProfile({
       .finally(() => setSubscriptionInfoLoading(false));
   }, [locale, authData?.user, t]);
 
-  useEffect(() => {
-    if (authData?.user) {
-      window.dispatchEvent(new Event(ONBOARDING_REFRESH_EVENT));
-    }
-  }, [authData?.user]);
 
   // Revoke blob URL on unmount or when profileImage changes to avoid memory leaks
   useEffect(() => {

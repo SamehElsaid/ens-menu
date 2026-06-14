@@ -1,0 +1,101 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+import { Advertisement } from "@/types/Menu";
+import AdCard from "./AdCard";
+import MobileListPagination from "@/components/Dashboard/mobile/MobileListPagination";
+
+function AdCardSkeleton() {
+  return (
+    <div
+      className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800/80"
+      aria-hidden
+    >
+      <div className="dashboard-mobile-shimmer aspect-video w-full bg-slate-100 dark:bg-slate-700/60" />
+      <div className="space-y-3 p-4">
+        <div className="dashboard-mobile-shimmer h-6 w-2/3 rounded-md bg-slate-100 dark:bg-slate-700/60" />
+        <div className="dashboard-mobile-shimmer h-4 w-full rounded-md bg-slate-100 dark:bg-slate-700/60" />
+        <div className="grid grid-cols-3 gap-1.5">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="dashboard-mobile-shimmer h-12 rounded-xl bg-slate-100 dark:bg-slate-700/60"
+            />
+          ))}
+        </div>
+        <div className="flex gap-2 border-t border-slate-100 pt-3 dark:border-slate-700">
+          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-xl bg-slate-100 dark:bg-slate-700/60" />
+          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-xl bg-slate-100 dark:bg-slate-700/60" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface AdsCardGridProps {
+  ads: Advertisement[];
+  loading: boolean;
+  locale: string;
+  page: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  getTitle: (ad: Advertisement) => string;
+  getContent: (ad: Advertisement) => string;
+  onEdit: (ad: Advertisement) => void;
+  onDelete: (ad: Advertisement) => void;
+}
+
+export default function AdsCardGrid({
+  ads,
+  loading,
+  locale,
+  page,
+  totalPages,
+  onPageChange,
+  getTitle,
+  getContent,
+  onEdit,
+  onDelete,
+}: AdsCardGridProps) {
+  const t = useTranslations("Advertisements.page");
+
+  if (loading) {
+    return (
+      <div
+        id="onboarding-advertisements-table"
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6"
+        aria-busy="true"
+        aria-label={t("loading")}
+      >
+        {Array.from({ length: 8 }).map((_, i) => (
+          <AdCardSkeleton key={i} />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div id="onboarding-advertisements-table" className="space-y-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6 items-stretch">
+        {ads.map((ad) => (
+          <AdCard
+            key={ad.id ?? `${getTitle(ad)}-${ad.createdAt}`}
+            ad={ad}
+            locale={locale}
+            title={getTitle(ad)}
+            contentPreview={getContent(ad)}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        ))}
+      </div>
+
+      <MobileListPagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+        locale={locale}
+      />
+    </div>
+  );
+}

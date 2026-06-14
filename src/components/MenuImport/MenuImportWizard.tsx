@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "react-toastify";
-import LinkTo from "@/components/Global/LinkTo";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import { useAppSelector } from "@/store/hooks";
 import { useMenuImportFlow } from "@/hooks/useMenuImportFlow";
@@ -20,6 +19,7 @@ import {
 } from "@/lib/menuImport/constants";
 import { formatImageSizeLog } from "@/lib/menuImport/formatImageSize";
 import { IoArrowBackOutline } from "react-icons/io5";
+import { useCompleteAiImportOnboarding } from "@/hooks/useCompleteAiImportOnboarding";
 
 export default function MenuImportWizard() {
   const t = useTranslations("MenuImport");
@@ -35,8 +35,33 @@ export default function MenuImportWizard() {
 
   const flow = useMenuImportFlow({ menuId, currency, locale });
   const { state } = flow;
+  const { isOnboarding, completeOnboarding, leaveOnboarding, skipOnboarding } =
+    useCompleteAiImportOnboarding(menuId);
 
   const [isPreparingImage, setIsPreparingImage] = useState(false);
+  const prevStepRef = useRef(state.step);
+  const savedScrollYRef = useRef(0);
+
+  useEffect(() => {
+    const syncScroll = () => {
+      savedScrollYRef.current = window.scrollY;
+    };
+    syncScroll();
+    window.addEventListener("scroll", syncScroll, { passive: true });
+    return () => window.removeEventListener("scroll", syncScroll);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (prevStepRef.current === state.step) return;
+    prevStepRef.current = state.step;
+    const y = savedScrollYRef.current;
+    window.scrollTo({ top: y, left: 0, behavior: "auto" });
+  }, [state.step]);
+
+  useEffect(() => {
+    if (!state.saveResult || !isOnboarding) return;
+    void completeOnboarding();
+  }, [state.saveResult, isOnboarding, completeOnboarding]);
 
   const handleFileSelect = useCallback(
     async (file: File) => {
@@ -80,16 +105,17 @@ export default function MenuImportWizard() {
   }, [flow]);
 
   return (
-    <div className="space-y-8 pb-10 animate-fadeIn">
+    <div className="mobile-stack pb-8 sm:pb-10 animate-fadeIn">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
-          <LinkTo
-            href={`/dashboard/${menuId}`}
+          <button
+            type="button"
+            onClick={() => void leaveOnboarding()}
             className="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-primary mb-3 transition-colors"
           >
             <IoArrowBackOutline className="text-lg" />
             {t("backToOverview")}
-          </LinkTo>
+          </button>
           <PageTitleWithHelp>
             <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100">
               {t("pageTitle")}
@@ -101,10 +127,10 @@ export default function MenuImportWizard() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 md:p-8">
+      <div className="mobile-card shadow-sm dark:bg-slate-800">
         <ImportStepper currentStep={state.step} />
 
-        <div className="mt-8">
+        <div className="mt-6 sm:mt-8">
           {state.step === "upload" && (
             <UploadStep
               file={state.file}
@@ -114,6 +140,8 @@ export default function MenuImportWizard() {
               onAnalyze={flow.startAnalysis}
               isProcessing={state.isProcessing}
               isPreparing={isPreparingImage}
+              showSkip={isOnboarding}
+              onSkip={() => void skipOnboarding()}
             />
           )}
 

@@ -23,7 +23,6 @@ import type {
 } from "@/types/MenuAnalytics";
 import {
   IoEyeOutline,
-  IoLockClosedOutline,
   IoReceiptOutline,
   IoStatsChartOutline,
   IoDownloadOutline,
@@ -313,41 +312,6 @@ function RevenueBarChart({
           </span>
         </div>
       ))}
-    </div>
-  );
-}
-
-function ProUpgradeCard({
-  menuSlugOrId,
-  dir,
-}: {
-  menuSlugOrId: string;
-  dir: "rtl" | "ltr";
-}) {
-  const t = useTranslations("menuOverview");
-
-  return (
-    <div
-      dir={dir}
-      className="rounded-2xl border border-dashed border-primary/30 dark:border-primary/40 bg-primary/5 dark:bg-primary/10 p-6 flex flex-col sm:flex-row sm:items-center gap-4"
-    >
-      <div className="w-12 h-12 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary shrink-0">
-        <IoLockClosedOutline className="text-2xl" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-1">
-          {t("proAnalyticsLockedTitle")}
-        </h3>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          {t("proAnalyticsLockedDescription")}
-        </p>
-      </div>
-      <LinkTo
-        href={`/dashboard/${menuSlugOrId}/subscription`}
-        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-medium text-sm hover:bg-primary/90 transition-all shrink-0"
-      >
-        {t("upgradeToPro")}
-      </LinkTo>
     </div>
   );
 }
@@ -669,7 +633,9 @@ export default function MenuProAnalytics({
           <DemoDataBanner message={t("demoDataBanner")} dir={textDir} />
         )}
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div
+          className={`grid grid-cols-1 gap-4 ${isFreePlan ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}
+        >
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5">
             <AdminMetricsGrid
               items={quickSummaryMetrics}
@@ -689,7 +655,7 @@ export default function MenuProAnalytics({
             />
           </div>
 
-          {!isFreePlan ? (
+          {!isFreePlan && (
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5">
               <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">
                 {t("topOrderedItems")}
@@ -699,21 +665,6 @@ export default function MenuProAnalytics({
                 dir={textDir}
                 emptyMessage={t("noOrderData")}
               />
-            </div>
-          ) : (
-            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 flex flex-col justify-center">
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">
-                {t("freePlanLimit7d")}
-              </p>
-              <p className="text-sm text-slate-600 dark:text-slate-300 mb-3">
-                {t("proAnalyticsLockedDescription")}
-              </p>
-              <LinkTo
-                href={`/dashboard/${menuSlugOrId}/subscription`}
-                className="text-sm font-medium text-primary hover:underline"
-              >
-                {t("upgradeToPro")}
-              </LinkTo>
             </div>
           )}
         </div>
@@ -771,8 +722,6 @@ export default function MenuProAnalytics({
             emptyMessage={t("noVisitData")}
           />
         </SectionCard>
-
-        <ProUpgradeCard menuSlugOrId={menuSlugOrId} dir={textDir} />
       </div>
     );
   }

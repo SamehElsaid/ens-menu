@@ -1,57 +1,20 @@
 "use client";
 
-import {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  type MouseEvent,
-} from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { axiosGet } from "@/shared/axiosCall";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import AddTableModal from "@/components/Dashboard/AddTableModal";
 import DeleteTableConfirm from "@/components/Dashboard/DeleteTableConfirm";
-import DataTable from "@/components/Custom/DataTable";
+import TablesCardGrid from "@/components/Dashboard/tables/TablesCardGrid";
 import LinkTo from "@/components/Global/LinkTo";
 import { MenuTable } from "@/types/Menu";
 import { useAppSelector } from "@/store/hooks";
 import { isFreePlanUser } from "@/lib/subscription";
-import { toast } from "react-toastify";
-import {
-  StyledQrCode,
-  downloadStyledQrPng,
-} from "@/components/Global/StyledQrCode";
-import {
-  IoAddCircleOutline,
-  IoCopyOutline,
-  IoDownloadOutline,
-  IoEllipseSharp,
-  IoCreateOutline,
-  IoTrashOutline,
-} from "react-icons/io5";
-
-import {
-  publicMenuQrUrl,
-  resolvePublicMenuSlug,
-} from "@/lib/publicMenuUrl";
+import { IoAddCircleOutline, IoArrowBackOutline } from "react-icons/io5";
+import { resolvePublicMenuSlug } from "@/lib/publicMenuUrl";
 import { resolveMenuItemImageSrc } from "@/components/menuItemImage";
-
-function tablePublicMenuUrl(
-  slug: string | undefined | null,
-  tableNumber: string,
-): string {
-  return publicMenuQrUrl(slug, { table: tableNumber });
-}
-
-function safeTableFilenameSegment(tableNumber: string): string {
-  return String(tableNumber)
-    .replace(/[\\/:*?"<>|]/g, "-")
-    .trim()
-    .slice(0, 80) || "table";
-}
 
 export default function TablesPage() {
   const t = useTranslations("Tables");
@@ -126,165 +89,10 @@ export default function TablesPage() {
     setEditingTable(null);
   }, []);
 
-  const columnDefs = useMemo<ColDef<MenuTable>[]>(
-    () => [
-      {
-        headerName: t("tableNumber"),
-        field: "tableNumber",
-        flex: 1,
-        minWidth: 120,
-        cellRenderer: (params: ICellRendererParams<MenuTable>) => (
-          <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100">
-            {params.data?.tableNumber ?? "—"}
-          </h3>
-        ),
-      },
-      {
-        headerName: t("status"),
-        field: "isActive",
-        width: 120,
-        cellRenderer: (params: ICellRendererParams<MenuTable>) => {
-          const row = params.data;
-          if (!row) return null;
-          const active = row.isActive;
-          return (
-            <span
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
-                active
-                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-                  : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
-              }`}
-            >
-              <IoEllipseSharp
-                className={`text-[8px] ${active ? "text-green-500 dark:text-green-400" : "text-amber-500 dark:text-amber-400"}`}
-              />
-              {active ? t("active") : t("inactive")}
-            </span>
-          );
-        },
-      },
-      {
-        headerName: t("qrCode"),
-        field: "tableNumber",
-        width: 172,
-        sortable: false,
-        cellRenderer: (params: ICellRendererParams<MenuTable>) => {
-          const row = params.data;
-          if (!row?.tableNumber) return null;
-          const url = tablePublicMenuUrl(menuSlug, row.tableNumber);
-          if (!url) {
-            return (
-              <span
-                className="text-xs text-slate-500 dark:text-slate-400 leading-snug max-w-36"
-                title={t("noMenuUrl")}
-              >
-                —
-              </span>
-            );
-          }
-          const copy = () => {
-            void navigator.clipboard.writeText(url).then(() => {
-              toast.success(t("linkCopied"));
-            });
-          };
-          const download = (e: MouseEvent<HTMLButtonElement>) => {
-            e.stopPropagation();
-            const name = `table-${safeTableFilenameSegment(row.tableNumber)}-qr.png`;
-            void downloadStyledQrPng({
-              value: url,
-              filename: name,
-              size: 640,
-              centerLogoSrc: qrCenterLogoSrc,
-            }).then(() => {
-              toast.success(t("qrDownloaded"));
-            });
-          };
-          return (
-            <div className="flex items-center gap-2 py-1">
-              <div className="flex flex-col items-center gap-0.5 shrink-0">
-                <a
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden bg-white"
-                  title={t("qrOpensMenu")}
-                >
-                  <StyledQrCode
-                    value={url}
-                    size={128}
-                    displaySize={64}
-                    centerLogoSrc={qrCenterLogoSrc}
-                  />
-                </a>
-                <span className="text-[9px] text-slate-400 dark:text-slate-500 leading-none text-center max-w-[72px]">
-                  powered by ensmenu
-                </span>
-              </div>
-              <div className="flex flex-col gap-1 shrink-0">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    copy();
-                  }}
-                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-primary/30"
-                  title={t("copyMenuLink")}
-                  aria-label={t("copyMenuLink")}
-                >
-                  <IoCopyOutline className="text-lg" />
-                </button>
-                <button
-                  type="button"
-                  onClick={download}
-                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-primary/30"
-                  title={t("downloadQrImage")}
-                  aria-label={t("downloadQrImage")}
-                >
-                  <IoDownloadOutline className="text-lg" />
-                </button>
-              </div>
-            </div>
-          );
-        },
-      },
-      {
-        headerName: t("action"),
-        width: 120,
-        sortable: false,
-        cellRenderer: (params: ICellRendererParams<MenuTable>) => {
-          const row = params.data;
-          if (!row) return null;
-          return (
-            <div className="flex items-center gap-2 h-full">
-              <button
-                type="button"
-                title={t("edit")}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEdit(row);
-                }}
-                className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-primary/30 dark:hover:border-primary/50 hover:text-primary transition-colors"
-              >
-                <IoCreateOutline className="text-lg" />
-              </button>
-              <button
-                type="button"
-                title={t("delete")}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(row);
-                }}
-                className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-red-50 dark:hover:bg-red-900/30 hover:border-red-200 dark:hover:border-red-800 hover:text-red-600 dark:hover:text-red-300 transition-colors"
-              >
-                <IoTrashOutline className="text-lg" />
-              </button>
-            </div>
-          );
-        },
-      },
-    ],
-    [t, handleEdit, handleDelete, menuSlug, qrCenterLogoSrc],
-  );
+  const openAddModal = useCallback(() => {
+    setEditingTable(null);
+    setShowAddModal(true);
+  }, []);
 
   if (isFreePlan) {
     const title =
@@ -300,17 +108,19 @@ export default function TablesPage() {
     return (
       <div
         id="onboarding-tables-upgrade"
-        className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4"
+        className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4 text-center md:min-h-[60vh] md:gap-4"
       >
         <PageTitleWithHelp className="justify-center">
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100">
+          <h1 className="text-xl font-bold text-slate-800 sm:text-2xl md:text-3xl dark:text-slate-100">
             {title}
           </h1>
         </PageTitleWithHelp>
-        <p className="max-w-md text-slate-500 dark:text-slate-400">{description}</p>
+        <p className="max-w-md text-sm text-slate-500 md:text-base dark:text-slate-400">
+          {description}
+        </p>
         <LinkTo
           href={`/dashboard/${menuId}/subscription`}
-          className="mt-4 inline-flex items-center justify-center gap-2 px-8 py-3 bg-linear-to-r from-primary to-primary/80 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+          className="mt-2 inline-flex items-center justify-center gap-2 rounded-2xl bg-linear-to-r from-primary to-primary/80 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] md:mt-4 md:px-8"
         >
           {buttonLabel}
         </LinkTo>
@@ -320,51 +130,58 @@ export default function TablesPage() {
 
   return (
     <>
-      <div
-        id="onboarding-tables-header"
-        className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8"
-      >
-        <div>
-          <PageTitleWithHelp>
-            <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
-              {t("title")}
-            </h1>
-          </PageTitleWithHelp>
-          <p className="text-slate-500 mt-1 dark:text-slate-400">
-            {t("subtitle")}
-          </p>
-        </div>
-        <div id="onboarding-tables-actions" className="flex flex-wrap items-center gap-3">
-          <LinkTo
-            href={`/dashboard/${menuId}`}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-primary/30 dark:hover:border-primary/50 text-sm font-medium transition-all"
-          >
-            {tStaff("backToOverview")}
-          </LinkTo>
+      <div id="onboarding-tables-header" className="dashboard-tables-header mb-5 min-w-0 md:mb-6">
+        <LinkTo
+          href={`/dashboard/${menuId}`}
+          className="mb-3 inline-flex items-center gap-1 text-xs font-medium text-slate-500 transition-colors hover:text-primary dark:text-slate-400 dark:hover:text-primary"
+        >
+          <IoArrowBackOutline className="text-sm rtl:rotate-180" aria-hidden />
+          {tStaff("backToOverview")}
+        </LinkTo>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div className="min-w-0 flex-1">
+            <PageTitleWithHelp>
+              <h1 className="text-xl font-bold text-slate-800 sm:text-2xl md:text-3xl dark:text-slate-100">
+                {t("title")}
+              </h1>
+            </PageTitleWithHelp>
+            <p className="mt-0.5 text-sm text-slate-500 md:mt-1 dark:text-slate-400">
+              {t("subtitle")}
+            </p>
+            {!loading && tables.length > 0 && (
+              <p className="mt-2 text-xs font-medium text-slate-400 dark:text-slate-500">
+                {t("totalTablesLabel")}:{" "}
+                <span className="font-bold tabular-nums text-slate-700 dark:text-slate-300">
+                  {tables.length}
+                </span>
+              </p>
+            )}
+          </div>
+
           <button
+            id="onboarding-tables-actions"
             type="button"
-            onClick={() => {
-              setEditingTable(null);
-              setShowAddModal(true);
-            }}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold shadow-lg hover:opacity-90 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            onClick={openAddModal}
+            className="inline-flex h-10 shrink-0 items-center justify-center gap-2 self-start rounded-xl bg-primary px-4 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] sm:h-11 sm:px-5"
           >
-            <IoAddCircleOutline className="text-xl" />
+            <IoAddCircleOutline className="text-lg" aria-hidden />
             {t("addTable")}
           </button>
         </div>
       </div>
 
-      <div id="onboarding-tables-table">
-      <DataTable<MenuTable>
-        rowData={tables}
-        columnDefs={columnDefs}
-        loading={loading}
-        locale={locale}
-        showRowNumbers={true}
-        pagination={true}
-        paginationPageSize={10}
-      />
+      <div id="onboarding-tables-table" className="dashboard-tables-page min-w-0 pb-6">
+        <TablesCardGrid
+          tables={tables}
+          loading={loading}
+          locale={locale}
+          menuSlug={menuSlug}
+          qrCenterLogoSrc={qrCenterLogoSrc}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onAdd={openAddModal}
+        />
       </div>
 
       {(showAddModal || editingTable) && menuId && (
@@ -385,7 +202,6 @@ export default function TablesPage() {
           onDeleted={refreshList}
         />
       )}
-      <div className="pb-10" />
     </>
   );
 }
