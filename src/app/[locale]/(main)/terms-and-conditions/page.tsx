@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import FooterSection from "@/components/HomePage/Footer";
 import LegalPageView, {
   type LegalDocument,
 } from "@/components/Legal/LegalPageView";
@@ -39,7 +38,6 @@ export default async function TermsAndConditionsPage({ params }: Props) {
         contactCta={t("contactCta")}
         showStickyCta={false}
       />
-      <FooterSection />
     </>
   );
 }

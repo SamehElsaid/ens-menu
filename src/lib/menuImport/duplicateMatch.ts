@@ -296,6 +296,46 @@ export function collectUnresolvedPriceConflicts(
   return unresolved;
 }
 
+export function collectPriceConflictRefIds(draft: ImportDraft): string[] {
+  const refIds: string[] = [];
+
+  for (const category of draft.categories) {
+    for (const item of category.items) {
+      if (item.variants.length > 0) {
+        for (const variant of item.variants) {
+          if (variant.flags.includes("price_conflict")) {
+            refIds.push(variant.id);
+          }
+        }
+      } else if (item.flags.includes("price_conflict")) {
+        refIds.push(item.id);
+      }
+    }
+  }
+
+  return refIds;
+}
+
+export function collectExactDuplicateRefIds(draft: ImportDraft): string[] {
+  const refIds: string[] = [];
+
+  for (const category of draft.categories) {
+    for (const item of category.items) {
+      if (item.variants.length > 0) {
+        for (const variant of item.variants) {
+          if (variant.duplicateMeta?.status === "exact_duplicate") {
+            refIds.push(variant.id);
+          }
+        }
+      } else if (item.duplicateMeta?.status === "exact_duplicate") {
+        refIds.push(item.id);
+      }
+    }
+  }
+
+  return refIds;
+}
+
 export function countDuplicateStats(draft: ImportDraft) {
   let exactDuplicates = 0;
   let priceConflicts = 0;

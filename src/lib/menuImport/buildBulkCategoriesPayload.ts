@@ -31,6 +31,9 @@ function toBulkItem(saveItem: ExpandedSaveItem): BulkImportItem {
     ...(descriptionEn ? { descriptionEn } : {}),
     price: saveItem.price,
     isAvailable: saveItem.isAvailable,
+    ...(saveItem.imageUrl
+      ? { imageUrl: saveItem.imageUrl, image: saveItem.imageUrl }
+      : {}),
   };
 }
 

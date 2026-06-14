@@ -82,8 +82,8 @@ function BrandBlock({
         <p
           className={`brand-tagline-shimmer mt-0.5 font-medium leading-snug tracking-wide ${
             isMobileLogo
-              ? "max-w-[11rem] text-[9px]"
-              : "max-w-[13rem] text-[10px] sm:text-[11px]"
+              ? "max-w-44 text-[9px]"
+              : "max-w-52 text-[10px] sm:text-[11px]"
           }`}
         >
           {aiBadge}

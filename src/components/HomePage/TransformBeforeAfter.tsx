@@ -22,10 +22,10 @@ type TransformBeforeAfterProps = {
 
 function PaperMenuVisual({ alt }: { alt: string }) {
   return (
-    <div className="transform-paper-stage relative mx-auto w-full max-w-[19rem] sm:max-w-[21rem]">
+    <div className="transform-paper-stage relative mx-auto w-full max-w-76 sm:max-w-84">
       <div
         aria-hidden
-        className="transform-paper-glow pointer-events-none absolute -inset-4 rounded-[2rem] bg-amber-500/12 blur-3xl dark:bg-amber-600/8"
+        className="transform-paper-glow pointer-events-none absolute -inset-4 rounded-4xl bg-amber-500/12 blur-3xl dark:bg-amber-600/8"
       />
 
       <div className="transform-paper-table relative overflow-hidden rounded-[1.15rem] border border-amber-900/10 px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_20px_50px_-28px_rgba(61,43,31,0.55)] sm:px-5 sm:py-6 dark:border-amber-500/10">
@@ -40,10 +40,10 @@ function PaperMenuVisual({ alt }: { alt: string }) {
 
         <div
           aria-hidden
-          className="transform-paper-back absolute inset-x-[14%] top-[14%] h-[78%] rotate-[6deg] rounded-[3px] bg-[#ebe4d8]/90 shadow-[0_4px_14px_-6px_rgba(15,23,42,0.35)] dark:bg-[#2e2b27]"
+          className="transform-paper-back absolute inset-x-[14%] top-[14%] h-[78%] rotate-6 rounded-[3px] bg-[#ebe4d8]/90 shadow-[0_4px_14px_-6px_rgba(15,23,42,0.35)] dark:bg-[#2e2b27]"
         />
 
-        <div className="transform-paper-sheet relative mx-auto w-[90%] max-w-[15.5rem] sm:max-w-[16.5rem]">
+        <div className="transform-paper-sheet relative mx-auto w-[90%] max-w-62 sm:max-w-66">
           <div
             aria-hidden
             className="transform-paper-stain pointer-events-none absolute bottom-[14%] start-[8%] z-10 h-12 w-16 rounded-full bg-amber-950/20 blur-md"
@@ -74,7 +74,7 @@ function PaperMenuVisual({ alt }: { alt: string }) {
             />
             <div
               aria-hidden
-              className="pointer-events-none absolute end-0 top-0 h-[2.25rem] w-[2.25rem] bg-gradient-to-bl from-white/25 via-transparent to-transparent"
+              className="pointer-events-none absolute end-0 top-0 h-9 w-9 bg-linear-to-bl from-white/25 via-transparent to-transparent"
             />
           </div>
         </div>
@@ -98,7 +98,7 @@ function SmartMenuVisual({
   addLabel: string;
 }) {
   return (
-    <div className="transform-smart-scene relative mx-auto w-full max-w-[15.5rem] sm:max-w-[17rem]">
+    <div className="transform-smart-scene relative mx-auto w-full max-w-62 sm:max-w-68">
       <CtaPhoneMockup
         restaurantName={restaurantName}
         items={menuItems}
@@ -137,7 +137,7 @@ function PainPointList({
         >
           <span
             className={cn(
-              "mt-0.5 flex h-[1.125rem] w-[1.125rem] shrink-0 items-center justify-center rounded-full",
+              "mt-0.5 flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full",
               isBefore
                 ? "bg-slate-200/80 text-slate-500 dark:bg-slate-800"
                 : "bg-purple-100 text-purple-600 dark:bg-purple-500/15 dark:text-purple-400",
@@ -173,7 +173,7 @@ export default function TransformBeforeAfter({
         <span className="text-sm rtl:rotate-180">→</span>
       </div>
 
-      <article className="transform-panel transform-panel--before flex flex-col overflow-hidden rounded-[1.25rem] border border-amber-200/40 bg-gradient-to-b from-amber-50/40 to-slate-50/60 shadow-[0_4px_24px_-16px_rgba(120,80,40,0.12)] dark:border-amber-500/10 dark:from-amber-950/10 dark:to-slate-900/25">
+      <article className="transform-panel transform-panel--before flex flex-col overflow-hidden rounded-[1.25rem] border border-amber-200/40 bg-linear-to-b from-amber-50/40 to-slate-50/60 shadow-[0_4px_24px_-16px_rgba(120,80,40,0.12)] dark:border-amber-500/10 dark:from-amber-950/10 dark:to-slate-900/25">
         <div className="border-b border-amber-200/35 px-5 py-3 dark:border-amber-500/10">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100/90 px-3 py-0.5 text-xs font-semibold text-amber-900/80 dark:bg-amber-500/10 dark:text-amber-200/80">
             <FiX size={12} />
@@ -181,7 +181,7 @@ export default function TransformBeforeAfter({
           </span>
         </div>
         <div className="flex flex-1 flex-col gap-4 p-4 sm:gap-5 sm:p-6">
-          <div className="flex items-center justify-center py-2 sm:min-h-[14.5rem] sm:py-0 lg:min-h-[16rem]">
+          <div className="flex items-center justify-center py-2 sm:min-h-58 sm:py-0 lg:min-h-64">
             <PaperMenuVisual alt={paperMenuAlt} />
           </div>
           <PainPointList items={beforeItems} variant="before" />
@@ -199,7 +199,7 @@ export default function TransformBeforeAfter({
           </span>
         </div>
         <div className="flex flex-1 flex-col gap-4 overflow-visible p-4 sm:gap-5 sm:p-6">
-          <div className="flex items-center justify-center overflow-visible py-2 sm:min-h-[14rem] sm:py-1 lg:min-h-[16rem]">
+          <div className="flex items-center justify-center overflow-visible py-2 sm:min-h-56 sm:py-1 lg:min-h-64">
             <SmartMenuVisual
               restaurantName={restaurantName}
               menuItems={menuItems}

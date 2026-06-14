@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Logo } from "@/components/Global/Logo";
 import PoweredByEnsEg from "@/components/Global/PoweredByEnsEg";
 import LegalNavLink from "@/components/Legal/LegalNavLink";
+import { MarketingButtonLink } from "@/components/marketing";
 import { getSocialLinks } from "@/modules/Footer";
 
 export default function HomeMinimalFooter() {
@@ -20,7 +21,7 @@ export default function HomeMinimalFooter() {
   );
 
   const links = [
-    { name: t("linkContact"), path: "/contact" as const },
+    { name: t("linkAbout"), path: "/about" as const },
     { name: t("privacy"), path: "/privacy-policy" as const },
     { name: t("terms"), path: "/terms-and-conditions" as const },
   ];
@@ -56,6 +57,8 @@ export default function HomeMinimalFooter() {
           </div>
         </div>
 
+      
+
         <div className="mx-auto mt-3 flex max-w-md flex-col items-center text-center sm:mt-6">
           <div className="home-minimal-footer__brand">
             <Logo size="compact" variant="white" />
@@ -68,6 +71,15 @@ export default function HomeMinimalFooter() {
           <p className="mt-2 text-[10px] text-slate-500 sm:mt-5 sm:text-[11px]">
             © {currentYear} ENSMENU · {t("copyright")}
           </p>
+        </div>
+        <div className="mt-3 flex justify-center sm:mt-4">
+          <MarketingButtonLink
+            href="/contact"
+            variant="compact"
+            className="home-minimal-footer__contact-btn min-w-[10.5rem] px-5 py-2.5 text-[13px] shadow-[0_8px_24px_-8px_rgba(124,58,237,0.55)] hover:scale-[1.02]"
+          >
+            {t("linkContact")}
+          </MarketingButtonLink>
         </div>
       </div>
     </footer>

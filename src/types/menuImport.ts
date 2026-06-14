@@ -171,6 +171,8 @@ export interface BulkImportItem {
   descriptionEn?: string;
   price: number;
   isAvailable: boolean;
+  imageUrl?: string;
+  image?: string;
 }
 
 export interface BulkImportCategory {

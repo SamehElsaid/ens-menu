@@ -1,44 +1,9 @@
 import type { Metadata } from "next";
-import dynamic from "next/dynamic";
 import { getTranslations } from "next-intl/server";
 import { buildSeoMetadata } from "@/lib/seo";
 import HeroContent from "@/components/HomePage/HeroContent";
 import TransformShowcaseSection from "@/components/HomePage/TransformShowcaseSection";
-import TrustedBySection from "@/components/HomePage/TrustedBySection";
-import SectionSkeleton from "@/components/HomePage/SectionSkeleton";
-import ChatWidget from "@/components/ChatWidget";
-
-const dynamicSection = (factory: () => Promise<unknown>, height: string) =>
-  dynamic(() => factory() as Promise<{ default: React.ComponentType }>, {
-    loading: () => <SectionSkeleton height={height} />,
-  });
-
-const TemplateShow = dynamicSection(
-  () => import("@/components/HomePage/TemplateShow"),
-  "640px",
-);
-
-const PhoneVideoSection = dynamicSection(
-  () => import("@/components/HomePage/PhoneVideoSection"),
-  "720px",
-);
-
-const Features = dynamicSection(
-  () => import("@/components/HomePage/FeatureSection"),
-  "520px",
-);
-
-const HowItWorks = dynamicSection(
-  () => import("@/components/HomePage/HowItWorks"),
-  "480px",
-);
-
-const FAQ = dynamicSection(() => import("@/components/HomePage/FAQ"), "420px");
-
-const FooterSection = dynamicSection(
-  () => import("@/components/HomePage/Footer"),
-  "320px",
-);
+import HomeCTASection from "@/components/HomePage/HomeCTASection";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -64,13 +29,8 @@ async function Page({ params }: Props) {
     <>
       <HeroContent locale={locale} />
       <TransformShowcaseSection locale={locale} />
-      {/* <TemplateShow /> */}
-      {/* <TrustedBySection /> */}
-      <PhoneVideoSection />
-      <Features />
-      {/* <HowItWorks /> */}
-      <FAQ />
-      <FooterSection />
+      <HomeCTASection locale={locale} />
+
     </>
   );
 }

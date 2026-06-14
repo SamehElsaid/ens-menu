@@ -4,7 +4,7 @@ import SafeLink from "@/components/Global/SafeLink";
 import { usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 
-type LegalNavHref = "/contact" | "/privacy-policy" | "/terms-and-conditions";
+type LegalNavHref = "/about" | "/contact" | "/privacy-policy" | "/terms-and-conditions";
 
 type LegalNavLinkProps = {
   href: LegalNavHref;

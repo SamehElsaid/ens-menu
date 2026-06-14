@@ -478,7 +478,7 @@ export default function PricingComparisonPage() {
 
   return (
     <div
-      className="pricing-page relative overflow-hidden bg-[#f8f9fc] pb-28 pt-14 dark:bg-[#070a0f] md:pb-32 md:pt-24 lg:py-32"
+      className="pricing-page relative min-h-0 overflow-x-clip overflow-y-visible bg-[#f8f9fc] pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))] pt-14 dark:bg-[#070a0f] md:overflow-hidden md:pb-32 md:pt-24 lg:min-h-screen lg:py-32"
       dir={isRTL ? "rtl" : "ltr"}
     >
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -786,10 +786,10 @@ export default function PricingComparisonPage() {
         </section>
       </div>
 
-      <div className="pricing-mobile-sticky-cta fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/90 bg-white/95 p-4 backdrop-blur-md dark:border-slate-800 dark:bg-[#070a0f]/95 md:hidden">
+      <div className="pricing-mobile-sticky-cta pointer-events-none fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/90 bg-white/95 p-4 backdrop-blur-md dark:border-slate-800 dark:bg-[#070a0f]/95 md:hidden">
         <Link
           href="/auth/register"
-          className="flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-linear-to-br from-violet-500 to-indigo-600 text-base font-bold text-white shadow-lg shadow-violet-500/25"
+          className="pointer-events-auto flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-linear-to-br from-violet-500 to-indigo-600 text-base font-bold text-white shadow-lg shadow-violet-500/25"
         >
           {t("mobileStickyCta")}
         </Link>

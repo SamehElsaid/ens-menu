@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { ImportDraft, ImportError } from "@/types/menuImport";
 import type { SaveBlockingError } from "@/types/menuImport";
@@ -8,12 +8,21 @@ import ReviewCategoryBlock from "../review/ReviewCategoryBlock";
 import ConfirmSavePanel from "../review/ConfirmSavePanel";
 import SaveResultPanel from "../review/SaveResultPanel";
 import SaveProgressOverlay from "../shared/SaveProgressOverlay";
-import { countDuplicateStats } from "@/lib/menuImport/duplicateMatch";
 import {
-  focusFirstMissingField,
-  importRefDomId,
-} from "@/lib/menuImport/importRefDomId";
+  collectExactDuplicateRefIds,
+  collectPriceConflictRefIds,
+  countDuplicateStats,
+} from "@/lib/menuImport/duplicateMatch";
+import { expandItemForSave } from "@/lib/menuImport/draftSaveUtils";
+import { scrollToImportRef } from "@/lib/menuImport/importRefDomId";
 import { IoAddCircleOutline } from "react-icons/io5";
+
+const STAT_BADGE_NEUTRAL =
+  "px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors cursor-pointer";
+const STAT_BADGE_WARNING =
+  "px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 font-medium hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors cursor-pointer";
+const WARNING_BLOCK =
+  "w-full text-start p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-sm text-amber-800 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors cursor-pointer";
 
 interface ReviewStepProps {
   draft: ImportDraft;
@@ -106,47 +115,64 @@ export default function ReviewStep({
   const [scrollTargetRefId, setScrollTargetRefId] = useState<string | null>(
     null,
   );
-  const nameErrorIndexRef = useRef(0);
+  const scrollIndexRef = useRef<Record<string, number>>({});
 
-  const scrollToNameError = (index?: number) => {
-    if (blockingNameErrors.length === 0) return;
+  const categoryRefIds = useMemo(
+    () => draft.categories.map((category) => category.id),
+    [draft.categories],
+  );
+  const itemRefIds = useMemo(
+    () =>
+      draft.categories.flatMap((category) =>
+        category.items.map((item) => item.id),
+      ),
+    [draft.categories],
+  );
+  const expandedItemRefIds = useMemo(
+    () =>
+      draft.categories.flatMap((category) =>
+        category.items.flatMap((item) =>
+          expandItemForSave(item).map((saveItem) => saveItem.refId),
+        ),
+      ),
+    [draft.categories],
+  );
+  const priceConflictRefIds = useMemo(
+    () => collectPriceConflictRefIds(draft),
+    [draft],
+  );
+  const exactDuplicateRefIds = useMemo(
+    () => collectExactDuplicateRefIds(draft),
+    [draft],
+  );
+  const missingPriceRefIds = useMemo(
+    () => blockingPriceErrors.map((error) => error.refId),
+    [blockingPriceErrors],
+  );
+  const missingNameRefIds = useMemo(
+    () => blockingNameErrors.map((error) => error.refId),
+    [blockingNameErrors],
+  );
+  const unresolvedConflictRefIds = useMemo(
+    () => unresolvedPriceConflicts.map((conflict) => conflict.refId),
+    [unresolvedPriceConflicts],
+  );
 
-    const idx =
-      index ??
-      nameErrorIndexRef.current % blockingNameErrors.length;
-    if (index === undefined) {
-      nameErrorIndexRef.current = idx + 1;
-    }
+  const scrollToRefGroup = (
+    refIds: string[],
+    groupKey: string,
+    options?: { focusMissing?: boolean },
+  ) => {
+    if (refIds.length === 0) return;
 
-    const refId = blockingNameErrors[idx]?.refId;
+    const idx = scrollIndexRef.current[groupKey] ?? 0;
+    scrollIndexRef.current[groupKey] = idx + 1;
+
+    const refId = refIds[idx % refIds.length];
     if (!refId) return;
 
     setScrollTargetRefId(refId);
-
-    requestAnimationFrame(() => {
-      window.setTimeout(() => {
-        const el = document.getElementById(importRefDomId(refId));
-        if (!el) return;
-
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
-        focusFirstMissingField(el);
-
-        el.classList.add(
-          "ring-2",
-          "ring-primary",
-          "ring-offset-2",
-          "rounded-2xl",
-        );
-        window.setTimeout(() => {
-          el.classList.remove(
-            "ring-2",
-            "ring-primary",
-            "ring-offset-2",
-            "rounded-2xl",
-          );
-        }, 2000);
-      }, 80);
-    });
+    scrollToImportRef(refId, { focusMissing: options?.focusMissing });
   };
 
   if (saveResult) {
@@ -171,39 +197,75 @@ export default function ReviewStep({
           </p>
         </div>
         <div className="flex flex-wrap gap-2 text-sm">
-          <span className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium">
+          <button
+            type="button"
+            onClick={() => scrollToRefGroup(categoryRefIds, "categories")}
+            className={STAT_BADGE_NEUTRAL}
+          >
             {t("statCategories", { count: draft.stats.categoryCount })}
-          </span>
-          <span className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium">
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToRefGroup(itemRefIds, "items")}
+            className={STAT_BADGE_NEUTRAL}
+          >
             {t("statItems", { count: draft.stats.itemCount })}
-          </span>
-          <span className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium">
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToRefGroup(expandedItemRefIds, "expandedItems")}
+            className={STAT_BADGE_NEUTRAL}
+          >
             {t("statExpandedItems", {
               count: draft.stats.expandedItemCount,
             })}
-          </span>
+          </button>
           {dupStats.exactDuplicates > 0 && (
-            <span className="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 font-medium">
+            <button
+              type="button"
+              onClick={() =>
+                scrollToRefGroup(exactDuplicateRefIds, "exactDuplicates")
+              }
+              className={STAT_BADGE_NEUTRAL}
+            >
               {t("statDuplicates", { count: dupStats.exactDuplicates })}
-            </span>
+            </button>
           )}
           {dupStats.priceConflicts > 0 && (
-            <span className="px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 font-medium">
+            <button
+              type="button"
+              onClick={() =>
+                scrollToRefGroup(priceConflictRefIds, "priceConflicts")
+              }
+              className={STAT_BADGE_WARNING}
+            >
               {t("statPriceConflicts", { count: dupStats.priceConflicts })}
-            </span>
+            </button>
           )}
           {draft.stats.missingPriceCount > 0 && (
-            <span className="px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 font-medium">
+            <button
+              type="button"
+              onClick={() =>
+                scrollToRefGroup(missingPriceRefIds, "missingPrices", {
+                  focusMissing: true,
+                })
+              }
+              className={STAT_BADGE_WARNING}
+            >
               {t("statMissingPrices", {
                 count: draft.stats.missingPriceCount,
               })}
-            </span>
+            </button>
           )}
           {draft.stats.missingNameCount > 0 && (
             <button
               type="button"
-              onClick={() => scrollToNameError()}
-              className="px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 font-medium hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors cursor-pointer"
+              onClick={() =>
+                scrollToRefGroup(missingNameRefIds, "missingNames", {
+                  focusMissing: true,
+                })
+              }
+              className={STAT_BADGE_WARNING}
             >
               {t("statMissingNames", {
                 count: draft.stats.missingNameCount,
@@ -229,25 +291,46 @@ export default function ReviewStep({
       {!canProceedToConfirm && !duplicatesLoading && (
         <div className="space-y-2">
           {blockingPriceErrors.length > 0 && (
-            <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-sm text-amber-800 dark:text-amber-200">
+            <button
+              type="button"
+              onClick={() =>
+                scrollToRefGroup(missingPriceRefIds, "missingPricesBlock", {
+                  focusMissing: true,
+                })
+              }
+              className={WARNING_BLOCK}
+            >
               {t("missingPriceBlock", { count: blockingPriceErrors.length })}
-            </div>
+            </button>
           )}
           {blockingNameErrors.length > 0 && (
             <button
               type="button"
-              onClick={() => scrollToNameError(0)}
-              className="w-full text-start p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-sm text-amber-800 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors cursor-pointer"
+              onClick={() =>
+                scrollToRefGroup(missingNameRefIds, "missingNamesBlock", {
+                  focusMissing: true,
+                })
+              }
+              className={WARNING_BLOCK}
             >
               {t("missingNameBlock", { count: blockingNameErrors.length })}
             </button>
           )}
           {unresolvedPriceConflicts.length > 0 && (
-            <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-sm text-amber-800 dark:text-amber-200">
+            <button
+              type="button"
+              onClick={() =>
+                scrollToRefGroup(
+                  unresolvedConflictRefIds,
+                  "unresolvedConflictsBlock",
+                )
+              }
+              className={WARNING_BLOCK}
+            >
               {t("unresolvedPriceConflicts", {
                 count: unresolvedPriceConflicts.length,
               })}
-            </div>
+            </button>
           )}
         </div>
       )}

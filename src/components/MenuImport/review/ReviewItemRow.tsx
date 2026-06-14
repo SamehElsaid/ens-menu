@@ -1,12 +1,11 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import { axiosPost } from "@/shared/axiosCall";
-import { _checkFileSize, _checkFileType, _resizeImage } from "@/shared/_shared";
+import { _resizeImage } from "@/shared/_shared";
 import type { ImportItem } from "@/types/menuImport";
-import type { UploadResponse } from "@/types/Menu";
 import { importRefDomId } from "@/lib/menuImport/importRefDomId";
 import {
   IoTrashOutline,
@@ -50,6 +49,16 @@ export default function ReviewItemRow({
 }: ReviewItemRowProps) {
   const t = useTranslations("MenuImport");
   const fileRef = useRef<HTMLInputElement>(null);
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
+
+  const IMAGE_VALID_TYPES = [
+    "image/png",
+    "image/jpeg",
+    "image/jpg",
+    "image/webp",
+  ] as const;
+  const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
   const hasMissingPrice =
     item.flags.includes("missing_price") ||
     item.variants.some((v) => v.flags.includes("missing_price"));
@@ -76,26 +85,51 @@ export default function ReviewItemRow({
     "border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800";
 
   const handleImageUpload = async (file: File) => {
-    const resized = await _resizeImage(file);
-    if (!_checkFileType(resized) || !_checkFileSize(resized, 2)) {
-      toast.error(t("invalidFileSize", { max: 2 }));
+    if (!IMAGE_VALID_TYPES.includes(file.type as (typeof IMAGE_VALID_TYPES)[number])) {
+      toast.error(t("invalidFileType"));
       return;
     }
-    const formData = new FormData();
-    formData.append("type", "categories");
-    formData.append("file", resized);
-    const result = await axiosPost<FormData, UploadResponse>(
-      "/upload",
-      locale,
-      formData,
-      true,
-    );
-    if (result.status && result.data?.url) {
-      onImageChange(result.data.url);
-    } else {
+
+    setIsImageLoading(true);
+    try {
+      const resized = await _resizeImage(file);
+      if (resized.size > MAX_IMAGE_BYTES) {
+        toast.error(t("invalidFileSize", { max: 2 }));
+        return;
+      }
+
+      const previewUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error("preview_failed"));
+        reader.readAsDataURL(resized);
+      });
+      setLocalPreview(previewUrl);
+
+      const formData = new FormData();
+      formData.append("image", resized);
+      const result = await axiosPost<FormData, { image: string }>(
+        "/structure/image/",
+        locale,
+        formData,
+        true,
+      );
+      if (result.status && result.data?.image) {
+        onImageChange(result.data.image);
+        setLocalPreview(null);
+      } else {
+        toast.error(t("imageUploadError"));
+        setLocalPreview(null);
+      }
+    } catch {
       toast.error(t("imageUploadError"));
+      setLocalPreview(null);
+    } finally {
+      setIsImageLoading(false);
     }
   };
+
+  const displayImageUrl = item.imageUrl ?? localPreview;
 
   return (
     <div
@@ -151,17 +185,18 @@ export default function ReviewItemRow({
         <div className="flex items-start gap-3 shrink-0">
           <button
             type="button"
+            disabled={isImageLoading}
             onClick={() => fileRef.current?.click()}
-            className={`w-[4.5rem] h-[4.5rem] rounded-xl flex flex-col items-center justify-center overflow-hidden shrink-0 transition-all hover:scale-[1.03] active:scale-[0.98] ${
-              item.imageUrl
+            className={`relative w-[4.5rem] h-[4.5rem] rounded-xl flex flex-col items-center justify-center overflow-hidden shrink-0 transition-all hover:scale-[1.03] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-80 ${
+              displayImageUrl
                 ? "border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 hover:border-primary"
                 : "border-2 border-dashed border-primary/35 bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/15 hover:border-primary/60"
             }`}
           >
-            {item.imageUrl ? (
+            {displayImageUrl ? (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img
-                src={item.imageUrl}
+                src={displayImageUrl}
                 alt=""
                 className="w-full h-full object-cover"
               />
@@ -173,22 +208,34 @@ export default function ReviewItemRow({
                 </span>
               </>
             )}
+            {isImageLoading && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/55 backdrop-blur-[1px]">
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span className="text-[8px] font-semibold text-white mt-1 leading-none px-1 text-center">
+                  {t("uploadingImage")}
+                </span>
+              </div>
+            )}
           </button>
           <input
             ref={fileRef}
             type="file"
-            accept="image/png,image/jpeg,image/webp"
+            accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
             className="hidden"
+            disabled={isImageLoading}
             onChange={(e) => {
               const f = e.target.files?.[0];
               if (f) void handleImageUpload(f);
               e.target.value = "";
             }}
           />
-          {item.imageUrl && (
+          {displayImageUrl && !isImageLoading && (
             <button
               type="button"
-              onClick={() => onImageChange(undefined)}
+              onClick={() => {
+                setLocalPreview(null);
+                onImageChange(undefined);
+              }}
               className="text-xs text-slate-400 hover:text-red-500"
             >
               <IoCloseOutline />

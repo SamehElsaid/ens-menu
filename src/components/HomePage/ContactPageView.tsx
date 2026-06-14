@@ -77,7 +77,7 @@ function LinaComingSoonRow({
         showDivider && "border-b border-slate-100 dark:border-slate-800/80",
       )}
     >
-      <div className="contact-lina-row relative overflow-hidden rounded-xl border border-green-500/15 bg-gradient-to-r from-green-500/[0.08] via-purple-500/[0.06] to-transparent px-3 py-2.5 text-start dark:border-green-500/20 dark:from-green-500/10 dark:via-purple-500/10">
+      <div className="contact-lina-row relative overflow-hidden rounded-xl border border-green-500/15 bg-linear-to-r from-green-500/8 via-purple-500/6 to-transparent px-3 py-2.5 text-start dark:border-green-500/20 dark:from-green-500/10 dark:via-purple-500/10">
         <div
           aria-hidden
           className="contact-lina-glow pointer-events-none absolute inset-0 opacity-70"
@@ -88,7 +88,7 @@ function LinaComingSoonRow({
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-1.5">
-              <p className="bg-gradient-to-r from-purple-600 to-violet-500 bg-clip-text text-sm font-black text-transparent dark:from-purple-400 dark:to-violet-300 sm:text-[15px]">
+              <p className="bg-linear-to-r from-purple-600 to-violet-500 bg-clip-text text-sm font-black text-transparent dark:from-purple-400 dark:to-violet-300 sm:text-[15px]">
                 {t("linaWhatsapp.name")}
               </p>
               <span className="inline-flex rounded-full border border-green-500/25 bg-green-500/10 px-1.5 py-0.5 text-[8px] font-bold tracking-wide text-green-700 dark:text-green-400">
@@ -122,7 +122,7 @@ function ContactPhoneRow({
   return (
     <div
       className={cn(
-        "flex min-h-[3.5rem] flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3",
+        "flex min-h-14 flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3",
         showDivider && "border-b border-slate-100 dark:border-slate-800/80",
       )}
     >
@@ -181,7 +181,7 @@ function ContactEmailRow({
   t: (key: string) => string;
 }) {
   return (
-    <div className="flex min-h-[3.5rem] flex-col gap-2 border-t border-slate-100 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 dark:border-slate-800/80">
+    <div className="flex min-h-14 flex-col gap-2 border-t border-slate-100 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 dark:border-slate-800/80">
       <div className="flex min-w-0 flex-1 items-center gap-2.5 text-start">
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-purple-100 bg-purple-50 text-purple-600 dark:border-purple-500/20 dark:bg-purple-500/10 dark:text-purple-400">
           <FiMail className="size-3.5" aria-hidden />
@@ -302,7 +302,7 @@ function LocationPanel({
             <iframe
               src={info.mapEmbedUrl}
               title={label}
-              className="h-[9.5rem] w-full border-0 sm:h-[10.5rem]"
+              className="h-38 w-full border-0 sm:h-42"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
               allowFullScreen
@@ -332,7 +332,7 @@ function WhatsAppHeroCard({ t }: { t: (key: string) => string }) {
       href={WHATSAPP_PRIMARY}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative order-2 overflow-hidden rounded-2xl border border-green-200/80 bg-gradient-to-br from-green-50 via-white to-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-green-300 hover:shadow-md dark:border-green-500/25 dark:from-green-500/15 dark:via-slate-900/50 dark:to-slate-900/50 dark:hover:border-green-400/40 sm:p-5"
+      className="group relative order-2 overflow-hidden rounded-2xl border border-green-200/80 bg-linear-to-br from-green-50 via-white to-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-green-300 hover:shadow-md dark:border-green-500/25 dark:from-green-500/15 dark:via-slate-900/50 dark:to-slate-900/50 dark:hover:border-green-400/40 sm:p-5"
     >
       <div
         aria-hidden
@@ -390,7 +390,7 @@ export default function ContactPageView() {
           aria-hidden
         />
         <div
-          className="absolute inset-0 hidden bg-[linear-gradient(rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.08)_1px,transparent_1px)] bg-[size:56px_56px] dark:block dark:bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]"
+          className="absolute inset-0 hidden bg-[linear-gradient(rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.08)_1px,transparent_1px)] bg-size-[56px_56px] dark:block dark:bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]"
           aria-hidden
         />
       </div>
@@ -451,7 +451,7 @@ export default function ContactPageView() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={social.name}
-                    className="contact-social-card group flex min-h-[5.75rem] flex-col items-center justify-center gap-1.5 rounded-2xl border border-slate-200/80 bg-white/90 px-2 py-3 text-center shadow-sm dark:border-slate-700/80 dark:bg-slate-900/60 sm:min-h-[6.25rem] sm:gap-2 sm:px-3 sm:py-4"
+                    className="contact-social-card group flex min-h-[5.75rem] flex-col items-center justify-center gap-1.5 rounded-2xl border border-slate-200/80 bg-white/90 px-2 py-3 text-center shadow-sm dark:border-slate-700/80 dark:bg-slate-900/60 sm:min-h-25 sm:gap-2 sm:px-3 sm:py-4"
                   >
                     <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-purple-600 transition-colors group-hover:bg-purple-100 dark:bg-purple-500/15 dark:text-purple-400 dark:group-hover:bg-purple-500/25">
                       <social.icon className="size-4" aria-hidden />
