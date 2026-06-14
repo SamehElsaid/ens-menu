@@ -334,7 +334,7 @@ function Header() {
                 className="flex w-full items-center justify-center rounded-full bg-purple-600 px-4 py-2.5 text-[13px] font-medium text-white"
               >
                 {tHeader("startNow")}
-              </SafeLink>
+              </Link>
             </div>
           )}
 
