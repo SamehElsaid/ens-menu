@@ -28,6 +28,7 @@ async function Page({ params }: Props) {
   return (
     <>
       <HeroContent locale={locale} />
+      From development
       <TransformShowcaseSection locale={locale} />
       <HomeCTASection locale={locale} />
 
