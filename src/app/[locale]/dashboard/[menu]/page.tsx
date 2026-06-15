@@ -101,10 +101,11 @@ export default function DashboardMenuPage() {
   const menuLinkUrl = publicSlug ? publicMenuLinkUrl(publicSlug) : "";
   const menuQrUrl = publicSlug ? publicMenuQrUrl(publicSlug) : "";
   const menuQrRef = useRef<StyledQrCodeHandle>(null);
-  const qrCenterLogoSrc =
-    !isFreePlan && menu?.logo?.trim()
+  const qrCenterLogoSrc = isFreePlan
+    ? null
+    : menu?.logo?.trim()
       ? resolveMenuItemImageSrc(menu.logo)
-      : null;
+      : undefined;
 
   const isAuthHydrating = !userData && Boolean(Cookies.get("sub"));
 

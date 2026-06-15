@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Logo } from "@/components/Global/Logo";
 import PoweredByEnsEg from "@/components/Global/PoweredByEnsEg";
 import LegalNavLink from "@/components/Legal/LegalNavLink";
-import { MarketingButtonLink } from "@/components/marketing";
+
 import { getSocialLinks } from "@/modules/Footer";
 
 export default function HomeMinimalFooter() {

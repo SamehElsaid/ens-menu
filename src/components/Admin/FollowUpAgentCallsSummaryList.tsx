@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 import CallNowPhoneModal from "@/components/Admin/CallNowPhoneModal";
+import FollowUpOutcomeIcon from "@/components/Admin/FollowUpOutcomeIcon";
 import PhoneDisplay from "@/components/Global/PhoneDisplay";
 import {
   formatFollowUpDate,
@@ -40,7 +41,8 @@ export default function FollowUpAgentCallsSummaryList({
   return (
     <>
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1fr)_auto] gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+        <div className="grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1fr)_auto] gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+          <span className="w-6 text-center">{t("outcome")}</span>
           <span>{t("columns.date")}</span>
           <span>{t("columns.name")}</span>
           <span>{t("columns.phone")}</span>
@@ -53,8 +55,11 @@ export default function FollowUpAgentCallsSummaryList({
             return (
               <li
                 key={call.id}
-                className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1fr)_auto] items-center gap-2 px-3 py-3"
+                className="grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1fr)_auto] items-center gap-2 px-3 py-3"
               >
+                <div className="flex w-6 justify-center">
+                  <FollowUpOutcomeIcon outcome={call.outcome} size="sm" />
+                </div>
                 <button
                   type="button"
                   onClick={() => onSelect(call)}

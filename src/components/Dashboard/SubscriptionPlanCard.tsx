@@ -1,15 +1,17 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import {
   HiArrowDown,
   HiArrowUp,
   HiCheck,
+  HiChevronDown,
   HiOutlineChat,
   HiOutlineGift,
   HiOutlineSparkles,
   HiOutlineTag,
 } from "react-icons/hi";
+import { useTranslations } from "next-intl";
 import ProPlanPriceSelector, {
   type ProBillingChoice,
 } from "@/components/Pricing/ProPlanPriceSelector";
@@ -55,6 +57,8 @@ type SubscriptionPlanCardProps = {
   children?: ReactNode;
 };
 
+const INITIAL_VISIBLE_FEATURES = 6;
+
 function PlanFeatureList({
   features,
   isRTL,
@@ -63,7 +67,7 @@ function PlanFeatureList({
   isRTL: boolean;
 }) {
   return (
-    <ul className="space-y-2.5 flex-1 min-h-0">
+    <ul className="space-y-2.5">
       {features.map((f, i) => (
         <li
           key={`${f}-${i}`}
@@ -78,6 +82,47 @@ function PlanFeatureList({
         </li>
       ))}
     </ul>
+  );
+}
+
+function CollapsiblePlanFeatureList({
+  features,
+  isRTL,
+  initialVisibleCount = INITIAL_VISIBLE_FEATURES,
+}: {
+  features: string[];
+  isRTL: boolean;
+  initialVisibleCount?: number;
+}) {
+  const t = useTranslations("PricingPage");
+  const [expanded, setExpanded] = useState(false);
+  const hasMore = features.length > initialVisibleCount;
+  const visibleFeatures = expanded
+    ? features
+    : features.slice(0, initialVisibleCount);
+
+  return (
+    <div className="flex-1 min-h-0">
+      <PlanFeatureList features={visibleFeatures} isRTL={isRTL} />
+      {hasMore && (
+        <button
+          type="button"
+          onClick={() => setExpanded((prev) => !prev)}
+          className={`mt-4 flex w-full min-h-[40px] items-center justify-center gap-2 rounded-xl border border-slate-200/90 bg-slate-50/90 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200 dark:hover:bg-slate-800 ${
+            isRTL ? "flex-row-reverse" : ""
+          }`}
+          aria-expanded={expanded}
+        >
+          {expanded ? t("mobileShowLess") : t("mobileShowMore")}
+          <HiChevronDown
+            className={`h-4 w-4 transition-transform duration-300 ${
+              expanded ? "rotate-180" : ""
+            }`}
+            aria-hidden
+          />
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -233,7 +278,7 @@ export default function SubscriptionPlanCard({
 
       <div className="mb-5 h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-700 to-transparent" />
 
-      <PlanFeatureList features={features} isRTL={isRTL} />
+      <CollapsiblePlanFeatureList features={features} isRTL={isRTL} />
 
       <div className="mt-6 flex flex-col gap-2 pt-2">
         {isCurrentPlan && (
@@ -307,6 +352,7 @@ export function CustomSubscriptionPlanCard({
   contactWhatsAppLabel,
   currentPlanLabel,
   customPlanFeatures,
+  planDescription,
   whatsappUrl,
   className = "",
 }: {
@@ -318,6 +364,7 @@ export function CustomSubscriptionPlanCard({
   contactWhatsAppLabel: string;
   currentPlanLabel: string;
   customPlanFeatures: string[];
+  planDescription?: string;
   whatsappUrl: string;
   className?: string;
 }) {
@@ -354,7 +401,7 @@ export function CustomSubscriptionPlanCard({
           {planCustomLabel}
         </h3>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          {contactForDetailsLabel}
+          {planDescription ?? contactForDetailsLabel}
         </p>
       </header>
 
@@ -366,7 +413,7 @@ export function CustomSubscriptionPlanCard({
 
       <div className="mb-5 h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-700 to-transparent" />
 
-      <PlanFeatureList features={customPlanFeatures} isRTL={isRTL} />
+      <CollapsiblePlanFeatureList features={customPlanFeatures} isRTL={isRTL} />
 
       <div className="mt-6 pt-2">
         {isCurrentCustomPlan ? (

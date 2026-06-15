@@ -68,11 +68,6 @@ export default function SettingsPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { menu: menuId } = useParams();
 
-  const userData = useAppSelector((state) => state.auth.data);
-  const planId = (userData as { user?: { subscription?: { planId?: number } } })
-    ?.user?.subscription?.planId;
-  const isFreePlan = planId === 1;
-
   const {
     control,
     handleSubmit,
@@ -136,15 +131,6 @@ export default function SettingsPage() {
   const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    if (isFreePlan) {
-      toast.error(
-        locale === "ar"
-          ? "تغيير الشعار غير متاح في الخطة المجانية."
-          : "Changing the logo is not available on the free plan.",
-      );
-      return;
-    }
 
     const validTypes = [
       "image/png",
@@ -415,25 +401,14 @@ export default function SettingsPage() {
               </div>
 
               <div className="flex flex-col items-center gap-2 w-full">
-                <label
-                  className={
-                    isFreePlan ? "cursor-not-allowed" : "cursor-pointer"
-                  }
-                >
+                <label className="cursor-pointer">
                   <input
                     type="file"
                     accept=".png,.ico,.jpg,.jpeg,image/png,image/x-icon,image/vnd.microsoft.icon,image/jpeg"
                     onChange={handleLogoChange}
                     className="hidden"
-                    disabled={isFreePlan}
                   />
-                  <div
-                    className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
-                      isFreePlan
-                        ? "bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
-                        : "bg-primary hover:bg-primary/90 text-white"
-                    }`}
-                  >
+                  <div className="px-4 py-2 rounded-lg transition-colors flex items-center gap-2 bg-primary hover:bg-primary/90 text-white">
                     <IoCloudUploadOutline className="text-xl" />
                     <span className="text-sm font-medium">
                       {tMenus("logoUpload")}
@@ -441,11 +416,7 @@ export default function SettingsPage() {
                   </div>
                 </label>
                 <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
-                  {isFreePlan
-                    ? locale === "ar"
-                      ? "تغيير الشعار متاح فقط في الباقات المدفوعة."
-                      : "Changing the logo is available only on paid plans."
-                    : tMenus("logoHint")}
+                  {tMenus("logoHint")}
                 </p>
               </div>
             </div>

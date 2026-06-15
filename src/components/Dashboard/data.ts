@@ -365,7 +365,7 @@ export const adminNavSections: NavSection[] = [
       {
         label: "vouchers",
         icon: IoTicketOutline,
-        key: "promo",
+        key: "vouchers",
         link: "vouchers",
       },
       {

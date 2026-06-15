@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { IoPencilOutline, IoTrashOutline } from "react-icons/io5";
 import { toast } from "react-toastify";
 import CallNowPhoneModal from "@/components/Admin/CallNowPhoneModal";
+import FollowUpOutcomeIcon from "@/components/Admin/FollowUpOutcomeIcon";
 import {
   formatFollowUpDateTime,
   formatFollowUpPurpose,
@@ -95,7 +96,8 @@ export default function FollowUpCallsList({
                   {call.userName}
                 </p>
               )}
-              <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+              <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                <FollowUpOutcomeIcon outcome={call.outcome} size="sm" />
                 {t(`outcomes.${call.outcome}`)}
                 {call.purpose && (
                   <span className="font-normal text-slate-500 dark:text-slate-400">

@@ -18,7 +18,11 @@ type Props = {
 
 async function resolveQrCenterLogo(
   centerLogoSrc: string | null | undefined,
-): Promise<string> {
+): Promise<string | null> {
+  if (centerLogoSrc === null) {
+    return null;
+  }
+
   const candidate = centerLogoSrc?.trim()
     ? resolveMenuItemImageSrc(centerLogoSrc)
     : DEFAULT_QR_CENTER_LOGO;

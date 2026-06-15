@@ -37,7 +37,7 @@ interface TablesCardGridProps {
   loading: boolean;
   locale: string;
   menuSlug: string | undefined | null;
-  qrCenterLogoSrc: string | null;
+  qrCenterLogoSrc: string | null | undefined;
   onEdit: (table: MenuTable) => void;
   onDelete: (table: MenuTable) => void;
   onAdd: () => void;

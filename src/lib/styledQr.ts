@@ -3,7 +3,7 @@ import type { Options } from "qr-code-styling";
 /** شعار ENS ثابت في منتصف الـ QR (ليس شعار المنيو) */
 export const DEFAULT_QR_CENTER_LOGO = "/ENSd.png";
 
-/** نفس أسلوب الـ QR الناعم (دوائر + زوايا مستديرة) مع شعار ENS في المنتصف */
+/** نفس أسلوب الـ QR الناعم (دوائر + زوايا مستديرة). centerLogoSrc: null = بدون صورة، undefined = شعار ENS */
 export function getStyledQrOptions(params: {
   value: string;
   size: number;
@@ -11,7 +11,7 @@ export function getStyledQrOptions(params: {
 }): Options {
   const margin = Math.max(6, Math.round(params.size * 0.035));
 
-  return {
+  const base: Options = {
     width: params.size,
     height: params.size,
     type: "canvas",
@@ -37,6 +37,14 @@ export function getStyledQrOptions(params: {
     backgroundOptions: {
       color: "#ffffff",
     },
+  };
+
+  if (params.centerLogoSrc === null) {
+    return base;
+  }
+
+  return {
+    ...base,
     image: params.centerLogoSrc || DEFAULT_QR_CENTER_LOGO,
     imageOptions: {
       hideBackgroundDots: true,

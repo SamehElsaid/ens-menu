@@ -26,10 +26,11 @@ export default function TablesPage() {
   const menuLogo = menuRecord?.logo;
   const userData = useAppSelector((s) => s.auth.data);
   const isFreePlan = isFreePlanUser(userData);
-  const qrCenterLogoSrc =
-    !isFreePlan && menuLogo?.trim()
+  const qrCenterLogoSrc = isFreePlan
+    ? null
+    : menuLogo?.trim()
       ? resolveMenuItemImageSrc(menuLogo)
-      : null;
+      : undefined;
   const menuId =
     typeof params.menu === "string"
       ? params.menu
