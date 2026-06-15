@@ -6,6 +6,7 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
 
+
 const nextConfig: NextConfig = {
   reactStrictMode: false,
   async rewrites() {
