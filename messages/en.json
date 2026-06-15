@@ -133,7 +133,7 @@
         },
         {
           "id": "service",
-          "heading": "Terms and Conditions | ENSMENU",
+          "heading": "Service description",
           "body": "ENSMENU provides a complete solution for creating and managing digital menus:\n• Digital menus and QR menus for restaurants, cafés, and hotels\n• AI menu import from images and files\n• Smart table ordering via QR\n• Dashboard to manage items, branches, and tables\n• Staff notifications for new orders\n• Share your digital menu with guests via a custom link or QR code\n\nAvailable features may vary depending on your plan (free, Pro, or custom)."
         },
         {
@@ -3636,8 +3636,8 @@
     "statWarnings": "{count} warnings",
     "missingPriceBlock": "{count} items/variants missing price — complete prices before continuing",
     "missingNameBlock": "{count} entries missing Arabic or English name — complete names before continuing",
-      "missingPriceBlockHint": "Click here to go to the item with the issue",
-      "missingNameBlockHint": "Click here to go to the item with the issue",
+    "missingPriceBlockHint": "Click here to go to the item with the issue",
+    "missingNameBlockHint": "Click here to go to the item with the issue",
     "blockingHint": "Complete required fields before continuing",
     "parseErrorsNotice": "Could not parse {count} elements from the response",
     "itemsInCategory": "{count} items",

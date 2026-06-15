@@ -3,6 +3,12 @@
 import { useEffect, useState, type RefObject } from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { cn } from "@/lib/cn";
+import {
+  getMaxScroll,
+  getNormalizedScrollLeft,
+  isRtlElement,
+  setNormalizedScrollLeft,
+} from "@/lib/rtlScroll";
 
 type MobileScrollSwipeHintsProps = {
   scrollRef: RefObject<HTMLElement | null>;
@@ -10,22 +16,8 @@ type MobileScrollSwipeHintsProps = {
   className?: string;
 };
 
-function isRtlElement(el: HTMLElement) {
-  return getComputedStyle(el).direction === "rtl";
-}
-
-function getNormalizedScrollLeft(el: HTMLElement) {
-  const { scrollLeft, scrollWidth, clientWidth } = el;
-  const maxScroll = Math.max(0, scrollWidth - clientWidth);
-  if (maxScroll <= 0) return 0;
-
-  if (!isRtlElement(el)) return scrollLeft;
-  if (scrollLeft < 0) return -scrollLeft;
-  return maxScroll - scrollLeft;
-}
-
 function scrollToward(el: HTMLElement, toward: "start" | "end") {
-  const maxScroll = Math.max(0, el.scrollWidth - el.clientWidth);
+  const maxScroll = getMaxScroll(el);
   if (maxScroll <= 0) return;
 
   const delta = el.clientWidth * 0.72;
@@ -35,13 +27,7 @@ function scrollToward(el: HTMLElement, toward: "start" | "end") {
       ? Math.max(0, current - delta)
       : Math.min(maxScroll, current + delta);
 
-  const rtl = isRtlElement(el);
-  let left = target;
-  if (rtl) {
-    left = el.scrollLeft < 0 ? -target : maxScroll - target;
-  }
-
-  el.scrollTo({ left, behavior: "smooth" });
+  setNormalizedScrollLeft(el, target, "smooth");
 }
 
 export default function MobileScrollSwipeHints({

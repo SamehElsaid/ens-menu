@@ -28,6 +28,10 @@ import { HiOutlineSparkles } from "react-icons/hi2";
 import HeroProductThumb from "@/components/HomePage/HeroProductThumb";
 import type { MenuImportItem } from "@/components/HomePage/menuImportTypes";
 import { cn } from "@/lib/cn";
+import {
+  centerElementInScroller,
+  scrollByPointerDelta,
+} from "@/lib/rtlScroll";
 
 export type MenuImportStep = {
   title: string;
@@ -69,34 +73,65 @@ const HIGHLIGHT_ICONS = {
 
 const MenuImportActiveStepContext = createContext(1);
 
+type MenuImportAutoplayContextValue = {
+  reportStepReady: (stepIndex: number) => void;
+  autoplayEnabled: boolean;
+};
+
+const MenuImportAutoplayContext = createContext<MenuImportAutoplayContextValue>({
+  reportStepReady: () => {},
+  autoplayEnabled: false,
+});
+
 function useMenuImportActiveStep() {
   return useContext(MenuImportActiveStepContext);
 }
 
-/** Prevent scroll jumps when step/progress layout updates (scroll anchoring). */
-function usePreserveScrollPosition(...deps: unknown[]) {
-  const scrollYRef = useRef(0);
+function useMenuImportAutoplay() {
+  return useContext(MenuImportAutoplayContext);
+}
 
-  useLayoutEffect(() => {
-    scrollYRef.current = window.scrollY;
+function useStepAutoplaySignal(
+  stepIndex: number,
+  signal:
+    | { type: "complete"; value: boolean }
+    | { type: "duration"; ms: number },
+) {
+  const { reportStepReady, autoplayEnabled } = useMenuImportAutoplay();
+  const activeStep = useMenuImportActiveStep();
+  const current = activeStep === stepIndex + 1;
+  const reportedRef = useRef(false);
 
-    const restore = () => {
-      const y = scrollYRef.current;
-      if (Math.abs(window.scrollY - y) > 1) {
-        window.scrollTo({ top: y, left: 0, behavior: "auto" });
-      }
-    };
+  useEffect(() => {
+    reportedRef.current = false;
+  }, [activeStep]);
 
-    restore();
-    const raf1 = requestAnimationFrame(restore);
-    const raf2 = requestAnimationFrame(() => requestAnimationFrame(restore));
+  useEffect(() => {
+    if (!autoplayEnabled || !current) return;
 
-    return () => {
-      cancelAnimationFrame(raf1);
-      cancelAnimationFrame(raf2);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- explicit scroll-lock triggers
-  }, deps);
+    if (signal.type === "complete") {
+      if (!signal.value || reportedRef.current) return;
+      reportedRef.current = true;
+      reportStepReady(stepIndex);
+      return;
+    }
+
+    const durationMs = prefersReducedMotion() ? 500 : signal.ms;
+    const timer = window.setTimeout(() => {
+      if (reportedRef.current) return;
+      reportedRef.current = true;
+      reportStepReady(stepIndex);
+    }, durationMs);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    autoplayEnabled,
+    current,
+    reportStepReady,
+    signal.type,
+    signal.type === "complete" ? signal.value : signal.ms,
+    stepIndex,
+  ]);
 }
 
 function QrSvg({ className }: { className?: string }) {
@@ -126,8 +161,11 @@ function easeInOutCubic(t: number): number {
 
 const SYNCED_PROGRESS_TARGET = 100;
 const SYNCED_PROGRESS_DURATION_MS = 2600;
-/** Advance after progress animation finishes (+ small read buffer). */
-const STEP_ADVANCE_MS = SYNCED_PROGRESS_DURATION_MS + 600;
+/** Brief pause after a step animation finishes before advancing. */
+const STEP_COMPLETE_BUFFER_MS = 600;
+const STEP_QR_DURATION_MS = 2200;
+const STEP_SCAN_DURATION_MS = 3200;
+const STEP_LIVE_DURATION_MS = 3600;
 const USER_INTERACTION_PAUSE_MS = 12_000;
 const SCROLL_EASE = "cubic-bezier(0.32, 0.72, 0, 1)";
 const DRAG_SWIPE_THRESHOLD_PX = 36;
@@ -143,20 +181,7 @@ function centerTimelineStep(
   step: HTMLElement,
   behavior: ScrollBehavior,
 ) {
-  const maxScroll = Math.max(0, container.scrollWidth - container.clientWidth);
-  if (maxScroll <= 0) return;
-
-  const containerRect = container.getBoundingClientRect();
-  const stepRect = step.getBoundingClientRect();
-  const target =
-    container.scrollLeft +
-    (stepRect.left + stepRect.width / 2) -
-    (containerRect.left + containerRect.width / 2);
-
-  container.scrollTo({
-    left: Math.max(0, Math.min(maxScroll, target)),
-    behavior,
-  });
+  centerElementInScroller(container, step, behavior);
 }
 
 function findCenteredStepIndex(
@@ -297,24 +322,6 @@ function useTimelineDrag({
     [activeStepRef, onStepResolved, programmaticScrollRef, skipAutoScrollRef, stepCount, stepRefs, isDraggingRef],
   );
 
-  const settleFromScroll = useCallback(() => {
-    const container = timelineRef.current;
-    if (
-      !container ||
-      dragRef.current.active ||
-      isDraggingRef.current ||
-      programmaticScrollRef.current ||
-      container.classList.contains(TIMELINE_DRAGGING_CLASS)
-    ) {
-      return;
-    }
-
-    const nearest = findCenteredStepIndex(container, stepRefs.current);
-    if (nearest !== activeStepRef.current) {
-      onStepResolved(nearest);
-    }
-  }, [activeStepRef, isDraggingRef, onStepResolved, programmaticScrollRef, stepRefs, timelineRef]);
-
   useEffect(() => {
     const container = timelineRef.current;
     if (!container) return;
@@ -336,7 +343,7 @@ function useTimelineDrag({
 
       event.preventDefault();
       const delta = event.clientX - dragRef.current.lastX;
-      container.scrollBy({ left: -delta, behavior: "auto" });
+      scrollByPointerDelta(container, delta, "auto");
       dragRef.current.lastX = event.clientX;
     };
 
@@ -360,44 +367,6 @@ function useTimelineDrag({
     finishDrag,
     timelineRef,
   ]);
-
-  useEffect(() => {
-    const container = timelineRef.current;
-    if (!container) return;
-
-    const onUserScroll = () => {
-      if (
-        dragRef.current.active ||
-        isDraggingRef.current ||
-        programmaticScrollRef.current ||
-        container.classList.contains(TIMELINE_DRAGGING_CLASS)
-      ) {
-        return;
-      }
-      pauseAutoplay();
-    };
-
-    container.addEventListener("scroll", onUserScroll, { passive: true });
-
-    const onScrollEnd = () => {
-      if (
-        dragRef.current.active ||
-        isDraggingRef.current ||
-        programmaticScrollRef.current ||
-        container.classList.contains(TIMELINE_DRAGGING_CLASS)
-      ) {
-        return;
-      }
-      settleFromScroll();
-    };
-
-    container.addEventListener("scrollend", onScrollEnd);
-
-    return () => {
-      container.removeEventListener("scroll", onUserScroll);
-      container.removeEventListener("scrollend", onScrollEnd);
-    };
-  }, [isDraggingRef, pauseAutoplay, programmaticScrollRef, settleFromScroll, timelineRef]);
 
   return { isDragging };
 }
@@ -540,6 +509,7 @@ function AnimatedStatusLabel({
 }
 
 function SyncedProgressBlock({
+  stepIndex,
   current,
   passed,
   label,
@@ -549,6 +519,7 @@ function SyncedProgressBlock({
   glow = false,
   leadingIcon,
 }: {
+  stepIndex: number;
   current: boolean;
   passed: boolean;
   label: string;
@@ -559,6 +530,10 @@ function SyncedProgressBlock({
   leadingIcon?: ReactNode;
 }) {
   const { value, display, complete } = useSyncedPercent(current, passed);
+  useStepAutoplaySignal(stepIndex, {
+    type: "complete",
+    value: current && complete,
+  });
   const statusLabel = complete ? completeLabel : label;
   const processing = current && !complete;
 
@@ -815,6 +790,7 @@ function StepUploadVisual({
         </ul>
       </div>
       <SyncedProgressBlock
+        stepIndex={stepIndex}
         current={current}
         passed={passed}
         label={label}
@@ -877,6 +853,7 @@ function StepAiVisual({
         </div>
       </div>
       <SyncedProgressBlock
+        stepIndex={stepIndex}
         current={current}
         passed={passed}
         label={label}
@@ -918,6 +895,7 @@ function StepPhotosVisual({
         ))}
       </ul>
       <SyncedProgressBlock
+        stepIndex={stepIndex}
         current={current}
         passed={passed}
         label={label}
@@ -934,8 +912,22 @@ function StepPhotosVisual({
 }
 
 function StepQrVisual({ downloadLabel }: { downloadLabel: string }) {
+  const activeStep = useMenuImportActiveStep();
+  const stepIndex = 3;
+  const current = activeStep === stepIndex + 1;
+
+  useStepAutoplaySignal(stepIndex, {
+    type: "duration",
+    ms: STEP_QR_DURATION_MS,
+  });
+
   return (
-    <div className="flex w-full flex-col items-center gap-3">
+    <div
+      className={cn(
+        "flex w-full flex-col items-center gap-3",
+        current && "menu-import-qr-reveal",
+      )}
+    >
       <div className="relative p-1">
         <span className="absolute start-0 top-0 h-4 w-4 rounded-ss-md border-s-2 border-t-2 border-purple-500" />
         <span className="absolute end-0 top-0 h-4 w-4 rounded-se-md border-e-2 border-t-2 border-purple-500" />
@@ -956,7 +948,13 @@ function StepQrVisual({ downloadLabel }: { downloadLabel: string }) {
 
 function StepScanVisual({ scanToOrderLabel }: { scanToOrderLabel: string }) {
   const activeStep = useMenuImportActiveStep();
-  const active = activeStep >= 5;
+  const stepIndex = 4;
+  const active = activeStep >= stepIndex + 1;
+
+  useStepAutoplaySignal(stepIndex, {
+    type: "duration",
+    ms: STEP_SCAN_DURATION_MS,
+  });
 
   return (
     <div className="relative mx-auto w-full max-w-[180px]">
@@ -1079,7 +1077,13 @@ function StepLiveVisual({
   orderItemPrice: string;
 }) {
   const activeStep = useMenuImportActiveStep();
-  const live = activeStep >= 6;
+  const stepIndex = 5;
+  const live = activeStep >= stepIndex + 1;
+
+  useStepAutoplaySignal(stepIndex, {
+    type: "duration",
+    ms: STEP_LIVE_DURATION_MS,
+  });
 
   return (
     <div className="menu-import-live-phone-wrap">
@@ -1316,6 +1320,7 @@ export default function MenuImportStory({
   const skipAutoScrollRef = useRef(false);
   const activeStepRef = useRef(1);
   const pauseUntilRef = useRef(0);
+  const advanceTimerRef = useRef<number | null>(null);
   const [activeStep, setActiveStep] = useState(1);
   const [visible, setVisible] = useState(false);
   const globalProgressTarget = (activeStep / stepCount) * 100;
@@ -1327,6 +1332,41 @@ export default function MenuImportStory({
   const pauseAutoplay = useCallback((durationMs = USER_INTERACTION_PAUSE_MS) => {
     pauseUntilRef.current = Date.now() + durationMs;
   }, []);
+
+  const clearAdvanceTimer = useCallback(() => {
+    if (advanceTimerRef.current) {
+      window.clearTimeout(advanceTimerRef.current);
+      advanceTimerRef.current = null;
+    }
+  }, []);
+
+  const reportStepReady = useCallback(
+    (stepIndex: number) => {
+      if (!visible) return;
+      if (activeStepRef.current !== stepIndex + 1) return;
+
+      clearAdvanceTimer();
+
+      const scheduleAdvance = () => {
+        if (document.hidden) return;
+        if (Date.now() < pauseUntilRef.current) {
+          advanceTimerRef.current = window.setTimeout(
+            scheduleAdvance,
+            pauseUntilRef.current - Date.now() + 50,
+          );
+          return;
+        }
+        if (activeStepRef.current !== stepIndex + 1) return;
+        setActiveStep((prev) => (prev >= stepCount ? 1 : prev + 1));
+      };
+
+      advanceTimerRef.current = window.setTimeout(
+        scheduleAdvance,
+        STEP_COMPLETE_BUFFER_MS,
+      );
+    },
+    [clearAdvanceTimer, stepCount, visible],
+  );
 
   const resolveTimelineStep = useCallback(
     (step: number) => {
@@ -1365,7 +1405,7 @@ export default function MenuImportStory({
     goToStep(activeStep >= stepCount ? 1 : activeStep + 1);
   }, [activeStep, goToStep, stepCount]);
 
-  usePreserveScrollPosition(activeStep, visible);
+  useEffect(() => clearAdvanceTimer, [activeStep, clearAdvanceTimer]);
 
   useEffect(() => {
     const node = rootRef.current;
@@ -1386,48 +1426,68 @@ export default function MenuImportStory({
   }, []);
 
   useEffect(() => {
-    if (!visible) return;
-
-    const tick = () => {
-      if (document.hidden || Date.now() < pauseUntilRef.current) return;
-      setActiveStep((prev) => (prev >= stepCount ? 1 : prev + 1));
-    };
-
-    const interval = window.setInterval(tick, STEP_ADVANCE_MS);
-    return () => window.clearInterval(interval);
-  }, [visible, stepCount]);
-
-  useEffect(() => {
     const onVisibility = () => {
-      if (document.hidden) pauseAutoplay(STEP_ADVANCE_MS);
+      if (document.hidden) pauseAutoplay(STEP_COMPLETE_BUFFER_MS);
     };
     document.addEventListener("visibilitychange", onVisibility);
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, [pauseAutoplay]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const container = timelineRef.current;
-    const step = stepRefs.current[activeStep - 1];
-    if (!container || !step || !visible || isDraggingRef.current || skipAutoScrollRef.current) {
+    if (!container || !visible || isDraggingRef.current || skipAutoScrollRef.current) {
       return;
     }
 
     const behavior: ScrollBehavior = prefersReducedMotion() ? "auto" : "smooth";
+    let cancelled = false;
+    let attempts = 0;
 
-    lockProgrammaticScroll(
-      programmaticScrollRef,
-      behavior === "smooth" ? PROGRAMMATIC_SCROLL_LOCK_MS : 0,
-    );
-    centerTimelineStep(container, step, behavior);
+    const scrollToActiveStep = () => {
+      if (cancelled || isDraggingRef.current || skipAutoScrollRef.current) {
+        return;
+      }
+
+      const step = stepRefs.current[activeStep - 1];
+      if (!step) {
+        if (attempts < 6) {
+          attempts += 1;
+          requestAnimationFrame(scrollToActiveStep);
+        }
+        return;
+      }
+
+      lockProgrammaticScroll(
+        programmaticScrollRef,
+        behavior === "smooth" ? PROGRAMMATIC_SCROLL_LOCK_MS : 0,
+      );
+      centerTimelineStep(container, step, behavior);
+    };
+
+    scrollToActiveStep();
 
     const raf = requestAnimationFrame(() => {
-      if (!isDraggingRef.current) {
-        centerTimelineStep(container, step, behavior);
-      }
+      if (!cancelled) scrollToActiveStep();
     });
 
+    let scrollEndTimer: number | undefined;
+    const onScrollEnd = () => {
+      if (cancelled || isDraggingRef.current) return;
+      const step = stepRefs.current[activeStep - 1];
+      if (step) centerTimelineStep(container, step, "auto");
+    };
+
+    if ("onscrollend" in container) {
+      container.addEventListener("scrollend", onScrollEnd);
+    } else {
+      scrollEndTimer = window.setTimeout(onScrollEnd, PROGRAMMATIC_SCROLL_LOCK_MS + 80);
+    }
+
     return () => {
+      cancelled = true;
       cancelAnimationFrame(raf);
+      container.removeEventListener("scrollend", onScrollEnd);
+      if (scrollEndTimer) window.clearTimeout(scrollEndTimer);
     };
   }, [activeStep, visible]);
 
@@ -1505,6 +1565,9 @@ export default function MenuImportStory({
 
   return (
     <MenuImportActiveStepContext.Provider value={activeStep}>
+    <MenuImportAutoplayContext.Provider
+      value={{ reportStepReady, autoplayEnabled: visible }}
+    >
     <div
       ref={rootRef}
       className={cn("w-full", visible && "menu-import-story-visible")}
@@ -1644,6 +1707,7 @@ export default function MenuImportStory({
         </div>
       )}
     </div>
+    </MenuImportAutoplayContext.Provider>
     </MenuImportActiveStepContext.Provider>
   );
 }

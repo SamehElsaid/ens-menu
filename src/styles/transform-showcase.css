@@ -638,6 +638,22 @@
     transform: translateY(-1px);
   }
 
+  .menu-import-qr-reveal {
+    animation: menu-import-qr-reveal 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  @keyframes menu-import-qr-reveal {
+    from {
+      opacity: 0.45;
+      transform: scale(0.94);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .menu-import-step-card:hover {
       transform: none;
@@ -679,6 +695,7 @@
     .menu-import-check-pop,
     .menu-import-photo-row,
     .menu-import-product-row--in,
+    .menu-import-qr-reveal,
     .menu-import-stand-float,
     .menu-import-phone-glow,
     .menu-import-scan-beam,

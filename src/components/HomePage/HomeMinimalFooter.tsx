@@ -29,7 +29,7 @@ export default function HomeMinimalFooter() {
   return (
     <footer className="home-minimal-footer">
       <div className="home-section-shell py-4 sm:py-7">
-        <div className="flex flex-col items-center gap-2.5 border-b border-white/[0.04] pb-3.5 sm:gap-3 sm:pb-5 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-8 sm:gap-y-2">
+        <div className="flex flex-col items-center gap-2.5 border-b border-white/4 pb-3.5 sm:gap-3 sm:pb-5 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-8 sm:gap-y-2">
           <nav
             aria-label={t("quickLinks")}
             className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-0.5 sm:gap-x-5 sm:gap-y-1"
@@ -57,8 +57,6 @@ export default function HomeMinimalFooter() {
           </div>
         </div>
 
-      
-
         <div className="mx-auto mt-3 flex max-w-md flex-col items-center text-center sm:mt-6">
           <div className="home-minimal-footer__brand">
             <Logo size="compact" variant="white" />
@@ -71,15 +69,6 @@ export default function HomeMinimalFooter() {
           <p className="mt-2 text-[10px] text-slate-500 sm:mt-5 sm:text-[11px]">
             © {currentYear} ENSMENU · {t("copyright")}
           </p>
-        </div>
-        <div className="mt-3 flex justify-center sm:mt-4">
-          <MarketingButtonLink
-            href="/contact"
-            variant="compact"
-            className="home-minimal-footer__contact-btn min-w-[10.5rem] px-5 py-2.5 text-[13px] shadow-[0_8px_24px_-8px_rgba(124,58,237,0.55)] hover:scale-[1.02]"
-          >
-            {t("linkContact")}
-          </MarketingButtonLink>
         </div>
       </div>
     </footer>
