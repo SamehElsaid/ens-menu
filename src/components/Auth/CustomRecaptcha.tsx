@@ -130,13 +130,7 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
           rejectTimeoutRef.current = null;
         }, REJECT_RESET_MS);
       },
-      [
-        clearRejectTimeout,
-        closeModal,
-        mode,
-        onVerifiedChange,
-        resolvePending,
-      ],
+      [clearRejectTimeout, closeModal, mode, onVerifiedChange, resolvePending],
     );
 
     const handleExpired = useCallback(() => {
@@ -241,8 +235,7 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
             transform: widgetScale < 1 ? `scale(${widgetScale})` : undefined,
             transformOrigin: "top center",
             width: widgetScale < 1 ? RECAPTCHA_WIDTH * widgetScale : undefined,
-            height:
-              widgetScale < 1 ? Math.ceil(78 * widgetScale) : undefined,
+            height: widgetScale < 1 ? Math.ceil(78 * widgetScale) : undefined,
           }}
         >
           <ReCAPTCHA
@@ -260,7 +253,10 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
 
     if (mode === "on-demand") {
       return (
-        <div className={cn(silent ? "sr-only" : "w-full", className)} aria-hidden={silent}>
+        <div
+          className={cn(silent ? "sr-only" : "w-full", className)}
+          aria-hidden={silent}
+        >
           {!silent &&
             (isVerified ? (
               <div className="register-recaptcha-trust register-recaptcha-trust--verified inline-flex items-center gap-2 rounded-lg border border-emerald-200/70 bg-emerald-50/80 px-3 py-2 text-[12px] font-medium text-emerald-700 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-300">
@@ -279,8 +275,10 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
             createPortal(
               <div
                 className={cn(
-                  "recaptcha-modal fixed inset-0 z-[250] flex items-end justify-center p-4 sm:items-center",
-                  modalVisible ? "recaptcha-modal--visible" : "recaptcha-modal--hidden",
+                  "recaptcha-modal fixed inset-0 z-[250] flex items-center justify-center p-4",
+                  modalVisible
+                    ? "recaptcha-modal--visible"
+                    : "recaptcha-modal--hidden",
                 )}
                 role="dialog"
                 aria-modal="true"
@@ -296,7 +294,7 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
                   }}
                 />
 
-                <div className="recaptcha-modal__panel relative z-[1] w-full max-w-[min(360px,calc(100vw-2rem))] rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_24px_64px_-20px_rgba(15,23,42,0.35)] dark:border-slate-700/60 dark:bg-slate-900">
+                <div className="recaptcha-modal__panel relative z-1 w-full max-w-[min(360px,calc(100vw-2rem))] rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_24px_64px_-20px_rgba(15,23,42,0.35)] dark:border-slate-700/60 dark:bg-slate-900">
                   <button
                     type="button"
                     className="absolute end-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
@@ -381,7 +379,9 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
               : isRejected
                 ? "border-red-300/80 bg-red-50/80 dark:border-red-500/30 dark:bg-red-950/20"
                 : "border-slate-200/80 bg-white/80 hover:border-purple-200/80 dark:border-slate-700 dark:bg-slate-900/50 dark:hover:border-purple-500/25",
-            status === "idle" && !isVerified && "cursor-pointer active:scale-[0.995]",
+            status === "idle" &&
+              !isVerified &&
+              "cursor-pointer active:scale-[0.995]",
           )}
         >
           <div className="pointer-events-none relative z-[1] flex items-center gap-3 px-3.5 py-3 select-none">

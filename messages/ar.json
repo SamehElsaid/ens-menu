@@ -2351,7 +2351,7 @@
       "editError": "فشل تحديث الإعلان",
       "titlePlaceholder": "مثال: عرض صيفي",
       "contentPlaceholder": "تفاصيل العرض...",
-      "linkUrlPlaceholder": "https://..."
+      "linkUrlPlaceholder": "https://... أو www...."
     },
     "freePlanTitle": "هذه الميزة متاحة للخطط المدفوعة فقط",
     "freePlanDescription": "قم بالترقية للوصول إلى ميزة الإعلانات وإبراز عروضك لعملائك.",

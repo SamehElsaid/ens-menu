@@ -1,3 +1,7 @@
+import {
+  isValidExternalUrl,
+  normalizeExternalUrl,
+} from "@/lib/normalizeExternalUrl";
 import { useTranslations } from "next-intl";
 import * as yup from "yup";
 
@@ -28,12 +32,16 @@ export const createAdvertisementSchema = (
     linkUrl: yup
       .string()
       .trim()
-      .url(t("linkUrlInvalid"))
       .nullable()
       .notRequired()
-      .transform((val, originalValue) =>
-        originalValue === "" || originalValue == null ? null : val
-      ),
+      .transform((val, originalValue) => {
+        if (originalValue === "" || originalValue == null) return null;
+        return normalizeExternalUrl(String(originalValue));
+      })
+      .test("is-valid-url", t("linkUrlInvalid"), (value) => {
+        if (value == null || value === "") return true;
+        return isValidExternalUrl(value);
+      }),
   });
 
 export type AdvertisementFormSchema = yup.InferType<

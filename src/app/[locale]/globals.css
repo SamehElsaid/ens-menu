@@ -5262,20 +5262,14 @@ body.recaptcha-modal-open {
 }
 
 .recaptcha-modal__panel {
-  transform: translateY(12px) scale(0.98);
+  transform: scale(0.96);
   transition:
     transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 0.24s ease;
 }
 
 .recaptcha-modal--visible .recaptcha-modal__panel {
-  transform: translateY(0) scale(1);
-}
-
-@media (min-width: 640px) {
-  .recaptcha-modal__panel {
-    transform: translateY(8px) scale(0.98);
-  }
+  transform: scale(1);
 }
 
 /* ── Field availability checking (register / auth forms) ── */
@@ -5356,7 +5350,12 @@ body.recaptcha-modal-open {
 .register-submit-btn--loading {
   opacity: 1 !important;
   cursor: wait !important;
-  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 50%, #4f46e5 100%) !important;
+  background: linear-gradient(
+    135deg,
+    #7c3aed 0%,
+    #6366f1 50%,
+    #4f46e5 100%
+  ) !important;
   box-shadow:
     0 1px 0 rgb(255 255 255 / 0.12) inset,
     0 10px 28px -10px rgb(124 58 237 / 0.55) !important;

@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import LoadImage from "@/components/ImageLoad";
 import { Advertisement } from "@/types/Menu";
 import { adRowMetrics } from "@/lib/adMetrics";
+import { normalizeExternalUrl } from "@/lib/normalizeExternalUrl";
 import {
   IoCreateOutline,
   IoEllipseSharp,
@@ -35,7 +36,9 @@ export default function AdCard({
   const imageSrc = ad.imageUrl ?? (ad as { image?: string }).image ?? "";
   const showStatus = ad.isActive !== undefined;
   const active = ad.isActive !== false;
-  const link = ad.linkUrl?.trim();
+  const link = ad.linkUrl?.trim()
+    ? normalizeExternalUrl(ad.linkUrl.trim())
+    : undefined;
 
   return (
     <article

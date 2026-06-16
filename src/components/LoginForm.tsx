@@ -130,9 +130,7 @@ export default function LoginForm() {
         errorType?: string;
       };
       const errorMessage =
-        payload?.error ||
-        payload?.message ||
-        t("auth.invalidCredentials");
+        payload?.error || payload?.message || t("auth.invalidCredentials");
       setApiError(errorMessage);
       setLoading(false);
       recaptchaRef.current?.reset();

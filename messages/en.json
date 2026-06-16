@@ -2443,7 +2443,7 @@
       "editError": "Failed to update advertisement",
       "titlePlaceholder": "e.g., Summer Offer",
       "contentPlaceholder": "Promotion details...",
-      "linkUrlPlaceholder": "https://..."
+      "linkUrlPlaceholder": "https://... or www...."
     },
     "freePlanTitle": "This feature is available on paid plans only",
     "freePlanDescription": "Upgrade your plan to enable advertisements and highlight your offers.",
