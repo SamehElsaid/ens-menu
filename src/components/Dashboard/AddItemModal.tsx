@@ -20,9 +20,19 @@ import {
   IoEllipseSharp,
   IoCheckmarkCircle,
   IoRemoveCircle,
+  IoTrashOutline,
 } from "react-icons/io5";
 import CustomBtn from "../Custom/CustomBtn";
 import { MdOutlineFastfood } from "react-icons/md";
+
+type PriceMode = "single" | "multiple";
+
+interface ItemSizeRow {
+  id: string;
+  nameAr: string;
+  nameEn: string;
+  price: string;
+}
 
 export interface AddItemFormData {
   nameAr: string;
@@ -34,6 +44,15 @@ export interface AddItemFormData {
   originalPrice: string;
   discountPercent: string;
   isAvailable: boolean;
+}
+
+function createSizeRow(): ItemSizeRow {
+  return {
+    id: crypto.randomUUID(),
+    nameAr: "",
+    nameEn: "",
+    price: "",
+  };
 }
 
 interface AddItemModalProps {
@@ -63,6 +82,12 @@ export default function AddItemModal({
   const [isDragOver, setIsDragOver] = useState(false);
   const [pexelsModalOpen, setPexelsModalOpen] = useState(false);
   const [categoriesLocal, setCategoriesLocal] = useState<Category[]>([]);
+  const [priceMode, setPriceMode] = useState<PriceMode>("single");
+  const [sizes, setSizes] = useState<ItemSizeRow[]>([]);
+  const [sizesError, setSizesError] = useState<string | null>(null);
+  const [sizeFieldErrors, setSizeFieldErrors] = useState<
+    Record<string, Partial<Record<"nameAr" | "nameEn" | "price", string>>>
+  >({});
   const categories = categoriesProp ?? categoriesLocal;
   const modalRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -153,6 +178,10 @@ export default function AddItemModal({
           item.discountPercent != null ? String(item.discountPercent) : "",
         isAvailable: item.isAvailable ?? item.available ?? true,
       });
+      setPriceMode("single");
+      setSizes([]);
+      setSizesError(null);
+      setSizeFieldErrors({});
       const url = item.imageUrl ?? item.image ?? "";
       setImagePreview(url || null);
       setImage(null);
@@ -169,6 +198,10 @@ export default function AddItemModal({
         discountPercent: "",
         isAvailable: true,
       });
+      setPriceMode("single");
+      setSizes([]);
+      setSizesError(null);
+      setSizeFieldErrors({});
       setImagePreview(null);
       setImage(null);
       setSelectedImageUrl(null);
@@ -188,7 +221,51 @@ export default function AddItemModal({
     return () => window.removeEventListener("keydown", handleEscape);
   }, [onClose, isCreating]);
 
+  const validateSizes = () => {
+    const nextErrors: Record<
+      string,
+      Partial<Record<"nameAr" | "nameEn" | "price", string>>
+    > = {};
+    let hasError = false;
+
+    for (const size of sizes) {
+      const rowErrors: Partial<Record<"nameAr" | "nameEn" | "price", string>> =
+        {};
+
+      if (!size.nameAr.trim()) {
+        rowErrors.nameAr = t("nameArRequired");
+        hasError = true;
+      }
+      if (!size.nameEn.trim()) {
+        rowErrors.nameEn = t("nameEnRequired");
+        hasError = true;
+      }
+      if (!size.price.trim() || Number.isNaN(Number(size.price))) {
+        rowErrors.price = t("priceRequired");
+        hasError = true;
+      }
+
+      if (Object.keys(rowErrors).length > 0) {
+        nextErrors[size.id] = rowErrors;
+      }
+    }
+
+    setSizeFieldErrors(nextErrors);
+    return !hasError;
+  };
+
   const onSubmit = async (data: AddItemFormData) => {
+    if (priceMode === "multiple") {
+      if (sizes.length === 0) {
+        setSizesError(t("sizesRequired"));
+        return;
+      }
+      if (!validateSizes()) {
+        return;
+      }
+    }
+    setSizesError(null);
+
     try {
       setIsCreating(true);
 
@@ -215,19 +292,32 @@ export default function AddItemModal({
         imageUrl = selectedImageUrl;
       }
 
+      const normalizedSizes =
+        priceMode === "multiple"
+          ? sizes.map((size) => ({
+              nameAr: size.nameAr.trim(),
+              nameEn: size.nameEn.trim(),
+              price: Number(size.price),
+            }))
+          : undefined;
+
       const payload = {
         nameAr: data.nameAr,
         nameEn: data.nameEn,
         descriptionAr: data.descriptionAr || undefined,
         descriptionEn: data.descriptionEn || undefined,
         categoryId: Number(data.categoryId) || undefined,
-        price: Number(data.price) || 0,
-        originalPrice: data.originalPrice
-          ? Number(data.originalPrice)
-          : undefined,
-        discountPercent: data.discountPercent
-          ? Number(data.discountPercent)
-          : undefined,
+        price:
+          priceMode === "single"
+            ? Number(data.price) || 0
+            : Math.min(...(normalizedSizes?.map((size) => size.price) ?? [0])),
+        ...(priceMode === "single" && data.originalPrice
+          ? { originalPrice: Number(data.originalPrice) }
+          : {}),
+        ...(priceMode === "single" && data.discountPercent
+          ? { discountPercent: Number(data.discountPercent) }
+          : {}),
+        ...(normalizedSizes ? { sizes: normalizedSizes } : {}),
         isAvailable: data.isAvailable,
         ...(imageUrl && { imageUrl, image: imageUrl }),
       };
@@ -326,6 +416,53 @@ export default function AddItemModal({
 
   const getCategoryName = (cat: Category) =>
     locale === "ar" ? cat.nameAr || cat.nameEn : cat.nameEn || cat.nameAr;
+
+  const addSizeRow = () => {
+    setSizes((prev) => [...prev, createSizeRow()]);
+    setSizesError(null);
+  };
+
+  const updateSizeRow = (id: string, patch: Partial<ItemSizeRow>) => {
+    setSizes((prev) =>
+      prev.map((row) => (row.id === id ? { ...row, ...patch } : row)),
+    );
+    setSizesError(null);
+    setSizeFieldErrors((prev) => {
+      if (!prev[id]) return prev;
+      const next = { ...prev[id] };
+      if (patch.nameAr !== undefined) delete next.nameAr;
+      if (patch.nameEn !== undefined) delete next.nameEn;
+      if (patch.price !== undefined) delete next.price;
+      if (Object.keys(next).length === 0) {
+        const { [id]: _removed, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [id]: next };
+    });
+  };
+
+  const removeSizeRow = (id: string) => {
+    setSizes((prev) => {
+      const next = prev.filter((row) => row.id !== id);
+      return next.length === 0 ? [createSizeRow()] : next;
+    });
+    setSizesError(null);
+    setSizeFieldErrors((prev) => {
+      const { [id]: _removed, ...rest } = prev;
+      return rest;
+    });
+  };
+
+  const handlePriceModeChange = (mode: PriceMode) => {
+    setPriceMode(mode);
+    setSizesError(null);
+    setSizeFieldErrors({});
+    if (mode === "single") {
+      setSizes([]);
+    } else {
+      setSizes([createSizeRow()]);
+    }
+  };
 
   return (
     <div
@@ -565,106 +702,223 @@ export default function AddItemModal({
 
             <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
               <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
-                {t("category")} & {t("price")}
+                {t("category")}
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t("category")} *
-                  </label>
-                  <Controller
-                    name="categoryId"
-                    control={control}
-                    rules={{ required: t("categoryRequired") }}
-                    render={({ field }) => (
-                      <select
-                        value={field.value}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        onBlur={field.onBlur}
-                        className="w-full px-4 py-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary focus:border-primary"
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t("category")} *
+                </label>
+                <Controller
+                  name="categoryId"
+                  control={control}
+                  rules={{ required: t("categoryRequired") }}
+                  render={({ field }) => (
+                    <select
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      onBlur={field.onBlur}
+                      className="w-full px-4 py-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary focus:border-primary"
+                    >
+                      <option value="">— {tItems("selectCategory")} —</option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={String(cat.id)}>
+                          {getCategoryName(cat)}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                />
+                {errors.categoryId?.message && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.categoryId.message}
+                  </p>
+                )}
+              </div>
+            </section>
+
+            <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
+                {t("price")}
+              </h3>
+              <div className="flex rounded-2xl p-1 bg-gray-100 dark:bg-gray-600/40 border border-gray-200/80 dark:border-gray-600/50 w-fit mb-4">
+                <button
+                  type="button"
+                  onClick={() => handlePriceModeChange("single")}
+                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    priceMode === "single"
+                      ? "bg-white dark:bg-gray-700 text-primary shadow-sm border border-gray-200/80 dark:border-gray-600 ring-1 ring-primary/20"
+                      : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                  }`}
+                >
+                  {t("oneSize")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handlePriceModeChange("multiple")}
+                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    priceMode === "multiple"
+                      ? "bg-white dark:bg-gray-700 text-primary shadow-sm border border-gray-200/80 dark:border-gray-600 ring-1 ring-primary/20"
+                      : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                  }`}
+                >
+                  {t("multipleSizes")}
+                </button>
+              </div>
+
+              {priceMode === "single" ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      {t("price")} *
+                    </label>
+                    <Controller
+                      name="price"
+                      control={control}
+                      rules={{
+                        validate: (value) =>
+                          priceMode !== "single" || value.trim()
+                            ? true
+                            : t("priceRequired"),
+                      }}
+                      render={({ field }) => (
+                        <CustomInput
+                          type="number"
+                          min={0}
+                          step="0.01"
+                          value={field.value}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          onBlur={field.onBlur}
+                          className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
+                          placeholder="0"
+                          error={errors.price?.message}
+                        />
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      {t("originalPrice")}
+                    </label>
+                    <Controller
+                      name="originalPrice"
+                      control={control}
+                      render={({ field }) => (
+                        <CustomInput
+                          type="number"
+                          min={0}
+                          step="0.01"
+                          value={field.value}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          onBlur={field.onBlur}
+                          className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
+                          placeholder={t("optionalPlaceholder")}
+                        />
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      {t("discountPercent")}
+                    </label>
+                    <Controller
+                      name="discountPercent"
+                      control={control}
+                      render={({ field }) => (
+                        <CustomInput
+                          type="number"
+                          min={0}
+                          max={100}
+                          step="1"
+                          value={field.value}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          onBlur={field.onBlur}
+                          className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
+                          placeholder="0"
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {sizes.map((size) => (
+                    <div
+                      key={size.id}
+                      className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr_auto] gap-3 items-start p-4 rounded-2xl border border-gray-200 dark:border-gray-600 bg-white/70 dark:bg-gray-800/50"
+                    >
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          {t("sizeNameAr")} *
+                        </label>
+                        <CustomInput
+                          type="text"
+                          value={size.nameAr}
+                          onChange={(e) =>
+                            updateSizeRow(size.id, { nameAr: e.target.value })
+                          }
+                          className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
+                          placeholder="مثال: صغير"
+                          dir="rtl"
+                          error={sizeFieldErrors[size.id]?.nameAr}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          {t("sizeNameEn")} *
+                        </label>
+                        <CustomInput
+                          type="text"
+                          value={size.nameEn}
+                          onChange={(e) =>
+                            updateSizeRow(size.id, { nameEn: e.target.value })
+                          }
+                          className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
+                          placeholder="e.g. Small"
+                          error={sizeFieldErrors[size.id]?.nameEn}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          {t("price")} *
+                        </label>
+                        <CustomInput
+                          type="number"
+                          min={0}
+                          step="0.01"
+                          value={size.price}
+                          onChange={(e) =>
+                            updateSizeRow(size.id, { price: e.target.value })
+                          }
+                          className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
+                          placeholder="0"
+                          error={sizeFieldErrors[size.id]?.price}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeSizeRow(size.id)}
+                        className="mt-8 p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                        aria-label={tItems("deleteConfirmTitle")}
                       >
-                        <option value="">— {tItems("selectCategory")} —</option>
-                        {categories.map((cat) => (
-                          <option key={cat.id} value={String(cat.id)}>
-                            {getCategoryName(cat)}
-                          </option>
-                        ))}
-                      </select>
-                    )}
-                  />
-                  {errors.categoryId?.message && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.categoryId.message}
-                    </p>
+                        <IoTrashOutline className="text-lg" />
+                      </button>
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={addSizeRow}
+                    className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                  >
+                    <IoAddCircleOutline className="text-lg" />
+                    {t("addSize")}
+                  </button>
+
+                  {sizesError && (
+                    <p className="text-xs text-red-500">{sizesError}</p>
                   )}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t("price")} *
-                  </label>
-                  <Controller
-                    name="price"
-                    control={control}
-                    rules={{ required: t("priceRequired") }}
-                    render={({ field }) => (
-                      <CustomInput
-                        type="number"
-                        min={0}
-                        step="0.01"
-                        value={field.value}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        onBlur={field.onBlur}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                        placeholder="0"
-                        error={errors.price?.message}
-                      />
-                    )}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t("originalPrice")}
-                  </label>
-                  <Controller
-                    name="originalPrice"
-                    control={control}
-                    render={({ field }) => (
-                      <CustomInput
-                        type="number"
-                        min={0}
-                        step="0.01"
-                        value={field.value}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        onBlur={field.onBlur}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                        placeholder={t("optionalPlaceholder")}
-                      />
-                    )}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t("discountPercent")}
-                  </label>
-                  <Controller
-                    name="discountPercent"
-                    control={control}
-                    render={({ field }) => (
-                      <CustomInput
-                        type="number"
-                        min={0}
-                        max={100}
-                        step="1"
-                        value={field.value}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        onBlur={field.onBlur}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                        placeholder="0"
-                      />
-                    )}
-                  />
-                </div>
-              </div>
+              )}
             </section>
 
             <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
