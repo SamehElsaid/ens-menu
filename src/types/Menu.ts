@@ -94,6 +94,18 @@ export interface ItemCategoryRef {
   [key: string]: unknown;
 }
 
+export interface ItemSizeOption {
+  nameAr: string;
+  nameEn: string;
+  price: number;
+}
+
+export interface ItemVariantOption {
+  labelAr: string;
+  labelEn: string;
+  price: number;
+}
+
 export interface Item {
   id: number;
   /** من الـ API قد يأتي name فقط (بدون تفريق عربي/إنجليزي) */
@@ -115,6 +127,8 @@ export interface Item {
   price: number;
   originalPrice?: number;
   discountPercent?: number;
+  sizes?: ItemSizeOption[];
+  variants?: ItemVariantOption[];
   imageUrl?: string;
   image?: string;
   /** API قد يرسل available بدل isAvailable */

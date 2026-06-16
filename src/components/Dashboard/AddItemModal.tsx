@@ -34,6 +34,16 @@ interface ItemSizeRow {
   price: string;
 }
 
+interface ItemVariantRow {
+  id: string;
+  labelAr: string;
+  labelEn: string;
+  price: string;
+}
+
+type SizeFieldKey = "nameAr" | "nameEn" | "price";
+type VariantFieldKey = "labelAr" | "labelEn" | "price";
+
 export interface AddItemFormData {
   nameAr: string;
   nameEn: string;
@@ -41,7 +51,6 @@ export interface AddItemFormData {
   descriptionEn: string;
   categoryId: string;
   price: string;
-  originalPrice: string;
   discountPercent: string;
   isAvailable: boolean;
 }
@@ -53,6 +62,45 @@ function createSizeRow(): ItemSizeRow {
     nameEn: "",
     price: "",
   };
+}
+
+function createVariantRow(): ItemVariantRow {
+  return {
+    id: crypto.randomUUID(),
+    labelAr: "",
+    labelEn: "",
+    price: "",
+  };
+}
+
+function parseItemSizes(item: Item): ItemSizeRow[] {
+  const raw = item.sizes;
+  if (!Array.isArray(raw) || raw.length === 0) return [];
+
+  return raw.map((size) => {
+    const row = size as Record<string, unknown>;
+    return {
+      id: crypto.randomUUID(),
+      nameAr: String(row.nameAr ?? row.name_ar ?? ""),
+      nameEn: String(row.nameEn ?? row.name_en ?? ""),
+      price: row.price != null ? String(row.price) : "",
+    };
+  });
+}
+
+function parseItemVariants(item: Item): ItemVariantRow[] {
+  const raw = item.variants;
+  if (!Array.isArray(raw) || raw.length === 0) return [];
+
+  return raw.map((variant) => {
+    const row = variant as Record<string, unknown>;
+    return {
+      id: crypto.randomUUID(),
+      labelAr: String(row.labelAr ?? row.label_ar ?? row.label ?? ""),
+      labelEn: String(row.labelEn ?? row.label_en ?? row.label ?? ""),
+      price: row.price != null ? String(row.price) : "",
+    };
+  });
 }
 
 interface AddItemModalProps {
@@ -86,7 +134,11 @@ export default function AddItemModal({
   const [sizes, setSizes] = useState<ItemSizeRow[]>([]);
   const [sizesError, setSizesError] = useState<string | null>(null);
   const [sizeFieldErrors, setSizeFieldErrors] = useState<
-    Record<string, Partial<Record<"nameAr" | "nameEn" | "price", string>>>
+    Record<string, Partial<Record<SizeFieldKey, string>>>
+  >({});
+  const [variants, setVariants] = useState<ItemVariantRow[]>([]);
+  const [variantFieldErrors, setVariantFieldErrors] = useState<
+    Record<string, Partial<Record<VariantFieldKey, string>>>
   >({});
   const categories = categoriesProp ?? categoriesLocal;
   const modalRef = useRef<HTMLDivElement>(null);
@@ -108,7 +160,6 @@ export default function AddItemModal({
       descriptionEn: "",
       categoryId: "",
       price: "",
-      originalPrice: "",
       discountPercent: "",
       isAvailable: true,
     },
@@ -148,6 +199,8 @@ export default function AddItemModal({
       };
 
       const fallbackName = item.name ?? snake.name_en ?? snake.name_ar ?? "";
+      const parsedSizes = parseItemSizes(item);
+      const parsedVariants = parseItemVariants(item);
 
       reset({
         nameAr: item.nameAr ?? snake.name_ar ?? fallbackName,
@@ -172,16 +225,16 @@ export default function AddItemModal({
             "",
         ),
         price: item.price != null ? String(item.price) : "",
-        originalPrice:
-          item.originalPrice != null ? String(item.originalPrice) : "",
         discountPercent:
           item.discountPercent != null ? String(item.discountPercent) : "",
         isAvailable: item.isAvailable ?? item.available ?? true,
       });
-      setPriceMode("single");
-      setSizes([]);
+      setPriceMode(parsedSizes.length > 0 ? "multiple" : "single");
+      setSizes(parsedSizes.length > 0 ? parsedSizes : []);
+      setVariants(parsedVariants);
       setSizesError(null);
       setSizeFieldErrors({});
+      setVariantFieldErrors({});
       const url = item.imageUrl ?? item.image ?? "";
       setImagePreview(url || null);
       setImage(null);
@@ -194,14 +247,15 @@ export default function AddItemModal({
         descriptionEn: "",
         categoryId: "",
         price: "",
-        originalPrice: "",
         discountPercent: "",
         isAvailable: true,
       });
       setPriceMode("single");
       setSizes([]);
+      setVariants([]);
       setSizesError(null);
       setSizeFieldErrors({});
+      setVariantFieldErrors({});
       setImagePreview(null);
       setImage(null);
       setSelectedImageUrl(null);
@@ -224,13 +278,12 @@ export default function AddItemModal({
   const validateSizes = () => {
     const nextErrors: Record<
       string,
-      Partial<Record<"nameAr" | "nameEn" | "price", string>>
+      Partial<Record<SizeFieldKey, string>>
     > = {};
     let hasError = false;
 
     for (const size of sizes) {
-      const rowErrors: Partial<Record<"nameAr" | "nameEn" | "price", string>> =
-        {};
+      const rowErrors: Partial<Record<SizeFieldKey, string>> = {};
 
       if (!size.nameAr.trim()) {
         rowErrors.nameAr = t("nameArRequired");
@@ -254,6 +307,40 @@ export default function AddItemModal({
     return !hasError;
   };
 
+  const validateVariants = () => {
+    if (variants.length === 0) return true;
+
+    const nextErrors: Record<
+      string,
+      Partial<Record<VariantFieldKey, string>>
+    > = {};
+    let hasError = false;
+
+    for (const variant of variants) {
+      const rowErrors: Partial<Record<VariantFieldKey, string>> = {};
+
+      if (!variant.labelAr.trim()) {
+        rowErrors.labelAr = t("nameArRequired");
+        hasError = true;
+      }
+      if (!variant.labelEn.trim()) {
+        rowErrors.labelEn = t("nameEnRequired");
+        hasError = true;
+      }
+      if (!variant.price.trim() || Number.isNaN(Number(variant.price))) {
+        rowErrors.price = t("priceRequired");
+        hasError = true;
+      }
+
+      if (Object.keys(rowErrors).length > 0) {
+        nextErrors[variant.id] = rowErrors;
+      }
+    }
+
+    setVariantFieldErrors(nextErrors);
+    return !hasError;
+  };
+
   const onSubmit = async (data: AddItemFormData) => {
     if (priceMode === "multiple") {
       if (sizes.length === 0) {
@@ -263,6 +350,9 @@ export default function AddItemModal({
       if (!validateSizes()) {
         return;
       }
+    }
+    if (!validateVariants()) {
+      return;
     }
     setSizesError(null);
 
@@ -301,6 +391,15 @@ export default function AddItemModal({
             }))
           : undefined;
 
+      const normalizedVariants =
+        variants.length > 0
+          ? variants.map((variant) => ({
+              labelAr: variant.labelAr.trim(),
+              labelEn: variant.labelEn.trim(),
+              price: Number(variant.price),
+            }))
+          : undefined;
+
       const payload = {
         nameAr: data.nameAr,
         nameEn: data.nameEn,
@@ -311,13 +410,11 @@ export default function AddItemModal({
           priceMode === "single"
             ? Number(data.price) || 0
             : Math.min(...(normalizedSizes?.map((size) => size.price) ?? [0])),
-        ...(priceMode === "single" && data.originalPrice
-          ? { originalPrice: Number(data.originalPrice) }
-          : {}),
-        ...(priceMode === "single" && data.discountPercent
+        ...(data.discountPercent
           ? { discountPercent: Number(data.discountPercent) }
           : {}),
         ...(normalizedSizes ? { sizes: normalizedSizes } : {}),
+        ...(normalizedVariants ? { variants: normalizedVariants } : {}),
         isAvailable: data.isAvailable,
         ...(imageUrl && { imageUrl, image: imageUrl }),
       };
@@ -462,6 +559,37 @@ export default function AddItemModal({
     } else {
       setSizes([createSizeRow()]);
     }
+  };
+
+  const addVariantRow = () => {
+    setVariants((prev) => [...prev, createVariantRow()]);
+    setVariantFieldErrors({});
+  };
+
+  const updateVariantRow = (id: string, patch: Partial<ItemVariantRow>) => {
+    setVariants((prev) =>
+      prev.map((row) => (row.id === id ? { ...row, ...patch } : row)),
+    );
+    setVariantFieldErrors((prev) => {
+      if (!prev[id]) return prev;
+      const next = { ...prev[id] };
+      if (patch.labelAr !== undefined) delete next.labelAr;
+      if (patch.labelEn !== undefined) delete next.labelEn;
+      if (patch.price !== undefined) delete next.price;
+      if (Object.keys(next).length === 0) {
+        const { [id]: _removed, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [id]: next };
+    });
+  };
+
+  const removeVariantRow = (id: string) => {
+    setVariants((prev) => prev.filter((row) => row.id !== id));
+    setVariantFieldErrors((prev) => {
+      const { [id]: _removed, ...rest } = prev;
+      return rest;
+    });
   };
 
   return (
@@ -766,78 +894,33 @@ export default function AddItemModal({
               </div>
 
               {priceMode === "single" ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {t("price")} *
-                    </label>
-                    <Controller
-                      name="price"
-                      control={control}
-                      rules={{
-                        validate: (value) =>
-                          priceMode !== "single" || value.trim()
-                            ? true
-                            : t("priceRequired"),
-                      }}
-                      render={({ field }) => (
-                        <CustomInput
-                          type="number"
-                          min={0}
-                          step="0.01"
-                          value={field.value}
-                          onChange={(e) => field.onChange(e.target.value)}
-                          onBlur={field.onBlur}
-                          className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                          placeholder="0"
-                          error={errors.price?.message}
-                        />
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {t("originalPrice")}
-                    </label>
-                    <Controller
-                      name="originalPrice"
-                      control={control}
-                      render={({ field }) => (
-                        <CustomInput
-                          type="number"
-                          min={0}
-                          step="0.01"
-                          value={field.value}
-                          onChange={(e) => field.onChange(e.target.value)}
-                          onBlur={field.onBlur}
-                          className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                          placeholder={t("optionalPlaceholder")}
-                        />
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {t("discountPercent")}
-                    </label>
-                    <Controller
-                      name="discountPercent"
-                      control={control}
-                      render={({ field }) => (
-                        <CustomInput
-                          type="number"
-                          min={0}
-                          max={100}
-                          step="1"
-                          value={field.value}
-                          onChange={(e) => field.onChange(e.target.value)}
-                          onBlur={field.onBlur}
-                          className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                          placeholder="0"
-                        />
-                      )}
-                    />
-                  </div>
+                <div className="max-w-md">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {t("price")} *
+                  </label>
+                  <Controller
+                    name="price"
+                    control={control}
+                    rules={{
+                      validate: (value) =>
+                        priceMode !== "single" || value.trim()
+                          ? true
+                          : t("priceRequired"),
+                    }}
+                    render={({ field }) => (
+                      <CustomInput
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        value={field.value}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        onBlur={field.onBlur}
+                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
+                        placeholder="0"
+                        error={errors.price?.message}
+                      />
+                    )}
+                  />
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -919,6 +1002,119 @@ export default function AddItemModal({
                   )}
                 </div>
               )}
+
+              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600 max-w-md">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t("discountPercent")}
+                </label>
+                <Controller
+                  name="discountPercent"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomInput
+                      type="number"
+                      min={0}
+                      max={100}
+                      step="1"
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      onBlur={field.onBlur}
+                      className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
+                      placeholder="0"
+                    />
+                  )}
+                />
+              </div>
+            </section>
+
+            <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1">
+                {t("addOns")}
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                {t("addOnsHint")}
+              </p>
+
+              <div className="space-y-4">
+                {variants.map((variant) => (
+                  <div
+                    key={variant.id}
+                    className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr_auto] gap-3 items-start p-4 rounded-2xl border border-gray-200 dark:border-gray-600 bg-white/70 dark:bg-gray-800/50"
+                  >
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {t("variantLabelAr")} *
+                      </label>
+                      <CustomInput
+                        type="text"
+                        value={variant.labelAr}
+                        onChange={(e) =>
+                          updateVariantRow(variant.id, {
+                            labelAr: e.target.value,
+                          })
+                        }
+                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
+                        placeholder="مثال: جبنة إضافية"
+                        dir="rtl"
+                        error={variantFieldErrors[variant.id]?.labelAr}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {t("variantLabelEn")} *
+                      </label>
+                      <CustomInput
+                        type="text"
+                        value={variant.labelEn}
+                        onChange={(e) =>
+                          updateVariantRow(variant.id, {
+                            labelEn: e.target.value,
+                          })
+                        }
+                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
+                        placeholder="e.g. Extra cheese"
+                        error={variantFieldErrors[variant.id]?.labelEn}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {t("price")} *
+                      </label>
+                      <CustomInput
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        value={variant.price}
+                        onChange={(e) =>
+                          updateVariantRow(variant.id, {
+                            price: e.target.value,
+                          })
+                        }
+                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
+                        placeholder="0"
+                        error={variantFieldErrors[variant.id]?.price}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeVariantRow(variant.id)}
+                      className="mt-8 p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                      aria-label={tItems("deleteConfirmTitle")}
+                    >
+                      <IoTrashOutline className="text-lg" />
+                    </button>
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={addVariantRow}
+                  className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                >
+                  <IoAddCircleOutline className="text-lg" />
+                  {t("addVariant")}
+                </button>
+              </div>
             </section>
 
             <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
