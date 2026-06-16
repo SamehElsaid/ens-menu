@@ -19,6 +19,7 @@ import {
   useProfileGateStatus,
 } from "@/components/Dashboard/RequirePhone";
 import { DashboardTitleProvider } from "@/components/Dashboard/DashboardTitleProvider";
+import UpcomingFeaturesAnnouncement from "@/components/Dashboard/UpcomingFeaturesAnnouncement";
 import { usePathname } from "@/i18n/navigation";
 import {
   extractDashboardMenuRouteKey,
@@ -155,6 +156,7 @@ export default function DashboardClientLayout({
     <DashboardTitleProvider>
       <AuthUserHydrate />
       <FcmTokenSync />
+      <UpcomingFeaturesAnnouncement />
       {isAppLoading ? null : accountGateStatus === "suspended" ? (
         <Layout segment={sidebarSegment} hideSidebar>
           <SuspendedAccountScreen />
