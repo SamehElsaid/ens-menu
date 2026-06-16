@@ -197,9 +197,11 @@ export function AdminBarChart({
 export function AdminMonthGrid({
   points,
   dir = "ltr",
+  formatCount,
 }: {
   points: { month: string; count: number }[];
   dir?: "rtl" | "ltr";
+  formatCount?: (count: number) => string;
 }) {
   if (points.length === 0) return null;
 
@@ -214,7 +216,7 @@ export function AdminMonthGrid({
             {item.month}
           </p>
           <p className="text-xl font-bold text-slate-900 dark:text-slate-100 tabular-nums">
-            {item.count.toLocaleString()}
+            {formatCount ? formatCount(item.count) : item.count.toLocaleString()}
           </p>
         </div>
       ))}
