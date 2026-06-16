@@ -2534,6 +2534,19 @@
       "deliveryOrders": "Delivery orders will be available on Pro plans. Upgrade to get early access when we launch.",
       "staff": "Staff and waiter management is a Pro feature. Upgrade to add team members and route orders to them.",
       "advertisements": "In-menu advertisements are a Pro feature. Upgrade to create and manage promotional ads."
+    },
+    "upcomingFeatures": {
+      "close": "Got it",
+      "countdownDays": "Days",
+      "countdownHours": "Hours",
+      "countdownMinutes": "Minutes",
+      "countdownSeconds": "Seconds",
+      "features": {
+        "deliveryOrders": {
+          "title": "Delivery is coming",
+          "description": "Soon you'll accept delivery orders straight from your menu, track every order in real time, and manage deliveries from one place — no extra apps needed."
+        }
+      }
     }
   },
   "tableOrders": {
