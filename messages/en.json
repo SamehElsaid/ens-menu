@@ -2345,6 +2345,8 @@
     "missingImagesHint": "Some items need photos — tap Add photo",
     "mobileFabLabel": "Add item",
     "mobileUploadHint": "Tap to add or change photo",
+    "sizesCount": "{count} sizes",
+    "addOnsCount": "{count} add-ons",
     "addModal": {
       "title": "Add Item",
       "editTitle": "Edit Item",

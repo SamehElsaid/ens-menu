@@ -172,9 +172,26 @@ export default function ItemsPage() {
     setPage(1);
   }, []);
 
-  const handleEdit = useCallback((item: Item) => {
-    setEditingItem(item);
-  }, []);
+  const handleEdit = useCallback(
+    async (item: Item) => {
+      if (!menuId) return;
+      try {
+        const result = await axiosGet<{ item?: Item } | Item>(
+          `/menus/${menuId}/items/${item.id}?locale=${locale}`,
+          locale,
+        );
+        if (result.status && result.data) {
+          const payload = result.data as { item?: Item };
+          setEditingItem(payload.item ?? (result.data as Item));
+          return;
+        }
+      } catch {
+        // fallback to list row
+      }
+      setEditingItem(item);
+    },
+    [menuId, locale],
+  );
   const handleDelete = useCallback((item: Item) => {
     setDeletingItem(item);
   }, []);

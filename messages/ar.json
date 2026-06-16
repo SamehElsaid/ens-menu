@@ -2253,6 +2253,8 @@
     "missingImagesHint": "في أصناف محتاجة صور — اضغط على «أضف صورة»",
     "mobileFabLabel": "إضافة صنف",
     "mobileUploadHint": "اضغط لإضافة أو تغيير الصورة",
+    "sizesCount": "{count} أحجام",
+    "addOnsCount": "{count} إضافات",
     "addModal": {
       "title": "إضافة عنصر",
       "editTitle": "تعديل العنصر",

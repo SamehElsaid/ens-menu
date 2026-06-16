@@ -5,6 +5,12 @@ import LoadImage from "@/components/ImageLoad";
 import { Item } from "@/types/Menu";
 import { formatMenuPrice } from "@/lib/formatMenuPrice";
 import {
+  getItemDisplayPrice,
+  getItemSizes,
+  itemHasSizes,
+} from "@/lib/itemSizes";
+import { getItemVariants, itemHasVariants } from "@/lib/itemVariants";
+import {
   IoCreateOutline,
   IoEllipseSharp,
   IoTrashOutline,
@@ -39,7 +45,12 @@ export default function ItemCard({
     item.originalPrice != null &&
     item.originalPrice > 0 &&
     item.originalPrice !== item.price;
-  const priceLabel = formatMenuPrice(item.price, currency, locale);
+  const sizes = getItemSizes(item);
+  const variants = getItemVariants(item);
+  const hasMultipleSizes = itemHasSizes(item);
+  const hasAddOns = itemHasVariants(item);
+  const displayPrice = getItemDisplayPrice(item);
+  const priceLabel = formatMenuPrice(displayPrice, currency, locale);
   const originalPriceLabel = hasDiscount
     ? formatMenuPrice(item.originalPrice, currency, locale)
     : null;
@@ -117,8 +128,20 @@ export default function ItemCard({
 
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
           <span className="text-xl font-extrabold tabular-nums tracking-tight text-primary">
-            {priceLabel}
+            {hasMultipleSizes
+              ? `${locale === "ar" ? "من " : "From "}${priceLabel}`
+              : priceLabel}
           </span>
+          {hasMultipleSizes ? (
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              {t("sizesCount", { count: sizes.length })}
+            </span>
+          ) : null}
+          {hasAddOns ? (
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              {t("addOnsCount", { count: variants.length })}
+            </span>
+          ) : null}
           {originalPriceLabel && (
             <span className="text-sm text-slate-400 line-through tabular-nums dark:text-slate-500">
               {originalPriceLabel}

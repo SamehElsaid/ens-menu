@@ -73,26 +73,54 @@ function createVariantRow(): ItemVariantRow {
   };
 }
 
-function parseItemSizes(item: Item): ItemSizeRow[] {
-  const raw = item.sizes;
-  if (!Array.isArray(raw) || raw.length === 0) return [];
+function getApiErrorMessage(data: unknown, locale: string): string | null {
+  if (!data || typeof data !== "object") return null;
+  const row = data as Record<string, unknown>;
+  if (typeof row.error === "string" && row.error.trim()) return row.error;
+  if (locale === "ar" && typeof row.errorAr === "string") return row.errorAr;
+  if (typeof row.errorEn === "string") return row.errorEn;
+  if (typeof row.message === "string") return row.message;
+  return null;
+}
 
-  return raw.map((size) => {
+function parseItemSizes(item: Item): ItemSizeRow[] {
+  let list: unknown = item.sizes;
+
+  if (typeof list === "string") {
+    try {
+      list = JSON.parse(list) as unknown;
+    } catch {
+      return [];
+    }
+  }
+
+  if (!Array.isArray(list) || list.length === 0) return [];
+
+  return list.map((size) => {
     const row = size as Record<string, unknown>;
     return {
       id: crypto.randomUUID(),
-      nameAr: String(row.nameAr ?? row.name_ar ?? ""),
-      nameEn: String(row.nameEn ?? row.name_en ?? ""),
+      nameAr: String(row.nameAr ?? row.name_ar ?? row.labelAr ?? row.label ?? ""),
+      nameEn: String(row.nameEn ?? row.name_en ?? row.labelEn ?? row.label ?? ""),
       price: row.price != null ? String(row.price) : "",
     };
   });
 }
 
 function parseItemVariants(item: Item): ItemVariantRow[] {
-  const raw = item.variants;
-  if (!Array.isArray(raw) || raw.length === 0) return [];
+  let list: unknown = item.variants;
 
-  return raw.map((variant) => {
+  if (typeof list === "string") {
+    try {
+      list = JSON.parse(list) as unknown;
+    } catch {
+      return [];
+    }
+  }
+
+  if (!Array.isArray(list) || list.length === 0) return [];
+
+  return list.map((variant) => {
     const row = variant as Record<string, unknown>;
     return {
       id: crypto.randomUUID(),
@@ -389,16 +417,13 @@ export default function AddItemModal({
               nameEn: size.nameEn.trim(),
               price: Number(size.price),
             }))
-          : undefined;
+          : [];
 
-      const normalizedVariants =
-        variants.length > 0
-          ? variants.map((variant) => ({
-              labelAr: variant.labelAr.trim(),
-              labelEn: variant.labelEn.trim(),
-              price: Number(variant.price),
-            }))
-          : undefined;
+      const normalizedVariants = variants.map((variant) => ({
+        labelAr: variant.labelAr.trim(),
+        labelEn: variant.labelEn.trim(),
+        price: Number(variant.price),
+      }));
 
       const payload = {
         nameAr: data.nameAr,
@@ -409,12 +434,12 @@ export default function AddItemModal({
         price:
           priceMode === "single"
             ? Number(data.price) || 0
-            : Math.min(...(normalizedSizes?.map((size) => size.price) ?? [0])),
+            : Math.min(...normalizedSizes.map((size) => size.price)),
         ...(data.discountPercent
           ? { discountPercent: Number(data.discountPercent) }
           : {}),
-        ...(normalizedSizes ? { sizes: normalizedSizes } : {}),
-        ...(normalizedVariants ? { variants: normalizedVariants } : {}),
+        sizes: priceMode === "multiple" ? normalizedSizes : [],
+        variants: normalizedVariants,
         isAvailable: data.isAvailable,
         ...(imageUrl && { imageUrl, image: imageUrl }),
       };
@@ -430,7 +455,7 @@ export default function AddItemModal({
           onClose();
           onRefresh?.();
         } else {
-          toast.error(t("editError"));
+          toast.error(getApiErrorMessage(result.data, locale) ?? t("editError"));
         }
       } else {
         const result = await axiosPost<typeof payload, Item>(
@@ -443,7 +468,7 @@ export default function AddItemModal({
           onClose();
           onRefresh?.();
         } else {
-          toast.error(t("createError"));
+          toast.error(getApiErrorMessage(result.data, locale) ?? t("createError"));
         }
       }
     } catch {
