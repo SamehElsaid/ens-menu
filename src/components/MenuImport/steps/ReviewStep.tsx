@@ -42,6 +42,7 @@ interface ReviewStepProps {
   onOpenConfirm: () => void;
   onCloseConfirm: () => void;
   onConfirmSave: () => void;
+  onRetrySave: () => void;
   onUpdateCategory: (
     categoryId: string,
     patch: Partial<ImportDraft["categories"][0]>,
@@ -97,6 +98,7 @@ export default function ReviewStep({
   onOpenConfirm,
   onCloseConfirm,
   onConfirmSave,
+  onRetrySave,
   onUpdateCategory,
   onUpdateItem,
   onUpdateVariant,
@@ -177,11 +179,16 @@ export default function ReviewStep({
 
   if (saveResult) {
     return (
-      <SaveResultPanel
-        result={saveResult}
-        menuId={menuId}
-        onNewUpload={onNewUpload}
-      />
+      <>
+        <SaveResultPanel
+          result={saveResult}
+          menuId={menuId}
+          onNewUpload={onNewUpload}
+          onRetrySave={onRetrySave}
+          isRetrying={isSaving}
+        />
+        <SaveProgressOverlay visible={isSaving} />
+      </>
     );
   }
 

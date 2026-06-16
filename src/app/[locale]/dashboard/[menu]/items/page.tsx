@@ -5,14 +5,18 @@ import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { axiosGet } from "@/shared/axiosCall";
 import { useAppSelector } from "@/store/hooks";
+import { useSameRouteRefresh } from "@/hooks/useSameRouteRefresh";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import AddItemModal from "@/components/Dashboard/AddItemModal";
 import DeleteItemConfirm from "@/components/Dashboard/DeleteItemConfirm";
 import MenuImportEntryButton from "@/components/MenuImport/MenuImportEntryButton";
 import ItemsCardGrid from "@/components/Dashboard/ItemsCardGrid";
+import CategorySearchSelect, {
+  type CategoryOption,
+} from "@/components/Dashboard/CategorySearchSelect";
 import MobileFloatingAddButton from "@/components/Dashboard/mobile/MobileFloatingAddButton";
 import LinkTo from "@/components/Global/LinkTo";
-import { Item, Category } from "@/types/Menu";
+import { Item } from "@/types/Menu";
 import {
   IoAddCircleOutline,
   IoSearchOutline,
@@ -36,37 +40,21 @@ export default function ItemsPage() {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
+  const [isEditItemLoading, setIsEditItemLoading] = useState(false);
   const [deletingItem, setDeletingItem] = useState<Item | null>(null);
   const [refreshing, setRefreshing] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [totalItems, setTotalItems] = useState<number>(0);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [searchInput, setSearchInput] = useState("");
   const [categoryFilterId, setCategoryFilterId] = useState<string>("");
+  const [selectedCategoryFilter, setSelectedCategoryFilter] =
+    useState<CategoryOption | null>(null);
   const [availableFilter, setAvailableFilter] = useState<string>("");
   const [appliedSearch, setAppliedSearch] = useState("");
   const [appliedCategoryId, setAppliedCategoryId] = useState<string>("");
   const [appliedAvailableFilter, setAppliedAvailableFilter] =
     useState<string>("");
-
-  const fetchCategories = useCallback(async () => {
-    if (!menuId) return;
-    try {
-      const result = await axiosGet<Category[] | { categories: Category[] }>(
-        `/menus/${menuId}/categories?page=1&limit=500`,
-        locale,
-      );
-      if (result.status && result.data) {
-        const raw = result.data as { categories?: Category[] };
-        const list =
-          raw?.categories ?? (Array.isArray(result.data) ? result.data : []);
-        setCategories(list);
-      }
-    } catch {
-      setCategories([]);
-    }
-  }, [menuId, locale]);
 
   const fetchItems = useCallback(async () => {
     if (!menuId) return;
@@ -112,10 +100,6 @@ export default function ItemsPage() {
   ]);
 
   useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
-
-  useEffect(() => {
     fetchItems();
   }, [fetchItems, refreshing, page]);
 
@@ -144,12 +128,6 @@ export default function ItemsPage() {
     [locale],
   );
 
-  const getCategoryDisplayName = useCallback(
-    (cat: Category) =>
-      locale === "ar" ? cat.nameAr || cat.nameEn : cat.nameEn || cat.nameAr,
-    [locale],
-  );
-
   const isFiltered =
     appliedSearch.trim().length > 0 ||
     appliedCategoryId.length > 0 ||
@@ -165,6 +143,7 @@ export default function ItemsPage() {
   const handleReset = useCallback(() => {
     setSearchInput("");
     setCategoryFilterId("");
+    setSelectedCategoryFilter(null);
     setAvailableFilter("");
     setAppliedSearch("");
     setAppliedCategoryId("");
@@ -175,6 +154,8 @@ export default function ItemsPage() {
   const handleEdit = useCallback(
     async (item: Item) => {
       if (!menuId) return;
+      setEditingItem(null);
+      setIsEditItemLoading(true);
       try {
         const result = await axiosGet<{ item?: Item } | Item>(
           `/menus/${menuId}/items/${item.id}?locale=${locale}`,
@@ -183,12 +164,14 @@ export default function ItemsPage() {
         if (result.status && result.data) {
           const payload = result.data as { item?: Item };
           setEditingItem(payload.item ?? (result.data as Item));
-          return;
+        } else {
+          setEditingItem(item);
         }
       } catch {
-        // fallback to list row
+        setEditingItem(item);
+      } finally {
+        setIsEditItemLoading(false);
       }
-      setEditingItem(item);
     },
     [menuId, locale],
   );
@@ -199,6 +182,8 @@ export default function ItemsPage() {
   const refreshList = useCallback(() => {
     setRefreshing((r) => r + 1);
   }, []);
+
+  useSameRouteRefresh(refreshList);
 
   const handleItemSaved = useCallback(() => {
     refreshList();
@@ -212,6 +197,7 @@ export default function ItemsPage() {
   const closeAddModal = useCallback(() => {
     setShowAddModal(false);
     setEditingItem(null);
+    setIsEditItemLoading(false);
   }, []);
 
   return (
@@ -275,26 +261,24 @@ export default function ItemsPage() {
               />
             </div>
           </div>
-          <div className="min-w-[180px]">
+          <div className="min-w-[220px]">
             <label className="block text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2">
               {t("category")}
             </label>
-            <select
-              value={categoryFilterId}
-              onChange={(e) => setCategoryFilterId(e.target.value)}
-              className={`w-full h-11 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-shadow appearance-none bg-size-[1.25rem] bg-no-repeat ${locale === "ar" ? "bg-position-[left_0.75rem_center] pl-10 pr-4" : "bg-position-[right_0.75rem_center] pr-10 pl-4"}`}
-              style={{
-                backgroundImage:
-                  "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")",
-              }}
-            >
-              <option value="">{t("allCategories")}</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={String(cat.id)}>
-                  {getCategoryDisplayName(cat)}
-                </option>
-              ))}
-            </select>
+            {menuId ? (
+              <CategorySearchSelect
+                menuId={menuId}
+                instanceId="items-category-filter"
+                variant="filter"
+                value={categoryFilterId}
+                selectedOption={selectedCategoryFilter}
+                placeholder={t("allCategories")}
+                onChange={(id, option) => {
+                  setCategoryFilterId(id);
+                  setSelectedCategoryFilter(option);
+                }}
+              />
+            ) : null}
           </div>
           <div className="min-w-40">
             <label className="block text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2">
@@ -386,11 +370,11 @@ export default function ItemsPage() {
         </div>
       )}
 
-      {(showAddModal || editingItem) && menuId && (
+      {(showAddModal || isEditItemLoading || editingItem) && menuId && (
         <AddItemModal
           menuId={menuId}
           item={editingItem}
-          categories={categories}
+          isItemLoading={isEditItemLoading}
           onClose={closeAddModal}
           onRefresh={handleItemSaved}
         />

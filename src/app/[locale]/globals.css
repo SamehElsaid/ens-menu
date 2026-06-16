@@ -1715,6 +1715,64 @@ textarea {
   @apply !text-slate-200;
 }
 
+.filter-select__control {
+  @apply !h-11 !min-h-11 !rounded-xl !border !border-slate-200 dark:!border-slate-600 !bg-slate-50 dark:!bg-slate-700/50 !shadow-none;
+}
+
+.filter-select__control--is-focused {
+  @apply !border-primary !ring-2 !ring-primary/40 !shadow-none;
+}
+
+.filter-select__single-value,
+.filter-select__input-container {
+  @apply !text-slate-800 dark:!text-slate-200 !text-sm;
+}
+
+.filter-select__placeholder {
+  @apply !text-slate-400 dark:!text-slate-500;
+}
+
+.filter-select__indicator svg {
+  @apply !text-slate-400 dark:!text-slate-500;
+}
+
+.filter-select__indicator-separator {
+  @apply !bg-slate-200 dark:!bg-slate-600;
+}
+
+.filter-select__menu {
+  @apply !z-[1000] !mt-1 !rounded-xl !border !border-slate-200 dark:!border-slate-600 !bg-white dark:!bg-slate-800 !shadow-lg;
+}
+
+.filter-select__menu-list {
+  @apply !py-1;
+}
+
+.filter-select__option {
+  @apply !cursor-pointer !text-slate-800 dark:!text-slate-200 !text-sm;
+}
+
+.filter-select__option--is-focused {
+  @apply !bg-slate-100 dark:!bg-slate-700;
+}
+
+.filter-select__option--is-selected {
+  @apply !bg-primary !text-white;
+}
+
+.filter-select__loading-message,
+.filter-select__loading-indicator {
+  @apply !text-slate-500 dark:!text-slate-400 !text-sm;
+}
+
+.dark .filter-select__control {
+  @apply !bg-slate-700/50 !border-slate-600;
+}
+
+.dark .filter-select__control--is-focused {
+  @apply !border-primary !ring-primary/40;
+}
+
 .react-datepicker-wrapper {
   @apply w-full;
 }

@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
-import type { ImportItem } from "@/types/menuImport";
+import type { ImportItem, ImportVariant } from "@/types/menuImport";
 import type { PexelsPhoto } from "@/types/pexels";
 import LoadImage from "@/components/ImageLoad";
 import {
@@ -19,6 +19,26 @@ import {
   IoAddCircleOutline,
   IoCloseOutline,
 } from "react-icons/io5";
+
+function getVariantLabelAr(variant: ImportVariant): string {
+  return variant.labelAr ?? (variant.labelEn ? "" : variant.label ?? "");
+}
+
+function getVariantLabelEn(variant: ImportVariant): string {
+  return variant.labelEn ?? (variant.labelAr ? "" : variant.label ?? "");
+}
+
+function syncVariantLabel(
+  variant: ImportVariant,
+  patch: { labelAr?: string; labelEn?: string },
+): Pick<ImportVariant, "labelAr" | "labelEn" | "label"> {
+  const labelAr = patch.labelAr ?? getVariantLabelAr(variant);
+  const labelEn = patch.labelEn ?? getVariantLabelEn(variant);
+  return {
+    ...patch,
+    label: labelAr || labelEn || "",
+  };
+}
 
 interface ReviewItemRowProps {
   item: ImportItem;
@@ -397,20 +417,42 @@ export default function ReviewItemRow({
                   </div>
                 )}
               <div className="flex flex-wrap items-center gap-2">
-                <input
-                  type="text"
-                  value={variant.label}
-                  onChange={(e) =>
-                    onUpdateVariant(variant.id, { label: e.target.value })
-                  }
-                  placeholder={t("variantLabel")}
-                  className={`flex-1 min-w-[100px] px-2 py-1.5 rounded-lg border text-sm ${
-                    variant.flags.includes("missing_name_ar") ||
-                    variant.flags.includes("missing_name_en")
-                      ? missingFieldClass
-                      : "border-slate-200 dark:border-slate-600"
-                  }`}
-                />
+                <div className="flex-1 min-w-[200px] grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    value={getVariantLabelAr(variant)}
+                    onChange={(e) =>
+                      onUpdateVariant(
+                        variant.id,
+                        syncVariantLabel(variant, { labelAr: e.target.value }),
+                      )
+                    }
+                    placeholder={t("nameAr")}
+                    className={`w-full px-2 py-1.5 rounded-lg border text-sm ${
+                      variant.flags.includes("missing_name_ar")
+                        ? missingFieldClass
+                        : "border-slate-200 dark:border-slate-600"
+                    }`}
+                    dir="rtl"
+                  />
+                  <input
+                    type="text"
+                    value={getVariantLabelEn(variant)}
+                    onChange={(e) =>
+                      onUpdateVariant(
+                        variant.id,
+                        syncVariantLabel(variant, { labelEn: e.target.value }),
+                      )
+                    }
+                    placeholder={t("nameEn")}
+                    className={`w-full px-2 py-1.5 rounded-lg border text-sm ${
+                      variant.flags.includes("missing_name_en")
+                        ? missingFieldClass
+                        : "border-slate-200 dark:border-slate-600"
+                    }`}
+                    dir="ltr"
+                  />
+                </div>
                 <input
                   type="number"
                   min={0}

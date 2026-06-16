@@ -1,40 +1,91 @@
 import type {
   BulkImportCategory,
   BulkImportItem,
-  ExpandedSaveItem,
+  BulkImportPayload,
+  BulkImportSize,
   ImportDraft,
+  ImportItem,
+  ImportVariant,
   SaveImportErrorEntry,
   SaveMenuImportResponse,
 } from "@/types/menuImport";
 import {
   collectAllBlockingErrors,
   countExpandedItems,
-  expandItemForSave,
 } from "./draftSaveUtils";
 
-function shouldIncludeSaveItem(saveItem: ExpandedSaveItem): boolean {
-  const meta = saveItem.duplicateMeta;
+function shouldIncludeVariant(variant: ImportVariant): boolean {
+  const meta = variant.duplicateMeta;
   if (meta?.resolution === "skip") return false;
   if (meta?.status === "exact_duplicate") return false;
   return true;
 }
 
-function toBulkItem(saveItem: ExpandedSaveItem): BulkImportItem {
-  const descriptionAr = saveItem.descriptionAr?.trim();
-  const descriptionEn = saveItem.descriptionEn?.trim();
+function shouldIncludeItem(item: ImportItem): boolean {
+  if (item.variants.length > 0) {
+    return item.variants.some(
+      (variant) =>
+        variant.price !== null &&
+        Number.isFinite(variant.price) &&
+        shouldIncludeVariant(variant),
+    );
+  }
 
+  if (item.price === null || !Number.isFinite(item.price)) return false;
+
+  const meta = item.duplicateMeta;
+  if (meta?.resolution === "skip") return false;
+  if (meta?.status === "exact_duplicate") return false;
+  return true;
+}
+
+function toBulkSize(variant: ImportVariant): BulkImportSize {
+  const nameAr = (variant.labelAr ?? variant.label).trim();
+  const nameEn = (variant.labelEn ?? variant.label).trim();
   return {
-    id: saveItem.refId,
-    nameAr: saveItem.nameAr.trim() || saveItem.nameEn.trim(),
-    nameEn: saveItem.nameEn.trim() || saveItem.nameAr.trim(),
+    nameAr: nameAr || nameEn,
+    nameEn: nameEn || nameAr,
+    price: variant.price as number,
+  };
+}
+
+function toBulkItem(item: ImportItem, sortOrder: number): BulkImportItem | null {
+  if (!shouldIncludeItem(item)) return null;
+
+  const descriptionAr = item.descriptionAr?.trim();
+  const descriptionEn = item.descriptionEn?.trim();
+
+  const bulkItem: BulkImportItem = {
+    id: item.id,
+    nameAr: item.nameAr.trim() || item.nameEn.trim(),
+    nameEn: item.nameEn.trim() || item.nameAr.trim(),
     ...(descriptionAr ? { descriptionAr } : {}),
     ...(descriptionEn ? { descriptionEn } : {}),
-    price: saveItem.price,
-    isAvailable: saveItem.isAvailable,
-    ...(saveItem.imageUrl
-      ? { imageUrl: saveItem.imageUrl, image: saveItem.imageUrl }
+    isAvailable: item.isAvailable,
+    available: item.isAvailable,
+    sortOrder,
+    flags: item.flags,
+    ...(item.imageUrl
+      ? { imageUrl: item.imageUrl, image: item.imageUrl }
       : {}),
   };
+
+  if (item.variants.length > 0) {
+    const sizes = item.variants
+      .filter(
+        (variant) =>
+          variant.price !== null &&
+          Number.isFinite(variant.price) &&
+          shouldIncludeVariant(variant),
+      )
+      .map(toBulkSize);
+
+    if (sizes.length === 0) return null;
+
+    return { ...bulkItem, price: 0, sizes };
+  }
+
+  return { ...bulkItem, price: item.price as number };
 }
 
 export function buildBulkCategoriesPayload(
@@ -42,36 +93,37 @@ export function buildBulkCategoriesPayload(
 ): BulkImportCategory[] {
   const categories: BulkImportCategory[] = [];
 
-  for (const category of draft.categories) {
+  draft.categories.forEach((category, categoryIndex) => {
     const items: BulkImportItem[] = [];
 
-    for (const item of category.items) {
-      const expanded = expandItemForSave(item).filter(
-        (saveItem) =>
-          saveItem.price !== null &&
-          Number.isFinite(saveItem.price) &&
-          shouldIncludeSaveItem(saveItem),
-      );
+    category.items.forEach((item, itemIndex) => {
+      const bulkItem = toBulkItem(item, itemIndex);
+      if (bulkItem) items.push(bulkItem);
+    });
 
-      for (const saveItem of expanded) {
-        items.push(toBulkItem(saveItem));
-      }
-    }
-
-    if (items.length === 0) continue;
+    if (items.length === 0) return;
 
     categories.push({
       id: category.id,
       nameAr: category.nameAr.trim() || category.nameEn.trim(),
       nameEn: category.nameEn.trim() || category.nameAr.trim(),
+      sortOrder: categoryIndex,
+      isCollapsed: category.isCollapsed ?? false,
+      flags: category.flags,
       ...(category.imageUrl
         ? { imageUrl: category.imageUrl, image: category.imageUrl }
         : {}),
       items,
     });
-  }
+  });
 
   return categories;
+}
+
+export function buildBulkImportRequestBody(
+  draft: ImportDraft,
+): BulkImportPayload {
+  return { categories: buildBulkCategoriesPayload(draft) };
 }
 
 export function countBulkSaveStats(draft: ImportDraft) {
@@ -83,30 +135,51 @@ export function countBulkSaveStats(draft: ImportDraft) {
 
   let itemsSkippedDuplicate = 0;
   let itemsUpdated = 0;
+  let saveUnitsInPayload = 0;
 
   for (const category of draft.categories) {
     for (const item of category.items) {
-      for (const saveItem of expandItemForSave(item)) {
-        if (saveItem.price === null || !Number.isFinite(saveItem.price)) continue;
+      if (item.variants.length > 0) {
+        for (const variant of item.variants) {
+          if (variant.price === null || !Number.isFinite(variant.price)) {
+            continue;
+          }
 
-        if (!shouldIncludeSaveItem(saveItem)) {
+          if (!shouldIncludeVariant(variant)) {
+            itemsSkippedDuplicate++;
+            continue;
+          }
+
+          saveUnitsInPayload++;
+
+          if (variant.duplicateMeta?.resolution === "update_price") {
+            itemsUpdated++;
+          }
+        }
+      } else {
+        if (item.price === null || !Number.isFinite(item.price)) continue;
+
+        if (!shouldIncludeItem(item)) {
           itemsSkippedDuplicate++;
           continue;
         }
 
-        if (saveItem.duplicateMeta?.resolution === "update_price") {
+        saveUnitsInPayload++;
+
+        if (item.duplicateMeta?.resolution === "update_price") {
           itemsUpdated++;
         }
       }
     }
   }
 
-  const itemsAdded = itemsInPayload - itemsUpdated;
+  const itemsAdded = saveUnitsInPayload - itemsUpdated;
   const categoriesRequested = draft.categories.filter((c) => c.items.length > 0)
     .length;
 
   return {
     payload,
+    requestBody: { categories: payload },
     categoriesRequested,
     categoriesInPayload: payload.length,
     itemsInPayload,
@@ -138,7 +211,11 @@ export function computeConfirmSavePreview(
 
   for (const category of bulk.payload) {
     for (const item of category.items) {
-      if (item.price != null && Number.isFinite(item.price)) {
+      if (item.sizes?.length) {
+        for (const size of item.sizes) {
+          if (Number.isFinite(size.price)) prices.push(size.price);
+        }
+      } else if (item.price != null && Number.isFinite(item.price)) {
         prices.push(item.price);
       }
     }

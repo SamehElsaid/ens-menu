@@ -1,7 +1,7 @@
 import axios from "axios";
 import { axiosPost } from "@/shared/axiosCall";
 import type {
-  BulkImportCategory,
+  BulkImportPayload,
   ImportDraft,
   MenuImportApiResponse,
   SaveMenuImportResponse,
@@ -76,12 +76,12 @@ export async function saveMenuImportDraft(
     return buildMenuImportSaveResponse(draft, { ok: true, stats });
   }
 
-  console.log("[MenuImport] Bulk save payload:", stats.payload);
+  console.log("[MenuImport] Bulk save payload:", stats.requestBody);
 
-  const result = await axiosPost<BulkImportCategory[], unknown>(
+  const result = await axiosPost<BulkImportPayload, unknown>(
     `/menus/${menuId}/categories/bulk`,
     locale,
-    stats.payload,
+    stats.requestBody,
   );
 
   console.log("[MenuImport] Bulk save response:", result);

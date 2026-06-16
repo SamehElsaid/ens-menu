@@ -6,8 +6,11 @@ import { Controller, useForm } from "react-hook-form";
 import type { PexelsPhoto } from "@/types/pexels";
 import { getPexelsPhotoUrl } from "@/lib/menuImport/pexelsImportImage";
 import PexelsImagePickerModal from "@/components/MenuImport/review/PexelsImagePickerModal";
+import CategorySearchSelect, {
+  type CategoryOption,
+} from "@/components/Dashboard/CategorySearchSelect";
 import { useLocale, useTranslations } from "next-intl";
-import { axiosPost, axiosPatch, axiosGet } from "@/shared/axiosCall";
+import { axiosPost, axiosPatch } from "@/shared/axiosCall";
 import { _resizeImage } from "@/shared/_shared";
 import CustomInput from "@/components/Custom/CustomInput";
 import { toast } from "react-toastify";
@@ -138,18 +141,20 @@ interface AddItemModalProps {
   categories?: Category[];
   onClose: () => void;
   onRefresh?: () => void;
+  isItemLoading?: boolean;
 }
 
 export default function AddItemModal({
   menuId,
   item = null,
-  categories: categoriesProp,
+  categories: _categoriesProp,
   onClose,
   onRefresh,
+  isItemLoading = false,
 }: AddItemModalProps) {
   const t = useTranslations("Items.addModal");
   const locale = useLocale();
-  const isEdit = Boolean(item?.id);
+  const isEdit = Boolean(item?.id) || isItemLoading;
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
@@ -157,7 +162,8 @@ export default function AddItemModal({
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [pexelsModalOpen, setPexelsModalOpen] = useState(false);
-  const [categoriesLocal, setCategoriesLocal] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] =
+    useState<CategoryOption | null>(null);
   const [priceMode, setPriceMode] = useState<PriceMode>("single");
   const [sizes, setSizes] = useState<ItemSizeRow[]>([]);
   const [sizesError, setSizesError] = useState<string | null>(null);
@@ -168,7 +174,6 @@ export default function AddItemModal({
   const [variantFieldErrors, setVariantFieldErrors] = useState<
     Record<string, Partial<Record<VariantFieldKey, string>>>
   >({});
-  const categories = categoriesProp ?? categoriesLocal;
   const modalRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -194,28 +199,6 @@ export default function AddItemModal({
     mode: "onChange",
   });
 
-  const fetchCategories = useCallback(async () => {
-    if (categoriesProp !== undefined) return;
-    try {
-      const result = await axiosGet<Category[] | { categories: Category[] }>(
-        `/menus/${menuId}/categories?page=1&limit=500`,
-        locale,
-      );
-      if (result.status && result.data) {
-        const list = Array.isArray(result.data)
-          ? result.data
-          : ((result.data as { categories: Category[] }).categories ?? []);
-        setCategoriesLocal(list);
-      }
-    } catch {
-      setCategoriesLocal([]);
-    }
-  }, [menuId, locale, categoriesProp]);
-
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
-
   useEffect(() => {
     if (item) {
       // دعم كل من الحقول camelCase (nameAr/nameEn) و snake_case (name_ar/name_en) القادمة من الـ API
@@ -229,6 +212,22 @@ export default function AddItemModal({
       const fallbackName = item.name ?? snake.name_en ?? snake.name_ar ?? "";
       const parsedSizes = parseItemSizes(item);
       const parsedVariants = parseItemVariants(item);
+      const categoryId = String(
+        item.categoryId ??
+          (typeof item.category === "object" && item.category?.id != null
+            ? item.category.id
+            : (item as { category_id?: number }).category_id) ??
+          "",
+      );
+      const categoryRef =
+        typeof item.category === "object" && item.category != null
+          ? item.category
+          : null;
+      const categoryLabel = categoryRef
+        ? locale === "ar"
+          ? categoryRef.nameAr || categoryRef.nameEn || item.categoryName || ""
+          : categoryRef.nameEn || categoryRef.nameAr || item.categoryName || ""
+        : item.categoryName || "";
 
       reset({
         nameAr: item.nameAr ?? snake.name_ar ?? fallbackName,
@@ -245,13 +244,7 @@ export default function AddItemModal({
           item.description ??
           snake.description_ar ??
           "",
-        categoryId: String(
-          item.categoryId ??
-            (typeof item.category === "object" && item.category?.id != null
-              ? item.category.id
-              : (item as { category_id?: number }).category_id) ??
-            "",
-        ),
+        categoryId,
         price: item.price != null ? String(item.price) : "",
         discountPercent:
           item.discountPercent != null ? String(item.discountPercent) : "",
@@ -264,6 +257,11 @@ export default function AddItemModal({
       setSizeFieldErrors({});
       setVariantFieldErrors({});
       const url = item.imageUrl ?? item.image ?? "";
+      setSelectedCategory(
+        categoryId
+          ? { value: categoryId, label: categoryLabel || categoryId }
+          : null,
+      );
       setImagePreview(url || null);
       setImage(null);
       setSelectedImageUrl(null);
@@ -284,11 +282,12 @@ export default function AddItemModal({
       setSizesError(null);
       setSizeFieldErrors({});
       setVariantFieldErrors({});
+      setSelectedCategory(null);
       setImagePreview(null);
       setImage(null);
       setSelectedImageUrl(null);
     }
-  }, [item, reset]);
+  }, [item, reset, locale]);
 
   const nameAr = watch("nameAr");
   const nameEn = watch("nameEn");
@@ -536,9 +535,6 @@ export default function AddItemModal({
   };
   const handleDragLeave = () => setIsDragOver(false);
 
-  const getCategoryName = (cat: Category) =>
-    locale === "ar" ? cat.nameAr || cat.nameEn : cat.nameEn || cat.nameAr;
-
   const addSizeRow = () => {
     setSizes((prev) => [...prev, createSizeRow()]);
     setSizesError(null);
@@ -620,7 +616,7 @@ export default function AddItemModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]"
-      onClick={(e) => e.target === e.currentTarget && !isCreating && onClose()}
+      onClick={(e) => e.target === e.currentTarget && !isCreating && !isItemLoading && onClose()}
     >
       <div
         ref={modalRef}
@@ -660,6 +656,17 @@ export default function AddItemModal({
           </div>
         </div>
 
+        {isItemLoading ? (
+          <div className="flex flex-col items-center justify-center gap-3 py-24 px-6">
+            <div
+              className="h-10 w-10 animate-spin rounded-full border-[3px] border-primary border-t-transparent"
+              aria-hidden
+            />
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {tItems("loading")}
+            </p>
+          </div>
+        ) : (
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col min-h-0 flex-1"
@@ -866,19 +873,20 @@ export default function AddItemModal({
                   control={control}
                   rules={{ required: t("categoryRequired") }}
                   render={({ field }) => (
-                    <select
+                    <CategorySearchSelect
+                      menuId={menuId}
+                      instanceId="item-category"
                       value={field.value}
-                      onChange={(e) => field.onChange(e.target.value)}
+                      selectedOption={selectedCategory}
+                      placeholder={`— ${tItems("selectCategory")} —`}
+                      hasError={Boolean(errors.categoryId)}
+                      minHeight={48}
+                      onChange={(id, option) => {
+                        setSelectedCategory(option);
+                        field.onChange(id);
+                      }}
                       onBlur={field.onBlur}
-                      className="w-full px-4 py-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary focus:border-primary"
-                    >
-                      <option value="">— {tItems("selectCategory")} —</option>
-                      {categories.map((cat) => (
-                        <option key={cat.id} value={String(cat.id)}>
-                          {getCategoryName(cat)}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   )}
                 />
                 {errors.categoryId?.message && (
@@ -1210,6 +1218,7 @@ export default function AddItemModal({
             </div>
           </div>
         </form>
+        )}
       </div>
 
       <PexelsImagePickerModal

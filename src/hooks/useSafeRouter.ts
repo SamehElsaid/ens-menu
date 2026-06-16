@@ -3,8 +3,10 @@
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { useMemo } from "react";
+import { stopHolyLoader } from "holy-loader";
 import {
   dispatchCloseNavOverlays,
+  dispatchSameRouteRefresh,
   isSameRouteNavigation,
   normalizePathname,
 } from "@/lib/safeNavigation";
@@ -59,13 +61,17 @@ export function useSafeRouter() {
     const push = (href: RouterHref, options?: RouterOptions) => {
       const targetLocale = options?.locale ?? locale;
       if (isSameProgrammaticRoute(pathname, locale, href, targetLocale)) {
+        stopHolyLoader();
         dispatchCloseNavOverlays();
+        dispatchSameRouteRefresh();
         return;
       }
 
       const targetUrl = hrefToPath(href, targetLocale);
       if (isSameRouteNavigation(window.location.href, targetUrl)) {
+        stopHolyLoader();
         dispatchCloseNavOverlays();
+        dispatchSameRouteRefresh();
         return;
       }
 
@@ -75,13 +81,17 @@ export function useSafeRouter() {
     const replace = (href: RouterHref, options?: RouterOptions) => {
       const targetLocale = options?.locale ?? locale;
       if (isSameProgrammaticRoute(pathname, locale, href, targetLocale)) {
+        stopHolyLoader();
         dispatchCloseNavOverlays();
+        dispatchSameRouteRefresh();
         return;
       }
 
       const targetUrl = hrefToPath(href, targetLocale);
       if (isSameRouteNavigation(window.location.href, targetUrl)) {
+        stopHolyLoader();
         dispatchCloseNavOverlays();
+        dispatchSameRouteRefresh();
         return;
       }
 

@@ -164,16 +164,36 @@ export interface ExpandedSaveItem {
   duplicateMeta?: ImportDuplicateMeta;
 }
 
+export interface BulkImportSize {
+  nameAr: string;
+  nameEn: string;
+  price: number;
+}
+
+export interface BulkImportVariant {
+  id: string;
+  label: string;
+  labelAr?: string;
+  labelEn?: string;
+  price: number;
+  flags: ImportFlag[];
+}
+
 export interface BulkImportItem {
   id: string;
   nameAr: string;
   nameEn: string;
   descriptionAr?: string;
   descriptionEn?: string;
-  price: number;
+  price?: number;
   isAvailable: boolean;
+  available: boolean;
   imageUrl?: string;
   image?: string;
+  sortOrder: number;
+  flags: ImportFlag[];
+  sizes?: BulkImportSize[];
+  variants?: BulkImportVariant[];
 }
 
 export interface BulkImportCategory {
@@ -182,5 +202,12 @@ export interface BulkImportCategory {
   nameEn: string;
   imageUrl?: string;
   image?: string;
+  sortOrder: number;
+  isCollapsed: boolean;
+  flags: ImportFlag[];
   items: BulkImportItem[];
+}
+
+export interface BulkImportPayload {
+  categories: BulkImportCategory[];
 }

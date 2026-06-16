@@ -17,6 +17,11 @@ import type { AdminPermissionKey } from "@/types/AdminPermission";
 import type { NavItem, NavSection } from "./data";
 import ProUpgradeModal from "./ProUpgradeModal";
 import { FaCrown } from "react-icons/fa";
+import { IoOpenOutline } from "react-icons/io5";
+import {
+  publicMenuLinkUrl,
+  resolvePublicMenuSlug,
+} from "@/lib/publicMenuUrl";
 
 const ITEM =
   "flex w-full min-h-10 items-center gap-3 overflow-visible rounded-md px-3 py-1.5 text-[13px] font-normal leading-[1.45] transition-colors duration-150";
@@ -297,6 +302,9 @@ export function DashboardSidebar({
 
   const { menu, loading } = useAppSelector((state) => state.menuData);
   const pendingOrdersCount = usePendingOrdersCount(segment, canFetchProData);
+  const publicMenuUrl = !isAdmin
+    ? publicMenuLinkUrl(resolvePublicMenuSlug(menu?.slug, menu?.id))
+    : "";
 
   const resolveItemBadge = (item: NavItem): string | undefined => {
     if (item.dynamicBadge === "pendingOrders" && pendingOrdersCount > 0) {
@@ -392,6 +400,20 @@ export function DashboardSidebar({
             </>
           )}
         </LinkTo>
+      )}
+
+      {!isAdmin && publicMenuUrl && (
+        <div className="shrink-0 border-b border-slate-100 px-4 py-3 dark:border-slate-800/80">
+          <a
+            href={publicMenuUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-emerald-500 px-4 py-2.5 text-[13px] font-medium text-white shadow-md shadow-emerald-500/25 transition-colors hover:bg-emerald-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/50 focus-visible:ring-offset-2 active:scale-[0.98] dark:shadow-emerald-900/30"
+          >
+            <IoOpenOutline className="size-[18px] shrink-0" aria-hidden />
+            {t("viewMenu")}
+          </a>
+        </div>
       )}
 
       <nav className="flex-1 space-y-2 overflow-x-visible overflow-y-auto px-3 py-2.5 pb-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
