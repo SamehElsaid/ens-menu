@@ -174,7 +174,7 @@ export default function CategorySearchSelect({
         onMenuOpen={() => setMenuIsOpen(true)}
         onMenuClose={() => setMenuIsOpen(false)}
         filterOption={() => true}
-        dir={locale === "ar" ? "rtl" : "ltr"}
+        isRtl={locale === "ar"}
         placeholder={placeholder}
         options={categoryOptions}
         value={selectedOption}
