@@ -15,12 +15,16 @@ import {
 } from "react-icons/io5";
 import {
   actionActorName,
+  callItemOptionLabel,
   isGuestOrderAction,
   lastStaffWaiterName,
   orderActionLabel,
   resolveLatestOrderStatus,
+  type CallEntryDetail,
+  type CallItem,
+  type EntryAction,
+  type EntryOrder,
 } from "@/lib/tableOrders";
-import type { CallEntryDetail, CallItem, EntryAction, EntryOrder } from "@/lib/tableOrders";
 
 function StatusIcon({ status }: { status: string }) {
   if (status === "confirmed" || status === "delivered")
@@ -391,6 +395,20 @@ export default function OrderDetailsModal({
                             <p className="font-medium text-slate-800 dark:text-slate-100 truncate">
                               {item.name}
                             </p>
+                            {(item.size || item.variant) && (
+                              <p className="text-[11px] text-violet-600 dark:text-violet-400 mt-0.5 truncate">
+                                {[
+                                  callItemOptionLabel(item.size, locale, "size"),
+                                  callItemOptionLabel(
+                                    item.variant,
+                                    locale,
+                                    "variant",
+                                  ),
+                                ]
+                                  .filter(Boolean)
+                                  .join(" · ")}
+                              </p>
+                            )}
                             {item.price != null && (
                               <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
                                 {item.price}

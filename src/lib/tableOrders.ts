@@ -11,12 +11,22 @@ export type OrderActionType =
   | "TABLE_CALL_PREPARED"
   | "TABLE_CALL_DELIVERED";
 
+export interface CallItemOption {
+  nameAr?: string;
+  nameEn?: string;
+  labelAr?: string;
+  labelEn?: string;
+  price?: number;
+}
+
 export interface CallItem {
   menuItemId?: string | number;
   name?: string;
   price?: number;
   quantity?: number;
   total?: number;
+  size?: CallItemOption | null;
+  variant?: CallItemOption | null;
 }
 
 export interface EntryOrder {
@@ -112,6 +122,22 @@ export function isPendingOrder(entry: CallEntry): boolean {
 
 export function countPendingOrders(entries: CallEntry[]): number {
   return entries.filter(isPendingOrder).length;
+}
+
+export function callItemOptionLabel(
+  opt: CallItemOption | null | undefined,
+  locale: string,
+  kind: "size" | "variant",
+): string {
+  if (!opt) return "";
+  if (kind === "size") {
+    return locale === "ar"
+      ? opt.nameAr || opt.nameEn || ""
+      : opt.nameEn || opt.nameAr || "";
+  }
+  return locale === "ar"
+    ? opt.labelAr || opt.labelEn || ""
+    : opt.labelEn || opt.labelAr || "";
 }
 
 export function dashboardSocketOrigin(): string {

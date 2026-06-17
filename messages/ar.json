@@ -891,7 +891,7 @@
     "paymentResultTitle": "نتيجة الدفع",
     "paymentResultChecking": "جاري التأكد من حالة الدفع…",
     "paymentResultNoCheckout": "لم نتمكن من قراءة جلسة الدفع. افتح الاشتراك من حسابك للتحقق من خطتك.",
-    "paymentResultSuccessPro": "تم الدفع بنجاح. تم تفعيل اشتراك Pro السنوي.",
+    "paymentResultSuccessPro": "تم الدفع بنجاح. تم تفعيل اشتراك Pro .",
     "paymentResultFailed": "لم يكتمل الدفع.",
     "paymentResultCancelled": "تم إلغاء الدفع.",
     "paymentResultFailedStatus": "فشل الدفع. يمكنك المحاولة مرة أخرى من إدارة الاشتراك.",
