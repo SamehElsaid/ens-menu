@@ -74,7 +74,7 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
     const [mounted, setMounted] = useState(false);
     const [widgetScale, setWidgetScale] = useState(1);
 
-    const isDev = process.env.NEXT_PUBLIC_DEV === "dev";
+    const isDev = process.env.NEXT_PUBLIC_DEV === "dev" || process.env.NEXT_PUBLIC_DEV === "true";
 
     useBodyScrollLock(mode === "on-demand" && modalOpen);
 
