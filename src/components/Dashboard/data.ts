@@ -272,6 +272,13 @@ export const navSections: NavSection[] = [
         link: "settings/media",
         navId: "onboarding-sidebar-settings-media",
       },
+      {
+        label: "settingsDelivery",
+        icon: MdOutlineDeliveryDining,
+        key: "settings-delivery",
+        link: "settings/delivery",
+        navId: "onboarding-sidebar-settings-delivery",
+      },
     ],
   },
   {

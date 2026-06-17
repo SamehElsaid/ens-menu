@@ -2520,6 +2520,7 @@
     "settingsGeneral": "General",
     "settingsDesign": "Design",
     "settingsMedia": "Media",
+    "settingsDelivery": "Delivery",
     "Categories": "Categories",
     "Items": "Items",
     "Advertisements": "Advertisements",
@@ -4604,6 +4605,55 @@
     "features": {
       "qr": "Smart QR menus for restaurants, cafés, and hotels",
       "orders": "Live orders and instant staff notifications"
+    }
+  },
+  "settingsDeliveryPage": {
+    "title": "Delivery Settings",
+    "badge": "Delivery",
+    "savedSuccess": "Delivery settings saved",
+    "disabledHint": "Enable delivery to manage phones and delivery zones",
+    "deliveryStatus": {
+      "title": "Delivery Service",
+      "subtitle": "Enable or disable delivery orders for your menu",
+      "label": "Delivery enabled",
+      "enabledHint": "Customers can place delivery orders",
+      "disabledHint": "Delivery is currently disabled"
+    },
+    "contactNumbers": {
+      "title": "Contact Numbers",
+      "subtitle": "Phone numbers shown to delivery customers",
+      "deliveryPhone": "Delivery phone",
+      "whatsapp": "Orders WhatsApp",
+      "whatsappHint": "Delivery orders will be sent to this WhatsApp number",
+      "phonePlaceholder": "e.g. +201012345678"
+    },
+    "governorates": {
+      "title": "Delivery Zones",
+      "subtitle": "Configure which governorates you deliver to and at what price",
+      "empty": "No delivery zones added yet",
+      "emptyHint": "Add a governorate to start accepting delivery orders",
+      "addBtn": "Add Zone",
+      "searchLabel": "Search for a location",
+      "searchPlaceholder": "Search Google for city or governorate...",
+      "searching": "Searching...",
+      "noResults": "No results — try a different search term",
+      "nameAr": "Arabic name",
+      "nameArPlaceholder": "e.g. القاهرة",
+      "nameEn": "English name",
+      "nameEnPlaceholder": "e.g. Cairo",
+      "price": "Delivery price",
+      "pricePlaceholder": "e.g. 25",
+      "lat": "Latitude",
+      "lan": "Longitude",
+      "addTitle": "Add Delivery Zone",
+      "editTitle": "Edit Delivery Zone",
+      "saveGov": "Save Zone",
+      "cancel": "Cancel",
+      "deleteConfirm": "Are you sure you want to remove this delivery zone?",
+      "deleteBtn": "Delete"
+    },
+    "buttons": {
+      "save": "Save Changes"
     }
   }
 }

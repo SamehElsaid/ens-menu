@@ -2428,6 +2428,7 @@
     "settingsGeneral": "الإعدادات",
     "settingsDesign": "التصميم",
     "settingsMedia": "الوسائط",
+    "settingsDelivery": "التوصيل",
     "Categories": "التصنيفات",
     "Items": "العناصر",
     "Advertisements": "الإعلانات",
@@ -4604,6 +4605,55 @@
     "features": {
       "qr": "منيو QR يناسب مطعمك أو كافيهك أو فندقك",
       "orders": "الطلبات توصل للموظفين في نفس اللحظة"
+    }
+  },
+  "settingsDeliveryPage": {
+    "title": "إعدادات التوصيل",
+    "badge": "التوصيل",
+    "savedSuccess": "تم حفظ إعدادات التوصيل",
+    "disabledHint": "فعّل التوصيل أولاً لإدارة الأرقام ومناطق التوصيل",
+    "deliveryStatus": {
+      "title": "خدمة التوصيل",
+      "subtitle": "تفعيل أو تعطيل طلبات التوصيل لهذا المنيو",
+      "label": "التوصيل مفعّل",
+      "enabledHint": "يمكن للعملاء إرسال طلبات التوصيل",
+      "disabledHint": "التوصيل معطّل حالياً"
+    },
+    "contactNumbers": {
+      "title": "أرقام التواصل",
+      "subtitle": "أرقام الهاتف التي تظهر لعملاء التوصيل",
+      "deliveryPhone": "هاتف التوصيل",
+      "whatsapp": "واتساب استقبال الطلبات",
+      "whatsappHint": "طلبات التوصيل هتيجي على الواتساب ده",
+      "phonePlaceholder": "مثال: 01012345678+"
+    },
+    "governorates": {
+      "title": "مناطق التوصيل",
+      "subtitle": "حدد المحافظات التي توصّل إليها وسعر التوصيل لكل منطقة",
+      "empty": "لم تتم إضافة مناطق توصيل بعد",
+      "emptyHint": "أضف محافظة لبدء قبول طلبات التوصيل",
+      "addBtn": "إضافة منطقة",
+      "searchLabel": "البحث عن موقع",
+      "searchPlaceholder": "ابحث عن مدينة أو محافظة...",
+      "searching": "جارٍ البحث...",
+      "noResults": "لا توجد نتائج — جرّب كلمة بحث مختلفة",
+      "nameAr": "الاسم بالعربية",
+      "nameArPlaceholder": "مثال: القاهرة",
+      "nameEn": "الاسم بالإنجليزية",
+      "nameEnPlaceholder": "مثال: Cairo",
+      "price": "سعر التوصيل",
+      "pricePlaceholder": "مثال: 25",
+      "lat": "خط العرض",
+      "lan": "خط الطول",
+      "addTitle": "إضافة منطقة توصيل",
+      "editTitle": "تعديل منطقة توصيل",
+      "saveGov": "حفظ المنطقة",
+      "cancel": "إلغاء",
+      "deleteConfirm": "هل أنت متأكد من حذف منطقة التوصيل هذه؟",
+      "deleteBtn": "حذف"
+    },
+    "buttons": {
+      "save": "حفظ التغييرات"
     }
   }
 }
