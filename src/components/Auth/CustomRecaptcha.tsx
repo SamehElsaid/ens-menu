@@ -74,11 +74,20 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
     const [mounted, setMounted] = useState(false);
     const [widgetScale, setWidgetScale] = useState(1);
 
+    const isDev = process.env.NEXT_PUBLIC_DEV === "dev";
+
     useBodyScrollLock(mode === "on-demand" && modalOpen);
 
     useEffect(() => {
       setMounted(true);
     }, []);
+
+    useEffect(() => {
+      if (isDev) {
+        onVerifiedChange(true);
+        setStatus("verified");
+      }
+    }, [isDev, onVerifiedChange]);
 
     const clearRejectTimeout = useCallback(() => {
       if (rejectTimeoutRef.current !== null) {
@@ -169,6 +178,10 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
       () => ({
         promptVerification: () =>
           new Promise<boolean>((resolve) => {
+            if (isDev) {
+              resolve(true);
+              return;
+            }
             if (status === "verified") {
               resolve(true);
               return;
@@ -177,6 +190,7 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
             openModal();
           }),
         reset: () => {
+          if (isDev) return;
           recaptchaRef.current?.reset();
           setStatus("idle");
           setLoading(false);
@@ -185,7 +199,7 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
           resolvePending(false);
         },
       }),
-      [closeModal, onVerifiedChange, openModal, resolvePending, status],
+      [closeModal, onVerifiedChange, openModal, resolvePending, status, isDev],
     );
 
     useEffect(() => {
@@ -250,6 +264,10 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
         </div>
       </div>
     );
+
+    if (isDev) {
+      return null;
+    }
 
     if (mode === "on-demand") {
       return (
