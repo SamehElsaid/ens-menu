@@ -85,7 +85,7 @@ export default function CurrentPlanSummary({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-[24px] border border-primary/20 bg-gradient-to-br from-primary/8 via-white to-slate-50 dark:from-primary/15 dark:via-slate-900 dark:to-slate-950 p-5 md:p-6 shadow-sm ${isRTL ? "text-right" : "text-left"} ${className}`}
+      className={`relative overflow-hidden rounded-3xl border border-primary/20 bg-linear-to-br from-primary/8 via-white to-slate-50 dark:from-primary/15 dark:via-slate-900 dark:to-slate-950 p-5 md:p-6 shadow-sm ${isRTL ? "text-right" : "text-left"} ${className}`}
     >
       <div
         className={`absolute top-0 ${isRTL ? "left-0 rounded-br-[80px]" : "right-0 rounded-bl-[80px]"} h-24 w-24 bg-primary/10 dark:bg-primary/15 pointer-events-none`}
@@ -148,18 +148,6 @@ export default function CurrentPlanSummary({
             value: formatPlanDate(
               subscriptionInfo?.endDate as string | undefined,
             ),
-          },
-
-          {
-            label: t("maxMenusLabel"),
-
-            value: subscriptionInfo?.maxMenus ?? "—",
-          },
-
-          {
-            label: t("maxProductsLabel"),
-
-            value: subscriptionInfo?.maxProductsPerMenu ?? "—",
           },
         ].map((item) => (
           <div

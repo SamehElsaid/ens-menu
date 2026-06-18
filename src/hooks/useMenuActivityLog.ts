@@ -35,6 +35,8 @@ export function useMenuActivityLog(
       categoryUpdated: (name) => t("actions.categoryUpdated", { name }),
       itemCreated: (name) => t("actions.itemCreated", { name }),
       itemUpdated: (name) => t("actions.itemUpdated", { name }),
+      itemDeleted: (name) => t("actions.itemDeleted", { name }),
+      categoryDeleted: (name) => t("actions.categoryDeleted", { name }),
       staffCreated: (name) => t("actions.staffCreated", { name }),
       tableCreated: (number) => t("actions.tableCreated", { number }),
       adCreated: (title) => t("actions.adCreated", { title }),

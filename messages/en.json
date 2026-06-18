@@ -2619,7 +2619,7 @@
   },
   "menuActivityLog": {
     "title": "Activity log",
-    "subtitle": "Generated from your current menu data — categories, products, staff, tables, ads, and settings.",
+    "subtitle": "Tracks create, update, and delete actions on categories, products, staff, tables, ads, and settings.",
     "searchPlaceholder": "Search by name or action…",
     "empty": "No activity yet.",
     "emptyHint": "Add categories, products, staff, tables, or ads to see activity here.",
@@ -2633,6 +2633,8 @@
       "categoryUpdated": "Category updated: {name}",
       "itemCreated": "Product created: {name}",
       "itemUpdated": "Product updated: {name}",
+      "itemDeleted": "Product deleted: {name}",
+      "categoryDeleted": "Category deleted: {name}",
       "staffCreated": "Staff added: {name}",
       "tableCreated": "Table created: {number}",
       "adCreated": "Ad created: {title}",

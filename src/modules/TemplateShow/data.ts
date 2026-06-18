@@ -226,4 +226,20 @@ export const templatesInfo: TemplateInfo[] = [
     colors: ["#C67115", "#84623E"],
     defaultColors: ["#C67115", "#84623E"],
   },
+  {
+    id: "onecard",
+    name: "One Card Template",
+    nameAr: "قالب البطاقة الواحدة",
+    image: "/images/temp/onecard.jpeg",
+    description:
+      "Mobile-first menu with purple accents, circular categories, and a single featured product card",
+    descriptionAr:
+      "قائمة موبايل بطابع بنفسجي، تصنيفات دائرية، وبطاقة منتج واحدة بارزة",
+    isNew: true,
+    canEdit: true,
+    customizeHeroTexts: false,
+    slug: "onecard",
+    colors: ["#9333EA", "#7C3AED"],
+    defaultColors: ["#9333EA", "#7C3AED"],
+  },
 ];
