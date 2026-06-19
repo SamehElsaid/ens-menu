@@ -12,6 +12,7 @@ interface OrderActionButtonsProps {
   status: OrderStatus;
   onComplete: () => void;
   compact?: boolean;
+  translationNs?: "tableOrders" | "deliveryOrders";
 }
 
 type ActionConfig = {
@@ -66,8 +67,9 @@ export default function OrderActionButtons({
   status,
   onComplete,
   compact = false,
+  translationNs = "tableOrders",
 }: OrderActionButtonsProps) {
-  const t = useTranslations("tableOrders");
+  const t = useTranslations(translationNs);
   const locale = useLocale();
   const [localActing, setLocalActing] = useState(false);
   const actions = actionsForStatus(status);

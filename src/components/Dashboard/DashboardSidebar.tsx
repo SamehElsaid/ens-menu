@@ -301,7 +301,12 @@ export function DashboardSidebar({
       : navSections;
 
   const { menu, loading } = useAppSelector((state) => state.menuData);
-  const pendingOrdersCount = usePendingOrdersCount(segment, canFetchProData);
+  const pendingOrdersCount = usePendingOrdersCount(segment, canFetchProData, "table");
+  const pendingDeliveryOrdersCount = usePendingOrdersCount(
+    segment,
+    canFetchProData,
+    "delivery",
+  );
   const publicMenuUrl = !isAdmin
     ? publicMenuLinkUrl(resolvePublicMenuSlug(menu?.slug, menu?.id))
     : "";
@@ -309,6 +314,12 @@ export function DashboardSidebar({
   const resolveItemBadge = (item: NavItem): string | undefined => {
     if (item.dynamicBadge === "pendingOrders" && pendingOrdersCount > 0) {
       return String(pendingOrdersCount);
+    }
+    if (
+      item.dynamicBadge === "pendingDeliveryOrders" &&
+      pendingDeliveryOrdersCount > 0
+    ) {
+      return String(pendingDeliveryOrdersCount);
     }
     return item.badge;
   };

@@ -29,12 +29,24 @@ export interface CallItem {
   variant?: CallItemOption | null;
 }
 
+export type StaffOrderType = "table" | "delivery";
+
 export interface EntryOrder {
+  type?: StaffOrderType | string;
   customerName?: string | null;
+  customerPhone?: string | null;
+  customerAddress?: string | null;
+  orderNotes?: string | null;
   tableNumber?: string | null;
   status?: string;
   orderTotal?: number;
   items?: CallItem[];
+  /** @deprecated use `type` */
+  orderChannel?: string;
+  governorateId?: number | null;
+  governorateNameAr?: string | null;
+  governorateNameEn?: string | null;
+  deliveryFee?: number | null;
 }
 
 export interface ActionDetail {
@@ -58,8 +70,16 @@ export interface EntryAction {
 export interface CallEntry {
   id: string;
   orderId: string | number;
+  type?: StaffOrderType | string;
   tableNumber?: string | null;
   customerName?: string | null;
+  customerPhone?: string | null;
+  customerAddress?: string | null;
+  orderNotes?: string | null;
+  governorateId?: number | null;
+  governorateNameAr?: string | null;
+  governorateNameEn?: string | null;
+  deliveryFee?: number | null;
   totalPrice?: number;
   items?: CallItem[];
   actionDetails?: ActionDetail[];
@@ -75,6 +95,14 @@ export interface CallEntryDetail {
   items?: CallItem[];
   actions?: EntryAction[];
   order?: EntryOrder | null;
+  customerName?: string | null;
+  customerPhone?: string | null;
+  customerAddress?: string | null;
+  orderNotes?: string | null;
+  governorateId?: number | null;
+  governorateNameAr?: string | null;
+  governorateNameEn?: string | null;
+  deliveryFee?: number | null;
 }
 
 export interface ActivityCallsPayload {
@@ -104,12 +132,15 @@ export function resolveLatestOrderStatus(
   for (let i = actions.length - 1; i >= 0; i -= 1) {
     const s = String(actions[i]?.status ?? "")
       .trim()
-      .toLowerCase() as OrderStatus;
-    if (TERMINAL_STATUSES.has(s)) return s;
+      .toLowerCase() as OrderStatus | "table_call_created";
+    if (s === "table_call_created") return "pending";
+    if (TERMINAL_STATUSES.has(s as OrderStatus)) return s as OrderStatus;
   }
-  return String(actions[actions.length - 1]?.status ?? "pending")
+  const last = String(actions[actions.length - 1]?.status ?? "pending")
     .trim()
-    .toLowerCase() as OrderStatus;
+    .toLowerCase();
+  if (last === "table_call_created") return "pending";
+  return last as OrderStatus;
 }
 
 export function resolveListEntryStatus(entry: CallEntry): OrderStatus {
@@ -208,6 +239,42 @@ export function lastStaffWaiterName(actions: EntryAction[]): string | null {
 export function resolveEntryTime(details?: ActionDetail[]): string | undefined {
   if (!details?.length) return undefined;
   return details[details.length - 1]?.time;
+}
+
+export function isDeliveryEntry(entry: {
+  type?: string | null;
+  tableNumber?: string | null;
+  order?: EntryOrder | null;
+}): boolean {
+  const typeRaw = String(
+    entry.type ?? entry.order?.type ?? entry.order?.orderChannel ?? "",
+  )
+    .trim()
+    .toLowerCase();
+  if (typeRaw === "delivery") return true;
+  if (typeRaw === "table") return false;
+  const table = entry.tableNumber ?? entry.order?.tableNumber ?? "";
+  return String(table).trim().toLowerCase() === "delivery";
+}
+
+export function deliveryGovernorateLabel(
+  entry: {
+    governorateNameAr?: string | null;
+    governorateNameEn?: string | null;
+    order?: EntryOrder | null;
+  },
+  locale: string,
+): string | null {
+  const ar =
+    entry.governorateNameAr?.trim() ||
+    entry.order?.governorateNameAr?.trim() ||
+    "";
+  const en =
+    entry.governorateNameEn?.trim() ||
+    entry.order?.governorateNameEn?.trim() ||
+    "";
+  if (locale === "ar") return ar || en || null;
+  return en || ar || null;
 }
 
 export function orderStatusTone(status: OrderStatus): {

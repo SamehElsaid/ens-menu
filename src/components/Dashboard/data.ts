@@ -31,7 +31,7 @@ export type NavItem = {
   icon: IconType;
   badge?: string;
   /** Resolved at runtime in the sidebar (e.g. pending table orders). */
-  dynamicBadge?: "pendingOrders";
+  dynamicBadge?: "pendingOrders" | "pendingDeliveryOrders";
   badges?: Array<{ label: string; variant: "new" | "beta" | "soon" }>;
   /** Visual cluster within a section (e.g. table ordering). */
   subgroup?: string;
@@ -120,10 +120,10 @@ export const cashierNavSections: NavSection[] = [
         label: "deliveryOrders",
         icon: MdOutlineDeliveryDining,
         key: "delivery-orders",
+        link: "delivery-orders",
         subgroup: "tableOps",
         proFeature: true,
-        comingSoon: true,
-        badges: [{ label: "badgeSoon", variant: "soon" }],
+        dynamicBadge: "pendingDeliveryOrders",
       },
     ],
   },
@@ -226,10 +226,10 @@ export const navSections: NavSection[] = [
         label: "deliveryOrders",
         icon: MdOutlineDeliveryDining,
         key: "delivery-orders",
+        link: "delivery-orders",
         subgroup: "tableOps",
         proFeature: true,
-        comingSoon: true,
-        badges: [{ label: "badgeSoon", variant: "soon" }],
+        dynamicBadge: "pendingDeliveryOrders",
       },
       {
         label: "staff",

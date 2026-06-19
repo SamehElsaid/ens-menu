@@ -2,29 +2,22 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import ViewTime from "@/shared/ViewTime";
-import {
-  IoCalendarOutline,
-  IoCheckmarkCircle,
-  IoCloseCircle,
-  IoCloseOutline,
-  IoEllipseSharp,
-  IoListOutline,
-  IoPersonOutline,
-  IoReceiptOutline,
-  IoTimeOutline,
-} from "react-icons/io5";
+import { IoCalendarOutline, IoCallOutline, IoChatboxOutline, IoCheckmarkCircle, IoCloseCircle, IoCloseOutline, IoEllipseSharp, IoHomeOutline, IoListOutline, IoLocationOutline, IoPersonOutline, IoReceiptOutline, IoTimeOutline } from "react-icons/io5";
 import {
   actionActorName,
   callItemOptionLabel,
+  deliveryGovernorateLabel,
   isGuestOrderAction,
   lastStaffWaiterName,
   orderActionLabel,
   resolveLatestOrderStatus,
+  type CallEntry,
   type CallEntryDetail,
   type CallItem,
   type EntryAction,
   type EntryOrder,
 } from "@/lib/tableOrders";
+import OrderActionButtons from "./OrderActionButtons";
 
 function StatusIcon({ status }: { status: string }) {
   if (status === "confirmed" || status === "delivered")
@@ -162,29 +155,176 @@ function ActionsTimeline({
   );
 }
 
-function MetaCard({
+function DetailRow({
   icon,
   label,
   value,
-  valueClass = "text-slate-800 dark:text-slate-100",
+  href,
+  multiline = false,
+  emptyLabel,
 }: {
   icon: React.ReactNode;
   label: string;
-  value: React.ReactNode;
-  valueClass?: string;
+  value: React.ReactNode | null | undefined;
+  href?: string;
+  multiline?: boolean;
+  emptyLabel?: string;
 }) {
+  const hasValue =
+    value != null && (typeof value !== "string" || value.trim() !== "");
+
   return (
-    <div className="flex items-start gap-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 px-3 py-3">
-      <span className="mt-0.5 text-xl shrink-0">{icon}</span>
-      <div className="min-w-0">
-        <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+    <div
+      className={`flex gap-3 rounded-xl border border-slate-100 bg-white px-3.5 py-3 dark:border-slate-700/80 dark:bg-slate-900/50 ${
+        multiline ? "items-start" : "items-center"
+      }`}
+    >
+      <span
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-lg dark:bg-slate-800 ${
+          multiline ? "mt-0.5" : ""
+        }`}
+      >
+        {icon}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
           {label}
         </p>
-        <div className={`text-sm font-semibold mt-0.5 truncate ${valueClass}`}>
-          {value}
-        </div>
+        {hasValue ? (
+          href ? (
+            <a
+              href={href}
+              className="mt-0.5 block text-sm font-semibold text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-300"
+              dir="ltr"
+            >
+              {value}
+            </a>
+          ) : (
+            <p
+              className={`mt-0.5 text-sm font-semibold text-slate-800 dark:text-slate-100 ${
+                multiline ? "whitespace-pre-wrap leading-relaxed" : "truncate"
+              }`}
+            >
+              {value}
+            </p>
+          )
+        ) : (
+          <p className="mt-0.5 text-sm text-slate-400 dark:text-slate-500">
+            {emptyLabel ?? "—"}
+          </p>
+        )}
       </div>
     </div>
+  );
+}
+
+function OrderCustomerSection({
+  variant,
+  t,
+  customerDisplay,
+  phoneDisplay,
+  zoneLabel,
+  addressDisplay,
+  notesDisplay,
+  tableNumber,
+  deliveryFee,
+  currency,
+  when,
+}: {
+  variant: "table" | "delivery";
+  t: ReturnType<typeof useTranslations<"tableOrders" | "deliveryOrders">>;
+  customerDisplay: string | null;
+  phoneDisplay: string | null;
+  zoneLabel: string | null;
+  addressDisplay: string | null;
+  notesDisplay: string | null;
+  tableNumber?: string | null;
+  deliveryFee?: number | null;
+  currency: string;
+  when: React.ReactNode;
+}) {
+  const phoneHref = phoneDisplay
+    ? `tel:${phoneDisplay.replace(/[^\d+]/g, "")}`
+    : undefined;
+  const sectionTitle =
+    variant === "delivery" ? t("deliveryDetailsTitle") : t("orderDetailsTitle");
+
+  return (
+    <section className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 space-y-3">
+      <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+        {sectionTitle}
+      </h4>
+
+      <div className="grid gap-2.5 sm:grid-cols-2">
+        <DetailRow
+          icon={<IoPersonOutline className="text-fuchsia-500" />}
+          label={t("detailsCustomer")}
+          value={customerDisplay}
+          emptyLabel={t("notProvided")}
+        />
+        <DetailRow
+          icon={<IoCallOutline className="text-emerald-500" />}
+          label={t("detailsPhone")}
+          value={phoneDisplay}
+          href={phoneHref}
+          emptyLabel={t("notProvided")}
+        />
+        {variant === "delivery" ? (
+          <DetailRow
+            icon={<IoLocationOutline className="text-emerald-500" />}
+            label={t("detailsZone")}
+            value={zoneLabel}
+            emptyLabel={t("notProvided")}
+          />
+        ) : (
+          tableNumber &&
+          String(tableNumber).trim() !== "" && (
+            <DetailRow
+              icon={<IoReceiptOutline className="text-violet-500" />}
+              label={t("detailsTable")}
+              value={tableNumber}
+            />
+          )
+        )}
+        <DetailRow
+          icon={<IoCalendarOutline className="text-violet-500" />}
+          label={t("detailsWhen")}
+          value={when}
+        />
+      </div>
+
+      {variant === "delivery" && (
+        <DetailRow
+          icon={<IoHomeOutline className="text-sky-500" />}
+          label={t("detailsAddress")}
+          value={addressDisplay}
+          multiline
+          emptyLabel={t("notProvided")}
+        />
+      )}
+
+      <DetailRow
+        icon={<IoChatboxOutline className="text-sky-500" />}
+        label={t("detailsNotes")}
+        value={notesDisplay}
+        multiline
+        emptyLabel={t("noNotes")}
+      />
+
+      {variant === "delivery" && deliveryFee != null && deliveryFee > 0 && (
+        <div className="flex items-center justify-between rounded-xl border border-emerald-200/70 bg-emerald-50/80 px-3.5 py-3 dark:border-emerald-800/40 dark:bg-emerald-950/20">
+          <span className="text-sm font-medium text-emerald-800 dark:text-emerald-200">
+            {t("detailsDeliveryFee")}
+          </span>
+          <span className="text-base font-bold text-emerald-900 dark:text-emerald-100 tabular-nums">
+            {deliveryFee}
+            {currency && (
+              <span className="ms-1 text-xs font-semibold">{currency}</span>
+            )}
+          </span>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -193,13 +333,19 @@ export default function OrderDetailsModal({
   loading,
   currency,
   onClose,
+  variant = "table",
+  menuId,
+  onActionComplete,
 }: {
   entry: CallEntryDetail | null;
   loading: boolean;
   currency: string;
   onClose: () => void;
+  variant?: "table" | "delivery";
+  menuId?: string;
+  onActionComplete?: () => void;
 }) {
-  const t = useTranslations("tableOrders");
+  const t = useTranslations(variant === "delivery" ? "deliveryOrders" : "tableOrders");
   const locale = useLocale();
 
   const actions = entry?.actions ?? [];
@@ -235,6 +381,30 @@ export default function OrderDetailsModal({
   const waiterDisplay = entry?.actions
     ? lastStaffWaiterName(entry.actions)
     : null;
+  const zoneLabel =
+    variant === "delivery"
+      ? deliveryGovernorateLabel(
+          { order: order ?? undefined, ...(entry ?? {}) },
+          locale,
+        )
+      : null;
+  const deliveryFee =
+    variant === "delivery"
+      ? order?.deliveryFee != null
+        ? Number(order.deliveryFee)
+        : entry?.deliveryFee != null
+          ? Number(entry.deliveryFee)
+          : null
+      : null;
+  const phoneDisplay =
+    order?.customerPhone?.trim() || entry?.customerPhone?.trim() || null;
+  const addressDisplay =
+    order?.customerAddress?.trim() || entry?.customerAddress?.trim() || null;
+  const notesDisplay =
+    order?.orderNotes?.trim() || entry?.orderNotes?.trim() || null;
+  const whenDisplay = (
+    <ViewTime data={lastAction?.time ?? actions[0]?.time} />
+  );
 
   const statusConfig = {
     confirmed: {
@@ -336,34 +506,29 @@ export default function OrderDetailsModal({
             <ModalSkeleton />
           ) : entry ? (
             <>
-              <div className="px-5 py-4 grid grid-cols-2 gap-3 sm:grid-cols-4 border-b border-slate-100 dark:border-slate-800">
-                {customerDisplay && (
-                  <MetaCard
-                    icon={<IoPersonOutline className="text-fuchsia-500" />}
-                    label={t("detailsCustomer")}
-                    value={customerDisplay}
-                  />
-                )}
-                {waiterDisplay && (
-                  <MetaCard
+              <OrderCustomerSection
+                variant={variant}
+                t={t}
+                customerDisplay={customerDisplay}
+                phoneDisplay={phoneDisplay}
+                zoneLabel={zoneLabel}
+                addressDisplay={addressDisplay}
+                notesDisplay={notesDisplay}
+                tableNumber={order?.tableNumber}
+                deliveryFee={deliveryFee}
+                currency={currency}
+                when={whenDisplay}
+              />
+
+              {waiterDisplay && (
+                <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800">
+                  <DetailRow
                     icon={<IoPersonOutline className="text-violet-500" />}
                     label={t("colWaiter")}
                     value={waiterDisplay}
                   />
-                )}
-                <MetaCard
-                  icon={<IoCalendarOutline className="text-violet-500" />}
-                  label={t("detailsWhen")}
-                  value={<ViewTime data={lastAction?.time ?? actions[0]?.time} />}
-                />
-                {order?.tableNumber && (
-                  <MetaCard
-                    icon={<IoReceiptOutline className="text-violet-500" />}
-                    label={t("detailsTable")}
-                    value={order.tableNumber}
-                  />
-                )}
-              </div>
+                </div>
+              )}
 
               <div className="px-5 py-4">
                 <h4 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
@@ -469,14 +634,25 @@ export default function OrderDetailsModal({
           ) : null}
         </div>
 
-        <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-800 flex justify-end bg-slate-50/80 dark:bg-slate-900/80">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-          >
-            {t("close")}
-          </button>
+        <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-3 bg-slate-50/80 dark:bg-slate-900/80">
+          {entry && menuId && onActionComplete && !loading && (
+            <OrderActionButtons
+              menuId={menuId}
+              entry={entry as CallEntry}
+              status={status}
+              onComplete={onActionComplete}
+              translationNs={variant === "delivery" ? "deliveryOrders" : "tableOrders"}
+            />
+          )}
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            >
+              {t("close")}
+            </button>
+          </div>
         </div>
       </div>
     </div>

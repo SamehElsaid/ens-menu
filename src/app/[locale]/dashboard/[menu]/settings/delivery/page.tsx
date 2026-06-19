@@ -24,6 +24,7 @@ import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 
 interface DeliverySettings {
   deliveryOn: boolean;
+  deliveryWhatsAppOn: boolean;
   deliveryPhone: string;
   phoneNumber: string;
 }
@@ -70,6 +71,7 @@ export default function DeliverySettingsPage() {
 
   const [settings, setSettings] = useState<DeliverySettings>({
     deliveryOn: false,
+    deliveryWhatsAppOn: true,
     deliveryPhone: "",
     phoneNumber: "",
   });
@@ -100,7 +102,14 @@ export default function DeliverySettingsPage() {
         locale,
       );
       if (res.status && res.data) {
-        setSettings(res.data);
+        setSettings({
+          ...res.data,
+          deliveryWhatsAppOn: res.data.deliveryWhatsAppOn ?? true,
+          phoneNumber:
+            res.data.deliveryPhone?.trim() ||
+            res.data.phoneNumber?.trim() ||
+            "",
+        });
       }
       setIsLoadingSettings(false);
     };
@@ -187,24 +196,39 @@ export default function DeliverySettingsPage() {
     if (!isSettingsValid) return;
     setIsSavingSettings(true);
     try {
-      const payload: DeliverySettings = {
-        ...settings,
-        deliveryPhone: settings.phoneNumber,
+      const payload = {
+        deliveryOn: settings.deliveryOn,
+        deliveryWhatsAppOn: settings.deliveryWhatsAppOn,
+        ...(settings.deliveryWhatsAppOn && settings.phoneNumber.trim()
+          ? { deliveryPhone: settings.phoneNumber.trim() }
+          : {}),
       };
-      const res = await axiosPatch<DeliverySettings, DeliverySettings>(
+      const res = await axiosPatch<typeof payload, DeliverySettings>(
         "/user/delivery/settings",
         locale,
         payload,
       );
       if (res.status) {
         toast.success(t("savedSuccess"));
+        if (res.data) {
+          setSettings({
+            ...res.data,
+            deliveryWhatsAppOn: res.data.deliveryWhatsAppOn ?? true,
+            phoneNumber:
+              res.data.deliveryPhone?.trim() ||
+              res.data.phoneNumber?.trim() ||
+              settings.phoneNumber,
+          });
+        }
       }
     } finally {
       setIsSavingSettings(false);
     }
   };
 
-  const isSettingsValid = (settings.phoneNumber?.trim() ?? "") !== "";
+  const isSettingsValid =
+    !settings.deliveryWhatsAppOn ||
+    (settings.phoneNumber?.trim() ?? "") !== "";
 
   const isGovFormValid =
     govForm.nameAr.trim() !== "" &&
@@ -436,12 +460,65 @@ export default function DeliverySettingsPage() {
               </div>
             </div>
 
+            <div className="rounded-2xl border border-slate-100 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/40 p-4 space-y-3">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="h-9 w-9 rounded-xl bg-[#25D366]/10 flex items-center justify-center shrink-0">
+                    <FaWhatsapp className="text-base text-[#25D366]" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      {t("contactNumbers.whatsappOrdersTitle")}
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      {settings.deliveryWhatsAppOn
+                        ? t("contactNumbers.whatsappOrdersOnHint")
+                        : t("contactNumbers.whatsappOrdersOffHint")}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={settings.deliveryWhatsAppOn}
+                  onClick={() =>
+                    setSettings((s) => ({
+                      ...s,
+                      deliveryWhatsAppOn: !s.deliveryWhatsAppOn,
+                    }))
+                  }
+                  disabled={deliveryDisabled}
+                  className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#25D366]/30 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 ${
+                    settings.deliveryWhatsAppOn
+                      ? "bg-[#25D366]"
+                      : "bg-slate-200 dark:bg-slate-600"
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${
+                      settings.deliveryWhatsAppOn
+                        ? isRTL
+                          ? "-translate-x-5"
+                          : "translate-x-5"
+                        : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+
             <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
+              <div
+                className={`space-y-1.5 transition-opacity ${
+                  settings.deliveryWhatsAppOn ? "" : "opacity-50"
+                }`}
+              >
                 <label className="flex items-center gap-1.5 text-sm font-medium text-[#25D366]">
                   <FaWhatsapp className="text-base" />
-                  {t("contactNumbers.whatsapp")}{" "}
-                  <span className="text-red-500">*</span>
+                  {t("contactNumbers.whatsapp")}
+                  {settings.deliveryWhatsAppOn ? (
+                    <span className="text-red-500">*</span>
+                  ) : null}
                 </label>
                 <CustomInput
                   type="tel"
@@ -454,16 +531,22 @@ export default function DeliverySettingsPage() {
                     }))
                   }
                   placeholder={t("contactNumbers.phonePlaceholder")}
-                  disabled={deliveryDisabled}
+                  disabled={deliveryDisabled || !settings.deliveryWhatsAppOn}
                 />
-                {settingsTouched && !settings.phoneNumber?.trim() ? (
+                {settingsTouched &&
+                settings.deliveryWhatsAppOn &&
+                !settings.phoneNumber?.trim() ? (
                   <p className="text-xs text-red-500 mt-1">
                     {isRTL ? "رقم الواتساب مطلوب" : "WhatsApp number is required"}
                   </p>
-                ) : (
+                ) : settings.deliveryWhatsAppOn ? (
                   <p className="flex items-center gap-1 text-xs text-[#25D366]/80 dark:text-[#25D366]/70 mt-1">
                     <FaWhatsapp className="shrink-0" />
                     {t("contactNumbers.whatsappHint")}
+                  </p>
+                ) : (
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    {t("contactNumbers.whatsappDashboardOnlyHint")}
                   </p>
                 )}
               </div>
