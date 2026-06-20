@@ -8,7 +8,7 @@ import {
   resolveEntryTime,
   resolveListEntryStatus,
 } from "@/lib/tableOrders";
-import type { CallEntry } from "@/lib/tableOrders";
+import type { CallEntry, OrderActionResult } from "@/lib/tableOrders";
 import OrderActionButtons from "./OrderActionButtons";
 import { IoEllipseSharp, IoEyeOutline } from "react-icons/io5";
 import { MdOutlineDeliveryDining } from "react-icons/md";
@@ -17,7 +17,7 @@ interface DeliveryOrderMobileCardProps {
   entry: CallEntry;
   currency: string;
   onView: (id: string) => void;
-  onActionComplete: () => void;
+  onActionComplete: (result: OrderActionResult) => void;
   menuId: string;
 }
 
