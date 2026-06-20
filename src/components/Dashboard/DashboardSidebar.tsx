@@ -126,7 +126,7 @@ function SidebarNavItem({
         aria-hidden
       />
       <span
-        className={`flex-1 text-start whitespace-normal break-words ${locked ? "text-slate-500" : ""}`}
+        className={`flex-1 text-start whitespace-normal wrap-break-word ${locked ? "text-slate-500" : ""}`}
       >
         {t(item.label)}
       </span>
@@ -246,7 +246,7 @@ function NavGroup({
           return (
             <div
               key={`c-${cluster.subgroup}`}
-              className="rounded-lg bg-slate-50/70 p-0.5 ring-1 ring-inset ring-slate-100 dark:bg-white/[0.02] dark:ring-slate-800/80"
+              className="rounded-lg bg-slate-50/70 p-0.5 ring-1 ring-inset ring-slate-100 dark:bg-white/2 dark:ring-slate-800/80"
             >
               {inner}
             </div>
