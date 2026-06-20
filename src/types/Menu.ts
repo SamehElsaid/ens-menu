@@ -47,6 +47,7 @@ export interface Menu {
   logo?: string;
   currency: string;
   isActive: boolean;
+  chatbotEnabled?: boolean;
   workingHours: WorkHours;
   createdAt: string;
   updatedAt: string;

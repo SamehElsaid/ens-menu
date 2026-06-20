@@ -2536,7 +2536,7 @@
     "viewMenu": "View Menu",
     "history": "Activity log",
     "orders": "Table orders",
-    "deliveryOrders": "Delivery orders",
+    "deliveryOrders": "Online orders",
     "badgeSoon": "Soon",
     "menuImport": "AI Menu Import",
     "Menu Import": "Menu Import",
@@ -4165,7 +4165,11 @@
     "deleteThisMenu": "Delete this menu",
     "saveChanges": "Save changes",
     "namePlaceholder": "The Palm Cafe",
-    "descriptionPlaceholder": "Fresh pasta, grilled burgers, pizzas & signature drinks..."
+    "descriptionPlaceholder": "Fresh pasta, grilled burgers, pizzas & signature drinks...",
+    "chatbotEnabled": "AI Chatbot",
+    "chatbotEnabledDescription": "Allow customers to chat with an AI assistant directly on your menu.",
+    "chatbotEnabledOn": "Enabled",
+    "chatbotEnabledOff": "Disabled"
   },
   "menuMediaSettings": {
     "noMenuSelected": "No menu selected.",

@@ -5,7 +5,6 @@ import { IoSearchOutline } from "react-icons/io5";
 import { MdOutlineDeliveryDining } from "react-icons/md";
 import { NotificationPermissionCard } from "@/components/Global/NotificationPermissionCard";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
-import LinkTo from "@/components/Global/LinkTo";
 import { useAppSelector } from "@/store/hooks";
 import { useMenuOrdersPage } from "@/hooks/useMenuOrdersPage";
 import DeliveryOrderDetailsModal from "./DeliveryOrderDetailsModal";
@@ -19,7 +18,6 @@ export default function DeliveryOrdersView() {
 
   const {
     menuId,
-    isFreePlan,
     entries,
     loading,
     page,
@@ -36,30 +34,6 @@ export default function DeliveryOrdersView() {
     modalLoading,
     handleActionComplete,
   } = useMenuOrdersPage("delivery");
-
-  if (isFreePlan) {
-    return (
-      <div
-        id="onboarding-delivery-orders-upgrade"
-        className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4 text-center md:min-h-[60vh] md:gap-4"
-      >
-        <PageTitleWithHelp className="justify-center">
-          <h1 className="text-xl font-bold text-slate-800 sm:text-2xl md:text-3xl dark:text-slate-100">
-            {t("proOnlyTitle")}
-          </h1>
-        </PageTitleWithHelp>
-        <p className="max-w-md text-sm text-slate-500 md:text-base dark:text-slate-400">
-          {t("proOnlyDescription")}
-        </p>
-        <LinkTo
-          href={`/dashboard/${menuId}/subscription`}
-          className="mt-2 inline-flex items-center justify-center gap-2 rounded-2xl bg-linear-to-r from-primary to-primary/80 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] md:mt-4 md:px-8"
-        >
-          {t("upgradeShort")}
-        </LinkTo>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6 animate-fadeIn">

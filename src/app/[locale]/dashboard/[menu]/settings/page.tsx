@@ -14,6 +14,7 @@ import {
   IoCloudUploadOutline,
   IoCloseOutline,
   IoSaveOutline,
+  IoChatbubblesOutline,
 } from "react-icons/io5";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -36,6 +37,7 @@ interface SettingsFormValues {
   descriptionAr?: string | null;
   currency: string;
   isActive: boolean;
+  chatbotEnabled: boolean;
 }
 
 const settingsSchema = (
@@ -47,12 +49,14 @@ const settingsSchema = (
     description: yup.string().nullable(),
     descriptionAr: yup.string().nullable(),
     currency: yup.string().required(t("validation.currencyRequired")),
+    chatbotEnabled: yup.boolean().default(false),
   }) as yup.ObjectSchema<SettingsFormValues>;
 
 export default function SettingsPage() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { menu, loading } = useAppSelector((state) => state.menuData);
+  console.log(menu);
   const tMenus = useTranslations("Menus.createModal");
   const tMenuCard = useTranslations("Menus.menuCard");
   const tSettings = useTranslations("menuSettingsPage");
@@ -83,6 +87,7 @@ export default function SettingsPage() {
       descriptionAr: menu?.descriptionAr ?? "",
       currency: menu?.currency ?? "AED",
       isActive: menu?.isActive ?? false,
+      chatbotEnabled: menu?.chatbotEnabled ?? false,
     },
   });
 
@@ -96,6 +101,7 @@ export default function SettingsPage() {
       descriptionAr: menu.descriptionAr ?? "",
       currency: menu.currency,
       isActive: menu.isActive,
+      chatbotEnabled: menu.chatbotEnabled ?? false,
     });
     // Keep local active state in sync with latest menu data
     setLocalIsActive(menu.isActive);
@@ -212,6 +218,7 @@ export default function SettingsPage() {
         currency: values.currency,
         id: menuId,
         isActive: values.isActive,
+        chatbotEnabled: values.chatbotEnabled,
         logo: logoUrl ?? menu?.logo ?? null,
       };
       const result = await axiosPatch<typeof payload, Menu>(
@@ -470,9 +477,75 @@ export default function SettingsPage() {
         </div>
       </section>
 
+      {/* Chatbot toggle */}
+      <section
+        id="onboarding-settings-chatbot"
+        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6"
+      >
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-300 flex items-center justify-center">
+              <IoChatbubblesOutline className="text-xl" />
+            </div>
+            <div>
+              <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                {tSettings("chatbotEnabled")}
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                {tSettings("chatbotEnabledDescription")}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              <Controller
+                name="chatbotEnabled"
+                control={control}
+                render={({ field }) => (
+                  <span>
+                    {field.value
+                      ? tSettings("chatbotEnabledOn")
+                      : tSettings("chatbotEnabledOff")}
+                  </span>
+                )}
+              />
+            </span>
+            <Controller
+              name="chatbotEnabled"
+              control={control}
+              render={({ field }) => (
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={field.value}
+                  onClick={() => field.onChange(!field.value)}
+                  className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:ring-offset-2 ${
+                    field.value
+                      ? "bg-violet-500"
+                      : "bg-slate-200 dark:bg-slate-600"
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${
+                      field.value
+                        ? locale === "ar"
+                          ? "-translate-x-5"
+                          : "translate-x-5"
+                        : locale === "ar"
+                          ? "translate-x-0"
+                          : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              )}
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Locked / advanced sections */}
-      <section className="flex flex-col gap-6 lg:flex-row w-full">
-        {/* Favicon / logo for menu */}
+      <section className="flex flex-col gap-6 lg:flex-row w-full">        {/* Favicon / logo for menu */}
         {/* Status card */}
         <div
           id="onboarding-settings-status"
