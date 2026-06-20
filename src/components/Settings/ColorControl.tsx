@@ -1,11 +1,9 @@
-'use client';
+"use client";
 
 import { memo, useCallback, useEffect, useRef } from "react";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
 import { ColorResult, Sketch } from "@uiw/react-color";
-
-
 
 interface ColorControlProps {
   value: string;
@@ -36,11 +34,17 @@ function ColorControl({
 
       const path = (e.composedPath?.() ?? []) as EventTarget[];
 
-      // لو الكلك جوه الزر/الـ wrapper أو جوه عنصر الـ Tooltip نفسه، ما نقفلش
-      if (wrapperNode && (path.includes(wrapperNode) || (target && wrapperNode.contains(target)))) {
+      // لو الكلك جوه الزر/الـ wrapper أو جوه منتج الـ Tooltip نفسه، ما نقفلش
+      if (
+        wrapperNode &&
+        (path.includes(wrapperNode) || (target && wrapperNode.contains(target)))
+      ) {
         return;
       }
-      if (tooltipNode && (path.includes(tooltipNode) || (target && tooltipNode.contains(target)))) {
+      if (
+        tooltipNode &&
+        (path.includes(tooltipNode) || (target && tooltipNode.contains(target)))
+      ) {
         return;
       }
 
@@ -73,8 +77,8 @@ function ColorControl({
 
     return a
       ? `#${r}${g}${b}${Math.round(parseFloat(a) * 255)
-        .toString(16)
-        .padStart(2, "0")}`
+          .toString(16)
+          .padStart(2, "0")}`
       : `#${r}${g}${b}`;
   }, []);
 
@@ -103,4 +107,3 @@ function ColorControl({
 }
 
 export default memo(ColorControl);
-

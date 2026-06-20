@@ -7,7 +7,7 @@ import {
   resolveEntryTime,
   resolveListEntryStatus,
 } from "@/lib/tableOrders";
-import type { CallEntry } from "@/lib/tableOrders";
+import type { CallEntry, OrderActionResult } from "@/lib/tableOrders";
 import OrderActionButtons from "./OrderActionButtons";
 import {
   IoEllipseSharp,
@@ -19,7 +19,7 @@ interface OrderMobileCardProps {
   entry: CallEntry;
   currency: string;
   onView: (id: string) => void;
-  onActionComplete: () => void;
+  onActionComplete: (result: OrderActionResult) => void;
   menuId: string;
 }
 

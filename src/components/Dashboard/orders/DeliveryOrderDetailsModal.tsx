@@ -1,7 +1,7 @@
 "use client";
 
 import OrderDetailsModal from "./OrderDetailsModal";
-import type { CallEntryDetail } from "@/lib/tableOrders";
+import type { CallEntryDetail, OrderActionResult } from "@/lib/tableOrders";
 
 export default function DeliveryOrderDetailsModal({
   entry,
@@ -16,7 +16,7 @@ export default function DeliveryOrderDetailsModal({
   currency: string;
   onClose: () => void;
   menuId?: string;
-  onActionComplete?: () => void;
+  onActionComplete?: (result: OrderActionResult) => void;
 }) {
   return (
     <OrderDetailsModal

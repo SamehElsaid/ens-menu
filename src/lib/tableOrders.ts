@@ -147,6 +147,51 @@ export function resolveListEntryStatus(entry: CallEntry): OrderStatus {
   return resolveLatestOrderStatus(entry.actionDetails);
 }
 
+export function orderStatusFromAction(action: OrderActionType): OrderStatus {
+  switch (action) {
+    case "TABLE_CALL_CONFIRMED":
+      return "confirmed";
+    case "TABLE_CALL_CANCELLED":
+      return "cancelled";
+    case "TABLE_CALL_PREPARED":
+      return "prepared";
+    case "TABLE_CALL_DELIVERED":
+      return "delivered";
+    default:
+      return "pending";
+  }
+}
+
+/** Patch list card status in place — avoids full list refetch after an action. */
+export function applyLocalEntryStatusUpdate(
+  entry: CallEntry,
+  status: OrderStatus,
+): CallEntry {
+  const now = new Date().toISOString();
+  return {
+    ...entry,
+    actionDetails: [...(entry.actionDetails ?? []), { status, time: now }],
+  };
+}
+
+/** Keep visible order stable; only prepend genuinely new rows. */
+export function mergeOrderEntries(
+  prev: CallEntry[],
+  fresh: CallEntry[],
+): CallEntry[] {
+  if (prev.length === 0) return fresh;
+  const freshById = new Map(fresh.map((e) => [e.id, e]));
+  const prevIds = new Set(prev.map((e) => e.id));
+  const updated = prev.map((e) => freshById.get(e.id) ?? e);
+  const newOnes = fresh.filter((e) => !prevIds.has(e.id));
+  return newOnes.length > 0 ? [...newOnes, ...updated] : updated;
+}
+
+export type OrderActionResult = {
+  entryId: string;
+  status: OrderStatus;
+};
+
 export function isPendingOrder(entry: CallEntry): boolean {
   return resolveListEntryStatus(entry) === "pending";
 }

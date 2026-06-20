@@ -16,6 +16,7 @@ import {
   type CallItem,
   type EntryAction,
   type EntryOrder,
+  type OrderActionResult,
 } from "@/lib/tableOrders";
 import OrderActionButtons from "./OrderActionButtons";
 
@@ -343,7 +344,7 @@ export default function OrderDetailsModal({
   onClose: () => void;
   variant?: "table" | "delivery";
   menuId?: string;
-  onActionComplete?: () => void;
+  onActionComplete?: (result: OrderActionResult) => void;
 }) {
   const t = useTranslations(variant === "delivery" ? "deliveryOrders" : "tableOrders");
   const locale = useLocale();
