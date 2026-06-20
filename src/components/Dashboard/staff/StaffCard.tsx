@@ -61,9 +61,7 @@ export default function StaffCard({
       }`}
     >
       <div className="relative bg-linear-to-br from-primary/10 via-violet-50/80 to-fuchsia-50/40 px-4 pb-8 pt-4 dark:from-primary/15 dark:via-slate-900 dark:to-violet-950/40">
-        <div
-          className={`absolute top-3 ${isRTL ? "left-3" : "right-3"}`}
-        >
+        <div className={`absolute top-3 ${isRTL ? "left-3" : "right-3"}`}>
           <span
             className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold shadow-sm backdrop-blur-sm ${
               active
@@ -138,7 +136,7 @@ export default function StaffCard({
             </button>
           </div>
 
-          <button
+          {/* <button
             type="button"
             disabled={isToggling}
             onClick={() => onToggleActive(staff)}
@@ -160,7 +158,7 @@ export default function StaffCard({
               <IoPlayOutline className="text-base" aria-hidden />
             )}
             {active ? t("disable") : t("enable")}
-          </button>
+          </button> */}
         </div>
       </div>
     </article>

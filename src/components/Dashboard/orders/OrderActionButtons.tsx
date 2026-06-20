@@ -4,14 +4,20 @@ import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import { postTableOrderAction } from "@/lib/tableOrderActions";
-import type { CallEntry, OrderActionType, OrderStatus } from "@/lib/tableOrders";
+import type {
+  CallEntry,
+  OrderActionResult,
+  OrderActionType,
+  OrderStatus,
+} from "@/lib/tableOrders";
 
 interface OrderActionButtonsProps {
   menuId: string;
   entry: CallEntry;
   status: OrderStatus;
-  onComplete: () => void;
+  onComplete: (result: OrderActionResult) => void;
   compact?: boolean;
+  translationNs?: "tableOrders" | "deliveryOrders";
 }
 
 type ActionConfig = {
@@ -66,8 +72,9 @@ export default function OrderActionButtons({
   status,
   onComplete,
   compact = false,
+  translationNs = "tableOrders",
 }: OrderActionButtonsProps) {
-  const t = useTranslations("tableOrders");
+  const t = useTranslations(translationNs);
   const locale = useLocale();
   const [localActing, setLocalActing] = useState(false);
   const actions = actionsForStatus(status);
@@ -80,10 +87,15 @@ export default function OrderActionButtons({
     if (isBusy) return;
     setLocalActing(true);
     try {
-      const ok = await postTableOrderAction(menuId, entry.id, action, locale);
-      if (ok) {
+      const nextStatus = await postTableOrderAction(
+        menuId,
+        entry.id,
+        action,
+        locale,
+      );
+      if (nextStatus) {
         toast.success(t("actionSuccess"));
-        onComplete();
+        onComplete({ entryId: entry.id, status: nextStatus });
       } else {
         toast.error(t("actionError"));
       }

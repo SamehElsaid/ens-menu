@@ -20,6 +20,7 @@ import {
 } from "@/components/Dashboard/RequirePhone";
 import { DashboardTitleProvider } from "@/components/Dashboard/DashboardTitleProvider";
 import UpcomingFeaturesAnnouncement from "@/components/Dashboard/UpcomingFeaturesAnnouncement";
+import { PendingOrdersProvider } from "@/components/Dashboard/PendingOrdersProvider";
 import { usePathname } from "@/i18n/navigation";
 import {
   extractDashboardMenuRouteKey,
@@ -154,22 +155,22 @@ export default function DashboardClientLayout({
 
   return (
     <DashboardTitleProvider>
-      <AuthUserHydrate />
-      <FcmTokenSync />
-      <UpcomingFeaturesAnnouncement />
-      {isAppLoading ? null : accountGateStatus === "suspended" ? (
-        <Layout segment={sidebarSegment} hideSidebar>
-          <SuspendedAccountScreen />
-        </Layout>
-      ) : profileGateStatus === "incomplete" ? (
-        <Layout segment={sidebarSegment} hideSidebar>
-          <RequirePhone enforce requireVerification={false} />
-        </Layout>
-      ) : (
-        <Layout segment={sidebarSegment}>
-          {dashboardContent}
-        </Layout>
-      )}
+      <PendingOrdersProvider segment={sidebarSegment}>
+        <AuthUserHydrate />
+        <FcmTokenSync />
+        <UpcomingFeaturesAnnouncement />
+        {isAppLoading ? null : accountGateStatus === "suspended" ? (
+          <Layout segment={sidebarSegment} hideSidebar>
+            <SuspendedAccountScreen />
+          </Layout>
+        ) : profileGateStatus === "incomplete" ? (
+          <Layout segment={sidebarSegment} hideSidebar>
+            <RequirePhone enforce requireVerification={false} />
+          </Layout>
+        ) : (
+          <Layout segment={sidebarSegment}>{dashboardContent}</Layout>
+        )}
+      </PendingOrdersProvider>
     </DashboardTitleProvider>
   );
 }

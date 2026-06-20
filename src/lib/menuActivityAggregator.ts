@@ -72,11 +72,151 @@ function parseDate(value?: string | null): number | null {
   return Number.isFinite(ms) ? ms : null;
 }
 
+const AUDIT_LIST_LIMIT = 500;
+
+type BackendAuditRow = {
+  id: string;
+  action: string;
+  targetType: string;
+  targetId: number | null;
+  summaryAr: string;
+  summaryEn: string;
+  actorRole: string;
+  actorName: string;
+  createdAt: string;
+};
+
+const AUDIT_SUPERSEDED_ACTIONS = new Set([
+  "ITEM_CREATED",
+  "ITEM_UPDATED",
+  "ITEM_DELETED",
+  "CATEGORY_CREATED",
+  "CATEGORY_UPDATED",
+  "CATEGORY_DELETED",
+  "STAFF_CREATED",
+  "STAFF_UPDATED",
+  "STAFF_DELETED",
+  "AD_CREATED",
+  "AD_UPDATED",
+  "AD_DELETED",
+  "SETTINGS_UPDATED",
+  "MENU_SETTINGS_UPDATED",
+]);
+
+function normalizeAuditAction(action: string): string {
+  if (action === "MENU_SETTINGS_UPDATED") return "SETTINGS_UPDATED";
+  if (action === "MENU_BULK_IMPORT") return "MENU_IMPORTED";
+  return action;
+}
+
+function parseEntityNameFromSummary(summary: string): string | null {
+  const parts = summary.split(/:\s*/);
+  if (parts.length < 2) return null;
+  const name = parts.slice(1).join(": ").trim();
+  return name || null;
+}
+
+function auditRowToEntry(row: BackendAuditRow, locale: string): MenuAuditLogEntry {
+  const title =
+    locale === "ar"
+      ? row.summaryAr.trim() || row.summaryEn.trim()
+      : row.summaryEn.trim() || row.summaryAr.trim();
+
+  return {
+    id: `audit-${row.id}`,
+    actionType: normalizeAuditAction(row.action),
+    title,
+    entityType: row.targetType,
+    entityName: parseEntityNameFromSummary(title),
+    targetId: row.targetId,
+    userName: row.actorName?.trim() || null,
+    createdAt: row.createdAt,
+    isUndated: !row.createdAt?.trim(),
+  };
+}
+
+function parseSyntheticTargetId(id: string): number | null {
+  const match = id.match(
+    /^(?:item|category|staff|ad|table)-(?:created|updated)-(\d+)$/,
+  );
+  if (!match) return null;
+  const parsed = parseInt(match[1], 10);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function auditCoverageKey(entry: MenuAuditLogEntry): string | null {
+  if (entry.targetId == null || !entry.actionType) return null;
+  return `${entry.actionType}:${entry.entityType}:${entry.targetId}`;
+}
+
+function shouldSkipAggregatedEntry(
+  entry: MenuAuditLogEntry,
+  auditKeys: Set<string>,
+  hasAuditSettingsUpdate: boolean,
+): boolean {
+  if (
+    entry.actionType === "SETTINGS_UPDATED" &&
+    hasAuditSettingsUpdate
+  ) {
+    return true;
+  }
+
+  if (!AUDIT_SUPERSEDED_ACTIONS.has(entry.actionType)) return false;
+
+  const targetId = entry.targetId ?? parseSyntheticTargetId(entry.id);
+  if (targetId == null) return false;
+
+  const key = `${entry.actionType}:${entry.entityType}:${targetId}`;
+  return auditKeys.has(key);
+}
+
+async function fetchMenuAuditLogRows(
+  menuId: string,
+  locale: string,
+  q?: string,
+): Promise<BackendAuditRow[]> {
+  const res = await axiosGet<{ entries?: BackendAuditRow[] }>(
+    `/menus/${menuId}/audit-logs`,
+    locale,
+    undefined,
+    {
+      page: 1,
+      limit: AUDIT_LIST_LIMIT,
+      ...(q ? { q } : {}),
+    },
+  );
+
+  if (!res.status || !res.data) return [];
+  return Array.isArray(res.data.entries) ? res.data.entries : [];
+}
+
+function mergeActivityEntries(
+  auditEntries: MenuAuditLogEntry[],
+  aggregatedEntries: MenuAuditLogEntry[],
+): MenuAuditLogEntry[] {
+  const auditKeys = new Set<string>();
+  let hasAuditSettingsUpdate = false;
+  for (const entry of auditEntries) {
+    const key = auditCoverageKey(entry);
+    if (key) auditKeys.add(key);
+    if (entry.actionType === "SETTINGS_UPDATED") {
+      hasAuditSettingsUpdate = true;
+    }
+  }
+
+  const filteredAggregated = aggregatedEntries.filter(
+    (entry) =>
+      !shouldSkipAggregatedEntry(entry, auditKeys, hasAuditSettingsUpdate),
+  );
+
+  return [...auditEntries, ...filteredAggregated];
+}
+
 function isMeaningfulUpdate(createdAt?: string, updatedAt?: string): boolean {
   const created = parseDate(createdAt);
   const updated = parseDate(updatedAt);
   if (created == null || updated == null) return false;
-  return updated - created > 60_000;
+  return updated - created > 1000;
 }
 
 function makeEntry(
@@ -110,6 +250,7 @@ export function buildActivityEntriesFromSources(
         title: labels.categoryCreated(name),
         entityType: "category",
         entityName: name,
+        targetId: typeof cat.id === "number" ? cat.id : Number(cat.id) || null,
         date: cat.createdAt ?? cat.updatedAt ?? null,
         isUndated: false,
       }),
@@ -123,6 +264,7 @@ export function buildActivityEntriesFromSources(
           title: labels.categoryUpdated(name),
           entityType: "category",
           entityName: name,
+          targetId: typeof cat.id === "number" ? cat.id : Number(cat.id) || null,
           date: cat.updatedAt ?? null,
           isUndated: false,
         }),
@@ -139,6 +281,7 @@ export function buildActivityEntriesFromSources(
         title: labels.itemCreated(name),
         entityType: "item",
         entityName: name,
+        targetId: typeof item.id === "number" ? item.id : Number(item.id) || null,
         date: item.createdAt ?? item.updatedAt ?? null,
         isUndated: false,
       }),
@@ -151,6 +294,7 @@ export function buildActivityEntriesFromSources(
           title: labels.itemUpdated(name),
           entityType: "item",
           entityName: name,
+          targetId: typeof item.id === "number" ? item.id : Number(item.id) || null,
           date: item.updatedAt ?? null,
           isUndated: false,
         }),
@@ -256,6 +400,7 @@ function filterActivityEntries(
       entry.entityName,
       entry.actionType,
       entry.entityType,
+      entry.userName,
     ]
       .filter(Boolean)
       .join(" ")
@@ -378,9 +523,15 @@ export async function fetchAggregatedMenuActivityLog(
   const page = params.page ?? 1;
   const limit = params.limit ?? 20;
 
-  const sources = await fetchActivitySourceData(menuId, locale, sourceOptions);
+  const [sources, auditRows] = await Promise.all([
+    fetchActivitySourceData(menuId, locale, sourceOptions),
+    fetchMenuAuditLogRows(menuId, locale, params.q),
+  ]);
+
   const built = buildActivityEntriesFromSources(sources, locale, labels);
-  const sorted = sortActivityEntries(built);
+  const auditEntries = auditRows.map((row) => auditRowToEntry(row, locale));
+  const merged = mergeActivityEntries(auditEntries, built);
+  const sorted = sortActivityEntries(merged);
   const filtered = filterActivityEntries(sorted, params.q);
 
   return paginateActivityEntries(filtered, page, limit);

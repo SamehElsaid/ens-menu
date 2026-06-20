@@ -1715,6 +1715,64 @@ textarea {
   @apply !text-slate-200;
 }
 
+.filter-select__control {
+  @apply !h-11 !min-h-11 !rounded-xl !border !border-slate-200 dark:!border-slate-600 !bg-slate-50 dark:!bg-slate-700/50 !shadow-none;
+}
+
+.filter-select__control--is-focused {
+  @apply !border-primary !ring-2 !ring-primary/40 !shadow-none;
+}
+
+.filter-select__single-value,
+.filter-select__input-container {
+  @apply !text-slate-800 dark:!text-slate-200 !text-sm;
+}
+
+.filter-select__placeholder {
+  @apply !text-slate-400 dark:!text-slate-500;
+}
+
+.filter-select__indicator svg {
+  @apply !text-slate-400 dark:!text-slate-500;
+}
+
+.filter-select__indicator-separator {
+  @apply !bg-slate-200 dark:!bg-slate-600;
+}
+
+.filter-select__menu {
+  @apply !z-[1000] !mt-1 !rounded-xl !border !border-slate-200 dark:!border-slate-600 !bg-white dark:!bg-slate-800 !shadow-lg;
+}
+
+.filter-select__menu-list {
+  @apply !py-1;
+}
+
+.filter-select__option {
+  @apply !cursor-pointer !text-slate-800 dark:!text-slate-200 !text-sm;
+}
+
+.filter-select__option--is-focused {
+  @apply !bg-slate-100 dark:!bg-slate-700;
+}
+
+.filter-select__option--is-selected {
+  @apply !bg-primary !text-white;
+}
+
+.filter-select__loading-message,
+.filter-select__loading-indicator {
+  @apply !text-slate-500 dark:!text-slate-400 !text-sm;
+}
+
+.dark .filter-select__control {
+  @apply !bg-slate-700/50 !border-slate-600;
+}
+
+.dark .filter-select__control--is-focused {
+  @apply !border-primary !ring-primary/40;
+}
+
 .react-datepicker-wrapper {
   @apply w-full;
 }
@@ -5262,20 +5320,14 @@ body.recaptcha-modal-open {
 }
 
 .recaptcha-modal__panel {
-  transform: translateY(12px) scale(0.98);
+  transform: scale(0.96);
   transition:
     transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 0.24s ease;
 }
 
 .recaptcha-modal--visible .recaptcha-modal__panel {
-  transform: translateY(0) scale(1);
-}
-
-@media (min-width: 640px) {
-  .recaptcha-modal__panel {
-    transform: translateY(8px) scale(0.98);
-  }
+  transform: scale(1);
 }
 
 /* ── Field availability checking (register / auth forms) ── */
@@ -5356,7 +5408,12 @@ body.recaptcha-modal-open {
 .register-submit-btn--loading {
   opacity: 1 !important;
   cursor: wait !important;
-  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 50%, #4f46e5 100%) !important;
+  background: linear-gradient(
+    135deg,
+    #7c3aed 0%,
+    #6366f1 50%,
+    #4f46e5 100%
+  ) !important;
   box-shadow:
     0 1px 0 rgb(255 255 255 / 0.12) inset,
     0 10px 28px -10px rgb(124 58 237 / 0.55) !important;

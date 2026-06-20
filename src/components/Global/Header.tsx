@@ -53,7 +53,12 @@ interface NavLinkProps {
   className?: string;
 }
 
-function NavLink({ href, children, onClick, className = navLinkClass }: NavLinkProps) {
+function NavLink({
+  href,
+  children,
+  onClick,
+  className = navLinkClass,
+}: NavLinkProps) {
   return (
     <Link href={href} prefetch={false} onClick={onClick} className={className}>
       {children}
@@ -116,7 +121,11 @@ function HeaderActions({
 
   return (
     <div className="flex items-center gap-1 sm:gap-1.5">
-      <MarketingButtonLink href="/auth/register" variant="compact" prefetch={false}>
+      <MarketingButtonLink
+        href="/auth/register"
+        variant="compact"
+        prefetch={false}
+      >
         {tHeader("startNow")}
       </MarketingButtonLink>
       <MarketingButtonLink href="/auth/login" variant="ghost" prefetch={false}>
@@ -188,13 +197,22 @@ function Header() {
           <BrandBlock aiBadge={tHeader("aiBadge")} logoSize="header" />
           <div className="flex shrink-0 items-center gap-1.5">
             {!isLoggedIn && !isAuthRoute && (
-              <Link
-                href="/auth/register"
-                prefetch={false}
-                className={`${authBtn.compact} shrink-0 px-3.5 text-[11px]`}
-              >
-                {tHeader("startNow")}
-              </Link>
+              <>
+                <Link
+                  href="/auth/register"
+                  prefetch={false}
+                  className={`${authBtn.compact} shrink-0 px-3.5 text-[11px]`}
+                >
+                  {tHeader("startNow")}
+                </Link>
+                <Link
+                  href="/auth/login"
+                  prefetch={false}
+                  className={`${authBtn.ghost} shrink-0 px-3.5 text-[11px]`}
+                >
+                  {tHeader("signIn")}
+                </Link>
+              </>
             )}
             {isLoggedIn && <UserDropDown />}
             <button

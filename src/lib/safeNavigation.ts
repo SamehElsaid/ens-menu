@@ -2,6 +2,7 @@ import { routing } from "@/i18n/routing";
 import { stopHolyLoader } from "holy-loader";
 
 export const CLOSE_NAV_OVERLAYS_EVENT = "ensmenu:close-nav-overlays";
+export const SAME_ROUTE_REFRESH_EVENT = "ensmenu:same-route-refresh";
 
 const LOCALE_PREFIX = /^\/(ar|en)(?=\/|$)/;
 
@@ -113,6 +114,19 @@ export function dispatchCloseNavOverlays(): void {
   window.dispatchEvent(new CustomEvent(CLOSE_NAV_OVERLAYS_EVENT));
 }
 
+export function dispatchSameRouteRefresh(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  window.dispatchEvent(
+    new CustomEvent(SAME_ROUTE_REFRESH_EVENT, {
+      detail: {
+        pathname: normalizePathname(window.location.pathname),
+      },
+    }),
+  );
+}
+
 export function cancelSameRouteNavigation(
   event: Pick<MouseEvent, "preventDefault" | "stopPropagation">,
 ): void {
@@ -120,6 +134,7 @@ export function cancelSameRouteNavigation(
   event.stopPropagation();
   stopHolyLoader();
   dispatchCloseNavOverlays();
+  dispatchSameRouteRefresh();
 }
 
 export function shouldBlockSameRouteClick(
@@ -177,6 +192,7 @@ export function createSafeLinkClickHandler(
       event.stopPropagation();
       stopHolyLoader();
       dispatchCloseNavOverlays();
+      dispatchSameRouteRefresh();
       onSameRoute?.();
       onNavigate?.(event);
       return;

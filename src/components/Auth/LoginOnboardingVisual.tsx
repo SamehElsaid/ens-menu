@@ -43,9 +43,7 @@ export default function LoginOnboardingVisual({
 
       <p
         className={`max-w-sm leading-relaxed text-slate-600 dark:text-slate-400 ${
-          isCompact
-            ? "mt-1 text-xs leading-snug"
-            : "mt-2 text-[13px]"
+          isCompact ? "mt-1 text-xs leading-snug" : "mt-2 text-[13px]"
         }`}
       >
         {subtitle}
@@ -60,9 +58,7 @@ export default function LoginOnboardingVisual({
             <span
               key={badge}
               className={`inline-flex items-center gap-1 rounded-md border border-purple-200/70 bg-white/80 font-semibold text-purple-800 dark:border-purple-500/25 dark:bg-purple-500/10 dark:text-purple-200 ${
-                isCompact
-                  ? "px-1.5 py-0.5 text-[9px]"
-                  : "px-2 py-1 text-[10px]"
+                isCompact ? "px-1.5 py-0.5 text-[9px]" : "px-2 py-1 text-[10px]"
               }`}
             >
               <Icon size={isCompact ? 10 : 11} aria-hidden />

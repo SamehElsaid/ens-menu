@@ -31,7 +31,7 @@ export type NavItem = {
   icon: IconType;
   badge?: string;
   /** Resolved at runtime in the sidebar (e.g. pending table orders). */
-  dynamicBadge?: "pendingOrders";
+  dynamicBadge?: "pendingOrders" | "pendingDeliveryOrders";
   badges?: Array<{ label: string; variant: "new" | "beta" | "soon" }>;
   /** Visual cluster within a section (e.g. table ordering). */
   subgroup?: string;
@@ -120,10 +120,10 @@ export const cashierNavSections: NavSection[] = [
         label: "deliveryOrders",
         icon: MdOutlineDeliveryDining,
         key: "delivery-orders",
+        link: "delivery-orders",
         subgroup: "tableOps",
         proFeature: true,
-        comingSoon: true,
-        badges: [{ label: "badgeSoon", variant: "soon" }],
+        dynamicBadge: "pendingDeliveryOrders",
       },
     ],
   },
@@ -226,10 +226,10 @@ export const navSections: NavSection[] = [
         label: "deliveryOrders",
         icon: MdOutlineDeliveryDining,
         key: "delivery-orders",
+        link: "delivery-orders",
         subgroup: "tableOps",
         proFeature: true,
-        comingSoon: true,
-        badges: [{ label: "badgeSoon", variant: "soon" }],
+        dynamicBadge: "pendingDeliveryOrders",
       },
       {
         label: "staff",
@@ -271,6 +271,13 @@ export const navSections: NavSection[] = [
         key: "settings-media",
         link: "settings/media",
         navId: "onboarding-sidebar-settings-media",
+      },
+      {
+        label: "settingsDelivery",
+        icon: MdOutlineDeliveryDining,
+        key: "settings-delivery",
+        link: "settings/delivery",
+        navId: "onboarding-sidebar-settings-delivery",
       },
     ],
   },
@@ -365,7 +372,7 @@ export const adminNavSections: NavSection[] = [
       {
         label: "vouchers",
         icon: IoTicketOutline,
-        key: "promo",
+        key: "vouchers",
         link: "vouchers",
       },
       {

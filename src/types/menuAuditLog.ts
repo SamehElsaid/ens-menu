@@ -5,6 +5,7 @@ export interface MenuAuditLogEntry {
   description?: string | null;
   entityType: string;
   entityName?: string | null;
+  targetId?: number | null;
   userName?: string | null;
   createdAt: string;
   isUndated: boolean;
@@ -15,6 +16,8 @@ export interface ActivityLogLabels {
   categoryUpdated: (name: string) => string;
   itemCreated: (name: string) => string;
   itemUpdated: (name: string) => string;
+  itemDeleted: (name: string) => string;
+  categoryDeleted: (name: string) => string;
   staffCreated: (name: string) => string;
   tableCreated: (number: string) => string;
   adCreated: (title: string) => string;

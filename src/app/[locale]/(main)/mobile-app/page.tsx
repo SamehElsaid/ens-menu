@@ -10,7 +10,9 @@ import PricingSection from "@/components/HomePage/PricingSection";
 
 type PageProps = { params: Promise<{ locale: string }> };
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "meta" });
   return buildSeoMetadata({
@@ -42,7 +44,7 @@ export default async function MobileAppPage({ params }: PageProps) {
 
       <TemplateDescription />
 
-      <PricingSection />
+      {/* <PricingSection /> */}
 
       {/* CTA Footer */}
       <footer className="py-20 text-center bg-slate-50 dark:bg-slate-900/50">

@@ -100,14 +100,14 @@ export async function executeMenuImportSave(
     return response;
   };
 
-  console.log("[MenuImport] Bulk save payload:", stats.payload);
+  console.log("[MenuImport] Bulk save payload:", stats.requestBody);
 
   try {
     const bulkRes = await authorizedFetch(
       `${baseUrl}/menus/${menuId}/categories/bulk`,
       {
         method: "POST",
-        body: JSON.stringify(stats.payload),
+        body: JSON.stringify(stats.requestBody),
       },
     );
 

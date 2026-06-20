@@ -24,6 +24,7 @@ import { syncFcmToken } from "@/shared/syncFcmToken";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { TbLockPassword } from "react-icons/tb";
+import GoogleSignInButton from "@/components/Auth/GoogleSignInButton";
 
 let emailCheckTimeout: ReturnType<typeof setTimeout> | null = null;
 let lastCheckedAvailableEmail: string | null = null;
@@ -486,6 +487,12 @@ export default function RegisterForm({ steps = [] }: RegisterFormProps) {
             messages.register
           )}
         </button>
+
+        <GoogleSignInButton
+          dividerLabel="auth.orRegisterWith"
+          variant="full"
+          className="mt-3"
+        />
       </RegisterSection>
 
       <p className="pt-1 text-center text-[13px] text-slate-500 dark:text-slate-400">

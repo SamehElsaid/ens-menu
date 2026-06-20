@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { IoReceiptOutline } from "react-icons/io5";
-import type { CallEntry } from "@/lib/tableOrders";
+import type { CallEntry, OrderActionResult } from "@/lib/tableOrders";
 import MobileListPagination from "@/components/Dashboard/mobile/MobileListPagination";
 import OrderMobileCard from "./OrderMobileCard";
 
@@ -17,7 +17,7 @@ interface OrdersCardGridProps {
   onPageChange: (page: number) => void;
   isFiltered?: boolean;
   onView: (id: string) => void;
-  onActionComplete: () => void;
+  onActionComplete: (result: OrderActionResult) => void;
 }
 
 function OrderCardSkeleton() {

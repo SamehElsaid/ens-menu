@@ -1,6 +1,6 @@
 "use client";
 
-import type { CallEntry } from "@/lib/tableOrders";
+import type { CallEntry, OrderActionResult } from "@/lib/tableOrders";
 import OrderMobileCard from "./OrderMobileCard";
 
 interface OrdersMobileListProps {
@@ -8,7 +8,7 @@ interface OrdersMobileListProps {
   currency: string;
   menuId: string;
   onView: (id: string) => void;
-  onActionComplete: () => void;
+  onActionComplete: (result: OrderActionResult) => void;
 }
 
 export default function OrdersMobileList({

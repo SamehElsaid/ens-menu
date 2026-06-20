@@ -17,10 +17,10 @@ export function getCategoryPexelsSearchQuery(
 
 export function getPexelsPhotoUrl(photo: PexelsPhoto): string {
   return (
-    photo.src.medium ||
-    photo.src.large ||
+    photo.src.original ||
     photo.src.large2x ||
-    photo.src.original
+    photo.src.large ||
+    photo.src.medium
   );
 }
 

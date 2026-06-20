@@ -1,186 +1,40 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  useParams,
-  usePathname,
-  useRouter,
-  useSearchParams,
-} from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import ViewTime from "@/shared/ViewTime";
-import { axiosGet } from "@/shared/axiosCall";
 import { IoReceiptOutline, IoSearchOutline } from "react-icons/io5";
 import { NotificationPermissionCard } from "@/components/Global/NotificationPermissionCard";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import LinkTo from "@/components/Global/LinkTo";
 import { useAppSelector } from "@/store/hooks";
-import { isFreePlanUser } from "@/lib/subscription";
-import { useMenuActivitySocket } from "@/hooks/useMenuActivitySocket";
-import { countPendingOrders } from "@/lib/tableOrders";
-import type {
-  ActivityCallsPayload,
-  CallEntry,
-  CallEntryDetail,
-} from "@/lib/tableOrders";
+import { useMenuOrdersPage } from "@/hooks/useMenuOrdersPage";
 import OrderDetailsModal from "./OrderDetailsModal";
 import OrdersCardGrid from "./OrdersCardGrid";
-
-const PAGE_SIZE = 12;
 
 export default function TableOrdersView() {
   const t = useTranslations("tableOrders");
   const locale = useLocale();
-  const params = useParams();
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  const menuId =
-    typeof params.menu === "string"
-      ? params.menu
-      : ((params.menu as string[])?.[0] ?? "");
-
-  const [entries, setEntries] = useState<CallEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [searchInput, setSearchInput] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [liveTick, setLiveTick] = useState(0);
-  const [modalEntry, setModalEntry] = useState<CallEntryDetail | null>(null);
-  const [modalLoading, setModalLoading] = useState(false);
-
-  const isRTL = locale === "ar";
   const currency = useAppSelector((s) => s.menuData.menu?.currency ?? "");
-  const userData = useAppSelector((s) => s.auth.data);
-  const isFreePlan = isFreePlanUser(userData);
-  const pendingCount = useMemo(() => countPendingOrders(entries), [entries]);
-  const isFiltered = debouncedSearch.length > 0;
+  const isRTL = locale === "ar";
 
-  const entryParam = searchParams.get("entry");
-
-  const openModal = useCallback(
-    (id: string) => {
-      const sp = new URLSearchParams(Array.from(searchParams.entries()));
-      sp.set("entry", id);
-      router.replace(`${pathname}?${sp.toString()}`, { scroll: false });
-    },
-    [router, pathname, searchParams],
-  );
-
-  const closeModal = useCallback(() => {
-    const sp = new URLSearchParams(Array.from(searchParams.entries()));
-    sp.delete("entry");
-    const qs = sp.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-    setModalEntry(null);
-  }, [router, pathname, searchParams]);
-
-  useEffect(() => {
-    const id = setTimeout(() => setDebouncedSearch(searchInput.trim()), 300);
-    return () => clearTimeout(id);
-  }, [searchInput]);
-
-  const searchBaseline = useRef<string | null>(null);
-  useEffect(() => {
-    if (searchBaseline.current === null) {
-      searchBaseline.current = debouncedSearch;
-      return;
-    }
-    if (searchBaseline.current !== debouncedSearch) {
-      searchBaseline.current = debouncedSearch;
-      setPage(1);
-    }
-  }, [debouncedSearch]);
-
-  const fetchLogs = useCallback(async () => {
-    if (!menuId || isFreePlan) {
-      setLoading(false);
-      return;
-    }
-    try {
-      setLoading(true);
-      const paramsQ: Record<string, unknown> = { page, limit: PAGE_SIZE };
-      if (debouncedSearch.length > 0) paramsQ.q = debouncedSearch;
-
-      const result = await axiosGet<ActivityCallsPayload>(
-        `/menus/${menuId}/activity-logs`,
-        locale,
-        undefined,
-        paramsQ,
-      );
-
-      if (result.status && result.data) {
-        const p = result.data;
-        setEntries(p.entries ?? p.calls ?? []);
-        setTotalPages(Math.max(1, p.totalPages ?? 1));
-      } else {
-        setEntries([]);
-        setTotalPages(1);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [menuId, locale, page, debouncedSearch, liveTick, isFreePlan]);
-
-  useEffect(() => {
-    void fetchLogs();
-  }, [fetchLogs]);
-
-  const handleLiveUpdate = useCallback(() => {
-    setPage(1);
-    setLiveTick((n) => n + 1);
-  }, []);
-
-  useMenuActivitySocket(isFreePlan ? "" : menuId, handleLiveUpdate);
-
-  const handleActionComplete = useCallback(() => {
-    handleLiveUpdate();
-  }, [handleLiveUpdate]);
-
-  useEffect(() => {
-    if (!entryParam || !menuId) {
-      setModalEntry(null);
-      return;
-    }
-
-    let cancelled = false;
-    setModalEntry(null);
-    setModalLoading(true);
-
-    axiosGet<{ entry: CallEntryDetail } | CallEntryDetail>(
-      `/menus/${menuId}/activity-logs/${entryParam}`,
-      locale,
-    )
-      .then((result) => {
-        if (cancelled) return;
-        if (result.status && result.data) {
-          const raw = result.data as Record<string, unknown>;
-          const resolved = (raw.entry ?? raw) as CallEntryDetail;
-          setModalEntry(resolved);
-        }
-        setModalLoading(false);
-      })
-      .catch(() => {
-        if (!cancelled) setModalLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [entryParam, menuId, locale, liveTick]);
-
-  useEffect(() => {
-    const onEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && entryParam) closeModal();
-    };
-    window.addEventListener("keydown", onEsc);
-    return () => window.removeEventListener("keydown", onEsc);
-  }, [entryParam, closeModal]);
-
-  const showModal =
-    Boolean(entryParam) && (modalLoading || Boolean(modalEntry));
+  const {
+    menuId,
+    isFreePlan,
+    entries,
+    loading,
+    page,
+    setPage,
+    totalPages,
+    searchInput,
+    setSearchInput,
+    pendingCount,
+    isFiltered,
+    openModal,
+    closeModal,
+    showModal,
+    modalEntry,
+    modalLoading,
+    handleActionComplete,
+  } = useMenuOrdersPage("table");
 
   if (isFreePlan) {
     return (
@@ -281,6 +135,8 @@ export default function TableOrdersView() {
           loading={modalLoading}
           currency={currency}
           onClose={closeModal}
+          menuId={menuId}
+          onActionComplete={handleActionComplete}
         />
       )}
     </div>

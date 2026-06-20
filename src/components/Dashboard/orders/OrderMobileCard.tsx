@@ -7,15 +7,19 @@ import {
   resolveEntryTime,
   resolveListEntryStatus,
 } from "@/lib/tableOrders";
-import type { CallEntry } from "@/lib/tableOrders";
+import type { CallEntry, OrderActionResult } from "@/lib/tableOrders";
 import OrderActionButtons from "./OrderActionButtons";
-import { IoEllipseSharp, IoEyeOutline, IoReceiptOutline } from "react-icons/io5";
+import {
+  IoEllipseSharp,
+  IoEyeOutline,
+  IoReceiptOutline,
+} from "react-icons/io5";
 
 interface OrderMobileCardProps {
   entry: CallEntry;
   currency: string;
   onView: (id: string) => void;
-  onActionComplete: () => void;
+  onActionComplete: (result: OrderActionResult) => void;
   menuId: string;
 }
 
@@ -66,6 +70,14 @@ export default function OrderMobileCard({
               {t("colCustomer")}:{" "}
             </span>
             {entry.customerName.trim()}
+          </p>
+        )}
+        {entry.orderNotes?.trim() && (
+          <p className="text-sm text-slate-700 dark:text-slate-200 line-clamp-2">
+            <span className="text-slate-400 dark:text-slate-500">
+              {t("colNotes")}:{" "}
+            </span>
+            {entry.orderNotes.trim()}
           </p>
         )}
         <p className="text-sm text-slate-700 dark:text-slate-200">

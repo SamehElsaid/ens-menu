@@ -10,6 +10,7 @@ import type { ActivityCallsPayload } from "@/lib/tableOrders";
 export function usePendingOrdersCount(
   menuId: string | null | undefined,
   enabled = true,
+  channel: "table" | "delivery" = "table",
 ): number {
   const locale = useLocale();
   const [count, setCount] = useState(0);
@@ -24,7 +25,7 @@ export function usePendingOrdersCount(
         `/menus/${menuId}/activity-logs`,
         locale,
         undefined,
-        { page: 1, limit: 50, status: "pending" },
+        { page: 1, limit: 50, channel },
         undefined,
         true,
       );
@@ -41,7 +42,7 @@ export function usePendingOrdersCount(
     } catch {
       setCount(0);
     }
-  }, [menuId, locale, enabled]);
+  }, [menuId, locale, enabled, channel]);
 
   useEffect(() => {
     void refresh();

@@ -30,7 +30,6 @@ async function Page({ params }: Props) {
       <HeroContent locale={locale} />
       <TransformShowcaseSection locale={locale} />
       <HomeCTASection locale={locale} />
-
     </>
   );
 }

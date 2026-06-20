@@ -37,6 +37,7 @@ import {
 import type { AdminAnalyticsResponse } from "@/types/AdminAnalytics";
 import { useAdminPermissions } from "@/hooks/useAdminPermissions";
 import type { AdminPermissionKey } from "@/types/AdminPermission";
+import { formatMenuPrice } from "@/lib/formatMenuPrice";
 
 interface AdminStatsResponse {
   stats: {
@@ -322,7 +323,7 @@ export default function AdminPage() {
   const formatValue = (value: number | string, type?: string) => {
     if (typeof value === "string") return value;
     if (type === "revenue") {
-      return `$${value.toFixed(2)}`;
+      return formatMenuPrice(value, "EGP", locale);
     }
     return value.toString();
   };
@@ -618,7 +619,11 @@ export default function AdminPage() {
                 <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">
                   {t("revenueGrowth")}
                 </h3>
-                <AdminMonthGrid points={revenuePoints} dir={textDir} />
+                <AdminMonthGrid
+                  points={revenuePoints}
+                  dir={textDir}
+                  formatCount={(count) => formatMenuPrice(count, "EGP", locale)}
+                />
               </div>
             )}
 

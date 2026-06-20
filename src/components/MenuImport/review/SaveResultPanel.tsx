@@ -8,12 +8,15 @@ import {
   IoWarningOutline,
   IoAlertCircleOutline,
   IoImageOutline,
+  IoRefreshOutline,
 } from "react-icons/io5";
 
 interface SaveResultPanelProps {
   result: SaveMenuImportResponse;
   menuId: string;
   onNewUpload: () => void;
+  onRetrySave?: () => void;
+  isRetrying?: boolean;
 }
 
 function reasonLabel(
@@ -36,10 +39,22 @@ function reasonLabel(
   return reason;
 }
 
+const NON_RETRYABLE_REASONS = new Set(["bulk_import_limit"]);
+
+function isRetryableFailure(result: SaveMenuImportResponse): boolean {
+  if (result.ok) return false;
+  if (result.errors.some((err) => NON_RETRYABLE_REASONS.has(err.reason))) {
+    return false;
+  }
+  return true;
+}
+
 export default function SaveResultPanel({
   result,
   menuId,
   onNewUpload,
+  onRetrySave,
+  isRetrying = false,
 }: SaveResultPanelProps) {
   const t = useTranslations("MenuImport");
   const { summary, errors, ok, partial } = result;
@@ -65,6 +80,8 @@ export default function SaveResultPanel({
   const hasBulkImportLimit = errors.some(
     (err) => err.reason === "bulk_import_limit",
   );
+
+  const canRetry = isRetryableFailure(result) && !!onRetrySave;
 
   return (
     <div className="max-w-lg mx-auto text-center py-8 space-y-6">
@@ -199,12 +216,33 @@ export default function SaveResultPanel({
             {t("freePlanLimitUpgrade")}
           </LinkTo>
         )}
-        <LinkTo
-          href={`/dashboard/${menuId}/items`}
-          className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-primary text-white font-semibold hover:opacity-90"
-        >
-          {t("goToItems")}
-        </LinkTo>
+        {canRetry && (
+          <button
+            type="button"
+            onClick={onRetrySave}
+            disabled={isRetrying}
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-semibold hover:opacity-90 disabled:opacity-60"
+          >
+            <IoRefreshOutline className="text-lg" />
+            {isRetrying ? t("saving") : t("retryAnalysis")}
+          </button>
+        )}
+        {ok && (
+          <LinkTo
+            href={`/dashboard/${menuId}/items`}
+            className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-primary text-white font-semibold hover:opacity-90"
+          >
+            {t("goToItems")}
+          </LinkTo>
+        )}
+        {!ok && !hasBulkImportLimit && (
+          <LinkTo
+            href={`/dashboard/${menuId}/items`}
+            className="inline-flex items-center justify-center px-6 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium"
+          >
+            {t("goToItems")}
+          </LinkTo>
+        )}
         <button
           type="button"
           onClick={onNewUpload}

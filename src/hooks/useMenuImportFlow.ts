@@ -18,6 +18,7 @@ import {
   fetchExistingMenuSnapshot,
 } from "@/services/menuImportApi";
 import { annotateDraftWithSnapshot, collectUnresolvedPriceConflicts } from "@/lib/menuImport/duplicateMatch";
+import { buildMenuImportSaveResponse } from "@/lib/menuImport/buildBulkCategoriesPayload";
 import { generateImportId } from "@/lib/menuImport/generateImportId";
 import type {
   ImportCategory,
@@ -356,6 +357,8 @@ export function useMenuImportFlow({
                           {
                             id: generateImportId(),
                             label: "",
+                            labelAr: "",
+                            labelEn: "",
                             price: null,
                             flags: ["missing_price"],
                           },
@@ -544,11 +547,31 @@ export function useMenuImportFlow({
       const result = await saveMenuImportDraft(menuId, locale, state.draft);
       dispatch({ type: "SAVE_SUCCESS", result });
     } catch (error) {
+      const mapped = mapSaveImportError(error);
+      if (mapped.response) {
+        dispatch({ type: "SAVE_SUCCESS", result: mapped.response });
+        return;
+      }
+
       dispatch({
         type: "SAVE_FAIL",
+        result: buildMenuImportSaveResponse(state.draft, {
+          ok: false,
+          failed: true,
+          errors: [
+            {
+              type: "category",
+              reason:
+                mapped.code === "save_timeout" || mapped.code === "network"
+                  ? "network_error"
+                  : "bulk_save_failed",
+              message: mapped.code,
+            },
+          ],
+        }),
         error: {
           code: "save_failed",
-          message: mapSaveImportError(error).code,
+          message: mapped.code,
         },
       });
     }

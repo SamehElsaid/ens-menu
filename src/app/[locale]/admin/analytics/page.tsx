@@ -29,6 +29,7 @@ import {
   getAdminMenuLabel,
   getAdminProductLabel,
 } from "@/lib/fetchAdminAnalytics";
+import { formatMenuPrice } from "@/lib/formatMenuPrice";
 import type {
   AdminAnalyticsPeriod,
   AdminAnalyticsResponse,
@@ -324,6 +325,7 @@ export default function AdminAnalyticsPage() {
                 <AdminMonthGrid
                   points={analytics.revenueOverTime ?? []}
                   dir={textDir}
+                  formatCount={(count) => formatMenuPrice(count, "EGP", locale)}
                 />
               </AdminSectionCard>
             )}

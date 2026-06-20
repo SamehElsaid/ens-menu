@@ -23,7 +23,7 @@ export const UPCOMING_FEATURES: UpcomingFeatureConfig[] = [
   {
     id: "delivery-orders",
     messageKey: "deliveryOrders",
-    showCountdown: true,
+    showCountdown: false,
     launchAt: "2026-06-18T00:00:00.000Z",
     routeScope: "menuOverview",
   },

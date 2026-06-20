@@ -9,8 +9,12 @@ import ProPlanPriceSelector, {
   type ProBillingChoice,
 } from "@/components/Pricing/ProPlanPriceSelector";
 import PricingMobilePlanCards from "@/components/Pricing/PricingMobilePlanCards";
-import type { CellVal, ComparisonRow } from "@/components/Pricing/pricingComparisonTypes";
+import type { CellVal } from "@/components/Pricing/pricingComparisonTypes";
 import { usePlans } from "@/hooks/usePlans";
+import {
+  buildPricingComparisonRows,
+  CUSTOM_TABLE_FEATURE_KEYS,
+} from "@/lib/pricingComparison";
 import useSubscriptionUpgradeHref from "@/hooks/useSubscriptionUpgradeHref";
 import { BsQrCode } from "react-icons/bs";
 import {
@@ -51,26 +55,6 @@ const PAYMENT_METHODS = [
     imageWidth: 120,
     imageHeight: 40,
   },
-] as const;
-
-const STATIC_FREE_PLAN = {
-  maxMenus: 1,
-  allowCustomDomain: false,
-  hasAds: false,
-} as const;
-
-const STATIC_PRO_PLAN = {
-  maxMenus: 4,
-  allowCustomDomain: true,
-  hasAds: true,
-} as const;
-
-const CUSTOM_TABLE_FEATURE_KEYS = [
-  "waiterRequest",
-  "billRequest",
-  "deliveryMaps",
-  "newLanguages",
-  "onlinePayment",
 ] as const;
 
 const COL_PRO =
@@ -254,214 +238,18 @@ export default function PricingComparisonPage() {
 
   const tYes = t("yes");
   const tNo = t("no");
-  const tBasic = t("cellBasic");
 
-  const baseRows: ComparisonRow[] = [
-    {
-      id: "rowBillingCycle",
-      label: t("rowBillingCycle"),
-      free: t("billingFree"),
-      pro: t("billingProShort"),
-      custom: t("billingCustom"),
-    },
-    {
-      id: "rowMenus",
-      label: t("rowMenus"),
-      free: STATIC_FREE_PLAN.maxMenus,
-      pro: STATIC_PRO_PLAN.maxMenus,
-      custom: t("cellUnlimited"),
-    },
-    {
-      id: "rowProducts",
-      label: t("rowProducts"),
-      free: t("limited"),
-      pro: t("limited"),
-      custom: t("cellNegotiable"),
-    },
-    {
-      id: "rowSmartQr",
-      label: t("rowSmartQr"),
-      free: true,
-      pro: true,
-      custom: true,
-    },
-    {
-      id: "rowGuestMenu",
-      label: t("rowGuestMenu"),
-      free: true,
-      pro: true,
-      custom: true,
-    },
-    {
-      id: "rowAiMenuImport",
-      label: t("rowAiMenuImport"),
-      free: tBasic,
-      pro: true,
-      custom: true,
-    },
-    {
-      id: "rowAiSuggestions",
-      label: t("rowAiSuggestions"),
-      free: true,
-      pro: true,
-      custom: true,
-    },
-    {
-      id: "rowAiWaiter",
-      label: t("rowAiWaiter"),
-      free: t("aiFree"),
-      pro: t("aiPro"),
-      custom: t("aiCustom"),
-    },
-    {
-      id: "rowTableOrderingQr",
-      label: t("rowTableOrderingQr"),
-      free: false,
-      pro: true,
-      custom: true,
-    },
-    {
-      id: "rowLiveNotifications",
-      label: t("rowLiveNotifications"),
-      free: false,
-      pro: true,
-      custom: true,
-    },
-    {
-      id: "rowPhotoLibrary",
-      label: t("rowPhotoLibrary"),
-      free: true,
-      pro: true,
-      custom: true,
-    },
-    {
-      id: "rowMultiLanguage",
-      label: t("rowMultiLanguage"),
-      free: false,
-      pro: true,
-      custom: true,
-    },
-    {
-      id: "rowDashboard",
-      label: t("rowDashboard"),
-      free: true,
-      pro: true,
-      custom: true,
-    },
-    {
-      id: "rowStaffTables",
-      label: t("rowStaffTables"),
-      free: false,
-      pro: true,
-      custom: true,
-    },
-    {
-      id: "rowStaffMobileApp",
-      label: t("rowStaffMobileApp"),
-      free: false,
-      pro: true,
-      custom: true,
-    },
-    {
-      id: "rowStaffNotifications",
-      label: t("rowStaffNotifications"),
-      free: false,
-      pro: true,
-      custom: true,
-    },
-    {
-      id: "rowPlatformUpdates",
-      label: t("rowPlatformUpdates"),
-      free: true,
-      pro: true,
-      custom: true,
-    },
-    {
-      id: "rowHostingSecurity",
-      label: t("rowHostingSecurity"),
-      free: true,
-      pro: true,
-      custom: true,
-    },
-    {
-      id: "rowAds",
-      label: t("rowAds"),
-      free: STATIC_FREE_PLAN.hasAds,
-      pro: STATIC_PRO_PLAN.hasAds,
-      custom: true,
-    },
-    {
-      id: "rowDesign",
-      label: t("rowDesign"),
-      free: t("designFree"),
-      pro: t("designPro"),
-      custom: t("designCustom"),
-    },
-    {
-      id: "rowSupport",
-      label: t("rowSupport"),
-      free: t("supportFree"),
-      pro: t("supportPro"),
-      custom: t("supportCustom"),
-    },
-    ...CUSTOM_TABLE_FEATURE_KEYS.map((key) => ({
-      id: `customFeature.${key}`,
-      label: tLanding(`customFeatures.${key}`),
-      free: false,
-      pro: false,
-      custom: true,
-    })),
-  ];
-
-  const customFeatureIds = CUSTOM_TABLE_FEATURE_KEYS.map(
-    (key) => `customFeature.${key}`,
-  );
-
-  const orderedRowIds = [
-    // Core features
-    "rowBillingCycle",
-    "rowMenus",
-    "rowProducts",
-    "rowGuestMenu",
-    "rowSmartQr",
-    "rowDashboard",
-    "rowPhotoLibrary",
-    "rowHostingSecurity",
-    "rowPlatformUpdates",
-
-    // AI features
-    "rowAiMenuImport",
-    "rowAiSuggestions",
-    "rowAiWaiter",
-
-    // Live ordering & workflow
-    "rowTableOrderingQr",
-    "rowLiveNotifications",
-    "rowStaffNotifications",
-    "rowStaffTables",
-    "rowStaffMobileApp",
-    "rowMultiLanguage",
-
-    // Premium / business
-    "rowDesign",
-    "rowAds",
-    "rowSupport",
-
-    // Advanced custom-only add-ons
-    ...customFeatureIds,
-  ] as const;
-
-  const rowsById = new Map(baseRows.map((row) => [row.id, row] as const));
-  const rows = orderedRowIds
-    .map((id) => rowsById.get(id))
-    .filter((row): row is ComparisonRow => Boolean(row));
+  const rows = buildPricingComparisonRows({ t, tLanding });
 
   const desktopSections: Array<{ startId: string; title: string }> = [
     { startId: "rowBillingCycle", title: t("sectionCoreFeatures") },
     { startId: "rowAiMenuImport", title: t("sectionAiFeatures") },
     { startId: "rowTableOrderingQr", title: t("sectionLiveOrdering") },
     { startId: "rowDesign", title: t("sectionPremiumFeatures") },
-    { startId: "customFeature.waiterRequest", title: t("sectionAdvancedBusiness") },
+    {
+      startId: "customFeature.waiterRequest",
+      title: t("sectionAdvancedBusiness"),
+    },
   ];
   const desktopSectionByStartId = new Map<string, string>(
     desktopSections.map((section) => [section.startId, section.title]),
@@ -596,7 +384,10 @@ export default function PricingComparisonPage() {
                       className={`${COL_PRO} ${cellBase} z-[1] align-top py-7 sm:px-4 sm:py-9`}
                     >
                       <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-violet-400/18 via-fuchsia-400/10 to-transparent blur-xl dark:from-violet-500/12 dark:via-fuchsia-500/08" />
-                      <PlanColumnShell align="center" className="relative w-full">
+                      <PlanColumnShell
+                        align="center"
+                        className="relative w-full"
+                      >
                         <div className="flex w-full max-w-[12rem] flex-col items-center">
                           <span className="mb-2 inline-flex rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-tight text-white shadow-sm shadow-violet-500/20 sm:mb-2.5 sm:px-3 sm:text-[10px] sm:shadow-violet-500/25">
                             {tLanding("popular")}
@@ -671,7 +462,9 @@ export default function PricingComparisonPage() {
                           >
                             {row.label}
                           </th>
-                          <td className={`${cellBase} ${COL_SEP} ${rowTintFree}`}>
+                          <td
+                            className={`${cellBase} ${COL_SEP} ${rowTintFree}`}
+                          >
                             {renderCell(row.free, tYes, tNo)}
                           </td>
                           <td

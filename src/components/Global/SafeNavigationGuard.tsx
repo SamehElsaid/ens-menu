@@ -1,10 +1,11 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { stopHolyLoader } from "holy-loader";
 import { useEffect } from "react";
 import {
   cancelSameRouteNavigation,
+  SAME_ROUTE_REFRESH_EVENT,
   shouldBlockSameRouteClick,
 } from "@/lib/safeNavigation";
 
@@ -14,10 +15,21 @@ import {
  */
 export default function SafeNavigationGuard() {
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     stopHolyLoader();
   }, [pathname]);
+
+  useEffect(() => {
+    const handleSameRouteRefresh = () => {
+      router.refresh();
+    };
+
+    window.addEventListener(SAME_ROUTE_REFRESH_EVENT, handleSameRouteRefresh);
+    return () =>
+      window.removeEventListener(SAME_ROUTE_REFRESH_EVENT, handleSameRouteRefresh);
+  }, [router]);
 
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {

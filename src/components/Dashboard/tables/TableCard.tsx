@@ -23,7 +23,7 @@ import {
 interface TableCardProps {
   table: MenuTable;
   menuSlug: string | undefined | null;
-  qrCenterLogoSrc: string | null;
+  qrCenterLogoSrc: string | null | undefined;
   locale: string;
   onEdit: (table: MenuTable) => void;
   onDelete: (table: MenuTable) => void;

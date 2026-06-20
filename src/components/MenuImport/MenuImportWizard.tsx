@@ -168,6 +168,7 @@ export default function MenuImportWizard() {
               onOpenConfirm={handleOpenConfirm}
               onCloseConfirm={flow.closeConfirm}
               onConfirmSave={flow.confirmSave}
+              onRetrySave={flow.confirmSave}
               onUpdateCategory={flow.updateCategory}
               onUpdateItem={flow.updateItem}
               onUpdateVariant={flow.updateVariant}
