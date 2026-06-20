@@ -67,6 +67,8 @@ export default function DesignPage() {
       return false;
     }
 
+    const isSwitchingTheme = templateId !== activeTemplateId;
+
     if (!options?.skipLoadingUi) {
       setIsLoading(templateId);
     }
@@ -88,6 +90,26 @@ export default function DesignPage() {
             }),
           );
         }
+
+        if (isSwitchingTheme) {
+          const newTemplate = templatesInfo.find((t) => t.id === templateId);
+          const defaultColors =
+            newTemplate?.defaultColors ??
+            newTemplate?.colors ??
+            ["#0ea5e9", "#6366f1"];
+          const [primaryColor, secondaryColor] = defaultColors;
+          await axiosPatch(
+            `/menus/${resolvedMenuId}/customizations`,
+            locale,
+            {
+              primaryColor: primaryColor ?? "#0ea5e9",
+              secondaryColor: secondaryColor ?? primaryColor ?? "#6366f1",
+              backgroundColor: "#ffffff",
+              textColor: "#0f172a",
+            },
+          );
+        }
+
         return true;
       }
       return false;

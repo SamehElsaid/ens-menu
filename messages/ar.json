@@ -2041,7 +2041,7 @@
     "loading": "جاري التحميل...",
     "noCategories": "لا توجد فئات بعد",
     "noCategoriesDescription": "أضف أول صنف لتنظيم عناصر القائمة.",
-    "mobileFabLabel": "إضافة فئة",
+    "mobileFabLabel": "إضافة صنف",
     "mobileUploadHint": "اضغط لإضافة أو تغيير الصورة",
     "addModal": {
       "title": "إضافة صنف",
@@ -2251,7 +2251,7 @@
     "addImage": "أضف صورة",
     "totalItemsLabel": "إجمالي العناصر",
     "missingImagesHint": "في أصناف محتاجة صور — اضغط على «أضف صورة»",
-    "mobileFabLabel": "إضافة صنف",
+    "mobileFabLabel": "إضافة عنصر",
     "mobileUploadHint": "اضغط لإضافة أو تغيير الصورة",
     "sizesCount": "{count} أحجام",
     "addOnsCount": "{count} إضافات",
@@ -2428,7 +2428,7 @@
     "settingsGeneral": "الإعدادات",
     "settingsDesign": "التصميم",
     "settingsMedia": "الوسائط",
-    "settingsDelivery": "التوصيل",
+    "settingsDelivery": "طلبات أونلاين",
     "Categories": "التصنيفات",
     "Items": "العناصر",
     "Advertisements": "الإعلانات",
@@ -4725,10 +4725,27 @@
       "saveGov": "حفظ المنطقة",
       "cancel": "إلغاء",
       "deleteConfirm": "هل أنت متأكد من حذف منطقة التوصيل هذه؟",
-      "deleteBtn": "حذف"
+      "deleteBtn": "حذف",
+      "deleteConfirmTitle": "حذف منطقة التوصيل",
+      "typeNameToConfirm": "اكتب اسم المنطقة للتأكيد",
+      "confirmDelete": "حذف المنطقة",
+      "deleting": "جارٍ الحذف...",
+      "deleteSuccess": "تم حذف المنطقة بنجاح",
+      "deleteError": "فشل حذف المنطقة"
     },
     "buttons": {
       "save": "حفظ التغييرات"
     }
+  },
+  "notifications": {
+    "label": "الإشعارات",
+    "title": "الإشعارات",
+    "loading": "جاري التحميل...",
+    "empty": "لا توجد طلبات معلقة",
+    "order": "طلب",
+    "delivery": "توصيل",
+    "table": "طاولة",
+    "tableNo": "طاولة",
+    "viewAll": "عرض كل الطلبات"
   }
 }

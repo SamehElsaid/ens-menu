@@ -7,6 +7,7 @@ import { usePathname } from "@/i18n/navigation";
 import DarkModeToggle from "../Global/DarkModeToggle";
 import HeaderSearch from "../Global/HeaderSearch";
 import { useDashboardTitle } from "@/components/Dashboard/DashboardTitleProvider";
+import NotificationBell from "@/components/Dashboard/NotificationBell";
 
 export function DashboardHeader({
   setIsMenuOpen,
@@ -56,6 +57,7 @@ export function DashboardHeader({
 
         <div className="flex items-center justify-end gap-1">
           <HeaderSearch />
+          <NotificationBell segment={segment} />
           <DarkModeToggle />
           <UserDropDown />
         </div>

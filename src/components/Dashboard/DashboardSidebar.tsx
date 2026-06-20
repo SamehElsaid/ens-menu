@@ -12,7 +12,7 @@ import LoadImage from "../ImageLoad";
 import { useAppSelector } from "@/store/hooks";
 import Logo from "../Global/Logo";
 import { useAdminPermissions } from "@/hooks/useAdminPermissions";
-import { usePendingOrdersCount } from "@/hooks/usePendingOrdersCount";
+import { usePendingOrders } from "@/components/Dashboard/PendingOrdersProvider";
 import type { AdminPermissionKey } from "@/types/AdminPermission";
 import type { NavItem, NavSection } from "./data";
 import ProUpgradeModal from "./ProUpgradeModal";
@@ -301,12 +301,10 @@ export function DashboardSidebar({
       : navSections;
 
   const { menu, loading } = useAppSelector((state) => state.menuData);
-  const pendingOrdersCount = usePendingOrdersCount(segment, canFetchProData, "table");
-  const pendingDeliveryOrdersCount = usePendingOrdersCount(
-    segment,
-    canFetchProData,
-    "delivery",
-  );
+  const {
+    pendingTableCount: pendingOrdersCount,
+    pendingDeliveryCount: pendingDeliveryOrdersCount,
+  } = usePendingOrders();
   const publicMenuUrl = !isAdmin
     ? publicMenuLinkUrl(resolvePublicMenuSlug(menu?.slug, menu?.id))
     : "";

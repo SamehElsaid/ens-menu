@@ -2520,7 +2520,7 @@
     "settingsGeneral": "General",
     "settingsDesign": "Design",
     "settingsMedia": "Media",
-    "settingsDelivery": "Delivery",
+    "settingsDelivery": "Online orders",
     "Categories": "Categories",
     "Items": "Items",
     "Advertisements": "Advertisements",
@@ -4725,10 +4725,27 @@
       "saveGov": "Save Zone",
       "cancel": "Cancel",
       "deleteConfirm": "Are you sure you want to remove this delivery zone?",
-      "deleteBtn": "Delete"
+      "deleteBtn": "Delete",
+      "deleteConfirmTitle": "Delete Delivery Zone",
+      "typeNameToConfirm": "Type the zone name to confirm",
+      "confirmDelete": "Delete Zone",
+      "deleting": "Deleting...",
+      "deleteSuccess": "Zone deleted successfully",
+      "deleteError": "Failed to delete zone"
     },
     "buttons": {
       "save": "Save Changes"
     }
+  },
+  "notifications": {
+    "label": "Notifications",
+    "title": "Notifications",
+    "loading": "Loading...",
+    "empty": "No pending orders",
+    "order": "Order",
+    "delivery": "Delivery",
+    "table": "Table",
+    "tableNo": "Table",
+    "viewAll": "View all orders"
   }
 }

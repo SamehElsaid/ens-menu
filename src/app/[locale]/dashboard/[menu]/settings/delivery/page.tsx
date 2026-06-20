@@ -21,6 +21,7 @@ import { axiosGet, axiosPost, axiosPatch, axiosDelete } from "@/shared/axiosCall
 import CustomBtn from "@/components/Custom/CustomBtn";
 import CustomInput from "@/components/Custom/CustomInput";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
+import DeleteEntityConfirmModal from "@/components/Dashboard/DeleteEntityConfirmModal";
 
 interface DeliverySettings {
   deliveryOn: boolean;
@@ -87,6 +88,7 @@ export default function DeliverySettingsPage() {
   const [govForm, setGovForm] = useState<GovFormState>(EMPTY_GOV_FORM);
   const [isSavingGov, setIsSavingGov] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [govToDelete, setGovToDelete] = useState<Governorate | null>(null);
   const [govFormTouched, setGovFormTouched] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -94,26 +96,28 @@ export default function DeliverySettingsPage() {
   const [isSearching, setIsSearching] = useState(false);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const loadSettings = async (silent = false) => {
+    if (!silent) setIsLoadingSettings(true);
+    const res = await axiosGet<DeliverySettings>(
+      "/user/delivery/settings",
+      locale,
+    );
+    if (res.status && res.data) {
+      setSettings({
+        ...res.data,
+        deliveryWhatsAppOn: res.data.deliveryWhatsAppOn ?? true,
+        phoneNumber:
+          res.data.deliveryPhone?.trim() ||
+          res.data.phoneNumber?.trim() ||
+          "",
+      });
+    }
+    if (!silent) setIsLoadingSettings(false);
+  };
+
   useEffect(() => {
-    const load = async () => {
-      setIsLoadingSettings(true);
-      const res = await axiosGet<DeliverySettings>(
-        "/user/delivery/settings",
-        locale,
-      );
-      if (res.status && res.data) {
-        setSettings({
-          ...res.data,
-          deliveryWhatsAppOn: res.data.deliveryWhatsAppOn ?? true,
-          phoneNumber:
-            res.data.deliveryPhone?.trim() ||
-            res.data.phoneNumber?.trim() ||
-            "",
-        });
-      }
-      setIsLoadingSettings(false);
-    };
-    load();
+    loadSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locale]);
 
   const fetchGovernorates = async (silent = false) => {
@@ -210,16 +214,7 @@ export default function DeliverySettingsPage() {
       );
       if (res.status) {
         toast.success(t("savedSuccess"));
-        if (res.data) {
-          setSettings({
-            ...res.data,
-            deliveryWhatsAppOn: res.data.deliveryWhatsAppOn ?? true,
-            phoneNumber:
-              res.data.deliveryPhone?.trim() ||
-              res.data.phoneNumber?.trim() ||
-              settings.phoneNumber,
-          });
-        }
+        await loadSettings(true);
       }
     } finally {
       setIsSavingSettings(false);
@@ -310,17 +305,20 @@ export default function DeliverySettingsPage() {
     }
   };
 
-  const handleDeleteGov = async (id: number) => {
-    if (!window.confirm(t("governorates.deleteConfirm"))) return;
-    setDeletingId(id);
+  const handleConfirmDelete = async () => {
+    if (!govToDelete) return;
+    setDeletingId(govToDelete.id);
     try {
       const res = await axiosDelete(
-        `/user/delivery/governorates/${id}`,
+        `/user/delivery/governorates/${govToDelete.id}`,
         locale,
       );
       if (res.status) {
         await fetchGovernorates(true);
-        toast.success(isRTL ? "تم حذف المحافظة" : "Governorate deleted");
+        toast.success(t("governorates.deleteSuccess"));
+        setGovToDelete(null);
+      } else {
+        toast.error(t("governorates.deleteError"));
       }
     } finally {
       setDeletingId(null);
@@ -789,7 +787,7 @@ export default function DeliverySettingsPage() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleDeleteGov(gov.id)}
+                        onClick={() => setGovToDelete(gov)}
                         disabled={deletingId === gov.id}
                         className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors disabled:opacity-50"
                         aria-label={t("governorates.deleteBtn")}
@@ -823,6 +821,30 @@ export default function DeliverySettingsPage() {
           </CustomBtn>
         </div>
       </div>
+
+      {govToDelete && (
+        <DeleteEntityConfirmModal
+          titleId="delete-gov-title"
+          inputId="delete-gov-confirm-input"
+          title={t("governorates.deleteConfirmTitle")}
+          message={t("governorates.deleteConfirm")}
+          typeConfirmLabel={
+            <>
+              {t("governorates.typeNameToConfirm")}{" "}
+              <span className="font-bold text-gray-900 dark:text-white">
+                «{isRTL ? govToDelete.nameAr : govToDelete.nameEn}»
+              </span>
+            </>
+          }
+          confirmPlaceholder={isRTL ? govToDelete.nameAr : govToDelete.nameEn}
+          cancelLabel={t("governorates.cancel")}
+          confirmDeleteLabel={t("governorates.confirmDelete")}
+          deletingLabel={t("governorates.deleting")}
+          closeAriaLabel={t("governorates.cancel")}
+          onClose={() => setGovToDelete(null)}
+          onDelete={handleConfirmDelete}
+        />
+      )}
     </div>
   );
 }
