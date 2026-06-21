@@ -82,6 +82,7 @@ export interface Category {
   image?: string;
   isActive: boolean;
   menuId: number;
+  itemsCount?: number;
   createdAt?: string;
   updatedAt?: string;
   [key: string]: unknown;

@@ -10,6 +10,7 @@ import { useAppSelector } from "@/store/hooks";
 import { useMenuOrdersPage } from "@/hooks/useMenuOrdersPage";
 import DeliveryOrderDetailsModal from "./DeliveryOrderDetailsModal";
 import DeliveryOrdersCardGrid from "./DeliveryOrdersCardGrid";
+import OrdersFilters from "./OrdersFilters";
 
 export default function DeliveryOrdersView() {
   const t = useTranslations("deliveryOrders");
@@ -27,6 +28,13 @@ export default function DeliveryOrdersView() {
     totalPages,
     searchInput,
     setSearchInput,
+    dateFrom,
+    setDateFrom,
+    dateTo,
+    setDateTo,
+    statusFilter,
+    setStatusFilter,
+    clearFilters,
     pendingCount,
     isFiltered,
     openModal,
@@ -114,6 +122,20 @@ export default function DeliveryOrdersView() {
             autoComplete="off"
           />
         </div>
+
+        <OrdersFilters
+          translationNs="deliveryOrders"
+          theme="emerald"
+          dateFrom={dateFrom}
+          dateTo={dateTo}
+          statusFilter={statusFilter}
+          onDateFromChange={setDateFrom}
+          onDateToChange={setDateTo}
+          onStatusFilterChange={setStatusFilter}
+          onClearFilters={clearFilters}
+          hasActiveFilters={isFiltered}
+          isRTL={isRTL}
+        />
       </header>
 
       <DeliveryOrdersCardGrid

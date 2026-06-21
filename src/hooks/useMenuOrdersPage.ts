@@ -12,6 +12,8 @@ import { axiosGet } from "@/shared/axiosCall";
 import { useAppSelector } from "@/store/hooks";
 import { isFreePlanUser } from "@/lib/subscription";
 import { useMenuActivitySocket } from "@/hooks/useMenuActivitySocket";
+import { playNewOrderNotificationSound } from "@/lib/orderNotificationSound";
+import type { OrderStatusFilter } from "@/components/Dashboard/orders/OrdersFilters";
 import {
   applyLocalEntryStatusUpdate,
   countPendingOrders,
@@ -44,13 +46,20 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
   const [totalPages, setTotalPages] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [statusFilter, setStatusFilter] = useState<OrderStatusFilter>("all");
   const [modalEntry, setModalEntry] = useState<CallEntryDetail | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
 
   const userData = useAppSelector((s) => s.auth.data);
   const isFreePlan = isFreePlanUser(userData);
   const pendingCount = useMemo(() => countPendingOrders(entries), [entries]);
-  const isFiltered = debouncedSearch.length > 0;
+  const isFiltered =
+    debouncedSearch.length > 0 ||
+    dateFrom.length > 0 ||
+    dateTo.length > 0 ||
+    statusFilter !== "all";
   const entryParam = searchParams.get("entry");
 
   const openModal = useCallback(
@@ -87,6 +96,19 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
     }
   }, [debouncedSearch]);
 
+  const filterBaseline = useRef<string | null>(null);
+  const filterSignature = `${dateFrom}|${dateTo}|${statusFilter}`;
+  useEffect(() => {
+    if (filterBaseline.current === null) {
+      filterBaseline.current = filterSignature;
+      return;
+    }
+    if (filterBaseline.current !== filterSignature) {
+      filterBaseline.current = filterSignature;
+      setPage(1);
+    }
+  }, [filterSignature]);
+
   const fetchLogs = useCallback(
     async (silent = false) => {
       if (!menuId || isFreePlan) {
@@ -101,6 +123,9 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
           channel,
         };
         if (debouncedSearch.length > 0) paramsQ.q = debouncedSearch;
+        if (dateFrom) paramsQ.dateFrom = dateFrom;
+        if (dateTo) paramsQ.dateTo = dateTo;
+        if (statusFilter !== "all") paramsQ.status = statusFilter;
 
         const result = await axiosGet<ActivityCallsPayload>(
           `/menus/${menuId}/activity-logs`,
@@ -124,7 +149,7 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
         if (!silent) setLoading(false);
       }
     },
-    [menuId, locale, page, debouncedSearch, isFreePlan, channel],
+    [menuId, locale, page, debouncedSearch, dateFrom, dateTo, statusFilter, isFreePlan, channel],
   );
 
   useEffect(() => {
@@ -135,7 +160,9 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
     void fetchLogs(true);
   }, [fetchLogs]);
 
-  useMenuActivitySocket(isFreePlan ? "" : menuId, handleSocketUpdate);
+  useMenuActivitySocket(isFreePlan ? "" : menuId, handleSocketUpdate, {
+    onNewOrder: playNewOrderNotificationSound,
+  });
 
   const handleActionComplete = useCallback((result: OrderActionResult) => {
     setEntries((prev) =>
@@ -203,6 +230,13 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
   const showModal =
     Boolean(entryParam) && (modalLoading || Boolean(modalEntry));
 
+  const clearFilters = useCallback(() => {
+    setDateFrom("");
+    setDateTo("");
+    setStatusFilter("all");
+    setSearchInput("");
+  }, []);
+
   return {
     menuId,
     isFreePlan,
@@ -213,6 +247,13 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
     totalPages,
     searchInput,
     setSearchInput,
+    dateFrom,
+    setDateFrom,
+    dateTo,
+    setDateTo,
+    statusFilter,
+    setStatusFilter,
+    clearFilters,
     pendingCount,
     isFiltered,
     openModal,

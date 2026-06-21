@@ -9,6 +9,7 @@ import { useAppSelector } from "@/store/hooks";
 import { useMenuOrdersPage } from "@/hooks/useMenuOrdersPage";
 import OrderDetailsModal from "./OrderDetailsModal";
 import OrdersCardGrid from "./OrdersCardGrid";
+import OrdersFilters from "./OrdersFilters";
 
 export default function TableOrdersView() {
   const t = useTranslations("tableOrders");
@@ -26,6 +27,13 @@ export default function TableOrdersView() {
     totalPages,
     searchInput,
     setSearchInput,
+    dateFrom,
+    setDateFrom,
+    dateTo,
+    setDateTo,
+    statusFilter,
+    setStatusFilter,
+    clearFilters,
     pendingCount,
     isFiltered,
     openModal,
@@ -113,6 +121,20 @@ export default function TableOrdersView() {
             autoComplete="off"
           />
         </div>
+
+        <OrdersFilters
+          translationNs="tableOrders"
+          theme="violet"
+          dateFrom={dateFrom}
+          dateTo={dateTo}
+          statusFilter={statusFilter}
+          onDateFromChange={setDateFrom}
+          onDateToChange={setDateTo}
+          onStatusFilterChange={setStatusFilter}
+          onClearFilters={clearFilters}
+          hasActiveFilters={isFiltered}
+          isRTL={isRTL}
+        />
       </header>
 
       <OrdersCardGrid
