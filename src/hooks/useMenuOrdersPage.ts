@@ -111,7 +111,7 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
 
   const fetchLogs = useCallback(
     async (silent = false) => {
-      if (!menuId || isFreePlan) {
+      if (!menuId || (channel !== "delivery" && isFreePlan)) {
         setLoading(false);
         return;
       }
@@ -160,9 +160,10 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
     void fetchLogs(true);
   }, [fetchLogs]);
 
-  useMenuActivitySocket(isFreePlan ? "" : menuId, handleSocketUpdate, {
-    onNewOrder: playNewOrderNotificationSound,
-  });
+  useMenuActivitySocket(
+    channel !== "delivery" && isFreePlan ? "" : menuId,
+    handleSocketUpdate,
+  );
 
   const handleActionComplete = useCallback((result: OrderActionResult) => {
     setEntries((prev) =>

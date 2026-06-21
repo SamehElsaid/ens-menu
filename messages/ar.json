@@ -2446,7 +2446,7 @@
     "viewMenu": "عرض المنيو",
     "history": "سجل النشاط",
     "orders": "طلبات الطاولات",
-    "deliveryOrders": "طلبات الدلفري",
+    "deliveryOrders": "عرض طلبات الاونلاين",
     "badgeSoon": "قريباً",
     "menuImport": "استيراد المنيو",
     "Menu Import": "استيراد المنيو",
@@ -4181,7 +4181,11 @@
     "deleteThisMenu": "حذف هذه القائمة",
     "saveChanges": "حفظ التغييرات",
     "namePlaceholder": "The Palm Cafe",
-    "descriptionPlaceholder": "Fresh pasta, grilled burgers, pizzas & signature drinks..."
+    "descriptionPlaceholder": "Fresh pasta, grilled burgers, pizzas & signature drinks...",
+    "chatbotEnabled": "المساعد الذكي",
+    "chatbotEnabledDescription": "السماح للعملاء بالتفاعل مع مساعد ذكاء اصطناعي على قائمتك.",
+    "chatbotEnabledOn": "مفعّل",
+    "chatbotEnabledOff": "معطّل"
   },
   "menuMediaSettings": {
     "noMenuSelected": "لم يتم تحديد قائمة.",

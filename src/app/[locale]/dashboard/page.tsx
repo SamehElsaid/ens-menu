@@ -34,6 +34,10 @@ import {
 import LoadImage from "@/components/ImageLoad";
 import MenusMobileList from "@/components/Dashboard/mobile/MenusMobileList";
 import { getMenuDashboardRef, menuDashboardPath } from "@/lib/menuDashboardPath";
+import {
+  publicMenuLinkUrl,
+  resolvePublicMenuSlug,
+} from "@/lib/publicMenuUrl";
 
 export default function DashboardPage() {
   const t = useTranslations("Menus");
@@ -168,7 +172,7 @@ export default function DashboardPage() {
   };
 
   const getMenuPublicUrl = (menu: Menu) =>
-    `//${menu.slug}${process.env.NEXT_PUBLIC_MENU_URL ?? ""}`;
+    publicMenuLinkUrl(resolvePublicMenuSlug(menu.slug, menu.id));
 
   const formatDate = (dateStr: string) => {
     try {
