@@ -55,7 +55,11 @@ export function publicMenuQrUrl(
   });
 }
 
-/** Direct link to the menu (not counted as a QR scan). */
+/** Direct link to the menu (not counted as a QR scan).
+ *  Uses a protocol-relative URL (//) so it inherits the current page protocol
+ *  (HTTP in local dev, HTTPS in production), matching what cards display. */
 export function publicMenuLinkUrl(slug: string | undefined | null): string {
-  return buildPublicMenuBaseUrl(slug);
+  const normalized = resolvePublicMenuSlug(slug);
+  if (!normalized) return "";
+  return `//${normalized}${menuHostSuffix()}`;
 }

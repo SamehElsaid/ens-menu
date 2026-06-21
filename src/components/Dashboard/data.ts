@@ -122,7 +122,6 @@ export const cashierNavSections: NavSection[] = [
         key: "delivery-orders",
         link: "delivery-orders",
         subgroup: "tableOps",
-        proFeature: true,
         dynamicBadge: "pendingDeliveryOrders",
       },
     ],
@@ -228,7 +227,6 @@ export const navSections: NavSection[] = [
         key: "delivery-orders",
         link: "delivery-orders",
         subgroup: "tableOps",
-        proFeature: true,
         dynamicBadge: "pendingDeliveryOrders",
       },
       {
