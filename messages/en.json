@@ -4695,17 +4695,17 @@
       "disabledHint": "Delivery is currently disabled"
     },
     "contactNumbers": {
-      "title": "Contact Numbers",
-      "subtitle": "Phone numbers shown to delivery customers",
+      "title": "Receive orders on",
+      "subtitle": "Choose your preferred channel for receiving delivery orders and managing contact numbers",
       "deliveryPhone": "Delivery phone",
-      "whatsapp": "Orders WhatsApp",
-      "whatsappHint": "Delivery orders will be sent to this WhatsApp number",
+      "whatsapp": "WhatsApp number for receiving orders",
+      "whatsappHint": "Delivery orders will be automatically forwarded to this WhatsApp number",
       "whatsappOrdersTitle": "Receive orders on WhatsApp",
       "receiveOrdersOnTitle": "Receive orders on",
       "dashboardOption": "Dashboard",
       "whatsappOption": "WhatsApp",
-      "whatsappOrdersOnHint": "Orders go to WhatsApp and the dashboard",
-      "whatsappOrdersOffHint": "Orders go to the dashboard only",
+      "whatsappOrdersOnHint": "Receive orders directly on WhatsApp, with a copy saved to your dashboard",
+      "whatsappOrdersOffHint": "Receive and manage all orders directly through your control panel only",
       "whatsappDashboardOnlyHint": "WhatsApp is off — new orders appear in Delivery orders in the dashboard",
       "phonePlaceholder": "e.g. +201012345678"
     },
