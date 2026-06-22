@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { FiSave } from "react-icons/fi";
 import {
   MdOutlineDeliveryDining,
+  MdOutlineDashboard,
 } from "react-icons/md";
 import {
   IoPhonePortraitOutline,
@@ -458,49 +459,90 @@ export default function DeliverySettingsPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-100 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/40 p-4 space-y-3">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="h-9 w-9 rounded-xl bg-[#25D366]/10 flex items-center justify-center shrink-0">
-                    <FaWhatsapp className="text-base text-[#25D366]" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                      {t("contactNumbers.whatsappOrdersTitle")}
-                    </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                      {settings.deliveryWhatsAppOn
-                        ? t("contactNumbers.whatsappOrdersOnHint")
-                        : t("contactNumbers.whatsappOrdersOffHint")}
-                    </p>
-                  </div>
-                </div>
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                {t("contactNumbers.receiveOrdersOnTitle")}
+              </label>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Option 1: Dashboard */}
                 <button
                   type="button"
-                  role="switch"
-                  aria-checked={settings.deliveryWhatsAppOn}
                   onClick={() =>
                     setSettings((s) => ({
                       ...s,
-                      deliveryWhatsAppOn: !s.deliveryWhatsAppOn,
+                      deliveryWhatsAppOn: false,
                     }))
                   }
                   disabled={deliveryDisabled}
-                  className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#25D366]/30 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 ${
-                    settings.deliveryWhatsAppOn
-                      ? "bg-[#25D366]"
-                      : "bg-slate-200 dark:bg-slate-600"
-                  }`}
+                  className={`relative flex items-start gap-4 p-4 rounded-2xl border text-start transition-all duration-200 ${
+                    !settings.deliveryWhatsAppOn
+                      ? "border-primary bg-primary/5 dark:bg-primary/10 ring-1 ring-primary"
+                      : "border-slate-200 dark:border-slate-700 bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                  } ${deliveryDisabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
                 >
-                  <span
-                    className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${
-                      settings.deliveryWhatsAppOn
-                        ? isRTL
-                          ? "-translate-x-5"
-                          : "translate-x-5"
-                        : "translate-x-0"
-                    }`}
-                  />
+                  <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                    !settings.deliveryWhatsAppOn
+                      ? "bg-primary/20 text-primary"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500"
+                  }`}>
+                    <MdOutlineDashboard className="text-xl" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                      {t("contactNumbers.dashboardOption")}
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-normal">
+                      {t("contactNumbers.whatsappOrdersOffHint")}
+                    </p>
+                  </div>
+
+                  {/* Radio indicator */}
+                  <div className="flex items-center justify-center h-5 w-5 rounded-full border border-slate-300 dark:border-slate-600 shrink-0 mt-0.5">
+                    {!settings.deliveryWhatsAppOn && (
+                      <div className="h-2.5 w-2.5 rounded-full bg-primary" />
+                    )}
+                  </div>
+                </button>
+
+                {/* Option 2: WhatsApp */}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSettings((s) => ({
+                      ...s,
+                      deliveryWhatsAppOn: true,
+                    }))
+                  }
+                  disabled={deliveryDisabled}
+                  className={`relative flex items-start gap-4 p-4 rounded-2xl border text-start transition-all duration-200 ${
+                    settings.deliveryWhatsAppOn
+                      ? "border-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10 ring-1 ring-emerald-500"
+                      : "border-slate-200 dark:border-slate-700 bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                  } ${deliveryDisabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
+                >
+                  <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                    settings.deliveryWhatsAppOn
+                      ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500"
+                  }`}>
+                    <FaWhatsapp className="text-xl" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                      {t("contactNumbers.whatsappOption")}
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-normal">
+                      {t("contactNumbers.whatsappOrdersOnHint")}
+                    </p>
+                  </div>
+
+                  {/* Radio indicator */}
+                  <div className="flex items-center justify-center h-5 w-5 rounded-full border border-slate-300 dark:border-slate-600 shrink-0 mt-0.5">
+                    {settings.deliveryWhatsAppOn && (
+                      <div className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                    )}
+                  </div>
                 </button>
               </div>
             </div>
