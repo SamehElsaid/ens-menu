@@ -96,14 +96,14 @@ export default function DesignPage() {
           const defaultColors =
             newTemplate?.defaultColors ??
             newTemplate?.colors ??
-            ["#0ea5e9", "#6366f1"];
+            ["#9333EA", "#7C3AED"];
           const [primaryColor, secondaryColor] = defaultColors;
           await axiosPatch(
             `/menus/${resolvedMenuId}/customizations`,
             locale,
             {
-              primaryColor: primaryColor ?? "#0ea5e9",
-              secondaryColor: secondaryColor ?? primaryColor ?? "#6366f1",
+              primaryColor: primaryColor ?? "#9333EA",
+              secondaryColor: secondaryColor ?? primaryColor ?? "#7C3AED",
               backgroundColor: "#ffffff",
               textColor: "#0f172a",
             },

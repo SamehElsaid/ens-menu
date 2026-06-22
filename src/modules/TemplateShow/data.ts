@@ -19,6 +19,7 @@ export const templates: Template[] = [
     textAltAr: "يزيد المبيعات ويُحسن تجربة العملاء",
     textAltEn: "Increases sales and improves customer experience",
   },
+
   {
     id: 1,
     titleAr: "تحكم كامل واحصائيات متكاملة ",
@@ -72,14 +73,15 @@ export const templatesInfo: TemplateInfo[] = [
     id: "default",
     name: "Default Template",
     nameAr: "القالب الافتراضي",
-    image: "/images/temp/def.webp",
+    image: "/images/temp/view.jpg.jpeg",
     description:
       "Modern bilingual menu with hero section and smooth animations",
     isNew: false,
-    canEdit: false,
+    canEdit: true,
     descriptionAr: "قائمة عصرية ثنائية اللغة مع قسم بطولي ورسوم متحركة سلسة",
     slug: "default",
-    colors: ["#0ea5e9", "#6366f1"],
+    colors: ["#9333EA", "#7C3AED"],
+    defaultColors: ["#9333EA", "#7C3AED"],
   },
   {
     id: "neon",
@@ -225,21 +227,5 @@ export const templatesInfo: TemplateInfo[] = [
   //   slug: "retro",
   //   colors: ["#C67115", "#84623E"],
   //   defaultColors: ["#C67115", "#84623E"],
-  // },
-  // {
-  //   id: "onecard",
-  //   name: "One Card Template",
-  //   nameAr: "قالب البطاقة الواحدة",
-  //   image: "/images/temp/onecard.jpeg",
-  //   description:
-  //     "Mobile-first menu with purple accents, circular categories, and a single featured product card",
-  //   descriptionAr:
-  //     "قائمة موبايل بطابع بنفسجي، تصنيفات دائرية، وبطاقة منتج واحدة بارزة",
-  //   isNew: true,
-  //   canEdit: true,
-  //   customizeHeroTexts: false,
-  //   slug: "onecard",
-  //   colors: ["#9333EA", "#7C3AED"],
-  //   defaultColors: ["#9333EA", "#7C3AED"],
   // },
 ];
