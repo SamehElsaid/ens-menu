@@ -136,6 +136,20 @@ export const templatesInfo: TemplateInfo[] = [
     defaultColors: ["#7B2CBF", "#5A189A"],
   },
   {
+    id: "onecard",
+    name: "OneCard Template",
+    nameAr: "قالب الواحد كارد",
+    image: "/images/temp/onecard.png",
+    description:
+      "OneCard menu template with a modern design",
+    descriptionAr: "قالب قائمة واحد كارد عصري",
+    isNew: true,
+    canEdit: true,
+    slug: "onecard",
+    colors: ["#7B2CBF", "#5A189A"],
+    defaultColors: ["#7B2CBF", "#5A189A"],
+  },
+  {
     id: "vanilla",
     name: "Vanilla Template",
     nameAr: "قالب الفانيلا",
