@@ -19,6 +19,7 @@ export const templates: Template[] = [
     textAltAr: "يزيد المبيعات ويُحسن تجربة العملاء",
     textAltEn: "Increases sales and improves customer experience",
   },
+
   {
     id: 1,
     titleAr: "تحكم كامل واحصائيات متكاملة ",
@@ -76,10 +77,11 @@ export const templatesInfo: TemplateInfo[] = [
     description:
       "Modern bilingual menu with hero section and smooth animations",
     isNew: false,
-    canEdit: false,
+    canEdit: true,
     descriptionAr: "قائمة عصرية ثنائية اللغة مع قسم بطولي ورسوم متحركة سلسة",
     slug: "default",
-    colors: ["#0ea5e9", "#6366f1"],
+    colors: ["#7B2CBF", "#5A189A"],
+    defaultColors: ["#7B2CBF", "#5A189A"],
   },
   {
     id: "neon",
@@ -119,6 +121,46 @@ export const templatesInfo: TemplateInfo[] = [
     colors: ["#3b82f6", "#2563eb"],
     defaultColors: ["#3b82f6", "#2563eb"],
   },
+  {
+    id: "waffle",
+    name: "Waffle Template",
+    nameAr: "قالب الوافل",
+    image: "/images/temp/waffle.png",
+    description:
+      "Dark purple cafe menu with category cards and featured product layout",
+    descriptionAr: "قائمة كافيه بنفسجي داكن مع كروت تصنيفات وعرض منتجات مميز",
+    isNew: true,
+    canEdit: true,
+    slug: "waffle",
+    colors: ["#7B2CBF", "#5A189A"],
+    defaultColors: ["#7B2CBF", "#5A189A"],
+  },
+  {
+    id: "vanilla",
+    name: "Vanilla Template",
+    nameAr: "قالب الفانيلا",
+    image: "/images/temp/vanilla.png",
+    description: "Vanilla menu template with a modern design",
+    descriptionAr: "قالب قائمة فانيلا عصري",
+    isNew: true,
+    canEdit: true,
+    slug: "vanilla",
+    colors: ["#7B2CBF", "#5A189A"],
+    defaultColors: ["#7B2CBF", "#5A189A"],
+  },
+  // {
+  //   id: "onecard",
+  //   name: "OneCard Template",
+  //   nameAr: "قالب الواحد كارد",
+  //   image: "/images/temp/view.jpg.jpeg",
+  //   description: "OneCard menu template with a modern design",
+  //   descriptionAr: "قالب قائمة واحد كارد عصري",
+  //   isNew: true,
+  //   canEdit: true,
+  //   slug: "onecard",
+  //   colors: ["#7B2CBF", "#5A189A"],
+  //   defaultColors: ["#7B2CBF", "#5A189A"],
+  // },
   // {
   //   id: "emerald",
   //   name: "Emerald Template",
@@ -210,6 +252,7 @@ export const templatesInfo: TemplateInfo[] = [
   //   colors: ["#4338CA", "#06B6D4"],
   //   defaultColors: ["#4338CA", "#06B6D4"],
   // },
+
   // {
   //   id: "retro",
   //   name: "Retro Coffee Template",
@@ -225,21 +268,5 @@ export const templatesInfo: TemplateInfo[] = [
   //   slug: "retro",
   //   colors: ["#C67115", "#84623E"],
   //   defaultColors: ["#C67115", "#84623E"],
-  // },
-  // {
-  //   id: "onecard",
-  //   name: "One Card Template",
-  //   nameAr: "قالب البطاقة الواحدة",
-  //   image: "/images/temp/onecard.jpeg",
-  //   description:
-  //     "Mobile-first menu with purple accents, circular categories, and a single featured product card",
-  //   descriptionAr:
-  //     "قائمة موبايل بطابع بنفسجي، تصنيفات دائرية، وبطاقة منتج واحدة بارزة",
-  //   isNew: true,
-  //   canEdit: true,
-  //   customizeHeroTexts: false,
-  //   slug: "onecard",
-  //   colors: ["#9333EA", "#7C3AED"],
-  //   defaultColors: ["#9333EA", "#7C3AED"],
   // },
 ];

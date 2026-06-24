@@ -13,6 +13,7 @@ import { axiosGet } from "@/shared/axiosCall";
 import { useAppSelector } from "@/store/hooks";
 import { isFreePlanUser } from "@/lib/subscription";
 import { useMenuActivitySocket } from "@/hooks/useMenuActivitySocket";
+import { playNewOrderNotificationSound } from "@/lib/orderNotificationSound";
 import { isPendingOrder, isDeliveryEntry } from "@/lib/tableOrders";
 import type { ActivityCallsPayload, CallEntry } from "@/lib/tableOrders";
 
@@ -97,7 +98,9 @@ export function PendingOrdersProvider({
     void refresh();
   }, [refresh]);
 
-  useMenuActivitySocket(isFreePlan || !segment ? "" : segment, refresh);
+  useMenuActivitySocket(isFreePlan || !segment ? "" : segment, refresh, {
+    onNewOrder: playNewOrderNotificationSound,
+  });
 
   const pendingEntries = allEntries.filter(isPendingOrder);
   const pendingTableCount = pendingEntries.filter(

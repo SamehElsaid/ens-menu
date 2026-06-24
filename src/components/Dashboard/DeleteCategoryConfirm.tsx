@@ -24,14 +24,20 @@ export default function DeleteCategoryConfirm({
   const t = useTranslations("Categories");
   const locale = useLocale();
   const labelText = localeName.trim();
+  const itemsCount = Number(category.itemsCount ?? 0);
 
   const handleDelete = async () => {
-    const result = await axiosDelete<unknown>(
+    const result = await axiosDelete<{ deletedItemsCount?: number }>(
       `/menus/${menuId}/categories/${category.id}`,
       locale,
     );
     if (result.status) {
-      toast.success(t("deleteSuccess"));
+      const deletedCount = Number(result.data?.deletedItemsCount ?? itemsCount);
+      toast.success(
+        deletedCount > 0
+          ? t("deleteSuccessWithItems", { count: deletedCount })
+          : t("deleteSuccess"),
+      );
       onDeleted?.();
       onClose();
     } else {
@@ -39,12 +45,17 @@ export default function DeleteCategoryConfirm({
     }
   };
 
+  const message =
+    itemsCount > 0
+      ? t("deleteConfirmWithItems", { name: labelText, count: itemsCount })
+      : t("deleteConfirm", { name: labelText });
+
   return (
     <DeleteEntityConfirmModal
       titleId="delete-category-title"
       inputId="delete-category-confirm-input"
       title={t("deleteConfirmTitle")}
-      message={t("deleteConfirm", { name: labelText })}
+      message={message}
       typeConfirmLabel={t("typeNameToConfirm")}
       confirmPlaceholder={labelText}
       cancelLabel={t("addModal.cancel")}
