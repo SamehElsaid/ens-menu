@@ -4016,7 +4016,8 @@
       "currentTemplate": "Current template",
       "new": "New",
       "default": "Default",
-      "underConstruction": "Under construction"
+      "underConstruction": "Under construction",
+      "pro": "Pro"
     },
     "headerCta": "Choose design",
     "cards": {
@@ -4024,6 +4025,7 @@
       "templateHelper": "Ready-made template with a professional design",
       "buttonActive": "Template active",
       "buttonUse": "Choose this design",
+      "buttonUpgrade": "Upgrade to Pro",
       "preview": "Preview",
       "customize": "Customize",
       "templateNotActive": "This template is not active. Please activate it to customize it."

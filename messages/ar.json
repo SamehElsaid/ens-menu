@@ -3924,7 +3924,8 @@
       "currentTemplate": "القالب المستخدم",
       "new": "جديد",
       "default": "افتراضي",
-      "underConstruction": "تحت الإنشاء"
+      "underConstruction": "تحت الإنشاء",
+      "pro": "Pro"
     },
     "headerCta": "اختر التصميم",
     "cards": {
@@ -3932,6 +3933,7 @@
       "templateHelper": "قالب جاهز بتصميم احترافي",
       "buttonActive": "القالب مفعل",
       "buttonUse": "اختر هذا التصميم",
+      "buttonUpgrade": "ترقية للـ Pro",
       "preview": "معاينة",
       "customize": "تخصيص",
       "templateNotActive": "هذا القالب غير مفعل. يرجى تفعيله لتخصيصه."

@@ -22,6 +22,7 @@ export interface Template {
 
 
 export interface TemplateInfo {
+  isFree: boolean;
   colors: string[];
   id: string;
   name: string;

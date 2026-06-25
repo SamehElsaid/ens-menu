@@ -12,10 +12,12 @@ import { HiOutlineHand, HiOutlineColorSwatch } from "react-icons/hi";
 import { axiosPatch } from "@/shared/axiosCall";
 import type { Menu } from "@/types/Menu";
 import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
-import { FaCheck, FaSpinner } from "react-icons/fa";
+import { FaCheck, FaSpinner, FaCrown } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { menuRefFromRouteParam } from "@/lib/menuDashboardPath";
+import { menuRefFromRouteParam, menuDashboardPath } from "@/lib/menuDashboardPath";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
+import { isFreePlanUser } from "@/lib/subscription";
+import ProUpgradeModal from "@/components/Dashboard/ProUpgradeModal";
 
 const customizeButtonClassName =
   "flex-1 inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-xs font-medium border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors";
@@ -29,6 +31,9 @@ export default function DesignPage() {
 
   const dispatch = useAppDispatch();
   const { menu } = useAppSelector((state) => state.menuData);
+  const userData = useAppSelector((s) => s.auth.data);
+  const isFreePlan = !userData || isFreePlanUser(userData);
+  const subscriptionHref = menuDashboardPath(menu, "subscription");
   const resolvedMenuId =
     menuRefFromRouteParam(routeParams?.menu) ||
     (typeof menu?.uuid === "string" && menu.uuid.length > 0
@@ -47,6 +52,7 @@ export default function DesignPage() {
   const [customizeLoadingSlug, setCustomizeLoadingSlug] = useState<
     string | null
   >(null);
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [activeTemplateId, setActiveTemplateId] = useState<string>(
     typeof menu?.theme === "string" && menu.theme !== ""
       ? (menu.theme as string)
@@ -201,6 +207,27 @@ export default function DesignPage() {
         </button>
       </header>
 
+      {/* Helpful tips */}
+      <div className="rounded-2xl border border-sky-100 dark:border-sky-900/50 bg-sky-50/70 dark:bg-sky-900/30 px-4 py-4 md:px-6 md:py-5 flex flex-col gap-3">
+        <div
+          className={`flex items-center gap-2`}
+        >
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-sky-100 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 text-sm font-bold">
+            ✨
+          </div>
+          <h3 className="text-sm md:text-base font-semibold text-sky-900 dark:text-sky-200">
+            {t("tips.title")}
+          </h3>
+        </div>
+        <ul
+          className={`text-[11px] md:text-xs text-slate-600 dark:text-slate-400 space-y-1.5`}
+        >
+          <li>{t("tips.tip1")}</li>
+          <li>{t("tips.tip2")}</li>
+          <li>{t("tips.tip3")}</li>
+        </ul>
+      </div>
+
       {/* Templates grid */}
       <section
         id="onboarding-design-templates"
@@ -214,14 +241,17 @@ export default function DesignPage() {
             const linkView =
               "https://" + template.slug + process.env.NEXT_PUBLIC_MENU_URL;
             const isCustomizeLoading = customizeLoadingSlug === template.slug;
+            const isLocked = isFreePlan && !template.isFree;
 
             return (
               <div
                 key={template.id}
-                className={`group relative cursor-pointer rounded-[28px] border bg-white dark:bg-slate-800 shadow-sm transition-all duration-200 overflow-hidden ${
+                className={`group relative cursor-pointer rounded-[28px] border bg-white dark:bg-slate-800 shadow-sm transition-all duration-200 overflow-hidden flex flex-col ${
                   isActive
                     ? "border-primary ring-2 ring-primary/30 shadow-xl shadow-primary/10 dark:shadow-primary/20"
-                    : "border-slate-100 dark:border-slate-700 hover:border-primary/60 dark:hover:border-primary/50 hover:shadow-md"
+                    : isLocked
+                      ? "border-amber-200 dark:border-amber-700/50 opacity-90"
+                      : "border-slate-100 dark:border-slate-700 hover:border-primary/60 dark:hover:border-primary/50 hover:shadow-md"
                 }`}
               >
                 {/* Top status & image */}
@@ -268,22 +298,28 @@ export default function DesignPage() {
                         {t("badges.underConstruction")}
                       </span>
                     )}
-                    {isNew && !isActive && !template.isUnderConstruction && (
+                    {isNew && !isActive && !template.isUnderConstruction && !isLocked && (
                       <span className="absolute top-3 right-3 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 px-2.5 py-0.5 text-[11px] font-semibold shadow-sm border border-amber-200/50 dark:border-amber-500/30">
                         {t("badges.new")}
                       </span>
+                    )}
+
+                    {/* Pro lock overlay */}
+                    {isLocked && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40 backdrop-blur-[2px]">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400 text-amber-900 px-3 py-1 text-[11px] font-bold shadow-md">
+                          <FaCrown className="text-xs" />
+                          {t("badges.pro")}
+                        </span>
+                      </div>
                     )}
                   </div>
                 </div>
 
                 {/* Content */}
-                <div className="p-5 pt-4 space-y-3">
-                  <div
-                    className={`flex items-center justify-between gap-2 ${
-                      isRTL ? "flex-row-reverse" : ""
-                    }`}
-                  >
-                    <div className={isRTL ? "text-right" : "text-left"}>
+                <div className="p-5 pt-4 flex flex-col flex-1">
+                  <div className={`flex items-center justify-between gap-2`}>
+                    <div >
                       <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
                         {isRTL ? template.nameAr : template.name}
                       </h2>
@@ -299,18 +335,24 @@ export default function DesignPage() {
                         {t("badges.default")}
                       </span>
                     )}
+                    {isLocked && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 px-2.5 py-1 text-[11px] font-bold border border-amber-200/60 dark:border-amber-500/30">
+                        <FaCrown className="text-[10px]" />
+                        {t("badges.pro")}
+                      </span>
+                    )}
                   </div>
 
                   <p
-                    className={`text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 ${
+                    className={`text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 mt-3 ${
                       isRTL ? "text-right" : "text-left"
                     }`}
                   >
                     {isRTL ? template.descriptionAr : template.description}
                   </p>
 
-                  <div className="mt-4 space-y-2">
-                    {/* Primary select button - full width */}
+                  <div className="mt-auto pt-4 space-y-2">
+                    {/* Primary select button */}
                     <button
                       type="button"
                       id={
@@ -319,21 +361,34 @@ export default function DesignPage() {
                           : undefined
                       }
                       disabled={
-                        typeof isLoading === "string"
-                          ? isLoading !== template.id
-                          : false
+                        isLocked
+                          ? false
+                          : typeof isLoading === "string"
+                            ? isLoading !== template.id
+                            : false
                       }
                       onClick={(e) => {
                         e.stopPropagation();
+                        if (isLocked) {
+                          setUpgradeModalOpen(true);
+                          return;
+                        }
                         handleSelectTemplate(template.id);
                       }}
                       className={`w-full inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-xs font-semibold shadow-sm transition-colors ${
-                        isActive
-                          ? "bg-emerald-500 hover:bg-emerald-600 dark:hover:bg-emerald-600 text-white"
-                          : "bg-primary hover:bg-primary/90 dark:hover:bg-primary/80 text-white"
+                        isLocked
+                          ? "bg-amber-400 hover:bg-amber-500 text-amber-900"
+                          : isActive
+                            ? "bg-emerald-500 hover:bg-emerald-600 dark:hover:bg-emerald-600 text-white"
+                            : "bg-primary hover:bg-primary/90 dark:hover:bg-primary/80 text-white"
                       }`}
                     >
-                      {typeof isLoading === "string" ? (
+                      {isLocked ? (
+                        <>
+                          <FaCrown className="text-sm" />
+                          {t("cards.buttonUpgrade")}
+                        </>
+                      ) : typeof isLoading === "string" ? (
                         isLoading === template.id ? (
                           <FaSpinner className="animate-spin text-sm md:text-base" />
                         ) : (
@@ -344,9 +399,9 @@ export default function DesignPage() {
                       ) : (
                         <FaCheck className=" text-sm md:text-base" />
                       )}
-                      {isActive
+                      {!isLocked && (isActive
                         ? t("cards.buttonActive")
-                        : t("cards.buttonUse")}
+                        : t("cards.buttonUse"))}
                     </button>
 
                     {/* Secondary actions row: preview + customize */}
@@ -366,7 +421,7 @@ export default function DesignPage() {
                         <FiEye className="text-sm" />
                         {t("cards.preview")}
                       </button>
-                      {template.canEdit && (
+                      {template.canEdit && !isLocked && (
                         <button
                           type="button"
                           disabled={Boolean(customizeLoadingSlug)}
@@ -391,33 +446,12 @@ export default function DesignPage() {
             );
           })}
         </div>
-
-        {/* Helpful tips */}
-        <div className="mt-8 rounded-2xl border border-sky-100 dark:border-sky-900/50 bg-sky-50/70 dark:bg-sky-900/30 px-4 py-4 md:px-6 md:py-5 flex flex-col gap-3">
-          <div
-            className={`flex items-center gap-2 ${
-              isRTL ? "flex-row-reverse text-right" : "text-left"
-            }`}
-          >
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-sky-100 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 text-sm font-bold">
-              ✨
-            </div>
-            <h3 className="text-sm md:text-base font-semibold text-sky-900 dark:text-sky-200">
-              {t("tips.title")}
-            </h3>
-          </div>
-
-          <ul
-            className={`text-[11px] md:text-xs text-slate-600 dark:text-slate-400 space-y-1.5 ${
-              isRTL ? "text-right" : "text-left"
-            }`}
-          >
-            <li>{t("tips.tip1")}</li>
-            <li>{t("tips.tip2")}</li>
-            <li>{t("tips.tip3")}</li>
-          </ul>
-        </div>
       </section>
+      <ProUpgradeModal
+        open={upgradeModalOpen}
+        onClose={() => setUpgradeModalOpen(false)}
+        subscriptionHref={subscriptionHref}
+      />
     </div>
   );
 }
