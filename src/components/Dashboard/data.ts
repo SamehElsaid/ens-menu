@@ -24,6 +24,7 @@ import {
   IoTimeOutline,
   IoCallOutline,
   IoSparklesOutline,
+  IoMailOutline,
 } from "react-icons/io5";
 
 export type NavItem = {
@@ -324,6 +325,12 @@ export const adminNavSections: NavSection[] = [
     id: "admin",
     items: [
       { label: "users", icon: FaUserAlt, key: "users", link: "users" },
+      {
+        label: "customerEmails",
+        icon: IoMailOutline,
+        key: "broadcast",
+        link: "broadcast",
+      },
       {
         label: "followUps",
         icon: IoCallOutline,

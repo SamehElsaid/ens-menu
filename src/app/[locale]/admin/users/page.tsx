@@ -39,18 +39,16 @@ import {
   axiosPost,
 } from "@/shared/axiosCall";
 import { formatAdminDate } from "@/lib/fetchAdminAnalytics";
+import {
+  buildAdminUserDetailPath,
+  buildAdminUsersListPath,
+  parseAdminUsersListFilter,
+  parseAdminUsersListPage,
+  type AdminUsersListFilter,
+} from "@/lib/adminUsersListUrl";
 import { toast } from "react-toastify";
 
-type UserFilter =
-  | "all"
-  | "active"
-  | "suspended"
-  | "trial"
-  | "free"
-  | "pro"
-  | "no-menu"
-  | "inactive"
-  | "on-homepage";
+type UserFilter = AdminUsersListFilter;
 
 interface User {
   id: number;
@@ -101,26 +99,15 @@ export default function UsersPage() {
   const isRTL = locale === "ar";
   const textDir = isRTL ? "rtl" : "ltr";
 
-  const initialFilter = (searchParams.get("filter") as UserFilter) || "all";
-  const [planFilter, setPlanFilter] = useState<UserFilter>(
-    [
-      "all",
-      "active",
-      "suspended",
-      "trial",
-      "free",
-      "pro",
-      "no-menu",
-      "inactive",
-      "on-homepage",
-    ].includes(initialFilter)
-      ? initialFilter
-      : "all",
-  );
+  const initialFilter = parseAdminUsersListFilter(searchParams.get("filter"));
+  const initialPage = parseAdminUsersListPage(searchParams.get("page"));
+  const initialSearch = searchParams.get("search") ?? "";
+
+  const [planFilter, setPlanFilter] = useState<UserFilter>(initialFilter);
 
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(initialPage);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [totalUsersCount, setTotalUsersCount] = useState(0);
@@ -131,7 +118,7 @@ export default function UsersPage() {
   const [proUsers, setProUsers] = useState(0);
   const [usersWithoutMenu, setUsersWithoutMenu] = useState(0);
   const [usersOnHomepage, setUsersOnHomepage] = useState(0);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [loadingUserId, setLoadingUserId] = useState<number | null>(null);
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
@@ -147,15 +134,28 @@ export default function UsersPage() {
   }>({ isOpen: false, user: null });
   const [suspendReason, setSuspendReason] = useState("");
 
+  const syncListUrl = useCallback(
+    (filter: UserFilter, pageNum: number, search: string) => {
+      router.replace(buildAdminUsersListPath(filter, pageNum, search));
+    },
+    [router],
+  );
+
   const applyFilter = useCallback(
     (filter: UserFilter) => {
       setPlanFilter(filter);
       setPage(1);
-      const path =
-        filter === "all" ? "/admin/users" : `/admin/users?filter=${filter}`;
-      router.replace(path);
+      syncListUrl(filter, 1, searchQuery);
     },
-    [router],
+    [searchQuery, syncListUrl],
+  );
+
+  const openUserDetails = useCallback(
+    (userId: number) => {
+      const listPath = buildAdminUsersListPath(planFilter, page, searchQuery);
+      router.push(buildAdminUserDetailPath(userId, listPath));
+    },
+    [page, planFilter, router, searchQuery],
   );
 
   const fetchUsers = useCallback(
@@ -210,40 +210,28 @@ export default function UsersPage() {
   );
 
   useEffect(() => {
-    const urlFilter = (searchParams.get("filter") as UserFilter) || "all";
-    const nextFilter = [
-      "all",
-      "active",
-      "suspended",
-      "trial",
-      "free",
-      "pro",
-      "no-menu",
-      "inactive",
-      "on-homepage",
-    ].includes(urlFilter)
-      ? urlFilter
-      : "all";
-    setPlanFilter(nextFilter);
+    setPlanFilter(parseAdminUsersListFilter(searchParams.get("filter")));
+    setPage(parseAdminUsersListPage(searchParams.get("page")));
+    setSearchQuery(searchParams.get("search") ?? "");
   }, [searchParams]);
 
+  const appliedSearch = searchParams.get("search") ?? "";
+
   useEffect(() => {
-    fetchUsers(page, searchQuery, planFilter);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, locale, planFilter]);
+    fetchUsers(page, appliedSearch, planFilter);
+  }, [page, locale, planFilter, appliedSearch, fetchUsers]);
 
   const handleSearch = useCallback(() => {
     setPage(1);
-    fetchUsers(1, searchQuery, planFilter);
-  }, [searchQuery, fetchUsers, planFilter]);
+    syncListUrl(planFilter, 1, searchQuery);
+  }, [searchQuery, planFilter, syncListUrl]);
 
   const handleReset = useCallback(() => {
     setSearchQuery("");
     setPlanFilter("all");
     setPage(1);
     router.replace("/admin/users");
-    fetchUsers(1, "", "all");
-  }, [fetchUsers, router]);
+  }, [router]);
 
   const handleDelete = useCallback(async () => {
     if (!deleteModal.user) return;
@@ -468,7 +456,7 @@ export default function UsersPage() {
         cellRenderer: (params: { data: User; value: string }) => (
           <button
             type="button"
-            onClick={() => router.push(`/admin/users/${params.data.id}`)}
+            onClick={() => openUserDetails(params.data.id)}
             className="text-primary hover:underline font-medium text-start"
           >
             {params.value}
@@ -558,7 +546,7 @@ export default function UsersPage() {
             <div className={`flex items-center gap-1 `}>
               <button
                 type="button"
-                onClick={() => router.push(`/admin/users/${user.id}`)}
+                onClick={() => openUserDetails(user.id)}
                 disabled={isLoading}
                 title={t("actions.view")}
                 aria-label={t("actions.view")}
@@ -643,7 +631,7 @@ export default function UsersPage() {
     [
       t,
       isRTL,
-      router,
+      openUserDetails,
       loadingUserId,
       handleAddToHomepage,
       handleRemoveFromHomepage,
@@ -900,7 +888,10 @@ export default function UsersPage() {
           paginationPageSize={itemsPerPage}
           page={page}
           totalPages={totalPages}
-          onPageChange={(page) => setPage(page)}
+          onPageChange={(nextPage) => {
+            setPage(nextPage);
+            syncListUrl(planFilter, nextPage, searchQuery);
+          }}
         />
         {!loading && total > 0 && (
           <div

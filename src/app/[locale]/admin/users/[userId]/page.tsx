@@ -3,12 +3,13 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { IoArrowBack } from "react-icons/io5";
 import { FaTimesCircle, FaTimes } from "react-icons/fa";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import ConfirmationModal from "@/components/Custom/ConfirmationModal";
 import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
+import { safeAdminUsersListReturnPath } from "@/lib/adminUsersListUrl";
 import { toast } from "react-toastify";
 import UserFollowUpTimeline from "@/components/Admin/UserFollowUpTimeline";
 import CustomerOrdersSection from "@/components/Admin/CustomerOrdersSection";
@@ -97,6 +98,8 @@ export default function UserDetailsPage() {
   const tCustomer = useTranslations("adminUsers.userDetails.customerSections");
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
+  const listReturnPath = safeAdminUsersListReturnPath(searchParams.get("list"));
   const userId =
     typeof params.userId === "string"
       ? params.userId
@@ -592,7 +595,8 @@ export default function UserDetailsPage() {
             className={`flex items-center gap-4 mb-4 ${isRTL ? "flex-row-reverse" : ""}`}
           >
             <button
-              onClick={() => router.back()}
+              type="button"
+              onClick={() => router.push(listReturnPath)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${isRTL ? "flex-row-reverse" : ""}`}
             >
               <IoArrowBack className="text-lg" />
