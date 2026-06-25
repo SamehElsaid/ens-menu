@@ -241,7 +241,6 @@ export const navSections: NavSection[] = [
         icon: HiSpeakerphone,
         key: "advertisements",
         link: "advertisements",
-        proFeature: true,
       },
     ],
   },
