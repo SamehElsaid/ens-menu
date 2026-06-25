@@ -2530,6 +2530,7 @@
     "knowledgeManagement": "Knowledge Management",
     "analytics": "Analytics",
     "followUps": "Follow-ups",
+    "domainTransfers": "Domain transfers",
     "customerEmails": "Customer emails",
     "payments": "Payments",
     "Overview": "Overview",
@@ -2545,6 +2546,7 @@
     "Advertisements": "Advertisements",
     "Personal": "Personal",
     "Subscription": "Subscription",
+    "domainTransfer": "Connect domain",
     "Work Schedule": "Work Schedule",
     "Qualifications": "Qualifications",
     "Worked At": "Worked At",
@@ -4827,5 +4829,139 @@
     "table": "Table",
     "tableNo": "Table",
     "viewAll": "View all orders"
+  },
+  "domainTransfer": {
+    "title": "Connect your domain",
+    "description": "Link your domain to your ENS menu automatically — the system analyzes your domain and guides you step by step until the connection is complete.",
+    "domainLabel": "Domain URL",
+    "domainPlaceholder": "example.com or https://example.com",
+    "domainHint": "Enter the domain you want to connect to your menu.",
+    "submit": "Start automatic setup",
+    "submitting": "Preparing...",
+    "submitSuccess": "Request received — the system is starting now",
+    "submitError": "Failed to submit request",
+    "automatedProcess": "Automated processing",
+    "statusLabel": "Connection status",
+    "submittedAt": "{date}",
+    "confirmPrompt": "After updating DNS in your domain panel, click below so the system can verify your settings.",
+    "confirmDone": "DNS updated — continue verification",
+    "confirming": "Verifying...",
+    "confirmSuccess": "Confirmation received — the system is verifying your DNS",
+    "confirmError": "Verification failed",
+    "cancelRequest": "Cancel request",
+    "cancelConfirm": "Are you sure you want to cancel this domain connection request?",
+    "confirmCancel": "Yes, cancel",
+    "cancelDismiss": "Go back",
+    "cancelling": "Cancelling...",
+    "cancelSuccess": "Request cancelled",
+    "cancelError": "Failed to cancel request",
+    "completedMessage": "{domain} is now connected to your ENS menu!",
+    "systemUpdate": "Automatic update",
+    "dnsConfigTitle": "Required DNS settings",
+    "dnsNote": "DNS propagation may take 5 minutes to 48 hours depending on your provider.",
+    "waitingForDns": "Preparing DNS settings for your domain...",
+    "steps": {
+      "received": {
+        "title": "Request received",
+        "description": "Your domain has been registered in the system."
+      },
+      "analyzing": {
+        "title": "Domain analysis",
+        "description": "Domain analyzed successfully.",
+        "active": "Analyzing your domain and preparing connection settings..."
+      },
+      "dns": {
+        "title": "Configure DNS",
+        "description": "Apply the DNS settings shown below.",
+        "pending": "Waiting for domain analysis...",
+        "waiting": "Preparing DNS settings..."
+      },
+      "verify": {
+        "title": "Connection verification",
+        "description": "Verification runs automatically after DNS is configured.",
+        "active": "Verifying DNS settings and connecting your domain..."
+      },
+      "complete": {
+        "title": "Connection complete",
+        "description": "Your domain will be activated on your menu automatically.",
+        "active": "Domain connected successfully!"
+      }
+    },
+    "systemMessages": {
+      "verificationStarted": "The system started verifying your DNS settings.",
+      "transferComplete": "{domain} has been connected successfully."
+    },
+    "status": {
+      "pending": "Preparing",
+      "awaiting_user": "Awaiting DNS setup",
+      "user_confirmed": "Verifying",
+      "completed": "Complete",
+      "cancelled": "Cancelled"
+    },
+    "history": {
+      "title": "Previous requests",
+      "empty": "You have not submitted any domain connection requests yet.",
+      "submitted": "Submitted: {date}",
+      "resolved": "Closed: {date}",
+      "outcome": {
+        "accepted": "Accepted",
+        "cancelledByUser": "Cancelled by you",
+        "cancelledByAdmin": "Not accepted"
+      }
+    }
+  },
+  "adminDomainTransfers": {
+    "title": "Domain transfer requests",
+    "description": "Manage customer domain transfer and connection requests.",
+    "refresh": "Refresh",
+    "colUser": "Customer",
+    "colDomain": "Domain",
+    "colStatus": "Status",
+    "colDate": "Date",
+    "colActions": "Actions",
+    "view": "View",
+    "detailTitle": "Request details",
+    "email": "Email",
+    "phone": "Phone",
+    "userConfirmedAlert": "Customer confirmed they completed the steps — send more instructions or mark transfer as complete.",
+    "messagesHistory": "Message history",
+    "admin": "Admin",
+    "system": "System",
+    "customer": "Customer",
+    "userConfirmedSteps": "Customer confirmed they completed the required steps",
+    "pendingDnsAlert": "New request — write the DNS settings and send them to the customer.",
+    "dnsConfigLabel": "DNS settings",
+    "dnsConfigPlaceholder": "Example:\nType: CNAME\nName: @\nValue: connect.ensmenu.com\n\nOr any other instructions for the customer...",
+    "dnsConfigHint": "This text will be shown to the customer as the required DNS configuration.",
+    "sendDnsConfig": "Send DNS settings",
+    "replyLabel": "Additional message to customer",
+    "replyPlaceholder": "Write the steps the customer needs to complete...",
+    "sendMessage": "Send message",
+    "sending": "Sending...",
+    "messageSent": "Message sent",
+    "messageError": "Failed to send message",
+    "markComplete": "Confirm transfer complete",
+    "completing": "Confirming...",
+    "completeSuccess": "Domain transfer marked as complete",
+    "completeError": "Failed to confirm completion",
+    "cancelRequest": "Cancel request",
+    "cancelConfirm": "Are you sure you want to cancel this request?",
+    "confirmCancel": "Yes, cancel",
+    "cancelDismiss": "Go back",
+    "cancelling": "Cancelling...",
+    "cancelSuccess": "Request cancelled",
+    "cancelError": "Failed to cancel request",
+    "cancelledInfo": "Cancelled by {by} — {date}",
+    "cancelledByUser": "Customer",
+    "cancelledByAdmin": "Admin",
+    "completedBy": "Confirmed by {name} — {date}",
+    "loadDetailError": "Failed to load request details",
+    "status": {
+      "pending": "New",
+      "awaiting_user": "Awaiting customer",
+      "user_confirmed": "Customer confirmed",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    }
   }
 }

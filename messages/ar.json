@@ -2438,6 +2438,7 @@
     "knowledgeManagement": "إدارة المعرفة",
     "analytics": "التحليلات",
     "followUps": "متابعة العملاء",
+    "domainTransfers": "طلبات نقل الدومين",
     "customerEmails": "رسائل العملاء",
     "payments": "المدفوعات",
     "Overview": "نظرة عامة",
@@ -2453,6 +2454,7 @@
     "Advertisements": "الإعلانات",
     "Personal": "الملف الشخصي",
     "Subscription": "الاشتراك",
+    "domainTransfer": "ربط الدومين",
     "Work Schedule": "جدول العمل",
     "Qualifications": "المؤهلات",
     "Worked At": "عمل في",
@@ -4827,5 +4829,139 @@
     "table": "طاولة",
     "tableNo": "طاولة",
     "viewAll": "عرض كل الطلبات"
+  },
+  "domainTransfer": {
+    "title": "ربط الدومين",
+    "description": "اربط دومينك بمنيو ENS تلقائياً — النظام يحلل الدومين ويرشدك خطوة بخطوة حتى يكتمل الربط.",
+    "domainLabel": "رابط الدومين",
+    "domainPlaceholder": "example.com أو https://example.com",
+    "domainHint": "أدخل اسم الدومين الذي تريد ربطه بمنيوك.",
+    "submit": "بدء الربط التلقائي",
+    "submitting": "جاري التجهيز...",
+    "submitSuccess": "تم استلام طلبك — النظام يبدأ المعالجة الآن",
+    "submitError": "فشل إرسال الطلب",
+    "automatedProcess": "معالجة تلقائية",
+    "statusLabel": "حالة الربط",
+    "submittedAt": "{date}",
+    "confirmPrompt": "بعد ضبط إعدادات DNS في لوحة الدومين، اضغط الزر أدناه ليتابع النظام التحقق.",
+    "confirmDone": "تم ضبط الإعدادات — متابعة التحقق",
+    "confirming": "جاري التحقق...",
+    "confirmSuccess": "تم استلام تأكيدك — النظام يتحقق من الإعدادات",
+    "confirmError": "فشل التحقق",
+    "cancelRequest": "إلغاء الطلب",
+    "cancelConfirm": "هل أنت متأكد من إلغاء طلب ربط الدومين؟",
+    "confirmCancel": "نعم، إلغاء الطلب",
+    "cancelDismiss": "تراجع",
+    "cancelling": "جاري الإلغاء...",
+    "cancelSuccess": "تم إلغاء الطلب",
+    "cancelError": "فشل إلغاء الطلب",
+    "completedMessage": "تم ربط {domain} بمنيو ENS بنجاح!",
+    "systemUpdate": "تحديث تلقائي",
+    "dnsConfigTitle": "إعدادات DNS المطلوبة",
+    "dnsNote": "قد يستغرق انتشار إعدادات DNS من 5 دقائق إلى 48 ساعة حسب المزود.",
+    "waitingForDns": "جاري تجهيز إعدادات DNS لدومينك...",
+    "steps": {
+      "received": {
+        "title": "استلام الطلب",
+        "description": "تم تسجيل دومينك في النظام."
+      },
+      "analyzing": {
+        "title": "تحليل الدومين",
+        "description": "تم تحليل الدومين بنجاح.",
+        "active": "جاري تحليل الدومين وتحديد إعدادات الربط..."
+      },
+      "dns": {
+        "title": "ضبط DNS",
+        "description": "نفّذ إعدادات DNS الموضحة أدناه.",
+        "pending": "في انتظار تحليل الدومين...",
+        "waiting": "جاري تجهيز إعدادات DNS..."
+      },
+      "verify": {
+        "title": "التحقق من الربط",
+        "description": "سيتم التحقق تلقائياً بعد ضبط الإعدادات.",
+        "active": "جاري التحقق من إعدادات DNS وربط الدومين..."
+      },
+      "complete": {
+        "title": "اكتمال الربط",
+        "description": "سيُفعَّل الدومين على منيوك تلقائياً.",
+        "active": "تم ربط الدومين بنجاح!"
+      }
+    },
+    "systemMessages": {
+      "verificationStarted": "بدأ النظام التحقق من إعدادات DNS.",
+      "transferComplete": "اكتمل ربط {domain} بنجاح."
+    },
+    "status": {
+      "pending": "جاري التحضير",
+      "awaiting_user": "بانتظار ضبط DNS",
+      "user_confirmed": "جاري التحقق",
+      "completed": "مكتمل",
+      "cancelled": "ملغي"
+    },
+    "history": {
+      "title": "سجل الطلبات السابقة",
+      "empty": "لم تقدّم أي طلبات ربط دومين من قبل.",
+      "submitted": "تاريخ الطلب: {date}",
+      "resolved": "تاريخ الإغلاق: {date}",
+      "outcome": {
+        "accepted": "تم القبول",
+        "cancelledByUser": "ألغيت الطلب",
+        "cancelledByAdmin": "لم يُقبل"
+      }
+    }
+  },
+  "adminDomainTransfers": {
+    "title": "طلبات نقل الدومين",
+    "description": "إدارة طلبات العملاء لنقل وربط الدومينات.",
+    "refresh": "تحديث",
+    "colUser": "العميل",
+    "colDomain": "الدومين",
+    "colStatus": "الحالة",
+    "colDate": "التاريخ",
+    "colActions": "إجراءات",
+    "view": "عرض",
+    "detailTitle": "تفاصيل الطلب",
+    "email": "البريد",
+    "phone": "الهاتف",
+    "userConfirmedAlert": "العميل أكد تنفيذ الخطوات — يمكنك إرسال تعليمات إضافية أو تأكيد اكتمال النقل.",
+    "messagesHistory": "سجل الرسائل",
+    "admin": "الإدارة",
+    "system": "النظام",
+    "customer": "العميل",
+    "userConfirmedSteps": "أكد العميل تنفيذ الخطوات المطلوبة",
+    "pendingDnsAlert": "الطلب جديد — اكتب إعدادات DNS وأرسلها للعميل ليبدأ الربط.",
+    "dnsConfigLabel": "إعدادات DNS",
+    "dnsConfigPlaceholder": "مثال:\nالنوع: CNAME\nالاسم: @\nالقيمة: connect.ensmenu.com\n\nأو أي تعليمات أخرى للعميل...",
+    "dnsConfigHint": "سيظهر هذا النص للعميل كإعدادات DNS المطلوبة.",
+    "sendDnsConfig": "إرسال إعدادات DNS",
+    "replyLabel": "رسالة إضافية للعميل",
+    "replyPlaceholder": "اكتب الخطوات التي يجب على العميل تنفيذها...",
+    "sendMessage": "إرسال الرسالة",
+    "sending": "جاري الإرسال...",
+    "messageSent": "تم إرسال الرسالة",
+    "messageError": "فشل إرسال الرسالة",
+    "markComplete": "تأكيد اكتمال النقل",
+    "completing": "جاري التأكيد...",
+    "completeSuccess": "تم تأكيد اكتمال نقل الدومين",
+    "completeError": "فشل تأكيد الاكتمال",
+    "cancelRequest": "إلغاء الطلب",
+    "cancelConfirm": "هل أنت متأكد من إلغاء هذا الطلب؟",
+    "confirmCancel": "نعم، إلغاء",
+    "cancelDismiss": "تراجع",
+    "cancelling": "جاري الإلغاء...",
+    "cancelSuccess": "تم إلغاء الطلب",
+    "cancelError": "فشل إلغاء الطلب",
+    "cancelledInfo": "تم الإلغاء بواسطة {by} — {date}",
+    "cancelledByUser": "العميل",
+    "cancelledByAdmin": "الإدارة",
+    "completedBy": "تم التأكيد بواسطة {name} — {date}",
+    "loadDetailError": "فشل تحميل تفاصيل الطلب",
+    "status": {
+      "pending": "جديد",
+      "awaiting_user": "بانتظار العميل",
+      "user_confirmed": "أكد العميل",
+      "completed": "مكتمل",
+      "cancelled": "ملغي"
+    }
   }
 }

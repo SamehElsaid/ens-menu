@@ -25,6 +25,7 @@ import {
   IoCallOutline,
   IoSparklesOutline,
   IoMailOutline,
+  IoGlobeOutline,
 } from "react-icons/io5";
 
 export type NavItem = {
@@ -172,6 +173,12 @@ export const navSections: NavSection[] = [
         icon: FaCreditCard,
         key: "subscription",
         link: "subscription",
+      },
+      {
+        label: "domainTransfer",
+        icon: IoGlobeOutline,
+        key: "domain-transfer",
+        link: "domain-transfer",
       },
     ],
   },
@@ -336,6 +343,12 @@ export const adminNavSections: NavSection[] = [
         icon: IoCallOutline,
         key: "follow-ups",
         link: "follow-ups",
+      },
+      {
+        label: "domainTransfers",
+        icon: IoGlobeOutline,
+        key: "domain-transfers",
+        link: "domain-transfers",
       },
       {
         label: "plans",
