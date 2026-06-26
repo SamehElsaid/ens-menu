@@ -40,6 +40,7 @@ import {
 } from "@/shared/axiosCall";
 import { formatAdminDate } from "@/lib/fetchAdminAnalytics";
 import { toast } from "react-toastify";
+import LinkTo from "@/components/Global/LinkTo";
 
 type UserFilter =
   | "all"
@@ -556,16 +557,15 @@ export default function UsersPage() {
             "p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center text-sm";
           return (
             <div className={`flex items-center gap-1 `}>
-              <button
-                type="button"
-                onClick={() => router.push(`/admin/users/${user.id}`)}
-                disabled={isLoading}
+              <LinkTo
+                href={`/admin/users/${user.id}`}
                 title={t("actions.view")}
                 aria-label={t("actions.view")}
                 className={`${iconBtn} bg-blue-600 hover:bg-blue-700 text-white`}
+                disabled={isLoading}
               >
                 <FaEye />
-              </button>
+              </LinkTo>
               {featured ? (
                 <button
                   type="button"
