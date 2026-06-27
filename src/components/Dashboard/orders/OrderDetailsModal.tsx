@@ -706,7 +706,13 @@ export default function OrderDetailsModal({
   const printRef = useRef<HTMLDivElement>(null);
   const handlePrint = useReactToPrint({
     contentRef: printRef,
-    documentTitle: `${t("detailsTitle")} #${entry?.orderId ?? ""}`,
+    documentTitle: () =>
+      [
+        `#${entry?.orderId ?? ""}`,
+        customerDisplay,
+      ]
+        .filter(Boolean)
+        .join(" - "),
   });
 
   return (
