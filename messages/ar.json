@@ -2530,6 +2530,7 @@
     "colActions": "الإجراءات",
     "view": "عرض",
     "close": "إغلاق",
+    "printOrder": "طباعة الطلب",
     "detailsTitle": "تفاصيل الطلب",
     "orderDetailsTitle": "بيانات العميل",
     "deliveryDetailsTitle": "بيانات التوصيل",
@@ -2597,9 +2598,11 @@
     "colActions": "الإجراءات",
     "view": "عرض",
     "close": "إغلاق",
+    "printOrder": "طباعة الطلب",
     "detailsTitle": "تفاصيل طلب الدلفري",
     "deliveryDetailsTitle": "بيانات التوصيل",
     "detailsWhen": "الوقت",
+    "detailsTable": "الطاولة",
     "detailsZone": "منطقة التوصيل",
     "detailsDeliveryFee": "رسوم التوصيل",
     "detailsCustomer": "العميل",
@@ -3983,7 +3986,8 @@
       "currentTemplate": "القالب المستخدم",
       "new": "جديد",
       "default": "افتراضي",
-      "underConstruction": "تحت الإنشاء"
+      "underConstruction": "تحت الإنشاء",
+      "pro": "Pro"
     },
     "headerCta": "اختر التصميم",
     "cards": {
@@ -3991,6 +3995,7 @@
       "templateHelper": "قالب جاهز بتصميم احترافي",
       "buttonActive": "القالب مفعل",
       "buttonUse": "اختر هذا التصميم",
+      "buttonUpgrade": "ترقية للـ Pro",
       "preview": "معاينة",
       "customize": "تخصيص",
       "templateNotActive": "هذا القالب غير مفعل. يرجى تفعيله لتخصيصه."

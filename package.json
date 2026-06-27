@@ -39,6 +39,7 @@
     "react-phone-number-input": "^3.4.14",
     "react-redux": "^9.2.0",
     "react-select": "^5.10.2",
+    "react-to-print": "^3.3.0",
     "react-toastify": "^11.0.5",
     "react-tooltip": "^5.30.0",
     "sharp": "^0.34.5",

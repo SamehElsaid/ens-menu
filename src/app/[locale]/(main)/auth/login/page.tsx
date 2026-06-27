@@ -37,7 +37,7 @@ export default async function LoginPageView({ locale }: LoginPageViewProps) {
       />
 
       <div className="login-page__shell relative z-1 flex w-full min-w-0 flex-col justify-start pb-3 pt-12 sm:px-5 sm:pb-6 sm:pt-18 lg:flex-1 lg:justify-center lg:px-6 lg:pb-6 lg:pt-18">
-        <div className="login-page__container mx-auto flex w-full min-w-0 max-w-216 flex-col gap-4 lg:gap-0">
+        <div className="login-page__container mx-auto flex w-full min-w-0 max-w-216 flex-col gap-4 lg:gap-0 min-h-[calc(100dvh-228px)]">
           <section
             aria-label={t("headline")}
             className="login-page__welcome lg:hidden"

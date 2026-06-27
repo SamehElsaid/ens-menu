@@ -47,6 +47,7 @@ import {
   type AdminUsersListFilter,
 } from "@/lib/adminUsersListUrl";
 import { toast } from "react-toastify";
+import LinkTo from "@/components/Global/LinkTo";
 
 type UserFilter = AdminUsersListFilter;
 
@@ -544,16 +545,18 @@ export default function UsersPage() {
             "p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center text-sm";
           return (
             <div className={`flex items-center gap-1 `}>
-              <button
-                type="button"
-                onClick={() => openUserDetails(user.id)}
-                disabled={isLoading}
+              <LinkTo
+                href={buildAdminUserDetailPath(
+                  user.id,
+                  buildAdminUsersListPath(planFilter, page, searchQuery),
+                )}
                 title={t("actions.view")}
                 aria-label={t("actions.view")}
                 className={`${iconBtn} bg-blue-600 hover:bg-blue-700 text-white`}
+                disabled={isLoading}
               >
                 <FaEye />
-              </button>
+              </LinkTo>
               {featured ? (
                 <button
                   type="button"
@@ -635,6 +638,9 @@ export default function UsersPage() {
       loadingUserId,
       handleAddToHomepage,
       handleRemoveFromHomepage,
+      planFilter,
+      page,
+      searchQuery,
     ],
   );
 
@@ -830,9 +836,7 @@ export default function UsersPage() {
               className="group text-start w-full"
             >
               <CardDashBoard
-                borderColor={
-                  isSelected ? "border-primary" : card.borderColor
-                }
+                borderColor={isSelected ? "border-primary" : card.borderColor}
                 hover={!isSelected}
                 className={`p-4 h-full transition-all duration-200 ${
                   isSelected
