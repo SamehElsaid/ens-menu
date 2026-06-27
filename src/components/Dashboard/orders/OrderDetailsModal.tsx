@@ -1,8 +1,10 @@
 "use client";
 
+import React, { useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { useReactToPrint } from "react-to-print";
 import ViewTime from "@/shared/ViewTime";
-import { IoCalendarOutline, IoCallOutline, IoChatboxOutline, IoCheckmarkCircle, IoCloseCircle, IoCloseOutline, IoEllipseSharp, IoHomeOutline, IoListOutline, IoLocationOutline, IoPersonOutline, IoReceiptOutline, IoTimeOutline } from "react-icons/io5";
+import { IoCalendarOutline, IoCallOutline, IoChatboxOutline, IoCheckmarkCircle, IoCloseCircle, IoCloseOutline, IoEllipseSharp, IoHomeOutline, IoListOutline, IoLocationOutline, IoPrintOutline, IoPersonOutline, IoReceiptOutline, IoTimeOutline } from "react-icons/io5";
 import {
   actionActorName,
   callItemOptionLabel,
@@ -19,6 +21,262 @@ import {
   type OrderActionResult,
 } from "@/lib/tableOrders";
 import OrderActionButtons from "./OrderActionButtons";
+import { useAppSelector } from "@/store/hooks";
+import { isFreePlanUser } from "@/lib/subscription";
+
+function PrintableReceipt({
+  orderId,
+  title,
+  items,
+  totalPrice,
+  currency,
+  customerDisplay,
+  phoneDisplay,
+  zoneLabel,
+  addressDisplay,
+  notesDisplay,
+  tableNumber,
+  deliveryFee,
+  variant,
+  locale,
+  labels,
+  ref,
+}: {
+  orderId?: string | number;
+  title: string;
+  items: CallItem[];
+  totalPrice: number;
+  currency: string;
+  customerDisplay: string | null;
+  phoneDisplay: string | null;
+  zoneLabel: string | null;
+  addressDisplay: string | null;
+  notesDisplay: string | null;
+  tableNumber?: string | null;
+  deliveryFee?: number | null;
+  variant: "table" | "delivery";
+  locale: string;
+  labels: {
+    customer: string;
+    phone: string;
+    zone: string;
+    address: string;
+    table: string;
+    notes: string;
+    deliveryFee: string;
+    total: string;
+    itemName: string;
+    qty: string;
+    itemTotal: string;
+  };
+  ref: React.Ref<HTMLDivElement>;
+}) {
+  const isRtl = locale === "ar";
+  const dir = isRtl ? "rtl" : "ltr";
+  const alignEnd = isRtl ? "left" : "right";
+  const alignStart = isRtl ? "right" : "left";
+
+  const infoRows: { label: string; value: string | null | undefined }[] = [
+    { label: labels.customer, value: customerDisplay },
+    { label: labels.phone, value: phoneDisplay },
+  ];
+  if (variant === "delivery") {
+    infoRows.push({ label: labels.zone, value: zoneLabel });
+    infoRows.push({ label: labels.address, value: addressDisplay });
+  } else if (tableNumber && String(tableNumber).trim() !== "") {
+    infoRows.push({ label: labels.table, value: tableNumber });
+  }
+  if (notesDisplay) {
+    infoRows.push({ label: labels.notes, value: notesDisplay });
+  }
+
+  return (
+    <div
+      ref={ref}
+      dir={dir}
+      style={{
+        fontFamily: "system-ui, -apple-system, Arial, sans-serif",
+        fontSize: 13,
+        color: "#1e293b",
+        padding: 24,
+        direction: dir,
+      }}
+    >
+      <h1 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>
+        {title}
+      </h1>
+      <p style={{ color: "#64748b", fontSize: 12, marginBottom: 20 }}>
+        #{orderId ?? ""}
+      </p>
+
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <tbody>
+          {infoRows
+            .filter((r) => r.value && String(r.value).trim() !== "")
+            .map((r, i) => (
+              <tr key={i}>
+                <td
+                  style={{
+                    color: "#6b7280",
+                    padding: "4px 8px",
+                    whiteSpace: "nowrap",
+                    textAlign: alignStart,
+                  }}
+                >
+                  {r.label}
+                </td>
+                <td
+                  style={{
+                    padding: "4px 8px",
+                    fontWeight: 600,
+                    textAlign: alignStart,
+                  }}
+                >
+                  {r.value}
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+
+      <hr
+        style={{
+          border: "none",
+          borderTop: "1px dashed #cbd5e1",
+          margin: "16px 0",
+        }}
+      />
+
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <thead>
+          <tr style={{ background: "#f1f5f9" }}>
+            <th
+              style={{
+                padding: 8,
+                fontSize: 11,
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                color: "#64748b",
+                textAlign: alignStart,
+                fontWeight: 600,
+              }}
+            >
+              {labels.itemName}
+            </th>
+            <th
+              style={{
+                padding: 8,
+                fontSize: 11,
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                color: "#64748b",
+                textAlign: "center",
+                fontWeight: 600,
+              }}
+            >
+              {labels.qty}
+            </th>
+            <th
+              style={{
+                padding: 8,
+                fontSize: 11,
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                color: "#64748b",
+                textAlign: alignEnd,
+                fontWeight: 600,
+              }}
+            >
+              {labels.itemTotal}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((item, idx) => (
+            <tr key={idx} style={{ borderBottom: "1px solid #f1f5f9" }}>
+              <td style={{ padding: 8, textAlign: alignStart }}>
+                <span style={{ fontWeight: 500 }}>{item.name}</span>
+                {(item.size || item.variant) && (
+                  <>
+                    <br />
+                    <small style={{ color: "#6d28d9" }}>
+                      {[
+                        callItemOptionLabel(item.size, locale, "size"),
+                        callItemOptionLabel(item.variant, locale, "variant"),
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </small>
+                  </>
+                )}
+              </td>
+              <td style={{ padding: 8, textAlign: "center" }}>
+                ×{item.quantity}
+              </td>
+              <td
+                style={{ padding: 8, textAlign: alignEnd, fontWeight: 600 }}
+              >
+                {item.total != null ? `${item.total} ${currency}` : "—"}
+              </td>
+            </tr>
+          ))}
+
+          {variant === "delivery" && deliveryFee != null && deliveryFee > 0 && (
+            <tr style={{ background: "#ecfdf5" }}>
+              <td
+                colSpan={2}
+                style={{
+                  padding: 8,
+                  fontWeight: 600,
+                  color: "#065f46",
+                  textAlign: alignStart,
+                }}
+              >
+                {labels.deliveryFee}
+              </td>
+              <td
+                style={{
+                  padding: 8,
+                  fontWeight: 700,
+                  color: "#065f46",
+                  textAlign: alignEnd,
+                }}
+              >
+                {deliveryFee} {currency}
+              </td>
+            </tr>
+          )}
+
+          <tr style={{ background: "#f5f3ff" }}>
+            <td
+              colSpan={2}
+              style={{
+                padding: "10px 8px",
+                fontWeight: 700,
+                fontSize: 15,
+                color: "#4c1d95",
+                textAlign: alignStart,
+              }}
+            >
+              {labels.total}
+            </td>
+            <td
+              style={{
+                padding: "10px 8px",
+                fontWeight: 700,
+                fontSize: 15,
+                color: "#4c1d95",
+                textAlign: alignEnd,
+              }}
+            >
+              {totalPrice} {currency}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 function StatusIcon({ status }: { status: string }) {
   if (status === "confirmed" || status === "delivered")
@@ -349,6 +607,9 @@ export default function OrderDetailsModal({
   const t = useTranslations(variant === "delivery" ? "deliveryOrders" : "tableOrders");
   const locale = useLocale();
 
+  const userData = useAppSelector((s) => s.auth.data);
+  const isPro = Boolean(userData) && !isFreePlanUser(userData);
+
   const actions = entry?.actions ?? [];
   const lastAction =
     actions.length > 0 ? actions[actions.length - 1] : undefined;
@@ -441,6 +702,12 @@ export default function OrderDetailsModal({
   };
   const cfg =
     statusConfig[status as keyof typeof statusConfig] ?? statusConfig.pending;
+
+  const printRef = useRef<HTMLDivElement>(null);
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: `${t("detailsTitle")} #${entry?.orderId ?? ""}`,
+  });
 
   return (
     <div
@@ -645,7 +912,17 @@ export default function OrderDetailsModal({
               translationNs={variant === "delivery" ? "deliveryOrders" : "tableOrders"}
             />
           )}
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            {isPro && entry && !loading && (
+              <button
+                type="button"
+                onClick={handlePrint}
+                className="flex items-center gap-1.5 px-5 py-2 rounded-xl border border-violet-200 dark:border-violet-700 text-sm font-medium text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-900/20 hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-colors"
+              >
+                <IoPrintOutline className="text-base" />
+                {t("printOrder")}
+              </button>
+            )}
             <button
               type="button"
               onClick={onClose}
@@ -656,6 +933,41 @@ export default function OrderDetailsModal({
           </div>
         </div>
       </div>
+
+      {isPro && entry && (
+        <div style={{ overflow: "hidden", height: 0, position: "absolute" }}>
+          <PrintableReceipt
+            ref={printRef}
+            orderId={entry.orderId}
+            title={t("detailsTitle")}
+            items={items}
+            totalPrice={totalPrice}
+            currency={currency}
+            customerDisplay={customerDisplay}
+            phoneDisplay={phoneDisplay}
+            zoneLabel={zoneLabel}
+            addressDisplay={addressDisplay}
+            notesDisplay={notesDisplay}
+            tableNumber={order?.tableNumber}
+            deliveryFee={deliveryFee}
+            variant={variant}
+            locale={locale}
+            labels={{
+              customer: t("detailsCustomer"),
+              phone: t("detailsPhone"),
+              zone: variant === "delivery" ? t("detailsZone" as never) : "",
+              address: t("detailsAddress" as never),
+              table: t("detailsTable" as never),
+              notes: t("detailsNotes"),
+              deliveryFee: variant === "delivery" ? t("detailsDeliveryFee" as never) : "",
+              total: t("detailsTotal"),
+              itemName: t("colItemName"),
+              qty: t("colQty"),
+              itemTotal: t("colTotal"),
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

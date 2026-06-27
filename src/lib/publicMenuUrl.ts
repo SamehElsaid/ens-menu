@@ -2,6 +2,10 @@
 export const MENU_QR_ENTRY_PARAM = "src";
 export const MENU_QR_ENTRY_VALUE = "qr";
 
+/** Matches a raw UUID — these are never valid human-readable subdomains. */
+export const MENU_UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const DEFAULT_MENU_HOST_SUFFIX = ".ensmenu.com";
 
 function menuHostSuffix(): string {
@@ -9,13 +13,14 @@ function menuHostSuffix(): string {
   return fromEnv || DEFAULT_MENU_HOST_SUFFIX;
 }
 
-/** Normalized slug for public URLs (empty / whitespace → unusable). */
+/** Normalized slug for public URLs.
+ *  Returns empty string if the slug is absent or looks like a raw UUID. */
 export function resolvePublicMenuSlug(
   slug: string | undefined | null,
   menuId?: number | string | null,
 ): string {
   const trimmed = slug?.trim();
-  if (trimmed) return trimmed;
+  if (trimmed && !MENU_UUID_REGEX.test(trimmed)) return trimmed;
   if (menuId != null && String(menuId).trim()) {
     return String(menuId).trim();
   }

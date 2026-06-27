@@ -130,7 +130,7 @@ export default function TableCard({
             {t("manageTable")}
           </button>
 
-          <div className="grid grid-cols-3 gap-1.5">
+          <div className="flex items-center gap-1.5 justify-center">
             <button
               type="button"
               disabled={!hasUrl}
