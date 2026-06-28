@@ -6,7 +6,7 @@ import type {
 export const STATIC_FREE_PLAN = {
   maxMenus: 1,
   allowCustomDomain: false,
-  hasAds: false,
+  hasAds: true,
 } as const;
 
 export const STATIC_PRO_PLAN = {

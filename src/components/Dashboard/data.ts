@@ -24,6 +24,8 @@ import {
   IoTimeOutline,
   IoCallOutline,
   IoSparklesOutline,
+  IoMailOutline,
+  IoGlobeOutline,
 } from "react-icons/io5";
 
 export type NavItem = {
@@ -172,6 +174,12 @@ export const navSections: NavSection[] = [
         key: "subscription",
         link: "subscription",
       },
+      {
+        label: "domainTransfer",
+        icon: IoGlobeOutline,
+        key: "domain-transfer",
+        link: "domain-transfer",
+      },
     ],
   },
   {
@@ -241,7 +249,6 @@ export const navSections: NavSection[] = [
         icon: HiSpeakerphone,
         key: "advertisements",
         link: "advertisements",
-        proFeature: true,
       },
     ],
   },
@@ -326,10 +333,22 @@ export const adminNavSections: NavSection[] = [
     items: [
       { label: "users", icon: FaUserAlt, key: "users", link: "users" },
       {
+        label: "customerEmails",
+        icon: IoMailOutline,
+        key: "broadcast",
+        link: "broadcast",
+      },
+      {
         label: "followUps",
         icon: IoCallOutline,
         key: "follow-ups",
         link: "follow-ups",
+      },
+      {
+        label: "domainTransfers",
+        icon: IoGlobeOutline,
+        key: "domain-transfers",
+        link: "domain-transfers",
       },
       {
         label: "plans",

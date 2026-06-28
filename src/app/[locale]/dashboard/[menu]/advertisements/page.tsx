@@ -12,6 +12,7 @@ import AdsCardGrid from "@/components/Dashboard/advertisements/AdsCardGrid";
 import AdsEmptyState from "@/components/Dashboard/advertisements/AdsEmptyState";
 import { useAppSelector } from "@/store/hooks";
 import { isFreePlanUser } from "@/lib/subscription";
+import { canAddMenuAd, FREE_MAX_ADS_PER_MENU } from "@/lib/adPlanLimits";
 import LinkTo from "@/components/Global/LinkTo";
 import { DemoDataBanner } from "@/components/Admin/AdminAnalyticsWidgets";
 import { fetchMenuAnalytics } from "@/lib/fetchMenuAnalytics";
@@ -21,7 +22,6 @@ import { IoAddCircleOutline } from "react-icons/io5";
 export default function AdvertisementsPage() {
   const locale = useLocale();
   const t = useTranslations("Advertisements.page");
-  const tAds = useTranslations("Advertisements");
   const tMenus = useTranslations("Menus");
   const params = useParams();
   const menuParam = (params as Record<string, string | string[] | undefined>)
@@ -47,7 +47,7 @@ export default function AdvertisementsPage() {
   const isFreePlan = !userData || isFreePlanUser(userData);
 
   const fetchAds = useCallback(async () => {
-    if (!menuId || isFreePlan) return;
+    if (!menuId) return;
     try {
       setLoading(true);
       const result = await axiosGet<{
@@ -72,18 +72,20 @@ export default function AdvertisementsPage() {
     } finally {
       setLoading(false);
     }
-  }, [menuId, locale, page, isFreePlan]);
+  }, [menuId, locale, page]);
 
   useEffect(() => {
     fetchAds();
   }, [fetchAds, refreshing]);
 
   useEffect(() => {
-    if (!menuId || isFreePlan) return;
+    if (!menuId) return;
     void fetchMenuAnalytics(menuId, locale, "30d").then((data) => {
       setAdAnalyticsDemo(Boolean(data._isDemoData));
     });
-  }, [menuId, locale, isFreePlan]);
+  }, [menuId, locale]);
+
+  const canAddAd = canAddMenuAd(isFreePlan, ads.length);
 
   const adSummaryMetrics = useMemo(() => {
     const totalImpressions = ads.reduce(
@@ -128,9 +130,10 @@ export default function AdvertisementsPage() {
   }, []);
 
   const handleAddClick = useCallback(() => {
+    if (!canAddAd) return;
     setEditingAd(null);
     setShowModal(true);
-  }, []);
+  }, [canAddAd]);
 
   const handleEdit = useCallback((ad: Advertisement) => {
     setEditingAd(ad);
@@ -162,30 +165,6 @@ export default function AdvertisementsPage() {
     [locale],
   );
 
-  if (isFreePlan) {
-    return (
-      <div
-        id="onboarding-ads-upgrade"
-        className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4 text-center md:min-h-[60vh] md:gap-4"
-      >
-        <PageTitleWithHelp className="justify-center">
-          <h1 className="text-xl font-bold text-slate-800 sm:text-2xl md:text-3xl dark:text-slate-100">
-            {tAds("freePlanTitle")}
-          </h1>
-        </PageTitleWithHelp>
-        <p className="max-w-md text-sm text-slate-500 md:text-base dark:text-slate-400">
-          {tAds("freePlanDescription")}
-        </p>
-        <LinkTo
-          href={`/dashboard/${menuId}/subscription`}
-          className="mt-2 inline-flex items-center justify-center gap-2 rounded-2xl bg-linear-to-r from-primary to-primary/80 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] md:mt-4 md:px-8"
-        >
-          {tMenus("upgradePlan")}
-        </LinkTo>
-      </div>
-    );
-  }
-
   if (!menuId) {
     return (
       <div className="py-20 text-center text-slate-500 dark:text-slate-400">
@@ -199,6 +178,25 @@ export default function AdvertisementsPage() {
 
   return (
     <>
+      {isFreePlan && (
+        <div
+          className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-100"
+          dir={textDir}
+        >
+          {t("freePlanLimitBanner", { max: FREE_MAX_ADS_PER_MENU })}
+          {!canAddAd && (
+            <>
+              {" "}
+              <LinkTo
+                href={`/dashboard/${menuId}/subscription`}
+                className="font-semibold underline underline-offset-2"
+              >
+                {tMenus("upgradePlan")}
+              </LinkTo>
+            </>
+          )}
+        </div>
+      )}
       <div
         id="onboarding-advertisements-header"
         className="dashboard-ads-header mb-4 flex flex-col gap-3 overflow-visible sm:flex-row sm:items-start sm:justify-between sm:gap-4 md:mb-6"
@@ -218,7 +216,9 @@ export default function AdvertisementsPage() {
           id="onboarding-advertisements-actions"
           type="button"
           onClick={handleAddClick}
-          className="inline-flex h-10 shrink-0 items-center justify-center gap-2 self-start rounded-xl bg-primary px-4 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] sm:h-11 sm:px-5"
+          disabled={!canAddAd}
+          title={!canAddAd ? t("freePlanLimitReached") : undefined}
+          className="inline-flex h-10 shrink-0 items-center justify-center gap-2 self-start rounded-xl bg-primary px-4 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 sm:h-11 sm:px-5"
         >
           <IoAddCircleOutline className="text-lg" aria-hidden />
           {t("addButton")}
@@ -230,7 +230,7 @@ export default function AdvertisementsPage() {
       )}
 
       {showEmpty ? (
-        <AdsEmptyState onAdd={handleAddClick} />
+        <AdsEmptyState onAdd={canAddAd ? handleAddClick : undefined} />
       ) : (
         <>
           {ads.length > 0 && (

@@ -85,6 +85,14 @@ export function adminRouteToPermission(
     "administrators",
   ];
 
+  if (segment === "broadcast") {
+    return "users";
+  }
+
+  if (segment === "domain-transfers") {
+    return "users";
+  }
+
   if (segment === "users" && normalized.includes("/users/")) {
     return "users";
   }
