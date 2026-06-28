@@ -251,7 +251,11 @@ export default function MediaPage() {
                   <div className="flex-1 min-w-[180px]">
                     <CustomInput
                       type={row.id === "whatsapp" ? "tel" : "text"}
-                      value={row.value || undefined}
+                      value={
+                        row.id === "whatsapp"
+                          ? row.value || undefined
+                          : row.value
+                      }
                       onChange={(e) =>
                         updateSocial(
                           row.id,

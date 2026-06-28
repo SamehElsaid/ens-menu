@@ -12,6 +12,11 @@
       "description": "حمل تطبيق ENSmenu لإدارة منيو إلكتروني وطلبات QR code لمطعمك أو مقهاك — مجاني وسريع.",
       "keywords": "تطبيق مطعم، تطبيق منيو، إدارة طلبات، كاشير، ENSmenu"
     },
+    "ownerAppPage": {
+      "title": "تطبيق ENSMenu للمالك | أدر مطعمك من هاتفك",
+      "description": "حمل تطبيق ENSMenu Owner وأدر مطعمك ومنيوك وطلباتك وفريقك من أي مكان. متاح على Google Play.",
+      "keywords": "تطبيق صاحب مطعم، إدارة منيو، تطبيق مطعم، ENSmenu owner، QR كود"
+    },
     "auth": {
       "loginTitle": "تسجيل الدخول | ENSMENU",
       "loginDescription": "سجّل الدخول لإدارة منيو إلكتروني مجاني و QR code لمطعمك على ENSmenu.",
@@ -201,6 +206,7 @@
     "knowledgeBase": "قاعدة المعرفة",
     "contact": "تواصل معنا",
     "androidApp": "تطبيق أندرويد",
+    "ownerApp": "تطبيق المالك",
     "pricingPage": "الأسعار"
   },
   "home": {
@@ -1836,6 +1842,36 @@
     "mobileApp": {
       "whyOurApp": "لماذا تطبيقنا؟",
       "livePreview": "معاينة مباشرة"
+    },
+    "OwnerApp": {
+      "badge": "ENSMenu Owner — متاح الآن على Google Play",
+      "titleStart": "أدر مطعمك",
+      "titleHighlight": "من هاتفك",
+      "description": "تطبيق ENSMenu Owner يمنحك التحكم الكامل — أدر منيوك، ارفع الصور، تابع التحديثات، وأدر أعمالك من أي مكان.",
+      "googlePlay": "تنزيل من Google Play",
+      "appleStore": "App Store — قريباً",
+      "appleComingSoon": "قريباً على iOS",
+      "features": {
+        "qrMenu": "منيو QR ذكي",
+        "aiAssistant": "مساعد AI للمنيو",
+        "menuManagement": "إدارة المنيو بسهولة",
+        "uploadPhotos": "رفع صور المنيو",
+        "uploadLogo": "رفع شعار المطعم",
+        "multiLanguage": "دعم متعدد اللغات",
+        "realtimeUpdates": "تحديثات فورية",
+        "securePlatform": "منصة سحابية آمنة"
+      },
+      "floatingCards": {
+        "liveLabel": "متاح على Google Play",
+        "liveText": "حمّل الآن",
+        "syncLabel": "مزامنة فورية",
+        "syncText": "تحديث المنيو فوراً"
+      },
+      "featuresSectionTitle": "كل ما تحتاجه لإدارة مطعمك",
+      "featuresSectionSubtitle": "مصمم لأصحاب المطاعم الذين يريدون التحكم الكامل من راحة يدهم.",
+      "ctaTitle": "ابدأ إدارة مطعمك بذكاء",
+      "ctaSubtitle": "متاح الآن على Android. iOS قريباً.",
+      "ctaButton": "حمّل من Google Play"
     }
   },
   "PricingPage": {
@@ -4833,14 +4869,36 @@
     "delivery": "توصيل",
     "table": "طاولة",
     "tableNo": "طاولة",
-    "viewAll": "عرض كل الطلبات"
+    "viewAll": "عرض كل الطلبات",
+    "tableOrders": "طلبات الطاولات",
+    "viewTableOrders": "عرض طلبات الطاولات",
+    "onlineOrders": "طلبات الأونلاين",
+    "viewOnlineOrders": "عرض طلبات الأونلاين",
+    "recentOrders": "أحدث الطلبات",
+    "setupSection": "إعداد القائمة",
+    "noCategories": "لا توجد تصنيفات بعد",
+    "noCategoriesAction": "أضف تصنيفاً الآن",
+    "noItems": "لا توجد منتجات بعد",
+    "noItemsAction": "أضف منتجاً الآن",
+    "noTables": "لا توجد طاولات بعد",
+    "noTablesAction": "أضف طاولة الآن",
+    "noStaff": "لا يوجد موظفون بعد",
+    "noStaffAction": "أضف موظفاً الآن",
+    "noLogo": "لم يتم تخصيص شعار القائمة",
+    "noLogoAction": "أضف شعار القائمة",
+    "planSection": "ميزاتك الحالية",
+    "allTasksDone": "كل شيء جاهز! قائمتك مكتملة.",
+    "upgradePlan": "ترقية الخطة",
+    "freePlanUpgradeHint": "قم بالترقية للحصول على الطاولات والطلبات والموظفين",
+    "aiImportHint": "أو استورد المنيو بالذكاء الاصطناعي من صورة",
+    "aiImportAction": "استيراد من صورة"
   },
   "domainTransfer": {
     "title": "ربط الدومين",
     "description": "اربط دومينك بمنيو ENS تلقائياً — النظام يحلل الدومين ويرشدك خطوة بخطوة حتى يكتمل الربط.",
     "domainLabel": "رابط الدومين",
     "domainPlaceholder": "example.com أو https://example.com",
-    "domainHint": "أدخل اسم الدومين الذي تريد ربطه بمنيوك.",
+    "domainHint": "أدخل اسم الدومين الذي تريد ربطه بالمنيو الخاص بك.",
     "submit": "بدء الربط التلقائي",
     "submitting": "جاري التجهيز...",
     "submitSuccess": "تم استلام طلبك — النظام يبدأ المعالجة الآن",
