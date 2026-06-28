@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useParams, useSearchParams } from "next/navigation";
 import { IoArrowBack } from "react-icons/io5";
-import { FaTimesCircle, FaTimes } from "react-icons/fa";
+import { FaCheckCircle, FaTimesCircle, FaTimes } from "react-icons/fa";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import ConfirmationModal from "@/components/Custom/ConfirmationModal";
 import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
@@ -50,6 +50,8 @@ interface User {
   blockedReason?: string | null;
   deletedAt?: string | null;
   updatedAt?: string | null;
+  isEmailVerified?: boolean;
+  emailVerifiedAt?: string | null;
   accountStatus?: AccountStatus;
   planName: string;
   subscriptionStatus: string;
@@ -155,7 +157,13 @@ export default function UserDetailsPage() {
       );
 
       if (result.status && result.data) {
-        setUserData(result.data);
+        setUserData({
+          ...result.data,
+          user: {
+            ...result.data.user,
+            isEmailVerified: Boolean(result.data.user.isEmailVerified),
+          },
+        });
       } else {
         toast.error(t("error"));
       }
@@ -1305,7 +1313,14 @@ export default function UserDetailsPage() {
           </CardDashBoard>
           <CardDashBoard borderColor="border-green-200 dark:border-green-500/20">
             <div className="text-center">
-              <FaTimesCircle className="text-3xl text-red-600 dark:text-red-400 mx-auto mb-2" />
+              {user.isEmailVerified ? (
+                <FaCheckCircle className="text-3xl text-emerald-600 dark:text-emerald-400 mx-auto mb-2" />
+              ) : (
+                <FaTimesCircle className="text-3xl text-red-600 dark:text-red-400 mx-auto mb-2" />
+              )}
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                {user.isEmailVerified ? t("verified") : t("unverified")}
+              </p>
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 {t("statistics.emailVerification")}
               </p>
