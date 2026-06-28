@@ -18,6 +18,7 @@ export async function GET(request: NextRequest) {
 
   const childSitemaps: { loc: string; lastmod: string }[] = [
     { loc: `${siteOrigin}/sitemap-main.xml`, lastmod },
+    { loc: `${siteOrigin}/sitemap-knowledge-base.xml`, lastmod },
   ];
 
   for (let page = 1; page <= pageCount; page++) {

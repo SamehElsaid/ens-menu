@@ -121,6 +121,16 @@ export default function HeaderSearch() {
   const getSubtitle = (item: SearchResult) =>
     isRTL ? item.titleEn : item.titleAr;
 
+  const toSlug = (title: string, id: number): string => {
+    const base = title
+      .toLowerCase()
+      .replace(/[\u0600-\u06FF\s]+/g, "-")
+      .replace(/[^a-z0-9-]/g, "")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+    return base ? `${base}-${id}` : `${id}`;
+  };
+
 
   const popup = isOpen && mounted
     ? createPortal(
@@ -168,7 +178,7 @@ export default function HeaderSearch() {
                 {results.map((item) => (
                   <li key={item.id}>
                     <LinkTo
-                      href={`knowledge-base?id=${item.id}`}
+                      href={`knowledge-base/${toSlug(item.titleEn, item.id)}`}
                       onClick={close}
                       className={`flex items-start gap-3 px-5 py-3 hover:bg-purple-50 dark:hover:bg-purple-500/10 transition-colors`}
                     >

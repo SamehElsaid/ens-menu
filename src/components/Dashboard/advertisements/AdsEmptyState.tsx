@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { IoAddCircleOutline, IoMegaphoneOutline } from "react-icons/io5";
 
 interface AdsEmptyStateProps {
-  onAdd: () => void;
+  onAdd?: () => void;
 }
 
 export default function AdsEmptyState({ onAdd }: AdsEmptyStateProps) {
@@ -21,14 +21,16 @@ export default function AdsEmptyState({ onAdd }: AdsEmptyStateProps) {
       <p className="mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
         {t("noAdsDescription")}
       </p>
-      <button
-        type="button"
-        onClick={onAdd}
-        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98]"
-      >
-        <IoAddCircleOutline className="text-lg" aria-hidden />
-        {t("addFirstAd")}
-      </button>
+      {onAdd && (
+        <button
+          type="button"
+          onClick={onAdd}
+          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98]"
+        >
+          <IoAddCircleOutline className="text-lg" aria-hidden />
+          {t("addFirstAd")}
+        </button>
+      )}
     </div>
   );
 }

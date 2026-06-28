@@ -1,9 +1,9 @@
 "use client";
 
-import { Suspense, useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
+import LinkTo from "@/components/Global/LinkTo";
 import {
   IoSearchOutline,
   IoCloseOutline,
@@ -55,15 +55,24 @@ interface DetailResponse {
 
 const PAGE_LIMIT = 10;
 
+/** Converts a title + id into a URL-friendly slug, e.g. "Default Template-68" → "default-template-68" */
+function toSlug(title: string, id: number): string {
+  const base = title
+    .toLowerCase()
+    .replace(/[\u0600-\u06FF\s]+/g, "-") // replace Arabic chars & spaces with dash
+    .replace(/[^a-z0-9-]/g, "")          // remove any remaining non-URL chars
+    .replace(/-+/g, "-")                  // collapse multiple dashes
+    .replace(/^-|-$/g, "");               // trim leading/trailing dashes
+  return base ? `${base}-${id}` : `${id}`;
+}
+
 /* ─────────────────────── inner component ───────────── */
 
-function KnowledgeBaseInner() {
+function KnowledgeBaseInner({ initialId }: { initialId?: number }) {
   const locale = useLocale();
   const t = useTranslations("knowledgeBase");
   const isRTL = locale === "ar";
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const urlId = searchParams.get("id");
 
   /* sidebar state */
   const [articles, setArticles] = useState<ArticleListItem[]>([]);
@@ -80,7 +89,7 @@ function KnowledgeBaseInner() {
 
   /* article detail state */
   const [selectedId, setSelectedId] = useState<number | null>(
-    urlId ? Number(urlId) : null,
+    initialId ?? null,
   );
   const [article, setArticle] = useState<ArticleDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -117,13 +126,13 @@ function KnowledgeBaseInner() {
           if (res.data.pagination) setPagination(res.data.pagination);
 
           /* auto-select first article on very first load if no URL id */
-          if (firstLoad.current && list.length > 0 && !urlId) {
+          if (firstLoad.current && list.length > 0 && !initialId) {
             firstLoad.current = false;
             const isDesktop = window.matchMedia("(min-width: 768px)").matches;
             if (isDesktop) {
-              const firstId = list[0].id;
-              setSelectedId(firstId);
-              router.replace(`/knowledge-base?id=${firstId}`);
+              const first = list[0];
+              setSelectedId(first.id);
+              router.replace(`/knowledge-base/${toSlug(first.titleEn, first.id)}`);
             }
           } else {
             firstLoad.current = false;
@@ -143,10 +152,10 @@ function KnowledgeBaseInner() {
     fetchList(sidebarPage, debouncedSearch);
   }, [fetchList, sidebarPage, debouncedSearch]);
 
-  /* ── sync URL id → selectedId ── */
+  /* ── sync initialId → selectedId when navigating between articles ── */
   useEffect(() => {
-    setSelectedId(urlId ? Number(urlId) : null);
-  }, [urlId]);
+    setSelectedId(initialId ?? null);
+  }, [initialId]);
 
   /* ── fetch article detail by ID ── */
   const fetchDetail = useCallback(
@@ -171,12 +180,6 @@ function KnowledgeBaseInner() {
   useEffect(() => {
     if (selectedId !== null) fetchDetail(selectedId);
   }, [fetchDetail, selectedId]);
-
-  /* ── click article → update URL ── */
-  const handleSelect = (id: number) => {
-    if (id === selectedId) return;
-    router.push(`/knowledge-base?id=${id}`);
-  };
 
   const handleMobileBack = () => {
     setSelectedId(null);
@@ -274,10 +277,11 @@ function KnowledgeBaseInner() {
           <ul className="space-y-0.5">
             {articles.map((item) => {
               const isActive = selectedId === item.id;
+              const slug = toSlug(item.titleEn, item.id);
               return (
                 <li key={item.id}>
-                  <button
-                    onClick={() => handleSelect(item.id)}
+                  <LinkTo
+                    href={`/knowledge-base/${slug}`}
                     className={`w-full text-start text-sm rounded-lg px-3 py-2.5 transition-all duration-150 flex items-center gap-2.5 ${
                       isActive
                         ? "bg-purple-50 dark:bg-purple-500/15 text-purple-700 dark:text-purple-300 font-semibold"
@@ -292,7 +296,7 @@ function KnowledgeBaseInner() {
                     <span className="line-clamp-2 leading-snug">
                       {getTitle(item)}
                     </span>
-                  </button>
+                  </LinkTo>
                 </li>
               );
             })}
@@ -446,9 +450,7 @@ function KnowledgeBaseInner() {
 /* ─────────────────────── page export ───────────────── */
 
 export default function KnowledgeBasePage() {
-  return (
-    <Suspense>
-      <KnowledgeBaseInner />
-    </Suspense>
-  );
+  return <KnowledgeBaseInner />;
 }
+
+export { KnowledgeBaseInner };

@@ -14,13 +14,6 @@ import { useCallback, useRef, useState } from "react";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import { pushSignUpEvent } from "@/shared/gtmEvents";
 import { toast } from "react-toastify";
-import { encryptData } from "@/shared/encryption";
-import Cookies from "js-cookie";
-import { useAppDispatch } from "@/store/hooks";
-import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
-import { withNewUserOnboardingFlag } from "@/lib/aiImportOnboarding";
-import { LoginResponse } from "@/types/LoginResponse";
-import { syncFcmToken } from "@/shared/syncFcmToken";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { TbLockPassword } from "react-icons/tb";
@@ -253,7 +246,6 @@ export default function RegisterForm({ steps = [] }: RegisterFormProps) {
   const [recaptchaVerified, setRecaptchaVerified] = useState(false);
   const recaptchaRef = useRef<RecaptchaGateHandle>(null);
   const router = useRouter();
-  const dispatch = useAppDispatch();
 
   const onSubmit = async (data: RegisterSchema) => {
     setLoading(true);
@@ -283,41 +275,6 @@ export default function RegisterForm({ steps = [] }: RegisterFormProps) {
     if (response.status) {
       pushSignUpEvent();
       toast.success(t("auth.registerSuccess"));
-
-      const loginResponse = await axiosPost<
-        { email: string; password: string },
-        LoginResponse & { message?: string }
-      >(
-        "/auth/login",
-        locale,
-        { email: data.email, password: data.password },
-        false,
-        true,
-      );
-
-      if (loginResponse.status && loginResponse.data) {
-        const { accessToken, refreshToken, user } = loginResponse.data;
-        const encryptedData = encryptData({
-          token: accessToken ?? "",
-          refreshToken: refreshToken ?? "",
-          role: user?.role ?? "",
-        });
-        Cookies.set("sub", encryptedData, {
-          expires: 3,
-          sameSite: "Lax",
-          secure: true,
-          path: "/",
-        });
-        void syncFcmToken(locale);
-        if (user) {
-          dispatch(
-            SET_ACTIVE_USER({ user: withNewUserOnboardingFlag(user) }),
-          );
-        }
-        window.location.href = `/${locale}${user?.role === "admin" ? "/admin" : "/dashboard"}`;
-        return;
-      }
-
       router.push("/auth/login");
       setLoading(false);
     } else {

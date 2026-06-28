@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import LoadImage from "@/components/ImageLoad";
 import { templatesInfo } from "@/modules/TemplateShow/data";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
@@ -26,6 +27,8 @@ export default function DesignPage() {
   const locale = useLocale();
   const isRTL = locale === "ar";
   const routeParams = useParams<{ menu: string }>();
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   const t = useTranslations("settingsDesignPage");
 
@@ -48,7 +51,7 @@ export default function DesignPage() {
     return true;
   });
   const [isLoading, setIsLoading] = useState<boolean | string>(false);
-  const [customizingSlug, setCustomizingSlug] = useState<string | null>(null);
+  const customizingSlug = searchParams.get("customize");
   const [customizeLoadingSlug, setCustomizeLoadingSlug] = useState<
     string | null
   >(null);
@@ -130,6 +133,11 @@ export default function DesignPage() {
     id: string;
     slug: string;
   }) => {
+    if (isFreePlan) {
+      setUpgradeModalOpen(true);
+      return;
+    }
+
     if (!resolvedMenuId) {
       toast.error(
         locale === "ar"
@@ -154,10 +162,16 @@ export default function DesignPage() {
           return;
         }
       }
-      setCustomizingSlug(template.slug);
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("customize", template.slug);
+      router.push(`?${params.toString()}`);
     } finally {
       setCustomizeLoadingSlug(null);
     }
+  };
+
+  const handleCloseCustomize = () => {
+    router.back();
   };
 
   if (customizingSlug) {
@@ -165,7 +179,7 @@ export default function DesignPage() {
       <TemplateDesignCustomizePanel
         tempSlug={customizingSlug}
         embedded
-        onClose={() => setCustomizingSlug(null)}
+        onClose={handleCloseCustomize}
       />
     );
   }

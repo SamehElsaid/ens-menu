@@ -286,7 +286,9 @@ export function DashboardSidebar({
   const canShowAdminItem = (item: NavItem) => {
     const key = item.key || item.link || "";
     if (!key || key === "overview" || key === "personal") return true;
-    return hasAdminPermission(key as AdminPermissionKey);
+    const permissionKey =
+      key === "broadcast" ? "users" : (key as AdminPermissionKey);
+    return hasAdminPermission(permissionKey);
   };
 
   const navSectionsData = isAdmin

@@ -26,6 +26,16 @@ function sanitizeTableNumberInput(raw: string): string {
     .slice(0, TABLE_NUMBER_MAX);
 }
 
+function getApiErrorMessage(data: unknown, locale: string): string | null {
+  if (!data || typeof data !== "object") return null;
+  const row = data as Record<string, unknown>;
+  if (typeof row.error === "string" && row.error.trim()) return row.error;
+  if (locale === "ar" && typeof row.errorAr === "string") return row.errorAr;
+  if (typeof row.errorEn === "string") return row.errorEn;
+  if (typeof row.message === "string") return row.message;
+  return null;
+}
+
 export interface AddTableFormData {
   tableNumber: string;
   isActive: boolean;
@@ -102,7 +112,7 @@ export default function AddTableModal({
           onClose();
           onRefresh?.();
         } else {
-          toast.error(t("editError"));
+          toast.error(getApiErrorMessage(result.data, locale) ?? t("editError"));
         }
       } else {
         const result = await axiosPost<
@@ -114,7 +124,7 @@ export default function AddTableModal({
           onClose();
           onRefresh?.();
         } else {
-          toast.error(t("createError"));
+          toast.error(getApiErrorMessage(result.data, locale) ?? t("createError"));
         }
       }
     } catch {

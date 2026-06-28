@@ -34,6 +34,7 @@ export default function LoginForm() {
     control,
     handleSubmit,
     setValue,
+    getValues,
     formState: { errors },
   } = useForm<LoginSchema>({
     defaultValues: {
@@ -57,6 +58,9 @@ export default function LoginForm() {
   const [recaptchaVerified, setRecaptchaVerified] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [emailVerificationRequired, setEmailVerificationRequired] =
+    useState(false);
+  const [resendingVerification, setResendingVerification] = useState(false);
   const recaptchaRef = useRef<RecaptchaGateHandle>(null);
 
   useEffect(() => {
@@ -79,6 +83,7 @@ export default function LoginForm() {
 
     setLoading(true);
     setApiError(null);
+    setEmailVerificationRequired(false);
 
     try {
       if (rememberMe) {
@@ -128,14 +133,39 @@ export default function LoginForm() {
         message?: string;
         error?: string;
         errorType?: string;
+        emailVerificationRequired?: boolean;
       };
       const errorMessage =
         payload?.error || payload?.message || t("auth.invalidCredentials");
       setApiError(errorMessage);
+      setEmailVerificationRequired(Boolean(payload?.emailVerificationRequired));
       setLoading(false);
       recaptchaRef.current?.reset();
       setRecaptchaVerified(false);
     }
+  };
+
+  const handleResendVerification = async () => {
+    const email = getValues("email");
+    if (!email) return;
+
+    setResendingVerification(true);
+    const response = await axiosPost<{ email: string; locale: string }, unknown>(
+      "/auth/resend-verification",
+      locale,
+      { email, locale },
+      false,
+      true,
+    );
+    setResendingVerification(false);
+
+    if (response.status) {
+      setApiError(t("auth.resendVerificationSuccess"));
+      return;
+    }
+
+    const payload = response.data as { error?: string; message?: string };
+    setApiError(payload?.error || payload?.message || t("auth.verifyEmailFailed"));
   };
 
   return (
@@ -238,9 +268,21 @@ export default function LoginForm() {
       {apiError && (
         <div
           role="alert"
-          className="login-form__error mt-3 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-[13px] font-medium text-red-800 dark:border-red-500/35 dark:bg-red-950/40 dark:text-red-300"
+          className="login-form__error mt-3 flex flex-col gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-[13px] font-medium text-red-800 dark:border-red-500/35 dark:bg-red-950/40 dark:text-red-300"
         >
-          {apiError}
+          <span>{apiError}</span>
+          {emailVerificationRequired && (
+            <button
+              type="button"
+              onClick={handleResendVerification}
+              disabled={resendingVerification}
+              className="text-start text-[12px] font-semibold text-purple-700 underline underline-offset-2 disabled:opacity-60 dark:text-purple-300"
+            >
+              {resendingVerification
+                ? t("auth.recaptchaVerifying")
+                : t("auth.resendVerification")}
+            </button>
+          )}
         </div>
       )}
 

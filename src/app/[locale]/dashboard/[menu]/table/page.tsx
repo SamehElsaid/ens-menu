@@ -102,9 +102,9 @@ export default function TablesPage() {
         : "Tables and QR links are available on Pro plans only";
     const description =
       locale === "ar"
-        ? "قم بالترقية من الصفحة الشخصية لإدارة الطاولات ونداء الطاقم."
-        : "Upgrade from your profile to manage tables and staff calls.";
-    const buttonLabel = tStaff("personalProfileLink");
+        ? "قم بالترقية لإدارة الطاولات ونداء الطاقم."
+        : "Upgrade your plan to manage tables and staff calls.";
+    const buttonLabel = tStaff("upgradeShort");
 
     return (
       <div

@@ -6,13 +6,11 @@ import type {
 export const STATIC_FREE_PLAN = {
   maxMenus: 1,
   allowCustomDomain: false,
-  hasAds: false,
 } as const;
 
 export const STATIC_PRO_PLAN = {
   maxMenus: 4,
   allowCustomDomain: true,
-  hasAds: true,
 } as const;
 
 export const CUSTOM_TABLE_FEATURE_KEYS = [
@@ -193,9 +191,9 @@ export function buildPricingComparisonRows({
     {
       id: "rowAds",
       label: t("rowAds"),
-      free: STATIC_FREE_PLAN.hasAds,
-      pro: STATIC_PRO_PLAN.hasAds,
-      custom: true,
+      free: t("adsFreeOne"),
+      pro: t("adsUnlimited"),
+      custom: t("adsUnlimited"),
     },
     {
       id: "rowDesign",

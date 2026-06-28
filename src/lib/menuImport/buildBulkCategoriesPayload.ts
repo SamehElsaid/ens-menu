@@ -101,8 +101,6 @@ export function buildBulkCategoriesPayload(
       if (bulkItem) items.push(bulkItem);
     });
 
-    if (items.length === 0) return;
-
     categories.push({
       id: category.id,
       nameAr: category.nameAr.trim() || category.nameEn.trim(),
@@ -174,8 +172,7 @@ export function countBulkSaveStats(draft: ImportDraft) {
   }
 
   const itemsAdded = saveUnitsInPayload - itemsUpdated;
-  const categoriesRequested = draft.categories.filter((c) => c.items.length > 0)
-    .length;
+  const categoriesRequested = draft.categories.length;
 
   return {
     payload,
@@ -278,8 +275,7 @@ function buildSummary(
     itemsFailed: number;
   },
 ) {
-  const categoriesRequested = draft.categories.filter((c) => c.items.length > 0)
-    .length;
+  const categoriesRequested = draft.categories.length;
   const itemsRequested = countExpandedItems(draft);
 
   return {

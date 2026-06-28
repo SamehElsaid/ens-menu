@@ -12,6 +12,11 @@
       "description": "حمل تطبيق ENSmenu لإدارة منيو إلكتروني وطلبات QR code لمطعمك أو مقهاك — مجاني وسريع.",
       "keywords": "تطبيق مطعم، تطبيق منيو، إدارة طلبات، كاشير، ENSmenu"
     },
+    "ownerAppPage": {
+      "title": "تطبيق ENSMenu للمالك | أدر مطعمك من هاتفك",
+      "description": "حمل تطبيق ENSMenu Owner وأدر مطعمك ومنيوك وطلباتك وفريقك من أي مكان. متاح على Google Play.",
+      "keywords": "تطبيق صاحب مطعم، إدارة منيو، تطبيق مطعم، ENSmenu owner، QR كود"
+    },
     "auth": {
       "loginTitle": "تسجيل الدخول | ENSMENU",
       "loginDescription": "سجّل الدخول لإدارة منيو إلكتروني مجاني و QR code لمطعمك على ENSmenu.",
@@ -22,6 +27,9 @@
       "resetPasswordTitle": "إعادة تعيين كلمة المرور | ENSMENU",
       "resetPasswordDescription": "إعادة تعيين كلمة مرور حساب ENSmenu لمنيو الإلكتروني.",
       "resetPasswordKeywords": "إعادة تعيين كلمة المرور، استعادة الحساب، ENSmenu",
+      "verifyEmailTitle": "تأكيد البريد الإلكتروني | ENSMENU",
+      "verifyEmailDescription": "تأكيد بريدك الإلكتروني لتفعيل حساب ENSmenu.",
+      "verifyEmailKeywords": "تأكيد البريد، تفعيل الحساب، ENSmenu",
       "staffLoginTitle": "تسجيل دخول الموظف | ENSMENU",
       "staffLoginDescription": "دخول الكاشير لإدارة المنيو الإلكتروني وطلبات QR code.",
       "staffLoginKeywords": "تسجيل دخول موظف، كاشير، لوحة تحكم ENSmenu"
@@ -197,7 +205,8 @@
     "faq": "الأسئلة الشائعة",
     "knowledgeBase": "قاعدة المعرفة",
     "contact": "تواصل معنا",
-    "androidApp": "تطبيق أندرويد",
+    "androidApp": "تطبيق الموظفين",
+    "ownerApp": "تطبيق الاونر",
     "pricingPage": "الأسعار"
   },
   "home": {
@@ -248,7 +257,7 @@
     "switchToSpecialist": "التسجيل كأخصائي",
     "firstName": "الاسم الأول",
     "lastName": "اسم العائلة",
-    "registerSuccess": "تم إنشاء الحساب بنجاح",
+    "registerSuccess": "تم إنشاء الحساب بنجاح. تحقق من بريدك الإلكتروني لتأكيد حسابك.",
     "phone": "رقم الهاتف",
     "email": "البريد الإلكتروني",
     "password": "كلمة المرور",
@@ -386,6 +395,17 @@
     "resetLinkSent": "تم إرسال رابط إعادة التعيين. يرجى التحقق من بريدك الإلكتروني.",
     "resetPasswordSuccess": "تم تحديث كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن.",
     "invalidResetToken": "رابط إعادة التعيين غير صالح. اطلب رابطًا جديدًا.",
+    "verifyEmailTitle": "تأكيد البريد الإلكتروني",
+    "verifyEmailDescription": "انقر على الرابط في بريدك لتفعيل حسابك، أو انتظر حتى نؤكد الرابط تلقائياً.",
+    "verifyEmailLoading": "جاري التحقق من بريدك الإلكتروني…",
+    "verifyEmailSuccessTitle": "تم التأكيد بنجاح",
+    "verifyEmailErrorTitle": "تعذّر تأكيد البريد",
+    "verifyEmailSuccess": "تم تأكيد بريدك الإلكتروني بنجاح. يمكنك تسجيل الدخول الآن.",
+    "verifyEmailFailed": "رابط التأكيد غير صالح أو منتهي الصلاحية.",
+    "verifyEmailMissingToken": "رابط التأكيد غير صالح. تحقق من بريدك الإلكتروني.",
+    "emailVerificationRequired": "يرجى تأكيد بريدك الإلكتروني قبل تسجيل الدخول.",
+    "resendVerification": "إعادة إرسال بريد التأكيد",
+    "resendVerificationSuccess": "تم إرسال بريد التأكيد. تحقق من صندوق الوارد.",
     "centerDescription": "انضم إلى شبكة المراكز لدينا",
     "centerTitle": "تسجيل مركز",
     "profileImage": "صورة الملف الشخصي",
@@ -1822,6 +1842,36 @@
     "mobileApp": {
       "whyOurApp": "لماذا تطبيقنا؟",
       "livePreview": "معاينة مباشرة"
+    },
+    "OwnerApp": {
+      "badge": "ENSMenu Owner — متاح الآن على Google Play",
+      "titleStart": "أدر مطعمك",
+      "titleHighlight": "من هاتفك",
+      "description": "تطبيق ENSMenu Owner يمنحك التحكم الكامل — أدر منيوك، ارفع الصور، تابع التحديثات، وأدر أعمالك من أي مكان.",
+      "googlePlay": "تنزيل من Google Play",
+      "appleStore": "App Store — قريباً",
+      "appleComingSoon": "قريباً على iOS",
+      "features": {
+        "qrMenu": "منيو QR ذكي",
+        "aiAssistant": "مساعد AI للمنيو",
+        "menuManagement": "إدارة المنيو بسهولة",
+        "uploadPhotos": "رفع صور المنيو",
+        "uploadLogo": "رفع شعار المطعم",
+        "multiLanguage": "دعم متعدد اللغات",
+        "realtimeUpdates": "تحديثات فورية",
+        "securePlatform": "منصة سحابية آمنة"
+      },
+      "floatingCards": {
+        "liveLabel": "متاح على Google Play",
+        "liveText": "حمّل الآن",
+        "syncLabel": "مزامنة فورية",
+        "syncText": "تحديث المنيو فوراً"
+      },
+      "featuresSectionTitle": "كل ما تحتاجه لإدارة مطعمك",
+      "featuresSectionSubtitle": "مصمم لأصحاب المطاعم الذين يريدون التحكم الكامل من راحة يدهم.",
+      "ctaTitle": "ابدأ إدارة مطعمك بذكاء",
+      "ctaSubtitle": "متاح الآن على Android. iOS قريباً.",
+      "ctaButton": "حمّل من Google Play"
     }
   },
   "PricingPage": {
@@ -1843,6 +1893,8 @@
     "rowMenus": "المنيوهات النشطة",
     "rowProducts": "المنتجات لكل منيو",
     "rowAds": "التحكم بالإعلانات",
+    "adsFreeOne": "إعلان واحد",
+    "adsUnlimited": "غير محدود",
     "rowStaffTables": " اضافه موظفين وطاولات",
     "rowStaffMobileApp": "ابلكيشن مخصص للموظفين ",
     "proStaffMobileAppBullet": "ابلكيشن مخصص للموظفين للطلبات والطاولات",
@@ -2273,6 +2325,8 @@
       "originalPrice": "السعر الأصلي",
       "originalPriceRequired": "السعر الأصلي مطلوب",
       "discountPercent": "نسبة الخصم %",
+      "discountMinError": "نسبة الخصم لا يمكن أن تكون أقل من 0",
+      "discountMaxError": "نسبة الخصم لا يمكن أن تتجاوز 100%",
       "oneSize": "حجم واحد",
       "multipleSizes": "عدد أحجام",
       "addSize": "إضافة حجم",
@@ -2355,8 +2409,8 @@
       "contentPlaceholder": "تفاصيل العرض...",
       "linkUrlPlaceholder": "https://... أو www...."
     },
-    "freePlanTitle": "هذه الميزة متاحة للخطط المدفوعة فقط",
-    "freePlanDescription": "قم بالترقية للوصول إلى ميزة الإعلانات وإبراز عروضك لعملائك.",
+    "freePlanTitle": "الترقية لمزيد من الإعلانات",
+    "freePlanDescription": "الخطة المجانية تشمل إعلاناً واحداً. قم بالترقية لإضافة إعلانات غير محدودة وإبراز عروضك.",
     "page": {
       "title": "الإعلانات",
       "description": "إدارة الإعلانات الترويجية لهذه القائمة.",
@@ -2386,7 +2440,9 @@
       "inactive": "غير نشط",
       "noAds": "لا توجد إعلانات بعد",
       "noAdsDescription": "ابدأ بإضافة إعلان ترويجي لقائمتك",
-      "addFirstAd": "إضافة أول إعلان"
+      "addFirstAd": "إضافة أول إعلان",
+      "freePlanLimitBanner": "الخطة المجانية تشمل {max} إعلان. قم بالترقية للحصول على إعلانات غير محدودة.",
+      "freePlanLimitReached": "وصلت للحد الأقصى للإعلانات في الخطة المجانية. قم بالترقية لإضافة المزيد."
     },
     "deleteConfirmTitle": "حذف الإعلان",
     "deleteConfirm": "هل أنت متأكد من حذف هذا الإعلان؟ لا يمكن التراجع عن هذا الإجراء.",
@@ -2422,6 +2478,8 @@
     "knowledgeManagement": "إدارة المعرفة",
     "analytics": "التحليلات",
     "followUps": "متابعة العملاء",
+    "domainTransfers": "طلبات نقل الدومين",
+    "customerEmails": "رسائل العملاء",
     "payments": "المدفوعات",
     "Overview": "نظرة عامة",
     "Profile": "الملف الشخصي",
@@ -2436,6 +2494,7 @@
     "Advertisements": "الإعلانات",
     "Personal": "الملف الشخصي",
     "Subscription": "الاشتراك",
+    "domainTransfer": "ربط الدومين",
     "Work Schedule": "جدول العمل",
     "Qualifications": "المؤهلات",
     "Worked At": "عمل في",
@@ -2462,7 +2521,7 @@
       "orders": "إدارة طلبات الطاولات ميزة Pro. قم بالترقية لاستقبال الطلبات ومتابعتها لحظياً.",
       "deliveryOrders": "طلبات الدلفري ستكون متاحة في Pro. قم بالترقية للوصول المبكر عند الإطلاق.",
       "staff": "إدارة الموظفين والنُدُل ميزة Pro. قم بالترقية لإضافة فريقك وتوجيه الطلبات.",
-      "advertisements": "إعلانات المنيو ميزة Pro. قم بالترقية لإنشاء وإدارة الإعلانات الترويجية."
+      "advertisements": "الخطة المجانية تشمل إعلاناً واحداً. قم بالترقية لإعلانات ترويجية غير محدودة على منيوك."
     },
     "upcomingFeatures": {
       "close": "حسناً",
@@ -3056,6 +3115,53 @@
     "plan": "الخطة",
     "endDate": "تاريخ الانتهاء",
     "demoDataBanner": "بيانات تجريبية للعرض — ستُستبدل تلقائياً عند ربط الـ Backend."
+  },
+  "adminBroadcast": {
+    "title": "رسائل العملاء",
+    "subtitle": "أرسل بريداً إلكترونياً لكل العملاء أو لمجموعة محددة أو لعملاء تختارهم يدوياً.",
+    "backToAdmin": "العودة للوحة الأدمن",
+    "refresh": "تحديث",
+    "audienceLabel": "المستلمون",
+    "audience": {
+      "all": "كل العملاء",
+      "selected": "عملاء محددون",
+      "pro": "المشتركون (مدفوع)",
+      "free": "الخطة المجانية",
+      "no-menu": "بدون منيو",
+      "with-menu": "لديهم منيو",
+      "products-no-image": "منتجات بدون صور"
+    },
+    "templates": {
+      "products-no-image": {
+        "subject": "أضف صوراً لمنتجاتك في ensmenu",
+        "message": "مرحباً،\n\nلاحظنا أن بعض المنتجات في منيو مطعمك لا تحتوي على صور.\n\nإضافة صور للمنتجات يجعل المنيو الخاص بك أكثر جاذبية ويساعد عملاءك على الاختيار بثقة.\n\nيمكنك إضافة الصور بسهولة من لوحة التحكم ← المنتجات.\n\nإذا احتجت مساعدة، فريق ensmenu جاهز لدعمك.\n\nمع تحياتنا،\nفريق ensmenu"
+      }
+    },
+    "searchUsers": "بحث عن عملاء",
+    "searchUsersPlaceholder": "ابحث بالاسم أو البريد…",
+    "searching": "جاري البحث…",
+    "subject": "عنوان الرسالة",
+    "subjectPlaceholder": "مثال: عرض خاص لمشتركي ensmenu",
+    "message": "نص الرسالة",
+    "messagePlaceholder": "اكتب رسالتك هنا… يمكنك استخدام فقرات متعددة.",
+    "emailLocale": "لغة قالب البريد",
+    "localeAr": "عربي",
+    "localeEn": "English",
+    "send": "إرسال الرسالة",
+    "previewTitle": "معاينة المستلمين",
+    "previewLoading": "جاري حساب المستلمين…",
+    "recipientsCount": "عميل سيستلم الرسالة",
+    "sampleRecipients": "عينة من المستلمين",
+    "noRecipients": "لا يوجد مستلمون لهذا الاختيار",
+    "cappedNotice": "الحد الأقصى {max} مستلم في كل عملية إرسال",
+    "hint": "يُستبعد الحسابات الموقوفة والمحذوفة. يُرسل البريد من عنوان ensmenu الرسمي.",
+    "confirmTitle": "تأكيد الإرسال",
+    "confirmMessage": "هل تريد إرسال هذه الرسالة إلى {count} عميل؟",
+    "confirmSend": "نعم، أرسل",
+    "sendSuccess": "تم الإرسال إلى {sent} من {total} عميل",
+    "sendPartial": "تم الإرسال إلى {sent} وفشل {failed} من {total}",
+    "sendError": "فشل إرسال الرسالة",
+    "previewError": "تعذّر معاينة المستلمين"
   },
   "adminUsers": {
     "title": "إدارة المستخدمين",
@@ -4774,6 +4880,162 @@
     "delivery": "توصيل",
     "table": "طاولة",
     "tableNo": "طاولة",
-    "viewAll": "عرض كل الطلبات"
+    "viewAll": "عرض كل الطلبات",
+    "tableOrders": "طلبات الطاولات",
+    "viewTableOrders": "عرض طلبات الطاولات",
+    "onlineOrders": "طلبات الأونلاين",
+    "viewOnlineOrders": "عرض طلبات الأونلاين",
+    "recentOrders": "أحدث الطلبات",
+    "setupSection": "إعداد القائمة",
+    "noCategories": "لا توجد تصنيفات بعد",
+    "noCategoriesAction": "أضف تصنيفاً الآن",
+    "noItems": "لا توجد منتجات بعد",
+    "noItemsAction": "أضف منتجاً الآن",
+    "noTables": "لا توجد طاولات بعد",
+    "noTablesAction": "أضف طاولة الآن",
+    "noStaff": "لا يوجد موظفون بعد",
+    "noStaffAction": "أضف موظفاً الآن",
+    "noLogo": "لم يتم تخصيص شعار القائمة",
+    "noLogoAction": "أضف شعار القائمة",
+    "planSection": "ميزاتك الحالية",
+    "allTasksDone": "كل شيء جاهز! قائمتك مكتملة.",
+    "upgradePlan": "ترقية الخطة",
+    "freePlanUpgradeHint": "قم بالترقية للحصول على الطاولات والطلبات والموظفين",
+    "aiImportHint": "أو استورد المنيو بالذكاء الاصطناعي من صورة",
+    "aiImportAction": "استيراد من صورة"
+  },
+  "domainTransfer": {
+    "title": "ربط الدومين",
+    "description": "اربط دومينك بمنيو ENS تلقائياً — النظام يحلل الدومين ويرشدك خطوة بخطوة حتى يكتمل الربط.",
+    "domainLabel": "رابط الدومين",
+    "domainPlaceholder": "example.com أو https://example.com",
+    "domainHint": "أدخل اسم الدومين الذي تريد ربطه بالمنيو الخاص بك.",
+    "submit": "بدء الربط التلقائي",
+    "submitting": "جاري التجهيز...",
+    "submitSuccess": "تم استلام طلبك — النظام يبدأ المعالجة الآن",
+    "submitError": "فشل إرسال الطلب",
+    "automatedProcess": "معالجة تلقائية",
+    "statusLabel": "حالة الربط",
+    "submittedAt": "{date}",
+    "confirmPrompt": "بعد ضبط إعدادات DNS في لوحة الدومين، اضغط الزر أدناه ليتابع النظام التحقق.",
+    "confirmDone": "تم ضبط الإعدادات — متابعة التحقق",
+    "confirming": "جاري التحقق...",
+    "confirmSuccess": "تم استلام تأكيدك — النظام يتحقق من الإعدادات",
+    "confirmError": "فشل التحقق",
+    "cancelRequest": "إلغاء الطلب",
+    "cancelConfirm": "هل أنت متأكد من إلغاء طلب ربط الدومين؟",
+    "confirmCancel": "نعم، إلغاء الطلب",
+    "cancelDismiss": "تراجع",
+    "cancelling": "جاري الإلغاء...",
+    "cancelSuccess": "تم إلغاء الطلب",
+    "cancelError": "فشل إلغاء الطلب",
+    "completedMessage": "تم ربط {domain} بمنيو ENS بنجاح!",
+    "systemUpdate": "تحديث تلقائي",
+    "dnsConfigTitle": "إعدادات DNS المطلوبة",
+    "dnsNote": "قد يستغرق انتشار إعدادات DNS من 5 دقائق إلى 48 ساعة حسب المزود.",
+    "waitingForDns": "جاري تجهيز إعدادات DNS لدومينك...",
+    "steps": {
+      "received": {
+        "title": "استلام الطلب",
+        "description": "تم تسجيل دومينك في النظام."
+      },
+      "analyzing": {
+        "title": "تحليل الدومين",
+        "description": "تم تحليل الدومين بنجاح.",
+        "active": "جاري تحليل الدومين وتحديد إعدادات الربط..."
+      },
+      "dns": {
+        "title": "ضبط DNS",
+        "description": "نفّذ إعدادات DNS الموضحة أدناه.",
+        "pending": "في انتظار تحليل الدومين...",
+        "waiting": "جاري تجهيز إعدادات DNS..."
+      },
+      "verify": {
+        "title": "التحقق من الربط",
+        "description": "سيتم التحقق تلقائياً بعد ضبط الإعدادات.",
+        "active": "جاري التحقق من إعدادات DNS وربط الدومين..."
+      },
+      "complete": {
+        "title": "اكتمال الربط",
+        "description": "سيُفعَّل الدومين على منيوك تلقائياً.",
+        "active": "تم ربط الدومين بنجاح!"
+      }
+    },
+    "systemMessages": {
+      "verificationStarted": "بدأ النظام التحقق من إعدادات DNS.",
+      "transferComplete": "اكتمل ربط {domain} بنجاح."
+    },
+    "status": {
+      "pending": "جاري التحضير",
+      "awaiting_user": "بانتظار ضبط DNS",
+      "user_confirmed": "جاري التحقق",
+      "completed": "مكتمل",
+      "cancelled": "ملغي"
+    },
+    "history": {
+      "title": "سجل الطلبات السابقة",
+      "empty": "لم تقدّم أي طلبات ربط دومين من قبل.",
+      "submitted": "تاريخ الطلب: {date}",
+      "resolved": "تاريخ الإغلاق: {date}",
+      "outcome": {
+        "accepted": "تم القبول",
+        "cancelledByUser": "ألغيت الطلب",
+        "cancelledByAdmin": "لم يُقبل"
+      }
+    }
+  },
+  "adminDomainTransfers": {
+    "title": "طلبات نقل الدومين",
+    "description": "إدارة طلبات العملاء لنقل وربط الدومينات.",
+    "refresh": "تحديث",
+    "colUser": "العميل",
+    "colDomain": "الدومين",
+    "colStatus": "الحالة",
+    "colDate": "التاريخ",
+    "colActions": "إجراءات",
+    "view": "عرض",
+    "detailTitle": "تفاصيل الطلب",
+    "email": "البريد",
+    "phone": "الهاتف",
+    "userConfirmedAlert": "العميل أكد تنفيذ الخطوات — يمكنك إرسال تعليمات إضافية أو تأكيد اكتمال النقل.",
+    "messagesHistory": "سجل الرسائل",
+    "admin": "الإدارة",
+    "system": "النظام",
+    "customer": "العميل",
+    "userConfirmedSteps": "أكد العميل تنفيذ الخطوات المطلوبة",
+    "pendingDnsAlert": "الطلب جديد — اكتب إعدادات DNS وأرسلها للعميل ليبدأ الربط.",
+    "dnsConfigLabel": "إعدادات DNS",
+    "dnsConfigPlaceholder": "مثال:\nالنوع: CNAME\nالاسم: @\nالقيمة: connect.ensmenu.com\n\nأو أي تعليمات أخرى للعميل...",
+    "dnsConfigHint": "سيظهر هذا النص للعميل كإعدادات DNS المطلوبة.",
+    "sendDnsConfig": "إرسال إعدادات DNS",
+    "replyLabel": "رسالة إضافية للعميل",
+    "replyPlaceholder": "اكتب الخطوات التي يجب على العميل تنفيذها...",
+    "sendMessage": "إرسال الرسالة",
+    "sending": "جاري الإرسال...",
+    "messageSent": "تم إرسال الرسالة",
+    "messageError": "فشل إرسال الرسالة",
+    "markComplete": "تأكيد اكتمال النقل",
+    "completing": "جاري التأكيد...",
+    "completeSuccess": "تم تأكيد اكتمال نقل الدومين",
+    "completeError": "فشل تأكيد الاكتمال",
+    "cancelRequest": "إلغاء الطلب",
+    "cancelConfirm": "هل أنت متأكد من إلغاء هذا الطلب؟",
+    "confirmCancel": "نعم، إلغاء",
+    "cancelDismiss": "تراجع",
+    "cancelling": "جاري الإلغاء...",
+    "cancelSuccess": "تم إلغاء الطلب",
+    "cancelError": "فشل إلغاء الطلب",
+    "cancelledInfo": "تم الإلغاء بواسطة {by} — {date}",
+    "cancelledByUser": "العميل",
+    "cancelledByAdmin": "الإدارة",
+    "completedBy": "تم التأكيد بواسطة {name} — {date}",
+    "loadDetailError": "فشل تحميل تفاصيل الطلب",
+    "status": {
+      "pending": "جديد",
+      "awaiting_user": "بانتظار العميل",
+      "user_confirmed": "أكد العميل",
+      "completed": "مكتمل",
+      "cancelled": "ملغي"
+    }
   }
 }

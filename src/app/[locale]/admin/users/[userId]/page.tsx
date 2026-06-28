@@ -3,12 +3,13 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { IoArrowBack } from "react-icons/io5";
-import { FaTimesCircle, FaTimes } from "react-icons/fa";
+import { FaCheckCircle, FaTimesCircle, FaTimes } from "react-icons/fa";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import ConfirmationModal from "@/components/Custom/ConfirmationModal";
 import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
+import { safeAdminUsersListReturnPath } from "@/lib/adminUsersListUrl";
 import { toast } from "react-toastify";
 import UserFollowUpTimeline from "@/components/Admin/UserFollowUpTimeline";
 import CustomerOrdersSection from "@/components/Admin/CustomerOrdersSection";
@@ -49,6 +50,8 @@ interface User {
   blockedReason?: string | null;
   deletedAt?: string | null;
   updatedAt?: string | null;
+  isEmailVerified?: boolean;
+  emailVerifiedAt?: string | null;
   accountStatus?: AccountStatus;
   planName: string;
   subscriptionStatus: string;
@@ -97,6 +100,8 @@ export default function UserDetailsPage() {
   const tCustomer = useTranslations("adminUsers.userDetails.customerSections");
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
+  const listReturnPath = safeAdminUsersListReturnPath(searchParams.get("list"));
   const userId =
     typeof params.userId === "string"
       ? params.userId
@@ -152,7 +157,13 @@ export default function UserDetailsPage() {
       );
 
       if (result.status && result.data) {
-        setUserData(result.data);
+        setUserData({
+          ...result.data,
+          user: {
+            ...result.data.user,
+            isEmailVerified: Boolean(result.data.user.isEmailVerified),
+          },
+        });
       } else {
         toast.error(t("error"));
       }
@@ -592,7 +603,8 @@ export default function UserDetailsPage() {
             className={`flex items-center gap-4 mb-4 ${isRTL ? "flex-row-reverse" : ""}`}
           >
             <button
-              onClick={() => router.back()}
+              type="button"
+              onClick={() => router.push(listReturnPath)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${isRTL ? "flex-row-reverse" : ""}`}
             >
               <IoArrowBack className="text-lg" />
@@ -1301,7 +1313,14 @@ export default function UserDetailsPage() {
           </CardDashBoard>
           <CardDashBoard borderColor="border-green-200 dark:border-green-500/20">
             <div className="text-center">
-              <FaTimesCircle className="text-3xl text-red-600 dark:text-red-400 mx-auto mb-2" />
+              {user.isEmailVerified ? (
+                <FaCheckCircle className="text-3xl text-emerald-600 dark:text-emerald-400 mx-auto mb-2" />
+              ) : (
+                <FaTimesCircle className="text-3xl text-red-600 dark:text-red-400 mx-auto mb-2" />
+              )}
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                {user.isEmailVerified ? t("verified") : t("unverified")}
+              </p>
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 {t("statistics.emailVerification")}
               </p>
