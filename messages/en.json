@@ -1985,6 +1985,8 @@
     "rowMenus": "Active menus",
     "rowProducts": "Products per menu",
     "rowAds": "Ads controls",
+    "adsFreeOne": "1 ad",
+    "adsUnlimited": "Unlimited",
     "rowStaffTables": "Staff & table QR ordering",
     "rowStaffMobileApp": "Dedicated staff mobile app",
     "proStaffMobileAppBullet": "Dedicated staff mobile app for orders & tables",
