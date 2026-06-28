@@ -2323,6 +2323,8 @@
       "originalPrice": "السعر الأصلي",
       "originalPriceRequired": "السعر الأصلي مطلوب",
       "discountPercent": "نسبة الخصم %",
+      "discountMinError": "نسبة الخصم لا يمكن أن تكون أقل من 0",
+      "discountMaxError": "نسبة الخصم لا يمكن أن تتجاوز 100%",
       "oneSize": "حجم واحد",
       "multipleSizes": "عدد أحجام",
       "addSize": "إضافة حجم",

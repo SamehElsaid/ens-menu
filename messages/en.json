@@ -2415,6 +2415,8 @@
       "originalPrice": "Original Price",
       "originalPriceRequired": "Original price is required",
       "discountPercent": "Discount %",
+      "discountMinError": "Discount cannot be less than 0",
+      "discountMaxError": "Discount cannot exceed 100%",
       "oneSize": "One size",
       "multipleSizes": "Multiple sizes",
       "addSize": "Add size",
