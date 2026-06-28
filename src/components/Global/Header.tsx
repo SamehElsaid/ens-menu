@@ -11,6 +11,7 @@ import { homeLinks } from "@/modules/Header";
 import LanguageToggle from "./LanguageTogle";
 import DarkModeToggle from "./DarkModeToggle";
 import { MarketingButtonLink } from "@/components/marketing";
+import HeaderSearch from "./HeaderSearch";
 
 const SCROLL_THRESHOLD = 16;
 const NAVBAR_SCROLL_OFFSET = 72;
@@ -112,6 +113,7 @@ function HeaderActions({
   if (isLoggedIn) {
     return (
       <div className="flex items-center gap-1">
+        <HeaderSearch />
         <DarkModeToggle />
         <LanguageToggle locale={locale} pathname={pathname} />
         <UserDropDown />
@@ -131,6 +133,7 @@ function HeaderActions({
       <MarketingButtonLink href="/auth/login" variant="ghost" prefetch={false}>
         {tHeader("signIn")}
       </MarketingButtonLink>
+      <HeaderSearch />
       <DarkModeToggle />
       <LanguageToggle locale={locale} pathname={pathname} />
     </div>
@@ -295,6 +298,7 @@ function Header() {
           )}
 
           <div className="mt-4 flex items-center justify-center gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
+            <HeaderSearch />
             <DarkModeToggle />
             <LanguageToggle locale={locale} pathname={pathname} />
           </div>
