@@ -7,7 +7,6 @@ import { adRowMetrics } from "@/lib/adMetrics";
 import { normalizeExternalUrl } from "@/lib/normalizeExternalUrl";
 import {
   IoCreateOutline,
-  IoEllipseSharp,
   IoImageOutline,
   IoLinkOutline,
   IoTrashOutline,
@@ -34,20 +33,12 @@ export default function AdCard({
   const isRTL = locale === "ar";
   const metrics = adRowMetrics(ad);
   const imageSrc = ad.imageUrl ?? (ad as { image?: string }).image ?? "";
-  const showStatus = ad.isActive !== undefined;
-  const active = ad.isActive !== false;
   const link = ad.linkUrl?.trim()
     ? normalizeExternalUrl(ad.linkUrl.trim())
     : undefined;
 
   return (
-    <article
-      className={`group flex h-full flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-xl dark:bg-slate-800/95 dark:shadow-slate-950/20 dark:hover:shadow-slate-950/40 ${
-        !showStatus || active
-          ? "border-slate-200/90 hover:border-primary/25 dark:border-slate-700/80 dark:hover:border-primary/40"
-          : "border-amber-200/80 bg-slate-50/40 hover:border-amber-300/60 dark:border-amber-900/40 dark:bg-amber-950/10 dark:hover:border-amber-800/50"
-      }`}
-    >
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm transition-all duration-300 hover:border-primary/25 hover:shadow-xl dark:border-slate-700/80 dark:bg-slate-800/95 dark:shadow-slate-950/20 dark:hover:border-primary/40 dark:hover:shadow-slate-950/40">
       <div className="dashboard-card-media relative aspect-video overflow-hidden bg-linear-to-br from-slate-100 via-slate-50 to-primary/5 dark:from-slate-800 dark:via-slate-900 dark:to-primary/10">
         {imageSrc ? (
           <div className="absolute inset-0">
@@ -65,21 +56,6 @@ export default function AdCard({
           <div className="flex h-full flex-col items-center justify-center gap-2 text-slate-400 dark:text-slate-500">
             <IoImageOutline className="text-4xl opacity-60" aria-hidden />
             <span className="text-xs font-medium">{t("columns.image")}</span>
-          </div>
-        )}
-
-        {showStatus && (
-          <div className={`absolute top-3 z-10 ${isRTL ? "left-3" : "right-3"}`}>
-            <span
-              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold shadow-sm backdrop-blur-sm ${
-                active
-                  ? "bg-emerald-500/90 text-white"
-                  : "bg-amber-500/90 text-white"
-              }`}
-            >
-              <IoEllipseSharp className="text-[7px]" aria-hidden />
-              {active ? t("active") : t("inactive")}
-            </span>
           </div>
         )}
       </div>

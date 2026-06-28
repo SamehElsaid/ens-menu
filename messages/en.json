@@ -1985,6 +1985,8 @@
     "rowMenus": "Active menus",
     "rowProducts": "Products per menu",
     "rowAds": "Ads controls",
+    "adsFreeOne": "1 ad",
+    "adsUnlimited": "Unlimited",
     "rowStaffTables": "Staff & table QR ordering",
     "rowStaffMobileApp": "Dedicated staff mobile app",
     "proStaffMobileAppBullet": "Dedicated staff mobile app for orders & tables",
@@ -3218,7 +3220,14 @@
       "pro": "Paid subscribers",
       "free": "Free plan",
       "no-menu": "No menu yet",
-      "with-menu": "Has menu"
+      "with-menu": "Has menu",
+      "products-no-image": "Products without images"
+    },
+    "templates": {
+      "products-no-image": {
+        "subject": "Add images to your menu items on ensmenu",
+        "message": "Hello,\n\nWe noticed that some items in your menu don't have photos yet.\n\nAdding images makes your menu more appealing and helps customers choose with confidence.\n\nYou can add photos easily from your dashboard → Products.\n\nIf you need help, the ensmenu team is here for you.\n\nBest regards,\nThe ensmenu team"
+      }
     },
     "searchUsers": "Search customers",
     "searchUsersPlaceholder": "Search by name or email…",
