@@ -635,6 +635,9 @@ export default function UsersPage() {
       loadingUserId,
       handleAddToHomepage,
       handleRemoveFromHomepage,
+      planFilter,
+      page,
+      searchQuery,
     ],
   );
 
@@ -830,9 +833,7 @@ export default function UsersPage() {
               className="group text-start w-full"
             >
               <CardDashBoard
-                borderColor={
-                  isSelected ? "border-primary" : card.borderColor
-                }
+                borderColor={isSelected ? "border-primary" : card.borderColor}
                 hover={!isSelected}
                 className={`p-4 h-full transition-all duration-200 ${
                   isSelected
