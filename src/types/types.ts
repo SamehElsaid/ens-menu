@@ -2,8 +2,9 @@ import { IconType } from "react-icons";
 
 export interface LinkProps {
   title: string;
-  href: string;
+  href?: string;
   icon: IconType;
+  children?: { title: string; href: string; icon: IconType }[];
 }
 
 export interface Template {

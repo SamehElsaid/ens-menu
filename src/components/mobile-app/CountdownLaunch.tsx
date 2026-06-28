@@ -5,7 +5,7 @@ import { useLocale } from "next-intl";
 import { FiSend, FiZap } from "react-icons/fi";
 
 // Target: one week from June 28 2026
-const LAUNCH_TARGET = new Date("2026-07-05T00:00:00");
+const LAUNCH_TARGET = new Date("2026-07-14T00:00:00");
 
 interface TimeLeft {
   days: number;

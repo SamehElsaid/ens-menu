@@ -1,11 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useAppSelector } from "@/store/hooks";
 import UserDropDown from "../UserDropDown";
-import { FiMenu, FiX } from "react-icons/fi";
+import { FiChevronDown, FiMenu, FiX } from "react-icons/fi";
 import Logo from "../Global/Logo";
 import { homeLinks } from "@/modules/Header";
 import LanguageToggle from "./LanguageTogle";
@@ -64,6 +64,63 @@ function NavLink({
     <Link href={href} prefetch={false} onClick={onClick} className={className}>
       {children}
     </Link>
+  );
+}
+
+function NavDropdown({
+  label,
+  items,
+}: {
+  label: string;
+  items: { name: string; href: string }[];
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleMouseEnter = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    closeTimer.current = setTimeout(() => setOpen(false), 120);
+  };
+
+  useEffect(() => () => { if (closeTimer.current) clearTimeout(closeTimer.current); }, []);
+
+  return (
+    <div
+      ref={ref}
+      className="relative"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <button
+        type="button"
+        className={`${navLinkClass} flex items-center gap-1`}
+      >
+        {label}
+        <FiChevronDown
+          size={13}
+          className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      {open && (
+        <div className="absolute top-[calc(100%+6px)] z-20 min-w-[170px] overflow-hidden rounded-xl border border-slate-100/80 bg-white py-1 shadow-lg ring-1 ring-slate-900/5 dark:border-slate-800 dark:bg-[#0d1117] ltr:left-0 rtl:right-0">
+          {items.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              prefetch={false}
+              className="block px-4 py-2.5 text-[13px] font-medium text-slate-600 transition-colors hover:bg-purple-50 hover:text-purple-600 dark:text-slate-400 dark:hover:bg-purple-500/10 dark:hover:text-purple-300"
+            >
+              {item.name}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -176,9 +233,13 @@ function Header() {
     scrollToHash(href.slice(1));
   };
 
-  const navLinks = homeLinks.map((link) => ({
+  const navItems = homeLinks.map((link) => ({
     name: t(link.title),
     href: link.href,
+    children: link.children?.map((child) => ({
+      name: t(child.title),
+      href: child.href,
+    })),
   }));
 
   const isAuthRoute = isAuthPathname(pathname);
@@ -239,15 +300,23 @@ function Header() {
             aria-label="Main"
             className="col-start-2 flex items-center justify-center gap-6 xl:gap-8"
           >
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.name}
-                href={link.href}
-                onClick={(e) => handleInPageNav(e, link.href)}
-              >
-                {link.name}
-              </NavLink>
-            ))}
+            {navItems.map((item) =>
+              item.children ? (
+                <NavDropdown
+                  key={item.name}
+                  label={item.name}
+                  items={item.children}
+                />
+              ) : (
+                <NavLink
+                  key={item.name}
+                  href={item.href!}
+                  onClick={(e) => handleInPageNav(e, item.href!)}
+                >
+                  {item.name}
+                </NavLink>
+              ),
+            )}
           </nav>
 
           <div className="col-start-3 flex items-center justify-self-end text-end">
@@ -264,16 +333,29 @@ function Header() {
       {isOpen && (
         <div className="border-t border-slate-100 bg-white px-5 py-5 dark:border-slate-800 dark:bg-[#0d1117] lg:hidden">
           <nav className="flex flex-col gap-0.5">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.name}
-                href={link.href}
-                onClick={(e) => handleInPageNav(e, link.href)}
-                className={mobileNavLinkClass}
-              >
-                {link.name}
-              </NavLink>
-            ))}
+            {navItems.map((item) =>
+              item.children ? (
+                item.children.map((child) => (
+                  <NavLink
+                    key={child.href}
+                    href={child.href}
+                    onClick={(e) => handleInPageNav(e, child.href)}
+                    className={mobileNavLinkClass}
+                  >
+                    {child.name}
+                  </NavLink>
+                ))
+              ) : (
+                <NavLink
+                  key={item.name}
+                  href={item.href!}
+                  onClick={(e) => handleInPageNav(e, item.href!)}
+                  className={mobileNavLinkClass}
+                >
+                  {item.name}
+                </NavLink>
+              ),
+            )}
           </nav>
 
           {!isLoggedIn && (
