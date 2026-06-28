@@ -1,4 +1,3 @@
-import ChatWidget from "@/components/ChatWidget";
 import Header from "@/components/Global/Header";
 import SiteFooter from "@/components/Global/SiteFooter";
 
@@ -16,7 +15,6 @@ export default async function MainLayout({
         </main>
         <SiteFooter />
       </div>
-      <ChatWidget />
     </>
   );
 }

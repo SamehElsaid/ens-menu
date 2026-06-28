@@ -1043,18 +1043,39 @@ export default function AddItemModal({
                 <Controller
                   name="discountPercent"
                   control={control}
+                  rules={{
+                    min: { value: 0, message: t("discountMinError") },
+                    max: { value: 100, message: t("discountMaxError") },
+                  }}
                   render={({ field }) => (
-                    <CustomInput
-                      type="number"
-                      min={0}
-                      max={100}
-                      step="1"
-                      value={field.value}
-                      onChange={(e) => field.onChange(e.target.value)}
-                      onBlur={field.onBlur}
-                      className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                      placeholder="0"
-                    />
+                    <>
+                      <CustomInput
+                        type="number"
+                        min={0}
+                        max={100}
+                        step="1"
+                        value={field.value}
+                        onChange={(e) => {
+                          const raw = e.target.value;
+                          if (raw === "" || raw === "-") {
+                            field.onChange(raw);
+                            return;
+                          }
+                          const num = Number(raw);
+                          field.onChange(
+                            Math.min(100, Math.max(0, num)).toString()
+                          );
+                        }}
+                        onBlur={field.onBlur}
+                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
+                        placeholder="0"
+                      />
+                      {errors.discountPercent && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {errors.discountPercent.message}
+                        </p>
+                      )}
+                    </>
                   )}
                 />
               </div>

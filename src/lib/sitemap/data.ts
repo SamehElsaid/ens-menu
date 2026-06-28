@@ -164,3 +164,78 @@ export function buildAllEntries(
     ...buildMenuEntriesForSlugs(slugs, lastmod),
   ].slice(0, URLS_PER_SITEMAP);
 }
+
+/* ─────────────── Knowledge-base helpers ─────────────── */
+
+interface KbArticle {
+  id: number;
+  titleEn: string;
+}
+
+interface KbListResponse {
+  success: boolean;
+  data: KbArticle[];
+  pagination: { total: number; page: number; limit: number; totalPages: number };
+}
+
+const KB_FETCH_LIMIT = 100;
+
+/** Converts an article title + id into a URL slug, e.g. "Default Template" + 68 → "default-template-68" */
+export function kbSlug(titleEn: string, id: number): string {
+  const base = (titleEn ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+  return base ? `${base}-${id}` : String(id);
+}
+
+/** Fetches every knowledge-base article (all pages) from the API. */
+export async function fetchAllKbArticles(): Promise<KbArticle[]> {
+  const apiBase = process.env.NEXT_PUBLIC_BASE_URL?.trim();
+  if (!apiBase) return [];
+
+  const all: KbArticle[] = [];
+  let page = 1;
+
+  while (true) {
+    try {
+      const res = await fetch(
+        `${apiBase}/searchInformation?page=${page}&limit=${KB_FETCH_LIMIT}`,
+        { cache: "no-store", headers: { Accept: "application/json" } },
+      );
+      if (!res.ok) break;
+
+      const json = (await res.json()) as KbListResponse;
+      const items = json?.data ?? [];
+      if (!Array.isArray(items) || items.length === 0) break;
+
+      all.push(...items);
+
+      if (page >= (json?.pagination?.totalPages ?? 1)) break;
+      page++;
+    } catch {
+      break;
+    }
+  }
+
+  return all;
+}
+
+/** Builds sitemap entries for every knowledge-base article (ar + en). */
+export function buildKbEntries(
+  articles: KbArticle[],
+  siteOrigin: string,
+  lastmod: string,
+): SitemapEntry[] {
+  return articles.flatMap((article) => {
+    const slug = kbSlug(article.titleEn, article.id);
+    const arHref = `${siteOrigin}/knowledge-base/${slug}`;
+    const enHref = `${siteOrigin}/en/knowledge-base/${slug}`;
+    const shared = { lastmod, changefreq: "weekly" as const, priority: 0.6 };
+    return [
+      sitemapEntry(arHref, arHref, enHref, lastmod, shared),
+      sitemapEntry(enHref, arHref, enHref, lastmod, shared),
+    ];
+  });
+}

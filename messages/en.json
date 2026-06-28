@@ -12,6 +12,11 @@
       "description": "Download the ENSmenu app to run your free electronic menu, QR code orders, and staff workflow.",
       "keywords": "restaurant app, menu app, order management, cashier, ENSmenu"
     },
+    "ownerAppPage": {
+      "title": "ENSMenu Owner App | Manage Your Restaurant From Your Phone",
+      "description": "Download the ENSMenu Owner app and manage your restaurant, menu, orders, and staff from anywhere. Available on Google Play.",
+      "keywords": "restaurant owner app, menu management app, ENSmenu owner, restaurant management, QR menu app"
+    },
     "auth": {
       "loginTitle": "Login | ENSMENU",
       "loginDescription": "Sign in to manage your free electronic menu and QR code on ENSmenu.",
@@ -201,6 +206,7 @@
     "knowledgeBase": "Knowledge Base",
     "contact": "Contact",
     "androidApp": "Android App",
+    "ownerApp": "Owner App",
     "pricingPage": "Pricing"
   },
   "home": {
@@ -1928,6 +1934,36 @@
     "mobileApp": {
       "whyOurApp": "Why our app?",
       "livePreview": "Live Preview"
+    },
+    "OwnerApp": {
+      "badge": "ENSMenu Owner — Now on Google Play",
+      "titleStart": "Run your restaurant",
+      "titleHighlight": "from your phone",
+      "description": "The ENSMenu Owner app gives you full control — manage your menu, upload photos, track updates, and run your food business from anywhere.",
+      "googlePlay": "Get it on Google Play",
+      "appleStore": "App Store — Coming Soon",
+      "appleComingSoon": "Coming soon on iOS",
+      "features": {
+        "qrMenu": "Smart QR Menu",
+        "aiAssistant": "AI Menu Assistant",
+        "menuManagement": "Easy Menu Management",
+        "uploadPhotos": "Upload Menu Photos",
+        "uploadLogo": "Upload Restaurant Logo",
+        "multiLanguage": "Multi-language Support",
+        "realtimeUpdates": "Real-time Updates",
+        "securePlatform": "Secure Cloud Platform"
+      },
+      "floatingCards": {
+        "liveLabel": "Live on Google Play",
+        "liveText": "Download now",
+        "syncLabel": "Real-time sync",
+        "syncText": "Menu updates instantly"
+      },
+      "featuresSectionTitle": "Everything you need to run your restaurant",
+      "featuresSectionSubtitle": "Built for restaurant owners who want full control from the palm of their hand.",
+      "ctaTitle": "Start managing your restaurant smarter",
+      "ctaSubtitle": "Available on Android now. iOS coming soon.",
+      "ctaButton": "Download on Google Play"
     }
   },
   "PricingPage": {
@@ -2379,6 +2415,8 @@
       "originalPrice": "Original Price",
       "originalPriceRequired": "Original price is required",
       "discountPercent": "Discount %",
+      "discountMinError": "Discount cannot be less than 0",
+      "discountMaxError": "Discount cannot exceed 100%",
       "oneSize": "One size",
       "multipleSizes": "Multiple sizes",
       "addSize": "Add size",
@@ -4833,7 +4871,29 @@
     "delivery": "Delivery",
     "table": "Table",
     "tableNo": "Table",
-    "viewAll": "View all orders"
+    "viewAll": "View all orders",
+    "tableOrders": "Table Orders",
+    "viewTableOrders": "View Table Orders",
+    "onlineOrders": "Online Orders",
+    "viewOnlineOrders": "View Online Orders",
+    "recentOrders": "Recent Orders",
+    "setupSection": "Menu Setup",
+    "noCategories": "No categories yet",
+    "noCategoriesAction": "Add a category now",
+    "noItems": "No products yet",
+    "noItemsAction": "Add a product now",
+    "noTables": "No tables yet",
+    "noTablesAction": "Add a table now",
+    "noStaff": "No staff members yet",
+    "noStaffAction": "Add a staff member now",
+    "noLogo": "Menu logo not set",
+    "noLogoAction": "Add your menu logo",
+    "planSection": "Your Current Features",
+    "allTasksDone": "All set! Your menu is complete.",
+    "upgradePlan": "Upgrade Plan",
+    "freePlanUpgradeHint": "Upgrade to get tables, orders & staff management",
+    "aiImportHint": "Or import your menu from a photo using AI",
+    "aiImportAction": "Import from photo"
   },
   "domainTransfer": {
     "title": "Connect your domain",

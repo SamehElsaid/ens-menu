@@ -48,21 +48,25 @@ const AppLandingHero = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-5 justify-center lg:justify-start mb-12">
-              <a
-                href="https://expo.dev/artifacts/eas/iXgE6EHRgCGLqf8HwRek6R.apk"
-                download
-                className="group relative flex items-center gap-4 px-10 py-5 bg-slate-900 dark:bg-violet-600 text-white rounded-2xl font-bold text-lg hover:scale-[1.03] transition-all shadow-xl shadow-violet-500/25 active:scale-95"
-              >
-                <Download size={24} className="group-hover:animate-bounce" />
-                <div className="text-start border-s border-white/20 ps-4">
-                  <span className="block text-[10px] opacity-70 font-bold uppercase tracking-[0.2em] leading-none mb-1">
-                    {t("downloadKicker")}
-                  </span>
-                  <span className="block text-lg tracking-tight">
-                    {t("downloadCta")}
-                  </span>
-                </div>
-              </a>
+              <div className="relative">
+                <button
+                  disabled
+                  className="relative flex items-center gap-4 px-10 py-5 bg-slate-400 dark:bg-slate-700 text-white/60 rounded-2xl font-bold text-lg cursor-not-allowed shadow-xl"
+                >
+                  <Download size={24} />
+                  <div className="text-start border-s border-white/20 ps-4">
+                    <span className="block text-[10px] opacity-70 font-bold uppercase tracking-[0.2em] leading-none mb-1">
+                      {t("downloadKicker")}
+                    </span>
+                    <span className="block text-lg tracking-tight">
+                      {t("downloadCta")}
+                    </span>
+                  </div>
+                </button>
+                <span className="absolute -top-3 -end-3 px-3 py-1 bg-violet-600 text-white text-xs font-black rounded-full shadow-lg shadow-violet-500/40 animate-pulse">
+                  قريباً
+                </span>
+              </div>
 
               <div className="flex flex-col items-center sm:items-start gap-1 px-2 border-s-2 border-slate-100 dark:border-slate-800 ms-2">
                 <span className="text-sm font-black text-slate-400 uppercase tracking-tighter italic">

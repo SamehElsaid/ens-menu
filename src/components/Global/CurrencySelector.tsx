@@ -26,6 +26,7 @@ const currencies: Currency[] = [
   { code: "LBP", name: "Lebanese Pound", nameAr: "ليرة لبنانية", symbol: "ل.ل" },
   { code: "MAD", name: "Moroccan Dirham", nameAr: "درهم مغربي", symbol: "د.م" },
   { code: "TND", name: "Tunisian Dinar", nameAr: "دينار تونسي", symbol: "د.ت" },
+  { code: "LYD", name: "Libyan Dinar", nameAr: "دينار ليبي", symbol: "د.ل" },
   { code: "IQD", name: "Iraqi Dinar", nameAr: "دينار عراقي", symbol: "ع.د" },
   { code: "TRY", name: "Turkish Lira", nameAr: "ليرة تركية", symbol: "₺" },
   { code: "INR", name: "Indian Rupee", nameAr: "روبية هندية", symbol: "₹" },

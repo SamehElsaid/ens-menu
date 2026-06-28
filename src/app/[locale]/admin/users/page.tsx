@@ -546,10 +546,7 @@ export default function UsersPage() {
           return (
             <div className={`flex items-center gap-1 `}>
               <LinkTo
-                href={buildAdminUserDetailPath(
-                  user.id,
-                  buildAdminUsersListPath(planFilter, page, searchQuery),
-                )}
+                href={`/admin/users/${user.id}`}
                 title={t("actions.view")}
                 aria-label={t("actions.view")}
                 className={`${iconBtn} bg-blue-600 hover:bg-blue-700 text-white`}
