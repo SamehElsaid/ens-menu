@@ -48,44 +48,38 @@ const HeroOwnerApp = () => {
             </p>
 
             {/* Download Buttons */}
-            <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start mb-12">
-              {/* Google Play — real link */}
+            <div className="flex flex-col sm:flex-row items-center gap-3 justify-center lg:justify-start mb-12">
+              {/* Google Play — standard badge */}
               <a
                 href={GOOGLE_PLAY_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center gap-4 px-8 py-4 bg-slate-900 dark:bg-slate-800 text-white rounded-2xl font-bold hover:scale-[1.03] transition-all shadow-xl shadow-slate-900/25 dark:shadow-black/40 active:scale-95 border border-slate-700/50 min-w-[200px]"
+                className="group inline-flex items-center gap-3 px-5 py-3 bg-black text-white rounded-xl hover:scale-[1.03] hover:brightness-110 transition-all shadow-lg active:scale-95 border border-white/10 min-w-[180px]"
               >
-                <FaGooglePlay
-                  size={28}
-                  className="text-green-400 shrink-0 group-hover:scale-110 transition-transform"
-                />
-                <div className={`border-s border-white/20 ps-4 text-start`}>
-                  <span className="block text-[10px] opacity-60 font-semibold uppercase tracking-[0.2em] leading-none mb-1">
+                <FaGooglePlay size={26} className="shrink-0 text-white" />
+                <div className="text-start leading-tight">
+                  <span className="block text-[10px] font-medium tracking-wide opacity-75">
                     GET IT ON
                   </span>
-                  <span className="block text-base font-black tracking-tight">
-                    {t("googlePlay")}
+                  <span className="block text-[17px] font-bold tracking-tight">
+                    Google Play
                   </span>
                 </div>
               </a>
 
-              {/* Apple Store — coming soon */}
-              <div className="relative group flex items-center gap-4 px-8 py-4 bg-slate-100 dark:bg-slate-800/40 text-slate-400 dark:text-slate-500 rounded-2xl font-bold cursor-not-allowed border border-slate-200 dark:border-slate-700/50 min-w-[200px] select-none">
-                <FaApple
-                  size={30}
-                  className="shrink-0 opacity-50"
-                />
-                <div className={`border-s border-slate-300 dark:border-slate-700 ps-4 text-start`}>
-                  <span className="block text-[10px] font-semibold uppercase tracking-[0.2em] leading-none mb-1 opacity-60">
-                    DOWNLOAD ON THE
+              {/* Apple Store — coming soon, standard badge style */}
+              <div className="relative inline-flex items-center gap-3 px-5 py-3 bg-black/40 text-white/40 rounded-xl cursor-not-allowed border border-white/10 min-w-[180px] select-none">
+                <FaApple size={28} className="shrink-0" />
+                <div className="text-start leading-tight">
+                  <span className="block text-[10px] font-medium tracking-wide opacity-75">
+                    Download on the
                   </span>
-                  <span className="block text-base font-black tracking-tight">
+                  <span className="block text-[17px] font-bold tracking-tight">
                     App Store
                   </span>
                 </div>
                 {/* Coming soon pill */}
-                <span className="absolute -top-2.5 -end-2 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-amber-400 text-amber-900 rounded-full shadow-md">
+                <span className="absolute -top-2.5 -end-2 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-amber-400 text-amber-900 rounded-full shadow">
                   {t("appleComingSoon")}
                 </span>
               </div>

@@ -2,7 +2,6 @@
 
 import { useTranslations, useLocale } from "next-intl";
 import {
-  FiDownload as Download,
   FiShield as Shield,
   FiZap as Zap,
   FiMonitor as Monitor,
@@ -46,40 +45,6 @@ const AppLandingHero = () => {
             <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
               {t("description")}
             </p>
-
-            <div className="flex flex-col sm:flex-row items-center gap-5 justify-center lg:justify-start mb-12">
-              <div className="relative">
-                <button
-                  disabled
-                  className="relative flex items-center gap-4 px-10 py-5 bg-slate-400 dark:bg-slate-700 text-white/60 rounded-2xl font-bold text-lg cursor-not-allowed shadow-xl"
-                >
-                  <Download size={24} />
-                  <div className="text-start border-s border-white/20 ps-4">
-                    <span className="block text-[10px] opacity-70 font-bold uppercase tracking-[0.2em] leading-none mb-1">
-                      {t("downloadKicker")}
-                    </span>
-                    <span className="block text-lg tracking-tight">
-                      {t("downloadCta")}
-                    </span>
-                  </div>
-                </button>
-                <span className="absolute -top-3 -end-3 px-3 py-1 bg-violet-600 text-white text-xs font-black rounded-full shadow-lg shadow-violet-500/40 animate-pulse">
-                  قريباً
-                </span>
-              </div>
-
-              <div className="flex flex-col items-center sm:items-start gap-1 px-2 border-s-2 border-slate-100 dark:border-slate-800 ms-2">
-                <span className="text-sm font-black text-slate-400 uppercase tracking-tighter italic">
-                  {t("optimizedFor")}
-                </span>
-                <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                  {t("platform")}
-                </span>
-                <span className="text-sm font-bold text-violet-500 uppercase tracking-widest mt-1">
-                  {t("noBrowser")}
-                </span>
-              </div>
-            </div>
 
             <div className="grid grid-cols-2 sm:flex sm:flex-wrap justify-center lg:justify-start gap-6 border-t border-slate-100 dark:border-slate-800 pt-8">
               <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
