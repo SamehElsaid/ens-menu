@@ -17,6 +17,10 @@ import CustomInput from "@/components/Custom/CustomInput";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import { cn } from "@/lib/cn";
+import {
+  getBroadcastTemplate,
+  hasBroadcastTemplate,
+} from "@/lib/adminBroadcastTemplates";
 
 type BroadcastAudience =
   | "all"
@@ -24,7 +28,8 @@ type BroadcastAudience =
   | "pro"
   | "free"
   | "no-menu"
-  | "with-menu";
+  | "with-menu"
+  | "products-no-image";
 
 type PreviewResponse = {
   count: number;
@@ -54,6 +59,7 @@ const AUDIENCES: BroadcastAudience[] = [
   "free",
   "no-menu",
   "with-menu",
+  "products-no-image",
   "selected",
 ];
 
@@ -62,12 +68,18 @@ export default function AdminBroadcastPage() {
   const t = useTranslations("adminBroadcast");
   const router = useRouter();
   const textDir = locale === "ar" ? "rtl" : "ltr";
+  const defaultEmailLocale = locale === "ar" ? "ar" : "en";
+  const defaultTemplate = getBroadcastTemplate(
+    "products-no-image",
+    defaultEmailLocale,
+  );
 
-  const [audience, setAudience] = useState<BroadcastAudience>("all");
-  const [subject, setSubject] = useState("");
-  const [message, setMessage] = useState("");
+  const [audience, setAudience] =
+    useState<BroadcastAudience>("products-no-image");
+  const [subject, setSubject] = useState(defaultTemplate.subject);
+  const [message, setMessage] = useState(defaultTemplate.message);
   const [emailLocale, setEmailLocale] = useState<"ar" | "en">(
-    locale === "ar" ? "ar" : "en",
+    defaultEmailLocale,
   );
 
   const [preview, setPreview] = useState<PreviewResponse | null>(null);
@@ -80,6 +92,32 @@ export default function AdminBroadcastPage() {
 
   const [sending, setSending] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const applyAudienceTemplate = (nextAudience: BroadcastAudience) => {
+    if (hasBroadcastTemplate(nextAudience)) {
+      const template = getBroadcastTemplate(nextAudience, emailLocale);
+      setSubject(template.subject);
+      setMessage(template.message);
+      return;
+    }
+
+    setSubject("");
+    setMessage("");
+  };
+
+  const handleAudienceChange = (nextAudience: BroadcastAudience) => {
+    setAudience(nextAudience);
+    applyAudienceTemplate(nextAudience);
+  };
+
+  const handleEmailLocaleChange = (nextLocale: "ar" | "en") => {
+    setEmailLocale(nextLocale);
+    if (hasBroadcastTemplate(audience)) {
+      const template = getBroadcastTemplate(audience, nextLocale);
+      setSubject(template.subject);
+      setMessage(template.message);
+    }
+  };
 
   const selectedIds = useMemo(
     () => selectedUsers.map((user) => user.id),
@@ -198,8 +236,14 @@ export default function AdminBroadcastPage() {
       } else {
         toast.success(t("sendSuccess", { sent, total }));
       }
-      setSubject("");
-      setMessage("");
+      if (hasBroadcastTemplate(audience)) {
+        const template = getBroadcastTemplate(audience, emailLocale);
+        setSubject(template.subject);
+        setMessage(template.message);
+      } else {
+        setSubject("");
+        setMessage("");
+      }
       return;
     }
 
@@ -247,7 +291,7 @@ export default function AdminBroadcastPage() {
                 <button
                   key={item}
                   type="button"
-                  onClick={() => setAudience(item)}
+                  onClick={() => handleAudienceChange(item)}
                   className={cn(
                     "rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
                     audience === item
@@ -357,7 +401,7 @@ export default function AdminBroadcastPage() {
                 <button
                   key={item}
                   type="button"
-                  onClick={() => setEmailLocale(item)}
+                  onClick={() => handleEmailLocaleChange(item)}
                   className={cn(
                     "rounded-lg border px-4 py-2 text-sm font-medium",
                     emailLocale === item
