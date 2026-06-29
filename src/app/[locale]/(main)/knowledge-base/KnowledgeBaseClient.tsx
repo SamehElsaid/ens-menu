@@ -125,6 +125,8 @@ function KnowledgeBaseInner({ initialId }: { initialId?: number }) {
           setArticles(list);
           if (res.data.pagination) setPagination(res.data.pagination);
 
+          
+
           /* auto-select first article on very first load if no URL id */
           if (firstLoad.current && list.length > 0 && !initialId) {
             firstLoad.current = false;
