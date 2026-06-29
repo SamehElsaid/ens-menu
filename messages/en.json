@@ -63,6 +63,11 @@
       "title": "About | ENSMENU — The Future of Smart Menu",
       "description": "ENSmenu for restaurants, cafés, and hotels — QR menus, smart ordering, and branch management powered by AI.",
       "keywords": "ENSmenu about, smart menu, smart menu, QR menu, AI ordering, Egypt startup"
+    },
+    "knowledgeBasePage": {
+      "title": "Knowledge Base | ENSMENU",
+      "description": "Browse our knowledge base for answers about electronic menus, QR orders, and restaurant management on ENSmenu.",
+      "keywords": "knowledge base, ENSmenu help, digital menu guide, restaurant support, QR menu"
     }
   },
   "legalPages": {
@@ -2569,6 +2574,7 @@
     "promo": "Promo",
     "vouchers": "Vouchers",
     "knowledgeManagement": "Knowledge Management",
+    "metadata": "Metadata",
     "analytics": "Analytics",
     "followUps": "Follow-ups",
     "domainTransfers": "Domain transfers",
@@ -5037,6 +5043,59 @@
       "user_confirmed": "Customer confirmed",
       "completed": "Completed",
       "cancelled": "Cancelled"
+    }
+  },
+  "adminMetadata": {
+    "title": "Metadata Management",
+    "subtitle": "Manage page titles, descriptions, and keywords for SEO",
+    "back": "Back",
+    "addNew": "Add Page",
+    "fetchError": "Failed to load metadata",
+    "configured": "Configured",
+    "notConfigured": "Not configured",
+    "empty": "No metadata entries yet. Click \"Add Page\" to create one.",
+    "edit": "Edit",
+    "configure": "Configure",
+    "delete": "Delete",
+    "confirmDelete": "Are you sure?",
+    "deleteSuccess": "Metadata deleted successfully",
+    "deleteError": "Failed to delete metadata",
+    "saveError": "An error occurred",
+    "updateSuccess": "Metadata updated successfully",
+    "updateError": "Failed to update metadata",
+    "createSuccess": "Metadata created successfully",
+    "createError": "Failed to create metadata",
+    "pageNameRequired": "Page name is required",
+    "columns": {
+      "pageName": "Page Name",
+      "titleAr": "Title (AR)",
+      "titleEn": "Title (EN)",
+      "actions": "Actions"
+    },
+    "modal": {
+      "editTitle": "Edit Metadata",
+      "createTitle": "Add New Metadata",
+      "pageName": "Page Name",
+      "title": "Title",
+      "description": "Description",
+      "keywords": "Keywords",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving..."
+    },
+    "generate": {
+      "btn": "Generate from AI",
+      "title": "Generate SEO with AI",
+      "pageType": "Page Type",
+      "articleTitle": "Article / Page Title",
+      "articleTitlePlaceholder": "Enter the page or article title...",
+      "articleContent": "Article / Page Content",
+      "articleContentPlaceholder": "Paste the full content of the page or article here...",
+      "run": "Generate",
+      "generating": "Generating...",
+      "success": "SEO generated successfully!",
+      "error": "Failed to generate SEO. Please try again.",
+      "fieldsRequired": "Please fill in the article title and content."
     }
   }
 }

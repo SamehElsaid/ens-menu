@@ -5,18 +5,20 @@ import LegalPageView, {
 } from "@/components/Legal/LegalPageView";
 import { formatLegalUpdatedLabel } from "@/components/Legal/formatLegalUpdatedLabel";
 import { buildSeoMetadata } from "@/lib/seo";
+import { fetchPageMetadata, resolveMetaField } from "@/lib/fetchPageMetadata";
 
 type Props = { params: Promise<{ locale: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "meta" });
+  const dynamic = await fetchPageMetadata("terms-and-conditions");
   return buildSeoMetadata({
     locale,
     path: "terms-and-conditions",
-    title: t("legalTerms.title"),
-    description: t("legalTerms.description"),
-    keywords: t("legalTerms.keywords"),
+    title: resolveMetaField(dynamic, locale, "title", t("legalTerms.title")),
+    description: resolveMetaField(dynamic, locale, "description", t("legalTerms.description")),
+    keywords: resolveMetaField(dynamic, locale, "keywords", t("legalTerms.keywords")),
     coreKeywords: t("coreKeywords"),
     siteName: t("siteName"),
     robots: "index, follow",

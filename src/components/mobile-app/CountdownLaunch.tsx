@@ -144,14 +144,14 @@ export default function CountdownLaunch() {
             <>
               تطبيق الموظفين يُطلق خلال{" "}
               <span className="text-transparent bg-clip-text bg-linear-to-r from-violet-600 to-indigo-500">
-                أسبوع
+                14 يوم
               </span>
             </>
           ) : (
             <>
               Staff App launching in{" "}
               <span className="text-transparent bg-clip-text bg-linear-to-r from-violet-600 to-indigo-500">
-                one week
+                14 days
               </span>
             </>
           )}
@@ -196,7 +196,7 @@ export default function CountdownLaunch() {
                   0,
                   100 -
                     ((LAUNCH_TARGET.getTime() - Date.now()) /
-                      (7 * 24 * 60 * 60 * 1000)) *
+                      (14 * 24 * 60 * 60 * 1000)) *
                       100
                 ).toFixed(2)}%`,
               }}

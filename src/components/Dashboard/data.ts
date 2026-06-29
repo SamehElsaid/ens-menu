@@ -26,6 +26,7 @@ import {
   IoSparklesOutline,
   IoMailOutline,
   IoGlobeOutline,
+  IoSearchOutline,
 } from "react-icons/io5";
 
 export type NavItem = {
@@ -397,6 +398,12 @@ export const adminNavSections: NavSection[] = [
         icon: IoLibraryOutline,
         key: "knowledge-management",
         link: "knowledge-management",
+      },
+      {
+        label: "metadata",
+        icon: IoSearchOutline,
+        key: "metadata",
+        link: "metadata",
       },
     ],
   },

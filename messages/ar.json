@@ -63,6 +63,11 @@
       "title": "من نحن | ENSMENU — مستقبل المنيو الذكي",
       "description": "ENSmenu منصة للمطاعم والكافيهات والفنادق — منيو QR، طلب ذكي، وإدارة الطلبات والفروع بالذكاء الاصطناعي.",
       "keywords": "ENSmenu، من نحن، المنيو الذكي، منيو ذكي، QR، مطاعم، فنادق، مصر"
+    },
+    "knowledgeBasePage": {
+      "title": "قاعدة المعرفة | ENSMENU",
+      "description": "تصفح قاعدة المعرفة للحصول على إجابات حول المنيو الإلكتروني وطلبات QR وإدارة المطاعم في ENSmenu.",
+      "keywords": "قاعدة المعرفة، مساعدة ENSmenu، دليل منيو رقمي، دعم المطاعم، QR"
     }
   },
   "legalPages": {
@@ -2477,6 +2482,7 @@
     "promo": "الترويج",
     "vouchers": "أكواد الخصم",
     "knowledgeManagement": "إدارة المعرفة",
+    "metadata": "الميتاداتا",
     "analytics": "التحليلات",
     "followUps": "متابعة العملاء",
     "domainTransfers": "طلبات نقل الدومين",
@@ -5037,6 +5043,59 @@
       "user_confirmed": "أكد العميل",
       "completed": "مكتمل",
       "cancelled": "ملغي"
+    }
+  },
+  "adminMetadata": {
+    "title": "إدارة الميتاداتا",
+    "subtitle": "إدارة عناوين ووصف وكلمات مفتاحية صفحات الموقع لتحسين محركات البحث",
+    "back": "رجوع",
+    "addNew": "إضافة صفحة",
+    "fetchError": "فشل تحميل البيانات",
+    "configured": "مضبوطة",
+    "notConfigured": "غير مضبوطة",
+    "empty": "لا توجد بيانات بعد. اضغط \"إضافة صفحة\" لإنشاء واحدة.",
+    "edit": "تعديل",
+    "configure": "إعداد",
+    "delete": "حذف",
+    "confirmDelete": "هل أنت متأكد؟",
+    "deleteSuccess": "تم حذف الميتاداتا بنجاح",
+    "deleteError": "فشل حذف الميتاداتا",
+    "saveError": "حدث خطأ",
+    "updateSuccess": "تم تحديث الميتاداتا بنجاح",
+    "updateError": "فشل تحديث الميتاداتا",
+    "createSuccess": "تم إنشاء الميتاداتا بنجاح",
+    "createError": "فشل إنشاء الميتاداتا",
+    "pageNameRequired": "اسم الصفحة مطلوب",
+    "columns": {
+      "pageName": "اسم الصفحة",
+      "titleAr": "العنوان (AR)",
+      "titleEn": "العنوان (EN)",
+      "actions": "إجراءات"
+    },
+    "modal": {
+      "editTitle": "تعديل الميتاداتا",
+      "createTitle": "إضافة ميتاداتا جديدة",
+      "pageName": "اسم الصفحة",
+      "title": "العنوان",
+      "description": "الوصف",
+      "keywords": "الكلمات المفتاحية",
+      "cancel": "إلغاء",
+      "save": "حفظ",
+      "saving": "جاري الحفظ..."
+    },
+    "generate": {
+      "btn": "توليد بالذكاء الاصطناعي",
+      "title": "توليد SEO بالذكاء الاصطناعي",
+      "pageType": "نوع الصفحة",
+      "articleTitle": "عنوان المقال / الصفحة",
+      "articleTitlePlaceholder": "أدخل عنوان الصفحة أو المقال...",
+      "articleContent": "محتوى المقال / الصفحة",
+      "articleContentPlaceholder": "الصق المحتوى الكامل للصفحة أو المقال هنا...",
+      "run": "توليد",
+      "generating": "جاري التوليد...",
+      "success": "تم توليد SEO بنجاح!",
+      "error": "فشل توليد SEO. يرجى المحاولة مرة أخرى.",
+      "fieldsRequired": "يرجى تعبئة عنوان المقال والمحتوى."
     }
   }
 }
