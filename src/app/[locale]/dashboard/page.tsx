@@ -54,6 +54,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [subscriptionLoading, setSubscriptionLoading] = useState(true);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showExtraMenusModal, setShowExtraMenusModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Menu | null>(null);
@@ -87,6 +88,7 @@ export default function DashboardPage() {
 
   const fetchSubscription = useCallback(async () => {
     try {
+      setSubscriptionLoading(true);
       const result = await axiosGet<SubscriptionResponse>(
         "/user/subscription",
         locale,
@@ -96,8 +98,29 @@ export default function DashboardPage() {
       }
     } catch (error) {
       console.error("Error fetching subscription:", error);
+    } finally {
+      setSubscriptionLoading(false);
     }
   }, [locale]);
+
+  const resolveSubscription = useCallback(async (): Promise<Subscription | null> => {
+    if (subscription != null || !subscriptionLoading) {
+      return subscription;
+    }
+    try {
+      const result = await axiosGet<SubscriptionResponse>(
+        "/user/subscription",
+        locale,
+      );
+      if (result.status && result.data?.subscription) {
+        setSubscription(result.data.subscription);
+        return result.data.subscription;
+      }
+    } catch (error) {
+      console.error("Error fetching subscription:", error);
+    }
+    return subscription;
+  }, [subscription, subscriptionLoading, locale]);
 
   useEffect(() => {
     fetchMenus();
@@ -112,10 +135,11 @@ export default function DashboardPage() {
     if (!deleteTarget) setDeleteConfirmText("");
   }, [deleteTarget]);
 
-  const handleCreateClick = () => {
-    const effectiveMax = getEffectiveMaxMenus(subscription);
+  const handleCreateClick = async () => {
+    const sub = await resolveSubscription();
+    const effectiveMax = getEffectiveMaxMenus(sub);
     if (menus.length >= effectiveMax) {
-      if (isProSubscription(subscription)) {
+      if (isProSubscription(sub)) {
         setShowExtraMenusModal(true);
       } else {
         setShowLimitModal(true);
@@ -203,12 +227,17 @@ export default function DashboardPage() {
 
     // تشغيل منيو بينما عدد النشطة بالفعل = الحد → عرض مودال "المنيو الآخر هيتوقف، جدد الاشتراك"
     if (!menu.isActive && activeCount >= effectiveMax) {
-      if (isProSubscription(subscription)) {
-        setShowExtraMenusModal(true);
-      } else {
-        setSwitchMenuTarget(menu);
+      const sub = await resolveSubscription();
+      const resolvedMax = getEffectiveMaxMenus(sub);
+      const resolvedActiveCount = menus.filter((m) => m.isActive).length;
+      if (resolvedActiveCount >= resolvedMax) {
+        if (isProSubscription(sub)) {
+          setShowExtraMenusModal(true);
+        } else {
+          setSwitchMenuTarget(menu);
+        }
+        return;
       }
-      return;
     }
 
     try {

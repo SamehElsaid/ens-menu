@@ -16,6 +16,7 @@ export interface Plan {
   name: string;
   priceMonthly?: number;
   priceYearly: number;
+  extraMenuPrice?: number | null;
   maxMenus: number;
   maxProductsPerMenu: number;
   allowCustomDomain?: boolean;
@@ -30,13 +31,29 @@ interface PlansResponse {
 
 const defaultForm: Record<string, string | number | boolean> = {
   name: "",
+  priceMonthly: 0,
   priceYearly: 0,
+  extraMenuPrice: 0,
   maxMenus: 0,
   maxProducts: 0,
   hasAds: false,
   isActive: true,
   allowFullDesignControl: false,
 };
+
+function isProPlanName(name: string): boolean {
+  return String(name).trim().toLowerCase() === "pro";
+}
+
+function formatEgp(value: unknown): string {
+  if (value == null || value === "") return "—";
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "—";
+  return `${n.toLocaleString("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  })} EGP`;
+}
 
 export default function PlansPage() {
   const locale = useLocale();
@@ -83,7 +100,9 @@ export default function PlansPage() {
     setEditModal({ isOpen: true, plan });
     setForm({
       name: plan.name,
+      priceMonthly: Number(plan.priceMonthly ?? 0),
       priceYearly: Number(plan.priceYearly) ?? 0,
+      extraMenuPrice: Number(plan.extraMenuPrice ?? 0),
       maxMenus: plan.maxMenus ?? 0,
       maxProducts: plan.maxProductsPerMenu ?? 0,
       hasAds: Boolean(plan.hasAds),
@@ -102,8 +121,9 @@ export default function PlansPage() {
 
     setSaving(true);
     try {
-      const payload = {
+      const payload: Record<string, unknown> = {
         name: String(form.name).trim(),
+        priceMonthly: Number(form.priceMonthly),
         priceYearly: Number(form.priceYearly),
         maxMenus: Number(form.maxMenus),
         maxProductsPerMenu: Number(form.maxProducts),
@@ -111,6 +131,10 @@ export default function PlansPage() {
         isActive: Boolean(form.isActive),
         allowCustomDomain: Boolean(form.allowFullDesignControl),
       };
+
+      if (isProPlanName(String(form.name))) {
+        payload.extraMenuPrice = Number(form.extraMenuPrice);
+      }
 
       const result = await axiosPatch<typeof payload, { message?: string }>(
         `/admin/plans/${editModal.plan.id}`,
@@ -139,19 +163,28 @@ export default function PlansPage() {
         field: "name",
         headerName: t("columns.name"),
         flex: 1,
-        minWidth: 120,
+        minWidth: 100,
+      },
+      {
+        field: "priceMonthly",
+        headerName: t("columns.priceMonthly"),
+        width: 130,
+        valueFormatter: (params) => formatEgp(params.value),
       },
       {
         field: "priceYearly",
         headerName: t("columns.priceYearly"),
-        width: 120,
-        valueFormatter: (params) =>
-          params.value != null
-            ? `$${Number(params.value).toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}`
-            : "—",
+        width: 130,
+        valueFormatter: (params) => formatEgp(params.value),
+      },
+      {
+        field: "extraMenuPrice",
+        headerName: t("columns.extraMenuPrice"),
+        width: 140,
+        valueFormatter: (params) => {
+          if (!isProPlanName(String(params.data?.name ?? ""))) return "—";
+          return formatEgp(params.value);
+        },
       },
       {
         field: "maxMenus",
@@ -210,8 +243,11 @@ export default function PlansPage() {
           ) : null,
       },
     ],
-    [t, locale, openEdit],
+    [t, openEdit],
   );
+
+  const editingPro =
+    editModal.plan != null && isProPlanName(String(form.name));
 
   return (
     <div className="space-y-6">
@@ -245,7 +281,6 @@ export default function PlansPage() {
         />
       </CardDashBoard>
 
-      {/* Edit Plan Modal */}
       {editModal.isOpen && editModal.plan && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
@@ -269,24 +304,74 @@ export default function PlansPage() {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  {t("editModal.priceYearly")}
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  step={0.01}
-                  value={Number(form.priceYearly)}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      priceYearly: e.target.value ? Number(e.target.value) : 0,
-                    }))
-                  }
-                  className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    {t("editModal.priceMonthly")}
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    step={0.01}
+                    value={Number(form.priceMonthly)}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        priceMonthly: e.target.value
+                          ? Number(e.target.value)
+                          : 0,
+                      }))
+                    }
+                    className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    {t("editModal.priceYearly")}
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    step={0.01}
+                    value={Number(form.priceYearly)}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        priceYearly: e.target.value
+                          ? Number(e.target.value)
+                          : 0,
+                      }))
+                    }
+                    className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
+                  />
+                </div>
               </div>
+
+              {editingPro && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    {t("editModal.extraMenuPrice")}
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    step={0.01}
+                    value={Number(form.extraMenuPrice)}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        extraMenuPrice: e.target.value
+                          ? Number(e.target.value)
+                          : 0,
+                      }))
+                    }
+                    className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">
+                    {t("editModal.extraMenuPriceHint")}
+                  </p>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">

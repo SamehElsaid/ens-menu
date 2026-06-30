@@ -16,7 +16,7 @@ import {
   shouldShowExtraMenuShortPeriodWarning,
 } from "@/lib/subscriptionMenus";
 import type { Subscription } from "@/types/Subscription";
-import { IoCloseOutline, IoCartOutline, IoWarningOutline } from "react-icons/io5";
+import { IoCloseOutline, IoWarningOutline } from "react-icons/io5";
 
 type AuthUser = {
   name?: string;
@@ -126,13 +126,13 @@ export default function ExtraMenusPurchaseModal({
         </button>
 
         <div className="flex flex-col gap-4 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-            <IoCartOutline className="text-3xl text-primary" />
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-900/30">
+            <IoWarningOutline className="text-3xl text-amber-500 dark:text-amber-400" />
           </div>
 
           <div>
             <h3 className="mb-2 text-xl font-bold text-slate-800 dark:text-slate-100">
-              {t("extraMenusTitle")}
+              {t("limitReached")}
             </h3>
             <p className="text-sm text-slate-500 dark:text-slate-400">
               {t("extraMenusDescription", {
