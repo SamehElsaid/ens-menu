@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import CustomInput from "@/components/Custom/CustomInput";
 import CurrencySelector from "@/components/Global/CurrencySelector";
 import { useTranslations, useLocale } from "next-intl";
@@ -19,16 +19,18 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { axiosPatch, axiosPost } from "@/shared/axiosCall";
+import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
 import { _resizeImage } from "@/shared/_shared";
 import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
 import { toast } from "react-toastify";
-import type { Menu, UploadResponse } from "@/types/Menu";
+import type { Menu, MenusResponse, UploadResponse } from "@/types/Menu";
 import { useParams, useRouter } from "next/navigation";
 import CustomBtn from "@/components/Custom/CustomBtn";
 import DeleteMenuConfirm from "../../../../../components/Dashboard/DeleteMenuConfirm";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import ImageLoad from "@/components/ImageLoad";
+import { Subscription, SubscriptionResponse } from "@/types/Subscription";
+import { getEffectiveMaxMenus } from "@/lib/subscriptionMenus";
 
 interface SettingsFormValues {
   name: string;
@@ -56,8 +58,8 @@ export default function SettingsPage() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { menu, loading } = useAppSelector((state) => state.menuData);
-  console.log(menu);
-  const tMenus = useTranslations("Menus.createModal");
+  const tMenusCreate = useTranslations("Menus.createModal");
+  const tMenusList = useTranslations("Menus");
   const tMenuCard = useTranslations("Menus.menuCard");
   const tSettings = useTranslations("menuSettingsPage");
   const tCommon = useTranslations("common");
@@ -70,7 +72,45 @@ export default function SettingsPage() {
     menu?.isActive ?? false,
   );
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [allMenus, setAllMenus] = useState<Menu[]>([]);
   const { menu: menuId } = useParams();
+
+  const fetchSubscriptionAndMenus = useCallback(async () => {
+    const [subResult, menusResult] = await Promise.all([
+      axiosGet<SubscriptionResponse>("/user/subscription", locale),
+      axiosGet<MenusResponse | Menu[]>("/menus", locale, undefined, { locale }),
+    ]);
+
+    if (subResult.status && subResult.data?.subscription) {
+      setSubscription(subResult.data.subscription);
+    }
+
+    if (menusResult.status && menusResult.data) {
+      const menusList = Array.isArray(menusResult.data)
+        ? menusResult.data
+        : (menusResult.data.menus ?? []);
+      setAllMenus(menusList);
+    }
+  }, [locale]);
+
+  useEffect(() => {
+    void fetchSubscriptionAndMenus();
+  }, [fetchSubscriptionAndMenus]);
+
+  const wouldExceedActiveMenuLimit = useCallback(
+    (activating: boolean) => {
+      if (!activating || !menu) return false;
+
+      const effectiveMax = getEffectiveMaxMenus(subscription);
+      const otherActiveCount = allMenus.filter(
+        (m) => m.isActive && String(m.id) !== String(menu.id),
+      ).length;
+
+      return otherActiveCount >= effectiveMax;
+    },
+    [allMenus, menu, subscription],
+  );
 
   const {
     control,
@@ -79,7 +119,7 @@ export default function SettingsPage() {
     setValue,
     formState: { errors, isSubmitting, isDirty },
   } = useForm<SettingsFormValues>({
-    resolver: yupResolver(settingsSchema(tMenus)),
+    resolver: yupResolver(settingsSchema(tMenusCreate)),
     defaultValues: {
       name: menu?.nameEn ?? "",
       nameAr: menu?.nameAr ?? "",
@@ -146,13 +186,13 @@ export default function SettingsPage() {
       "image/jpg",
     ];
     if (!validTypes.includes(file.type)) {
-      toast.error(tMenus("logoFormatError"));
+      toast.error(tMenusCreate("logoFormatError"));
       return;
     }
 
     const resized = await _resizeImage(file);
     if (resized.size > 2 * 1024 * 1024) {
-      toast.error(tMenus("logoSizeError"));
+      toast.error(tMenusCreate("logoSizeError"));
       return;
     }
 
@@ -175,17 +215,32 @@ export default function SettingsPage() {
   const handleToggleStatus = async () => {
     if (!menu) return;
 
-    setTogglingStatus(true);
-
     const nextValue = !localIsActive;
+
+    if (wouldExceedActiveMenuLimit(nextValue)) {
+      await fetchSubscriptionAndMenus();
+      if (wouldExceedActiveMenuLimit(nextValue)) {
+        toast.error(tMenusList("switchMenuLimitMessage"));
+        return;
+      }
+    }
+
+    setTogglingStatus(true);
     setLocalIsActive(nextValue);
-    // Update form value so submit payload includes latest status
     setValue("isActive", nextValue, { shouldDirty: true });
     setTogglingStatus(false);
   };
 
   const onSubmit = async (values: SettingsFormValues) => {
     if (!menu) return;
+
+    if (wouldExceedActiveMenuLimit(values.isActive)) {
+      await fetchSubscriptionAndMenus();
+      if (wouldExceedActiveMenuLimit(values.isActive)) {
+        toast.error(tMenusList("switchMenuLimitMessage"));
+        return;
+      }
+    }
 
     try {
       let logoUrl: string | null = null;
@@ -234,6 +289,9 @@ export default function SettingsPage() {
             ? "تم تحديث إعدادات القائمة"
             : "Menu settings updated",
         );
+        void fetchSubscriptionAndMenus();
+      } else {
+        toast.error(tMenusList("toggleError"));
       }
     } finally {
       setTogglingStatus(false);
@@ -274,7 +332,7 @@ export default function SettingsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              {tMenus("nameEn")} *
+              {tMenusCreate("nameEn")} *
             </label>
             <Controller
               name="name"
@@ -294,7 +352,7 @@ export default function SettingsPage() {
 
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              {tMenus("nameAr")} *
+              {tMenusCreate("nameAr")} *
             </label>
             <Controller
               name="nameAr"
@@ -316,7 +374,7 @@ export default function SettingsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              {tMenus("descriptionEn")}
+              {tMenusCreate("descriptionEn")}
             </label>
             <Controller
               name="description"
@@ -336,7 +394,7 @@ export default function SettingsPage() {
 
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              {tMenus("descriptionAr")}
+              {tMenusCreate("descriptionAr")}
             </label>
             <Controller
               name="descriptionAr"
@@ -368,7 +426,7 @@ export default function SettingsPage() {
               </div>
               <div>
                 <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-                  {tMenus("logo")}
+                  {tMenusCreate("logo")}
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   {locale === "ar"
@@ -418,12 +476,12 @@ export default function SettingsPage() {
                   <div className="px-4 py-2 rounded-lg transition-colors flex items-center gap-2 bg-primary hover:bg-primary/90 text-white">
                     <IoCloudUploadOutline className="text-xl" />
                     <span className="text-sm font-medium">
-                      {tMenus("logoUpload")}
+                      {tMenusCreate("logoUpload")}
                     </span>
                   </div>
                 </label>
                 <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
-                  {tMenus("logoHint")}
+                  {tMenusCreate("logoHint")}
                 </p>
               </div>
             </div>
@@ -437,7 +495,7 @@ export default function SettingsPage() {
               </div>
               <div>
                 <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-                  {tMenus("currency")}
+                  {tMenusCreate("currency")}
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   {locale === "ar"
@@ -449,7 +507,7 @@ export default function SettingsPage() {
 
             <div className="space-y-2">
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                {tMenus("currencyLabel")}
+                {tMenusCreate("currencyLabel")}
               </label>
               <Controller
                 name="currency"

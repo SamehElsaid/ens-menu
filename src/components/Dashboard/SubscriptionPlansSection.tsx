@@ -24,9 +24,10 @@ import SubscriptionPlanCard, {
   SubscriptionPlanCardSkeleton,
 } from "@/components/Dashboard/SubscriptionPlanCard";
 import SubscriptionPaymentMethods from "@/components/Dashboard/SubscriptionPaymentMethods";
-import SubscriptionVoucherSection from "@/components/Dashboard/SubscriptionVoucherSection";
-import RenewExtraMenusSelector from "@/components/Dashboard/RenewExtraMenusSelector";
+import SubscriptionManagePanel from "@/components/Dashboard/SubscriptionManagePanel";
 import { RequirePhone } from "@/components/Dashboard/RequirePhone";
+import type { Menu, MenusResponse } from "@/types/Menu";
+import { isProSubscription } from "@/lib/subscriptionMenus";
 import {
   buildPricingComparisonRows,
   comparisonRowsToPlanFeatures,
@@ -93,6 +94,7 @@ export default function SubscriptionPlansSection({
     useState<VoucherValidationResult | null>(null);
   const [voucherRedeemLoading, setVoucherRedeemLoading] = useState(false);
   const [renewExtraMenusCount, setRenewExtraMenusCount] = useState(0);
+  const [menusUsed, setMenusUsed] = useState<number | null>(null);
   const dispatch = useAppDispatch();
   const searchParams = useSearchParams();
 
@@ -131,6 +133,15 @@ export default function SubscriptionPlansSection({
         }
       })
       .finally(() => setPlansLoading(false));
+
+    void axiosGet<MenusResponse | Menu[]>("/menus", locale).then((res) => {
+      if (res.status && res.data) {
+        const menus = Array.isArray(res.data)
+          ? res.data
+          : (res.data.menus ?? []);
+        setMenusUsed(menus.length);
+      }
+    });
   }, [locale, authData?.user, isAdmin]);
 
   const pricingComparisonRows = useMemo(
@@ -167,9 +178,12 @@ export default function SubscriptionPlansSection({
   const currentPlanNameResolved =
     subscriptionInfo?.planName ?? profile?.user?.subscription?.planName ?? "";
 
-  const isProUser =
-    Boolean(currentPlanNameResolved) &&
-    String(currentPlanNameResolved).toLowerCase() === "pro";
+  const isProUser = isProSubscription({
+    planName: currentPlanNameResolved,
+  });
+
+  const proPlan =
+    plans.find((p) => String(p.name).toLowerCase() === "pro") ?? null;
 
   const currentPlanIndex = plans.findIndex(
     (p) =>
@@ -505,49 +519,51 @@ export default function SubscriptionPlansSection({
           </p>
         </header>
 
-        <section
-          id="onboarding-subscription-plans"
-          className="rounded-3xl border border-slate-100 dark:border-slate-800 bg-gradient-to-b from-white to-slate-50/80 dark:from-slate-900 dark:to-slate-950 shadow-sm p-5 md:p-8"
-        >
+        <div className="mb-8 grid gap-6 lg:grid-cols-2 lg:items-start">
           <CurrentPlanSummary
             subscriptionInfo={subscriptionInfo}
             loading={subscriptionInfoLoading}
             currentPlanName={currentPlanNameResolved}
-            canRenewPro={canRenewPro}
-            renewLoading={proPayLoading}
-            onRenew={() => void handleRenewPro()}
-            className="mb-6"
+            menusUsed={menusUsed}
           />
 
-          {canRenewPro && (
-            <RenewExtraMenusSelector
-              subscription={subscriptionInfo}
-              billingCycle={proBillingChoice}
-              value={renewExtraMenusCount}
-              onChange={setRenewExtraMenusCount}
-              disabled={proPayLoading}
-              className="mb-6"
-            />
-          )}
+          <SubscriptionManagePanel
+            locale={locale}
+            isRTL={isRTL}
+            subscription={subscriptionInfo}
+            menusUsed={menusUsed}
+            proPlan={proPlan}
+            isProUser={isProUser}
+            canRenewPro={canRenewPro}
+            canUpgradeToPro={canUpgradeToPro}
+            proBillingChoice={proBillingChoice}
+            onProBillingChange={setProBillingChoice}
+            renewExtraMenusCount={renewExtraMenusCount}
+            onRenewExtraMenusChange={setRenewExtraMenusCount}
+            appliedVoucherCode={appliedVoucherCode}
+            voucherValidation={voucherValidation}
+            onVoucherApplied={handleVoucherApplied}
+            onRenew={() => void handleRenewPro()}
+            onUpgrade={() => void handleUpgradeToPro()}
+            onRedeemDuration={() => void handleRedeemDurationVoucher()}
+            onRequirePhone={() => setPhoneGateOpen(true)}
+            loading={proPayLoading}
+            voucherRedeemLoading={voucherRedeemLoading}
+            currencyLabel={tLandingPricing("currencyEgp")}
+          />
+        </div>
 
-          <div className="mb-8">
-            <SubscriptionVoucherSection
-              locale={locale}
-              isRTL={isRTL}
-              billingCycle={proBillingChoice}
-              onBillingChange={setProBillingChoice}
-              showBillingChoice={false}
-              showBillingHint={canUpgradeToPro}
-              isProUser={isProUser}
-              canUpgradeToPro={canUpgradeToPro}
-              currencyLabel={tLandingPricing("currencyEgp")}
-              appliedCode={appliedVoucherCode}
-              validation={voucherValidation}
-              onApplied={handleVoucherApplied}
-              onRedeemDuration={() => handleRedeemDurationVoucher()}
-              redeemLoading={voucherRedeemLoading}
-              disabled={proPayLoading}
-            />
+        <section
+          id="onboarding-subscription-plans"
+          className="rounded-3xl border border-slate-100 dark:border-slate-800 bg-gradient-to-b from-white to-slate-50/80 dark:from-slate-900 dark:to-slate-950 shadow-sm p-5 md:p-8"
+        >
+          <div className={`mb-6 ${isRTL ? "text-right" : "text-left"}`}>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+              {t("comparePlansTitle")}
+            </h2>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              {t("comparePlansDescription")}
+            </p>
           </div>
 
           {plansLoading ? (
@@ -598,10 +614,9 @@ export default function SubscriptionPlansSection({
 
                   const isProPlan = planKey === "pro";
                   const isFreePlan = planKey === "free";
-                  const showProBilling =
-                    isProPlan && (canUpgrade || (canRenewPro && isCurrentPlanBool));
-                  const canRenewOnCard =
-                    isProPlan && isCurrentPlanBool && canRenewPro;
+                  const showProBilling = false;
+                  const canRenewOnCard = false;
+                  const showUpgradeOnCard = false;
 
                   const planDisplayName =
                     planKey === "free"
@@ -647,7 +662,7 @@ export default function SubscriptionPlansSection({
                       showProBilling={showProBilling}
                       proBillingChoice={proBillingChoice}
                       onProBillingChange={setProBillingChoice}
-                      canUpgrade={canUpgrade}
+                      canUpgrade={showUpgradeOnCard}
                       canDowngrade={canDowngrade}
                       canRenew={canRenewOnCard}
                       proPayLoading={proPayLoading}

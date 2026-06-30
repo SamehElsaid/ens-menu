@@ -79,9 +79,9 @@ export function buildPricingComparisonRows({
     {
       id: "rowProducts",
       label: t("rowProducts"),
-      free: t("limited"),
-      pro: t("limited"),
-      custom: t("cellNegotiable"),
+      free: t("productsUnlimited"),
+      pro: t("productsUnlimited"),
+      custom: t("productsUnlimited"),
     },
     {
       id: "rowSmartQr",

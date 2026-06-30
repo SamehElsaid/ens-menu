@@ -32,6 +32,10 @@ type VoucherSectionProps = {
   onApplied: (code: string, result: VoucherValidationResult | null) => void;
   onRedeemDuration?: () => Promise<void>;
   redeemLoading?: boolean;
+  /** Flat layout inside a parent checkout panel */
+  embedded?: boolean;
+  /** Hide duration redeem button — parent panel owns the primary CTA */
+  suppressDurationRedeem?: boolean;
 };
 
 function formatDurationValue(
@@ -74,6 +78,8 @@ export default function SubscriptionVoucherSection({
   onApplied,
   onRedeemDuration,
   redeemLoading,
+  embedded = false,
+  suppressDurationRedeem = false,
 }: VoucherSectionProps) {
   const t = useTranslations("personalProfile");
   const [codeInput, setCodeInput] = useState(appliedCode ?? "");
@@ -135,25 +141,39 @@ export default function SubscriptionVoucherSection({
   return (
     <div
       id="subscription-voucher-section"
-      className="rounded-[28px] border border-primary/20 bg-gradient-to-br from-primary/[0.04] via-white to-violet-50/50 p-5 shadow-sm dark:border-primary/25 dark:from-primary/10 dark:via-slate-900 dark:to-slate-950 md:p-6"
+      className={
+        embedded
+          ? "rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 dark:border-slate-700/80 dark:bg-slate-950/50"
+          : "rounded-[28px] border border-primary/20 bg-gradient-to-br from-primary/[0.04] via-white to-violet-50/50 p-5 shadow-sm dark:border-primary/25 dark:from-primary/10 dark:via-slate-900 dark:to-slate-950 md:p-6"
+      }
     >
       <div
-        className={`mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between ${isRTL ? "sm:flex-row-reverse" : ""}`}
+        className={`${embedded ? "mb-3" : "mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"} ${!embedded && isRTL ? "sm:flex-row-reverse" : ""}`}
       >
         <div className={isRTL ? "text-right" : "text-left"}>
           <div
-            className={`mb-2 flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
+            className={`${embedded ? "mb-1" : "mb-2"} flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/15 text-primary">
-              <IoTicketOutline className="text-xl" />
-            </span>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+            {!embedded && (
+              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+                <IoTicketOutline className="text-xl" />
+              </span>
+            )}
+            <h2
+              className={
+                embedded
+                  ? "text-sm font-semibold text-slate-800 dark:text-slate-100"
+                  : "text-lg font-bold text-slate-900 dark:text-slate-100"
+              }
+            >
               {t("voucherSectionTitle")}
             </h2>
           </div>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            {sectionDescription}
-          </p>
+          {!embedded && (
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              {sectionDescription}
+            </p>
+          )}
         </div>
 
         {showBillingChoice && onBillingChange && (
@@ -255,7 +275,7 @@ export default function SubscriptionVoucherSection({
             </button>
           </div>
 
-          {isDuration && onRedeemDuration && (
+          {isDuration && onRedeemDuration && !suppressDurationRedeem && (
             <button
               type="button"
               onClick={() => void onRedeemDuration()}
