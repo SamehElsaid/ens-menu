@@ -8,6 +8,7 @@ import {
   HiChevronDown,
   HiOutlineChat,
   HiOutlineGift,
+  HiOutlineRefresh,
   HiOutlineSparkles,
   HiOutlineTag,
 } from "react-icons/hi";
@@ -32,12 +33,16 @@ type SubscriptionPlanCardProps = {
   onProBillingChange: (choice: ProBillingChoice) => void;
   canUpgrade: boolean;
   canDowngrade: boolean;
+  canRenew?: boolean;
   proPayLoading: boolean;
   downgradeLoading: boolean;
+  renewLoading?: boolean;
   onUpgrade: () => void;
   onDowngrade: () => void;
+  onRenew?: () => void;
   upgradeLabel: string;
   downgradeLabel: string;
+  renewLabel?: string;
   payingLabel: string;
   downgradingLabel: string;
   currentPlanLabel: string;
@@ -140,12 +145,16 @@ export default function SubscriptionPlanCard({
   onProBillingChange,
   canUpgrade,
   canDowngrade,
+  canRenew = false,
   proPayLoading,
   downgradeLoading,
+  renewLoading = false,
   onUpgrade,
   onDowngrade,
+  onRenew,
   upgradeLabel,
   downgradeLabel,
+  renewLabel,
   payingLabel,
   downgradingLabel,
   currentPlanLabel,
@@ -281,11 +290,22 @@ export default function SubscriptionPlanCard({
       <CollapsiblePlanFeatureList features={features} isRTL={isRTL} />
 
       <div className="mt-6 flex flex-col gap-2 pt-2">
-        {isCurrentPlan && (
+        {isCurrentPlan && !canRenew && (
           <span className="inline-flex items-center justify-center gap-2 rounded-2xl border border-primary/25 bg-primary/5 px-4 py-3 text-sm font-semibold text-primary dark:text-primary-foreground">
             <HiCheck className="h-4 w-4" />
             {currentPlanLabel}
           </span>
+        )}
+        {canRenew && onRenew && (
+          <button
+            type="button"
+            onClick={onRenew}
+            disabled={proPayLoading || renewLoading}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-sm font-semibold text-white shadow-md shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <HiOutlineRefresh className={`h-4 w-4 shrink-0 ${renewLoading || proPayLoading ? "animate-spin" : ""}`} />
+            {proPayLoading || renewLoading ? payingLabel : renewLabel ?? currentPlanLabel}
+          </button>
         )}
         {canUpgrade && (
           <>

@@ -759,6 +759,10 @@ export default function PersonalProfile({
               subscriptionInfo={subscriptionInfo}
               loading={subscriptionInfoLoading}
               currentPlanName={currentPlanNameResolved}
+              canRenewPro={subscriptionInfo?.canRenewPro === true}
+              onRenew={() =>
+                router.push(menuDashboardPath(menu, "subscription"))
+              }
               className="mb-5"
             />
             {menuRef && (

@@ -25,6 +25,7 @@ import SubscriptionPlanCard, {
 } from "@/components/Dashboard/SubscriptionPlanCard";
 import SubscriptionPaymentMethods from "@/components/Dashboard/SubscriptionPaymentMethods";
 import SubscriptionVoucherSection from "@/components/Dashboard/SubscriptionVoucherSection";
+import RenewExtraMenusSelector from "@/components/Dashboard/RenewExtraMenusSelector";
 import { RequirePhone } from "@/components/Dashboard/RequirePhone";
 import {
   buildPricingComparisonRows,
@@ -91,6 +92,7 @@ export default function SubscriptionPlansSection({
   const [voucherValidation, setVoucherValidation] =
     useState<VoucherValidationResult | null>(null);
   const [voucherRedeemLoading, setVoucherRedeemLoading] = useState(false);
+  const [renewExtraMenusCount, setRenewExtraMenusCount] = useState(0);
   const dispatch = useAppDispatch();
   const searchParams = useSearchParams();
 
@@ -205,6 +207,21 @@ export default function SubscriptionPlansSection({
     return null;
   })();
 
+  const canRenewPro = subscriptionInfo?.canRenewPro === true;
+
+  useEffect(() => {
+    const current = Number(subscriptionInfo?.extraMenus ?? 0);
+    if (Number.isFinite(current) && current >= 0) {
+      setRenewExtraMenusCount(current);
+    }
+  }, [subscriptionInfo?.extraMenus]);
+
+  useEffect(() => {
+    if (isProUser && activeSubscriptionBillingCycle) {
+      setProBillingChoice(activeSubscriptionBillingCycle);
+    }
+  }, [isProUser, activeSubscriptionBillingCycle]);
+
   useEffect(() => {
     setAppliedVoucherCode(null);
     setVoucherValidation(null);
@@ -287,7 +304,11 @@ export default function SubscriptionPlansSection({
   }, [profile?.phoneNumber, profile?.restaurantName, profile?.isPhoneVerified]);
 
   const initiateProPayment = useCallback(
-    async (userOverride?: AuthUser) => {
+    async (
+      userOverride?: AuthUser,
+      options?: { renew?: boolean; extraMenus?: number },
+    ) => {
+      const isRenew = options?.renew === true;
       const activeUser = userOverride ?? profile;
       const hasPhone = Boolean(activeUser?.phoneNumber?.trim());
       const hasRestaurantName = Boolean(activeUser?.restaurantName?.trim());
@@ -326,6 +347,8 @@ export default function SubscriptionPlansSection({
           mobile: string;
           currency?: string;
           voucherCode?: string;
+          renew?: boolean;
+          extraMenus?: number;
         },
         {
           success?: boolean;
@@ -342,6 +365,7 @@ export default function SubscriptionPlansSection({
         email: activeUser?.email?.trim() || undefined,
         mobile: phoneToSend,
         currency: "EGP",
+        ...(isRenew ? { renew: true, extraMenus: options?.extraMenus ?? renewExtraMenusCount } : {}),
         ...(appliedVoucherCode && voucherValidation?.voucher.type === "discount"
           ? { voucherCode: appliedVoucherCode }
           : {}),
@@ -382,8 +406,20 @@ export default function SubscriptionPlansSection({
       appliedVoucherCode,
       voucherValidation,
       refreshSubscriptionState,
+      renewExtraMenusCount,
     ],
   );
+
+  const handleRenewPro = useCallback(async () => {
+    if (needsPhoneGateForPayment()) {
+      setPhoneGateOpen(true);
+      return;
+    }
+    await initiateProPayment(undefined, {
+      renew: true,
+      extraMenus: renewExtraMenusCount,
+    });
+  }, [needsPhoneGateForPayment, initiateProPayment, renewExtraMenusCount]);
 
   const handleUpgradeToPro = useCallback(async () => {
     if (hasDurationVoucher) {
@@ -414,8 +450,15 @@ export default function SubscriptionPlansSection({
     }
 
     setPhoneGateOpen(false);
-    await initiateProPayment(freshUser);
-  }, [locale, dispatch, initiateProPayment]);
+    if (canRenewPro) {
+      await initiateProPayment(freshUser, {
+        renew: true,
+        extraMenus: renewExtraMenusCount,
+      });
+    } else {
+      await initiateProPayment(freshUser);
+    }
+  }, [locale, dispatch, initiateProPayment, canRenewPro, renewExtraMenusCount]);
 
   if (isAdmin) {
     return null;
@@ -470,8 +513,22 @@ export default function SubscriptionPlansSection({
             subscriptionInfo={subscriptionInfo}
             loading={subscriptionInfoLoading}
             currentPlanName={currentPlanNameResolved}
+            canRenewPro={canRenewPro}
+            renewLoading={proPayLoading}
+            onRenew={() => void handleRenewPro()}
             className="mb-6"
           />
+
+          {canRenewPro && (
+            <RenewExtraMenusSelector
+              subscription={subscriptionInfo}
+              billingCycle={proBillingChoice}
+              value={renewExtraMenusCount}
+              onChange={setRenewExtraMenusCount}
+              disabled={proPayLoading}
+              className="mb-6"
+            />
+          )}
 
           <div className="mb-8">
             <SubscriptionVoucherSection
@@ -513,9 +570,10 @@ export default function SubscriptionPlansSection({
                 .map((plan, index) => {
                   const currentPlanName = currentPlanNameResolved;
                   const planKey = String(plan.name).toLowerCase();
-                  const isCurrentPlan =
+                  const isCurrentPlanBool = Boolean(
                     currentPlanName &&
-                    planKey === String(currentPlanName).toLowerCase();
+                      planKey === String(currentPlanName).toLowerCase(),
+                  );
                   const isCustomPlan = planKey.includes("custom");
                   const isMostPopular = index === 1 && plans.length > 1;
                   const currentPlanIndex = plans.findIndex(
@@ -540,7 +598,10 @@ export default function SubscriptionPlansSection({
 
                   const isProPlan = planKey === "pro";
                   const isFreePlan = planKey === "free";
-                  const showProBilling = isProPlan && canUpgrade;
+                  const showProBilling =
+                    isProPlan && (canUpgrade || (canRenewPro && isCurrentPlanBool));
+                  const canRenewOnCard =
+                    isProPlan && isCurrentPlanBool && canRenewPro;
 
                   const planDisplayName =
                     planKey === "free"
@@ -566,6 +627,12 @@ export default function SubscriptionPlansSection({
                       : t("upgradeToProYearlyCta")
                     : t("upgrade");
 
+                  const renewLabel = isProPlan
+                    ? proBillingChoice === "monthly"
+                      ? t("renewProMonthlyCta")
+                      : t("renewProYearlyCta")
+                    : t("renewSubscriptionCta");
+
                   return (
                     <SubscriptionPlanCard
                       key={plan.id}
@@ -573,7 +640,7 @@ export default function SubscriptionPlansSection({
                       planDisplayName={planDisplayName}
                       features={features}
                       isRTL={isRTL}
-                      isCurrentPlan={Boolean(isCurrentPlan)}
+                      isCurrentPlan={isCurrentPlanBool}
                       isMostPopular={isMostPopular}
                       isProPlan={isProPlan}
                       isFreePlan={isFreePlan}
@@ -582,12 +649,16 @@ export default function SubscriptionPlansSection({
                       onProBillingChange={setProBillingChoice}
                       canUpgrade={canUpgrade}
                       canDowngrade={canDowngrade}
+                      canRenew={canRenewOnCard}
                       proPayLoading={proPayLoading}
                       downgradeLoading={downgradeLoading}
+                      renewLoading={proPayLoading}
                       onUpgrade={() => void handleUpgradeToPro()}
                       onDowngrade={() => setDowngradeModalOpen(true)}
+                      onRenew={() => void handleRenewPro()}
                       upgradeLabel={upgradeLabel}
                       downgradeLabel={t("downgrade")}
+                      renewLabel={renewLabel}
                       payingLabel={t("paying")}
                       downgradingLabel={t("downgrading")}
                       currentPlanLabel={t("currentPlan")}
@@ -606,7 +677,7 @@ export default function SubscriptionPlansSection({
                         isProPlan && canUpgrade ? voucherDurationHint : null
                       }
                       activeBillingCycle={
-                        isProPlan && isCurrentPlan
+                        isProPlan && isCurrentPlanBool
                           ? activeSubscriptionBillingCycle
                           : null
                       }

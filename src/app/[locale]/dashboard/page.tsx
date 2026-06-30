@@ -6,6 +6,7 @@ import { useRouter } from "@/i18n/navigation";
 import { axiosGet, axiosDelete, axiosPatch } from "@/shared/axiosCall";
 import LinkTo from "@/components/Global/LinkTo";
 import CreateMenuModal from "@/components/Dashboard/CreateMenuModal";
+import ExtraMenusPurchaseModal from "@/components/Dashboard/ExtraMenusPurchaseModal";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import { pushFirstMenuCreatedEvent } from "@/shared/gtmEvents";
 import { toast } from "react-toastify";
@@ -38,6 +39,10 @@ import {
   publicMenuLinkUrl,
   resolvePublicMenuSlug,
 } from "@/lib/publicMenuUrl";
+import {
+  getEffectiveMaxMenus,
+  isProSubscription,
+} from "@/lib/subscriptionMenus";
 
 export default function DashboardPage() {
   const t = useTranslations("Menus");
@@ -50,6 +55,7 @@ export default function DashboardPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [showLimitModal, setShowLimitModal] = useState(false);
+  const [showExtraMenusModal, setShowExtraMenusModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Menu | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -107,9 +113,13 @@ export default function DashboardPage() {
   }, [deleteTarget]);
 
   const handleCreateClick = () => {
-    const maxMenus = subscription?.maxMenus ?? 1;
-    if (menus.length >= maxMenus) {
-      setShowLimitModal(true);
+    const effectiveMax = getEffectiveMaxMenus(subscription);
+    if (menus.length >= effectiveMax) {
+      if (isProSubscription(subscription)) {
+        setShowExtraMenusModal(true);
+      } else {
+        setShowLimitModal(true);
+      }
     } else {
       setShowCreateModal(true);
     }
@@ -188,12 +198,16 @@ export default function DashboardPage() {
   };
 
   const handleToggleActive = async (menu: Menu) => {
-    const maxMenus = subscription?.maxMenus ?? 1;
+    const effectiveMax = getEffectiveMaxMenus(subscription);
     const activeCount = menus.filter((m) => m.isActive).length;
 
     // تشغيل منيو بينما عدد النشطة بالفعل = الحد → عرض مودال "المنيو الآخر هيتوقف، جدد الاشتراك"
-    if (!menu.isActive && activeCount >= maxMenus) {
-      setSwitchMenuTarget(menu);
+    if (!menu.isActive && activeCount >= effectiveMax) {
+      if (isProSubscription(subscription)) {
+        setShowExtraMenusModal(true);
+      } else {
+        setSwitchMenuTarget(menu);
+      }
       return;
     }
 
@@ -319,6 +333,14 @@ export default function DashboardPage() {
             locale={locale}
             upgradeMenuRef={getMenuDashboardRef(menus[0])}
             onClose={() => setShowLimitModal(false)}
+          />
+        )}
+
+        {showExtraMenusModal && (
+          <ExtraMenusPurchaseModal
+            subscription={subscription}
+            currentCount={menus.length}
+            onClose={() => setShowExtraMenusModal(false)}
           />
         )}
       </>
@@ -532,6 +554,14 @@ export default function DashboardPage() {
         />
       )}
 
+      {showExtraMenusModal && (
+        <ExtraMenusPurchaseModal
+          subscription={subscription}
+          currentCount={menus.length}
+          onClose={() => setShowExtraMenusModal(false)}
+        />
+      )}
+
       {/* Switch Menu (Free limit) Modal */}
       {switchMenuTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
@@ -696,7 +726,7 @@ function LimitReachedModal({
   upgradeMenuRef?: string;
   onClose: () => void;
 }) {
-  const maxMenus = subscription?.maxMenus ?? 1;
+  const maxMenus = getEffectiveMaxMenus(subscription);
   const planName = subscription?.planName || subscription?.plan || "Free";
 
   return (

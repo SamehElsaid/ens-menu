@@ -3,6 +3,16 @@ export interface Subscription {
   planName?: string;
   planId?: number;
   maxMenus?: number;
+  extraMenus?: number;
+  effectiveMaxMenus?: number;
+  extraMenuPrice?: number;
+  subscriptionDaysRemaining?: number;
+  subscriptionMonthsRemaining?: number;
+  extraMenuProratedPrice?: number;
+  extraMenuShortPeriodWarning?: boolean;
+  canRenewPro?: boolean;
+  renewExtendsFromEndDate?: string | null;
+  isInGracePeriod?: boolean;
   maxProductsPerMenu?: number;
   status?: string;
   billingCycle?: string;

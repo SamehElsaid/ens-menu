@@ -2,7 +2,11 @@
 
 import { useLocale, useTranslations } from "next-intl";
 
-import { HiOutlineGift, HiOutlineSparkles } from "react-icons/hi";
+import {
+  HiOutlineGift,
+  HiOutlineSparkles,
+} from "react-icons/hi2";
+import { HiOutlineRefresh } from "react-icons/hi";
 
 import type { Subscription } from "@/types/Subscription";
 
@@ -13,6 +17,12 @@ type CurrentPlanSummaryProps = {
 
   currentPlanName: string;
 
+  canRenewPro?: boolean;
+
+  renewLoading?: boolean;
+
+  onRenew?: () => void;
+
   className?: string;
 };
 
@@ -22,6 +32,12 @@ export default function CurrentPlanSummary({
   loading,
 
   currentPlanName,
+
+  canRenewPro = false,
+
+  renewLoading = false,
+
+  onRenew,
 
   className = "",
 }: CurrentPlanSummaryProps) {
@@ -60,6 +76,8 @@ export default function CurrentPlanSummary({
     : t("planFree");
 
   const isPro = String(currentPlanName).toLowerCase() === "pro";
+  const daysRemaining = Number(subscriptionInfo?.subscriptionDaysRemaining ?? 0);
+  const extendFrom = subscriptionInfo?.renewExtendsFromEndDate;
 
   if (loading) {
     return (
@@ -116,11 +134,17 @@ export default function CurrentPlanSummary({
         </div>
 
         {subscriptionInfo?.status && (
-          <span className="inline-flex items-center rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+          <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
             {t("status")}: {String(subscriptionInfo.status)}
           </span>
         )}
       </div>
+
+      {canRenewPro && daysRemaining > 0 && (
+        <p className="relative mb-4 text-sm text-slate-600 dark:text-slate-300">
+          {t("renewKeepsRemainingDays", { days: String(daysRemaining) })}
+        </p>
+      )}
 
       <dl className="relative grid grid-cols-1 sm:grid-cols-2 gap-3">
         {[
@@ -164,6 +188,27 @@ export default function CurrentPlanSummary({
           </div>
         ))}
       </dl>
+
+      {canRenewPro && onRenew && (
+        <div className="relative mt-5 space-y-2">
+          {extendFrom && (
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {t("renewExtendsFromDate", {
+                date: formatPlanDate(extendFrom),
+              })}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={onRenew}
+            disabled={renewLoading}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-sm font-semibold text-white shadow-md shadow-primary/25 transition-all hover:bg-primary/90 disabled:opacity-60"
+          >
+            <HiOutlineRefresh className={`h-4 w-4 ${renewLoading ? "animate-spin" : ""}`} />
+            {renewLoading ? t("paying") : t("renewSubscriptionCta")}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

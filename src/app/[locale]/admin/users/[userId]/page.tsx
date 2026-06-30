@@ -54,6 +54,10 @@ interface User {
   emailVerifiedAt?: string | null;
   accountStatus?: AccountStatus;
   planName: string;
+  maxMenus?: number;
+  extraMenus?: number;
+  effectiveMaxMenus?: number;
+  subscriptionId?: number | null;
   subscriptionStatus: string;
   startDate: string;
   endDate: string | null;
@@ -71,6 +75,8 @@ interface Subscription {
   paymentStatus: string;
   paidAt: string | null;
   planName: string;
+  maxMenus?: number;
+  extraMenus?: number;
 }
 
 interface Menu {
@@ -120,6 +126,8 @@ export default function UserDetailsPage() {
     endDate: string;
   }>({ planId: 0, billingCycle: "free", startDate: "", endDate: "" });
   const [subscriptionSubmitting, setSubscriptionSubmitting] = useState(false);
+  const [extraMenusInput, setExtraMenusInput] = useState("0");
+  const [extraMenusSaving, setExtraMenusSaving] = useState(false);
   const [applyFreeConfirmOpen, setApplyFreeConfirmOpen] = useState(false);
   const [applyFreeLoading, setApplyFreeLoading] = useState(false);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
@@ -180,6 +188,16 @@ export default function UserDetailsPage() {
       fetchUserDetails();
     }
   }, [userId, fetchUserDetails]);
+
+  useEffect(() => {
+    if (!userData?.user) return;
+    const activeSub =
+      userData.subscriptions?.find((sub) => sub.status === "active") ||
+      userData.subscriptions?.[0];
+    const extra =
+      userData.user.extraMenus ?? activeSub?.extraMenus ?? 0;
+    setExtraMenusInput(String(extra));
+  }, [userData]);
 
   const userAnalytics = useMemo(() => {
     const u = userData?.user;
@@ -537,6 +555,34 @@ export default function UserDetailsPage() {
     }
   }, [subscriptionForm, plans, userId, locale, t, fetchUserDetails]);
 
+  const handleSaveExtraMenus = useCallback(async () => {
+    const parsed = parseInt(extraMenusInput, 10);
+    if (!Number.isFinite(parsed) || parsed < 0 || parsed > 100) {
+      toast.error(t("subscriptionInfo.extraMenusInvalid"));
+      return;
+    }
+    setExtraMenusSaving(true);
+    try {
+      const result = await axiosPatch<
+        { extraMenus: number },
+        { message?: string; effectiveMaxMenus?: number }
+      >(`/admin/users/${userId}/extra-menus`, locale, {
+        extraMenus: parsed,
+      });
+      if (result.status) {
+        toast.success(t("subscriptionInfo.extraMenusSuccess"));
+        await fetchUserDetails();
+      } else {
+        toast.error(t("subscriptionInfo.extraMenusError"));
+      }
+    } catch (err) {
+      console.error("Error updating extra menus:", err);
+      toast.error(t("subscriptionInfo.extraMenusError"));
+    } finally {
+      setExtraMenusSaving(false);
+    }
+  }, [extraMenusInput, userId, locale, t, fetchUserDetails]);
+
   const handleApplyFreeLimits = useCallback(async () => {
     setApplyFreeLoading(true);
     try {
@@ -592,6 +638,16 @@ export default function UserDetailsPage() {
     planName: user.planName,
     status: user.subscriptionStatus,
   };
+
+  const planBaseMenus =
+    user.maxMenus ?? activeSubscription?.maxMenus ?? 1;
+  const currentExtraMenus =
+    user.extraMenus ?? activeSubscription?.extraMenus ?? 0;
+  const effectiveMenuLimit =
+    user.effectiveMaxMenus ?? planBaseMenus + currentExtraMenus;
+  const hasActiveSubscription =
+    String(subscription.status ?? user.subscriptionStatus).toLowerCase() ===
+      "active" && Boolean(user.subscriptionId ?? activeSubscription?.id);
 
   const textDir = isRTL ? "rtl" : "ltr";
   return (
@@ -658,7 +714,75 @@ export default function UserDetailsPage() {
               {formatDate(subscription.endDate)}
             </p>
           </div>
+          <div>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+              {t("subscriptionInfo.menuLimit")}
+            </p>
+            <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+              {t("subscriptionInfo.menuLimitValue", {
+                total: String(effectiveMenuLimit),
+                base: String(planBaseMenus),
+                extra: String(currentExtraMenus),
+              })}
+            </p>
+          </div>
         </div>
+
+        {hasActiveSubscription && (
+          <div
+            className={`mt-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/40 p-4 ${isRTL ? "text-right" : "text-left"}`}
+          >
+            <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-1">
+              {t("subscriptionInfo.extraMenusTitle")}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
+              {t("subscriptionInfo.extraMenusHint", {
+                base: String(planBaseMenus),
+              })}
+            </p>
+            <div
+              className={`flex flex-wrap items-end gap-3 ${isRTL ? "flex-row-reverse" : ""}`}
+            >
+              <div className="min-w-[140px]">
+                <label
+                  htmlFor="admin-extra-menus"
+                  className="block text-xs text-slate-500 dark:text-slate-400 mb-1"
+                >
+                  {t("subscriptionInfo.extraMenusCount")}
+                </label>
+                <input
+                  id="admin-extra-menus"
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={extraMenusInput}
+                  onChange={(e) => setExtraMenusInput(e.target.value)}
+                  disabled={extraMenusSaving}
+                  className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
+                />
+              </div>
+              <p className="text-sm text-slate-600 dark:text-slate-300 pb-2">
+                {t("subscriptionInfo.extraMenusPreview", {
+                  total: String(
+                    planBaseMenus +
+                      (parseInt(extraMenusInput, 10) || 0),
+                  ),
+                })}
+              </p>
+              <button
+                type="button"
+                onClick={() => void handleSaveExtraMenus()}
+                disabled={extraMenusSaving}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition-colors"
+              >
+                {extraMenusSaving
+                  ? t("subscriptionInfo.saving")
+                  : t("subscriptionInfo.extraMenusSave")}
+              </button>
+            </div>
+          </div>
+        )}
+
         <div
           className={`flex items-center gap-3 mt-6 ${isRTL ? "flex-row-reverse" : ""}`}
         >
