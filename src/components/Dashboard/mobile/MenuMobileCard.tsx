@@ -3,7 +3,9 @@
 import { useTranslations } from "next-intl";
 import LinkTo from "@/components/Global/LinkTo";
 import LoadImage from "@/components/ImageLoad";
+
 import { Menu } from "@/types/Menu";
+import type { MenuGroupMeta } from "@/lib/menuDeliveryGroups";
 import {
   IoCalendarOutline,
   IoEllipseSharp,
@@ -14,6 +16,7 @@ import {
   IoRestaurant,
   IoSettingsOutline,
   IoTrashOutline,
+  IoGitNetworkOutline,
 } from "react-icons/io5";
 
 export type MenuMobileCardProps = {
@@ -26,8 +29,11 @@ export type MenuMobileCardProps = {
   togglingId: number | null;
   menuPublicUrl: string;
   dashboardPath: string;
+  groupMeta: MenuGroupMeta;
+  isNested?: boolean;
   onToggleActive: (menu: Menu) => void;
   onDelete: (menu: Menu) => void;
+  onAddToGroup?: (menu: Menu) => void;
 };
 
 export default function MenuMobileCard({
@@ -40,20 +46,27 @@ export default function MenuMobileCard({
   togglingId,
   menuPublicUrl,
   dashboardPath,
+  groupMeta,
+  isNested = false,
   onToggleActive,
   onDelete,
+  onAddToGroup,
 }: MenuMobileCardProps) {
   const t = useTranslations("Menus");
 
   return (
     <article
       className={`dashboard-menu-card overflow-hidden rounded-2xl border bg-white shadow-[0_1px_8px_rgba(15,23,42,0.06)] dark:bg-slate-900 dark:shadow-[0_1px_12px_rgba(0,0,0,0.22)] ${
-        menu.isActive
-          ? "border-slate-200/90 dark:border-slate-700/80"
-          : "border-amber-200/70 bg-slate-50/40 dark:border-amber-900/35 dark:bg-amber-950/10"
+        isNested ? "rounded-xl shadow-none" : ""
+      } ${
+        groupMeta.inGroup || isNested
+          ? "border-teal-200/70 dark:border-teal-800/40"
+          : menu.isActive
+            ? "border-slate-200/90 dark:border-slate-700/80"
+            : "border-amber-200/70 bg-slate-50/40 dark:border-amber-900/35 dark:bg-amber-950/10"
       }`}
     >
-      <div className="p-3.5">
+      <div className={isNested ? "p-3" : "p-3.5"}>
         <div className="mb-2.5 flex items-start justify-between gap-2">
           <div className="flex min-w-0 flex-1 flex-row-reverse items-start gap-2.5 rtl:flex-row">
             <div className="min-w-0 flex-1 text-start">
@@ -64,19 +77,21 @@ export default function MenuMobileCard({
               >
                 {menuName}
               </h3>
-              <span
-                className={`mt-1 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
-                  menu.isActive
-                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/25 dark:text-emerald-300"
-                    : "bg-amber-50 text-amber-700 dark:bg-amber-900/25 dark:text-amber-300"
-                }`}
-              >
-                <IoEllipseSharp
-                  className={`text-[5px] ${menu.isActive ? "text-emerald-500" : "text-amber-500"}`}
-                  aria-hidden
-                />
-                {menu.isActive ? t("menuCard.active") : t("menuCard.paused")}
-              </span>
+              <div className="mt-1 flex flex-wrap items-center gap-1">
+                <span
+                  className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                    menu.isActive
+                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/25 dark:text-emerald-300"
+                      : "bg-amber-50 text-amber-700 dark:bg-amber-900/25 dark:text-amber-300"
+                  }`}
+                >
+                  <IoEllipseSharp
+                    className={`text-[5px] ${menu.isActive ? "text-emerald-500" : "text-amber-500"}`}
+                    aria-hidden
+                  />
+                  {menu.isActive ? t("menuCard.active") : t("menuCard.paused")}
+                </span>
+              </div>
             </div>
 
             <div className="dashboard-menu-card__thumb size-[52px] shrink-0 overflow-hidden rounded-xl border border-slate-200/80 bg-primary/5 ring-1 ring-white dark:border-slate-600 dark:bg-primary/15 dark:ring-slate-800">
@@ -102,7 +117,9 @@ export default function MenuMobileCard({
               onClick={() => onToggleActive(menu)}
               disabled={togglingId === menu.id}
               title={menu.isActive ? t("menuCard.pause") : t("menuCard.play")}
-              aria-label={menu.isActive ? t("menuCard.pause") : t("menuCard.play")}
+              aria-label={
+                menu.isActive ? t("menuCard.pause") : t("menuCard.play")
+              }
               className={`inline-flex size-8 items-center justify-center rounded-lg border transition-colors active:scale-95 disabled:opacity-50 ${
                 menu.isActive
                   ? "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800/60 dark:bg-amber-900/20 dark:text-amber-300"
@@ -139,7 +156,10 @@ export default function MenuMobileCard({
           {menu.createdAt && (
             <div className="min-w-0">
               <span className="mb-0.5 flex items-center gap-1 text-[10px] font-medium text-slate-400 dark:text-slate-500">
-                <IoCalendarOutline className="shrink-0 text-[11px]" aria-hidden />
+                <IoCalendarOutline
+                  className="shrink-0 text-[11px]"
+                  aria-hidden
+                />
                 {t("menuCard.createdAt")}
               </span>
               <p className="truncate text-[11px] font-medium text-slate-600 dark:text-slate-300">
@@ -150,7 +170,10 @@ export default function MenuMobileCard({
           {menu.updatedAt && (
             <div className="min-w-0">
               <span className="mb-0.5 flex items-center gap-1 text-[10px] font-medium text-slate-400 dark:text-slate-500">
-                <IoCalendarOutline className="shrink-0 text-[11px] opacity-80" aria-hidden />
+                <IoCalendarOutline
+                  className="shrink-0 text-[11px] opacity-80"
+                  aria-hidden
+                />
                 {t("menuCard.updatedAt")}
               </span>
               <p className="truncate text-[11px] font-medium text-slate-600 dark:text-slate-300">
@@ -174,24 +197,36 @@ export default function MenuMobileCard({
           </span>
         </div>
 
-        <div className="mt-3 flex items-center gap-2 border-t border-slate-100 pt-3 dark:border-slate-800">
-          <LinkTo
-            id={isFirst ? "onboarding-manage-menu" : undefined}
-            href={dashboardPath}
-            className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary px-3 text-xs font-semibold text-white transition-colors hover:bg-primary/90 active:scale-[0.98]"
-          >
-            <IoSettingsOutline className="text-sm" aria-hidden />
-            {t("menuCard.manage")}
-          </LinkTo>
-          <a
-            href={menuPublicUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary active:scale-[0.98] dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-300 dark:hover:border-primary/40 dark:hover:bg-primary/10 dark:hover:text-primary"
-          >
-            <IoEyeOutline className="text-sm" aria-hidden />
-            {t("menuCard.preview")}
-          </a>
+        <div className="mt-3 flex flex-col gap-2 border-t border-slate-100 pt-3 dark:border-slate-800">
+          {!groupMeta.inGroup && onAddToGroup && (
+            <button
+              type="button"
+              onClick={() => onAddToGroup(menu)}
+              className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-xl bg-linear-to-r from-teal-600 to-emerald-600 px-3 text-xs font-bold text-white shadow-sm transition active:scale-[0.98] dark:from-teal-700 dark:to-emerald-800"
+            >
+              <IoGitNetworkOutline className="text-sm" aria-hidden />
+              {t("menuCard.addToGroup")}
+            </button>
+          )}
+          <div className="flex items-center gap-2">
+            <LinkTo
+              id={isFirst ? "onboarding-manage-menu" : undefined}
+              href={dashboardPath}
+              className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary px-3 text-xs font-semibold text-white transition-colors hover:bg-primary/90 active:scale-[0.98]"
+            >
+              <IoSettingsOutline className="text-sm" aria-hidden />
+              {t("menuCard.manage")}
+            </LinkTo>
+            <a
+              href={menuPublicUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary active:scale-[0.98] dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-300 dark:hover:border-primary/40 dark:hover:bg-primary/10 dark:hover:text-primary"
+            >
+              <IoEyeOutline className="text-sm" aria-hidden />
+              {t("menuCard.preview")}
+            </a>
+          </div>
         </div>
       </div>
     </article>

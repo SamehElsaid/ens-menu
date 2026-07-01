@@ -1,6 +1,12 @@
 "use client";
 
+import { useMemo } from "react";
 import { Menu } from "@/types/Menu";
+import MenuDeliveryGroupPanel from "@/components/Dashboard/MenuDeliveryGroupPanel";
+import {
+  buildMenuDisplayGroups,
+  resolveMenuGroupMeta,
+} from "@/lib/menuDeliveryGroups";
 import MenuMobileCard from "./MenuMobileCard";
 
 type MenusMobileListProps = {
@@ -14,6 +20,9 @@ type MenusMobileListProps = {
   getDashboardPath: (menu: Menu) => string;
   onToggleActive: (menu: Menu) => void;
   onDelete: (menu: Menu) => void;
+  onAddToGroup?: (menu: Menu) => void;
+  onManageGroup?: (group: { groupId: number; groupName: string; menuIds: number[] }) => void;
+  hasUngroupedMenus?: boolean;
 };
 
 export default function MenusMobileList({
@@ -27,25 +36,81 @@ export default function MenusMobileList({
   getDashboardPath,
   onToggleActive,
   onDelete,
+  onAddToGroup,
+  onManageGroup,
+  hasUngroupedMenus = false,
 }: MenusMobileListProps) {
+  const groups = useMemo(() => buildMenuDisplayGroups(menus), [menus]);
+
+  const firstManageMenuId = useMemo(() => {
+    for (const group of groups) {
+      if (group.type === "group") return group.menus[0]?.id ?? null;
+      return group.menu.id;
+    }
+    return null;
+  }, [groups]);
+
   return (
     <div className="dashboard-mobile-list dashboard-menus-mobile-list flex flex-col gap-3 pb-2 md:hidden">
-      {menus.map((menu, index) => (
-        <MenuMobileCard
-          key={menu.id}
-          menu={menu}
-          menuName={getMenuName(menu)}
-          description={getMenuDescription(menu) || undefined}
-          locale={locale}
-          formatDate={formatDate}
-          isFirst={index === 0}
-          togglingId={togglingId}
-          menuPublicUrl={getMenuPublicUrl(menu)}
-          dashboardPath={getDashboardPath(menu)}
-          onToggleActive={onToggleActive}
-          onDelete={onDelete}
-        />
-      ))}
+      {groups.map((group) => {
+        if (group.type === "group") {
+          return (
+            <MenuDeliveryGroupPanel
+              key={`mobile-group-${group.groupId}`}
+              groupName={group.groupName}
+              memberCount={group.menus.length}
+              layout="mobile"
+              canAddMenus={hasUngroupedMenus}
+              onAddMenus={() =>
+                onManageGroup?.({
+                  groupId: group.groupId,
+                  groupName: group.groupName,
+                  menuIds: group.menus.map((m) => m.id),
+                })
+              }
+              menuCards={group.menus.map((menu) => (
+                    <MenuMobileCard
+                      key={menu.id}
+                      menu={menu}
+                      menuName={getMenuName(menu)}
+                      description={getMenuDescription(menu) || undefined}
+                      locale={locale}
+                      formatDate={formatDate}
+                      isFirst={menu.id === firstManageMenuId}
+                      togglingId={togglingId}
+                      menuPublicUrl={getMenuPublicUrl(menu)}
+                      dashboardPath={getDashboardPath(menu)}
+                      groupMeta={resolveMenuGroupMeta(menu)}
+                      isNested
+                      onToggleActive={onToggleActive}
+                      onDelete={onDelete}
+                      onAddToGroup={onAddToGroup}
+                    />
+                  ))}
+            />
+          );
+        }
+
+        const menu = group.menu;
+        return (
+          <MenuMobileCard
+            key={menu.id}
+            menu={menu}
+            menuName={getMenuName(menu)}
+            description={getMenuDescription(menu) || undefined}
+            locale={locale}
+            formatDate={formatDate}
+            isFirst={menu.id === firstManageMenuId}
+            togglingId={togglingId}
+            menuPublicUrl={getMenuPublicUrl(menu)}
+            dashboardPath={getDashboardPath(menu)}
+            groupMeta={resolveMenuGroupMeta(menu)}
+            onToggleActive={onToggleActive}
+            onDelete={onDelete}
+            onAddToGroup={onAddToGroup}
+          />
+        );
+      })}
     </div>
   );
 }

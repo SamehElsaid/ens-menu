@@ -1,11 +1,15 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { axiosGet, axiosDelete, axiosPatch } from "@/shared/axiosCall";
 import LinkTo from "@/components/Global/LinkTo";
 import CreateMenuModal from "@/components/Dashboard/CreateMenuModal";
+import CreateMenuGroupModal from "@/components/Dashboard/CreateMenuGroupModal";
+import AddMenuToGroupModal, {
+  ManageMenuGroupModal,
+} from "@/components/Dashboard/AddMenuToGroupModal";
 import ExtraMenusPurchaseModal from "@/components/Dashboard/ExtraMenusPurchaseModal";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import { pushFirstMenuCreatedEvent } from "@/shared/gtmEvents";
@@ -31,9 +35,19 @@ import {
   IoPauseOutline,
   IoPlayOutline,
   IoCalendarOutline,
+  IoGitNetworkOutline,
 } from "react-icons/io5";
 import LoadImage from "@/components/ImageLoad";
 import MenusMobileList from "@/components/Dashboard/mobile/MenusMobileList";
+import MenuDashboardCard from "@/components/Dashboard/MenuDashboardCard";
+import MenuDeliveryGroupPanel from "@/components/Dashboard/MenuDeliveryGroupPanel";
+import {
+  buildMenuDisplayGroups,
+  resolveMenuGroupMeta,
+  extractMenuGroupsFromMenus,
+  menusAvailableToJoinGroup,
+  type MenuGroupSummary,
+} from "@/lib/menuDeliveryGroups";
 import { getMenuDashboardRef, menuDashboardPath } from "@/lib/menuDashboardPath";
 import {
   publicMenuLinkUrl,
@@ -53,6 +67,10 @@ export default function DashboardPage() {
   const [menus, setMenus] = useState<Menu[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
+  const [addToGroupTarget, setAddToGroupTarget] = useState<Menu | null>(null);
+  const [manageGroupTarget, setManageGroupTarget] =
+    useState<MenuGroupSummary | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [subscriptionLoading, setSubscriptionLoading] = useState(true);
   const [showLimitModal, setShowLimitModal] = useState(false);
@@ -79,7 +97,11 @@ export default function DashboardPage() {
         const menusList = Array.isArray(result.data)
           ? result.data
           : (result.data.menus ?? []);
-        setMenus(menusList);
+        setMenus(
+          menusList
+            .map((item) => normalizeMenuFromApi(item))
+            .filter((item): item is Menu => item != null),
+        );
       }
     } finally {
       setLoading(false);
@@ -220,6 +242,70 @@ export default function DashboardPage() {
       return dateStr;
     }
   };
+
+  const menuDisplayGroups = useMemo(
+    () => buildMenuDisplayGroups(menus),
+    [menus],
+  );
+
+  const firstManageMenuId = useMemo(() => {
+    for (const group of menuDisplayGroups) {
+      if (group.type === "group") return group.menus[0]?.id ?? null;
+      return group.menu.id;
+    }
+    return null;
+  }, [menuDisplayGroups]);
+
+  const showCreateGroupButton = menus.length >= 2;
+
+  const menuGroups = useMemo(
+    () => extractMenuGroupsFromMenus(menus),
+    [menus],
+  );
+  const hasUngroupedMenus = menusAvailableToJoinGroup(menus).length > 0;
+  const canAddToExistingGroup = menuGroups.length > 0 && hasUngroupedMenus;
+
+  const handleCreateGroupClick = () => {
+    if (!isProSubscription(subscription)) {
+      setShowLimitModal(true);
+      return;
+    }
+    setShowCreateGroupModal(true);
+  };
+
+  const handleAddToGroupClick = (menu: Menu) => {
+    if (!isProSubscription(subscription)) {
+      setShowLimitModal(true);
+      return;
+    }
+    setAddToGroupTarget(menu);
+  };
+
+  const handleManageGroupClick = (group: MenuGroupSummary) => {
+    if (!isProSubscription(subscription)) {
+      setShowLimitModal(true);
+      return;
+    }
+    setManageGroupTarget(group);
+  };
+
+  const refreshMenus = () => setRefreshing((n) => n + 1);
+
+  const cardLabels = useMemo(
+    () => ({
+      active: t("menuCard.active"),
+      paused: t("menuCard.paused"),
+      pause: t("menuCard.pause"),
+      play: t("menuCard.play"),
+      deleteMenu: t("deleteMenu"),
+      createdAt: t("menuCard.createdAt"),
+      updatedAt: t("menuCard.updatedAt"),
+      manage: t("menuCard.manage"),
+      preview: t("menuCard.preview"),
+      addToGroup: canAddToExistingGroup ? t("menuCard.addToGroup") : undefined,
+    }),
+    [t, canAddToExistingGroup],
+  );
 
   const handleToggleActive = async (menu: Menu) => {
     const effectiveMax = getEffectiveMaxMenus(subscription);
@@ -391,14 +477,26 @@ export default function DashboardPage() {
             {t("subtitle")}
           </p>
         </div>
-        <button
-          id="onboarding-create-menu"
-          onClick={handleCreateClick}
-          className="inline-flex w-full max-w-[280px] items-center justify-center gap-2 rounded-xl bg-linear-to-r from-primary to-primary/80 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg active:scale-[0.98] sm:w-auto sm:max-w-none sm:px-6 sm:py-3 sm:text-base"
-        >
-          <IoAddCircleOutline className="text-lg sm:text-xl" />
-          {t("createMenu")}
-        </button>
+        <div className="flex w-full max-w-[320px] flex-col gap-2 sm:w-auto sm:flex-row sm:max-w-none">
+          {showCreateGroupButton && (
+            <button
+              type="button"
+              onClick={handleCreateGroupClick}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-teal-600/70 bg-linear-to-r from-teal-50 to-emerald-50 px-4 py-2.5 text-sm font-bold text-teal-900 shadow-sm transition hover:border-teal-600 hover:from-teal-100 hover:to-emerald-100 active:scale-[0.98] sm:w-auto sm:px-5 sm:py-3 sm:text-base dark:border-teal-500/50 dark:from-teal-950/50 dark:to-emerald-950/30 dark:text-teal-100 dark:hover:from-teal-900/50"
+            >
+              <IoGitNetworkOutline className="text-lg sm:text-xl" />
+              {t("createGroup")}
+            </button>
+          )}
+          <button
+            id="onboarding-create-menu"
+            onClick={handleCreateClick}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-primary to-primary/80 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg active:scale-[0.98] sm:w-auto sm:px-6 sm:py-3 sm:text-base"
+          >
+            <IoAddCircleOutline className="text-lg sm:text-xl" />
+            {t("createMenu")}
+          </button>
+        </div>
       </div>
 
       <MenusMobileList
@@ -412,154 +510,83 @@ export default function DashboardPage() {
         getDashboardPath={(menu) => menuDashboardPath(menu)}
         onToggleActive={handleToggleActive}
         onDelete={setDeleteTarget}
+        onAddToGroup={canAddToExistingGroup ? handleAddToGroupClick : undefined}
+        onManageGroup={handleManageGroupClick}
+        hasUngroupedMenus={hasUngroupedMenus}
       />
 
       {/* Menus Grid — desktop/tablet */}
       <div className="hidden grid-cols-1 gap-6 md:grid md:grid-cols-2 xl:grid-cols-3">
-        {menus.map((menu, index) => (
-          <div
-            key={`menu-${menu.id}-${index}`}
-            className={`bg-white flex flex-col dark:bg-slate-900 rounded-2xl border shadow-sm overflow-hidden transition-all duration-300 hover:shadow-xl dark:hover:shadow-slate-950/40 ${menu.isActive
-                ? "border-slate-100 dark:border-slate-800 hover:border-primary/20 dark:hover:border-primary/40"
-                : "border-amber-100/80 dark:border-amber-900/40 bg-slate-50/30 dark:bg-amber-950/10"
-              }`}
-          >
-            {/* Card Header with Logo */}
-            <div className="p-6 pb-3 grow flex flex-col">
-              <div className="flex items-start gap-4">
-                {/* Logo */}
-                <div className="w-16 h-16 rounded-xl bg-primary/5 dark:bg-primary/15 border border-primary/10 dark:border-primary/25 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-white dark:ring-slate-800 shadow-sm">
-                  {menu.logo ? (
-                    <LoadImage
-                      src={menu.logo}
-                      alt={getMenuName(menu)}
-                      className="w-full h-full object-contain"
-                      width={64}
-                      height={64}
-                    />
-                  ) : (
-                    <IoRestaurant className="text-primary text-3xl" />
-                  )}
-                </div>
-
-                {/* Menu Info */}
-                <div className="flex-1 min-w-0 grow flex flex-col">
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 truncate mb-1">
-                    {getMenuName(menu)}
-                  </h3>
-                  <div className="flex items-center gap-2 flex-wrap ">
-                    <span
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${menu.isActive
-                          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-                          : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
-                        }`}
-                    >
-                      <IoEllipseSharp
-                        className={`text-[8px] ${menu.isActive ? "text-green-800 dark:text-green-400" : "text-amber-500 dark:text-amber-400"}`}
+        {menuDisplayGroups.map((group) => {
+          if (group.type === "group") {
+            return (
+              <MenuDeliveryGroupPanel
+                key={`menu-group-${group.groupId}`}
+                groupName={group.groupName}
+                memberCount={group.menus.length}
+                layout="desktop"
+                canAddMenus={hasUngroupedMenus}
+                onAddMenus={() =>
+                  handleManageGroupClick({
+                    id: group.groupId,
+                    name: group.groupName,
+                    menuIds: group.menus.map((m) => m.id),
+                  })
+                }
+                menuCards={group.menus.map((menu) => (
+                      <MenuDashboardCard
+                        key={menu.id}
+                        menu={menu}
+                        menuName={getMenuName(menu)}
+                        description={getMenuDescription(menu)}
+                        formatDate={formatDate}
+                        togglingId={togglingId}
+                        menuPublicUrl={getMenuPublicUrl(menu)}
+                        groupMeta={resolveMenuGroupMeta(menu)}
+                        manageLinkId={
+                          menu.id === firstManageMenuId
+                            ? "onboarding-manage-menu"
+                            : undefined
+                        }
+                        isNested
+                        labels={cardLabels}
+                        onToggleActive={handleToggleActive}
+                        onDelete={setDeleteTarget}
+                        onAddToGroup={
+                          canAddToExistingGroup
+                            ? handleAddToGroupClick
+                            : undefined
+                        }
                       />
-                      {menu.isActive
-                        ? t("menuCard.active")
-                        : t("menuCard.paused")}
-                    </span>
-                  </div>
-                </div>
+                    ))}
+              />
+            );
+          }
 
-                {/* Actions: Pause/Play + Delete */}
-                <div className="flex gap-2 shrink-0">
-                  <button
-                    onClick={() => handleToggleActive(menu)}
-                    disabled={togglingId === menu.id}
-                    title={
-                      menu.isActive ? t("menuCard.pause") : t("menuCard.play")
-                    }
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition-colors disabled:opacity-50 disabled:pointer-events-none ${menu.isActive
-                        ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800 dark:hover:bg-amber-900/35"
-                        : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800 dark:hover:bg-emerald-900/35"
-                      }`}
-                  >
-                    {togglingId === menu.id ? (
-                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                    ) : menu.isActive ? (
-                      <>
-                        <IoPauseOutline className="text-lg" />
-                        <span className="hidden sm:inline">
-                          {t("menuCard.pause")}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <IoPlayOutline className="text-lg" />
-                        <span className="hidden sm:inline">
-                          {t("menuCard.play")}
-                        </span>
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => setDeleteTarget(menu)}
-                    title={t("deleteMenu")}
-                    className="flex items-center justify-center w-10 h-[38px] rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-300 hover:border-red-200 dark:hover:border-red-800 transition-colors"
-                  >
-                    <IoTrashOutline className="text-lg" />
-                  </button>
-                </div>
-              </div>
+          const menu = group.menu;
 
-              {/* Description */}
-              {getMenuDescription(menu) && (
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-3 line-clamp-2">
-                  {getMenuDescription(menu)}
-                </p>
-              )}
-
-              {/* Created & Updated dates */}
-              <div className="flex flex-wrap items-center mt-auto gap-x-4 gap-y-1 text-xs text-slate-400 dark:text-slate-3  00 ">
-                {menu.createdAt && (
-                  <span className="flex items-center gap-1.5">
-                    <IoCalendarOutline className="text-sm shrink-0" />
-                    {t("menuCard.createdAt")}: {formatDate(menu.createdAt)}
-                  </span>
-                )}
-                {menu.updatedAt && (
-                  <span className="flex items-center gap-1.5">
-                    <IoCalendarOutline className="text-sm shrink-0 opacity-70" />
-                    {t("menuCard.updatedAt")}: {formatDate(menu.updatedAt)}
-                  </span>
-                )}
-              </div>
-
-              {/* Slug URL */}
-              <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-300">
-                <IoGlobeOutline className="shrink-0 text-sm" />
-                <span className="truncate font-mono" dir="ltr">
-                  {getMenuPublicUrl(menu).replace(/^\/\//, "")}
-                </span>
-              </div>
-            </div>
-
-            {/* Card Footer with Action Buttons */}
-            <div className="px-6 py-3 bg-slate-50/50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex items-center gap-3">
-              <LinkTo
-                id={index === 0 ? "onboarding-manage-menu" : undefined}
-                href={menuDashboardPath(menu)}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition-all"
-              >
-                <IoSettingsOutline className="text-base" />
-                {t("menuCard.manage")}
-              </LinkTo>
-              <a
-                href={getMenuPublicUrl(menu)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-sm font-semibold hover:border-primary/30 dark:hover:border-primary/50 hover:text-primary dark:hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/15 transition-all"
-              >
-                <IoEyeOutline className="text-base" />
-                {t("menuCard.preview")}
-                <IoOpenOutline className="text-xs" />
-              </a>
-            </div>
-          </div>
-        ))}
+          return (
+            <MenuDashboardCard
+              key={menu.id}
+              menu={menu}
+              menuName={getMenuName(menu)}
+              description={getMenuDescription(menu)}
+              formatDate={formatDate}
+              togglingId={togglingId}
+              menuPublicUrl={getMenuPublicUrl(menu)}
+              groupMeta={resolveMenuGroupMeta(menu)}
+              manageLinkId={
+                menu.id === firstManageMenuId ? "onboarding-manage-menu" : undefined
+              }
+              labels={cardLabels}
+              onToggleActive={handleToggleActive}
+              onDelete={setDeleteTarget}
+              onAddToGroup={
+                canAddToExistingGroup ? handleAddToGroupClick : undefined
+              }
+            />
+          );
+        })}
       </div>
 
       {/* Create Menu Modal */}
@@ -568,6 +595,35 @@ export default function DashboardPage() {
           onClose={() => setShowCreateModal(false)}
           onMenuCreated={handleMenuCreated}
           onRefresh={() => setRefreshing(refreshing + 1)}
+        />
+      )}
+
+      {showCreateGroupModal && (
+        <CreateMenuGroupModal
+          menus={menus}
+          getMenuName={getMenuName}
+          onClose={() => setShowCreateGroupModal(false)}
+          onCreated={refreshMenus}
+        />
+      )}
+
+      {addToGroupTarget && menuGroups.length > 0 && (
+        <AddMenuToGroupModal
+          menu={addToGroupTarget}
+          groups={menuGroups}
+          getMenuName={getMenuName}
+          onClose={() => setAddToGroupTarget(null)}
+          onSaved={refreshMenus}
+        />
+      )}
+
+      {manageGroupTarget && (
+        <ManageMenuGroupModal
+          group={manageGroupTarget}
+          menus={menus}
+          getMenuName={getMenuName}
+          onClose={() => setManageGroupTarget(null)}
+          onSaved={refreshMenus}
         />
       )}
 

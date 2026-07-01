@@ -51,6 +51,11 @@ export interface Menu {
   workingHours: WorkHours;
   createdAt: string;
   updatedAt: string;
+  /** Named group for shared delivery + geo redirect (Pro). */
+  menuGroupId?: number | null;
+  menuGroupName?: string | null;
+  menuGroupMemberCount?: number;
+  isGroupInbox?: boolean;
   _count?: {
     items?: number;
     categories?: number;

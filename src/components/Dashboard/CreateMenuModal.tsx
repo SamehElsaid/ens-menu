@@ -26,6 +26,8 @@ import {
   IoInformationCircleOutline,
   IoAddCircleOutline,
   IoCloudUploadOutline,
+  IoArrowBackOutline,
+  IoGitNetworkOutline,
 } from "react-icons/io5";
 import CustomBtn from "../Custom/CustomBtn";
 import { normalizeMenuFromApi } from "@/lib/normalizeMenuFromApi";
@@ -72,6 +74,7 @@ export default function CreateMenuModal({
 }: CreateMenuModalProps) {
   const t = useTranslations("Menus.createModal");
   const locale = useLocale();
+  const isRTL = locale === "ar";
 
   const {
     control,
@@ -614,7 +617,7 @@ export default function CreateMenuModal({
             id="onboarding-create-actions"
             className="flex gap-3 pt-6 border-t border-gray-200 dark:border-gray-700 justify-end"
           >
-            <div className="w-fit!">
+            <div className="w-fit! ms-auto flex gap-3">
               <button
                 type="button"
                 onClick={onClose}

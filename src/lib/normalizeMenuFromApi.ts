@@ -29,6 +29,12 @@ export function normalizeMenuFromApi(data: unknown): Menu | null {
     "";
   const nameAr = (candidate.nameAr as string | undefined) ?? nameEn;
 
+  const menuGroupIdRaw = candidate.menuGroupId;
+  const menuGroupId =
+    menuGroupIdRaw != null && menuGroupIdRaw !== ""
+      ? Number(menuGroupIdRaw)
+      : null;
+
   return {
     ...(candidate as Menu),
     id,
@@ -39,6 +45,14 @@ export function normalizeMenuFromApi(data: unknown): Menu | null {
     slug,
     nameEn,
     nameAr,
+    menuGroupId:
+      menuGroupId != null && Number.isFinite(menuGroupId) ? menuGroupId : null,
+    menuGroupName:
+      typeof candidate.menuGroupName === "string"
+        ? candidate.menuGroupName
+        : null,
+    menuGroupMemberCount: Number(candidate.menuGroupMemberCount ?? 0),
+    isGroupInbox: candidate.isGroupInbox === true,
     currency: String(candidate.currency ?? "EGP"),
     isActive: candidate.isActive !== false,
     activeItemsCount: Number(candidate.activeItemsCount ?? 0),

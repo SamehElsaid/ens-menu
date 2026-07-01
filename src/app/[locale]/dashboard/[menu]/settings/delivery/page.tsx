@@ -23,6 +23,7 @@ import CustomBtn from "@/components/Custom/CustomBtn";
 import CustomInput from "@/components/Custom/CustomInput";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import DeleteEntityConfirmModal from "@/components/Dashboard/DeleteEntityConfirmModal";
+import { useAppSelector } from "@/store/hooks";
 
 interface DeliverySettings {
   deliveryOn: boolean;
@@ -70,6 +71,9 @@ export default function DeliverySettingsPage() {
   const locale = useLocale();
   const t = useTranslations("settingsDeliveryPage");
   const isRTL = locale === "ar";
+  const menu = useAppSelector((s) => s.menuData.menu);
+  const menuId = menu?.id;
+  const deliveryApiBase = menuId ? `/menus/${menuId}/delivery` : null;
 
   const [settings, setSettings] = useState<DeliverySettings>({
     deliveryOn: false,
@@ -98,9 +102,10 @@ export default function DeliverySettingsPage() {
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadSettings = async (silent = false) => {
+    if (!deliveryApiBase) return;
     if (!silent) setIsLoadingSettings(true);
     const res = await axiosGet<DeliverySettings>(
-      "/user/delivery/settings",
+      `${deliveryApiBase}/settings`,
       locale,
     );
     if (res.status && res.data) {
@@ -117,14 +122,16 @@ export default function DeliverySettingsPage() {
   };
 
   useEffect(() => {
+    if (!menuId) return;
     loadSettings();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [locale]);
+  }, [locale, menuId]);
 
   const fetchGovernorates = async (silent = false) => {
+    if (!deliveryApiBase) return;
     if (!silent) setIsLoadingGovs(true);
     const res = await axiosGet<{ governorates: Governorate[] }>(
-      "/user/delivery/governorates",
+      `${deliveryApiBase}/governorates`,
       locale,
     );
     if (res.status && res.data) {
@@ -137,9 +144,10 @@ export default function DeliverySettingsPage() {
   };
 
   useEffect(() => {
+    if (!menuId) return;
     fetchGovernorates();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [locale]);
+  }, [locale, menuId]);
 
   useEffect(() => {
     return () => {
@@ -197,6 +205,7 @@ export default function DeliverySettingsPage() {
   };
 
   const handleSaveSettings = async () => {
+    if (!deliveryApiBase) return;
     setSettingsTouched(true);
     if (!isSettingsValid) return;
     setIsSavingSettings(true);
@@ -209,7 +218,7 @@ export default function DeliverySettingsPage() {
           : {}),
       };
       const res = await axiosPatch<typeof payload, DeliverySettings>(
-        "/user/delivery/settings",
+        `${deliveryApiBase}/settings`,
         locale,
         payload,
       );
@@ -266,6 +275,7 @@ export default function DeliverySettingsPage() {
   };
 
   const handleSaveGov = async () => {
+    if (!deliveryApiBase) return;
     setGovFormTouched(true);
     if (!isGovFormValid) return;
     setIsSavingGov(true);
@@ -280,7 +290,7 @@ export default function DeliverySettingsPage() {
 
       if (editingId !== null) {
         const res = await axiosPatch<typeof payload, Governorate>(
-          `/user/delivery/governorates/${editingId}`,
+          `${deliveryApiBase}/governorates/${editingId}`,
           locale,
           payload,
         );
@@ -291,7 +301,7 @@ export default function DeliverySettingsPage() {
         }
       } else {
         const res = await axiosPost<typeof payload, Governorate>(
-          "/user/delivery/governorates",
+          `${deliveryApiBase}/governorates`,
           locale,
           payload,
         );
@@ -307,11 +317,11 @@ export default function DeliverySettingsPage() {
   };
 
   const handleConfirmDelete = async () => {
-    if (!govToDelete) return;
+    if (!govToDelete || !deliveryApiBase) return;
     setDeletingId(govToDelete.id);
     try {
       const res = await axiosDelete(
-        `/user/delivery/governorates/${govToDelete.id}`,
+        `${deliveryApiBase}/governorates/${govToDelete.id}`,
         locale,
       );
       if (res.status) {
