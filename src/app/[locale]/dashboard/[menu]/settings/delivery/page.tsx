@@ -71,13 +71,26 @@ interface GovFormState {
 
 interface Branch {
   id: number;
-  nameAr: string;
-  nameEn: string;
-  latitude: number;
-  longitude: number;
-  deliveryBasePrice: number;
-  deliveryPricePerKm: number;
-  maxDeliveryRadiusKm: number;
+  nameAr?: string | null;
+  nameEn?: string | null;
+  name?: string | null;
+  latitude: number | string | null;
+  longitude: number | string | null;
+  deliveryBasePrice?: number | string | null;
+  deliveryPricePerKm?: number | string | null;
+  maxDeliveryRadiusKm?: number | string | null;
+}
+
+function branchNumber(value: unknown, fallback = 0): number {
+  if (value == null || value === "") return fallback;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function branchFieldString(value: unknown, fallback = ""): string {
+  if (value == null || value === "") return fallback;
+  const n = Number(value);
+  return Number.isFinite(n) ? String(n) : fallback;
 }
 
 interface BranchFormState {
@@ -216,16 +229,16 @@ export default function DeliverySettingsPage() {
       const branch = list[0];
       if (branch) {
         setBranchId(branch.id);
-        const lat = Number(branch.latitude);
-        const lng = Number(branch.longitude);
+        const lat = branchNumber(branch.latitude, NaN);
+        const lng = branchNumber(branch.longitude, NaN);
         const coords = isValidBranchCoordinate(lat) && isValidBranchCoordinate(lng)
           ? { latitude: String(lat), longitude: String(lng) }
           : getDefaultBranchFormCoords();
         setBranchForm({
           ...coords,
-          deliveryBasePrice: String(branch.deliveryBasePrice ?? ""),
-          deliveryPricePerKm: String(branch.deliveryPricePerKm ?? ""),
-          maxDeliveryRadiusKm: String(branch.maxDeliveryRadiusKm || 10),
+          deliveryBasePrice: branchFieldString(branch.deliveryBasePrice),
+          deliveryPricePerKm: branchFieldString(branch.deliveryPricePerKm),
+          maxDeliveryRadiusKm: branchFieldString(branch.maxDeliveryRadiusKm, "10"),
         });
       } else {
         setBranchId(null);
@@ -477,11 +490,11 @@ export default function DeliverySettingsPage() {
       const payload = {
         nameAr: menuNameAr,
         nameEn: menuNameEn,
-        latitude: parseFloat(branchForm.latitude) || 0,
-        longitude: parseFloat(branchForm.longitude) || 0,
-        deliveryBasePrice: parseFloat(branchForm.deliveryBasePrice) || 0,
-        deliveryPricePerKm: parseFloat(branchForm.deliveryPricePerKm) || 0,
-        maxDeliveryRadiusKm: parseFloat(branchForm.maxDeliveryRadiusKm) || 0,
+        latitude: branchNumber(branchForm.latitude),
+        longitude: branchNumber(branchForm.longitude),
+        deliveryBasePrice: branchNumber(branchForm.deliveryBasePrice),
+        deliveryPricePerKm: branchNumber(branchForm.deliveryPricePerKm),
+        maxDeliveryRadiusKm: branchNumber(branchForm.maxDeliveryRadiusKm),
       };
 
       if (branchId !== null) {
