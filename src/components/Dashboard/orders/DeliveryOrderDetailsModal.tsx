@@ -1,7 +1,12 @@
 "use client";
 
 import OrderDetailsModal from "./OrderDetailsModal";
-import type { CallEntryDetail, OrderActionResult } from "@/lib/tableOrders";
+import type {
+  CallEntryDetail,
+  CallItem,
+  OrderActionResult,
+  OrderStatus,
+} from "@/lib/tableOrders";
 
 export default function DeliveryOrderDetailsModal({
   entry,
@@ -10,6 +15,7 @@ export default function DeliveryOrderDetailsModal({
   onClose,
   menuId,
   onActionComplete,
+  onItemsUpdated,
 }: {
   entry: CallEntryDetail | null;
   loading: boolean;
@@ -17,6 +23,12 @@ export default function DeliveryOrderDetailsModal({
   onClose: () => void;
   menuId?: string;
   onActionComplete?: (result: OrderActionResult) => void;
+  onItemsUpdated?: (
+    entryId: string,
+    items: CallItem[],
+    orderTotal: number,
+    status: OrderStatus,
+  ) => void;
 }) {
   return (
     <OrderDetailsModal
@@ -27,6 +39,7 @@ export default function DeliveryOrderDetailsModal({
       variant="delivery"
       menuId={menuId}
       onActionComplete={onActionComplete}
+      onItemsUpdated={onItemsUpdated}
     />
   );
 }

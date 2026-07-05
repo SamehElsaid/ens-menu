@@ -41,6 +41,7 @@ export default function DeliveryOrdersView() {
     modalEntry,
     modalLoading,
     handleActionComplete,
+    handleItemsUpdated,
   } = useMenuOrdersPage("delivery");
 
   return (
@@ -134,6 +135,7 @@ export default function DeliveryOrdersView() {
           onClose={closeModal}
           menuId={menuId}
           onActionComplete={handleActionComplete}
+          onItemsUpdated={handleItemsUpdated}
         />
       )}
     </div>

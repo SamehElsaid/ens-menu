@@ -18,15 +18,55 @@ interface OrderActionButtonsProps {
   onComplete: (result: OrderActionResult) => void;
   compact?: boolean;
   translationNs?: "tableOrders" | "deliveryOrders";
+  /** Cashier or owner — may finish / close table orders. */
+  canFinish?: boolean;
+  variant?: "table" | "delivery";
 }
 
 type ActionConfig = {
   action: OrderActionType;
-  labelKey: "accept" | "reject" | "markPrepared" | "markDelivered";
+  labelKey: "accept" | "reject" | "markPrepared" | "markDelivered" | "finish";
   className: string;
 };
 
-function actionsForStatus(status: OrderStatus): ActionConfig[] {
+function actionsForStatus(
+  status: OrderStatus,
+  variant: "table" | "delivery",
+  canFinish: boolean,
+): ActionConfig[] {
+  if (variant === "table") {
+    switch (status) {
+      case "pending":
+        return [
+          {
+            action: "TABLE_CALL_CONFIRMED",
+            labelKey: "accept",
+            className:
+              "bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500",
+          },
+          {
+            action: "TABLE_CALL_CANCELLED",
+            labelKey: "reject",
+            className:
+              "border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-800/50 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-900/40",
+          },
+        ];
+      case "confirmed":
+      case "prepared":
+        if (!canFinish) return [];
+        return [
+          {
+            action: "TABLE_CALL_COMPLETED",
+            labelKey: "finish",
+            className:
+              "bg-violet-600 text-white hover:bg-violet-700 dark:bg-violet-600 dark:hover:bg-violet-500",
+          },
+        ];
+      default:
+        return [];
+    }
+  }
+
   switch (status) {
     case "pending":
       return [
@@ -44,6 +84,7 @@ function actionsForStatus(status: OrderStatus): ActionConfig[] {
         },
       ];
     case "confirmed":
+      if (!canFinish) return [];
       return [
         {
           action: "TABLE_CALL_PREPARED",
@@ -53,6 +94,7 @@ function actionsForStatus(status: OrderStatus): ActionConfig[] {
         },
       ];
     case "prepared":
+      if (!canFinish) return [];
       return [
         {
           action: "TABLE_CALL_DELIVERED",
@@ -73,11 +115,13 @@ export default function OrderActionButtons({
   onComplete,
   compact = false,
   translationNs = "tableOrders",
+  canFinish = true,
+  variant = "table",
 }: OrderActionButtonsProps) {
   const t = useTranslations(translationNs);
   const locale = useLocale();
   const [localActing, setLocalActing] = useState(false);
-  const actions = actionsForStatus(status);
+  const actions = actionsForStatus(status, variant, canFinish);
 
   if (actions.length === 0) return null;
 

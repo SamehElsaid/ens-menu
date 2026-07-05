@@ -42,6 +42,7 @@ export default function TableOrdersView() {
     modalEntry,
     modalLoading,
     handleActionComplete,
+    handleItemsUpdated,
   } = useMenuOrdersPage("table");
 
   if (isFreePlan) {
@@ -159,6 +160,7 @@ export default function TableOrdersView() {
           onClose={closeModal}
           menuId={menuId}
           onActionComplete={handleActionComplete}
+          onItemsUpdated={handleItemsUpdated}
         />
       )}
     </div>

@@ -9,7 +9,8 @@ export type OrderActionType =
   | "TABLE_CALL_CONFIRMED"
   | "TABLE_CALL_CANCELLED"
   | "TABLE_CALL_PREPARED"
-  | "TABLE_CALL_DELIVERED";
+  | "TABLE_CALL_DELIVERED"
+  | "TABLE_CALL_COMPLETED";
 
 export interface CallItemOption {
   nameAr?: string;
@@ -157,6 +158,8 @@ export function orderStatusFromAction(action: OrderActionType): OrderStatus {
       return "prepared";
     case "TABLE_CALL_DELIVERED":
       return "delivered";
+    case "TABLE_CALL_COMPLETED":
+      return "delivered";
     default:
       return "pending";
   }
@@ -194,6 +197,14 @@ export type OrderActionResult = {
 
 export function isPendingOrder(entry: CallEntry): boolean {
   return resolveListEntryStatus(entry) === "pending";
+}
+
+export function isEditableOrderStatus(status: OrderStatus): boolean {
+  return (
+    status === "pending" ||
+    status === "confirmed" ||
+    status === "prepared"
+  );
 }
 
 export function countPendingOrders(entries: CallEntry[]): number {
@@ -242,6 +253,7 @@ export const ORDER_ACTION_LABEL: Record<string, { en: string; ar: string }> = {
   TABLE_CALL_ITEMS_UPDATED: { en: "Items Updated", ar: "تم تحديث الأصناف" },
   TABLE_CALL_PREPARED: { en: "Order Prepared", ar: "تم تحضير الطلب" },
   TABLE_CALL_DELIVERED: { en: "Order Delivered", ar: "تم تسليم الطلب" },
+  TABLE_CALL_COMPLETED: { en: "Order Completed", ar: "تم إنهاء الطلب" },
 };
 
 export function orderActionLabel(action: string, locale: string): string {

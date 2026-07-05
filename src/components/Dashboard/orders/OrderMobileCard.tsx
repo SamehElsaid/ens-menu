@@ -9,6 +9,7 @@ import {
 } from "@/lib/tableOrders";
 import type { CallEntry, OrderActionResult } from "@/lib/tableOrders";
 import OrderActionButtons from "./OrderActionButtons";
+import { useDashboardSession } from "@/hooks/useDashboardSession";
 import {
   IoEllipseSharp,
   IoEyeOutline,
@@ -31,6 +32,9 @@ export default function OrderMobileCard({
   menuId,
 }: OrderMobileCardProps) {
   const t = useTranslations("tableOrders");
+  const session = useDashboardSession();
+  const canFinish =
+    session?.role !== "staff" || session?.staffJobRole === "cashier";
   const status = resolveListEntryStatus(entry);
   const tone = orderStatusTone(status);
   const time = resolveEntryTime(entry.actionDetails);
@@ -110,6 +114,8 @@ export default function OrderMobileCard({
           status={status}
           onComplete={onActionComplete}
           compact
+          canFinish={canFinish}
+          variant="table"
         />
         <button
           type="button"
