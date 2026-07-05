@@ -722,10 +722,7 @@ body:has(.register-page) {
     min-height: 0;
     max-height: none;
     flex: none;
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
+    overflow: hidden;
   }
 
   .hero-lina-chat-card .hero-chat-animate-in {
@@ -2276,30 +2273,50 @@ textarea {
 
 @keyframes trusted-by-marquee {
   0% {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translateX(-50%);
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
 @keyframes trusted-by-marquee-rtl {
   0% {
-    transform: translateX(-50%);
+    transform: translate3d(-50%, 0, 0);
   }
   100% {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
+}
+
+.trusted-by-marquee-viewport {
+  width: 100%;
+  direction: ltr;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.trusted-by-marquee-viewport::-webkit-scrollbar {
+  display: none;
 }
 
 .trusted-by-marquee-track {
-  animation: trusted-by-marquee 42s linear infinite;
+  display: flex;
   width: max-content;
+  will-change: transform;
+  animation-name: trusted-by-marquee;
+  animation-duration: 15s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.trusted-by-marquee-set {
+  flex-shrink: 0;
+  direction: ltr;
 }
 
 .trusted-by-marquee-track--rtl {
-  animation: trusted-by-marquee-rtl 42s linear infinite;
-  width: max-content;
+  animation-name: trusted-by-marquee-rtl;
 }
 
 .trusted-by-marquee-track:hover {
@@ -5981,10 +5998,7 @@ body.recaptcha-modal-open {
     min-height: 0;
     max-height: none;
     flex: none;
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
+    overflow: hidden;
   }
 
   .hero-lina-chat-card .hero-chat-animate-in {

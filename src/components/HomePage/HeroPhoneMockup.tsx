@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FiCheck, FiMinus, FiPlus } from "react-icons/fi";
 import { useLocale, useTranslations } from "next-intl";
 import HeroProductThumb from "@/components/HomePage/HeroProductThumb";
@@ -337,8 +337,6 @@ export default function HeroPhoneMockup({
     [t],
   );
 
-  const chatScrollRef = useRef<HTMLDivElement>(null);
-  const chatEndRef = useRef<HTMLDivElement>(null);
 
   const [quantities] = useState<QtyState>(() => buildInitialQty(turns));
   const [addedTurns, setAddedTurns] = useState<Set<string>>(new Set());
@@ -391,16 +389,6 @@ export default function HeroPhoneMockup({
 
     return () => window.clearTimeout(timer);
   }, [phase, turnIndex, turns.length, reduceMotion, loopId]);
-
-  useEffect(() => {
-    const scrollParent = chatScrollRef.current;
-    if (!scrollParent) return;
-
-    scrollParent.scrollTo({
-      top: scrollParent.scrollHeight,
-      behavior: reduceMotion ? "auto" : "smooth",
-    });
-  }, [turnIndex, phase, loopId, reduceMotion]);
 
   const cartItemCount = useMemo(() => {
     let count = 0;
@@ -469,15 +457,11 @@ export default function HeroPhoneMockup({
           </div>
         </header>
 
-        <div
-          ref={chatScrollRef}
-          className="hero-chat-scroll min-h-0 flex-1 space-y-3.5 overflow-y-auto overscroll-contain px-3 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
+        <div className="hero-chat-scroll min-h-0 flex-1 space-y-3.5 overflow-hidden overscroll-none px-3 py-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {turns.map((turn, index) => {
-            if (index > turnIndex) return null;
+            if (index !== turnIndex) return null;
 
-            const effectivePhase: TurnPhase =
-              index < turnIndex ? "added" : phase;
+            const effectivePhase = phase;
 
             const showUser = phaseAtLeast(effectivePhase, "user");
             const showTyping =
@@ -517,7 +501,6 @@ export default function HeroPhoneMockup({
               </div>
             );
           })}
-          <div ref={chatEndRef} aria-hidden className="h-px shrink-0" />
         </div>
 
         <footer

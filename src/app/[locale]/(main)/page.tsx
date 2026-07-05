@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { buildSeoMetadata } from "@/lib/seo";
 import { fetchPageMetadata, resolveMetaField } from "@/lib/fetchPageMetadata";
 import HeroContent from "@/components/HomePage/HeroContent";
+import TrustedBySection from "@/components/HomePage/TrustedBySection";
 import TransformShowcaseSection from "@/components/HomePage/TransformShowcaseSection";
 import HomeCTASection from "@/components/HomePage/HomeCTASection";
 
@@ -30,6 +31,7 @@ async function Page({ params }: Props) {
   return (
     <>
       <HeroContent locale={locale} />
+      <TrustedBySection />
       <TransformShowcaseSection locale={locale} />
       <HomeCTASection locale={locale} />
     </>

@@ -1318,6 +1318,7 @@ export default function MenuImportStory({
   const programmaticScrollRef = useRef(false);
   const isDraggingRef = useRef(false);
   const skipAutoScrollRef = useRef(false);
+  const userNavigatedRef = useRef(false);
   const activeStepRef = useRef(1);
   const pauseUntilRef = useRef(0);
   const advanceTimerRef = useRef<number | null>(null);
@@ -1391,6 +1392,7 @@ export default function MenuImportStory({
   const goToStep = useCallback(
     (step: number) => {
       const next = Math.max(1, Math.min(stepCount, step));
+      userNavigatedRef.current = true;
       setActiveStep(next);
       pauseAutoplay();
     },
@@ -1435,9 +1437,17 @@ export default function MenuImportStory({
 
   useLayoutEffect(() => {
     const container = timelineRef.current;
-    if (!container || !visible || isDraggingRef.current || skipAutoScrollRef.current) {
+    if (
+      !container ||
+      !visible ||
+      isDraggingRef.current ||
+      skipAutoScrollRef.current ||
+      !userNavigatedRef.current
+    ) {
       return;
     }
+
+    userNavigatedRef.current = false;
 
     const behavior: ScrollBehavior = prefersReducedMotion() ? "auto" : "smooth";
     let cancelled = false;
