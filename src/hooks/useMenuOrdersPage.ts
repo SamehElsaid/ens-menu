@@ -21,7 +21,9 @@ import {
   type ActivityCallsPayload,
   type CallEntry,
   type CallEntryDetail,
+  type CallItem,
   type OrderActionResult,
+  type OrderStatus,
 } from "@/lib/tableOrders";
 
 const PAGE_SIZE = 12;
@@ -189,6 +191,35 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
     });
   }, []);
 
+  const handleItemsUpdated = useCallback(
+    (
+      entryId: string,
+      items: CallItem[],
+      orderTotal: number,
+      status: OrderStatus,
+    ) => {
+      setEntries((prev) =>
+        prev.map((entry) =>
+          entry.id === entryId
+            ? { ...entry, items, totalPrice: orderTotal }
+            : entry,
+        ),
+      );
+      setModalEntry((prev) => {
+        if (!prev || String(prev.id) !== entryId) return prev;
+        return {
+          ...prev,
+          items,
+          totalPrice: orderTotal,
+          order: prev.order
+            ? { ...prev.order, items, orderTotal, status }
+            : prev.order,
+        };
+      });
+    },
+    [],
+  );
+
   useEffect(() => {
     if (!entryParam || !menuId) {
       setModalEntry(null);
@@ -263,5 +294,6 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
     modalEntry,
     modalLoading,
     handleActionComplete,
+    handleItemsUpdated,
   };
 }
