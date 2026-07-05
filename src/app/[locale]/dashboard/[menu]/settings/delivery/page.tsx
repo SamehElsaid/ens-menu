@@ -147,10 +147,12 @@ export default function DeliverySettingsPage() {
   const [branchId, setBranchId] = useState<number | null>(null);
   const [branchForm, setBranchForm] = useState<BranchFormState>(EMPTY_BRANCH_FORM);
   const [isLoadingBranch, setIsLoadingBranch] = useState(true);
-  const [isSavingBranch, setIsSavingBranch] = useState(false);
   const [branchFormTouched, setBranchFormTouched] = useState(false);
   const [isSavingDeliveryMode, setIsSavingDeliveryMode] = useState(false);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+
+  const deliveryDisabled = !settings.deliveryOn;
+  const isDistanceMode = settings.deliveryMode === "distance";
 
   const loadSettings = async (silent = false) => {
     if (!deliveryApiBase) return;
@@ -299,7 +301,12 @@ export default function DeliverySettingsPage() {
   const handleSaveSettings = async () => {
     if (!deliveryApiBase) return;
     setSettingsTouched(true);
+    if (isDistanceMode && settings.deliveryOn) {
+      setBranchFormTouched(true);
+    }
     if (!isSettingsValid) return;
+    if (isDistanceMode && settings.deliveryOn && !isBranchFormValid) return;
+
     setIsSavingSettings(true);
     try {
       const payload = {
@@ -315,10 +322,40 @@ export default function DeliverySettingsPage() {
         locale,
         payload,
       );
-      if (res.status) {
-        toast.success(t("savedSuccess"));
-        await loadSettings(true);
+      if (!res.status) return;
+
+      if (isDistanceMode && settings.deliveryOn && branchesApiBase) {
+        const branchPayload = {
+          nameAr: menuNameAr,
+          nameEn: menuNameEn,
+          latitude: parseFloat(branchForm.latitude) || 0,
+          longitude: parseFloat(branchForm.longitude) || 0,
+          deliveryBasePrice: parseFloat(branchForm.deliveryBasePrice) || 0,
+          deliveryPricePerKm: parseFloat(branchForm.deliveryPricePerKm) || 0,
+          maxDeliveryRadiusKm: parseFloat(branchForm.maxDeliveryRadiusKm) || 0,
+        };
+
+        const branchRes =
+          branchId !== null
+            ? await axiosPatch<typeof branchPayload, Branch>(
+                `${branchesApiBase}/${branchId}`,
+                locale,
+                branchPayload,
+              )
+            : await axiosPost<typeof branchPayload, Branch>(
+                branchesApiBase,
+                locale,
+                branchPayload,
+              );
+
+        if (!branchRes.status) return;
+
+        await loadBranchSettings(true);
+        setBranchFormTouched(false);
       }
+
+      toast.success(t("savedSuccess"));
+      await loadSettings(true);
     } finally {
       setIsSavingSettings(false);
     }
@@ -374,6 +411,14 @@ export default function DeliverySettingsPage() {
     parseFloat(branchForm.deliveryPricePerKm) >= 0 &&
     branchForm.maxDeliveryRadiusKm.trim() !== "" &&
     parseFloat(branchForm.maxDeliveryRadiusKm) > 0;
+
+  const isSaveDisabled =
+    isSavingSettings ||
+    (settingsTouched && !isSettingsValid) ||
+    (isDistanceMode &&
+      settings.deliveryOn &&
+      branchFormTouched &&
+      !isBranchFormValid);
 
   const resetForm = () => {
     setGovForm(EMPTY_GOV_FORM);
@@ -467,53 +512,6 @@ export default function DeliverySettingsPage() {
       setDeletingId(null);
     }
   };
-
-  const handleSaveBranch = async () => {
-    if (!branchesApiBase) return;
-    setBranchFormTouched(true);
-    if (!isBranchFormValid) return;
-    setIsSavingBranch(true);
-    try {
-      const payload = {
-        nameAr: menuNameAr,
-        nameEn: menuNameEn,
-        latitude: parseFloat(branchForm.latitude) || 0,
-        longitude: parseFloat(branchForm.longitude) || 0,
-        deliveryBasePrice: parseFloat(branchForm.deliveryBasePrice) || 0,
-        deliveryPricePerKm: parseFloat(branchForm.deliveryPricePerKm) || 0,
-        maxDeliveryRadiusKm: parseFloat(branchForm.maxDeliveryRadiusKm) || 0,
-      };
-
-      if (branchId !== null) {
-        const res = await axiosPatch<typeof payload, Branch>(
-          `${branchesApiBase}/${branchId}`,
-          locale,
-          payload,
-        );
-        if (res.status) {
-          await loadBranchSettings(true);
-          toast.success(t("branches.updateSuccess"));
-          setBranchFormTouched(false);
-        }
-      } else {
-        const res = await axiosPost<typeof payload, Branch>(
-          branchesApiBase,
-          locale,
-          payload,
-        );
-        if (res.status) {
-          await loadBranchSettings(true);
-          toast.success(t("branches.addSuccess"));
-          setBranchFormTouched(false);
-        }
-      }
-    } finally {
-      setIsSavingBranch(false);
-    }
-  };
-
-  const deliveryDisabled = !settings.deliveryOn;
-  const isDistanceMode = settings.deliveryMode === "distance";
 
   if (isLoadingSettings) {
     return (
@@ -914,7 +912,8 @@ export default function DeliverySettingsPage() {
                 {/* Google / Nominatim search */}
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    {t("governorates.searchLabel")}
+                    {t("governorates.searchLabel")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -925,7 +924,11 @@ export default function DeliverySettingsPage() {
                         setTimeout(() => setSearchResults([]), 200)
                       }
                       placeholder={t("governorates.searchPlaceholder")}
-                      className="w-full py-3.5 ps-10 pe-4 outline-none rounded-2xl border border-accent-purple/20 focus:border-accent-purple focus:ring-2 focus:ring-accent-purple/20 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600 dark:placeholder:text-slate-400 dark:focus:border-accent-purple text-sm"
+                      className={`w-full py-3.5 ps-10 pe-4 outline-none rounded-2xl border focus:ring-2 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400 text-sm ${
+                        govFormTouched && !govForm.lat.trim()
+                          ? "border-red-500 focus:border-red-500 focus:ring-red-500/20 dark:border-red-500"
+                          : "border-accent-purple/20 focus:border-accent-purple focus:ring-accent-purple/20 dark:border-slate-600 dark:focus:border-accent-purple"
+                      }`}
                     />
                     <div className="absolute start-3 top-1/2 -translate-y-1/2 text-slate-400">
                       {isSearching ? (
@@ -960,6 +963,13 @@ export default function DeliverySettingsPage() {
                         </p>
                       )}
                   </div>
+                  {govFormTouched && !govForm.lat.trim() && (
+                    <p className="text-xs text-red-500">
+                      {isRTL
+                        ? "يرجى اختيار المنطقة من نتائج البحث"
+                        : "Please select a region from the search results"}
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-3">
@@ -1004,13 +1014,6 @@ export default function DeliverySettingsPage() {
                   {/* lat & lan: hidden visually, tracked in state and sent to API */}
                   <input type="hidden" value={govForm.lat} readOnly />
                   <input type="hidden" value={govForm.lan} readOnly />
-                  {govFormTouched && !govForm.lat && (
-                    <p className="sm:col-span-2 text-xs text-red-500 -mt-1">
-                      {isRTL
-                        ? "يرجى اختيار موقع من نتائج البحث أولاً"
-                        : "Please select a location from the search results first"}
-                    </p>
-                  )}
                   <div className="space-y-1.5 sm:col-span-2">
                     <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                       {t("governorates.price")}{" "}
@@ -1222,20 +1225,6 @@ export default function DeliverySettingsPage() {
                     />
                   </div>
                 </div>
-
-                <div className="flex items-center justify-end gap-3 pt-1">
-                  <CustomBtn
-                    onClick={handleSaveBranch}
-                    loading={isSavingBranch}
-                    disabled={isSavingBranch || (branchFormTouched && !isBranchFormValid)}
-                    className="w-auto! min-w-[160px]"
-                  >
-                    <span className="flex items-center gap-2">
-                      <IoSaveOutline className="text-base" />
-                      {t("branches.saveBranch")}
-                    </span>
-                  </CustomBtn>
-                </div>
               </div>
             )}
           </section>
@@ -1247,7 +1236,7 @@ export default function DeliverySettingsPage() {
           <CustomBtn
             onClick={handleSaveSettings}
             loading={isSavingSettings}
-            disabled={isSavingSettings || (settingsTouched && !isSettingsValid)}
+            disabled={isSaveDisabled}
             className="w-auto! min-w-[160px]"
           >
             <span className="flex items-center justify-center gap-2">

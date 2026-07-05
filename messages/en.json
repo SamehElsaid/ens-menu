@@ -5014,7 +5014,7 @@
       "empty": "No delivery zones added yet",
       "emptyHint": "Add a governorate to start accepting delivery orders",
       "addBtn": "Add Zone",
-      "searchLabel": "Search for a location",
+      "searchLabel": "Select region",
       "searchPlaceholder": "Search Google for city or governorate...",
       "searching": "Searching...",
       "noResults": "No results — try a different search term",
