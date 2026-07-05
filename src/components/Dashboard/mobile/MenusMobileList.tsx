@@ -6,6 +6,7 @@ import MenuDeliveryGroupPanel from "@/components/Dashboard/MenuDeliveryGroupPane
 import {
   buildMenuDisplayGroups,
   resolveMenuGroupMeta,
+  type MenuGroupSummary,
 } from "@/lib/menuDeliveryGroups";
 import MenuMobileCard from "./MenuMobileCard";
 
@@ -21,7 +22,7 @@ type MenusMobileListProps = {
   onToggleActive: (menu: Menu) => void;
   onDelete: (menu: Menu) => void;
   onAddToGroup?: (menu: Menu) => void;
-  onManageGroup?: (group: { groupId: number; groupName: string; menuIds: number[] }) => void;
+  onManageGroup?: (group: MenuGroupSummary) => void;
   hasUngroupedMenus?: boolean;
 };
 
@@ -63,8 +64,8 @@ export default function MenusMobileList({
               canAddMenus={hasUngroupedMenus}
               onAddMenus={() =>
                 onManageGroup?.({
-                  groupId: group.groupId,
-                  groupName: group.groupName,
+                  id: group.groupId,
+                  name: group.groupName,
                   menuIds: group.menus.map((m) => m.id),
                 })
               }

@@ -511,7 +511,7 @@ export default function DashboardPage() {
         onToggleActive={handleToggleActive}
         onDelete={setDeleteTarget}
         onAddToGroup={canAddToExistingGroup ? handleAddToGroupClick : undefined}
-        onManageGroup={handleManageGroupClick}
+        onManageGroup={canAddToExistingGroup ? handleManageGroupClick : () => {}}
         hasUngroupedMenus={hasUngroupedMenus}
       />
 
