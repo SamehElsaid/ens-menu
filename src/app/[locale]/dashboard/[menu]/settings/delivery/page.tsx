@@ -17,19 +17,29 @@ import {
   IoSearchOutline,
   IoSaveOutline,
 } from "react-icons/io5";
-import { FaWhatsapp } from "react-icons/fa";
+import { FaWhatsapp, FaCrown } from "react-icons/fa";
 import { axiosGet, axiosPost, axiosPatch, axiosDelete } from "@/shared/axiosCall";
 import CustomBtn from "@/components/Custom/CustomBtn";
 import CustomInput from "@/components/Custom/CustomInput";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import DeleteEntityConfirmModal from "@/components/Dashboard/DeleteEntityConfirmModal";
+import BranchLocationPicker, {
+  getDefaultBranchFormCoords,
+  isValidBranchCoordinate,
+} from "@/components/Dashboard/delivery/BranchLocationPicker";
+import ProUpgradeModal from "@/components/Dashboard/ProUpgradeModal";
 import { useAppSelector } from "@/store/hooks";
+import { isFreePlanUser } from "@/lib/subscription";
+import { menuDashboardPath } from "@/lib/menuDashboardPath";
+
+type DeliveryMode = "governorates" | "distance";
 
 interface DeliverySettings {
   deliveryOn: boolean;
   deliveryWhatsAppOn: boolean;
   deliveryPhone: string;
   phoneNumber: string;
+  deliveryMode?: DeliveryMode;
 }
 
 interface Governorate {
@@ -59,6 +69,25 @@ interface GovFormState {
   price: string;
 }
 
+interface Branch {
+  id: number;
+  nameAr: string;
+  nameEn: string;
+  latitude: number;
+  longitude: number;
+  deliveryBasePrice: number;
+  deliveryPricePerKm: number;
+  maxDeliveryRadiusKm: number;
+}
+
+interface BranchFormState {
+  latitude: string;
+  longitude: string;
+  deliveryBasePrice: string;
+  deliveryPricePerKm: string;
+  maxDeliveryRadiusKm: string;
+}
+
 const EMPTY_GOV_FORM: GovFormState = {
   nameAr: "",
   nameEn: "",
@@ -67,19 +96,33 @@ const EMPTY_GOV_FORM: GovFormState = {
   price: "",
 };
 
+const EMPTY_BRANCH_FORM: BranchFormState = {
+  ...getDefaultBranchFormCoords(),
+  deliveryBasePrice: "",
+  deliveryPricePerKm: "",
+  maxDeliveryRadiusKm: "10",
+};
+
 export default function DeliverySettingsPage() {
   const locale = useLocale();
   const t = useTranslations("settingsDeliveryPage");
   const isRTL = locale === "ar";
   const menu = useAppSelector((s) => s.menuData.menu);
+  const userData = useAppSelector((s) => s.auth.data);
+  const isFreePlan = !userData || isFreePlanUser(userData);
+  const subscriptionHref = menuDashboardPath(menu, "subscription");
   const menuId = menu?.id;
+  const menuNameAr = menu?.nameAr?.trim() ?? "";
+  const menuNameEn = menu?.nameEn?.trim() ?? "";
   const deliveryApiBase = menuId ? `/menus/${menuId}/delivery` : null;
+  const branchesApiBase = menuId ? `/menus/${menuId}/branches` : null;
 
   const [settings, setSettings] = useState<DeliverySettings>({
     deliveryOn: false,
     deliveryWhatsAppOn: true,
     deliveryPhone: "",
     phoneNumber: "",
+    deliveryMode: "governorates",
   });
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
@@ -101,6 +144,14 @@ export default function DeliverySettingsPage() {
   const [isSearching, setIsSearching] = useState(false);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const [branchId, setBranchId] = useState<number | null>(null);
+  const [branchForm, setBranchForm] = useState<BranchFormState>(EMPTY_BRANCH_FORM);
+  const [isLoadingBranch, setIsLoadingBranch] = useState(true);
+  const [isSavingBranch, setIsSavingBranch] = useState(false);
+  const [branchFormTouched, setBranchFormTouched] = useState(false);
+  const [isSavingDeliveryMode, setIsSavingDeliveryMode] = useState(false);
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+
   const loadSettings = async (silent = false) => {
     if (!deliveryApiBase) return;
     if (!silent) setIsLoadingSettings(true);
@@ -112,6 +163,7 @@ export default function DeliverySettingsPage() {
       setSettings({
         ...res.data,
         deliveryWhatsAppOn: res.data.deliveryWhatsAppOn ?? true,
+        deliveryMode: res.data.deliveryMode ?? "governorates",
         phoneNumber:
           res.data.deliveryPhone?.trim() ||
           res.data.phoneNumber?.trim() ||
@@ -148,6 +200,46 @@ export default function DeliverySettingsPage() {
     fetchGovernorates();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locale, menuId]);
+
+  const loadBranchSettings = async (silent = false) => {
+    if (!branchesApiBase) return;
+    if (!silent) setIsLoadingBranch(true);
+    const res = await axiosGet<Branch | Branch[] | { branches: Branch[] }>(
+      branchesApiBase,
+      locale,
+    );
+    if (res.status && res.data) {
+      const list = Array.isArray(res.data)
+        ? res.data
+        : (res.data as { branches?: Branch[] }).branches ??
+          ((res.data as Branch).id != null ? [res.data as Branch] : []);
+      const branch = list[0];
+      if (branch) {
+        setBranchId(branch.id);
+        const lat = Number(branch.latitude);
+        const lng = Number(branch.longitude);
+        const coords = isValidBranchCoordinate(lat) && isValidBranchCoordinate(lng)
+          ? { latitude: String(lat), longitude: String(lng) }
+          : getDefaultBranchFormCoords();
+        setBranchForm({
+          ...coords,
+          deliveryBasePrice: String(branch.deliveryBasePrice ?? ""),
+          deliveryPricePerKm: String(branch.deliveryPricePerKm ?? ""),
+          maxDeliveryRadiusKm: String(branch.maxDeliveryRadiusKm || 10),
+        });
+      } else {
+        setBranchId(null);
+        setBranchForm(EMPTY_BRANCH_FORM);
+      }
+    }
+    if (!silent) setIsLoadingBranch(false);
+  };
+
+  useEffect(() => {
+    if (!menuId || settings.deliveryMode !== "distance") return;
+    loadBranchSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locale, menuId, settings.deliveryMode]);
 
   useEffect(() => {
     return () => {
@@ -213,6 +305,7 @@ export default function DeliverySettingsPage() {
       const payload = {
         deliveryOn: settings.deliveryOn,
         deliveryWhatsAppOn: settings.deliveryWhatsAppOn,
+        deliveryMode: settings.deliveryMode ?? "governorates",
         ...(settings.deliveryWhatsAppOn && settings.phoneNumber.trim()
           ? { deliveryPhone: settings.phoneNumber.trim() }
           : {}),
@@ -231,6 +324,33 @@ export default function DeliverySettingsPage() {
     }
   };
 
+  const handleDeliveryModeChange = async (mode: DeliveryMode) => {
+    if (mode === settings.deliveryMode) return;
+    if (mode === "distance" && isFreePlan) {
+      setUpgradeModalOpen(true);
+      return;
+    }
+    if (!deliveryApiBase) return;
+
+    setIsSavingDeliveryMode(true);
+    try {
+      const res = await axiosPatch<{ deliveryMode: DeliveryMode }, DeliverySettings>(
+        `${deliveryApiBase}/settings`,
+        locale,
+        { deliveryMode: mode },
+      );
+      if (res.status) {
+        setSettings((s) => ({ ...s, deliveryMode: mode }));
+        toast.success(t("deliveryMode.savedSuccess"));
+        if (mode === "distance") {
+          await loadBranchSettings(true);
+        }
+      }
+    } finally {
+      setIsSavingDeliveryMode(false);
+    }
+  };
+
   const isSettingsValid =
     !settings.deliveryWhatsAppOn ||
     (settings.phoneNumber?.trim() ?? "") !== "";
@@ -242,6 +362,18 @@ export default function DeliverySettingsPage() {
     govForm.lan.trim() !== "" &&
     govForm.price.trim() !== "" &&
     parseFloat(govForm.price) > 0;
+
+  const isBranchFormValid =
+    menuNameAr !== "" &&
+    menuNameEn !== "" &&
+    branchForm.latitude.trim() !== "" &&
+    branchForm.longitude.trim() !== "" &&
+    branchForm.deliveryBasePrice.trim() !== "" &&
+    parseFloat(branchForm.deliveryBasePrice) >= 0 &&
+    branchForm.deliveryPricePerKm.trim() !== "" &&
+    parseFloat(branchForm.deliveryPricePerKm) >= 0 &&
+    branchForm.maxDeliveryRadiusKm.trim() !== "" &&
+    parseFloat(branchForm.maxDeliveryRadiusKm) > 0;
 
   const resetForm = () => {
     setGovForm(EMPTY_GOV_FORM);
@@ -336,7 +468,52 @@ export default function DeliverySettingsPage() {
     }
   };
 
+  const handleSaveBranch = async () => {
+    if (!branchesApiBase) return;
+    setBranchFormTouched(true);
+    if (!isBranchFormValid) return;
+    setIsSavingBranch(true);
+    try {
+      const payload = {
+        nameAr: menuNameAr,
+        nameEn: menuNameEn,
+        latitude: parseFloat(branchForm.latitude) || 0,
+        longitude: parseFloat(branchForm.longitude) || 0,
+        deliveryBasePrice: parseFloat(branchForm.deliveryBasePrice) || 0,
+        deliveryPricePerKm: parseFloat(branchForm.deliveryPricePerKm) || 0,
+        maxDeliveryRadiusKm: parseFloat(branchForm.maxDeliveryRadiusKm) || 0,
+      };
+
+      if (branchId !== null) {
+        const res = await axiosPatch<typeof payload, Branch>(
+          `${branchesApiBase}/${branchId}`,
+          locale,
+          payload,
+        );
+        if (res.status) {
+          await loadBranchSettings(true);
+          toast.success(t("branches.updateSuccess"));
+          setBranchFormTouched(false);
+        }
+      } else {
+        const res = await axiosPost<typeof payload, Branch>(
+          branchesApiBase,
+          locale,
+          payload,
+        );
+        if (res.status) {
+          await loadBranchSettings(true);
+          toast.success(t("branches.addSuccess"));
+          setBranchFormTouched(false);
+        }
+      }
+    } finally {
+      setIsSavingBranch(false);
+    }
+  };
+
   const deliveryDisabled = !settings.deliveryOn;
+  const isDistanceMode = settings.deliveryMode === "distance";
 
   if (isLoadingSettings) {
     return (
@@ -597,7 +774,104 @@ export default function DeliverySettingsPage() {
             </div>
           </section>
 
-          {/* ── Section 3: Governorates ── */}
+          {/* ── Section 3: Delivery zone method ── */}
+          <section
+            id="onboarding-delivery-mode"
+            className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 md:p-6 space-y-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-violet-500/10 dark:bg-violet-500/20 flex items-center justify-center">
+                <IoLocationOutline className="text-lg text-violet-600 dark:text-violet-400" />
+              </div>
+              <div>
+                <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                  {t("deliveryMode.title")}
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  {t("deliveryMode.subtitle")}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => handleDeliveryModeChange("governorates")}
+                disabled={deliveryDisabled || isSavingDeliveryMode}
+                className={`relative flex items-start gap-4 p-4 rounded-2xl border text-start transition-all duration-200 ${
+                  !isDistanceMode
+                    ? "border-primary bg-primary/5 dark:bg-primary/10 ring-1 ring-primary"
+                    : "border-slate-200 dark:border-slate-700 bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                } ${deliveryDisabled || isSavingDeliveryMode ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
+              >
+                <div
+                  className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                    !isDistanceMode
+                      ? "bg-primary/20 text-primary"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500"
+                  }`}
+                >
+                  <IoLocationOutline className="text-xl" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                    {t("deliveryMode.governoratesOption")}
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-normal">
+                    {t("deliveryMode.governoratesHint")}
+                  </p>
+                </div>
+                <div className="flex items-center justify-center h-5 w-5 rounded-full border border-slate-300 dark:border-slate-600 shrink-0 mt-0.5">
+                  {!isDistanceMode && (
+                    <div className="h-2.5 w-2.5 rounded-full bg-primary" />
+                  )}
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleDeliveryModeChange("distance")}
+                disabled={deliveryDisabled || isSavingDeliveryMode}
+                className={`relative flex items-start gap-4 p-4 rounded-2xl border text-start transition-all duration-200 ${
+                  isDistanceMode
+                    ? "border-amber-500 bg-amber-500/5 dark:bg-amber-500/10 ring-1 ring-amber-500"
+                    : "border-slate-200 dark:border-slate-700 bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                } ${deliveryDisabled || isSavingDeliveryMode ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
+              >
+                <div
+                  className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                    isDistanceMode
+                      ? "bg-amber-50/20 text-amber-600 dark:text-amber-400"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500"
+                  }`}
+                >
+                  <FaCrown className="text-xl" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                      {t("deliveryMode.distanceOption")}
+                    </p>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700 dark:bg-amber-500/20 dark:text-amber-300">
+                      <FaCrown className="text-[9px]" />
+                      Pro
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-normal">
+                    {t("deliveryMode.distanceHint")}
+                  </p>
+                </div>
+                <div className="flex items-center justify-center h-5 w-5 rounded-full border border-slate-300 dark:border-slate-600 shrink-0 mt-0.5">
+                  {isDistanceMode && (
+                    <div className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+                  )}
+                </div>
+              </button>
+            </div>
+          </section>
+
+          {/* ── Section 4: Governorates ── */}
+          {!isDistanceMode && (
           <section
             id="onboarding-delivery-governorates"
             className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 md:p-6 space-y-4"
@@ -850,6 +1124,122 @@ export default function DeliverySettingsPage() {
               </div>
             )}
           </section>
+          )}
+
+          {/* ── Section 4: Branch location (distance mode) ── */}
+          {isDistanceMode && (
+          <section
+            id="onboarding-delivery-branches"
+            className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 md:p-6 space-y-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center">
+                <IoLocationOutline className="text-lg text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                  {t("branches.title")}
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  {t("branches.subtitle")}
+                </p>
+              </div>
+            </div>
+
+            {isLoadingBranch ? (
+              <div className="flex items-center justify-center py-10">
+                <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <BranchLocationPicker
+                  latitude={branchForm.latitude}
+                  longitude={branchForm.longitude}
+                  onLocationChange={(lat, lng) =>
+                    setBranchForm((f) => ({
+                      ...f,
+                      latitude: String(lat),
+                      longitude: String(lng),
+                    }))
+                  }
+                  searchLabel={t("branches.searchLabel")}
+                  searchPlaceholder={t("branches.searchPlaceholder")}
+                  mapHint={t("branches.mapHint")}
+                />
+                {branchFormTouched && !branchForm.latitude && (
+                  <p className="text-xs text-red-500">
+                    {t("branches.locationRequired")}
+                  </p>
+                )}
+
+                <div className="grid sm:grid-cols-3 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      {t("branches.basePrice")} <span className="text-red-500">*</span>
+                    </label>
+                    <CustomInput
+                      type="number"
+                      value={branchForm.deliveryBasePrice}
+                      onChange={(e) =>
+                        setBranchForm((f) => ({
+                          ...f,
+                          deliveryBasePrice: (e as React.ChangeEvent<HTMLInputElement>).target.value,
+                        }))
+                      }
+                      placeholder={t("branches.basePricePlaceholder")}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      {t("branches.pricePerKm")} <span className="text-red-500">*</span>
+                    </label>
+                    <CustomInput
+                      type="number"
+                      value={branchForm.deliveryPricePerKm}
+                      onChange={(e) =>
+                        setBranchForm((f) => ({
+                          ...f,
+                          deliveryPricePerKm: (e as React.ChangeEvent<HTMLInputElement>).target.value,
+                        }))
+                      }
+                      placeholder={t("branches.pricePerKmPlaceholder")}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      {t("branches.maxRadius")} <span className="text-red-500">*</span>
+                    </label>
+                    <CustomInput
+                      type="number"
+                      value={branchForm.maxDeliveryRadiusKm}
+                      onChange={(e) =>
+                        setBranchForm((f) => ({
+                          ...f,
+                          maxDeliveryRadiusKm: (e as React.ChangeEvent<HTMLInputElement>).target.value,
+                        }))
+                      }
+                      placeholder={t("branches.maxRadiusPlaceholder")}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-1">
+                  <CustomBtn
+                    onClick={handleSaveBranch}
+                    loading={isSavingBranch}
+                    disabled={isSavingBranch || (branchFormTouched && !isBranchFormValid)}
+                    className="w-auto! min-w-[160px]"
+                  >
+                    <span className="flex items-center gap-2">
+                      <IoSaveOutline className="text-base" />
+                      {t("branches.saveBranch")}
+                    </span>
+                  </CustomBtn>
+                </div>
+              </div>
+            )}
+          </section>
+          )}
         </div>
 
         {/* ── Save settings footer ── */}
@@ -891,6 +1281,13 @@ export default function DeliverySettingsPage() {
           onDelete={handleConfirmDelete}
         />
       )}
+
+      <ProUpgradeModal
+        open={upgradeModalOpen}
+        onClose={() => setUpgradeModalOpen(false)}
+        subscriptionHref={subscriptionHref}
+        featureKey="deliveryDistance"
+      />
     </div>
   );
 }
