@@ -9,7 +9,7 @@ import GoogleGtag from "@/components/Global/GoogleGtag";
 import GoogleTagManager from "@/components/Global/GoogleTagManager";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import 'suneditor/dist/css/suneditor.min.css'
+import "suneditor/dist/css/suneditor.min.css";
 import Script from "next/script";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL;
@@ -81,13 +81,13 @@ export default async function RootLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           <RenderInProvider>{children}</RenderInProvider>
         </NextIntlClientProvider>
-        <Script id="chatwoot-settings" strategy="beforeInteractive">
+        {/* <Script id="chatwoot-settings" strategy="beforeInteractive">
           {`window.chatwootSettings = { position: "left" };`}
         </Script>
         <Script
           src="https://support.ens.eg/widget.js?key=ste_b9498147b00024bae6f9102153fa03e6"
           strategy="lazyOnload"
-        />
+        /> */}
       </body>
     </html>
   );
