@@ -4,7 +4,9 @@ import { useLocale, useTranslations } from "next-intl";
 import ViewTime from "@/shared/ViewTime";
 import {
   deliveryGovernorateLabel,
+  deliveryGrandTotal,
   orderStatusTone,
+  resolveEntryDeliveryFee,
   resolveEntryTime,
   resolveListEntryStatus,
 } from "@/lib/tableOrders";
@@ -38,6 +40,10 @@ export default function DeliveryOrderMobileCard({
   const tone = orderStatusTone(status);
   const time = resolveEntryTime(entry.actionDetails);
   const zoneLabel = deliveryGovernorateLabel(entry, locale);
+  const grandTotal = deliveryGrandTotal(
+    entry.totalPrice ?? 0,
+    resolveEntryDeliveryFee(entry),
+  );
 
   return (
     <article className="dashboard-order-card flex h-full flex-col overflow-hidden rounded-2xl border border-emerald-200/70 bg-white shadow-[0_2px_16px_rgba(16,185,129,0.08)] dark:border-emerald-800/40 dark:bg-slate-800/95 dark:shadow-[0_2px_20px_rgba(0,0,0,0.3)]">
@@ -108,7 +114,7 @@ export default function DeliveryOrderMobileCard({
         </p>
         <div className="flex items-center justify-between gap-2">
           <p className="text-base font-bold text-emerald-800 dark:text-emerald-200 tabular-nums">
-            {entry.totalPrice ?? 0}
+            {grandTotal}
             {currency && (
               <span className="ms-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                 {currency}

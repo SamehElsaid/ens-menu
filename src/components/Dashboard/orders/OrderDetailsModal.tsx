@@ -10,6 +10,7 @@ import {
   actionActorName,
   callItemOptionLabel,
   deliveryGovernorateLabel,
+  deliveryGrandTotal,
   isEditableOrderStatus,
   isGuestOrderAction,
   lastStaffWaiterName,
@@ -637,7 +638,7 @@ export default function OrderDetailsModal({
     entry?.order ?? lastAction?.detail?.order ?? actions[0]?.detail?.order;
 
   const items: CallItem[] = entry?.items ?? order?.items ?? [];
-  const totalPrice = entry?.totalPrice ?? order?.orderTotal ?? 0;
+  const itemsSubtotal = entry?.totalPrice ?? order?.orderTotal ?? 0;
   const status = resolveLatestOrderStatus(actions, order);
   const canEditItems = isEditableOrderStatus(status);
 
@@ -649,13 +650,32 @@ export default function OrderDetailsModal({
   }, [entry]);
 
   const displayItems = editingItems ? draftItems : items;
-  const displayTotal = editingItems
-    ? draftItems.reduce(
-        (sum, item) =>
-          sum + (item.total ?? (item.price ?? 0) * (item.quantity ?? 1)),
-        0,
-      )
-    : totalPrice;
+  const draftItemsSubtotal = draftItems.reduce(
+    (sum, item) =>
+      sum + (item.total ?? (item.price ?? 0) * (item.quantity ?? 1)),
+    0,
+  );
+  const deliveryFee =
+    variant === "delivery"
+      ? order?.deliveryFee != null
+        ? Number(order.deliveryFee)
+        : entry?.deliveryFee != null
+          ? Number(entry.deliveryFee)
+          : null
+      : null;
+  const displayTotal =
+    variant === "delivery"
+      ? deliveryGrandTotal(
+          editingItems ? draftItemsSubtotal : itemsSubtotal,
+          deliveryFee,
+        )
+      : editingItems
+        ? draftItemsSubtotal
+        : itemsSubtotal;
+  const printTotal =
+    variant === "delivery"
+      ? deliveryGrandTotal(itemsSubtotal, deliveryFee)
+      : itemsSubtotal;
 
   const adjustDraftQty = (index: number, delta: number) => {
     setDraftItems((prev) =>
@@ -744,14 +764,6 @@ export default function OrderDetailsModal({
           { order: order ?? undefined, ...(entry ?? {}) },
           locale,
         )
-      : null;
-  const deliveryFee =
-    variant === "delivery"
-      ? order?.deliveryFee != null
-        ? Number(order.deliveryFee)
-        : entry?.deliveryFee != null
-          ? Number(entry.deliveryFee)
-          : null
       : null;
   const phoneDisplay =
     order?.customerPhone?.trim() || entry?.customerPhone?.trim() || null;
@@ -1109,7 +1121,7 @@ export default function OrderDetailsModal({
             orderId={entry.orderId}
             title={t("detailsTitle")}
             items={items}
-            totalPrice={totalPrice}
+            totalPrice={printTotal}
             currency={currency}
             customerDisplay={customerDisplay}
             phoneDisplay={phoneDisplay}

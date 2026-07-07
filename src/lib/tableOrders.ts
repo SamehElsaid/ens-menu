@@ -314,6 +314,39 @@ export function isDeliveryEntry(entry: {
   return String(table).trim().toLowerCase() === "delivery";
 }
 
+export function resolveEntryDeliveryFee(entry: {
+  deliveryFee?: number | null;
+  order?: EntryOrder | null;
+}): number | null {
+  if (
+    entry.deliveryFee != null &&
+    Number.isFinite(Number(entry.deliveryFee))
+  ) {
+    return Number(entry.deliveryFee);
+  }
+  if (
+    entry.order?.deliveryFee != null &&
+    Number.isFinite(Number(entry.order.deliveryFee))
+  ) {
+    return Number(entry.order.deliveryFee);
+  }
+  return null;
+}
+
+/** Items subtotal plus delivery fee (when applicable). */
+export function deliveryGrandTotal(
+  itemsTotal: number,
+  deliveryFee?: number | null,
+): number {
+  const fee =
+    deliveryFee != null &&
+    Number.isFinite(Number(deliveryFee)) &&
+    Number(deliveryFee) > 0
+      ? Number(deliveryFee)
+      : 0;
+  return Math.round((itemsTotal + fee) * 100) / 100;
+}
+
 export function deliveryGovernorateLabel(
   entry: {
     governorateNameAr?: string | null;
