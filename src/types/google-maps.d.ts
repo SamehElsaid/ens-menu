@@ -42,6 +42,23 @@ declare namespace google.maps {
     function clearInstanceListeners(instance: unknown): void;
   }
 
+  class Geocoder {
+    geocode(
+      request: { address?: string; location?: LatLng },
+      callback: (
+        results: GeocoderResult[] | null,
+        status: GeocoderStatus,
+      ) => void,
+    ): void;
+  }
+
+  interface GeocoderResult {
+    geometry: { location: LatLng };
+    formatted_address?: string;
+  }
+
+  type GeocoderStatus = string;
+
   namespace places {
     class Autocomplete {
       constructor(input: HTMLInputElement, opts?: Record<string, unknown>);

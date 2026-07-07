@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useLocale } from "next-intl";
-import { IoLocationSharp, IoSearchOutline } from "react-icons/io5";
+import { useLocale, useTranslations } from "next-intl";
+import { IoLocationSharp, IoLocateOutline, IoSearchOutline } from "react-icons/io5";
 import { loadGoogleMaps } from "@/lib/loadGoogleMaps";
 
 const DEFAULT_LAT = 29.9602;
@@ -46,11 +46,13 @@ export default function BranchLocationPicker({
   disabled = false,
 }: BranchLocationPickerProps) {
   const locale = useLocale();
+  const t = useTranslations("settingsDeliveryPage.branches");
   const isRTL = locale === "ar";
 
   const mapRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const mapInstance = useRef<google.maps.Map | null>(null);
+  const geocoderRef = useRef<google.maps.Geocoder | null>(null);
   const autocompleteInstance = useRef<google.maps.places.Autocomplete | null>(
     null,
   );
@@ -61,6 +63,9 @@ export default function BranchLocationPicker({
 
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
+  const [isGeocoding, setIsGeocoding] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   const parsedLat = parseFloat(latitude);
   const parsedLng = parseFloat(longitude);
@@ -105,6 +110,53 @@ export default function BranchLocationPicker({
     skipIdleEmitRef.current = true;
     map.panTo(new google.maps.LatLng(lat, lng));
     if (emit) emitLocation(lat, lng);
+  };
+
+  const handleCurrentLocation = () => {
+    setLocationError(null);
+    if (!navigator.geolocation) {
+      setLocationError(t("geolocationUnavailable"));
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setIsLocating(false);
+        moveMapTo(position.coords.latitude, position.coords.longitude);
+      },
+      () => {
+        setIsLocating(false);
+        setLocationError(t("geolocationDenied"));
+      },
+      { enableHighAccuracy: true, timeout: 15_000, maximumAge: 60_000 },
+    );
+  };
+
+  const handleGoToArea = () => {
+    setLocationError(null);
+    const query = searchRef.current?.value.trim();
+    if (!query) return;
+
+    const geocoder = geocoderRef.current ?? new google.maps.Geocoder();
+    geocoderRef.current = geocoder;
+
+    setIsGeocoding(true);
+    geocoder.geocode({ address: query }, (results, status) => {
+      setIsGeocoding(false);
+      if (status === "OK" && results?.[0]?.geometry?.location) {
+        const location = results[0].geometry.location;
+        moveMapTo(location.lat(), location.lng());
+        return;
+      }
+      setLocationError(t("areaNotFound"));
+    });
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleGoToArea();
+    }
   };
 
   useEffect(() => {
@@ -152,6 +204,7 @@ export default function BranchLocationPicker({
           const place = autocomplete.getPlace();
           const location = place.geometry?.location;
           if (!location) return;
+          setLocationError(null);
           moveMapTo(location.lat(), location.lng());
         });
 
@@ -242,18 +295,52 @@ export default function BranchLocationPicker({
         <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
           {searchLabel}
         </label>
-        <div className="relative">
-          <input
-            ref={searchRef}
-            type="text"
-            dir={isRTL ? "rtl" : "ltr"}
-            placeholder={searchPlaceholder}
-            className="w-full py-3.5 ps-10 pe-4 outline-none rounded-2xl border border-accent-purple/20 focus:border-accent-purple focus:ring-2 focus:ring-accent-purple/20 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600 dark:placeholder:text-slate-400 dark:focus:border-accent-purple text-sm text-start"
-          />
-          <div className="absolute start-3 top-1/2 -translate-y-1/2 text-slate-400">
-            <IoSearchOutline className="text-lg" />
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1 min-w-0">
+            <input
+              ref={searchRef}
+              type="text"
+              dir={isRTL ? "rtl" : "ltr"}
+              placeholder={searchPlaceholder}
+              onKeyDown={handleSearchKeyDown}
+              className="w-full py-3.5 ps-10 pe-4 outline-none rounded-2xl border border-accent-purple/20 focus:border-accent-purple focus:ring-2 focus:ring-accent-purple/20 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600 dark:placeholder:text-slate-400 dark:focus:border-accent-purple text-sm text-start"
+            />
+            <div className="absolute start-3 top-1/2 -translate-y-1/2 text-slate-400">
+              <IoSearchOutline className="text-lg" />
+            </div>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleCurrentLocation}
+              disabled={isLoading || isLocating}
+              className="inline-flex items-center justify-center gap-1.5 rounded-2xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            >
+              {isLocating ? (
+                <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+              ) : (
+                <IoLocateOutline className="text-lg text-primary shrink-0" />
+              )}
+              <span className="hidden sm:inline">{t("currentLocationBtn")}</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleGoToArea}
+              disabled={isLoading || isGeocoding}
+              className="inline-flex items-center justify-center gap-1.5 rounded-2xl bg-primary text-white px-3 py-2.5 text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            >
+              {isGeocoding ? (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <IoSearchOutline className="text-lg shrink-0" />
+              )}
+              <span className="hidden sm:inline">{t("goToAreaBtn")}</span>
+            </button>
           </div>
         </div>
+        {locationError ? (
+          <p className="text-xs text-red-500">{locationError}</p>
+        ) : null}
       </div>
 
       <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-600">
