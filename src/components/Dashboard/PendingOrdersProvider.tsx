@@ -52,38 +52,47 @@ export function PendingOrdersProvider({
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    if (!segment || isFreePlan) {
+    if (!segment) {
       setAllEntries([]);
       return;
     }
     setLoading(true);
     try {
-      const [tableRes, deliveryRes] = await Promise.all([
-        axiosGet<ActivityCallsPayload>(
-          `/menus/${segment}/activity-logs`,
-          locale,
-          undefined,
-          { page: 1, limit: 50, channel: "table" },
-          undefined,
-          true,
-        ),
-        axiosGet<ActivityCallsPayload>(
-          `/menus/${segment}/activity-logs`,
-          locale,
-          undefined,
-          { page: 1, limit: 50, channel: "delivery" },
-          undefined,
-          true,
-        ),
-      ]);
+      const requests: Promise<ReturnType<typeof axiosGet<ActivityCallsPayload>>>[] =
+        [
+          axiosGet<ActivityCallsPayload>(
+            `/menus/${segment}/activity-logs`,
+            locale,
+            undefined,
+            { page: 1, limit: 50, channel: "delivery" },
+            undefined,
+            true,
+          ),
+        ];
+
+      if (!isFreePlan) {
+        requests.unshift(
+          axiosGet<ActivityCallsPayload>(
+            `/menus/${segment}/activity-logs`,
+            locale,
+            undefined,
+            { page: 1, limit: 50, channel: "table" },
+            undefined,
+            true,
+          ),
+        );
+      }
+
+      const results = await Promise.all(requests);
 
       const tableEntries =
-        tableRes.status && tableRes.data
-          ? (tableRes.data.entries ?? tableRes.data.calls ?? [])
+        !isFreePlan && results[0]?.status && results[0]?.data
+          ? (results[0].data.entries ?? results[0].data.calls ?? [])
           : [];
+      const deliveryResult = isFreePlan ? results[0] : results[1];
       const deliveryEntries =
-        deliveryRes.status && deliveryRes.data
-          ? (deliveryRes.data.entries ?? deliveryRes.data.calls ?? [])
+        deliveryResult?.status && deliveryResult?.data
+          ? (deliveryResult.data.entries ?? deliveryResult.data.calls ?? [])
           : [];
 
       setAllEntries([...tableEntries, ...deliveryEntries]);
@@ -98,7 +107,7 @@ export function PendingOrdersProvider({
     void refresh();
   }, [refresh]);
 
-  useMenuActivitySocket(isFreePlan || !segment ? "" : segment, refresh, {
+  useMenuActivitySocket(!segment ? "" : segment, refresh, {
     onNewOrder: playNewOrderNotificationSound,
   });
 

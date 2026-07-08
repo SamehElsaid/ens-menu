@@ -831,6 +831,9 @@ export default function DeliverySettingsPage() {
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-normal">
                     {t("deliveryMode.governoratesHint")}
                   </p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400 mt-2">
+                    {t("deliveryMode.governoratesIncluded")}
+                  </p>
                 </div>
                 <div className="flex items-center justify-center h-5 w-5 rounded-full border border-slate-300 dark:border-slate-600 shrink-0 mt-0.5">
                   {!isDistanceMode && (

@@ -10,6 +10,7 @@ import CreateMenuGroupModal from "@/components/Dashboard/CreateMenuGroupModal";
 import AddMenuToGroupModal, {
   ManageMenuGroupModal,
 } from "@/components/Dashboard/AddMenuToGroupModal";
+import RemoveMenuFromGroupConfirm from "@/components/Dashboard/RemoveMenuFromGroupConfirm";
 import ExtraMenusPurchaseModal from "@/components/Dashboard/ExtraMenusPurchaseModal";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import { pushFirstMenuCreatedEvent } from "@/shared/gtmEvents";
@@ -69,6 +70,8 @@ export default function DashboardPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
   const [addToGroupTarget, setAddToGroupTarget] = useState<Menu | null>(null);
+  const [removeFromGroupTarget, setRemoveFromGroupTarget] =
+    useState<Menu | null>(null);
   const [manageGroupTarget, setManageGroupTarget] =
     useState<MenuGroupSummary | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
@@ -289,6 +292,14 @@ export default function DashboardPage() {
     setManageGroupTarget(group);
   };
 
+  const handleRemoveFromGroupClick = (menu: Menu) => {
+    if (!isProSubscription(subscription)) {
+      setShowLimitModal(true);
+      return;
+    }
+    setRemoveFromGroupTarget(menu);
+  };
+
   const refreshMenus = () => setRefreshing((n) => n + 1);
 
   const cardLabels = useMemo(
@@ -303,6 +314,7 @@ export default function DashboardPage() {
       manage: t("menuCard.manage"),
       preview: t("menuCard.preview"),
       addToGroup: canAddToExistingGroup ? t("menuCard.addToGroup") : undefined,
+      removeFromGroup: t("menuCard.removeFromGroup"),
     }),
     [t, canAddToExistingGroup],
   );
@@ -511,8 +523,8 @@ export default function DashboardPage() {
         onToggleActive={handleToggleActive}
         onDelete={setDeleteTarget}
         onAddToGroup={canAddToExistingGroup ? handleAddToGroupClick : undefined}
-        onManageGroup={canAddToExistingGroup ? handleManageGroupClick : () => {}}
-        hasUngroupedMenus={hasUngroupedMenus}
+        onRemoveFromGroup={handleRemoveFromGroupClick}
+        onManageGroup={handleManageGroupClick}
       />
 
       {/* Menus Grid — desktop/tablet */}
@@ -525,8 +537,7 @@ export default function DashboardPage() {
                 groupName={group.groupName}
                 memberCount={group.menus.length}
                 layout="desktop"
-                canAddMenus={hasUngroupedMenus}
-                onAddMenus={() =>
+                onManageGroup={() =>
                   handleManageGroupClick({
                     id: group.groupId,
                     name: group.groupName,
@@ -557,6 +568,7 @@ export default function DashboardPage() {
                             ? handleAddToGroupClick
                             : undefined
                         }
+                        onRemoveFromGroup={handleRemoveFromGroupClick}
                       />
                     ))}
               />
@@ -584,6 +596,7 @@ export default function DashboardPage() {
               onAddToGroup={
                 canAddToExistingGroup ? handleAddToGroupClick : undefined
               }
+              onRemoveFromGroup={handleRemoveFromGroupClick}
             />
           );
         })}
@@ -624,6 +637,16 @@ export default function DashboardPage() {
           getMenuName={getMenuName}
           onClose={() => setManageGroupTarget(null)}
           onSaved={refreshMenus}
+        />
+      )}
+
+      {removeFromGroupTarget && (
+        <RemoveMenuFromGroupConfirm
+          menu={removeFromGroupTarget}
+          menus={menus}
+          getMenuName={getMenuName}
+          onClose={() => setRemoveFromGroupTarget(null)}
+          onRemoved={refreshMenus}
         />
       )}
 

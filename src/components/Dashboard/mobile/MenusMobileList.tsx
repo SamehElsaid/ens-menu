@@ -22,8 +22,8 @@ type MenusMobileListProps = {
   onToggleActive: (menu: Menu) => void;
   onDelete: (menu: Menu) => void;
   onAddToGroup?: (menu: Menu) => void;
+  onRemoveFromGroup?: (menu: Menu) => void;
   onManageGroup?: (group: MenuGroupSummary) => void;
-  hasUngroupedMenus?: boolean;
 };
 
 export default function MenusMobileList({
@@ -38,8 +38,8 @@ export default function MenusMobileList({
   onToggleActive,
   onDelete,
   onAddToGroup,
+  onRemoveFromGroup,
   onManageGroup,
-  hasUngroupedMenus = false,
 }: MenusMobileListProps) {
   const groups = useMemo(() => buildMenuDisplayGroups(menus), [menus]);
 
@@ -61,8 +61,7 @@ export default function MenusMobileList({
               groupName={group.groupName}
               memberCount={group.menus.length}
               layout="mobile"
-              canAddMenus={hasUngroupedMenus}
-              onAddMenus={() =>
+              onManageGroup={() =>
                 onManageGroup?.({
                   id: group.groupId,
                   name: group.groupName,
@@ -86,6 +85,7 @@ export default function MenusMobileList({
                       onToggleActive={onToggleActive}
                       onDelete={onDelete}
                       onAddToGroup={onAddToGroup}
+                      onRemoveFromGroup={onRemoveFromGroup}
                     />
                   ))}
             />
@@ -109,6 +109,7 @@ export default function MenusMobileList({
             onToggleActive={onToggleActive}
             onDelete={onDelete}
             onAddToGroup={onAddToGroup}
+            onRemoveFromGroup={onRemoveFromGroup}
           />
         );
       })}

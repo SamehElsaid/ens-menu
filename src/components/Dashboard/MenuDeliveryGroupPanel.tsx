@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { IoAddOutline, IoGitNetworkOutline, IoPeopleOutline } from "react-icons/io5";
+import { IoGitNetworkOutline, IoPeopleOutline, IoSettingsOutline } from "react-icons/io5";
 import type { ReactNode } from "react";
 
 type MenuDeliveryGroupPanelProps = {
@@ -9,8 +9,7 @@ type MenuDeliveryGroupPanelProps = {
   memberCount: number;
   menuCards: ReactNode;
   layout?: "desktop" | "mobile";
-  onAddMenus?: () => void;
-  canAddMenus?: boolean;
+  onManageGroup?: () => void;
 };
 
 export default function MenuDeliveryGroupPanel({
@@ -18,8 +17,7 @@ export default function MenuDeliveryGroupPanel({
   memberCount,
   menuCards,
   layout = "desktop",
-  onAddMenus,
-  canAddMenus = false,
+  onManageGroup,
 }: MenuDeliveryGroupPanelProps) {
   const t = useTranslations("Menus.menuCard");
   const isMobile = layout === "mobile";
@@ -45,14 +43,14 @@ export default function MenuDeliveryGroupPanel({
               </p>
             </div>
           </div>
-          {canAddMenus && onAddMenus && (
+          {onManageGroup && (
             <button
               type="button"
-              onClick={onAddMenus}
+              onClick={onManageGroup}
               className="inline-flex items-center gap-1.5 rounded-xl bg-white px-3 py-2 text-xs font-bold text-teal-800 shadow-sm transition hover:bg-teal-50 active:scale-[0.98] dark:bg-teal-950 dark:text-teal-100 dark:hover:bg-teal-900"
             >
-              <IoAddOutline className="text-base" aria-hidden />
-              {t("addMenuToGroup")}
+              <IoSettingsOutline className="text-base" aria-hidden />
+              {t("manageGroup")}
             </button>
           )}
         </div>

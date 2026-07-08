@@ -18,6 +18,7 @@ import {
   IoSettingsOutline,
   IoTrashOutline,
   IoGitNetworkOutline,
+  IoRemoveCircleOutline,
 } from "react-icons/io5";
 
 export type MenuDashboardCardProps = {
@@ -41,10 +42,12 @@ export type MenuDashboardCardProps = {
     manage: string;
     preview: string;
     addToGroup?: string;
+    removeFromGroup?: string;
   };
   onToggleActive: (menu: Menu) => void;
   onDelete: (menu: Menu) => void;
   onAddToGroup?: (menu: Menu) => void;
+  onRemoveFromGroup?: (menu: Menu) => void;
 };
 
 function cardShellClass(
@@ -86,6 +89,7 @@ export default function MenuDashboardCard({
   onToggleActive,
   onDelete,
   onAddToGroup,
+  onRemoveFromGroup,
 }: MenuDashboardCardProps) {
   return (
     <div className={cardShellClass(menu, groupMeta, isNested)}>
@@ -208,6 +212,16 @@ export default function MenuDashboardCard({
           >
             <IoGitNetworkOutline className="text-base" />
             {labels.addToGroup}
+          </button>
+        )}
+        {groupMeta.inGroup && onRemoveFromGroup && labels.removeFromGroup && (
+          <button
+            type="button"
+            onClick={() => onRemoveFromGroup(menu)}
+            className="flex w-full items-center justify-center gap-2 border-b border-amber-200/70 bg-linear-to-r from-amber-50/90 to-orange-50/40 px-4 py-2.5 text-sm font-bold text-amber-900 transition hover:from-amber-100 hover:to-orange-100 dark:border-amber-800/40 dark:from-amber-950/40 dark:to-orange-950/20 dark:text-amber-100 dark:hover:from-amber-900/50"
+          >
+            <IoRemoveCircleOutline className="text-base" />
+            {labels.removeFromGroup}
           </button>
         )}
         <div className="flex items-center gap-2 px-4 py-3">

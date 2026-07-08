@@ -2148,7 +2148,9 @@
       "groupMemberBadge": "In group",
       "inboxBadge": "Orders inbox",
       "addToGroup": "Add to group",
-      "addMenuToGroup": "Add menu"
+      "addMenuToGroup": "Add menu",
+      "removeFromGroup": "Remove from group",
+      "manageGroup": "Manage group"
     },
     "addToGroupModal": {
       "title": "Add to group",
@@ -2162,12 +2164,23 @@
     "manageGroupModal": {
       "title": "Manage {name}",
       "description": "Select menus for this group.",
-      "noMoreMenus": "No other menus available to add.",
+      "noMoreMenusHint": "No other menus available to add. Uncheck menus below to remove them from the group.",
       "inGroupBadge": "Member",
       "selectedCount": "Selected: {count}",
       "submit": "Save",
       "cancel": "Cancel",
-      "success": "Group updated"
+      "success": "Group updated",
+      "successDissolved": "Group dissolved",
+      "dissolveWarning": "Fewer than 2 menus selected — saving will dissolve the group and ungroup all menus."
+    },
+    "removeFromGroupModal": {
+      "title": "Remove from group",
+      "description": "Remove «{name}» from group «{group}»?",
+      "descriptionDissolve": "Remove «{name}» from «{group}»? The group only has 2 menus, so the entire group will be dissolved.",
+      "submit": "Remove",
+      "cancel": "Cancel",
+      "success": "Menu removed from group",
+      "successDissolved": "Menu removed and group dissolved"
     },
     "createGroup": "Create group",
     "createGroupModal": {
@@ -2719,7 +2732,7 @@
     "proFeatureDescription": {
       "tables": "QR tables and table links are a Pro feature. Upgrade to generate QR codes and manage dine-in ordering.",
       "orders": "Table order management is a Pro feature. Upgrade to receive, accept, and track live table orders.",
-      "deliveryOrders": "Delivery orders will be available on Pro plans. Upgrade to get early access when we launch.",
+      "deliveryOrders": "Distance-based delivery with Google Maps is a Pro feature. Delivery by governorate is available on all plans.",
       "staff": "Staff and waiter management is a Pro feature. Upgrade to add team members and route orders to them.",
       "advertisements": "Free plan includes 1 ad. Upgrade for unlimited promotional ads on your menu.",
       "deliveryDistance": "Distance-based delivery with Google Maps branches is a Pro feature. Upgrade to set branch locations and automatic delivery pricing by distance."
@@ -4984,6 +4997,7 @@
       "subtitle": "Choose how delivery areas and pricing are calculated",
       "governoratesOption": "By governorate / zone",
       "governoratesHint": "Set a fixed delivery price for each area you deliver to",
+      "governoratesIncluded": "Available on all plans",
       "distanceOption": "By distance",
       "distanceHint": "Set branch locations on Google Maps and charge by distance from the branch",
       "savedSuccess": "Delivery zone method updated"

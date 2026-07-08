@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "react-toastify";
-import { axiosPatch, axiosPost } from "@/shared/axiosCall";
+import { axiosPost } from "@/shared/axiosCall";
+import { updateMenuGroupMembership } from "@/lib/menuGroupActions";
 import type { Menu } from "@/types/Menu";
 import type { MenuGroupSummary } from "@/lib/menuDeliveryGroups";
 import { menusAvailableToJoinGroup } from "@/lib/menuDeliveryGroups";
@@ -136,8 +137,7 @@ export function ManageMenuGroupModal({
   const toggleMenu = (menuId: number) => {
     setSelectedIds((prev) => {
       if (prev.includes(menuId)) {
-        const next = prev.filter((id) => id !== menuId);
-        return next.length >= 2 ? next : prev;
+        return prev.filter((id) => id !== menuId);
       }
       return [...prev, menuId];
     });
@@ -152,21 +152,21 @@ export function ManageMenuGroupModal({
     selectedIds.length !== group.menuIds.length ||
     selectedIds.some((id) => !group.menuIds.includes(id));
 
-  const canSubmit =
-    selectedIds.length >= 2 && !isSaving && addableMenus.length > 0 && hasChanges;
+  const willDissolveGroup = selectedIds.length < 2;
+  const canSubmit = !isSaving && hasChanges && (selectedIds.length >= 2 || willDissolveGroup);
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
     setIsSaving(true);
     try {
-      const res = await axiosPatch<{ menuIds: number[] }, { group?: { id: number } }>(
-        `/menu-groups/${group.id}`,
+      const res = await updateMenuGroupMembership(
         locale,
-        { menuIds: selectedIds },
+        group.id,
+        selectedIds,
       );
 
       if (res.status) {
-        toast.success(t("success"));
+        toast.success(willDissolveGroup ? t("successDissolved") : t("success"));
         onSaved();
         onClose();
       }
@@ -196,23 +196,27 @@ export function ManageMenuGroupModal({
       }
     >
       {addableMenus.length === 0 ? (
-        <MenuGroupEmptyHint>{t("noMoreMenus")}</MenuGroupEmptyHint>
-      ) : (
-        <MenuGroupPickList>
-          {allSelectable.map((menuItem) => (
-            <MenuGroupPickItem
-              key={menuItem.id}
-              menu={menuItem}
-              name={getMenuName(menuItem)}
-              selected={selectedIds.includes(menuItem.id)}
-              onToggle={() => toggleMenu(menuItem.id)}
-              badge={
-                group.menuIds.includes(menuItem.id) ? t("inGroupBadge") : undefined
-              }
-            />
-          ))}
-        </MenuGroupPickList>
-      )}
+        <MenuGroupEmptyHint>{t("noMoreMenusHint")}</MenuGroupEmptyHint>
+      ) : null}
+      <MenuGroupPickList>
+        {allSelectable.map((menuItem) => (
+          <MenuGroupPickItem
+            key={menuItem.id}
+            menu={menuItem}
+            name={getMenuName(menuItem)}
+            selected={selectedIds.includes(menuItem.id)}
+            onToggle={() => toggleMenu(menuItem.id)}
+            badge={
+              group.menuIds.includes(menuItem.id) ? t("inGroupBadge") : undefined
+            }
+          />
+        ))}
+      </MenuGroupPickList>
+      {willDissolveGroup && hasChanges ? (
+        <p className="mt-3 text-xs text-amber-700 dark:text-amber-300">
+          {t("dissolveWarning")}
+        </p>
+      ) : null}
     </MenuGroupModalShell>
   );
 }

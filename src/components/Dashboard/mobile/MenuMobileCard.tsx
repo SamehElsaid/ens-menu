@@ -17,6 +17,7 @@ import {
   IoSettingsOutline,
   IoTrashOutline,
   IoGitNetworkOutline,
+  IoRemoveCircleOutline,
 } from "react-icons/io5";
 
 export type MenuMobileCardProps = {
@@ -34,6 +35,7 @@ export type MenuMobileCardProps = {
   onToggleActive: (menu: Menu) => void;
   onDelete: (menu: Menu) => void;
   onAddToGroup?: (menu: Menu) => void;
+  onRemoveFromGroup?: (menu: Menu) => void;
 };
 
 export default function MenuMobileCard({
@@ -51,6 +53,7 @@ export default function MenuMobileCard({
   onToggleActive,
   onDelete,
   onAddToGroup,
+  onRemoveFromGroup,
 }: MenuMobileCardProps) {
   const t = useTranslations("Menus");
 
@@ -206,6 +209,16 @@ export default function MenuMobileCard({
             >
               <IoGitNetworkOutline className="text-sm" aria-hidden />
               {t("menuCard.addToGroup")}
+            </button>
+          )}
+          {groupMeta.inGroup && onRemoveFromGroup && (
+            <button
+              type="button"
+              onClick={() => onRemoveFromGroup(menu)}
+              className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border border-amber-300/80 bg-linear-to-r from-amber-50 to-orange-50 px-3 text-xs font-bold text-amber-900 transition active:scale-[0.98] dark:border-amber-700/50 dark:from-amber-950/40 dark:to-orange-950/30 dark:text-amber-100"
+            >
+              <IoRemoveCircleOutline className="text-sm" aria-hidden />
+              {t("menuCard.removeFromGroup")}
             </button>
           )}
           <div className="flex items-center gap-2">
