@@ -79,16 +79,23 @@ export function AdminMetricsGrid({
   );
 }
 
+export type AdminRankedListItem = {
+  id: string | number;
+  label: string;
+  count: number;
+  href?: string;
+};
+
 export function AdminRankedList({
   items,
   dir = "ltr",
   emptyMessage,
   onItemClick,
 }: {
-  items: { id: string | number; label: string; count: number }[];
+  items: AdminRankedListItem[];
   dir?: "rtl" | "ltr";
   emptyMessage?: string;
-  onItemClick?: (item: { id: string | number; label: string; count: number }) => void;
+  onItemClick?: (item: AdminRankedListItem) => void;
 }) {
   const isRTL = dir === "rtl";
   const max = items.length > 0 ? items[0].count : 1;
@@ -114,7 +121,16 @@ export function AdminRankedList({
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary dark:bg-primary/20">
                 {index + 1}
               </span>
-              {onItemClick ? (
+              {item.href ? (
+                <a
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="truncate text-start text-sm font-medium text-primary hover:underline"
+                >
+                  {item.label}
+                </a>
+              ) : onItemClick ? (
                 <button
                   type="button"
                   onClick={() => onItemClick(item)}

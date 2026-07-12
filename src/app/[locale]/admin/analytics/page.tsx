@@ -30,6 +30,10 @@ import {
   getAdminProductLabel,
 } from "@/lib/fetchAdminAnalytics";
 import { formatMenuPrice } from "@/lib/formatMenuPrice";
+import {
+  publicMenuLinkUrl,
+  resolvePublicMenuSlug,
+} from "@/lib/publicMenuUrl";
 import type {
   AdminAnalyticsPeriod,
   AdminAnalyticsResponse,
@@ -202,21 +206,29 @@ export default function AdminAnalyticsPage() {
     () =>
       (
         analytics?.freeBannerMetrics?.topMenusByClicks ?? []
-      ).map((m) => ({
-        id: m.id,
-        label: getAdminMenuLabel(m, locale),
-        count: m.clicks,
-      })),
+      ).map((m) => {
+        const slug = resolvePublicMenuSlug(m.slug, m.id);
+        return {
+          id: m.id,
+          label: getAdminMenuLabel(m, locale),
+          count: m.clicks,
+          href: slug ? publicMenuLinkUrl(slug) : undefined,
+        };
+      }),
     [analytics?.freeBannerMetrics?.topMenusByClicks, locale],
   );
 
   const topMenus = useMemo(
     () =>
-      (analytics?.topMenus ?? []).map((m) => ({
-        id: m.id,
-        label: getAdminMenuLabel(m, locale),
-        count: m.views,
-      })),
+      (analytics?.topMenus ?? []).map((m) => {
+        const slug = resolvePublicMenuSlug(m.slug, m.id);
+        return {
+          id: m.id,
+          label: getAdminMenuLabel(m, locale),
+          count: m.views,
+          href: slug ? publicMenuLinkUrl(slug) : undefined,
+        };
+      }),
     [analytics?.topMenus, locale],
   );
 

@@ -26,6 +26,7 @@ import {
 } from "@/lib/tableOrders";
 import { patchTableOrderItems } from "@/lib/tableOrderActions";
 import OrderActionButtons from "./OrderActionButtons";
+import OrderAddItemPicker from "./OrderAddItemPicker";
 import { useAppSelector } from "@/store/hooks";
 import { isFreePlanUser } from "@/lib/subscription";
 import { useDashboardSession } from "@/hooks/useDashboardSession";
@@ -937,6 +938,26 @@ export default function OrderDetailsModal({
                     </button>
                   )}
                 </div>
+
+                {editingItems && menuId && (
+                  <OrderAddItemPicker
+                    menuId={menuId}
+                    open={editingItems}
+                    currency={currency}
+                    onAdd={(updater) => setDraftItems(updater)}
+                    labels={{
+                      addProduct: t("addProduct"),
+                      addProductSearch: t("addProductSearch"),
+                      addProductLoading: t("addProductLoading"),
+                      addProductEmpty: t("addProductEmpty"),
+                      addProductNoResults: t("addProductNoResults"),
+                      addProductSelectSize: t("addProductSelectSize"),
+                      addProductSelectVariant: t("addProductSelectVariant"),
+                      addProductConfirm: t("addProductConfirm"),
+                      addProductNone: t("addProductCancel"),
+                    }}
+                  />
+                )}
 
                 {displayItems.length === 0 ? (
                   <p className="text-sm text-slate-500 dark:text-slate-400 py-4 text-center">
