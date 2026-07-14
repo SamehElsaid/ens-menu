@@ -6,6 +6,7 @@ import { useRouter } from "@/i18n/navigation";
 import { axiosGet, axiosDelete, axiosPatch } from "@/shared/axiosCall";
 import LinkTo from "@/components/Global/LinkTo";
 import CreateMenuModal from "@/components/Dashboard/CreateMenuModal";
+import CopyMenuModal from "@/components/Dashboard/CopyMenuModal";
 import CreateMenuGroupModal from "@/components/Dashboard/CreateMenuGroupModal";
 import AddMenuToGroupModal, {
   ManageMenuGroupModal,
@@ -79,6 +80,7 @@ export default function DashboardPage() {
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showExtraMenusModal, setShowExtraMenusModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Menu | null>(null);
+  const [copyTarget, setCopyTarget] = useState<Menu | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [togglingId, setTogglingId] = useState<number | null>(null);
@@ -191,6 +193,27 @@ export default function DashboardPage() {
     } else {
       fetchMenus();
     }
+  };
+
+  const handleCopyClick = async (menu: Menu) => {
+    const sub = await resolveSubscription();
+    const effectiveMax = getEffectiveMaxMenus(sub);
+    if (menus.length >= effectiveMax) {
+      if (isProSubscription(sub)) {
+        setShowExtraMenusModal(true);
+      } else {
+        setShowLimitModal(true);
+      }
+      return;
+    }
+    setCopyTarget(menu);
+  };
+
+  const handleMenuCopied = (newMenu: Menu) => {
+    const normalized = normalizeMenuFromApi(newMenu) ?? newMenu;
+    setMenus((prev) => [normalized, ...prev]);
+    setCopyTarget(null);
+    router.push(menuDashboardPath(normalized));
   };
 
   const handleDeleteMenu = async () => {
@@ -309,6 +332,7 @@ export default function DashboardPage() {
       pause: t("menuCard.pause"),
       play: t("menuCard.play"),
       deleteMenu: t("deleteMenu"),
+      copyMenu: t("menuCard.copyMenu"),
       createdAt: t("menuCard.createdAt"),
       updatedAt: t("menuCard.updatedAt"),
       manage: t("menuCard.manage"),
@@ -522,6 +546,7 @@ export default function DashboardPage() {
         getDashboardPath={(menu) => menuDashboardPath(menu)}
         onToggleActive={handleToggleActive}
         onDelete={setDeleteTarget}
+        onCopy={handleCopyClick}
         onAddToGroup={canAddToExistingGroup ? handleAddToGroupClick : undefined}
         onRemoveFromGroup={handleRemoveFromGroupClick}
         onManageGroup={handleManageGroupClick}
@@ -563,6 +588,7 @@ export default function DashboardPage() {
                         labels={cardLabels}
                         onToggleActive={handleToggleActive}
                         onDelete={setDeleteTarget}
+                        onCopy={handleCopyClick}
                         onAddToGroup={
                           canAddToExistingGroup
                             ? handleAddToGroupClick
@@ -593,6 +619,7 @@ export default function DashboardPage() {
               labels={cardLabels}
               onToggleActive={handleToggleActive}
               onDelete={setDeleteTarget}
+              onCopy={handleCopyClick}
               onAddToGroup={
                 canAddToExistingGroup ? handleAddToGroupClick : undefined
               }
@@ -608,6 +635,15 @@ export default function DashboardPage() {
           onClose={() => setShowCreateModal(false)}
           onMenuCreated={handleMenuCreated}
           onRefresh={() => setRefreshing(refreshing + 1)}
+        />
+      )}
+
+      {copyTarget && (
+        <CopyMenuModal
+          menu={copyTarget}
+          menuName={getMenuName(copyTarget)}
+          onClose={() => setCopyTarget(null)}
+          onCopied={handleMenuCopied}
         />
       )}
 

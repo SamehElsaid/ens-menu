@@ -8,8 +8,16 @@ import { IoArrowBack, IoCreateOutline } from "react-icons/io5";
 import { FaSpinner } from "react-icons/fa";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import DataTable from "@/components/Custom/DataTable";
+import PlanCapabilitiesFields from "@/components/Admin/PlanCapabilitiesFields";
 import { axiosGet, axiosPatch } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
+import {
+  DEFAULT_CUSTOM_CAPABILITIES,
+  DEFAULT_FREE_CAPABILITIES,
+  DEFAULT_PRO_CAPABILITIES,
+  normalizePlanCapabilities,
+  type PlanCapabilities,
+} from "@/types/PlanCapabilities";
 
 export interface Plan {
   id: number;
@@ -23,10 +31,15 @@ export interface Plan {
   hasAds: boolean;
   isActive: boolean;
   activeSubscriptions?: number;
+  capabilities?: PlanCapabilities;
 }
 
 interface PlansResponse {
   plans: Plan[];
+}
+
+interface CustomDisplayResponse {
+  capabilities: PlanCapabilities;
 }
 
 const defaultForm: Record<string, string | number | boolean> = {
@@ -43,6 +56,10 @@ const defaultForm: Record<string, string | number | boolean> = {
 
 function isProPlanName(name: string): boolean {
   return String(name).trim().toLowerCase() === "pro";
+}
+
+function isFreePlanName(name: string): boolean {
+  return String(name).trim().toLowerCase() === "free";
 }
 
 function formatEgp(value: unknown): string {
@@ -72,7 +89,14 @@ export default function PlansPage() {
   });
   const [form, setForm] =
     useState<Record<string, string | number | boolean>>(defaultForm);
+  const [caps, setCaps] = useState<PlanCapabilities>(DEFAULT_FREE_CAPABILITIES);
   const [saving, setSaving] = useState(false);
+
+  const [customCaps, setCustomCaps] = useState<PlanCapabilities>(
+    DEFAULT_CUSTOM_CAPABILITIES,
+  );
+  const [customLoading, setCustomLoading] = useState(true);
+  const [customSaving, setCustomSaving] = useState(false);
 
   const fetchPlans = useCallback(async () => {
     try {
@@ -92,9 +116,33 @@ export default function PlansPage() {
     }
   }, [locale, t]);
 
+  const fetchCustomDisplay = useCallback(async () => {
+    try {
+      setCustomLoading(true);
+      const result = await axiosGet<CustomDisplayResponse>(
+        "/admin/plans/custom-display",
+        locale,
+      );
+      if (result.status && result.data?.capabilities) {
+        setCustomCaps(
+          normalizePlanCapabilities(
+            result.data.capabilities,
+            DEFAULT_CUSTOM_CAPABILITIES,
+          ),
+        );
+      }
+    } catch (err) {
+      console.error("Error fetching custom display:", err);
+      toast.error(t("customDisplay.error"));
+    } finally {
+      setCustomLoading(false);
+    }
+  }, [locale, t]);
+
   useEffect(() => {
     fetchPlans();
-  }, [fetchPlans]);
+    fetchCustomDisplay();
+  }, [fetchPlans, fetchCustomDisplay]);
 
   const openEdit = useCallback((plan: Plan) => {
     setEditModal({ isOpen: true, plan });
@@ -109,11 +157,16 @@ export default function PlansPage() {
       isActive: Boolean(plan.isActive),
       allowFullDesignControl: Boolean(plan.allowCustomDomain),
     });
+    const fallback = isFreePlanName(plan.name)
+      ? DEFAULT_FREE_CAPABILITIES
+      : DEFAULT_PRO_CAPABILITIES;
+    setCaps(normalizePlanCapabilities(plan.capabilities, fallback));
   }, []);
 
   const closeEdit = useCallback(() => {
     setEditModal({ isOpen: false, plan: null });
     setForm(defaultForm);
+    setCaps(DEFAULT_FREE_CAPABILITIES);
   }, []);
 
   const handleSave = useCallback(async () => {
@@ -130,6 +183,7 @@ export default function PlansPage() {
         hasAds: Boolean(form.hasAds),
         isActive: Boolean(form.isActive),
         allowCustomDomain: Boolean(form.allowFullDesignControl),
+        capabilities: caps,
       };
 
       if (isProPlanName(String(form.name))) {
@@ -155,7 +209,28 @@ export default function PlansPage() {
     } finally {
       setSaving(false);
     }
-  }, [editModal.plan, form, locale, t, closeEdit, fetchPlans]);
+  }, [editModal.plan, form, caps, locale, t, closeEdit, fetchPlans]);
+
+  const handleSaveCustom = useCallback(async () => {
+    setCustomSaving(true);
+    try {
+      const result = await axiosPatch<
+        { capabilities: PlanCapabilities },
+        { message?: string }
+      >("/admin/plans/custom-display", locale, { capabilities: customCaps });
+      if (result.status) {
+        toast.success(t("customDisplay.saveSuccess"));
+        fetchCustomDisplay();
+      } else {
+        toast.error(t("customDisplay.saveError"));
+      }
+    } catch (err) {
+      console.error("Error updating custom display:", err);
+      toast.error(t("customDisplay.saveError"));
+    } finally {
+      setCustomSaving(false);
+    }
+  }, [customCaps, locale, t, fetchCustomDisplay]);
 
   const columnDefs = useMemo<ColDef<Plan>[]>(
     () => [
@@ -279,6 +354,51 @@ export default function PlansPage() {
           showRowNumbers={true}
           pagination={false}
         />
+      </CardDashBoard>
+
+      <CardDashBoard>
+        <div className={`space-y-4 ${isRTL ? "text-right" : "text-left"}`}>
+          <div>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+              {t("customDisplay.title")}
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              {t("customDisplay.subtitle")}
+            </p>
+          </div>
+          {customLoading ? (
+            <div className="flex items-center gap-2 text-slate-500">
+              <FaSpinner className="animate-spin" />
+              {t("customDisplay.loading")}
+            </div>
+          ) : (
+            <>
+              <PlanCapabilitiesFields
+                idPrefix="custom"
+                value={customCaps}
+                onChange={setCustomCaps}
+                t={t}
+              />
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleSaveCustom}
+                  disabled={customSaving}
+                  className="px-5 py-2.5 bg-primary text-white rounded-xl font-semibold hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2"
+                >
+                  {customSaving ? (
+                    <>
+                      <FaSpinner className="animate-spin" />
+                      {t("editModal.saving")}
+                    </>
+                  ) : (
+                    t("customDisplay.save")
+                  )}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </CardDashBoard>
 
       {editModal.isOpen && editModal.plan && (
@@ -468,6 +588,13 @@ export default function PlansPage() {
                   {t("editModal.allowFullDesignControl")}
                 </label>
               </div>
+
+              <PlanCapabilitiesFields
+                idPrefix="plan"
+                value={caps}
+                onChange={setCaps}
+                t={t}
+              />
 
               <div className="flex gap-3 pt-4">
                 <button

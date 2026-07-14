@@ -19,6 +19,7 @@ import {
   IoTrashOutline,
   IoGitNetworkOutline,
   IoRemoveCircleOutline,
+  IoCopyOutline,
 } from "react-icons/io5";
 
 export type MenuDashboardCardProps = {
@@ -37,6 +38,7 @@ export type MenuDashboardCardProps = {
     pause: string;
     play: string;
     deleteMenu: string;
+    copyMenu: string;
     createdAt: string;
     updatedAt: string;
     manage: string;
@@ -46,6 +48,7 @@ export type MenuDashboardCardProps = {
   };
   onToggleActive: (menu: Menu) => void;
   onDelete: (menu: Menu) => void;
+  onCopy?: (menu: Menu) => void;
   onAddToGroup?: (menu: Menu) => void;
   onRemoveFromGroup?: (menu: Menu) => void;
 };
@@ -88,6 +91,7 @@ export default function MenuDashboardCard({
   labels,
   onToggleActive,
   onDelete,
+  onCopy,
   onAddToGroup,
   onRemoveFromGroup,
 }: MenuDashboardCardProps) {
@@ -163,6 +167,16 @@ export default function MenuDashboardCard({
                 </>
               )}
             </button>
+            {onCopy && (
+              <button
+                type="button"
+                onClick={() => onCopy(menu)}
+                title={labels.copyMenu}
+                className="flex h-[38px] w-10 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-500 transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-primary/40 dark:hover:bg-primary/15 dark:hover:text-primary"
+              >
+                <IoCopyOutline className="text-lg" />
+              </button>
+            )}
             <button
               type="button"
               onClick={() => onDelete(menu)}

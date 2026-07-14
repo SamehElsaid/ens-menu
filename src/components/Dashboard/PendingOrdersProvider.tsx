@@ -10,8 +10,7 @@ import {
 } from "react";
 import { useLocale } from "next-intl";
 import { axiosGet } from "@/shared/axiosCall";
-import { useAppSelector } from "@/store/hooks";
-import { isFreePlanUser } from "@/lib/subscription";
+import { useCurrentPlanCapabilities } from "@/hooks/useCurrentPlanCapabilities";
 import { useMenuActivitySocket } from "@/hooks/useMenuActivitySocket";
 import { playNewOrderNotificationSound } from "@/lib/orderNotificationSound";
 import { isPendingOrder, isDeliveryEntry } from "@/lib/tableOrders";
@@ -45,8 +44,9 @@ export function PendingOrdersProvider({
   children: ReactNode;
 }) {
   const locale = useLocale();
-  const userData = useAppSelector((s) => s.auth.data);
-  const isFreePlan = !userData || isFreePlanUser(userData);
+  const capabilities = useCurrentPlanCapabilities();
+  const tableOrderingEnabled = capabilities.tableOrderingQr;
+  const liveNotificationsEnabled = capabilities.liveOrderNotifications;
 
   const [allEntries, setAllEntries] = useState<CallEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -58,19 +58,18 @@ export function PendingOrdersProvider({
     }
     setLoading(true);
     try {
-      const requests: Promise<ReturnType<typeof axiosGet<ActivityCallsPayload>>>[] =
-        [
-          axiosGet<ActivityCallsPayload>(
-            `/menus/${segment}/activity-logs`,
-            locale,
-            undefined,
-            { page: 1, limit: 50, channel: "delivery" },
-            undefined,
-            true,
-          ),
-        ];
+      const requests = [
+        axiosGet<ActivityCallsPayload>(
+          `/menus/${segment}/activity-logs`,
+          locale,
+          undefined,
+          { page: 1, limit: 50, channel: "delivery" },
+          undefined,
+          true,
+        ),
+      ];
 
-      if (!isFreePlan) {
+      if (tableOrderingEnabled) {
         requests.unshift(
           axiosGet<ActivityCallsPayload>(
             `/menus/${segment}/activity-logs`,
@@ -86,10 +85,10 @@ export function PendingOrdersProvider({
       const results = await Promise.all(requests);
 
       const tableEntries =
-        !isFreePlan && results[0]?.status && results[0]?.data
+        tableOrderingEnabled && results[0]?.status && results[0]?.data
           ? (results[0].data.entries ?? results[0].data.calls ?? [])
           : [];
-      const deliveryResult = isFreePlan ? results[0] : results[1];
+      const deliveryResult = tableOrderingEnabled ? results[1] : results[0];
       const deliveryEntries =
         deliveryResult?.status && deliveryResult?.data
           ? (deliveryResult.data.entries ?? deliveryResult.data.calls ?? [])
@@ -101,13 +100,16 @@ export function PendingOrdersProvider({
     } finally {
       setLoading(false);
     }
-  }, [segment, locale, isFreePlan]);
+  }, [segment, locale, tableOrderingEnabled]);
 
   useEffect(() => {
     void refresh();
   }, [refresh]);
 
-  useMenuActivitySocket(!segment ? "" : segment, refresh, {
+  useMenuActivitySocket(
+    !segment || !liveNotificationsEnabled ? "" : segment,
+    refresh,
+    {
     onNewOrder: playNewOrderNotificationSound,
   });
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import ViewTime from "@/shared/ViewTime";
 import {
@@ -9,7 +10,10 @@ import {
 } from "@/lib/tableOrders";
 import type { CallEntry, OrderActionResult } from "@/lib/tableOrders";
 import OrderActionButtons from "./OrderActionButtons";
+import OrderChargesLines from "./OrderChargesLines";
 import { useDashboardSession } from "@/hooks/useDashboardSession";
+import { useAppSelector } from "@/store/hooks";
+import { resolveOrderCharges } from "@/lib/menuOrderCharges";
 import {
   IoEllipseSharp,
   IoEyeOutline,
@@ -33,11 +37,26 @@ export default function OrderMobileCard({
 }: OrderMobileCardProps) {
   const t = useTranslations("tableOrders");
   const session = useDashboardSession();
+  const menu = useAppSelector((s) => s.menuData.menu);
   const canFinish =
     session?.role !== "staff" || session?.staffJobRole === "cashier";
   const status = resolveListEntryStatus(entry);
   const tone = orderStatusTone(status);
   const time = resolveEntryTime(entry.actionDetails);
+  const charges = useMemo(
+    () =>
+      resolveOrderCharges({
+        items: entry.items,
+        storedItemsSubtotal: entry.itemsSubtotal,
+        storedTaxAmount: entry.taxAmount,
+        storedServiceAmount: entry.serviceAmount,
+        storedTaxPercent: entry.taxPercent,
+        storedServicePercent: entry.servicePercent,
+        storedTotal: entry.totalPrice,
+        menu,
+      }),
+    [entry, menu],
+  );
 
   return (
     <article className="dashboard-order-card flex h-full flex-col overflow-hidden rounded-2xl border border-violet-200/70 bg-white shadow-[0_2px_16px_rgba(124,58,237,0.08)] dark:border-violet-800/40 dark:bg-slate-800/95 dark:shadow-[0_2px_20px_rgba(0,0,0,0.3)]">
@@ -90,17 +109,20 @@ export default function OrderMobileCard({
           </span>
           {entry.items?.length ?? 0}
         </p>
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-base font-bold text-violet-800 dark:text-violet-200 tabular-nums">
-            {entry.totalPrice ?? 0}
-            {currency && (
-              <span className="ms-1 text-xs font-semibold text-violet-600 dark:text-violet-400">
-                {currency}
-              </span>
-            )}
-          </p>
+        <div className="space-y-2">
+          <OrderChargesLines
+            charges={charges}
+            currency={currency}
+            labels={{
+              subtotal: t("detailsSubtotal"),
+              tax: t("detailsTax"),
+              service: t("detailsService"),
+              total: t("detailsTotal"),
+            }}
+            accent="violet"
+          />
           {time && (
-            <time className="text-xs text-slate-500 dark:text-slate-400">
+            <time className="block text-end text-xs text-slate-500 dark:text-slate-400">
               <ViewTime data={time} />
             </time>
           )}

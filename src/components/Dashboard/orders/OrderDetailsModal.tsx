@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useReactToPrint } from "react-to-print";
 import { toast } from "react-toastify";
@@ -10,7 +10,6 @@ import {
   actionActorName,
   callItemOptionLabel,
   deliveryGovernorateLabel,
-  deliveryGrandTotal,
   isEditableOrderStatus,
   isGuestOrderAction,
   lastStaffWaiterName,
@@ -24,9 +23,11 @@ import {
   type OrderActionResult,
   type OrderStatus,
 } from "@/lib/tableOrders";
+import { resolveOrderCharges } from "@/lib/menuOrderCharges";
 import { patchTableOrderItems } from "@/lib/tableOrderActions";
 import OrderActionButtons from "./OrderActionButtons";
 import OrderAddItemPicker from "./OrderAddItemPicker";
+import OrderChargesLines from "./OrderChargesLines";
 import { useAppSelector } from "@/store/hooks";
 import { isFreePlanUser } from "@/lib/subscription";
 import { useDashboardSession } from "@/hooks/useDashboardSession";
@@ -625,6 +626,7 @@ export default function OrderDetailsModal({
     session?.role !== "staff" || session?.staffJobRole === "cashier";
 
   const userData = useAppSelector((s) => s.auth.data);
+  const menu = useAppSelector((s) => s.menuData.menu);
   const isPro = Boolean(userData) && !isFreePlanUser(userData);
 
   const [editingItems, setEditingItems] = useState(false);
@@ -639,7 +641,6 @@ export default function OrderDetailsModal({
     entry?.order ?? lastAction?.detail?.order ?? actions[0]?.detail?.order;
 
   const items: CallItem[] = entry?.items ?? order?.items ?? [];
-  const itemsSubtotal = entry?.totalPrice ?? order?.orderTotal ?? 0;
   const status = resolveLatestOrderStatus(actions, order);
   const canEditItems = isEditableOrderStatus(status);
 
@@ -651,11 +652,6 @@ export default function OrderDetailsModal({
   }, [entry]);
 
   const displayItems = editingItems ? draftItems : items;
-  const draftItemsSubtotal = draftItems.reduce(
-    (sum, item) =>
-      sum + (item.total ?? (item.price ?? 0) * (item.quantity ?? 1)),
-    0,
-  );
   const deliveryFee =
     variant === "delivery"
       ? order?.deliveryFee != null
@@ -664,19 +660,38 @@ export default function OrderDetailsModal({
           ? Number(entry.deliveryFee)
           : null
       : null;
-  const displayTotal =
-    variant === "delivery"
-      ? deliveryGrandTotal(
-          editingItems ? draftItemsSubtotal : itemsSubtotal,
-          deliveryFee,
-        )
-      : editingItems
-        ? draftItemsSubtotal
-        : itemsSubtotal;
-  const printTotal =
-    variant === "delivery"
-      ? deliveryGrandTotal(itemsSubtotal, deliveryFee)
-      : itemsSubtotal;
+  const charges = useMemo(
+    () =>
+      resolveOrderCharges({
+        items: displayItems,
+        storedItemsSubtotal: editingItems
+          ? null
+          : (entry?.itemsSubtotal ?? order?.itemsSubtotal ?? null),
+        storedTaxAmount: editingItems
+          ? null
+          : (entry?.taxAmount ?? order?.taxAmount ?? null),
+        storedServiceAmount: editingItems
+          ? null
+          : (entry?.serviceAmount ?? order?.serviceAmount ?? null),
+        storedTaxPercent: entry?.taxPercent ?? order?.taxPercent ?? null,
+        storedServicePercent:
+          entry?.servicePercent ?? order?.servicePercent ?? null,
+        storedTotal: editingItems
+          ? null
+          : (entry?.totalPrice ?? order?.orderTotal ?? null),
+        deliveryFee,
+        menu,
+      }),
+    [
+      deliveryFee,
+      displayItems,
+      editingItems,
+      entry,
+      menu,
+      order,
+    ],
+  );
+  const printTotal = charges.grandTotal;
 
   const adjustDraftQty = (index: number, delta: number) => {
     setDraftItems((prev) =>
@@ -1055,18 +1070,22 @@ export default function OrderDetailsModal({
                       ))}
                     </div>
 
-                    <div className="mt-3 flex items-center justify-between px-4 py-3 rounded-xl bg-linear-to-r from-violet-50 to-fuchsia-50/60 dark:from-violet-950/40 dark:to-fuchsia-950/20 border border-violet-200/60 dark:border-violet-700/40">
-                      <span className="text-sm font-semibold text-violet-800 dark:text-violet-300">
-                        {t("detailsTotal")}
-                      </span>
-                      <span className="text-lg font-bold text-violet-900 dark:text-violet-200 tabular-nums">
-                        {displayTotal}
-                        {currency && (
-                          <span className="ms-1.5 text-sm font-semibold text-violet-700 dark:text-violet-400">
-                            {currency}
-                          </span>
-                        )}
-                      </span>
+                    <div className="mt-3 px-4 py-3 rounded-xl bg-linear-to-r from-violet-50 to-fuchsia-50/60 dark:from-violet-950/40 dark:to-fuchsia-950/20 border border-violet-200/60 dark:border-violet-700/40">
+                      <OrderChargesLines
+                        charges={charges}
+                        currency={currency}
+                        labels={{
+                          subtotal: t("detailsSubtotal"),
+                          tax: t("detailsTax"),
+                          service: t("detailsService"),
+                          deliveryFee:
+                            variant === "delivery"
+                              ? t("detailsDeliveryFee" as never)
+                              : undefined,
+                          total: t("detailsTotal"),
+                        }}
+                        accent="violet"
+                      />
                     </div>
 
                     {editingItems && (

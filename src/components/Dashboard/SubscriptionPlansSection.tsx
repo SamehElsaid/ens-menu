@@ -17,6 +17,11 @@ import {
   pickFailedRequestMessage,
 } from "@/lib/subscriptionPayment";
 import type { Plan, PlansResponse } from "@/types/Plan";
+import type { PlanCapabilities } from "@/types/PlanCapabilities";
+import {
+  DEFAULT_CUSTOM_CAPABILITIES,
+  normalizePlanCapabilities,
+} from "@/types/PlanCapabilities";
 import CurrentPlanSummary from "@/components/Dashboard/CurrentPlanSummary";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import SubscriptionPlanCard, {
@@ -75,6 +80,9 @@ export default function SubscriptionPlansSection({
   const isAdmin = profile?.role === "admin";
 
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [customDisplay, setCustomDisplay] = useState<PlanCapabilities>(
+    DEFAULT_CUSTOM_CAPABILITIES,
+  );
   const [plansLoading, setPlansLoading] = useState(true);
   const [subscriptionInfo, setSubscriptionInfo] = useState<Subscription | null>(
     null,
@@ -130,6 +138,12 @@ export default function SubscriptionPlansSection({
       .then((res) => {
         if (res.status && res.data?.plans?.length) {
           setPlans(res.data.plans);
+          setCustomDisplay(
+            normalizePlanCapabilities(
+              res.data.customDisplay,
+              DEFAULT_CUSTOM_CAPABILITIES,
+            ),
+          );
         }
       })
       .finally(() => setPlansLoading(false));
@@ -144,13 +158,37 @@ export default function SubscriptionPlansSection({
     });
   }, [locale, authData?.user, isAdmin]);
 
+  const freePlanRow = useMemo(
+    () => plans.find((p) => p.name?.toLowerCase() === "free"),
+    [plans],
+  );
+  const proPlanRow = useMemo(
+    () => plans.find((p) => p.name?.toLowerCase() === "pro"),
+    [plans],
+  );
+
   const pricingComparisonRows = useMemo(
     () =>
       buildPricingComparisonRows({
         t: tPricingPage,
         tLanding: tLandingPricing,
+        freePlan: freePlanRow
+          ? {
+              maxMenus: freePlanRow.maxMenus,
+              allowCustomDomain: freePlanRow.allowCustomDomain,
+              capabilities: freePlanRow.capabilities,
+            }
+          : null,
+        proPlan: proPlanRow
+          ? {
+              maxMenus: proPlanRow.maxMenus,
+              allowCustomDomain: proPlanRow.allowCustomDomain,
+              capabilities: proPlanRow.capabilities,
+            }
+          : null,
+        customDisplay,
       }),
-    [tPricingPage, tLandingPricing],
+    [tPricingPage, tLandingPricing, freePlanRow, proPlanRow, customDisplay],
   );
 
   const planFeaturesByKey = useMemo(

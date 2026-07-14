@@ -29,8 +29,8 @@ import BranchLocationPicker, {
 } from "@/components/Dashboard/delivery/BranchLocationPicker";
 import ProUpgradeModal from "@/components/Dashboard/ProUpgradeModal";
 import { useAppSelector } from "@/store/hooks";
-import { isFreePlanUser } from "@/lib/subscription";
 import { menuDashboardPath } from "@/lib/menuDashboardPath";
+import { useCurrentPlanCapabilities } from "@/hooks/useCurrentPlanCapabilities";
 
 type DeliveryMode = "governorates" | "distance";
 
@@ -121,8 +121,8 @@ export default function DeliverySettingsPage() {
   const t = useTranslations("settingsDeliveryPage");
   const isRTL = locale === "ar";
   const menu = useAppSelector((s) => s.menuData.menu);
-  const userData = useAppSelector((s) => s.auth.data);
-  const isFreePlan = !userData || isFreePlanUser(userData);
+  const capabilities = useCurrentPlanCapabilities();
+  const canUseDistanceDelivery = capabilities.advancedDeliveryMaps;
   const subscriptionHref = menuDashboardPath(menu, "subscription");
   const menuId = menu?.id;
   const menuNameAr = menu?.nameAr?.trim() ?? "";
@@ -376,7 +376,7 @@ export default function DeliverySettingsPage() {
 
   const handleDeliveryModeChange = async (mode: DeliveryMode) => {
     if (mode === settings.deliveryMode) return;
-    if (mode === "distance" && isFreePlan) {
+    if (mode === "distance" && !canUseDistanceDelivery) {
       setUpgradeModalOpen(true);
       return;
     }

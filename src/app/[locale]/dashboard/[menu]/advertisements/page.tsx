@@ -3,21 +3,21 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { axiosGet } from "@/shared/axiosCall";
+import { axiosGet, axiosPatch } from "@/shared/axiosCall";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import AddAdvertisementModal from "@/components/Dashboard/AddAdvertisementModal";
 import DeleteAdvertisementConfirm from "@/components/Dashboard/DeleteAdvertisementConfirm";
 import AdsStatsSection from "@/components/Dashboard/advertisements/AdsStatsSection";
 import AdsCardGrid from "@/components/Dashboard/advertisements/AdsCardGrid";
 import AdsEmptyState from "@/components/Dashboard/advertisements/AdsEmptyState";
-import { useAppSelector } from "@/store/hooks";
-import { isFreePlanUser } from "@/lib/subscription";
-import { canAddMenuAd, FREE_MAX_ADS_PER_MENU } from "@/lib/adPlanLimits";
+import { canAddMenuAd } from "@/lib/adPlanLimits";
 import LinkTo from "@/components/Global/LinkTo";
 import { DemoDataBanner } from "@/components/Admin/AdminAnalyticsWidgets";
 import { fetchMenuAnalytics } from "@/lib/fetchMenuAnalytics";
 import { Advertisement } from "@/types/Menu";
 import { IoAddCircleOutline } from "react-icons/io5";
+import { useCurrentPlanCapabilities } from "@/hooks/useCurrentPlanCapabilities";
+import { toast } from "react-toastify";
 
 export default function AdvertisementsPage() {
   const locale = useLocale();
@@ -41,10 +41,12 @@ export default function AdvertisementsPage() {
   const [refreshing, setRefreshing] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [totalAds, setTotalAds] = useState(0);
+  const [togglingId, setTogglingId] = useState<number | null>(null);
   const [adAnalyticsDemo, setAdAnalyticsDemo] = useState(false);
 
-  const userData = useAppSelector((state) => state.auth.data);
-  const isFreePlan = !userData || isFreePlanUser(userData);
+  const capabilities = useCurrentPlanCapabilities();
+  const maxAdsPerMenu = capabilities.maxAdsPerMenu;
 
   const fetchAds = useCallback(async () => {
     if (!menuId) return;
@@ -54,7 +56,7 @@ export default function AdvertisementsPage() {
         success?: boolean;
         data?: {
           ads?: Advertisement[];
-          pagination?: { totalPages?: number };
+          pagination?: { totalPages?: number; total?: number };
         };
       }>(`/menus/${menuId}/ads?page=${page}&limit=12`, locale);
 
@@ -65,9 +67,11 @@ export default function AdvertisementsPage() {
 
         const pages = wrapper.data?.pagination?.totalPages ?? 0;
         setTotalPages(pages);
+        setTotalAds(Number(wrapper.data?.pagination?.total ?? list.length));
       } else {
         setAds([]);
         setTotalPages(0);
+        setTotalAds(0);
       }
     } finally {
       setLoading(false);
@@ -85,7 +89,7 @@ export default function AdvertisementsPage() {
     });
   }, [menuId, locale]);
 
-  const canAddAd = canAddMenuAd(isFreePlan, ads.length);
+  const canAddAd = canAddMenuAd(maxAdsPerMenu, totalAds);
 
   const adSummaryMetrics = useMemo(() => {
     const totalImpressions = ads.reduce(
@@ -144,6 +148,42 @@ export default function AdvertisementsPage() {
     setDeletingAd(ad);
   }, []);
 
+  const handleToggleActive = useCallback(
+    async (ad: Advertisement) => {
+      if (ad.id == null) return;
+      const nextActive = !ad.isActive;
+      try {
+        setTogglingId(ad.id);
+        const result = await axiosPatch<
+          { isActive: boolean },
+          { success?: boolean; message?: string; error?: string }
+        >(`/ads/${ad.id}`, locale, { isActive: nextActive });
+
+        if (result.status) {
+          setAds((prev) =>
+            prev.map((item) =>
+              item.id === ad.id ? { ...item, isActive: nextActive } : item,
+            ),
+          );
+          toast.success(
+            nextActive ? t("toggleActivateSuccess") : t("togglePauseSuccess"),
+          );
+        } else {
+          const apiMessage =
+            (result.data as { error?: string; message?: string } | undefined)
+              ?.error ||
+            (result.data as { message?: string } | undefined)?.message;
+          toast.error(apiMessage || t("toggleError"));
+        }
+      } catch {
+        toast.error(t("toggleError"));
+      } finally {
+        setTogglingId(null);
+      }
+    },
+    [locale, t],
+  );
+
   const getTitle = useCallback(
     (ad: Advertisement) => {
       if (locale === "ar") return ad.titleAr || ad.title || "";
@@ -178,12 +218,12 @@ export default function AdvertisementsPage() {
 
   return (
     <>
-      {isFreePlan && (
+      {maxAdsPerMenu >= 0 && (
         <div
           className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-100"
           dir={textDir}
         >
-          {t("freePlanLimitBanner", { max: FREE_MAX_ADS_PER_MENU })}
+          {t("freePlanLimitBanner", { max: maxAdsPerMenu })}
           {!canAddAd && (
             <>
               {" "}
@@ -247,8 +287,10 @@ export default function AdvertisementsPage() {
               onPageChange={setPage}
               getTitle={getTitle}
               getContent={getContent}
+              togglingId={togglingId}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onToggleActive={handleToggleActive}
             />
           </div>
         </>

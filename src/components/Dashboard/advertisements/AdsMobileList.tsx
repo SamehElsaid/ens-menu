@@ -39,8 +39,10 @@ interface AdsMobileListProps {
   totalPages: number;
   onPageChange: (page: number) => void;
   getTitle: (ad: Advertisement) => string;
+  togglingId?: number | null;
   onEdit: (ad: Advertisement) => void;
   onDelete: (ad: Advertisement) => void;
+  onToggleActive?: (ad: Advertisement) => void;
   onAdd: () => void;
 }
 
@@ -52,8 +54,10 @@ export default function AdsMobileList({
   totalPages,
   onPageChange,
   getTitle,
+  togglingId = null,
   onEdit,
   onDelete,
+  onToggleActive,
   onAdd,
 }: AdsMobileListProps) {
   if (loading) {
@@ -82,8 +86,10 @@ export default function AdsMobileList({
           ad={ad}
           locale={locale}
           title={getTitle(ad)}
+          togglingId={togglingId}
           onEdit={onEdit}
           onDelete={onDelete}
+          onToggleActive={onToggleActive}
         />
       ))}
       {totalPages > 1 && (

@@ -18,6 +18,7 @@ export interface Subscription {
   billingCycle?: string;
   startDate?: string | null;
   endDate?: string | null;
+  capabilities?: import("@/types/PlanCapabilities").PlanCapabilities;
   [key: string]: unknown;
 }
 

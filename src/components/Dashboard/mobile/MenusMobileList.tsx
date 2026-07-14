@@ -21,6 +21,7 @@ type MenusMobileListProps = {
   getDashboardPath: (menu: Menu) => string;
   onToggleActive: (menu: Menu) => void;
   onDelete: (menu: Menu) => void;
+  onCopy?: (menu: Menu) => void;
   onAddToGroup?: (menu: Menu) => void;
   onRemoveFromGroup?: (menu: Menu) => void;
   onManageGroup?: (group: MenuGroupSummary) => void;
@@ -37,6 +38,7 @@ export default function MenusMobileList({
   getDashboardPath,
   onToggleActive,
   onDelete,
+  onCopy,
   onAddToGroup,
   onRemoveFromGroup,
   onManageGroup,
@@ -84,6 +86,7 @@ export default function MenusMobileList({
                       isNested
                       onToggleActive={onToggleActive}
                       onDelete={onDelete}
+                      onCopy={onCopy}
                       onAddToGroup={onAddToGroup}
                       onRemoveFromGroup={onRemoveFromGroup}
                     />
@@ -108,6 +111,7 @@ export default function MenusMobileList({
             groupMeta={resolveMenuGroupMeta(menu)}
             onToggleActive={onToggleActive}
             onDelete={onDelete}
+            onCopy={onCopy}
             onAddToGroup={onAddToGroup}
             onRemoveFromGroup={onRemoveFromGroup}
           />

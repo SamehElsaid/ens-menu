@@ -1,3 +1,5 @@
+import type { PlanCapabilities } from "@/types/PlanCapabilities";
+
 export type Plan = {
   id: number;
   name: string;
@@ -13,10 +15,13 @@ export type Plan = {
   maxProductsPerMenu: number;
   allowCustomDomain: boolean;
   hasAds: boolean;
+  extraMenuPrice?: number | null;
   features: string[];
+  capabilities?: PlanCapabilities;
 };
 
 export type PlansResponse = {
   success: boolean;
   plans: Plan[];
+  customDisplay?: PlanCapabilities;
 };
