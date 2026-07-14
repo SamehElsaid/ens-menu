@@ -9,6 +9,7 @@ import { HiSpeakerphone } from "react-icons/hi";
 import {
   MdOutlineDeliveryDining,
   MdOutlineFastfood,
+  MdOutlineReorder,
   MdOutlineTableBar,
   MdPeopleOutline,
 } from "react-icons/md";
@@ -101,6 +102,12 @@ export const cashierNavSections: NavSection[] = [
         icon: MdOutlineFastfood,
         key: "items",
         link: "items",
+      },
+      {
+        label: "displayOrder",
+        icon: MdOutlineReorder,
+        key: "display-order",
+        link: "display-order",
       },
       {
         label: "tables",
@@ -212,6 +219,12 @@ export const navSections: NavSection[] = [
         icon: MdOutlineFastfood,
         key: "items",
         link: "items",
+      },
+      {
+        label: "displayOrder",
+        icon: MdOutlineReorder,
+        key: "display-order",
+        link: "display-order",
       },
       {
         label: "tables",

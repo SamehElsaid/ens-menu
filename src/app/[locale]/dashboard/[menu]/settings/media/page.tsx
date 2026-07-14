@@ -18,6 +18,7 @@ import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
 import { toast } from "react-toastify";
 import type { Menu } from "@/types/Menu";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
+import { normalizeExternalUrl } from "@/lib/normalizeExternalUrl";
 
 function timeStringToDate(s: string): Date | null {
   if (!s || !/^\d{2}:\d{2}$/.test(s)) return null;
@@ -41,6 +42,13 @@ const DAY_KEYS = [
 type DayKey = (typeof DAY_KEYS)[number];
 
 type SocialKey = "facebook" | "instagram" | "twitter" | "whatsapp";
+
+const SOCIAL_URL_PLACEHOLDERS: Record<Exclude<SocialKey, "whatsapp">, string> =
+  {
+    facebook: "https://www.facebook.com/...",
+    instagram: "https://www.instagram.com/...",
+    twitter: "https://x.com/...",
+  };
 
 interface SocialLinkRow {
   id: SocialKey;
@@ -95,7 +103,7 @@ const SocialIcons: Record<SocialKey, React.ElementType> = {
 const socialIconColors: Record<SocialKey, string> = {
   facebook: "text-[#1877F2] bg-[#1877F2]/10",
   instagram: "text-pink-500 bg-pink-500/10",
-  twitter: "text-emerald-600 bg-emerald-500/10",
+  twitter: "text-[#1DA1F2] bg-[#1DA1F2]/10",
   whatsapp: "text-[#25D366] bg-[#25D366]/10",
 };
 
@@ -170,7 +178,12 @@ export default function MediaPage() {
       return;
     }
     const socialByKey = Object.fromEntries(
-      socialLinks.map((row) => [row.id, row.value]),
+      socialLinks.map((row) => {
+        const trimmed = row.value.trim();
+        if (!trimmed) return [row.id, ""];
+        if (row.id === "whatsapp") return [row.id, trimmed];
+        return [row.id, normalizeExternalUrl(trimmed)];
+      }),
     ) as Record<SocialKey, string>;
     const payload = {
       socialFacebook: socialByKey.facebook,
@@ -251,11 +264,7 @@ export default function MediaPage() {
                   <div className="flex-1 min-w-[180px]">
                     <CustomInput
                       type={row.id === "whatsapp" ? "tel" : "text"}
-                      value={
-                        row.id === "whatsapp"
-                          ? row.value || undefined
-                          : row.value
-                      }
+                      value={row.value}
                       onChange={(e) =>
                         updateSocial(
                           row.id,
@@ -265,10 +274,22 @@ export default function MediaPage() {
                                 .target.value,
                         )
                       }
+                      onBlur={
+                        row.id === "whatsapp"
+                          ? undefined
+                          : () => {
+                              const trimmed = row.value.trim();
+                              if (!trimmed) return;
+                              updateSocial(
+                                row.id,
+                                normalizeExternalUrl(trimmed),
+                              );
+                            }
+                      }
                       placeholder={
                         row.id === "whatsapp"
-                          ? "+965..."
-                          : `https://${row.id}.com/...`
+                          ? "123-456-7890"
+                          : SOCIAL_URL_PLACEHOLDERS[row.id]
                       }
                     />
                   </div>
@@ -336,7 +357,7 @@ export default function MediaPage() {
               </label>
               <CustomInput
                 type="tel"
-                value={contact.phone || undefined}
+                value={contact.phone}
                 onChange={(val) =>
                   setContact((c) => ({
                     ...c,

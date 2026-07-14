@@ -56,6 +56,26 @@ export function findMatchingItemInCategory(
   return { kind: "none" };
 }
 
+function clearItemDuplicateMeta(item: ImportItem): ImportItem {
+  const { duplicateMeta: _removed, ...rest } = item;
+  return {
+    ...rest,
+    flags: item.flags.filter(
+      (f) => f !== "duplicate" && f !== "price_conflict",
+    ),
+  };
+}
+
+function clearVariantDuplicateMeta(variant: ImportVariant): ImportVariant {
+  const { duplicateMeta: _removed, ...rest } = variant;
+  return {
+    ...rest,
+    flags: variant.flags.filter(
+      (f) => f !== "duplicate" && f !== "price_conflict",
+    ),
+  };
+}
+
 function applyItemDuplicateMeta(
   item: ImportItem,
   nameAr: string,
@@ -73,11 +93,7 @@ function applyItemDuplicateMeta(
   );
 
   if (match.kind === "none") {
-    const { duplicateMeta: _removed, ...rest } = item;
-    const flags = item.flags.filter(
-      (f) => f !== "duplicate" && f !== "price_conflict",
-    );
-    return { ...rest, flags };
+    return clearItemDuplicateMeta(item);
   }
 
   if (match.kind === "exact") {
@@ -134,7 +150,7 @@ export function annotateDraftWithSnapshot(
       if (item.variants.length > 0) {
         const variants = item.variants.map((variant) => {
           if (matchedCategoryId === null) {
-            return variant;
+            return clearVariantDuplicateMeta(variant);
           }
           const vAr = variant.labelAr ?? variant.label;
           const vEn = variant.labelEn ?? variant.label;
@@ -144,13 +160,14 @@ export function annotateDraftWithSnapshot(
           const nameEn = item.nameEn.trim()
             ? `${item.nameEn.trim()} - ${vEn.trim()}`
             : vEn.trim();
-          const price = variant.price ?? 0;
-          if (price === null || !Number.isFinite(price)) return variant;
+          if (variant.price === null || !Number.isFinite(variant.price)) {
+            return clearVariantDuplicateMeta(variant);
+          }
 
           const match = findMatchingItemInCategory(
             nameAr,
             nameEn,
-            price,
+            variant.price,
             matchedCategoryId,
             snapshot.items,
           );
@@ -175,15 +192,16 @@ export function annotateDraftWithSnapshot(
                 (f) => f !== "duplicate" && f !== "price_conflict",
               );
 
+        const { duplicateMeta: _removed, ...itemRest } = item;
         return {
-          ...item,
+          ...itemRest,
           variants,
           flags: itemFlags,
         };
       }
 
       if (matchedCategoryId === null || item.price === null) {
-        return item;
+        return clearItemDuplicateMeta(item);
       }
 
       return applyItemDuplicateMeta(
@@ -222,11 +240,7 @@ function applyVariantDuplicateMeta(
   match: ItemMatchResult,
 ): ImportVariant {
   if (match.kind === "none") {
-    const flags = variant.flags.filter(
-      (f) => f !== "duplicate" && f !== "price_conflict",
-    );
-    const { duplicateMeta: _removed, ...rest } = variant;
-    return { ...rest, flags };
+    return clearVariantDuplicateMeta(variant);
   }
 
   if (match.kind === "exact") {

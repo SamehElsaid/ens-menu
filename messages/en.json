@@ -2002,7 +2002,8 @@
       "featuresSectionTitle": "Everything you need to run your restaurant",
       "featuresSectionSubtitle": "Built for restaurant owners who want full control from the palm of their hand.",
       "ctaTitle": "Start managing your restaurant smarter",
-      "ctaSubtitle": "Available on Android now. iOS coming soon.",
+      "ctaAndroidStatus": "Available now",
+      "ctaIosStatus": "Coming soon",
       "ctaButton": "Download on Google Play"
     }
   },
@@ -2586,6 +2587,33 @@
     "selectCategory": "Select category",
     "availableToOrderNow": "Is this product available to order now?"
   },
+  "DisplayOrder": {
+    "title": "Display order",
+    "subtitle": "Arrange categories and products the same way they appear on your public menu",
+    "save": "Save order",
+    "saving": "Saving...",
+    "saved": "Display order updated",
+    "saveError": "Failed to update display order",
+    "loading": "Loading...",
+    "emptyCategories": "No categories yet",
+    "emptyItems": "No products in this category",
+    "allCategories": "All",
+    "categoriesStripHint": "Drag the category pills to reorder them",
+    "productsInCategory": "Products — drag cards or use the arrows",
+    "allGroupedHint": "Products are grouped by category — reorder only inside each category",
+    "categoryItemsCount": "{count} products",
+    "uncategorized": "Uncategorized",
+    "dragHint": "Same idea as the public menu: first batch, then scroll to load more ({pageSize} per page)",
+    "loadingMore": "Loading more products...",
+    "scrollForMore": "Scroll for more",
+    "endOfList": "All loaded products",
+    "moveUp": "Move earlier",
+    "moveDown": "Move later",
+    "availableNow": "Available now",
+    "dragHandle": "Drag",
+    "dropPlaceholder": "Drop here",
+    "unsavedChanges": "You have unsaved changes"
+  },
   "Advertisements": {
     "addModal": {
       "title": "Add Advertisement",
@@ -2683,6 +2711,7 @@
     "tables": "Tables",
     "staff": "Staff",
     "items": "Items",
+    "displayOrder": "Display order",
     "advertisements": "Advertisements",
     "appVersion": "App Version",
     "promo": "Promo",

@@ -1910,7 +1910,8 @@
       "featuresSectionTitle": "كل ما تحتاجه لإدارة مطعمك",
       "featuresSectionSubtitle": "مصمم لأصحاب المطاعم الذين يريدون التحكم الكامل من راحة يدهم.",
       "ctaTitle": "ابدأ إدارة مطعمك بذكاء",
-      "ctaSubtitle": "متاح الآن على Android. iOS قريباً.",
+      "ctaAndroidStatus": "متاح الآن",
+      "ctaIosStatus": "قريباً",
       "ctaButton": "حمّل من Google Play"
     }
   },
@@ -2494,6 +2495,33 @@
     "selectCategory": "اختر الصنف",
     "availableToOrderNow": "هل المنتج متوفر للطلب الآن؟"
   },
+  "DisplayOrder": {
+    "title": "ترتيب العرض",
+    "subtitle": "رتّب التصنيفات والمنتجات بنفس شكل ظهورها في المنيو العامة",
+    "save": "حفظ الترتيب",
+    "saving": "جاري الحفظ...",
+    "saved": "تم تحديث ترتيب العرض",
+    "saveError": "فشل تحديث ترتيب العرض",
+    "loading": "جاري التحميل...",
+    "emptyCategories": "لا توجد تصنيفات بعد",
+    "emptyItems": "لا توجد منتجات في هذا التصنيف",
+    "allCategories": "الكل",
+    "categoriesStripHint": "اسحب التصنيفات لإعادة ترتيبها",
+    "productsInCategory": "المنتجات — اسحب الكروت أو استخدم الأسهم",
+    "allGroupedHint": "المنتجات مجمّعة حسب التصنيف — الترتيب داخل كل تصنيف فقط",
+    "categoryItemsCount": "{count} منتجات",
+    "uncategorized": "بدون تصنيف",
+    "dragHint": "نفس فكرة المنيو العامة: أول دفعة ثم سكرول لجلب المزيد ({pageSize} لكل صفحة)",
+    "loadingMore": "جاري تحميل المزيد...",
+    "scrollForMore": "مرّر للمزيد",
+    "endOfList": "تم تحميل كل المنتجات",
+    "moveUp": "تحريك للأمام",
+    "moveDown": "تحريك للخلف",
+    "availableNow": "متاح الآن",
+    "dragHandle": "اسحب",
+    "dropPlaceholder": "أفلت هنا",
+    "unsavedChanges": "هناك تغييرات غير محفوظة"
+  },
   "Advertisements": {
     "addModal": {
       "title": "إضافة إعلان",
@@ -2591,6 +2619,7 @@
     "settings": "الإعدادات",
     "categories": "التصنيفات",
     "items": "المنتجات",
+    "displayOrder": "ترتيب العرض",
     "advertisements": "الإعلانات",
     "appVersion": "إصدار التطبيق",
     "promo": "الترويج",
