@@ -41,8 +41,10 @@ interface AdsCardGridProps {
   onPageChange: (page: number) => void;
   getTitle: (ad: Advertisement) => string;
   getContent: (ad: Advertisement) => string;
+  togglingId?: number | null;
   onEdit: (ad: Advertisement) => void;
   onDelete: (ad: Advertisement) => void;
+  onToggleActive?: (ad: Advertisement) => void;
 }
 
 export default function AdsCardGrid({
@@ -54,8 +56,10 @@ export default function AdsCardGrid({
   onPageChange,
   getTitle,
   getContent,
+  togglingId = null,
   onEdit,
   onDelete,
+  onToggleActive,
 }: AdsCardGridProps) {
   const t = useTranslations("Advertisements.page");
 
@@ -84,8 +88,10 @@ export default function AdsCardGrid({
             locale={locale}
             title={getTitle(ad)}
             contentPreview={getContent(ad)}
+            togglingId={togglingId}
             onEdit={onEdit}
             onDelete={onDelete}
+            onToggleActive={onToggleActive}
           />
         ))}
       </div>

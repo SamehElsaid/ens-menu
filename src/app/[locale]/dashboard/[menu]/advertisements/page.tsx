@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { axiosGet } from "@/shared/axiosCall";
+import { axiosGet, axiosPatch } from "@/shared/axiosCall";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import AddAdvertisementModal from "@/components/Dashboard/AddAdvertisementModal";
 import DeleteAdvertisementConfirm from "@/components/Dashboard/DeleteAdvertisementConfirm";
@@ -17,6 +17,7 @@ import { fetchMenuAnalytics } from "@/lib/fetchMenuAnalytics";
 import { Advertisement } from "@/types/Menu";
 import { IoAddCircleOutline } from "react-icons/io5";
 import { useCurrentPlanCapabilities } from "@/hooks/useCurrentPlanCapabilities";
+import { toast } from "react-toastify";
 
 export default function AdvertisementsPage() {
   const locale = useLocale();
@@ -40,6 +41,8 @@ export default function AdvertisementsPage() {
   const [refreshing, setRefreshing] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [totalAds, setTotalAds] = useState(0);
+  const [togglingId, setTogglingId] = useState<number | null>(null);
   const [adAnalyticsDemo, setAdAnalyticsDemo] = useState(false);
 
   const capabilities = useCurrentPlanCapabilities();
@@ -53,7 +56,7 @@ export default function AdvertisementsPage() {
         success?: boolean;
         data?: {
           ads?: Advertisement[];
-          pagination?: { totalPages?: number };
+          pagination?: { totalPages?: number; total?: number };
         };
       }>(`/menus/${menuId}/ads?page=${page}&limit=12`, locale);
 
@@ -64,9 +67,11 @@ export default function AdvertisementsPage() {
 
         const pages = wrapper.data?.pagination?.totalPages ?? 0;
         setTotalPages(pages);
+        setTotalAds(Number(wrapper.data?.pagination?.total ?? list.length));
       } else {
         setAds([]);
         setTotalPages(0);
+        setTotalAds(0);
       }
     } finally {
       setLoading(false);
@@ -84,7 +89,7 @@ export default function AdvertisementsPage() {
     });
   }, [menuId, locale]);
 
-  const canAddAd = canAddMenuAd(maxAdsPerMenu, ads.length);
+  const canAddAd = canAddMenuAd(maxAdsPerMenu, totalAds);
 
   const adSummaryMetrics = useMemo(() => {
     const totalImpressions = ads.reduce(
@@ -142,6 +147,42 @@ export default function AdvertisementsPage() {
   const handleDelete = useCallback((ad: Advertisement) => {
     setDeletingAd(ad);
   }, []);
+
+  const handleToggleActive = useCallback(
+    async (ad: Advertisement) => {
+      if (ad.id == null) return;
+      const nextActive = !ad.isActive;
+      try {
+        setTogglingId(ad.id);
+        const result = await axiosPatch<
+          { isActive: boolean },
+          { success?: boolean; message?: string; error?: string }
+        >(`/ads/${ad.id}`, locale, { isActive: nextActive });
+
+        if (result.status) {
+          setAds((prev) =>
+            prev.map((item) =>
+              item.id === ad.id ? { ...item, isActive: nextActive } : item,
+            ),
+          );
+          toast.success(
+            nextActive ? t("toggleActivateSuccess") : t("togglePauseSuccess"),
+          );
+        } else {
+          const apiMessage =
+            (result.data as { error?: string; message?: string } | undefined)
+              ?.error ||
+            (result.data as { message?: string } | undefined)?.message;
+          toast.error(apiMessage || t("toggleError"));
+        }
+      } catch {
+        toast.error(t("toggleError"));
+      } finally {
+        setTogglingId(null);
+      }
+    },
+    [locale, t],
+  );
 
   const getTitle = useCallback(
     (ad: Advertisement) => {
@@ -246,8 +287,10 @@ export default function AdvertisementsPage() {
               onPageChange={setPage}
               getTitle={getTitle}
               getContent={getContent}
+              togglingId={togglingId}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onToggleActive={handleToggleActive}
             />
           </div>
         </>
