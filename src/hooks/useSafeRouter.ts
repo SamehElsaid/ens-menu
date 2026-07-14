@@ -10,22 +10,20 @@ import {
   isSameRouteNavigation,
   normalizePathname,
 } from "@/lib/safeNavigation";
-import { routing } from "@/i18n/routing";
+import { localePathPrefix } from "@/i18n/routing";
 
 type RouterHref = Parameters<ReturnType<typeof useRouter>["push"]>[0];
 type RouterOptions = Parameters<ReturnType<typeof useRouter>["push"]>[1];
 
 function hrefToPath(href: RouterHref, locale: string): string {
   if (typeof href === "string") {
-    const base =
-      locale === routing.defaultLocale ? "" : `/${locale}`;
+    const base = localePathPrefix(locale);
     const path = href.startsWith("/") ? href : `/${href}`;
     return `${typeof window !== "undefined" ? window.location.origin : ""}${base}${path === "/" ? "" : path}`;
   }
 
   const pathname = href.pathname ?? "/";
-  const base =
-    locale === routing.defaultLocale ? "" : `/${locale}`;
+  const base = localePathPrefix(locale);
   const path = pathname.startsWith("/") ? pathname : `/${pathname}`;
   const search = href.query
     ? `?${new URLSearchParams(href.query as Record<string, string>).toString()}`

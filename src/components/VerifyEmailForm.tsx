@@ -12,6 +12,7 @@ import {
 } from "react-icons/fi";
 import LinkTo from "@/components/Global/LinkTo";
 import CustomBtn from "@/components/Custom/CustomBtn";
+import { localizeHref } from "@/i18n/routing";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import { cn } from "@/lib/cn";
 import { toast } from "react-toastify";
@@ -240,7 +241,7 @@ export default function VerifyEmailForm() {
         <CustomBtn
           type="button"
           onClick={() => {
-            window.location.href = `/${locale}/auth/login`;
+            window.location.href = localizeHref("/auth/login", locale);
           }}
           text={t("auth.login")}
           className="w-full"

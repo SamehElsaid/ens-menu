@@ -1,5 +1,6 @@
 import GoogleAuthProvider from "@/components/Global/GoogleAuthProvider";
 import NoBfcache from "@/components/Global/NoBfcache";
+import { localizeHref } from "@/i18n/routing";
 import { DecryptedToken } from "@/proxy";
 import { decryptData } from "@/shared/encryption";
 import { cookies } from "next/headers";
@@ -22,7 +23,12 @@ export default async function AuthLayout({
 
   console.log(tokenDecrypted);
   if (tokenDecrypted) {
-    return redirect(`/${locale}${tokenDecrypted?.role === "admin" ? "/admin" : "/dashboard"}`);
+    return redirect(
+      localizeHref(
+        tokenDecrypted?.role === "admin" ? "/admin" : "/dashboard",
+        locale,
+      ),
+    );
   }
 
   return (

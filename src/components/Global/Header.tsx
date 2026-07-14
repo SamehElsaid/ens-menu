@@ -28,7 +28,7 @@ const authBtn = {
 
 function isHomePathname(pathname: string) {
   const normalized = pathname.replace(/\/$/, "") || "/";
-  return normalized === "/" || normalized === "/en" || normalized === "/ar";
+  return normalized === "/" || normalized === "/en";
 }
 
 function isAuthPathname(pathname: string) {

@@ -1,7 +1,7 @@
 /** True on the marketing homepage (any locale prefix). */
 export function isPublicHomePath(pathname: string): boolean {
   const normalized = pathname.replace(/\/$/, "") || "/";
-  return normalized === "/" || normalized === "/en" || normalized === "/ar";
+  return normalized === "/" || normalized === "/en";
 }
 
 /** Client pathname — works with locale-as-needed routing. */

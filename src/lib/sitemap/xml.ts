@@ -1,18 +1,11 @@
 export const SITEMAP_NS = "http://www.sitemaps.org/schemas/sitemap/0.9";
-export const XHTML_NS = "http://www.w3.org/1999/xhtml";
 
 /** Browser preview (Google ignores this; still reads raw XML). */
 const XML_STYLESHEET_PI =
   '<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>\n';
 
-export type HreflangAlternate = {
-  hreflang: "ar" | "en" | "x-default" | string;
-  href: string;
-};
-
 export type SitemapEntry = {
   loc: string;
-  alternates?: HreflangAlternate[];
   lastmod?: string;
   changefreq?:
     | "always"
@@ -34,20 +27,10 @@ export function escapeXml(s: string): string {
     .replace(/'/g, "&apos;");
 }
 
-function renderAlternateLinks(alternates: HreflangAlternate[]): string {
-  return alternates
-    .map(
-      (a) =>
-        `    <xhtml:link rel="alternate" hreflang="${escapeXml(a.hreflang)}" href="${escapeXml(a.href)}" />`,
-    )
-    .join("\n");
-}
-
 export function buildUrlset(entries: SitemapEntry[]): string {
   const body = entries
     .map((e) => {
       const parts = [`    <loc>${escapeXml(e.loc)}</loc>`];
-      if (e.alternates?.length) parts.push(renderAlternateLinks(e.alternates));
       if (e.lastmod) parts.push(`    <lastmod>${escapeXml(e.lastmod)}</lastmod>`);
       if (e.changefreq) parts.push(`    <changefreq>${e.changefreq}</changefreq>`);
       if (e.priority != null) {
@@ -57,7 +40,7 @@ export function buildUrlset(entries: SitemapEntry[]): string {
     })
     .join("\n");
 
-  return `<?xml version="1.0" encoding="UTF-8"?>\n${XML_STYLESHEET_PI}<urlset xmlns="${SITEMAP_NS}" xmlns:xhtml="${XHTML_NS}">\n${body}\n</urlset>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n${XML_STYLESHEET_PI}<urlset xmlns="${SITEMAP_NS}">\n${body}\n</urlset>`;
 }
 
 export function buildSitemapIndex(

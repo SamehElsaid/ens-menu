@@ -1,26 +1,48 @@
-import type { HreflangAlternate, SitemapEntry } from "@/lib/sitemap/xml";
+import { localizeHref } from "@/i18n/routing";
+import type { SitemapEntry } from "@/lib/sitemap/xml";
 
 /** Max URLs per sitemap file (Google limit: 50,000). */
 export const URLS_PER_SITEMAP = 50_000;
 
-/** Two locales per public menu (/, /en). */
-export const LOCALES_PER_MENU = 2;
+export type SitemapLocale = "ar" | "en";
 
-export const MENUS_PER_SITEMAP_PAGE = Math.floor(
-  URLS_PER_SITEMAP / LOCALES_PER_MENU,
-);
+export const SITEMAP_LOCALES: readonly SitemapLocale[] = ["ar", "en"];
 
-/** Indexable marketing paths (no auth/dashboard). Folder names match app routes. */
-const MAIN_PATHS = [
-  "",
-  "about",
-  "Pricing",
-  "contact",
-  "mobile-app",
-  "privacy-policy",
-  "terms-and-conditions",
-  "knowledge-base",
+/** One URL per menu per locale-specific sitemap. */
+export const MENUS_PER_SITEMAP_PAGE = URLS_PER_SITEMAP;
+
+/**
+ * Indexable marketing pages: URL path + metaData `pageName` used by the API.
+ */
+const MAIN_PAGES = [
+  { path: "", metaPageName: "home" },
+  { path: "about", metaPageName: "about" },
+  { path: "Pricing", metaPageName: "pricing" },
+  { path: "contact", metaPageName: "contact" },
+  { path: "faq", metaPageName: "faq" },
+  { path: "mobile-app", metaPageName: "mobile-app" },
+  { path: "ens_owner_app_owner", metaPageName: "owner-app" },
+  { path: "privacy-policy", metaPageName: "privacy-policy" },
+  { path: "terms-and-conditions", metaPageName: "terms-and-conditions" },
+  { path: "knowledge-base", metaPageName: "knowledge-base" },
 ] as const;
+
+export type PublicMenuRef = {
+  slug: string;
+  updatedAt?: string;
+  createdAt?: string;
+};
+
+export type KbArticle = {
+  id: number;
+  titleEn: string;
+  updatedAt?: string;
+  createdAt?: string;
+};
+
+export function isSitemapLocale(value: string): value is SitemapLocale {
+  return value === "ar" || value === "en";
+}
 
 export function normalizeSiteOrigin(url: string): string {
   const trimmed = url.replace(/\/$/, "");
@@ -39,6 +61,38 @@ export function getSiteOrigin(requestOrigin?: string): string {
 
 export function todayIsoDate(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+/** Convert API ISO timestamps to sitemap `YYYY-MM-DD`. */
+export function toSitemapDate(value?: string | null): string | undefined {
+  if (!value) return undefined;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return undefined;
+  return date.toISOString().slice(0, 10);
+}
+
+function lastmodFromApi(
+  ...candidates: Array<string | null | undefined>
+): string | undefined {
+  for (const value of candidates) {
+    const parsed = toSitemapDate(value);
+    if (parsed) return parsed;
+  }
+  return undefined;
+}
+
+/**
+ * Absolute public URL for a sitemap endpoint in a given locale.
+ * Google path rule: sitemap at `/en/sitemap*` may only list `/en/…` page URLs;
+ * children stay as siblings (`/en/sitemap-main`), not nested under `/en/sitemap/…`.
+ */
+export function absoluteSitemapUrl(
+  siteOrigin: string,
+  locale: SitemapLocale,
+  sitemapPath: string,
+): string {
+  const path = sitemapPath.startsWith("/") ? sitemapPath : `/${sitemapPath}`;
+  return `${siteOrigin}${localizeHref(path, locale)}`;
 }
 
 /**
@@ -60,72 +114,110 @@ export function menuOrigin(slug: string): string {
   return `https://${host}`.replace(/\/$/, "");
 }
 
-/** Arabic (default) + English alternates for Google hreflang. */
-export function arEnAlternates(arHref: string, enHref: string): HreflangAlternate[] {
-  return [
-    { hreflang: "ar", href: arHref },
-    { hreflang: "en", href: enHref },
-    { hreflang: "x-default", href: arHref },
-  ];
+/** Locale page URL only — no hreflang (treated as separate sites). */
+function localePageUrl(
+  siteOrigin: string,
+  locale: SitemapLocale,
+  path: string,
+): string {
+  if (locale === "ar") {
+    return path ? `${siteOrigin}/${path}` : `${siteOrigin}/`;
+  }
+  return path ? `${siteOrigin}/en/${path}` : `${siteOrigin}/en`;
 }
 
 function sitemapEntry(
   loc: string,
-  arHref: string,
-  enHref: string,
-  lastmod: string,
+  lastmod: string | undefined,
   options: Pick<SitemapEntry, "changefreq" | "priority">,
 ): SitemapEntry {
-  return {
-    loc,
-    alternates: arEnAlternates(arHref, enHref),
-    lastmod,
-    ...options,
-  };
+  return lastmod
+    ? { loc, lastmod, ...options }
+    : { loc, ...options };
 }
 
-function localePair(origin: string, lastmod: string): SitemapEntry[] {
-  const arHref = `${origin}/`;
-  const enHref = `${origin}/en`;
-  const shared = { lastmod, changefreq: "weekly" as const, priority: 0.8 };
+/** `pageName` → lastmod date from `/metaData`. */
+export async function fetchMetaLastmodByPage(): Promise<Map<string, string>> {
+  const apiBase = process.env.NEXT_PUBLIC_BASE_URL?.trim();
+  const map = new Map<string, string>();
+  if (!apiBase) return map;
 
-  return [
-    sitemapEntry(arHref, arHref, enHref, lastmod, shared),
-    sitemapEntry(enHref, arHref, enHref, lastmod, shared),
-  ];
-}
+  try {
+    const res = await fetch(`${apiBase}/metaData`, {
+      cache: "no-store",
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) return map;
 
-export function buildMainSiteEntries(siteOrigin: string, lastmod: string): SitemapEntry[] {
-  const entries: SitemapEntry[] = [];
+    const json = (await res.json()) as {
+      data?: Array<{
+        pageName?: string;
+        updatedAt?: string;
+        createdAt?: string;
+      }>;
+      metaData?: Array<{
+        pageName?: string;
+        updatedAt?: string;
+        createdAt?: string;
+      }>;
+    };
 
-  for (const path of MAIN_PATHS) {
-    const arHref = path ? `${siteOrigin}/${path}` : `${siteOrigin}/`;
-    const enHref = path ? `${siteOrigin}/en/${path}` : `${siteOrigin}/en`;
-    const priority = path === "" ? 1.0 : 0.7;
-    const changefreq = path === "" ? "weekly" : "monthly";
+    const items = Array.isArray(json?.data)
+      ? json.data
+      : Array.isArray(json?.metaData)
+        ? json.metaData
+        : [];
 
-    entries.push(
-      sitemapEntry(arHref, arHref, enHref, lastmod, { changefreq, priority }),
-    );
-    entries.push(
-      sitemapEntry(enHref, arHref, enHref, lastmod, {
-        changefreq,
-        priority: path === "" ? 1.0 : 0.7,
-      }),
-    );
+    for (const item of items) {
+      const pageName = String(item?.pageName ?? "").trim();
+      const lastmod = lastmodFromApi(item?.updatedAt, item?.createdAt);
+      if (pageName && lastmod) map.set(pageName, lastmod);
+    }
+  } catch {
+    // keep empty map — entries omit lastmod
   }
 
-  return entries;
+  return map;
 }
 
-export function buildMenuEntriesForSlugs(
-  slugs: string[],
-  lastmod: string,
+export function buildMainSiteEntries(
+  siteOrigin: string,
+  locale: SitemapLocale,
+  metaLastmodByPage: Map<string, string>,
 ): SitemapEntry[] {
-  return slugs.flatMap((slug) => localePair(menuOrigin(slug), lastmod));
+  return MAIN_PAGES.map(({ path, metaPageName }) =>
+    sitemapEntry(
+      localePageUrl(siteOrigin, locale, path),
+      metaLastmodByPage.get(metaPageName),
+      {
+        changefreq: path === "" ? "weekly" : "monthly",
+        priority: path === "" ? 1.0 : 0.7,
+      },
+    ),
+  );
 }
 
+export function buildMenuEntries(
+  menus: PublicMenuRef[],
+  locale: SitemapLocale,
+): SitemapEntry[] {
+  return menus.map((menu) => {
+    const origin = menuOrigin(menu.slug);
+    const loc = locale === "ar" ? `${origin}/` : `${origin}/en`;
+    return sitemapEntry(loc, lastmodFromApi(menu.updatedAt, menu.createdAt), {
+      changefreq: "weekly",
+      priority: 0.8,
+    });
+  });
+}
+
+/** @deprecated Prefer `fetchPublicMenus` (includes dates when API sends them). */
 export async function fetchPublicMenuSlugs(): Promise<string[]> {
+  const menus = await fetchPublicMenus();
+  return menus.map((m) => m.slug);
+}
+
+export async function fetchPublicMenus(): Promise<PublicMenuRef[]> {
   const apiBase = process.env.NEXT_PUBLIC_BASE_URL?.trim();
   if (!apiBase) return [];
 
@@ -135,42 +227,82 @@ export async function fetchPublicMenuSlugs(): Promise<string[]> {
       headers: { Accept: "application/json" },
     });
     if (!res.ok) return [];
-    const slugs = (await res.json()) as unknown;
-    if (!Array.isArray(slugs)) return [];
-    return slugs.map((s) => String(s).trim()).filter(Boolean);
+    const payload = (await res.json()) as unknown;
+    if (!Array.isArray(payload)) return [];
+
+    return payload
+      .map((item): PublicMenuRef | null => {
+        if (typeof item === "string") {
+          const slug = item.trim();
+          return slug ? { slug } : null;
+        }
+        if (item && typeof item === "object") {
+          const row = item as Record<string, unknown>;
+          const slug = String(row.slug ?? row.name ?? "").trim();
+          if (!slug) return null;
+          return {
+            slug,
+            updatedAt:
+              typeof row.updatedAt === "string" ? row.updatedAt : undefined,
+            createdAt:
+              typeof row.createdAt === "string" ? row.createdAt : undefined,
+          };
+        }
+        return null;
+      })
+      .filter((m): m is PublicMenuRef => Boolean(m));
   } catch {
     return [];
   }
 }
 
+export function paginateMenus(menus: PublicMenuRef[], page: number): PublicMenuRef[] {
+  const pageIndex = Math.max(1, page) - 1;
+  const start = pageIndex * MENUS_PER_SITEMAP_PAGE;
+  return menus.slice(start, start + MENUS_PER_SITEMAP_PAGE);
+}
+
+/** @deprecated Use `paginateMenus`. */
 export function paginateSlugs(slugs: string[], page: number): string[] {
   const pageIndex = Math.max(1, page) - 1;
   const start = pageIndex * MENUS_PER_SITEMAP_PAGE;
   return slugs.slice(start, start + MENUS_PER_SITEMAP_PAGE);
 }
 
-export function menuSitemapPageCount(slugCount: number): number {
-  if (slugCount <= 0) return 0;
-  return Math.ceil(slugCount / MENUS_PER_SITEMAP_PAGE);
+export function menuSitemapPageCount(menuCount: number): number {
+  if (menuCount <= 0) return 0;
+  return Math.ceil(menuCount / MENUS_PER_SITEMAP_PAGE);
 }
 
-export function buildAllEntries(
+/** Child sitemap locs for one locale index (`/sitemap` or `/en/sitemap`). */
+export function buildLocaleSitemapIndex(
   siteOrigin: string,
-  slugs: string[],
-  lastmod: string,
-): SitemapEntry[] {
-  return [
-    ...buildMainSiteEntries(siteOrigin, lastmod),
-    ...buildMenuEntriesForSlugs(slugs, lastmod),
-  ].slice(0, URLS_PER_SITEMAP);
+  locale: SitemapLocale,
+  lastmod: string | undefined,
+  menuPageCount: number,
+): { loc: string; lastmod?: string }[] {
+  const children: { loc: string; lastmod?: string }[] = [
+    {
+      loc: absoluteSitemapUrl(siteOrigin, locale, "/sitemap-main"),
+      lastmod,
+    },
+    {
+      loc: absoluteSitemapUrl(siteOrigin, locale, "/sitemap-knowledge-base"),
+      lastmod,
+    },
+  ];
+
+  for (let page = 1; page <= menuPageCount; page++) {
+    children.push({
+      loc: absoluteSitemapUrl(siteOrigin, locale, `/sitemap-menus/${page}`),
+      lastmod,
+    });
+  }
+
+  return children;
 }
 
 /* ─────────────── Knowledge-base helpers ─────────────── */
-
-interface KbArticle {
-  id: number;
-  titleEn: string;
-}
 
 interface KbListResponse {
   success: boolean;
@@ -222,20 +354,30 @@ export async function fetchAllKbArticles(): Promise<KbArticle[]> {
   return all;
 }
 
-/** Builds sitemap entries for every knowledge-base article (ar + en). */
+/** Builds sitemap entries for knowledge-base articles in one locale. */
 export function buildKbEntries(
   articles: KbArticle[],
   siteOrigin: string,
-  lastmod: string,
+  locale: SitemapLocale,
 ): SitemapEntry[] {
-  return articles.flatMap((article) => {
+  return articles.map((article) => {
     const slug = kbSlug(article.titleEn, article.id);
-    const arHref = `${siteOrigin}/knowledge-base/${slug}`;
-    const enHref = `${siteOrigin}/en/knowledge-base/${slug}`;
-    const shared = { lastmod, changefreq: "weekly" as const, priority: 0.6 };
-    return [
-      sitemapEntry(arHref, arHref, enHref, lastmod, shared),
-      sitemapEntry(enHref, arHref, enHref, lastmod, shared),
-    ];
+    return sitemapEntry(
+      localePageUrl(siteOrigin, locale, `knowledge-base/${slug}`),
+      lastmodFromApi(article.updatedAt, article.createdAt),
+      { changefreq: "weekly", priority: 0.6 },
+    );
   });
+}
+
+/** Newest YYYY-MM-DD among API dates (for sitemap index lastmod). */
+export function newestSitemapDate(
+  ...dates: Array<string | undefined | null>
+): string | undefined {
+  let newest: string | undefined;
+  for (const value of dates) {
+    if (!value) continue;
+    if (!newest || value > newest) newest = value;
+  }
+  return newest;
 }

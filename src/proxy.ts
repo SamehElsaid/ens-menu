@@ -1,5 +1,5 @@
 import createMiddleware from "next-intl/middleware";
-import { routing } from "./i18n/routing";
+import { localePathPrefix, routing } from "./i18n/routing";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { decryptData } from "./shared/encryption";
@@ -11,11 +11,19 @@ export interface DecryptedToken {
   [key: string]: unknown;
 }
 
+/** Locale from URL: `en` when prefixed, otherwise default `ar` (no `/ar` prefix). */
+function resolveRequestLocale(pathname: string): string {
+  const match = pathname.match(/^\/(en)(?=\/|$)/);
+  return match?.[1] ?? routing.defaultLocale;
+}
+
 export default function proxy(request: NextRequest) {
   const url = request.nextUrl.clone();
 
   const token = request.cookies.get("sub");
   const pathname = url.pathname.replace(/^\/(ar|en)/, "");
+  const locale = resolveRequestLocale(request.nextUrl.pathname);
+  const prefix = localePathPrefix(locale);
 
   const tokenDecrypted = token
     ? (decryptData(token?.value ?? "") as DecryptedToken)
@@ -29,8 +37,6 @@ export default function proxy(request: NextRequest) {
   // Stop Login , Register , Forgot Password , Reset Password , Verify Email , Verify Phone
   if (pathname.startsWith("/auth")) {
     if (hasToken) {
-      const localeMatch = request.nextUrl.pathname.match(/^\/(ar|en)(?=\/|$)/);
-      const prefix = localeMatch ? `/${localeMatch[1]}` : "";
       const redirectParam = request.nextUrl.searchParams.get("redirect");
       if (
         isSafeInternalRedirect(redirectParam) &&
@@ -51,29 +57,26 @@ export default function proxy(request: NextRequest) {
 
   if (pathname.startsWith("/admin")) {
     if (tokenDecrypted?.role !== "admin") {
-      url.pathname = "/unauthorized";
+      url.pathname = `${prefix}/unauthorized`;
       return NextResponse.redirect(url);
     }
   }
 
   if (pathname.startsWith("/dashboard")) {
     if (!hasToken) {
-      url.pathname = "/unauthorized";
+      url.pathname = `${prefix}/unauthorized`;
       return NextResponse.redirect(url);
     }
     // Staff JWT cookie: only cashiers may use the owner dashboard UI
     if (tokenDecrypted.role === "staff") {
       if (tokenDecrypted.staffJobRole !== "cashier") {
-        url.pathname = "/unauthorized";
+        url.pathname = `${prefix}/unauthorized`;
         return NextResponse.redirect(url);
       }
       // Cashier: /dashboard (menu list) is owner-only — must use /dashboard/:menuId
       const isDashboardRoot =
         pathname === "/dashboard" || pathname === "/dashboard/";
       if (isDashboardRoot) {
-        const fullPath = request.nextUrl.pathname;
-        const localeMatch = fullPath.match(/^\/(ar|en)(?=\/|$)/);
-        const prefix = localeMatch ? `/${localeMatch[1]}` : "";
         const target = request.nextUrl.clone();
         target.pathname = `${prefix}/unauthorized`;
         target.searchParams.set("reason", "cashier_dashboard");
@@ -82,9 +85,6 @@ export default function proxy(request: NextRequest) {
       // Cashier: settings & staff management are owner-only
       const ownerOnlyNested = /^\/dashboard\/[^/]+\/(staff|settings)(\/|$)/;
       if (ownerOnlyNested.test(pathname)) {
-        const fullPath = request.nextUrl.pathname;
-        const localeMatch = fullPath.match(/^\/(ar|en)(?=\/|$)/);
-        const prefix = localeMatch ? `/${localeMatch[1]}` : "";
         const target = request.nextUrl.clone();
         target.pathname = `${prefix}/unauthorized`;
         target.searchParams.set("reason", "cashier_owner_pages");

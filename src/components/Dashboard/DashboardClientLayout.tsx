@@ -3,6 +3,7 @@
 import Layout from "@/components/Dashboard/Layout";
 import { axiosGet } from "@/shared/axiosCall";
 import { Menu } from "@/types/Menu";
+import { localizeHref } from "@/i18n/routing";
 import { useLocale } from "next-intl";
 import { redirect, useSelectedLayoutSegment } from "next/navigation";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
@@ -69,7 +70,7 @@ export default function DashboardClientLayout({
 
   useEffect(() => {
     const redirectToUnauthorized = () => {
-      redirect(`/${locale}/unauthorized`);
+      redirect(localizeHref("/unauthorized", locale));
     };
 
     if (!routeMenuKey) {

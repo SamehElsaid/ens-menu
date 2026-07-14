@@ -1,3 +1,5 @@
+import { localizeHref } from "@/i18n/routing";
+
 export const SUBSCRIPTION_UPGRADE_PATH = "/dashboard/subscription";
 
 export function isSafeInternalRedirect(
@@ -25,12 +27,12 @@ export function resolvePostLoginPath(
   redirectParam: string | null,
 ): string {
   if (role === "admin") {
-    return `/${locale}/admin`;
+    return localizeHref("/admin", locale);
   }
 
   if (isSafeInternalRedirect(redirectParam)) {
-    return `/${locale}${redirectParam}`;
+    return localizeHref(redirectParam, locale);
   }
 
-  return `/${locale}/dashboard`;
+  return localizeHref("/dashboard", locale);
 }
