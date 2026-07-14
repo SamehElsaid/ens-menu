@@ -28,6 +28,7 @@ import {
   IoMailOutline,
   IoGlobeOutline,
   IoSearchOutline,
+  IoStarOutline,
 } from "react-icons/io5";
 
 export type NavItem = {
@@ -144,6 +145,12 @@ export const cashierNavSections: NavSection[] = [
         icon: IoTimeOutline,
         key: "history",
         link: "history",
+      },
+      {
+        label: "ratings",
+        icon: IoStarOutline,
+        key: "ratings",
+        link: "ratings",
       },
     ],
   },
@@ -308,6 +315,12 @@ export const navSections: NavSection[] = [
         icon: IoTimeOutline,
         key: "history",
         link: "history",
+      },
+      {
+        label: "ratings",
+        icon: IoStarOutline,
+        key: "ratings",
+        link: "ratings",
       },
     ],
   },

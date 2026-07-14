@@ -1,10 +1,10 @@
-/** Free plan: max custom menu ads per menu. Paid plans: unlimited. */
+/** Plan ads quota helpers. -1 = unlimited. */
 export const FREE_MAX_ADS_PER_MENU = 1;
 
 export function canAddMenuAd(
-  isFreePlan: boolean,
+  maxAdsPerMenu: number,
   currentAdCount: number,
 ): boolean {
-  if (!isFreePlan) return true;
-  return currentAdCount < FREE_MAX_ADS_PER_MENU;
+  if (maxAdsPerMenu < 0) return true;
+  return currentAdCount < maxAdsPerMenu;
 }

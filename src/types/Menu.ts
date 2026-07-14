@@ -48,6 +48,13 @@ export interface Menu {
   currency: string;
   isActive: boolean;
   chatbotEnabled?: boolean;
+  wifiEnabled?: boolean;
+  wifiName?: string | null;
+  wifiPassword?: string | null;
+  taxEnabled?: boolean;
+  taxPercent?: number | null;
+  serviceEnabled?: boolean;
+  servicePercent?: number | null;
   workingHours: WorkHours;
   createdAt: string;
   updatedAt: string;

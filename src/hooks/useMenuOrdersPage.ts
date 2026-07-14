@@ -11,6 +11,7 @@ import { useLocale } from "next-intl";
 import { axiosGet } from "@/shared/axiosCall";
 import { useAppSelector } from "@/store/hooks";
 import { isFreePlanUser } from "@/lib/subscription";
+import { useCurrentPlanCapabilities } from "@/hooks/useCurrentPlanCapabilities";
 import { useMenuActivitySocket } from "@/hooks/useMenuActivitySocket";
 import { playNewOrderNotificationSound } from "@/lib/orderNotificationSound";
 import type { OrderStatusFilter } from "@/components/Dashboard/orders/OrdersFilters";
@@ -56,6 +57,8 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
 
   const userData = useAppSelector((s) => s.auth.data);
   const isFreePlan = isFreePlanUser(userData);
+  const capabilities = useCurrentPlanCapabilities();
+  const tableOrderingEnabled = capabilities.tableOrderingQr;
   const pendingCount = useMemo(() => countPendingOrders(entries), [entries]);
   const isFiltered =
     debouncedSearch.length > 0 ||
@@ -113,7 +116,7 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
 
   const fetchLogs = useCallback(
     async (silent = false) => {
-      if (!menuId || (channel !== "delivery" && isFreePlan)) {
+      if (!menuId || (channel === "table" && !tableOrderingEnabled)) {
         setLoading(false);
         return;
       }
@@ -151,7 +154,7 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
         if (!silent) setLoading(false);
       }
     },
-    [menuId, locale, page, debouncedSearch, dateFrom, dateTo, statusFilter, isFreePlan, channel],
+    [menuId, locale, page, debouncedSearch, dateFrom, dateTo, statusFilter, tableOrderingEnabled, channel],
   );
 
   useEffect(() => {
@@ -163,7 +166,7 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
   }, [fetchLogs]);
 
   useMenuActivitySocket(
-    channel !== "delivery" && isFreePlan ? "" : menuId,
+    channel === "table" && !tableOrderingEnabled ? "" : menuId,
     handleSocketUpdate,
   );
 
@@ -272,6 +275,7 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
   return {
     menuId,
     isFreePlan,
+    tableOrderingEnabled,
     entries,
     loading,
     page,

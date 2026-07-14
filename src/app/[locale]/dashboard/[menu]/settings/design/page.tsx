@@ -19,6 +19,7 @@ import { menuRefFromRouteParam, menuDashboardPath } from "@/lib/menuDashboardPat
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import { isFreePlanUser } from "@/lib/subscription";
 import ProUpgradeModal from "@/components/Dashboard/ProUpgradeModal";
+import { useCurrentPlanCapabilities } from "@/hooks/useCurrentPlanCapabilities";
 
 const customizeButtonClassName =
   "flex-1 inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-xs font-medium border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors";
@@ -36,6 +37,9 @@ export default function DesignPage() {
   const { menu } = useAppSelector((state) => state.menuData);
   const userData = useAppSelector((s) => s.auth.data);
   const isFreePlan = !userData || isFreePlanUser(userData);
+  const capabilities = useCurrentPlanCapabilities();
+  const allowedThemes = capabilities.allowedThemes;
+  const canCustomizeDesign = !isFreePlan;
   const subscriptionHref = menuDashboardPath(menu, "subscription");
   const resolvedMenuId =
     menuRefFromRouteParam(routeParams?.menu) ||
@@ -73,6 +77,11 @@ export default function DesignPage() {
     options?: { skipLoadingUi?: boolean },
   ): Promise<boolean> => {
     if (!resolvedMenuId) {
+      return false;
+    }
+
+    if (!allowedThemes.includes(templateId)) {
+      setUpgradeModalOpen(true);
       return false;
     }
 
@@ -133,7 +142,7 @@ export default function DesignPage() {
     id: string;
     slug: string;
   }) => {
-    if (isFreePlan) {
+    if (!canCustomizeDesign) {
       setUpgradeModalOpen(true);
       return;
     }
@@ -255,7 +264,7 @@ export default function DesignPage() {
             const linkView =
               "https://" + template.slug + process.env.NEXT_PUBLIC_MENU_URL;
             const isCustomizeLoading = customizeLoadingSlug === template.slug;
-            const isLocked = isFreePlan && !template.isFree;
+            const isLocked = !allowedThemes.includes(template.id);
 
             return (
               <div

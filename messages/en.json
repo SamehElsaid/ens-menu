@@ -2406,6 +2406,21 @@
       "editError": "Failed to update table"
     }
   },
+  "Ratings": {
+    "title": "Customer ratings",
+    "subtitle": "See what guests think about this place",
+    "backToOverview": "Back to main page",
+    "search": "Search",
+    "searchPlaceholder": "Search by name, phone, email, or note",
+    "totalLabel": "Total ratings",
+    "averageLabel": "Average rating",
+    "emptyTitle": "No ratings yet",
+    "emptyDescription": "When guests rate your place from the menu, their feedback will show up here.",
+    "emptySearchTitle": "No matching ratings",
+    "emptySearchDescription": "Try a different name, phone, email, or note.",
+    "anonymous": "Anonymous guest",
+    "noComment": "No notes left"
+  },
   "Staff": {
     "title": "Staff",
     "subtitle": "Manage staff for this menu",
@@ -2746,6 +2761,7 @@
     "drawerMenuTitle": "Menu",
     "viewMenu": "View Menu",
     "history": "Activity log",
+    "ratings": "Ratings",
     "orders": "Table orders",
     "deliveryOrders": "Online orders",
     "badgeSoon": "Soon",
@@ -2826,6 +2842,9 @@
     "notProvided": "Not provided",
     "noNotes": "No notes",
     "detailsTotal": "Total",
+    "detailsSubtotal": "Subtotal",
+    "detailsTax": "Tax",
+    "detailsService": "Service",
     "itemsTitle": "Items",
     "itemsEmpty": "No items in this order.",
     "actionsTitle": "Order timeline",
@@ -2912,6 +2931,9 @@
     "notProvided": "Not provided",
     "noNotes": "No notes",
     "detailsTotal": "Total",
+    "detailsSubtotal": "Subtotal",
+    "detailsTax": "Tax",
+    "detailsService": "Service",
     "itemsTitle": "Items",
     "itemsEmpty": "No items in this order.",
     "actionsTitle": "Order timeline",
@@ -4016,6 +4038,35 @@
       "cancel": "Cancel",
       "save": "Save",
       "saving": "Saving..."
+    },
+    "caps": {
+      "title": "Plan capabilities",
+      "aiMenuImport": "AI menu import (image / PDF)",
+      "tableOrderingQr": "Table ordering via QR",
+      "liveOrderNotifications": "Live order notifications",
+      "staffAndTables": "Add staff and tables",
+      "advancedDeliveryMaps": "Advanced delivery with maps",
+      "unlimitedAds": "Unlimited ads",
+      "maxAdsPerMenu": "Max ads per menu",
+      "allowedThemes": "Allowed themes"
+    },
+    "themes": {
+      "default": "Default",
+      "coffee": "Coffee",
+      "neon": "Neon",
+      "sky": "Sky",
+      "waffle": "Waffle",
+      "vanilla": "Vanilla",
+      "onecard": "OneCard"
+    },
+    "customDisplay": {
+      "title": "Custom plan (Pricing display)",
+      "subtitle": "Marketing-only settings for the Custom column on Pricing. Not enforced on real accounts.",
+      "loading": "Loading…",
+      "save": "Save Custom display",
+      "saveSuccess": "Custom display updated",
+      "saveError": "Failed to update Custom display",
+      "error": "Failed to load Custom display"
     }
   },
   "MenuImport": {
@@ -4429,6 +4480,17 @@
       "phone": "Phone number",
       "phonePlaceholder": "Default: UAE +971"
     },
+    "wifi": {
+      "title": "Wi‑Fi",
+      "description": "Optionally show guest Wi‑Fi details on your public menu.",
+      "enabled": "Show Wi‑Fi on menu",
+      "enabledOn": "Enabled",
+      "enabledOff": "Disabled",
+      "name": "Network name (SSID)",
+      "namePlaceholder": "Guest-WiFi",
+      "password": "Password",
+      "passwordPlaceholder": "Optional password"
+    },
     "businessHours": {
       "title": "Business hours",
       "to": "to",
@@ -4496,7 +4558,19 @@
     "chatbotEnabled": "AI Chatbot",
     "chatbotEnabledDescription": "Allow customers to chat with an AI assistant directly on your menu.",
     "chatbotEnabledOn": "Enabled",
-    "chatbotEnabledOff": "Disabled"
+    "chatbotEnabledOff": "Disabled",
+    "taxServiceTitle": "Tax & service",
+    "taxServiceDescription": "Optional percentages added to customer order totals when enabled.",
+    "taxEnabled": "Tax",
+    "taxEnabledDescription": "Add a tax percentage on order subtotals.",
+    "taxPercent": "Tax percentage",
+    "taxPercentPlaceholder": "e.g. 14",
+    "serviceEnabled": "Service charge",
+    "serviceEnabledDescription": "Add a service charge percentage on order subtotals.",
+    "servicePercent": "Service percentage",
+    "servicePercentPlaceholder": "e.g. 12",
+    "enabledOn": "Enabled",
+    "enabledOff": "Disabled"
   },
   "menuMediaSettings": {
     "noMenuSelected": "No menu selected.",

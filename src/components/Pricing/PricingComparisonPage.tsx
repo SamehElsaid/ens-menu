@@ -228,7 +228,7 @@ export default function PricingComparisonPage() {
   const isRTL = locale === "ar";
   const [proBillingChoice, setProBillingChoice] =
     useState<ProBillingChoice>("monthly");
-  const { proPlan } = usePlans();
+  const { proPlan, freePlan, customDisplay } = usePlans();
   const subscriptionUpgradeHref = useSubscriptionUpgradeHref();
 
   const proPriceMonthly = proPlan?.priceMonthly ?? STATIC_PRO_MONTHLY_EGP;
@@ -239,7 +239,25 @@ export default function PricingComparisonPage() {
   const tYes = t("yes");
   const tNo = t("no");
 
-  const rows = buildPricingComparisonRows({ t, tLanding });
+  const rows = buildPricingComparisonRows({
+    t,
+    tLanding,
+    freePlan: freePlan
+      ? {
+          maxMenus: freePlan.maxMenus,
+          allowCustomDomain: freePlan.allowCustomDomain,
+          capabilities: freePlan.capabilities,
+        }
+      : null,
+    proPlan: proPlan
+      ? {
+          maxMenus: proPlan.maxMenus,
+          allowCustomDomain: proPlan.allowCustomDomain,
+          capabilities: proPlan.capabilities,
+        }
+      : null,
+    customDisplay,
+  });
 
   const desktopSections: Array<{ startId: string; title: string }> = [
     { startId: "rowBillingCycle", title: t("sectionCoreFeatures") },

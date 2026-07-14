@@ -1,10 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import ViewTime from "@/shared/ViewTime";
 import {
   deliveryGovernorateLabel,
-  deliveryGrandTotal,
   orderStatusTone,
   resolveEntryDeliveryFee,
   resolveEntryTime,
@@ -12,7 +12,10 @@ import {
 } from "@/lib/tableOrders";
 import type { CallEntry, OrderActionResult } from "@/lib/tableOrders";
 import OrderActionButtons from "./OrderActionButtons";
+import OrderChargesLines from "./OrderChargesLines";
 import { useDashboardSession } from "@/hooks/useDashboardSession";
+import { useAppSelector } from "@/store/hooks";
+import { resolveOrderCharges } from "@/lib/menuOrderCharges";
 import { IoEllipseSharp, IoEyeOutline } from "react-icons/io5";
 import { MdOutlineDeliveryDining } from "react-icons/md";
 
@@ -34,15 +37,27 @@ export default function DeliveryOrderMobileCard({
   const t = useTranslations("deliveryOrders");
   const locale = useLocale();
   const session = useDashboardSession();
+  const menu = useAppSelector((s) => s.menuData.menu);
   const canFinish =
     session?.role !== "staff" || session?.staffJobRole === "cashier";
   const status = resolveListEntryStatus(entry);
   const tone = orderStatusTone(status);
   const time = resolveEntryTime(entry.actionDetails);
   const zoneLabel = deliveryGovernorateLabel(entry, locale);
-  const grandTotal = deliveryGrandTotal(
-    entry.totalPrice ?? 0,
-    resolveEntryDeliveryFee(entry),
+  const charges = useMemo(
+    () =>
+      resolveOrderCharges({
+        items: entry.items,
+        storedItemsSubtotal: entry.itemsSubtotal,
+        storedTaxAmount: entry.taxAmount,
+        storedServiceAmount: entry.serviceAmount,
+        storedTaxPercent: entry.taxPercent,
+        storedServicePercent: entry.servicePercent,
+        storedTotal: entry.totalPrice,
+        deliveryFee: resolveEntryDeliveryFee(entry),
+        menu,
+      }),
+    [entry, menu],
   );
 
   return (
@@ -112,17 +127,21 @@ export default function DeliveryOrderMobileCard({
           </span>
           {entry.items?.length ?? 0}
         </p>
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-base font-bold text-emerald-800 dark:text-emerald-200 tabular-nums">
-            {grandTotal}
-            {currency && (
-              <span className="ms-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                {currency}
-              </span>
-            )}
-          </p>
+        <div className="space-y-2">
+          <OrderChargesLines
+            charges={charges}
+            currency={currency}
+            labels={{
+              subtotal: t("detailsSubtotal"),
+              tax: t("detailsTax"),
+              service: t("detailsService"),
+              deliveryFee: t("detailsDeliveryFee"),
+              total: t("detailsTotal"),
+            }}
+            accent="emerald"
+          />
           {time && (
-            <time className="text-xs text-slate-500 dark:text-slate-400">
+            <time className="block text-end text-xs text-slate-500 dark:text-slate-400">
               <ViewTime data={time} />
             </time>
           )}

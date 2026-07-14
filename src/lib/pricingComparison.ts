@@ -2,6 +2,12 @@ import type {
   ComparisonRow,
   PlanId,
 } from "@/components/Pricing/pricingComparisonTypes";
+import type { PlanCapabilities } from "@/types/PlanCapabilities";
+import {
+  DEFAULT_CUSTOM_CAPABILITIES,
+  DEFAULT_FREE_CAPABILITIES,
+  DEFAULT_PRO_CAPABILITIES,
+} from "@/types/PlanCapabilities";
 
 export const STATIC_FREE_PLAN = {
   maxMenus: 1,
@@ -55,11 +61,53 @@ type PricingRowTranslators = {
   tLanding: (key: string) => string;
 };
 
+export type PricingPlanLimits = {
+  maxMenus: number;
+  allowCustomDomain?: boolean;
+  capabilities?: PlanCapabilities | null;
+};
+
+export type BuildPricingComparisonOptions = PricingRowTranslators & {
+  freePlan?: PricingPlanLimits | null;
+  proPlan?: PricingPlanLimits | null;
+  customDisplay?: PlanCapabilities | null;
+};
+
+function adsCell(
+  caps: PlanCapabilities,
+  t: (key: string) => string,
+): string | boolean {
+  if (caps.maxAdsPerMenu < 0) return t("adsUnlimited");
+  if (caps.maxAdsPerMenu === 1) return t("adsFreeOne");
+  return String(caps.maxAdsPerMenu);
+}
+
+function designCell(
+  caps: PlanCapabilities,
+  allowCustomDomain: boolean | undefined,
+  plan: PlanId,
+  t: (key: string) => string,
+): string {
+  if (plan === "custom") return t("designCustom");
+  if (allowCustomDomain || caps.allowedThemes.length >= 5) {
+    return t("designPro");
+  }
+  return t("designFree");
+}
+
 export function buildPricingComparisonRows({
   t,
   tLanding,
-}: PricingRowTranslators): ComparisonRow[] {
+  freePlan,
+  proPlan,
+  customDisplay,
+}: BuildPricingComparisonOptions): ComparisonRow[] {
   const tBasic = t("cellBasic");
+  const freeCaps = freePlan?.capabilities ?? DEFAULT_FREE_CAPABILITIES;
+  const proCaps = proPlan?.capabilities ?? DEFAULT_PRO_CAPABILITIES;
+  const customCaps = customDisplay ?? DEFAULT_CUSTOM_CAPABILITIES;
+  const freeMenus = freePlan?.maxMenus ?? STATIC_FREE_PLAN.maxMenus;
+  const proMenus = proPlan?.maxMenus ?? STATIC_PRO_PLAN.maxMenus;
 
   const baseRows: ComparisonRow[] = [
     {
@@ -72,8 +120,8 @@ export function buildPricingComparisonRows({
     {
       id: "rowMenus",
       label: t("rowMenus"),
-      free: STATIC_FREE_PLAN.maxMenus,
-      pro: STATIC_PRO_PLAN.maxMenus,
+      free: freeMenus,
+      pro: proMenus,
       custom: t("cellUnlimited"),
     },
     {
@@ -100,9 +148,9 @@ export function buildPricingComparisonRows({
     {
       id: "rowAiMenuImport",
       label: t("rowAiMenuImport"),
-      free: tBasic,
-      pro: true,
-      custom: true,
+      free: freeCaps.aiMenuImport ? tBasic : false,
+      pro: proCaps.aiMenuImport,
+      custom: customCaps.aiMenuImport,
     },
     {
       id: "rowAiSuggestions",
@@ -121,16 +169,16 @@ export function buildPricingComparisonRows({
     {
       id: "rowTableOrderingQr",
       label: t("rowTableOrderingQr"),
-      free: false,
-      pro: true,
-      custom: true,
+      free: freeCaps.tableOrderingQr,
+      pro: proCaps.tableOrderingQr,
+      custom: customCaps.tableOrderingQr,
     },
     {
       id: "rowLiveNotifications",
       label: t("rowLiveNotifications"),
-      free: false,
-      pro: true,
-      custom: true,
+      free: freeCaps.liveOrderNotifications,
+      pro: proCaps.liveOrderNotifications,
+      custom: customCaps.liveOrderNotifications,
     },
     {
       id: "rowPhotoLibrary",
@@ -156,23 +204,23 @@ export function buildPricingComparisonRows({
     {
       id: "rowStaffTables",
       label: t("rowStaffTables"),
-      free: false,
-      pro: true,
-      custom: true,
+      free: freeCaps.staffAndTables,
+      pro: proCaps.staffAndTables,
+      custom: customCaps.staffAndTables,
     },
     {
       id: "rowStaffMobileApp",
       label: t("rowStaffMobileApp"),
-      free: false,
-      pro: true,
-      custom: true,
+      free: freeCaps.staffAndTables,
+      pro: proCaps.staffAndTables,
+      custom: customCaps.staffAndTables,
     },
     {
       id: "rowStaffNotifications",
       label: t("rowStaffNotifications"),
-      free: false,
-      pro: true,
-      custom: true,
+      free: freeCaps.liveOrderNotifications,
+      pro: proCaps.liveOrderNotifications,
+      custom: customCaps.liveOrderNotifications,
     },
     {
       id: "rowPlatformUpdates",
@@ -191,16 +239,26 @@ export function buildPricingComparisonRows({
     {
       id: "rowAds",
       label: t("rowAds"),
-      free: t("adsFreeOne"),
-      pro: t("adsUnlimited"),
-      custom: t("adsUnlimited"),
+      free: adsCell(freeCaps, t),
+      pro: adsCell(proCaps, t),
+      custom: adsCell(customCaps, t),
     },
     {
       id: "rowDesign",
       label: t("rowDesign"),
-      free: t("designFree"),
-      pro: t("designPro"),
-      custom: t("designCustom"),
+      free: designCell(
+        freeCaps,
+        freePlan?.allowCustomDomain ?? STATIC_FREE_PLAN.allowCustomDomain,
+        "free",
+        t,
+      ),
+      pro: designCell(
+        proCaps,
+        proPlan?.allowCustomDomain ?? STATIC_PRO_PLAN.allowCustomDomain,
+        "pro",
+        t,
+      ),
+      custom: designCell(customCaps, true, "custom", t),
     },
     {
       id: "rowSupport",
@@ -213,8 +271,18 @@ export function buildPricingComparisonRows({
       id: `customFeature.${key}`,
       label: tLanding(`customFeatures.${key}`),
       free: false,
-      pro: false,
-      custom: true,
+      pro:
+        key === "deliveryMaps"
+          ? proCaps.advancedDeliveryMaps
+          : key === "waiterRequest" || key === "billRequest"
+            ? proCaps.tableOrderingQr
+            : false,
+      custom:
+        key === "deliveryMaps"
+          ? customCaps.advancedDeliveryMaps
+          : key === "waiterRequest" || key === "billRequest"
+            ? customCaps.tableOrderingQr
+            : true,
     })),
   ];
 

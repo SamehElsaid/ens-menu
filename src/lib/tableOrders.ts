@@ -48,6 +48,13 @@ export interface EntryOrder {
   governorateNameAr?: string | null;
   governorateNameEn?: string | null;
   deliveryFee?: number | null;
+  itemsSubtotal?: number | null;
+  taxEnabled?: boolean | null;
+  taxPercent?: number | null;
+  taxAmount?: number | null;
+  serviceEnabled?: boolean | null;
+  servicePercent?: number | null;
+  serviceAmount?: number | null;
 }
 
 export interface ActionDetail {
@@ -83,6 +90,13 @@ export interface CallEntry {
   deliveryFee?: number | null;
   totalPrice?: number;
   items?: CallItem[];
+  itemsSubtotal?: number | null;
+  taxEnabled?: boolean | null;
+  taxPercent?: number | null;
+  taxAmount?: number | null;
+  serviceEnabled?: boolean | null;
+  servicePercent?: number | null;
+  serviceAmount?: number | null;
   actionDetails?: ActionDetail[];
   category?: unknown;
   categoryName?: string;
@@ -94,6 +108,13 @@ export interface CallEntryDetail {
   orderId?: string | number;
   totalPrice?: number;
   items?: CallItem[];
+  itemsSubtotal?: number | null;
+  taxEnabled?: boolean | null;
+  taxPercent?: number | null;
+  taxAmount?: number | null;
+  serviceEnabled?: boolean | null;
+  servicePercent?: number | null;
+  serviceAmount?: number | null;
   actions?: EntryAction[];
   order?: EntryOrder | null;
   customerName?: string | null;

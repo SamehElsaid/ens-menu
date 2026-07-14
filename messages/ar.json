@@ -2314,6 +2314,21 @@
       "editError": "فشل تحديث الطاولة"
     }
   },
+  "Ratings": {
+    "title": "تقييمات العملاء",
+    "subtitle": "شوف رأي الزباين في المكان",
+    "backToOverview": "الرجوع للصفحة الرئيسية",
+    "search": "بحث",
+    "searchPlaceholder": "ابحث بالاسم أو الموبايل أو الإيميل أو الملاحظات",
+    "totalLabel": "عدد التقييمات",
+    "averageLabel": "متوسط التقييم",
+    "emptyTitle": "مفيش تقييمات لسة",
+    "emptyDescription": "لما الزباين يقيّموا المكان من المنيو، هتظهر التقييمات هنا.",
+    "emptySearchTitle": "مفيش نتائج مطابقة",
+    "emptySearchDescription": "جرّب اسم أو موبايل أو إيميل أو ملاحظة تانية.",
+    "anonymous": "زائر بدون اسم",
+    "noComment": "بدون ملاحظات"
+  },
   "Staff": {
     "title": "الموظفون",
     "subtitle": "إدارة موظفي هذه القائمة",
@@ -2654,6 +2669,7 @@
     "drawerMenuTitle": "القائمة",
     "viewMenu": "عرض المنيو",
     "history": "سجل النشاط",
+    "ratings": "التقييمات",
     "orders": "طلبات الطاولات",
     "deliveryOrders": "عرض طلبات الاونلاين",
     "badgeSoon": "قريباً",
@@ -2734,6 +2750,9 @@
     "notProvided": "غير متوفر",
     "noNotes": "لا توجد ملاحظات",
     "detailsTotal": "الإجمالي",
+    "detailsSubtotal": "المجموع الفرعي",
+    "detailsTax": "الضريبة",
+    "detailsService": "الخدمة",
     "itemsTitle": "المنتجات",
     "itemsEmpty": "لا توجد منتاجاتفي هذا الطلب.",
     "actionsTitle": "مسار الطلب",
@@ -2820,6 +2839,9 @@
     "notProvided": "غير متوفر",
     "noNotes": "لا توجد ملاحظات",
     "detailsTotal": "الإجمالي",
+    "detailsSubtotal": "المجموع الفرعي",
+    "detailsTax": "الضريبة",
+    "detailsService": "الخدمة",
     "itemsTitle": "المنتجات",
     "itemsEmpty": "لا توجد منتجات في هذا الطلب.",
     "actionsTitle": "مسار الطلب",
@@ -3924,6 +3946,35 @@
       "cancel": "إلغاء",
       "save": "حفظ",
       "saving": "جاري الحفظ..."
+    },
+    "caps": {
+      "title": "قدرات الخطة",
+      "aiMenuImport": "استيراد المنيو بالذكاء الاصطناعي (صورة / PDF)",
+      "tableOrderingQr": "طلب من الطاولة عبر QR",
+      "liveOrderNotifications": "إشعارات الطلبات المباشرة",
+      "staffAndTables": "إضافة موظفين وطاولات",
+      "advancedDeliveryMaps": "نظام دليفري بالخرائط المتقدم",
+      "unlimitedAds": "إعلانات غير محدودة",
+      "maxAdsPerMenu": "أقصى عدد إعلانات لكل منيو",
+      "allowedThemes": "الثيمات المتاحة"
+    },
+    "themes": {
+      "default": "الافتراضي",
+      "coffee": "القهوة",
+      "neon": "نيون",
+      "sky": "سماء",
+      "waffle": "وافل",
+      "vanilla": "فانيلا",
+      "onecard": "ون كارد"
+    },
+    "customDisplay": {
+      "title": "خطة Custom (عرض التسعير)",
+      "subtitle": "إعدادات تسويقية لعمود Custom في صفحة الأسعار فقط — بدون تطبيق فعلي على الحسابات.",
+      "loading": "جاري التحميل…",
+      "save": "حفظ عرض Custom",
+      "saveSuccess": "تم تحديث عرض Custom",
+      "saveError": "فشل تحديث عرض Custom",
+      "error": "فشل تحميل عرض Custom"
     }
   },
   "MenuImport": {
@@ -4337,6 +4388,17 @@
       "phone": "رقم الهاتف",
       "phonePlaceholder": "رقم افتراضي: الإمارات +971"
     },
+    "wifi": {
+      "title": "واي فاي",
+      "description": "يمكنك عرض بيانات الواي فاي للعملاء على المينيو العام عند التفعيل.",
+      "enabled": "عرض الواي فاي على المينيو",
+      "enabledOn": "مفعّل",
+      "enabledOff": "معطّل",
+      "name": "اسم الشبكة",
+      "namePlaceholder": "Guest-WiFi",
+      "password": "كلمة المرور",
+      "passwordPlaceholder": "اختياري"
+    },
     "businessHours": {
       "title": "مواعيد العمل",
       "to": "إلى",
@@ -4496,7 +4558,19 @@
     "chatbotEnabled": "المساعد الذكي",
     "chatbotEnabledDescription": "السماح للعملاء بالتفاعل مع مساعد ذكاء اصطناعي على قائمتك.",
     "chatbotEnabledOn": "مفعّل",
-    "chatbotEnabledOff": "معطّل"
+    "chatbotEnabledOff": "معطّل",
+    "taxServiceTitle": "الضريبة والخدمة",
+    "taxServiceDescription": "نسب اختيارية تُضاف لإجمالي طلب العميل عند التفعيل.",
+    "taxEnabled": "الضريبة",
+    "taxEnabledDescription": "إضافة نسبة ضريبة على إجمالي الطلب قبل التوصيل.",
+    "taxPercent": "نسبة الضريبة",
+    "taxPercentPlaceholder": "مثال: 14",
+    "serviceEnabled": "رسوم الخدمة",
+    "serviceEnabledDescription": "إضافة نسبة خدمة على إجمالي الطلب قبل التوصيل.",
+    "servicePercent": "نسبة الخدمة",
+    "servicePercentPlaceholder": "مثال: 12",
+    "enabledOn": "مفعّل",
+    "enabledOff": "معطّل"
   },
   "menuMediaSettings": {
     "noMenuSelected": "لم يتم تحديد قائمة.",

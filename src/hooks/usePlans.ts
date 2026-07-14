@@ -5,6 +5,8 @@ import { useLocale } from "next-intl";
 import { axiosGet } from "@/shared/axiosCall";
 import { useAppSelector } from "@/store/hooks";
 import type { Plan, PlansResponse } from "@/types/Plan";
+import type { PlanCapabilities } from "@/types/PlanCapabilities";
+import { normalizePlanCapabilities, DEFAULT_CUSTOM_CAPABILITIES } from "@/types/PlanCapabilities";
 
 type UsePlansOptions = {
   /** When true, use /user/plans if logged in (personalized intro offers). Default true. */
@@ -18,6 +20,9 @@ export function usePlans({ personalized = true }: UsePlansOptions = {}) {
   } | null;
   const isLoggedIn = Boolean(authPayload?.user);
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [customDisplay, setCustomDisplay] = useState<PlanCapabilities>(
+    DEFAULT_CUSTOM_CAPABILITIES,
+  );
   const [loading, setLoading] = useState(true);
 
   const loadPlans = useCallback(async () => {
@@ -33,6 +38,12 @@ export function usePlans({ personalized = true }: UsePlansOptions = {}) {
     );
     if (res.status && res.data?.plans?.length) {
       setPlans(res.data.plans);
+      setCustomDisplay(
+        normalizePlanCapabilities(
+          res.data.customDisplay,
+          DEFAULT_CUSTOM_CAPABILITIES,
+        ),
+      );
     } else {
       setPlans([]);
     }
@@ -46,5 +57,12 @@ export function usePlans({ personalized = true }: UsePlansOptions = {}) {
   const proPlan = plans.find((p) => p.name?.toLowerCase() === "pro");
   const freePlan = plans.find((p) => p.name?.toLowerCase() === "free");
 
-  return { plans, proPlan, freePlan, loading, reloadPlans: loadPlans };
+  return {
+    plans,
+    proPlan,
+    freePlan,
+    customDisplay,
+    loading,
+    reloadPlans: loadPlans,
+  };
 }

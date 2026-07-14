@@ -10,14 +10,13 @@ import DeleteAdvertisementConfirm from "@/components/Dashboard/DeleteAdvertiseme
 import AdsStatsSection from "@/components/Dashboard/advertisements/AdsStatsSection";
 import AdsCardGrid from "@/components/Dashboard/advertisements/AdsCardGrid";
 import AdsEmptyState from "@/components/Dashboard/advertisements/AdsEmptyState";
-import { useAppSelector } from "@/store/hooks";
-import { isFreePlanUser } from "@/lib/subscription";
-import { canAddMenuAd, FREE_MAX_ADS_PER_MENU } from "@/lib/adPlanLimits";
+import { canAddMenuAd } from "@/lib/adPlanLimits";
 import LinkTo from "@/components/Global/LinkTo";
 import { DemoDataBanner } from "@/components/Admin/AdminAnalyticsWidgets";
 import { fetchMenuAnalytics } from "@/lib/fetchMenuAnalytics";
 import { Advertisement } from "@/types/Menu";
 import { IoAddCircleOutline } from "react-icons/io5";
+import { useCurrentPlanCapabilities } from "@/hooks/useCurrentPlanCapabilities";
 
 export default function AdvertisementsPage() {
   const locale = useLocale();
@@ -43,8 +42,8 @@ export default function AdvertisementsPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [adAnalyticsDemo, setAdAnalyticsDemo] = useState(false);
 
-  const userData = useAppSelector((state) => state.auth.data);
-  const isFreePlan = !userData || isFreePlanUser(userData);
+  const capabilities = useCurrentPlanCapabilities();
+  const maxAdsPerMenu = capabilities.maxAdsPerMenu;
 
   const fetchAds = useCallback(async () => {
     if (!menuId) return;
@@ -85,7 +84,7 @@ export default function AdvertisementsPage() {
     });
   }, [menuId, locale]);
 
-  const canAddAd = canAddMenuAd(isFreePlan, ads.length);
+  const canAddAd = canAddMenuAd(maxAdsPerMenu, ads.length);
 
   const adSummaryMetrics = useMemo(() => {
     const totalImpressions = ads.reduce(
@@ -178,12 +177,12 @@ export default function AdvertisementsPage() {
 
   return (
     <>
-      {isFreePlan && (
+      {maxAdsPerMenu >= 0 && (
         <div
           className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-100"
           dir={textDir}
         >
-          {t("freePlanLimitBanner", { max: FREE_MAX_ADS_PER_MENU })}
+          {t("freePlanLimitBanner", { max: maxAdsPerMenu })}
           {!canAddAd && (
             <>
               {" "}
