@@ -8,14 +8,16 @@ import RatingsEmptyState from "./RatingsEmptyState";
 function RatingCardSkeleton() {
   return (
     <div
-      className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800/80"
+      className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800/80"
       aria-hidden
     >
-      <div className="dashboard-mobile-shimmer h-24 bg-amber-500/5 dark:bg-amber-500/10" />
+      <div className="dashboard-mobile-shimmer h-28 bg-amber-500/8 dark:bg-amber-500/12" />
       <div className="space-y-3 p-4">
-        <div className="dashboard-mobile-shimmer h-4 w-3/4 rounded-md bg-slate-100 dark:bg-slate-700/60" />
-        <div className="dashboard-mobile-shimmer h-16 w-full rounded-lg bg-slate-100 dark:bg-slate-700/60" />
-        <div className="dashboard-mobile-shimmer h-4 w-1/2 rounded-md bg-slate-100 dark:bg-slate-700/60" />
+        <div className="dashboard-mobile-shimmer h-14 w-full rounded-xl bg-slate-100 dark:bg-slate-700/60" />
+        <div className="flex gap-2">
+          <div className="dashboard-mobile-shimmer h-7 w-24 rounded-lg bg-slate-100 dark:bg-slate-700/60" />
+          <div className="dashboard-mobile-shimmer h-7 w-28 rounded-lg bg-slate-100 dark:bg-slate-700/60" />
+        </div>
       </div>
     </div>
   );

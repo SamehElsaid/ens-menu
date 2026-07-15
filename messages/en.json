@@ -2157,7 +2157,7 @@
     "copyModal": {
       "title": "Copy menu",
       "subtitle": "From «{name}»",
-      "description": "A new menu will be created with the same design and settings. Enter the new names and slug — categories and items are not copied.",
+      "description": "Enter the new menu names and slug, then choose what to copy into the new menu.",
       "menuNames": "Menu names",
       "nameAr": "Name (Arabic)",
       "nameEn": "Name (English)",
@@ -2169,6 +2169,14 @@
       "slugAvailable": "This link is available",
       "slugTaken": "This link is already taken",
       "slugTakenError": "This link is already in use. Please choose another one.",
+      "whatToCopy": "What do you want to copy?",
+      "options": {
+        "products": "Products & categories",
+        "settings": "Settings",
+        "design": "Design",
+        "media": "Media",
+        "address": "Address"
+      },
       "copy": "Copy menu",
       "copying": "Copying...",
       "copySuccess": "Menu copied successfully!",
@@ -2440,7 +2448,9 @@
     "subtitle": "See what guests think about this place",
     "backToOverview": "Back to main page",
     "search": "Search",
+    "clearFilter": "Clear filter",
     "searchPlaceholder": "Search by name, phone, email, or note",
+    "metricsTitle": "Ratings summary",
     "totalLabel": "Total ratings",
     "averageLabel": "Average rating",
     "emptyTitle": "No ratings yet",
