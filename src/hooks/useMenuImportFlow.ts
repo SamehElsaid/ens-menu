@@ -285,15 +285,29 @@ export function useMenuImportFlow({
       itemId: string,
       patch: Partial<ImportItem>,
     ) => {
+      const affectsDuplicateMatch =
+        patch.price !== undefined ||
+        patch.nameAr !== undefined ||
+        patch.nameEn !== undefined;
+
       patchDraft((draft) => ({
         ...draft,
         categories: draft.categories.map((c) =>
           c.id === categoryId
             ? {
                 ...c,
-                items: c.items.map((item) =>
-                  item.id === itemId ? { ...item, ...patch } : item,
-                ),
+                items: c.items.map((item) => {
+                  if (item.id !== itemId) return item;
+                  const next: ImportItem = { ...item, ...patch };
+                  if (
+                    affectsDuplicateMatch &&
+                    next.duplicateMeta?.resolution
+                  ) {
+                    const { resolution: _cleared, ...meta } = next.duplicateMeta;
+                    next.duplicateMeta = meta;
+                  }
+                  return next;
+                }),
               }
             : c,
         ),
@@ -309,6 +323,12 @@ export function useMenuImportFlow({
       variantId: string,
       patch: Partial<ImportVariant>,
     ) => {
+      const affectsDuplicateMatch =
+        patch.price !== undefined ||
+        patch.label !== undefined ||
+        patch.labelAr !== undefined ||
+        patch.labelEn !== undefined;
+
       patchDraft((draft) => ({
         ...draft,
         categories: draft.categories.map((c) =>
@@ -319,9 +339,21 @@ export function useMenuImportFlow({
                   item.id === itemId
                     ? {
                         ...item,
-                        variants: item.variants.map((v) =>
-                          v.id === variantId ? { ...v, ...patch } : v,
-                        ),
+                        variants: item.variants.map((v) => {
+                          if (v.id !== variantId) return v;
+                          const next: ImportVariant = { ...v, ...patch };
+                          if (
+                            affectsDuplicateMatch &&
+                            next.duplicateMeta?.resolution
+                          ) {
+                            const {
+                              resolution: _cleared,
+                              ...meta
+                            } = next.duplicateMeta;
+                            next.duplicateMeta = meta;
+                          }
+                          return next;
+                        }),
                       }
                     : item,
                 ),

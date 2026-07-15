@@ -187,11 +187,37 @@ export default function ReviewItemRow({
               })}
             </p>
             {item.duplicateMeta.resolution ? (
-              <p className="text-xs text-emerald-700 dark:text-emerald-300">
-                {item.duplicateMeta.resolution === "update_price"
-                  ? t("duplicateResolutionUpdate")
-                  : t("duplicateResolutionSkip")}
-              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                  {item.duplicateMeta.resolution === "update_price"
+                    ? t("duplicateResolutionUpdate")
+                    : t("duplicateResolutionSkip")}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onResolveDuplicate("update_price")}
+                    className={`text-xs px-3 py-1.5 rounded-lg font-medium ${
+                      item.duplicateMeta.resolution === "update_price"
+                        ? "bg-primary text-white"
+                        : "border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300"
+                    }`}
+                  >
+                    {t("duplicateUpdatePrice")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onResolveDuplicate("skip")}
+                    className={`text-xs px-3 py-1.5 rounded-lg font-medium ${
+                      item.duplicateMeta.resolution === "skip"
+                        ? "bg-primary text-white"
+                        : "border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300"
+                    }`}
+                  >
+                    {t("duplicateSkip")}
+                  </button>
+                </div>
+              </div>
             ) : (
               <div className="flex flex-wrap gap-2">
                 <button
@@ -341,7 +367,13 @@ export default function ReviewItemRow({
               type="number"
               min={0}
               step="0.01"
-              value={item.price ?? ""}
+              value={
+                item.duplicateMeta?.resolution === "skip" &&
+                item.duplicateMeta.existingPrice != null
+                  ? item.duplicateMeta.existingPrice
+                  : (item.price ?? "")
+              }
+              disabled={item.duplicateMeta?.resolution === "skip"}
               onChange={(e) =>
                 onUpdate({
                   price:
@@ -351,7 +383,7 @@ export default function ReviewItemRow({
                 })
               }
               placeholder={t("price")}
-              className={`w-28 px-3 py-2 rounded-lg border text-sm tabular-nums ${
+              className={`w-28 px-3 py-2 rounded-lg border text-sm tabular-nums disabled:opacity-70 disabled:cursor-not-allowed ${
                 item.price === null
                   ? "border-amber-400 bg-amber-50 dark:bg-amber-900/20"
                   : "border-slate-200 dark:border-slate-600"
@@ -413,7 +445,43 @@ export default function ReviewItemRow({
                           {t("duplicateSkip")}
                         </button>
                       </div>
-                    ) : null}
+                    ) : (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                          {variant.duplicateMeta.resolution === "update_price"
+                            ? t("duplicateResolutionUpdate")
+                            : t("duplicateResolutionSkip")}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              onResolveDuplicate("update_price", variant.id)
+                            }
+                            className={`text-xs px-2 py-1 rounded-lg ${
+                              variant.duplicateMeta.resolution === "update_price"
+                                ? "bg-primary text-white"
+                                : "border border-slate-300 dark:border-slate-600"
+                            }`}
+                          >
+                            {t("duplicateUpdatePrice")}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              onResolveDuplicate("skip", variant.id)
+                            }
+                            className={`text-xs px-2 py-1 rounded-lg ${
+                              variant.duplicateMeta.resolution === "skip"
+                                ? "bg-primary text-white"
+                                : "border border-slate-300 dark:border-slate-600"
+                            }`}
+                          >
+                            {t("duplicateSkip")}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               <div className="flex flex-wrap items-center gap-2">
@@ -457,7 +525,13 @@ export default function ReviewItemRow({
                   type="number"
                   min={0}
                   step="0.01"
-                  value={variant.price ?? ""}
+                  value={
+                    variant.duplicateMeta?.resolution === "skip" &&
+                    variant.duplicateMeta.existingPrice != null
+                      ? variant.duplicateMeta.existingPrice
+                      : (variant.price ?? "")
+                  }
+                  disabled={variant.duplicateMeta?.resolution === "skip"}
                   onChange={(e) =>
                     onUpdateVariant(variant.id, {
                       price:
@@ -467,7 +541,7 @@ export default function ReviewItemRow({
                     })
                   }
                   placeholder={t("price")}
-                  className={`w-24 px-2 py-1.5 rounded-lg border text-sm tabular-nums ${
+                  className={`w-24 px-2 py-1.5 rounded-lg border text-sm tabular-nums disabled:opacity-70 disabled:cursor-not-allowed ${
                     variant.price === null
                       ? "border-amber-400 bg-amber-50 dark:bg-amber-900/20"
                       : "border-slate-200 dark:border-slate-600"
