@@ -14,6 +14,7 @@ import {
   IoPricetagOutline,
   IoCheckmarkCircle,
   IoCloseCircle,
+  IoOptionsOutline,
 } from "react-icons/io5";
 
 type CopyMenuModalProps = {
@@ -23,10 +24,36 @@ type CopyMenuModalProps = {
   onCopied: (newMenu: Menu) => void;
 };
 
+type CopyOptions = {
+  copyProducts: boolean;
+  copySettings: boolean;
+  copyDesign: boolean;
+  copyMedia: boolean;
+  copyAddress: boolean;
+};
+
 type CopyMenuPayload = {
   nameAr: string;
   nameEn: string;
   slug: string;
+} & CopyOptions;
+
+type CopyOptionKey = keyof CopyOptions;
+
+const COPY_OPTION_KEYS: CopyOptionKey[] = [
+  "copyProducts",
+  "copySettings",
+  "copyDesign",
+  "copyMedia",
+  "copyAddress",
+];
+
+const OPTION_LABEL_KEYS: Record<CopyOptionKey, string> = {
+  copyProducts: "products",
+  copySettings: "settings",
+  copyDesign: "design",
+  copyMedia: "media",
+  copyAddress: "address",
 };
 
 function parseSlugAvailability(
@@ -56,6 +83,13 @@ export default function CopyMenuModal({
   const [slug, setSlug] = useState("");
   const [slugError, setSlugError] = useState<string | null>(null);
   const [isCopying, setIsCopying] = useState(false);
+  const [options, setOptions] = useState<CopyOptions>({
+    copyProducts: false,
+    copySettings: true,
+    copyDesign: true,
+    copyMedia: true,
+    copyAddress: true,
+  });
   const [slugStatus, setSlugStatus] = useState<{
     checking: boolean;
     available: boolean | null;
@@ -109,6 +143,10 @@ export default function CopyMenuModal({
     return null;
   };
 
+  const toggleOption = (key: CopyOptionKey) => {
+    setOptions((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedNameAr = nameAr.trim();
@@ -139,6 +177,7 @@ export default function CopyMenuModal({
         nameAr: trimmedNameAr,
         nameEn: trimmedNameEn,
         slug: normalizedSlug,
+        ...options,
       };
       const result = await axiosPost<CopyMenuPayload, Menu>(
         `/menus/${menu.id}/copy`,
@@ -186,8 +225,8 @@ export default function CopyMenuModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-900">
-        <div className="mb-5 flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
+      <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-900">
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 pb-4 pt-6 dark:border-slate-800">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <IoCopyOutline className="text-xl" />
@@ -212,115 +251,156 @@ export default function CopyMenuModal({
           </button>
         </div>
 
-        <p className="mb-4 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-          {t("description")}
-        </p>
+        <form
+          onSubmit={handleSubmit}
+          className="flex min-h-0 flex-1 flex-col"
+        >
+          <div className="space-y-4 overflow-y-auto px-6 py-4">
+            <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+              {t("description")}
+            </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-              <IoPricetagOutline className="text-primary" />
-              {t("menuNames")}
-            </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-slate-400">
-                  {t("nameAr")} *
-                </label>
-                <CustomInput
-                  type="text"
-                  value={nameAr}
-                  onChange={(e) => {
-                    const next = e.target.value;
-                    setNameAr(next);
-                    setNameArError(
-                      next.trim() ? null : t("validation.nameArRequired"),
-                    );
-                  }}
-                  className="px-4 py-3 border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
-                  placeholder={t("nameArPlaceholder")}
-                  error={nameArError ?? undefined}
-                />
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                <IoPricetagOutline className="text-primary" />
+                {t("menuNames")}
               </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-slate-400">
-                  {t("nameEn")} *
-                </label>
-                <CustomInput
-                  type="text"
-                  value={nameEn}
-                  onChange={(e) => {
-                    const next = e.target.value;
-                    setNameEn(next);
-                    setNameEnError(
-                      next.trim() ? null : t("validation.nameEnRequired"),
-                    );
-                  }}
-                  dir="ltr"
-                  className="px-4 py-3 border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
-                  placeholder={t("nameEnPlaceholder")}
-                  error={nameEnError ?? undefined}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <label className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-              <IoLinkOutline className="text-primary" />
-              {t("slug")} *
-            </label>
-            <CustomInput
-              type="text"
-              value={slug}
-              onChange={(e) => {
-                const next = e.target.value.toLowerCase().replace(/\s+/g, "-");
-                setSlug(next);
-                setSlugError(validateSlug(next));
-              }}
-              dir="ltr"
-              className="px-4 py-3 border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
-              placeholder={t("slugPlaceholder")}
-              error={slugError ?? undefined}
-            />
-            <div className="mt-2 min-h-5 text-xs">
-              {slugStatus.checking && (
-                <span className="text-slate-500">{t("slugChecking")}</span>
-              )}
-              {!slugStatus.checking && slugStatus.available === true && (
-                <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                  <IoCheckmarkCircle />
-                  {t("slugAvailable")}
-                </span>
-              )}
-              {!slugStatus.checking && slugStatus.available === false && (
-                <span className="inline-flex items-center gap-1 text-red-600 dark:text-red-400">
-                  <IoCloseCircle />
-                  {t("slugTaken")}
-                </span>
-              )}
-            </div>
-            {slugStatus.suggestions.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-2">
-                {slugStatus.suggestions.map((suggestion) => (
-                  <button
-                    key={suggestion}
-                    type="button"
-                    onClick={() => {
-                      setSlug(suggestion);
-                      setSlugError(null);
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-slate-400">
+                    {t("nameAr")} *
+                  </label>
+                  <CustomInput
+                    type="text"
+                    value={nameAr}
+                    onChange={(e) => {
+                      const next = e.target.value;
+                      setNameAr(next);
+                      setNameArError(
+                        next.trim() ? null : t("validation.nameArRequired"),
+                      );
                     }}
-                    className="rounded-lg border border-slate-200 px-2.5 py-1 font-mono text-xs text-slate-600 transition hover:border-primary/40 hover:bg-primary/5 hover:text-primary dark:border-slate-700 dark:text-slate-300"
+                    className="px-4 py-3 border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                    placeholder={t("nameArPlaceholder")}
+                    error={nameArError ?? undefined}
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-slate-400">
+                    {t("nameEn")} *
+                  </label>
+                  <CustomInput
+                    type="text"
+                    value={nameEn}
+                    onChange={(e) => {
+                      const next = e.target.value;
+                      setNameEn(next);
+                      setNameEnError(
+                        next.trim() ? null : t("validation.nameEnRequired"),
+                      );
+                    }}
                     dir="ltr"
-                  >
-                    {suggestion}
-                  </button>
-                ))}
+                    className="px-4 py-3 border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                    placeholder={t("nameEnPlaceholder")}
+                    error={nameEnError ?? undefined}
+                  />
+                </div>
               </div>
-            )}
+            </div>
+
+            <div>
+              <label className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                <IoLinkOutline className="text-primary" />
+                {t("slug")} *
+              </label>
+              <CustomInput
+                type="text"
+                value={slug}
+                onChange={(e) => {
+                  const next = e.target.value.toLowerCase().replace(/\s+/g, "-");
+                  setSlug(next);
+                  setSlugError(validateSlug(next));
+                }}
+                dir="ltr"
+                className="px-4 py-3 border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                placeholder={t("slugPlaceholder")}
+                error={slugError ?? undefined}
+              />
+              <div className="mt-2 min-h-5 text-xs">
+                {slugStatus.checking && (
+                  <span className="text-slate-500">{t("slugChecking")}</span>
+                )}
+                {!slugStatus.checking && slugStatus.available === true && (
+                  <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                    <IoCheckmarkCircle />
+                    {t("slugAvailable")}
+                  </span>
+                )}
+                {!slugStatus.checking && slugStatus.available === false && (
+                  <span className="inline-flex items-center gap-1 text-red-600 dark:text-red-400">
+                    <IoCloseCircle />
+                    {t("slugTaken")}
+                  </span>
+                )}
+              </div>
+              {slugStatus.suggestions.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {slugStatus.suggestions.map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      type="button"
+                      onClick={() => {
+                        setSlug(suggestion);
+                        setSlugError(null);
+                      }}
+                      className="rounded-lg border border-slate-200 px-2.5 py-1 font-mono text-xs text-slate-600 transition hover:border-primary/40 hover:bg-primary/5 hover:text-primary dark:border-slate-700 dark:text-slate-300"
+                      dir="ltr"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                <IoOptionsOutline className="text-primary" />
+                {t("whatToCopy")}
+              </div>
+              <div className="space-y-2 rounded-xl border border-slate-200 p-3 dark:border-slate-700">
+                {COPY_OPTION_KEYS.map((key) => {
+                  const checked = options[key];
+                  const inputId = `copy-option-${key}`;
+                  return (
+                    <label
+                      key={key}
+                      htmlFor={inputId}
+                      className={`flex cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2.5 transition ${
+                        checked
+                          ? "bg-primary/5 text-slate-900 dark:bg-primary/10 dark:text-slate-100"
+                          : "text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800/60"
+                      }`}
+                    >
+                      <input
+                        id={inputId}
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => toggleOption(key)}
+                        disabled={isCopying}
+                        className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                      />
+                      <span className="text-sm font-medium">
+                        {t(`options.${OPTION_LABEL_KEYS[key]}`)}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
-          <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+          <div className="flex flex-col-reverse gap-2 border-t border-slate-100 px-6 py-4 sm:flex-row sm:justify-end dark:border-slate-800">
             <button
               type="button"
               onClick={onClose}

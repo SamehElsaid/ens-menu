@@ -3,7 +3,13 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { IoArrowBackOutline, IoSearchOutline, IoStar } from "react-icons/io5";
+import {
+  IoArrowBackOutline,
+  IoRefreshOutline,
+  IoSearchOutline,
+  IoStar,
+  IoStatsChartOutline,
+} from "react-icons/io5";
 import { axiosGet } from "@/shared/axiosCall";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import LinkTo from "@/components/Global/LinkTo";
@@ -82,6 +88,14 @@ export default function RatingsPage() {
     setQuery(searchInput.trim());
   };
 
+  const clearFilter = () => {
+    setSearchInput("");
+    setQuery("");
+    setPage(1);
+  };
+
+  const hasActiveFilter = Boolean(query || searchInput.trim());
+
   return (
     <>
       <div className="mb-5 min-w-0 md:mb-6">
@@ -93,7 +107,7 @@ export default function RatingsPage() {
           {t("backToOverview")}
         </LinkTo>
 
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex flex-col gap-1.5 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
           <div className="min-w-0 flex-1">
             <PageTitleWithHelp>
               <h1 className="text-xl font-bold text-slate-800 sm:text-2xl md:text-3xl dark:text-slate-100">
@@ -104,14 +118,24 @@ export default function RatingsPage() {
               {t("subtitle")}
             </p>
           </div>
+        </div>
+      </div>
 
-          <form
-            onSubmit={submitSearch}
-            className="flex w-full max-w-md items-center gap-2 lg:w-auto"
+      <div className="mb-5 rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800/80 md:mb-6 md:p-5">
+        <form
+          onSubmit={submitSearch}
+          className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end"
+        >
+          <div
+            className="min-w-0 flex-1 sm:min-w-[220px]"
+            dir={locale === "ar" ? "rtl" : "ltr"}
           >
-            <div className="relative min-w-0 flex-1">
+            <label className="mb-2 block text-sm font-semibold text-slate-600 dark:text-slate-400">
+              {t("search")}
+            </label>
+            <div className="relative">
               <IoSearchOutline
-                className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-slate-400"
+                className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-lg text-slate-400"
                 aria-hidden
               />
               <input
@@ -119,45 +143,65 @@ export default function RatingsPage() {
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
                 placeholder={t("searchPlaceholder")}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white pe-3 ps-9 text-sm text-slate-800 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pe-3 ps-10 text-sm text-slate-800 outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20 dark:border-slate-600 dark:bg-slate-700/50 dark:text-slate-100 dark:focus:bg-slate-800"
               />
             </div>
+          </div>
+
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
             <button
               type="submit"
-              className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-white transition hover:bg-primary/90"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-white shadow-md transition hover:opacity-90 hover:shadow-lg"
             >
+              <IoSearchOutline className="text-lg" aria-hidden />
               {t("search")}
             </button>
-          </form>
-        </div>
+            {hasActiveFilter ? (
+              <button
+                type="button"
+                onClick={clearFilter}
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border-2 border-slate-200 px-5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
+              >
+                <IoRefreshOutline className="text-lg" aria-hidden />
+                {t("clearFilter")}
+              </button>
+            ) : null}
+          </div>
+        </form>
+      </div>
 
-        {!loading && summary.total > 0 ? (
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:max-w-md">
-            <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-800/80">
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+      {!loading && summary.total > 0 ? (
+        <section className="mb-5 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800 md:mb-6 md:p-5">
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900 md:text-base dark:text-slate-100">
+            <IoStatsChartOutline className="text-amber-500" aria-hidden />
+            {t("metricsTitle")}
+          </h2>
+          <div className="grid grid-cols-2 gap-3 sm:max-w-lg">
+            <div className="rounded-xl border border-sky-200/80 bg-sky-50/90 px-4 py-3 dark:border-sky-800/50 dark:bg-sky-950/30">
+              <p className="text-[10px] font-medium text-slate-500 md:text-xs dark:text-slate-400">
                 {t("totalLabel")}
               </p>
-              <p className="mt-1 text-2xl font-bold tabular-nums text-slate-800 dark:text-slate-100">
+              <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
                 {summary.total}
               </p>
             </div>
-            <div className="rounded-2xl border border-amber-200/70 bg-amber-50/60 px-4 py-3 dark:border-amber-900/40 dark:bg-amber-950/20">
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+            <div className="rounded-xl border border-amber-200/80 bg-amber-50/90 px-4 py-3 dark:border-amber-800/50 dark:bg-amber-950/30">
+              <p className="text-[10px] font-medium text-slate-500 md:text-xs dark:text-slate-400">
                 {t("averageLabel")}
               </p>
               <div className="mt-1 flex items-center gap-2">
-                <p className="text-2xl font-bold tabular-nums text-slate-800 dark:text-slate-100">
+                <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
                   {summary.average.toFixed(1)}
                 </p>
                 <IoStar className="text-amber-400" aria-hidden />
               </div>
-              <div className="mt-1">
-                <RatingStars stars={summary.average} />
+              <div className="mt-1.5">
+                <RatingStars stars={summary.average} precise />
               </div>
             </div>
           </div>
-        ) : null}
-      </div>
+        </section>
+      ) : null}
 
       <div className="min-w-0 pb-6">
         <RatingsCardGrid
