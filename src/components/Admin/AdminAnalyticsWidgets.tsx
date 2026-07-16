@@ -70,7 +70,10 @@ export function AdminMetricsGrid({
           <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
             {item.label}
           </p>
-          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 tabular-nums">
+          <p
+            lang="en"
+            className="text-2xl font-bold text-slate-900 dark:text-slate-100 tabular-nums"
+          >
             {item.value}
           </p>
         </div>
@@ -118,7 +121,10 @@ export function AdminRankedList({
             <div
               className={`flex min-w-0 flex-1 items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
             >
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary dark:bg-primary/20">
+              <span
+                lang="en"
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary dark:bg-primary/20"
+              >
                 {index + 1}
               </span>
               {item.href ? (
@@ -144,8 +150,11 @@ export function AdminRankedList({
                 </span>
               )}
             </div>
-            <span className="shrink-0 text-sm font-bold tabular-nums text-primary">
-              {item.count.toLocaleString()}
+            <span
+              lang="en"
+              className="shrink-0 text-sm font-bold tabular-nums text-primary"
+            >
+              {item.count.toLocaleString("en-US")}
             </span>
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
@@ -190,7 +199,10 @@ export function AdminBarChart({
           key={point.date}
           className="flex flex-1 flex-col items-center gap-2 min-w-0"
         >
-          <span className="text-[10px] font-semibold text-primary tabular-nums">
+          <span
+            lang="en"
+            className="text-[10px] font-semibold text-primary tabular-nums"
+          >
             {point.count}
           </span>
           <div className="w-full flex items-end justify-center h-24">
@@ -231,8 +243,13 @@ export function AdminMonthGrid({
           <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
             {item.month}
           </p>
-          <p className="text-xl font-bold text-slate-900 dark:text-slate-100 tabular-nums">
-            {formatCount ? formatCount(item.count) : item.count.toLocaleString()}
+          <p
+            lang="en"
+            className="text-xl font-bold text-slate-900 dark:text-slate-100 tabular-nums"
+          >
+            {formatCount
+              ? formatCount(item.count)
+              : item.count.toLocaleString("en-US")}
           </p>
         </div>
       ))}

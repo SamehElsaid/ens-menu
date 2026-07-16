@@ -202,7 +202,7 @@ function StatusBreakdown({
               {item.label}
             </span>
             <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">
-              {item.count.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")} (
+              {item.count.toLocaleString("en-US")} (
               {Math.round((item.count / total) * 100)}%)
             </span>
           </li>
@@ -233,8 +233,8 @@ function GapItemsList({
             {item.label}
           </p>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            {item.views.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")}{" "}
-            · {item.orders}{" "}
+            {item.views.toLocaleString("en-US")}{" "}
+            · {item.orders.toLocaleString("en-US")}{" "}
             {locale === "ar" ? "طلب" : "orders"}
           </p>
         </li>
@@ -368,19 +368,19 @@ export default function MenuProAnalytics({
       {
         id: "views",
         label: t("totalViews"),
-        value: (s?.totalViews ?? displayTotalViews).toLocaleString(),
+        value: (s?.totalViews ?? displayTotalViews).toLocaleString("en-US"),
         tone: "amber",
       },
       {
         id: "today",
         label: t("viewsToday"),
-        value: (s?.viewsToday ?? 0).toLocaleString(),
+        value: (s?.viewsToday ?? 0).toLocaleString("en-US"),
         tone: "orange",
       },
       {
         id: "week",
         label: t("viewsThisWeek"),
-        value: (s?.viewsThisWeek ?? 0).toLocaleString(),
+        value: (s?.viewsThisWeek ?? 0).toLocaleString("en-US"),
         tone: "sky",
       },
       {
@@ -405,25 +405,25 @@ export default function MenuProAnalytics({
       {
         id: "views",
         label: t("totalViews"),
-        value: (s.totalViews ?? displayTotalViews).toLocaleString(),
+        value: (s.totalViews ?? displayTotalViews).toLocaleString("en-US"),
         tone: "amber",
       },
       {
         id: "today",
         label: t("viewsToday"),
-        value: s.viewsToday.toLocaleString(),
+        value: s.viewsToday.toLocaleString("en-US"),
         tone: "orange",
       },
       {
         id: "week",
         label: t("viewsThisWeek"),
-        value: s.viewsThisWeek.toLocaleString(),
+        value: s.viewsThisWeek.toLocaleString("en-US"),
         tone: "sky",
       },
       {
         id: "orders",
         label: t("totalOrders"),
-        value: orders.toLocaleString(),
+        value: orders.toLocaleString("en-US"),
         tone: "emerald",
       },
       {
@@ -459,7 +459,7 @@ export default function MenuProAnalytics({
       {
         id: "tables",
         label: t("tablesCount"),
-        value: tablesCount,
+        value: tablesCount.toLocaleString("en-US"),
         tone: "slate",
       },
     ];
@@ -491,19 +491,19 @@ export default function MenuProAnalytics({
       {
         id: "today",
         label: t("viewsToday"),
-        value: s.viewsToday.toLocaleString(),
+        value: s.viewsToday.toLocaleString("en-US"),
         tone: "orange",
       },
       {
         id: "week",
         label: t("viewsThisWeek"),
-        value: s.viewsThisWeek.toLocaleString(),
+        value: s.viewsThisWeek.toLocaleString("en-US"),
         tone: "sky",
       },
       {
         id: "orders",
         label: t("totalOrders"),
-        value: orders.toLocaleString(),
+        value: orders.toLocaleString("en-US"),
         tone: "emerald",
       },
       {
@@ -969,13 +969,16 @@ export default function MenuProAnalytics({
                       id: "imp",
                       label: t("adImpressions"),
                       value:
-                        analytics.adMetrics.totalImpressions.toLocaleString(),
+                        analytics.adMetrics.totalImpressions.toLocaleString(
+                          "en-US",
+                        ),
                       tone: "sky",
                     },
                     {
                       id: "clk",
                       label: t("adClicks"),
-                      value: analytics.adMetrics.totalClicks.toLocaleString(),
+                      value:
+                        analytics.adMetrics.totalClicks.toLocaleString("en-US"),
                       tone: "amber",
                     },
                     {
