@@ -84,6 +84,11 @@ export default function OrderMobileCard({
             {t(`orderStatus.${status}` as never)}
           </span>
         </div>
+        {entry.pendingGuestAddition ? (
+          <p className="mt-2 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
+            {t("guestAdditionBadge")}
+          </p>
+        ) : null}
       </div>
 
       <div className="space-y-2 px-4 py-3">

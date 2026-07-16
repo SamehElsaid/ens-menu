@@ -174,7 +174,9 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
     setEntries((prev) =>
       prev.map((entry) =>
         entry.id === result.entryId
-          ? applyLocalEntryStatusUpdate(entry, result.status)
+          ? applyLocalEntryStatusUpdate(entry, result.status, {
+              clearPendingGuestAddition: result.clearPendingGuestAddition,
+            })
           : entry,
       ),
     );
@@ -183,8 +185,17 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
       const now = new Date().toISOString();
       return {
         ...prev,
+        ...(result.clearPendingGuestAddition
+          ? { pendingGuestAddition: false }
+          : {}),
         order: prev.order
-          ? { ...prev.order, status: result.status }
+          ? {
+              ...prev.order,
+              status: result.status,
+              ...(result.clearPendingGuestAddition
+                ? { pendingGuestAddition: false }
+                : {}),
+            }
           : prev.order,
         actions: [
           ...(prev.actions ?? []),

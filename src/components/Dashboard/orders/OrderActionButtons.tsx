@@ -25,7 +25,13 @@ interface OrderActionButtonsProps {
 
 type ActionConfig = {
   action: OrderActionType;
-  labelKey: "accept" | "reject" | "markPrepared" | "markDelivered" | "finish";
+  labelKey:
+    | "accept"
+    | "acceptAddition"
+    | "reject"
+    | "markPrepared"
+    | "markDelivered"
+    | "finish";
   className: string;
 };
 
@@ -33,14 +39,29 @@ function actionsForStatus(
   status: OrderStatus,
   variant: "table" | "delivery",
   canFinish: boolean,
+  pendingGuestAddition: boolean,
 ): ActionConfig[] {
   if (variant === "table") {
+    // Guest changed the cart after accept — must Accept again before Finish.
+    if (
+      pendingGuestAddition &&
+      (status === "confirmed" || status === "prepared")
+    ) {
+      return [
+        {
+          action: "TABLE_CALL_CONFIRMED",
+          labelKey: "acceptAddition",
+          className:
+            "bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-400",
+        },
+      ];
+    }
     switch (status) {
       case "pending":
         return [
           {
             action: "TABLE_CALL_CONFIRMED",
-            labelKey: "accept",
+            labelKey: pendingGuestAddition ? "acceptAddition" : "accept",
             className:
               "bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500",
           },
@@ -121,7 +142,13 @@ export default function OrderActionButtons({
   const t = useTranslations(translationNs);
   const locale = useLocale();
   const [localActing, setLocalActing] = useState(false);
-  const actions = actionsForStatus(status, variant, canFinish);
+  const pendingGuestAddition = entry.pendingGuestAddition === true;
+  const actions = actionsForStatus(
+    status,
+    variant,
+    canFinish,
+    pendingGuestAddition,
+  );
 
   if (actions.length === 0) return null;
 
@@ -139,9 +166,18 @@ export default function OrderActionButtons({
       );
       if (nextStatus) {
         toast.success(t("actionSuccess"));
-        onComplete({ entryId: entry.id, status: nextStatus });
+        onComplete({
+          entryId: entry.id,
+          status: nextStatus,
+          clearPendingGuestAddition:
+            pendingGuestAddition && action === "TABLE_CALL_CONFIRMED",
+        });
       } else {
-        toast.error(t("actionError"));
+        toast.error(
+          pendingGuestAddition && action === "TABLE_CALL_COMPLETED"
+            ? t("acceptAdditionRequired")
+            : t("actionError"),
+        );
       }
     } catch {
       toast.error(t("actionError"));
@@ -156,7 +192,7 @@ export default function OrderActionButtons({
     >
       {actions.map((cfg) => (
         <button
-          key={cfg.action}
+          key={`${cfg.action}-${cfg.labelKey}`}
           type="button"
           disabled={isBusy}
           onClick={() => void handleAction(cfg.action)}

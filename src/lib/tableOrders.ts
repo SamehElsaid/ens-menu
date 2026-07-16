@@ -55,6 +55,7 @@ export interface EntryOrder {
   serviceEnabled?: boolean | null;
   servicePercent?: number | null;
   serviceAmount?: number | null;
+  pendingGuestAddition?: boolean;
 }
 
 export interface ActionDetail {
@@ -97,6 +98,8 @@ export interface CallEntry {
   serviceEnabled?: boolean | null;
   servicePercent?: number | null;
   serviceAmount?: number | null;
+  /** Guest added/edited lines after staff already had the order — needs Accept again. */
+  pendingGuestAddition?: boolean;
   actionDetails?: ActionDetail[];
   category?: unknown;
   categoryName?: string;
@@ -125,6 +128,7 @@ export interface CallEntryDetail {
   governorateNameAr?: string | null;
   governorateNameEn?: string | null;
   deliveryFee?: number | null;
+  pendingGuestAddition?: boolean;
 }
 
 export interface ActivityCallsPayload {
@@ -190,10 +194,14 @@ export function orderStatusFromAction(action: OrderActionType): OrderStatus {
 export function applyLocalEntryStatusUpdate(
   entry: CallEntry,
   status: OrderStatus,
+  opts?: { clearPendingGuestAddition?: boolean },
 ): CallEntry {
   const now = new Date().toISOString();
   return {
     ...entry,
+    ...(opts?.clearPendingGuestAddition
+      ? { pendingGuestAddition: false }
+      : {}),
     actionDetails: [...(entry.actionDetails ?? []), { status, time: now }],
   };
 }
@@ -214,10 +222,14 @@ export function mergeOrderEntries(
 export type OrderActionResult = {
   entryId: string;
   status: OrderStatus;
+  clearPendingGuestAddition?: boolean;
 };
 
 export function isPendingOrder(entry: CallEntry): boolean {
-  return resolveListEntryStatus(entry) === "pending";
+  return (
+    resolveListEntryStatus(entry) === "pending" ||
+    entry.pendingGuestAddition === true
+  );
 }
 
 export function isEditableOrderStatus(status: OrderStatus): boolean {

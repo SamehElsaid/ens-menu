@@ -1124,7 +1124,12 @@ export default function OrderDetailsModal({
           {entry && menuId && onActionComplete && !loading && (
             <OrderActionButtons
               menuId={menuId}
-              entry={entry as CallEntry}
+              entry={{
+                ...(entry as CallEntry),
+                pendingGuestAddition:
+                  entry.pendingGuestAddition === true ||
+                  order?.pendingGuestAddition === true,
+              }}
               status={status}
               onComplete={onActionComplete}
               translationNs={variant === "delivery" ? "deliveryOrders" : "tableOrders"}
