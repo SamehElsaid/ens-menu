@@ -31,6 +31,10 @@ import {
 } from "react-icons/io5";
 import CustomBtn from "../Custom/CustomBtn";
 import { normalizeMenuFromApi } from "@/lib/normalizeMenuFromApi";
+import {
+  publicMenuHostDisplay,
+  sanitizeMenuSlugInput,
+} from "@/lib/publicMenuUrl";
 
 interface CreateMenuModalProps {
   onClose: () => void;
@@ -520,11 +524,7 @@ export default function CreateMenuModal({
                       type="text"
                       value={field.value}
                       onChange={(e) =>
-                        field.onChange(
-                          e.target.value
-                            .toLowerCase()
-                            .replace(/[^a-z0-9-]/g, "-"),
-                        )
+                        field.onChange(sanitizeMenuSlugInput(e.target.value))
                       }
                       onBlur={field.onBlur}
                       className={`px-4 py-3 font-mono dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:border-transparent ${
@@ -594,17 +594,21 @@ export default function CreateMenuModal({
                   </div>
                 )}
 
-              <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg select-none">
                 <div className="flex items-start gap-2">
-                  <IoInformationCircleOutline className="text-blue-500 text-lg mt-0.5" />
-                  <div className="flex-1">
+                  <IoInformationCircleOutline className="text-blue-500 text-lg mt-0.5 shrink-0" />
+                  <div className="flex-1 min-w-0">
                     <p className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">
                       {t("slugHint")}
                     </p>
-                    <p className="text-xs text-blue-600 dark:text-blue-400 font-mono">
-                      {slugValue
-                        ? `${slugValue}.ensmenu.com`
-                        : "your-slug.ensmenu.com"}
+                    <p
+                      className="text-xs text-blue-600 dark:text-blue-400 font-mono select-none"
+                      dir="ltr"
+                      onCopy={(e) => e.preventDefault()}
+                      onCut={(e) => e.preventDefault()}
+                      onContextMenu={(e) => e.preventDefault()}
+                    >
+                      {publicMenuHostDisplay(slugValue)}
                     </p>
                   </div>
                 </div>

@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import CustomInput from "@/components/Custom/CustomInput";
 import { normalizeMenuFromApi } from "@/lib/normalizeMenuFromApi";
+import { sanitizeMenuSlugInput } from "@/lib/publicMenuUrl";
 import type { Menu, SlugCheckResponse } from "@/types/Menu";
 import { toast } from "react-toastify";
 import {
@@ -317,7 +318,7 @@ export default function CopyMenuModal({
                 type="text"
                 value={slug}
                 onChange={(e) => {
-                  const next = e.target.value.toLowerCase().replace(/\s+/g, "-");
+                  const next = sanitizeMenuSlugInput(e.target.value);
                   setSlug(next);
                   setSlugError(validateSlug(next));
                 }}

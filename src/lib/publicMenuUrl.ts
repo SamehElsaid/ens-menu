@@ -27,6 +27,52 @@ export function resolvePublicMenuSlug(
   return "";
 }
 
+/** Display host for a menu slug, e.g. `my-menu.ensmenu.com`. */
+export function publicMenuHostDisplay(slug: string | undefined | null): string {
+  const trimmed = slug?.trim();
+  const suffix = menuHostSuffix();
+  if (!trimmed) return `your-slug${suffix}`;
+  return `${trimmed}${suffix}`;
+}
+
+/**
+ * Normalize slug field input (typing or paste).
+ * Strips full URLs / host suffixes so pasting `slug.ensmenu.com` keeps only `slug`.
+ */
+export function sanitizeMenuSlugInput(raw: string): string {
+  let value = raw.trim().toLowerCase();
+  if (!value) return "";
+
+  value = value.replace(/^https?:\/\//, "").replace(/^\/\//, "");
+  value = value.split(/[/?#]/)[0] ?? "";
+  value = value.replace(/^www\./, "");
+
+  const suffix = menuHostSuffix().toLowerCase();
+  const suffixNoDot = suffix.startsWith(".") ? suffix.slice(1) : suffix;
+
+  // Strip duplicated host suffixes from paste (e.g. slug.ensmenu.com.ensmenu.com)
+  let prev = "";
+  while (value !== prev) {
+    prev = value;
+    if (suffix && value.endsWith(suffix)) {
+      value = value.slice(0, -suffix.length);
+      continue;
+    }
+    if (suffixNoDot && value.endsWith(`.${suffixNoDot}`)) {
+      value = value.slice(0, -(suffixNoDot.length + 1));
+      continue;
+    }
+    if (suffixNoDot && value.endsWith(suffixNoDot) && value.includes(".")) {
+      value = value.slice(0, -suffixNoDot.length).replace(/\.$/, "");
+    }
+  }
+
+  return value
+    .replace(/[^a-z0-9-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 export function buildPublicMenuBaseUrl(slug: string | undefined | null): string {
   const normalized = resolvePublicMenuSlug(slug);
   if (!normalized) return "";
