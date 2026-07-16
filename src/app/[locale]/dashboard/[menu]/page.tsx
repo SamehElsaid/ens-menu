@@ -34,7 +34,7 @@ import {
   StyledQrCode,
   type StyledQrCodeHandle,
 } from "@/components/Global/StyledQrCode";
-import { useDashboardSession } from "@/hooks/useDashboardSession";
+import { useAuthorization } from "@/hooks/useAuthorization";
 import { isFreePlanUser } from "@/lib/subscription";
 import {
   publicMenuLinkUrl,
@@ -84,11 +84,8 @@ export default function DashboardMenuPage() {
       ? params.menu
       : ((params.menu as string[])?.[0] ?? "");
 
-  const dashboardSession = useDashboardSession();
+  const { can } = useAuthorization();
   const userData = useAppSelector((state) => state.auth.data);
-  const isCashierStaff =
-    dashboardSession?.role === "staff" &&
-    dashboardSession?.staffJobRole === "cashier";
   const isFreePlan = !userData || isFreePlanUser(userData);
 
   const { entries: latestActivity, loading: activityLoading } =
@@ -194,7 +191,7 @@ export default function DashboardMenuPage() {
             <FaChartLine className="text-lg shrink-0" />
             {t("overview")}
           </LinkTo>
-          {!isCashierStaff && (
+          {can("analytics:view") && (
             <LinkTo
               href={`/dashboard/${menuSlugOrId}/analytics`}
               className={`${tabBase} ${tabInactive}`}
@@ -203,36 +200,44 @@ export default function DashboardMenuPage() {
               {t("analytics")}
             </LinkTo>
           )}
-          <LinkTo
-            href={`/dashboard/${menuSlugOrId}/categories`}
-            className={`${tabBase} ${tabInactive}`}
-          >
-            <IoListOutline className="text-lg shrink-0" />
-            {t("categories")}
-          </LinkTo>
-          <LinkTo
-            id="onboarding-nav-products"
-            href={`/dashboard/${menuSlugOrId}/items`}
-            className={`${tabBase} ${tabInactive}`}
-          >
-            <MdOutlineFastfood className="text-lg shrink-0" />
-            {t("products")}
-          </LinkTo>
-          <LinkTo
-            href={`/dashboard/${menuSlugOrId}/table`}
-            className={`${tabBase} ${tabInactive}`}
-          >
-            <MdOutlineTableBar className="text-lg shrink-0" />
-            {t("tables")}
-          </LinkTo>
-          <LinkTo
-            href={`/dashboard/${menuSlugOrId}/orders`}
-            className={`${tabBase} ${tabInactive}`}
-          >
-            <IoReceiptOutline className="text-lg shrink-0" />
-            {t("tableOrders")}
-          </LinkTo>
-          {!isCashierStaff && (
+          {can("menu:categories") && (
+            <LinkTo
+              href={`/dashboard/${menuSlugOrId}/categories`}
+              className={`${tabBase} ${tabInactive}`}
+            >
+              <IoListOutline className="text-lg shrink-0" />
+              {t("categories")}
+            </LinkTo>
+          )}
+          {can("menu:items") && (
+            <LinkTo
+              id="onboarding-nav-products"
+              href={`/dashboard/${menuSlugOrId}/items`}
+              className={`${tabBase} ${tabInactive}`}
+            >
+              <MdOutlineFastfood className="text-lg shrink-0" />
+              {t("products")}
+            </LinkTo>
+          )}
+          {can("menu:tables") && (
+            <LinkTo
+              href={`/dashboard/${menuSlugOrId}/table`}
+              className={`${tabBase} ${tabInactive}`}
+            >
+              <MdOutlineTableBar className="text-lg shrink-0" />
+              {t("tables")}
+            </LinkTo>
+          )}
+          {can("orders:view") && (
+            <LinkTo
+              href={`/dashboard/${menuSlugOrId}/orders`}
+              className={`${tabBase} ${tabInactive}`}
+            >
+              <IoReceiptOutline className="text-lg shrink-0" />
+              {t("tableOrders")}
+            </LinkTo>
+          )}
+          {can("orders:view") && (
             <LinkTo
               href={`/dashboard/${menuSlugOrId}/history`}
               className={`${tabBase} ${tabInactive}`}
@@ -241,23 +246,23 @@ export default function DashboardMenuPage() {
               {t("activityLog")}
             </LinkTo>
           )}
-          {!isCashierStaff && (
-            <>
-              <LinkTo
-                href={`/dashboard/${menuSlugOrId}/staff`}
-                className={`${tabBase} ${tabInactive}`}
-              >
-                <MdPeopleOutline className="text-lg shrink-0" />
-                {t("staff")}
-              </LinkTo>
-              <LinkTo
-                href={`/dashboard/${menuSlugOrId}/settings`}
-                className={`${tabBase} ${tabInactive}`}
-              >
-                <FiSettings className="text-lg shrink-0" />
-                {t("settings")}
-              </LinkTo>
-            </>
+          {can("staff:manage") && (
+            <LinkTo
+              href={`/dashboard/${menuSlugOrId}/staff`}
+              className={`${tabBase} ${tabInactive}`}
+            >
+              <MdPeopleOutline className="text-lg shrink-0" />
+              {t("staff")}
+            </LinkTo>
+          )}
+          {can("settings:manage") && (
+            <LinkTo
+              href={`/dashboard/${menuSlugOrId}/settings`}
+              className={`${tabBase} ${tabInactive}`}
+            >
+              <FiSettings className="text-lg shrink-0" />
+              {t("settings")}
+            </LinkTo>
           )}
           <a
             href={menuLinkUrl || "#"}
@@ -270,14 +275,14 @@ export default function DashboardMenuPage() {
           </a>
         </nav>
 
-        {!isCashierStaff && (
+        {can("menu:import") && (
           <div className="mt-6 flex flex-wrap gap-3">
             <MenuImportEntryButton menuId={menuSlugOrId} variant="secondary" />
           </div>
         )}
       </header>
 
-      {isEmptyMenu && !isCashierStaff && (
+      {isEmptyMenu && can("menu:import") && (
         <MenuImportEntryButton menuId={menuSlugOrId} variant="card" />
       )}
 
@@ -433,7 +438,7 @@ export default function DashboardMenuPage() {
               <IoLinkOutline className="text-xl" />
             </div>
           </a>
-          {!isCashierStaff && (
+          {can("settings:manage") && (
             <LinkTo
               href={`/dashboard/${menuSlugOrId}/settings`}
               role="listitem"

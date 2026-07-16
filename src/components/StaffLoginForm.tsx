@@ -31,17 +31,13 @@ type StaffLoginApiResponse = {
     name?: string;
     email?: string;
     role?: string;
+    roleId?: number | null;
+    roleName?: string | null;
   };
+  role?: { id?: number; name?: string | null } | null;
+  permissions?: string[];
   menu?: { id?: number; uuid?: string; slug?: string };
 };
-
-function normalizeStaffJobRole(role: unknown): string {
-  const s = String(role ?? "")
-    .trim()
-    .toLowerCase();
-  if (s === "casher") return "cashier";
-  return s;
-}
 
 export default function StaffLoginForm() {
   const t = useTranslations("auth");
@@ -89,10 +85,13 @@ export default function StaffLoginForm() {
     }
 
     const { accessToken, refreshToken, staff, menu } = result.data;
-    const job = normalizeStaffJobRole(staff?.role);
+    const permissions = Array.isArray(result.data.permissions)
+      ? result.data.permissions.filter((p): p is string => typeof p === "string")
+      : [];
 
-    if (job !== "cashier") {
-      setApiError(t("staffOnlyCashierDashboard"));
+    // Only staff whose role can access the dashboard may sign in here.
+    if (!permissions.includes("dashboard:access")) {
+      setApiError(t("staffNoDashboardAccess"));
       setLoading(false);
       return;
     }
@@ -104,11 +103,16 @@ export default function StaffLoginForm() {
       return;
     }
 
+    const roleName =
+      result.data.role?.name ?? staff?.roleName ?? undefined;
+
     const saveTokens = {
       token: accessToken,
       refreshToken: refreshToken ?? "",
       role: "staff",
-      staffJobRole: job,
+      permissions,
+      staffRoleId: result.data.role?.id ?? staff?.roleId ?? undefined,
+      roleName,
       menuUuid: menuRef,
     };
 

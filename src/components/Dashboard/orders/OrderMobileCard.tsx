@@ -11,7 +11,6 @@ import {
 import type { CallEntry, OrderActionResult } from "@/lib/tableOrders";
 import OrderActionButtons from "./OrderActionButtons";
 import OrderChargesLines from "./OrderChargesLines";
-import { useDashboardSession } from "@/hooks/useDashboardSession";
 import { useAppSelector } from "@/store/hooks";
 import { resolveOrderCharges } from "@/lib/menuOrderCharges";
 import {
@@ -36,10 +35,7 @@ export default function OrderMobileCard({
   menuId,
 }: OrderMobileCardProps) {
   const t = useTranslations("tableOrders");
-  const session = useDashboardSession();
   const menu = useAppSelector((s) => s.menuData.menu);
-  const canFinish =
-    session?.role !== "staff" || session?.staffJobRole === "cashier";
   const status = resolveListEntryStatus(entry);
   const tone = orderStatusTone(status);
   const time = resolveEntryTime(entry.actionDetails);
@@ -141,7 +137,6 @@ export default function OrderMobileCard({
           status={status}
           onComplete={onActionComplete}
           compact
-          canFinish={canFinish}
           variant="table"
         />
         <button

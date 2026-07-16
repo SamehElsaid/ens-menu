@@ -55,7 +55,6 @@ const doRefreshAccessToken = async (): Promise<string | null> => {
       token: string;
       role: string;
       refreshToken: string;
-      staffJobRole?: string;
     };
 
     if (tokenDecrypted.role === "staff") {
@@ -80,9 +79,6 @@ const doRefreshAccessToken = async (): Promise<string | null> => {
       refreshToken: refreshToken,
       role: tokenDecrypted.role ?? "",
     };
-    if (tokenDecrypted.staffJobRole) {
-      newCookies.staffJobRole = tokenDecrypted.staffJobRole;
-    }
     Cookies.set("sub", encryptData(newCookies), { path: "/" });
     return accessToken;
   } catch (err) {

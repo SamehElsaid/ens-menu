@@ -52,6 +52,10 @@ export type NavItem = {
   /** Match route exactly (e.g. settings root vs. settings/design). */
   exactMatch?: boolean;
   navId?: string;
+  /** Staff RBAC permission required to see this item (owners/admins always pass). */
+  permission?: string;
+  /** Owner/admin only — never shown to staff regardless of permissions. */
+  ownerOnly?: boolean;
   children?: NavItem[];
 };
 
@@ -60,101 +64,6 @@ export type NavSection = {
   id: string;
   items: NavItem[];
 };
-
-/** Cashier staff: operational pages — no profile, subscription, settings, staff, or ads. */
-export const cashierNavSections: NavSection[] = [
-  {
-    id: "overview",
-    items: [
-      {
-        label: "Overview",
-        icon: FaChartLine,
-        key: "overview",
-        link: "",
-      },
-    ],
-  },
-  {
-    id: "import",
-    items: [
-      {
-        label: "menuImport",
-        icon: IoSparklesOutline,
-        key: "import",
-        link: "import",
-        badges: [
-          { label: "badgeNew", variant: "new" },
-          { label: "badgeBeta", variant: "beta" },
-        ],
-      },
-    ],
-  },
-  {
-    id: "menu",
-    items: [
-      {
-        label: "Categories",
-        icon: BiCategory,
-        key: "categories",
-        link: "categories",
-      },
-      {
-        label: "Items",
-        icon: MdOutlineFastfood,
-        key: "items",
-        link: "items",
-      },
-      {
-        label: "displayOrder",
-        icon: MdOutlineReorder,
-        key: "display-order",
-        link: "display-order",
-      },
-      {
-        label: "tables",
-        icon: MdOutlineTableBar,
-        key: "tables",
-        link: "table",
-        subgroup: "tableOps",
-        proFeature: true,
-      },
-      {
-        label: "orders",
-        icon: IoReceiptOutline,
-        key: "orders",
-        link: "orders",
-        subgroup: "tableOps",
-        proFeature: true,
-        dynamicBadge: "pendingOrders",
-      },
-      {
-        label: "deliveryOrders",
-        icon: MdOutlineDeliveryDining,
-        key: "delivery-orders",
-        link: "delivery-orders",
-        subgroup: "tableOps",
-        dynamicBadge: "pendingDeliveryOrders",
-      },
-    ],
-  },
-  {
-    id: "activity",
-    items: [
-      {
-        label: "history",
-        icon: IoTimeOutline,
-        key: "history",
-        link: "history",
-      },
-      {
-        label: "ratings",
-        icon: IoStarOutline,
-        key: "ratings",
-        link: "ratings",
-      },
-    ],
-  },
-];
 
 export const navSections: NavSection[] = [
   {
@@ -165,12 +74,14 @@ export const navSections: NavSection[] = [
         icon: FaChartLine,
         key: "overview",
         link: "",
+        permission: "dashboard:access",
       },
       {
         label: "analytics",
         icon: IoStatsChartOutline,
         key: "analytics",
         link: "analytics",
+        permission: "analytics:view",
       },
     ],
   },
@@ -182,18 +93,21 @@ export const navSections: NavSection[] = [
         icon: FaUserAlt,
         key: "personal",
         link: "personal",
+        ownerOnly: true,
       },
       {
         label: "Subscription",
         icon: FaCreditCard,
         key: "subscription",
         link: "subscription",
+        ownerOnly: true,
       },
       {
         label: "domainTransfer",
         icon: IoGlobeOutline,
         key: "domain-transfer",
         link: "domain-transfer",
+        ownerOnly: true,
       },
     ],
   },
@@ -205,6 +119,7 @@ export const navSections: NavSection[] = [
         icon: IoSparklesOutline,
         key: "import",
         link: "import",
+        permission: "menu:import",
         badges: [
           { label: "badgeNew", variant: "new" },
           { label: "badgeBeta", variant: "beta" },
@@ -220,18 +135,21 @@ export const navSections: NavSection[] = [
         icon: BiCategory,
         key: "categories",
         link: "categories",
+        permission: "menu:categories",
       },
       {
         label: "Items",
         icon: MdOutlineFastfood,
         key: "items",
         link: "items",
+        permission: "menu:items",
       },
       {
         label: "displayOrder",
         icon: MdOutlineReorder,
         key: "display-order",
         link: "display-order",
+        permission: "menu:items",
       },
       {
         label: "tables",
@@ -240,6 +158,7 @@ export const navSections: NavSection[] = [
         link: "table",
         subgroup: "tableOps",
         proFeature: true,
+        permission: "menu:tables",
       },
       {
         label: "orders",
@@ -249,6 +168,7 @@ export const navSections: NavSection[] = [
         subgroup: "tableOps",
         proFeature: true,
         dynamicBadge: "pendingOrders",
+        permission: "orders:view",
       },
       {
         label: "deliveryOrders",
@@ -257,6 +177,7 @@ export const navSections: NavSection[] = [
         link: "delivery-orders",
         subgroup: "tableOps",
         dynamicBadge: "pendingDeliveryOrders",
+        permission: "delivery:view",
       },
       {
         label: "staff",
@@ -264,12 +185,14 @@ export const navSections: NavSection[] = [
         key: "staff",
         link: "staff",
         proFeature: true,
+        permission: "staff:manage",
       },
       {
         label: "Advertisements",
         icon: HiSpeakerphone,
         key: "advertisements",
         link: "advertisements",
+        permission: "ads:manage",
       },
     ],
   },
@@ -283,6 +206,7 @@ export const navSections: NavSection[] = [
         link: "settings",
         exactMatch: true,
         navId: "onboarding-sidebar-settings-general",
+        permission: "settings:manage",
       },
       {
         label: "settingsDesign",
@@ -290,6 +214,7 @@ export const navSections: NavSection[] = [
         key: "settings-design",
         link: "settings/design",
         navId: "onboarding-sidebar-settings-design",
+        permission: "settings:manage",
       },
       {
         label: "settingsMedia",
@@ -297,6 +222,7 @@ export const navSections: NavSection[] = [
         key: "settings-media",
         link: "settings/media",
         navId: "onboarding-sidebar-settings-media",
+        permission: "settings:manage",
       },
       {
         label: "settingsDelivery",
@@ -304,6 +230,7 @@ export const navSections: NavSection[] = [
         key: "settings-delivery",
         link: "settings/delivery",
         navId: "onboarding-sidebar-settings-delivery",
+        permission: "settings:manage",
       },
     ],
   },
@@ -315,12 +242,14 @@ export const navSections: NavSection[] = [
         icon: IoTimeOutline,
         key: "history",
         link: "history",
+        permission: "orders:view",
       },
       {
         label: "ratings",
         icon: IoStarOutline,
         key: "ratings",
         link: "ratings",
+        permission: "analytics:view",
       },
     ],
   },

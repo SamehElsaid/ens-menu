@@ -1,8 +1,4 @@
-import {
-  cashierNavSections,
-  navSections,
-  type NavItem,
-} from "@/components/Dashboard/data";
+import { navSections, type NavItem } from "@/components/Dashboard/data";
 
 export type DashboardTitleRef = {
   namespace: string;
@@ -25,7 +21,7 @@ function buildSegmentLabelMap(): Record<string, string> {
   const map: Record<string, string> = {};
   const items: NavItem[] = [];
 
-  for (const section of [...navSections, ...cashierNavSections]) {
+  for (const section of navSections) {
     items.push(...section.items);
   }
 

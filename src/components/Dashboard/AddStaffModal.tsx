@@ -7,6 +7,7 @@ import { axiosPost, axiosPatch } from "@/shared/axiosCall";
 import CustomInput from "@/components/Custom/CustomInput";
 import { toast } from "react-toastify";
 import { MenuStaff } from "@/types/Menu";
+import { useMenuStaffRoles } from "@/hooks/useMenuStaffRoles";
 import {
   IoCloseOutline,
   IoEllipseSharp,
@@ -14,8 +15,7 @@ import {
   IoRemoveCircle,
   IoAddCircleOutline,
   IoPeopleOutline,
-  IoShirtOutline,
-  IoCashOutline,
+  IoShieldCheckmarkOutline,
 } from "react-icons/io5";
 import CustomBtn from "../Custom/CustomBtn";
 
@@ -27,7 +27,7 @@ export interface AddStaffFormData {
   password: string;
   confirmPassword: string;
   isActive: boolean;
-  role: "waiter" | "cashier";
+  roleId: number | null;
 }
 
 interface AddStaffModalProps {
@@ -41,21 +41,13 @@ function buildStaffPayload(data: AddStaffFormData): Record<string, unknown> {
   const payload: Record<string, unknown> = {
     name: data.name.trim(),
     isActive: data.isActive,
-    role: data.role,
   };
+  if (data.roleId != null) payload.roleId = data.roleId;
   const email = data.email.trim();
   if (email) payload.email = email;
   const password = data.password.trim();
   if (password) payload.password = password;
   return payload;
-}
-
-function normalizeStaffRoleForForm(role?: string): "waiter" | "cashier" {
-  const s = String(role ?? "")
-    .trim()
-    .toLowerCase();
-  if (s === "casher" || s === "cashier") return "cashier";
-  return "waiter";
 }
 
 export default function AddStaffModal({
@@ -69,6 +61,7 @@ export default function AddStaffModal({
   const isEdit = Boolean(staff?.id);
   const [isSaving, setIsSaving] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
+  const { roles, loading: rolesLoading } = useMenuStaffRoles(menuId);
 
   const {
     control,
@@ -83,7 +76,7 @@ export default function AddStaffModal({
       password: "",
       confirmPassword: "",
       isActive: true,
-      role: "waiter" as const,
+      roleId: null,
     },
     mode: "onChange",
   });
@@ -98,9 +91,7 @@ export default function AddStaffModal({
         password: "",
         confirmPassword: "",
         isActive: staff.isActive ?? true,
-        role: normalizeStaffRoleForForm(
-          typeof staff.role === "string" ? staff.role : undefined,
-        ),
+        roleId: typeof staff.roleId === "number" ? staff.roleId : null,
       });
     } else {
       reset({
@@ -109,7 +100,7 @@ export default function AddStaffModal({
         password: "",
         confirmPassword: "",
         isActive: true,
-        role: "waiter",
+        roleId: null,
       });
     }
   }, [staff, reset]);
@@ -210,40 +201,65 @@ export default function AddStaffModal({
             <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t("roleLabel")}
+                  {t("roleLabel")} *
                 </label>
                 <Controller
-                  name="role"
+                  name="roleId"
                   control={control}
-                  render={({ field }) => (
-                    <div className="flex rounded-2xl p-1 bg-gray-100 dark:bg-gray-600/40 border border-gray-200/80 dark:border-gray-600/50 w-fit flex-wrap gap-1">
-                      <button
-                        type="button"
-                        onClick={() => field.onChange("waiter")}
-                        className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                          field.value === "waiter"
-                            ? "bg-white dark:bg-gray-700 text-primary shadow-sm border border-gray-200/80 dark:border-gray-600 ring-1 ring-primary/20"
-                            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                        }`}
-                      >
-                        <IoShirtOutline className="text-lg" />
-                        {t("roleWaiter")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => field.onChange("cashier")}
-                        className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                          field.value === "cashier"
-                            ? "bg-white dark:bg-gray-700 text-primary shadow-sm border border-gray-200/80 dark:border-gray-600 ring-1 ring-primary/20"
-                            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                        }`}
-                      >
-                        <IoCashOutline className="text-lg" />
-                        {t("roleCashier")}
-                      </button>
-                    </div>
-                  )}
+                  rules={{
+                    validate: (v) =>
+                      v != null && Number.isFinite(v) ? true : t("roleRequired"),
+                  }}
+                  render={({ field }) => {
+                    if (rolesLoading) {
+                      return (
+                        <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-500 dark:border-gray-600 dark:bg-gray-700/40 dark:text-gray-400">
+                          <span
+                            className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"
+                            aria-hidden
+                          />
+                          {t("rolesLoading")}
+                        </div>
+                      );
+                    }
+                    if (roles.length === 0) {
+                      return (
+                        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300">
+                          {t("noRolesHint")}
+                        </p>
+                      );
+                    }
+                    return (
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        {roles.map((role) => {
+                          const isSelected = field.value === role.id;
+                          return (
+                            <button
+                              key={role.id}
+                              type="button"
+                              onClick={() => field.onChange(role.id)}
+                              className={`flex items-center gap-2.5 rounded-xl border px-3.5 py-3 text-start text-sm font-medium transition-all duration-200 ${
+                                isSelected
+                                  ? "border-primary/50 bg-primary/5 text-primary ring-1 ring-primary/20 dark:bg-primary/10"
+                                  : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700/40"
+                              }`}
+                            >
+                              <IoShieldCheckmarkOutline className="shrink-0 text-lg" />
+                              <span className="min-w-0 flex-1 truncate">
+                                {role.name}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    );
+                  }}
                 />
+                {errors.roleId && (
+                  <p className="mt-1.5 text-xs text-red-500">
+                    {errors.roleId.message}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

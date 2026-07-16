@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import { postTableOrderAction } from "@/lib/tableOrderActions";
+import { useAuthorization } from "@/hooks/useAuthorization";
 import type {
   CallEntry,
   OrderActionResult,
@@ -18,10 +19,17 @@ interface OrderActionButtonsProps {
   onComplete: (result: OrderActionResult) => void;
   compact?: boolean;
   translationNs?: "tableOrders" | "deliveryOrders";
-  /** Cashier or owner — may finish / close table orders. */
-  canFinish?: boolean;
   variant?: "table" | "delivery";
 }
+
+/** Staff permission required for each order action (owners always pass). */
+const ACTION_PERMISSION: Record<OrderActionType, string> = {
+  TABLE_CALL_CONFIRMED: "orders:confirm",
+  TABLE_CALL_CANCELLED: "orders:cancel",
+  TABLE_CALL_PREPARED: "orders:prepare",
+  TABLE_CALL_DELIVERED: "orders:deliver",
+  TABLE_CALL_COMPLETED: "orders:complete",
+};
 
 type ActionConfig = {
   action: OrderActionType;
@@ -38,7 +46,6 @@ type ActionConfig = {
 function actionsForStatus(
   status: OrderStatus,
   variant: "table" | "delivery",
-  canFinish: boolean,
   pendingGuestAddition: boolean,
 ): ActionConfig[] {
   if (variant === "table") {
@@ -74,7 +81,6 @@ function actionsForStatus(
         ];
       case "confirmed":
       case "prepared":
-        if (!canFinish) return [];
         return [
           {
             action: "TABLE_CALL_COMPLETED",
@@ -105,7 +111,6 @@ function actionsForStatus(
         },
       ];
     case "confirmed":
-      if (!canFinish) return [];
       return [
         {
           action: "TABLE_CALL_PREPARED",
@@ -115,7 +120,6 @@ function actionsForStatus(
         },
       ];
     case "prepared":
-      if (!canFinish) return [];
       return [
         {
           action: "TABLE_CALL_DELIVERED",
@@ -136,18 +140,15 @@ export default function OrderActionButtons({
   onComplete,
   compact = false,
   translationNs = "tableOrders",
-  canFinish = true,
   variant = "table",
 }: OrderActionButtonsProps) {
   const t = useTranslations(translationNs);
   const locale = useLocale();
+  const { can } = useAuthorization();
   const [localActing, setLocalActing] = useState(false);
   const pendingGuestAddition = entry.pendingGuestAddition === true;
-  const actions = actionsForStatus(
-    status,
-    variant,
-    canFinish,
-    pendingGuestAddition,
+  const actions = actionsForStatus(status, variant, pendingGuestAddition).filter(
+    (cfg) => can(ACTION_PERMISSION[cfg.action]),
   );
 
   if (actions.length === 0) return null;

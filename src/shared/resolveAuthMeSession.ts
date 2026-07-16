@@ -4,7 +4,7 @@ import {
   getAuthHintsFromEncryptedSub,
   isUserNotFoundApiBody,
 } from "@/shared/jwtPayload";
-import { patchSubCookieWithStaffMenuUuid } from "@/shared/staffSubCookie";
+import { patchSubCookieWithStaffSession } from "@/shared/staffSubCookie";
 
 type AuthMeResponse = { user?: Record<string, unknown> };
 type StaffMeResponse = {
@@ -12,6 +12,8 @@ type StaffMeResponse = {
     email?: string;
     name?: string;
   };
+  role?: { id?: number; name?: string | null } | null;
+  permissions?: string[];
   menu?: { id?: number; uuid?: string };
 };
 
@@ -45,9 +47,19 @@ async function resolveStaffMe(locale: string): Promise<ResolveAuthMeResult> {
   }
   if (res.status && res.data?.staff) {
     const menuUuid = res.data.menu?.uuid;
-    if (typeof menuUuid === "string" && menuUuid.length > 0) {
-      patchSubCookieWithStaffMenuUuid(menuUuid);
-    }
+    patchSubCookieWithStaffSession({
+      menuUuid:
+        typeof menuUuid === "string" && menuUuid.length > 0
+          ? menuUuid
+          : undefined,
+      permissions: Array.isArray(res.data.permissions)
+        ? res.data.permissions
+        : undefined,
+      staffRoleId:
+        typeof res.data.role?.id === "number" ? res.data.role.id : undefined,
+      roleName:
+        typeof res.data.role?.name === "string" ? res.data.role.name : undefined,
+    });
     return { outcome: "user", user: staffToUser(res.data.staff) };
   }
   return { outcome: "logout" };
