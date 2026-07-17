@@ -7,18 +7,3 @@ export function getStaffInitials(name: string): string {
   }
   return trimmed.slice(0, 2).toUpperCase();
 }
-
-export function normalizeStaffRole(role: string | undefined): string {
-  return String(role ?? "")
-    .trim()
-    .toLowerCase();
-}
-
-export function isCashierRole(role: string | undefined): boolean {
-  const r = normalizeStaffRole(role);
-  return r === "cashier" || r === "casher";
-}
-
-export function isWaiterRole(role: string | undefined): boolean {
-  return normalizeStaffRole(role) === "waiter";
-}

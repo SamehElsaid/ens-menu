@@ -13,7 +13,6 @@ import {
 import type { CallEntry, OrderActionResult } from "@/lib/tableOrders";
 import OrderActionButtons from "./OrderActionButtons";
 import OrderChargesLines from "./OrderChargesLines";
-import { useDashboardSession } from "@/hooks/useDashboardSession";
 import { useAppSelector } from "@/store/hooks";
 import { resolveOrderCharges } from "@/lib/menuOrderCharges";
 import { IoEllipseSharp, IoEyeOutline } from "react-icons/io5";
@@ -36,10 +35,7 @@ export default function DeliveryOrderMobileCard({
 }: DeliveryOrderMobileCardProps) {
   const t = useTranslations("deliveryOrders");
   const locale = useLocale();
-  const session = useDashboardSession();
   const menu = useAppSelector((s) => s.menuData.menu);
-  const canFinish =
-    session?.role !== "staff" || session?.staffJobRole === "cashier";
   const status = resolveListEntryStatus(entry);
   const tone = orderStatusTone(status);
   const time = resolveEntryTime(entry.actionDetails);
@@ -156,7 +152,6 @@ export default function DeliveryOrderMobileCard({
           onComplete={onActionComplete}
           compact
           translationNs="deliveryOrders"
-          canFinish={canFinish}
           variant="delivery"
         />
         <button

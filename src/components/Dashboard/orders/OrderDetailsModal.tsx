@@ -30,7 +30,7 @@ import OrderAddItemPicker from "./OrderAddItemPicker";
 import OrderChargesLines from "./OrderChargesLines";
 import { useAppSelector } from "@/store/hooks";
 import { isFreePlanUser } from "@/lib/subscription";
-import { useDashboardSession } from "@/hooks/useDashboardSession";
+import { useAuthorization } from "@/hooks/useAuthorization";
 
 function PrintableReceipt({
   orderId,
@@ -621,9 +621,7 @@ export default function OrderDetailsModal({
 }) {
   const t = useTranslations(variant === "delivery" ? "deliveryOrders" : "tableOrders");
   const locale = useLocale();
-  const session = useDashboardSession();
-  const canFinish =
-    session?.role !== "staff" || session?.staffJobRole === "cashier";
+  const { can } = useAuthorization();
 
   const userData = useAppSelector((s) => s.auth.data);
   const menu = useAppSelector((s) => s.menuData.menu);
@@ -642,7 +640,7 @@ export default function OrderDetailsModal({
 
   const items: CallItem[] = entry?.items ?? order?.items ?? [];
   const status = resolveLatestOrderStatus(actions, order);
-  const canEditItems = isEditableOrderStatus(status);
+  const canEditItems = isEditableOrderStatus(status) && can("orders:edit_items");
 
   useEffect(() => {
     setEditingItems(false);
@@ -1142,7 +1140,6 @@ export default function OrderDetailsModal({
               status={status}
               onComplete={onActionComplete}
               translationNs={variant === "delivery" ? "deliveryOrders" : "tableOrders"}
-              canFinish={canFinish}
               variant={variant}
             />
           )}

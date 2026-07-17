@@ -8,15 +8,27 @@ import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import AddStaffModal from "@/components/Dashboard/AddStaffModal";
 import DeleteStaffConfirm from "@/components/Dashboard/DeleteStaffConfirm";
 import StaffCardGrid from "@/components/Dashboard/staff/StaffCardGrid";
+import RoleCardGrid from "@/components/Dashboard/staff/RoleCardGrid";
+import AddRoleModal from "@/components/Dashboard/staff/AddRoleModal";
+import DeleteRoleConfirm from "@/components/Dashboard/staff/DeleteRoleConfirm";
 import LinkTo from "@/components/Global/LinkTo";
-import { MenuStaff } from "@/types/Menu";
-import { IoAddCircleOutline, IoArrowBackOutline } from "react-icons/io5";
+import { MenuStaff, MenuStaffRole } from "@/types/Menu";
+import { useMenuStaffRoles } from "@/hooks/useMenuStaffRoles";
+import {
+  IoAddCircleOutline,
+  IoArrowBackOutline,
+  IoPeopleOutline,
+  IoShieldCheckmarkOutline,
+} from "react-icons/io5";
 import { useAppSelector } from "@/store/hooks";
 import { isFreePlanUser } from "@/lib/subscription";
 import { toast } from "react-toastify";
 
+type StaffTab = "staff" | "roles";
+
 export default function StaffPage() {
   const t = useTranslations("Staff");
+  const tRoles = useTranslations("Roles");
   const locale = useLocale();
   const params = useParams();
   const menuId =
@@ -27,6 +39,8 @@ export default function StaffPage() {
   const userData = useAppSelector((state) => state.auth.data);
   const isFreePlan = isFreePlanUser(userData);
 
+  const [activeTab, setActiveTab] = useState<StaffTab>("staff");
+
   const [staffList, setStaffList] = useState<MenuStaff[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -34,6 +48,15 @@ export default function StaffPage() {
   const [deletingStaff, setDeletingStaff] = useState<MenuStaff | null>(null);
   const [togglingId, setTogglingId] = useState<number | null>(null);
   const [refreshing, setRefreshing] = useState(0);
+
+  const {
+    roles,
+    loading: rolesLoading,
+    refresh: refreshRoles,
+  } = useMenuStaffRoles(menuId, !isFreePlan);
+  const [showAddRoleModal, setShowAddRoleModal] = useState(false);
+  const [editingRole, setEditingRole] = useState<MenuStaffRole | null>(null);
+  const [deletingRole, setDeletingRole] = useState<MenuStaffRole | null>(null);
 
   const fetchStaff = useCallback(async () => {
     if (!menuId) return;
@@ -86,6 +109,30 @@ export default function StaffPage() {
     setEditingStaff(null);
     setShowAddModal(true);
   }, []);
+
+  const openAddRoleModal = useCallback(() => {
+    setEditingRole(null);
+    setShowAddRoleModal(true);
+  }, []);
+
+  const closeRoleModal = useCallback(() => {
+    setShowAddRoleModal(false);
+    setEditingRole(null);
+  }, []);
+
+  const handleEditRole = useCallback((role: MenuStaffRole) => {
+    setEditingRole(role);
+  }, []);
+
+  const handleDeleteRole = useCallback((role: MenuStaffRole) => {
+    setDeletingRole(role);
+  }, []);
+
+  // Role edits can change permissions/names shown on staff cards.
+  const onRolesChanged = useCallback(() => {
+    refreshRoles();
+    refreshList();
+  }, [refreshRoles, refreshList]);
 
   const handleToggleActive = useCallback(
     async (staff: MenuStaff) => {
@@ -161,9 +208,9 @@ export default function StaffPage() {
               </h1>
             </PageTitleWithHelp>
             <p className="mt-0.5 text-sm text-slate-500 md:mt-1 dark:text-slate-400">
-              {t("subtitle")}
+              {activeTab === "staff" ? t("subtitle") : tRoles("subtitle")}
             </p>
-            {!loading && staffList.length > 0 && (
+            {activeTab === "staff" && !loading && staffList.length > 0 && (
               <p className="mt-2 text-xs font-medium text-slate-400 dark:text-slate-500">
                 {t("totalStaffLabel")}:{" "}
                 <span className="font-bold tabular-nums text-slate-700 dark:text-slate-300">
@@ -171,32 +218,101 @@ export default function StaffPage() {
                 </span>
               </p>
             )}
+            {activeTab === "roles" && !rolesLoading && roles.length > 0 && (
+              <p className="mt-2 text-xs font-medium text-slate-400 dark:text-slate-500">
+                {tRoles("totalRolesLabel")}:{" "}
+                <span className="font-bold tabular-nums text-slate-700 dark:text-slate-300">
+                  {roles.length}
+                </span>
+              </p>
+            )}
           </div>
 
+          {activeTab === "staff" ? (
+            <button
+              id="onboarding-staff-actions"
+              type="button"
+              onClick={openAddModal}
+              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 self-start rounded-xl bg-primary px-4 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] sm:h-11 sm:px-5"
+            >
+              <IoAddCircleOutline className="text-lg" aria-hidden />
+              {t("addStaff")}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={openAddRoleModal}
+              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 self-start rounded-xl bg-primary px-4 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] sm:h-11 sm:px-5"
+            >
+              <IoAddCircleOutline className="text-lg" aria-hidden />
+              {tRoles("addRole")}
+            </button>
+          )}
+        </div>
+
+        <div
+          className="mt-5 flex gap-1 border-b border-slate-200 dark:border-slate-700/80"
+          role="tablist"
+        >
           <button
-            id="onboarding-staff-actions"
             type="button"
-            onClick={openAddModal}
-            className="inline-flex h-10 shrink-0 items-center justify-center gap-2 self-start rounded-xl bg-primary px-4 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] sm:h-11 sm:px-5"
+            role="tab"
+            aria-selected={activeTab === "staff"}
+            onClick={() => setActiveTab("staff")}
+            className={`-mb-px inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors ${
+              activeTab === "staff"
+                ? "border-primary text-primary"
+                : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+            }`}
           >
-            <IoAddCircleOutline className="text-lg" aria-hidden />
-            {t("addStaff")}
+            <IoPeopleOutline className="text-base" aria-hidden />
+            {t("tabStaff")}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "roles"}
+            onClick={() => setActiveTab("roles")}
+            className={`-mb-px inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors ${
+              activeTab === "roles"
+                ? "border-primary text-primary"
+                : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+            }`}
+          >
+            <IoShieldCheckmarkOutline className="text-base" aria-hidden />
+            {t("tabRoles")}
           </button>
         </div>
       </div>
 
-      <div id="onboarding-staff-table" className="dashboard-staff-page min-w-0 pb-6">
-        <StaffCardGrid
-          staffList={staffList}
-          loading={loading}
-          locale={locale}
-          togglingId={togglingId}
-          onEdit={handleEdit}
-          onToggleActive={handleToggleActive}
-          onDelete={handleDelete}
-          onAdd={openAddModal}
-        />
-      </div>
+      {activeTab === "staff" ? (
+        <div
+          id="onboarding-staff-table"
+          className="dashboard-staff-page min-w-0 pb-6"
+        >
+          <StaffCardGrid
+            staffList={staffList}
+            loading={loading}
+            locale={locale}
+            togglingId={togglingId}
+            onEdit={handleEdit}
+            onToggleActive={handleToggleActive}
+            onDelete={handleDelete}
+            onAdd={openAddModal}
+          />
+        </div>
+      ) : (
+        <div className="min-w-0 pb-6">
+          <RoleCardGrid
+            roles={roles}
+            loading={rolesLoading}
+            locale={locale}
+            onEdit={handleEditRole}
+            onDelete={handleDeleteRole}
+            onAdd={openAddRoleModal}
+          />
+        </div>
+      )}
 
       {(showAddModal || editingStaff) && menuId && (
         <AddStaffModal
@@ -214,6 +330,24 @@ export default function StaffPage() {
           displayLabel={deletingStaff.name}
           onClose={() => setDeletingStaff(null)}
           onDeleted={refreshList}
+        />
+      )}
+
+      {(showAddRoleModal || editingRole) && menuId && (
+        <AddRoleModal
+          menuId={menuId}
+          role={editingRole}
+          onClose={closeRoleModal}
+          onSaved={onRolesChanged}
+        />
+      )}
+
+      {deletingRole && menuId && (
+        <DeleteRoleConfirm
+          menuId={menuId}
+          role={deletingRole}
+          onClose={() => setDeletingRole(null)}
+          onDeleted={onRolesChanged}
         />
       )}
     </>

@@ -1,9 +1,9 @@
 import { decryptData } from "@/shared/encryption";
 
-/** Read JWT payload (no verify) for routing / hydrate (role, staff job). */
+/** Read JWT payload (no verify) for routing / hydrate (role). */
 export function decodeJwtPayload(
   token: string,
-): { role?: string; staffJobRole?: string } | null {
+): { role?: string } | null {
   try {
     const parts = token.split(".");
     if (parts.length < 2) return null;
@@ -11,7 +11,7 @@ export function decodeJwtPayload(
     const pad = base64.length % 4;
     if (pad) base64 += "=".repeat(4 - pad);
     const json = atob(base64);
-    return JSON.parse(json) as { role?: string; staffJobRole?: string };
+    return JSON.parse(json) as { role?: string };
   } catch {
     return null;
   }
@@ -21,26 +21,23 @@ export function decodeJwtPayload(
 export function getAuthHintsFromEncryptedSub(sub: string): {
   effectiveRole?: string;
   token?: string;
-  staffJobRole?: string;
-  /** Cashier: persisted from login or patched after /staff-auth/me. */
+  /** Staff: persisted from login or patched after /staff-auth/me. */
   menuUuid?: string;
 } | null {
   try {
     const d = decryptData(sub) as {
       role?: string;
       token?: string;
-      staffJobRole?: string;
       menuUuid?: string;
     };
     const token = typeof d.token === "string" ? d.token : undefined;
     const payload = token ? decodeJwtPayload(token) : null;
     const effectiveRole = payload?.role ?? d.role;
-    const staffJobRole = d.staffJobRole ?? payload?.staffJobRole;
     const menuUuid =
       typeof d.menuUuid === "string" && d.menuUuid.length > 0
         ? d.menuUuid
         : undefined;
-    return { effectiveRole, token, staffJobRole, menuUuid };
+    return { effectiveRole, token, menuUuid };
   } catch {
     return null;
   }

@@ -2,11 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { MenuStaff } from "@/types/Menu";
-import {
-  getStaffInitials,
-  isCashierRole,
-  isWaiterRole,
-} from "@/lib/staffDisplay";
+import { getStaffInitials } from "@/lib/staffDisplay";
 import {
   IoCreateOutline,
   IoEllipseSharp,
@@ -40,17 +36,13 @@ export default function StaffCard({
   const initials = getStaffInitials(staff.name);
   const email = staff.email?.trim() || t("emptyCell");
 
-  const roleLabel = isCashierRole(staff.role)
-    ? t("roleCashier")
-    : isWaiterRole(staff.role)
-      ? t("roleWaiter")
-      : staff.role?.trim() || t("emptyCell");
+  const roleLabel =
+    staff.roleName?.trim() || staff.role?.trim() || t("noRole");
 
-  const roleBadgeClass = isCashierRole(staff.role)
-    ? "bg-violet-500/90 text-white"
-    : isWaiterRole(staff.role)
-      ? "bg-primary/90 text-white"
-      : "bg-slate-500/80 text-white";
+  const hasRole = Boolean(staff.roleName?.trim() || staff.role?.trim());
+  const roleBadgeClass = hasRole
+    ? "bg-primary/90 text-white"
+    : "bg-slate-500/80 text-white";
 
   return (
     <article

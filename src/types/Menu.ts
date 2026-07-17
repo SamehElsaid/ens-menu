@@ -171,12 +171,27 @@ export interface MenuStaff {
   id: number;
   menuId: number;
   name: string;
+  /** @deprecated legacy job role text — replaced by roleId/roleName (RBAC). */
   role?: string;
+  roleId?: number | null;
+  roleName?: string | null;
   phone?: string;
   email?: string;
   isActive: boolean;
   createdAt?: string;
   [key: string]: unknown;
+}
+
+/** Dynamic per-menu staff role (RBAC). */
+export interface MenuStaffRole {
+  id: number;
+  menuId: number;
+  name: string;
+  permissions: string[];
+  isDefault: boolean;
+  staffCount: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Advertisement {
