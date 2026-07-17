@@ -2805,6 +2805,7 @@
     "acceptAddition": "قبول الإضافة",
     "acceptAdditionRequired": "اقبل إضافة العميل أولاً قبل إنهاء الترابيزة",
     "guestAdditionBadge": "إضافة جديدة من العميل",
+    "billRequestBadge": "طلب الفاتورة",
     "reject": "رفض",
     "markPrepared": "تم التحضير",
     "markDelivered": "تم التسليم",

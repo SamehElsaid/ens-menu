@@ -183,11 +183,14 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
     setModalEntry((prev) => {
       if (!prev || String(prev.id) !== result.entryId) return prev;
       const now = new Date().toISOString();
+      const clearBill =
+        result.status === "delivered" || result.status === "cancelled";
       return {
         ...prev,
         ...(result.clearPendingGuestAddition
           ? { pendingGuestAddition: false }
           : {}),
+        ...(clearBill ? { pendingBillRequest: false } : {}),
         order: prev.order
           ? {
               ...prev.order,
@@ -195,6 +198,7 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
               ...(result.clearPendingGuestAddition
                 ? { pendingGuestAddition: false }
                 : {}),
+              ...(clearBill ? { pendingBillRequest: false } : {}),
             }
           : prev.order,
         actions: [

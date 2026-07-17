@@ -59,7 +59,14 @@ export default function OrderMobileCard({
   );
 
   return (
-    <article className="dashboard-order-card flex h-full flex-col overflow-hidden rounded-2xl border border-violet-200/70 bg-white shadow-[0_2px_16px_rgba(124,58,237,0.08)] dark:border-violet-800/40 dark:bg-slate-800/95 dark:shadow-[0_2px_20px_rgba(0,0,0,0.3)]">
+    <article
+      className={[
+        "dashboard-order-card flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_2px_16px_rgba(124,58,237,0.08)] dark:bg-slate-800/95 dark:shadow-[0_2px_20px_rgba(0,0,0,0.3)]",
+        entry.pendingBillRequest
+          ? "border-2 border-red-500 shadow-[0_2px_16px_rgba(239,68,68,0.18)] dark:border-red-500 dark:shadow-[0_2px_20px_rgba(239,68,68,0.25)]"
+          : "border border-violet-200/70 dark:border-violet-800/40",
+      ].join(" ")}
+    >
       <div className="bg-linear-to-r from-violet-600/10 via-fuchsia-500/5 to-transparent px-4 py-3 dark:from-violet-900/30">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2.5 min-w-0">
@@ -87,6 +94,11 @@ export default function OrderMobileCard({
         {entry.pendingGuestAddition ? (
           <p className="mt-2 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
             {t("guestAdditionBadge")}
+          </p>
+        ) : null}
+        {entry.pendingBillRequest ? (
+          <p className="mt-2 inline-flex rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700 dark:bg-red-900/40 dark:text-red-200">
+            {t("billRequestBadge")}
           </p>
         ) : null}
       </div>

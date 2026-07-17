@@ -56,6 +56,7 @@ export interface EntryOrder {
   servicePercent?: number | null;
   serviceAmount?: number | null;
   pendingGuestAddition?: boolean;
+  pendingBillRequest?: boolean;
 }
 
 export interface ActionDetail {
@@ -100,6 +101,8 @@ export interface CallEntry {
   serviceAmount?: number | null;
   /** Guest added/edited lines after staff already had the order — needs Accept again. */
   pendingGuestAddition?: boolean;
+  /** Guest asked for the bill on this open table order. */
+  pendingBillRequest?: boolean;
   actionDetails?: ActionDetail[];
   category?: unknown;
   categoryName?: string;
@@ -129,6 +132,7 @@ export interface CallEntryDetail {
   governorateNameEn?: string | null;
   deliveryFee?: number | null;
   pendingGuestAddition?: boolean;
+  pendingBillRequest?: boolean;
 }
 
 export interface ActivityCallsPayload {
@@ -194,13 +198,21 @@ export function orderStatusFromAction(action: OrderActionType): OrderStatus {
 export function applyLocalEntryStatusUpdate(
   entry: CallEntry,
   status: OrderStatus,
-  opts?: { clearPendingGuestAddition?: boolean },
+  opts?: {
+    clearPendingGuestAddition?: boolean;
+    clearPendingBillRequest?: boolean;
+  },
 ): CallEntry {
   const now = new Date().toISOString();
   return {
     ...entry,
     ...(opts?.clearPendingGuestAddition
       ? { pendingGuestAddition: false }
+      : {}),
+    ...(opts?.clearPendingBillRequest ||
+    status === "delivered" ||
+    status === "cancelled"
+      ? { pendingBillRequest: false }
       : {}),
     actionDetails: [...(entry.actionDetails ?? []), { status, time: now }],
   };
@@ -228,7 +240,8 @@ export type OrderActionResult = {
 export function isPendingOrder(entry: CallEntry): boolean {
   return (
     resolveListEntryStatus(entry) === "pending" ||
-    entry.pendingGuestAddition === true
+    entry.pendingGuestAddition === true ||
+    entry.pendingBillRequest === true
   );
 }
 

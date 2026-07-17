@@ -896,6 +896,12 @@ export default function OrderDetailsModal({
               {summary}
             </p>
           )}
+          {(entry?.pendingBillRequest === true ||
+            order?.pendingBillRequest === true) && (
+            <p className="mt-2 inline-flex rounded-full bg-red-100 px-2.5 py-0.5 text-[11px] font-semibold text-red-700 dark:bg-red-900/40 dark:text-red-200">
+              {t("billRequestBadge")}
+            </p>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto">
@@ -1129,6 +1135,9 @@ export default function OrderDetailsModal({
                 pendingGuestAddition:
                   entry.pendingGuestAddition === true ||
                   order?.pendingGuestAddition === true,
+                pendingBillRequest:
+                  entry.pendingBillRequest === true ||
+                  order?.pendingBillRequest === true,
               }}
               status={status}
               onComplete={onActionComplete}

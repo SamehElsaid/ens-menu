@@ -2897,6 +2897,7 @@
     "acceptAddition": "Accept addition",
     "acceptAdditionRequired": "Accept the guest addition before finishing the table",
     "guestAdditionBadge": "New guest addition",
+    "billRequestBadge": "Bill requested",
     "reject": "Reject",
     "markPrepared": "Mark prepared",
     "markDelivered": "Mark delivered",
