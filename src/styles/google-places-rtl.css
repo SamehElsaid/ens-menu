@@ -1,0 +1,39 @@
+/* Google Places Autocomplete — RTL alignment */
+html[dir="rtl"] .pac-container {
+  direction: rtl;
+  text-align: right;
+  font-family: inherit;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgb(15 23 42 / 12%);
+}
+
+html[dir="rtl"] .pac-item {
+  direction: rtl;
+  text-align: right;
+  unicode-bidi: plaintext;
+  padding: 10px 12px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+html[dir="rtl"] .pac-item-query {
+  direction: rtl;
+  text-align: right;
+  unicode-bidi: plaintext;
+  font-size: 0.875rem;
+  color: #0f172a;
+}
+
+html[dir="rtl"] .pac-item span:not(.pac-icon) {
+  unicode-bidi: plaintext;
+}
+
+html[dir="rtl"] .pac-icon {
+  margin-left: 8px;
+  margin-right: 0;
+}
+
+html[dir="rtl"] .pac-logo::after {
+  text-align: left;
+}

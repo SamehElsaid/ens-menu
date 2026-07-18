@@ -38,12 +38,13 @@ function UserDropDown() {
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const userInitial = profile.data?.user?.email?.charAt(0).toUpperCase() ?? "U";
   const userName = profile.data?.user?.name ?? "John Doe";
-  const userRole = profile.data?.user?.role
-    ? t("roles." + profile.data?.user?.role)
-    : t("roles.admin");
-
-  const isCashier =
-    session?.role === "staff" && session?.staffJobRole === "cashier";
+  const isStaff = session?.role === "staff";
+  const userRole =
+    isStaff && session?.roleName
+      ? session.roleName
+      : profile.data?.user?.role
+        ? t("roles." + profile.data?.user?.role)
+        : t("roles.admin");
 
   const publicMenuUrl = publicMenuLinkUrl(menuSlug);
   const isDashboardMenuRoute = /^\/dashboard\/[^/]+/.test(pathname);
@@ -52,15 +53,15 @@ function UserDropDown() {
   /** Menu ref stored in encrypted cookie at staff login or patched after /staff-auth/me. */
   const subCookie = Cookies.get("sub");
   const subHints = subCookie ? getAuthHintsFromEncryptedSub(subCookie) : null;
-  const cashierMenuUuidFromCookie = subHints?.menuUuid;
-  const cashierMenuRefFromPath = pathname.match(/^\/dashboard\/([^/]+)/)?.[1];
-  const cashierDashboardHref =
+  const staffMenuUuidFromCookie = subHints?.menuUuid;
+  const staffMenuRefFromPath = pathname.match(/^\/dashboard\/([^/]+)/)?.[1];
+  const staffDashboardHref =
     getMenuDashboardRef(menu)
       ? menuDashboardPath(menu)
-      : cashierMenuRefFromPath
-        ? `/dashboard/${cashierMenuRefFromPath}`
-        : cashierMenuUuidFromCookie
-          ? `/dashboard/${cashierMenuUuidFromCookie}`
+      : staffMenuRefFromPath
+        ? `/dashboard/${staffMenuRefFromPath}`
+        : staffMenuUuidFromCookie
+          ? `/dashboard/${staffMenuUuidFromCookie}`
           : session?.menuUuid
             ? `/dashboard/${session.menuUuid}`
             : null;
@@ -73,11 +74,11 @@ function UserDropDown() {
       external?: boolean;
     }[] = [];
 
-    if (isCashier) {
-      if (cashierDashboardHref) {
+    if (isStaff) {
+      if (staffDashboardHref) {
         items.push({
           label: t("userProfile.dashboard"),
-          href: cashierDashboardHref,
+          href: staffDashboardHref,
           icon: <MdOutlineDashboard />,
         });
       }
@@ -100,8 +101,8 @@ function UserDropDown() {
 
     return items;
   }, [
-    cashierDashboardHref,
-    isCashier,
+    staffDashboardHref,
+    isStaff,
     profile.data?.user?.role,
     publicMenuUrl,
     showRestaurantLink,

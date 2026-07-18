@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-
-const DEFAULT_LOCALE = "ar";
+import { localizeHref } from "@/i18n/routing";
 
 /**
  * Base URL for canonical and Open Graph URLs.
@@ -37,11 +36,8 @@ export function buildSeoMetadata({
 }: SeoInput): Metadata {
   const mergedKeywords = [keywords, coreKeywords].filter(Boolean).join(",");
   const baseUrl = getBaseUrl();
-  const canonicalPath =
-    locale === DEFAULT_LOCALE ? (path ? `/${path}` : "/") : path ? `/${path}` : `/${locale}`;
+  const canonicalPath = localizeHref(path ? `/${path}` : "/", locale);
   const canonicalUrl = baseUrl ? new URL(canonicalPath, baseUrl).href : undefined;
-  const arPath = path ? `/${path}` : "/";
-  const enPath = path ? `/en/${path}` : "/en";
 
   return {
     title: { absolute: title },
@@ -54,21 +50,17 @@ export function buildSeoMetadata({
       description,
       siteName,
       url: canonicalUrl,
+      // Each locale is treated as its own site — no cross-locale alternates
       locale: locale === "ar" ? "ar_EG" : "en_GB",
-      alternateLocale: locale === "ar" ? "en_GB" : "ar_EG",
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
     },
-    alternates: baseUrl
+    alternates: canonicalUrl
       ? {
           canonical: canonicalUrl,
-          languages: {
-            ar: new URL(arPath, baseUrl).href,
-            en: new URL(enPath, baseUrl).href,
-          },
         }
       : undefined,
   };

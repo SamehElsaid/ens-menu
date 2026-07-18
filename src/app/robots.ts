@@ -16,11 +16,13 @@ export default function robots(): MetadataRoute.Robots {
         "/auth",
         "/en/auth",
         "/payment",
+        "/en/payment",
         "/unauthorized",
         "/en/unauthorized",
       ],
     },
-    sitemap: `${siteOrigin}/sitemap-index.xml`,
+    // One entry point per locale (Google recommendation for multilingual sites)
+    sitemap: [`${siteOrigin}/sitemap`, `${siteOrigin}/en/sitemap`],
     host: siteOrigin.replace(/^https?:\/\//, ""),
   };
 }

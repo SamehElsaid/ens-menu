@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-  xmlns:s="http://www.sitemaps.org/schemas/sitemap/0.9"
-  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  xmlns:s="http://www.sitemaps.org/schemas/sitemap/0.9">
   <xsl:output method="html" encoding="UTF-8" indent="yes"/>
 
   <xsl:template match="/">
@@ -20,7 +19,6 @@
           th { background: #f8fafc; }
           tr:nth-child(even) { background: #f8fafc; }
           a { color: #0d9488; word-break: break-all; }
-          .hreflang { font-size: 0.75rem; color: #64748b; }
         </style>
       </head>
       <body>
@@ -38,7 +36,6 @@
         <th>Last modified</th>
         <th>Change freq.</th>
         <th>Priority</th>
-        <th>Languages (hreflang)</th>
       </tr>
       <xsl:for-each select="s:url">
         <tr>
@@ -46,12 +43,6 @@
           <td><xsl:value-of select="s:lastmod"/></td>
           <td><xsl:value-of select="s:changefreq"/></td>
           <td><xsl:value-of select="s:priority"/></td>
-          <td class="hreflang">
-            <xsl:for-each select="xhtml:link">
-              <xsl:value-of select="@hreflang"/>: <xsl:value-of select="@href"/>
-              <xsl:if test="position() != last()"> | </xsl:if>
-            </xsl:for-each>
-          </td>
         </tr>
       </xsl:for-each>
     </table>

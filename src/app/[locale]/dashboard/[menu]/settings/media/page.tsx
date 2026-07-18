@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { FiSave } from "react-icons/fi";
-import { HiOutlineShare, HiOutlineMail, HiOutlineClock } from "react-icons/hi";
+import {
+  HiOutlineShare,
+  HiOutlineMail,
+  HiOutlineClock,
+  HiOutlineWifi,
+} from "react-icons/hi";
 import {
   FaFacebookF,
   FaInstagram,
@@ -18,6 +23,7 @@ import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
 import { toast } from "react-toastify";
 import type { Menu } from "@/types/Menu";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
+import { normalizeExternalUrl } from "@/lib/normalizeExternalUrl";
 
 function timeStringToDate(s: string): Date | null {
   if (!s || !/^\d{2}:\d{2}$/.test(s)) return null;
@@ -41,6 +47,13 @@ const DAY_KEYS = [
 type DayKey = (typeof DAY_KEYS)[number];
 
 type SocialKey = "facebook" | "instagram" | "twitter" | "whatsapp";
+
+const SOCIAL_URL_PLACEHOLDERS: Record<Exclude<SocialKey, "whatsapp">, string> =
+  {
+    facebook: "https://www.facebook.com/...",
+    instagram: "https://www.instagram.com/...",
+    twitter: "https://x.com/...",
+  };
 
 interface SocialLinkRow {
   id: SocialKey;
@@ -95,7 +108,7 @@ const SocialIcons: Record<SocialKey, React.ElementType> = {
 const socialIconColors: Record<SocialKey, string> = {
   facebook: "text-[#1877F2] bg-[#1877F2]/10",
   instagram: "text-pink-500 bg-pink-500/10",
-  twitter: "text-emerald-600 bg-emerald-500/10",
+  twitter: "text-[#1DA1F2] bg-[#1DA1F2]/10",
   whatsapp: "text-[#25D366] bg-[#25D366]/10",
 };
 
@@ -110,6 +123,11 @@ export default function MediaPage() {
     addressAr: "",
     addressEn: "",
     phone: "",
+  });
+  const [wifi, setWifi] = useState({
+    wifiEnabled: false,
+    wifiName: "",
+    wifiPassword: "",
   });
   const [workHours, setWorkHours] = useState<WorkHours>(INITIAL_WORK_HOURS);
   const [isSaving, setIsSaving] = useState(false);
@@ -135,6 +153,11 @@ export default function MediaPage() {
         addressAr: menuContact.addressAr ?? "",
         addressEn: menuContact.addressEn ?? "",
         phone: menuContact.phone ?? "",
+      });
+      setWifi({
+        wifiEnabled: menu.wifiEnabled === true,
+        wifiName: menu.wifiName ?? "",
+        wifiPassword: menu.wifiPassword ?? "",
       });
       setWorkHours(normalizeWorkHours(menu.workingHours));
     }
@@ -170,7 +193,12 @@ export default function MediaPage() {
       return;
     }
     const socialByKey = Object.fromEntries(
-      socialLinks.map((row) => [row.id, row.value]),
+      socialLinks.map((row) => {
+        const trimmed = row.value.trim();
+        if (!trimmed) return [row.id, ""];
+        if (row.id === "whatsapp") return [row.id, trimmed];
+        return [row.id, normalizeExternalUrl(trimmed)];
+      }),
     ) as Record<SocialKey, string>;
     const payload = {
       socialFacebook: socialByKey.facebook,
@@ -180,6 +208,9 @@ export default function MediaPage() {
       addressAr: contact.addressAr,
       addressEn: contact.addressEn,
       phone: contact.phone,
+      wifiEnabled: wifi.wifiEnabled,
+      wifiName: wifi.wifiName,
+      wifiPassword: wifi.wifiPassword,
       workingHours: workHours,
     };
     setIsSaving(true);
@@ -251,11 +282,7 @@ export default function MediaPage() {
                   <div className="flex-1 min-w-[180px]">
                     <CustomInput
                       type={row.id === "whatsapp" ? "tel" : "text"}
-                      value={
-                        row.id === "whatsapp"
-                          ? row.value || undefined
-                          : row.value
-                      }
+                      value={row.value}
                       onChange={(e) =>
                         updateSocial(
                           row.id,
@@ -265,10 +292,22 @@ export default function MediaPage() {
                                 .target.value,
                         )
                       }
+                      onBlur={
+                        row.id === "whatsapp"
+                          ? undefined
+                          : () => {
+                              const trimmed = row.value.trim();
+                              if (!trimmed) return;
+                              updateSocial(
+                                row.id,
+                                normalizeExternalUrl(trimmed),
+                              );
+                            }
+                      }
                       placeholder={
                         row.id === "whatsapp"
-                          ? "+965..."
-                          : `https://${row.id}.com/...`
+                          ? "123-456-7890"
+                          : SOCIAL_URL_PLACEHOLDERS[row.id]
                       }
                     />
                   </div>
@@ -336,7 +375,7 @@ export default function MediaPage() {
               </label>
               <CustomInput
                 type="tel"
-                value={contact.phone || undefined}
+                value={contact.phone}
                 onChange={(val) =>
                   setContact((c) => ({
                     ...c,
@@ -347,6 +386,97 @@ export default function MediaPage() {
               />
             </div>
           </div>
+        </section>
+
+        {/* Wi‑Fi (optional) */}
+        <section
+          id="onboarding-media-wifi"
+          className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 md:p-6 space-y-4"
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
+                <HiOutlineWifi className="text-lg text-primary" />
+              </div>
+              <div>
+                <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                  {t("wifi.title")}
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  {t("wifi.description")}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                {wifi.wifiEnabled ? t("wifi.enabledOn") : t("wifi.enabledOff")}
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={wifi.wifiEnabled}
+                aria-label={t("wifi.enabled")}
+                onClick={() =>
+                  setWifi((prev) => ({
+                    ...prev,
+                    wifiEnabled: !prev.wifiEnabled,
+                  }))
+                }
+                className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2 ${
+                  wifi.wifiEnabled
+                    ? "bg-primary"
+                    : "bg-slate-200 dark:bg-slate-600"
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${
+                    wifi.wifiEnabled
+                      ? isRTL
+                        ? "-translate-x-5"
+                        : "translate-x-5"
+                      : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+
+          {wifi.wifiEnabled && (
+            <div className="grid gap-4 sm:grid-cols-1">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  {t("wifi.name")}
+                </label>
+                <CustomInput
+                  type="text"
+                  value={wifi.wifiName}
+                  onChange={(e) =>
+                    setWifi((prev) => ({
+                      ...prev,
+                      wifiName: e.target.value,
+                    }))
+                  }
+                  placeholder={t("wifi.namePlaceholder")}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  {t("wifi.password")}
+                </label>
+                <CustomInput
+                  type="text"
+                  value={wifi.wifiPassword}
+                  onChange={(e) =>
+                    setWifi((prev) => ({
+                      ...prev,
+                      wifiPassword: e.target.value,
+                    }))
+                  }
+                  placeholder={t("wifi.passwordPlaceholder")}
+                />
+              </div>
+            </div>
+          )}
         </section>
 
         {/* Business hours */}

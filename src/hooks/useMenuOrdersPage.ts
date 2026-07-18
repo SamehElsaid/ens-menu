@@ -11,6 +11,7 @@ import { useLocale } from "next-intl";
 import { axiosGet } from "@/shared/axiosCall";
 import { useAppSelector } from "@/store/hooks";
 import { isFreePlanUser } from "@/lib/subscription";
+import { useCurrentPlanCapabilities } from "@/hooks/useCurrentPlanCapabilities";
 import { useMenuActivitySocket } from "@/hooks/useMenuActivitySocket";
 import { playNewOrderNotificationSound } from "@/lib/orderNotificationSound";
 import type { OrderStatusFilter } from "@/components/Dashboard/orders/OrdersFilters";
@@ -21,7 +22,9 @@ import {
   type ActivityCallsPayload,
   type CallEntry,
   type CallEntryDetail,
+  type CallItem,
   type OrderActionResult,
+  type OrderStatus,
 } from "@/lib/tableOrders";
 
 const PAGE_SIZE = 12;
@@ -54,6 +57,8 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
 
   const userData = useAppSelector((s) => s.auth.data);
   const isFreePlan = isFreePlanUser(userData);
+  const capabilities = useCurrentPlanCapabilities();
+  const tableOrderingEnabled = capabilities.tableOrderingQr;
   const pendingCount = useMemo(() => countPendingOrders(entries), [entries]);
   const isFiltered =
     debouncedSearch.length > 0 ||
@@ -111,7 +116,7 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
 
   const fetchLogs = useCallback(
     async (silent = false) => {
-      if (!menuId || (channel !== "delivery" && isFreePlan)) {
+      if (!menuId || (channel === "table" && !tableOrderingEnabled)) {
         setLoading(false);
         return;
       }
@@ -149,7 +154,7 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
         if (!silent) setLoading(false);
       }
     },
-    [menuId, locale, page, debouncedSearch, dateFrom, dateTo, statusFilter, isFreePlan, channel],
+    [menuId, locale, page, debouncedSearch, dateFrom, dateTo, statusFilter, tableOrderingEnabled, channel],
   );
 
   useEffect(() => {
@@ -161,7 +166,7 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
   }, [fetchLogs]);
 
   useMenuActivitySocket(
-    channel !== "delivery" && isFreePlan ? "" : menuId,
+    channel === "table" && !tableOrderingEnabled ? "" : menuId,
     handleSocketUpdate,
   );
 
@@ -169,17 +174,32 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
     setEntries((prev) =>
       prev.map((entry) =>
         entry.id === result.entryId
-          ? applyLocalEntryStatusUpdate(entry, result.status)
+          ? applyLocalEntryStatusUpdate(entry, result.status, {
+              clearPendingGuestAddition: result.clearPendingGuestAddition,
+            })
           : entry,
       ),
     );
     setModalEntry((prev) => {
       if (!prev || String(prev.id) !== result.entryId) return prev;
       const now = new Date().toISOString();
+      const clearBill =
+        result.status === "delivered" || result.status === "cancelled";
       return {
         ...prev,
+        ...(result.clearPendingGuestAddition
+          ? { pendingGuestAddition: false }
+          : {}),
+        ...(clearBill ? { pendingBillRequest: false } : {}),
         order: prev.order
-          ? { ...prev.order, status: result.status }
+          ? {
+              ...prev.order,
+              status: result.status,
+              ...(result.clearPendingGuestAddition
+                ? { pendingGuestAddition: false }
+                : {}),
+              ...(clearBill ? { pendingBillRequest: false } : {}),
+            }
           : prev.order,
         actions: [
           ...(prev.actions ?? []),
@@ -188,6 +208,35 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
       };
     });
   }, []);
+
+  const handleItemsUpdated = useCallback(
+    (
+      entryId: string,
+      items: CallItem[],
+      orderTotal: number,
+      status: OrderStatus,
+    ) => {
+      setEntries((prev) =>
+        prev.map((entry) =>
+          entry.id === entryId
+            ? { ...entry, items, totalPrice: orderTotal }
+            : entry,
+        ),
+      );
+      setModalEntry((prev) => {
+        if (!prev || String(prev.id) !== entryId) return prev;
+        return {
+          ...prev,
+          items,
+          totalPrice: orderTotal,
+          order: prev.order
+            ? { ...prev.order, items, orderTotal, status }
+            : prev.order,
+        };
+      });
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!entryParam || !menuId) {
@@ -241,6 +290,7 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
   return {
     menuId,
     isFreePlan,
+    tableOrderingEnabled,
     entries,
     loading,
     page,
@@ -263,5 +313,6 @@ export function useMenuOrdersPage(channel: MenuOrdersChannel) {
     modalEntry,
     modalLoading,
     handleActionComplete,
+    handleItemsUpdated,
   };
 }

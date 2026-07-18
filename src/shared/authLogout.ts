@@ -1,6 +1,6 @@
 import axios from "axios";
 import Cookies from "js-cookie";
-import { routing } from "@/i18n/routing";
+import { localePathPrefix, routing } from "@/i18n/routing";
 import {
   decryptData,
   decryptDataApi,
@@ -67,6 +67,6 @@ export async function performAuthLogout(): Promise<void> {
   resetFcmSync();
   Cookies.remove("sub", { path: "/" });
 
-  const homePath = locale === routing.defaultLocale ? "/" : `/${locale}`;
+  const homePath = localePathPrefix(locale) || "/";
   window.location.href = homePath;
 }

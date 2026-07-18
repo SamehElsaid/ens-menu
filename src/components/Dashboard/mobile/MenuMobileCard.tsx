@@ -17,6 +17,8 @@ import {
   IoSettingsOutline,
   IoTrashOutline,
   IoGitNetworkOutline,
+  IoRemoveCircleOutline,
+  IoCopyOutline,
 } from "react-icons/io5";
 
 export type MenuMobileCardProps = {
@@ -33,7 +35,9 @@ export type MenuMobileCardProps = {
   isNested?: boolean;
   onToggleActive: (menu: Menu) => void;
   onDelete: (menu: Menu) => void;
+  onCopy?: (menu: Menu) => void;
   onAddToGroup?: (menu: Menu) => void;
+  onRemoveFromGroup?: (menu: Menu) => void;
 };
 
 export default function MenuMobileCard({
@@ -50,7 +54,9 @@ export default function MenuMobileCard({
   isNested = false,
   onToggleActive,
   onDelete,
+  onCopy,
   onAddToGroup,
+  onRemoveFromGroup,
 }: MenuMobileCardProps) {
   const t = useTranslations("Menus");
 
@@ -134,6 +140,17 @@ export default function MenuMobileCard({
                 <IoPlayOutline className="text-base" aria-hidden />
               )}
             </button>
+            {onCopy && (
+              <button
+                type="button"
+                onClick={() => onCopy(menu)}
+                title={t("menuCard.copyMenu")}
+                aria-label={t("menuCard.copyMenu")}
+                className="inline-flex size-8 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-500 transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary active:scale-95 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-primary/40 dark:hover:bg-primary/15 dark:hover:text-primary"
+              >
+                <IoCopyOutline className="text-base" aria-hidden />
+              </button>
+            )}
             <button
               type="button"
               onClick={() => onDelete(menu)}
@@ -206,6 +223,16 @@ export default function MenuMobileCard({
             >
               <IoGitNetworkOutline className="text-sm" aria-hidden />
               {t("menuCard.addToGroup")}
+            </button>
+          )}
+          {groupMeta.inGroup && onRemoveFromGroup && (
+            <button
+              type="button"
+              onClick={() => onRemoveFromGroup(menu)}
+              className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border border-amber-300/80 bg-linear-to-r from-amber-50 to-orange-50 px-3 text-xs font-bold text-amber-900 transition active:scale-[0.98] dark:border-amber-700/50 dark:from-amber-950/40 dark:to-orange-950/30 dark:text-amber-100"
+            >
+              <IoRemoveCircleOutline className="text-sm" aria-hidden />
+              {t("menuCard.removeFromGroup")}
             </button>
           )}
           <div className="flex items-center gap-2">

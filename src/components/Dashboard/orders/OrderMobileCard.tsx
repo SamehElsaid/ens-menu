@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import ViewTime from "@/shared/ViewTime";
 import {
@@ -9,6 +10,9 @@ import {
 } from "@/lib/tableOrders";
 import type { CallEntry, OrderActionResult } from "@/lib/tableOrders";
 import OrderActionButtons from "./OrderActionButtons";
+import OrderChargesLines from "./OrderChargesLines";
+import { useAppSelector } from "@/store/hooks";
+import { resolveOrderCharges } from "@/lib/menuOrderCharges";
 import {
   IoEllipseSharp,
   IoEyeOutline,
@@ -31,12 +35,34 @@ export default function OrderMobileCard({
   menuId,
 }: OrderMobileCardProps) {
   const t = useTranslations("tableOrders");
+  const menu = useAppSelector((s) => s.menuData.menu);
   const status = resolveListEntryStatus(entry);
   const tone = orderStatusTone(status);
   const time = resolveEntryTime(entry.actionDetails);
+  const charges = useMemo(
+    () =>
+      resolveOrderCharges({
+        items: entry.items,
+        storedItemsSubtotal: entry.itemsSubtotal,
+        storedTaxAmount: entry.taxAmount,
+        storedServiceAmount: entry.serviceAmount,
+        storedTaxPercent: entry.taxPercent,
+        storedServicePercent: entry.servicePercent,
+        storedTotal: entry.totalPrice,
+        menu,
+      }),
+    [entry, menu],
+  );
 
   return (
-    <article className="dashboard-order-card flex h-full flex-col overflow-hidden rounded-2xl border border-violet-200/70 bg-white shadow-[0_2px_16px_rgba(124,58,237,0.08)] dark:border-violet-800/40 dark:bg-slate-800/95 dark:shadow-[0_2px_20px_rgba(0,0,0,0.3)]">
+    <article
+      className={[
+        "dashboard-order-card flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_2px_16px_rgba(124,58,237,0.08)] dark:bg-slate-800/95 dark:shadow-[0_2px_20px_rgba(0,0,0,0.3)]",
+        entry.pendingBillRequest
+          ? "border-2 border-red-500 shadow-[0_2px_16px_rgba(239,68,68,0.18)] dark:border-red-500 dark:shadow-[0_2px_20px_rgba(239,68,68,0.25)]"
+          : "border border-violet-200/70 dark:border-violet-800/40",
+      ].join(" ")}
+    >
       <div className="bg-linear-to-r from-violet-600/10 via-fuchsia-500/5 to-transparent px-4 py-3 dark:from-violet-900/30">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2.5 min-w-0">
@@ -61,6 +87,16 @@ export default function OrderMobileCard({
             {t(`orderStatus.${status}` as never)}
           </span>
         </div>
+        {entry.pendingGuestAddition ? (
+          <p className="mt-2 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
+            {t("guestAdditionBadge")}
+          </p>
+        ) : null}
+        {entry.pendingBillRequest ? (
+          <p className="mt-2 inline-flex rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700 dark:bg-red-900/40 dark:text-red-200">
+            {t("billRequestBadge")}
+          </p>
+        ) : null}
       </div>
 
       <div className="space-y-2 px-4 py-3">
@@ -86,17 +122,20 @@ export default function OrderMobileCard({
           </span>
           {entry.items?.length ?? 0}
         </p>
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-base font-bold text-violet-800 dark:text-violet-200 tabular-nums">
-            {entry.totalPrice ?? 0}
-            {currency && (
-              <span className="ms-1 text-xs font-semibold text-violet-600 dark:text-violet-400">
-                {currency}
-              </span>
-            )}
-          </p>
+        <div className="space-y-2">
+          <OrderChargesLines
+            charges={charges}
+            currency={currency}
+            labels={{
+              subtotal: t("detailsSubtotal"),
+              tax: t("detailsTax"),
+              service: t("detailsService"),
+              total: t("detailsTotal"),
+            }}
+            accent="violet"
+          />
           {time && (
-            <time className="text-xs text-slate-500 dark:text-slate-400">
+            <time className="block text-end text-xs text-slate-500 dark:text-slate-400">
               <ViewTime data={time} />
             </time>
           )}
@@ -110,6 +149,7 @@ export default function OrderMobileCard({
           status={status}
           onComplete={onActionComplete}
           compact
+          variant="table"
         />
         <button
           type="button"

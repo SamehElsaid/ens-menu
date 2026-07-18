@@ -4,8 +4,8 @@ import { CLOSE_NAV_OVERLAYS_EVENT } from "@/lib/safeNavigation";
 import { isFreePlanUser } from "@/lib/subscription";
 import { useCallback, useEffect, useState } from "react";
 import LinkTo from "../Global/LinkTo";
-import { adminNavSections, cashierNavSections, navSections } from "./data";
-import { useDashboardSession } from "@/hooks/useDashboardSession";
+import { adminNavSections, navSections } from "./data";
+import { useAuthorization } from "@/hooks/useAuthorization";
 import Drawer from "../Global/Drawer";
 import { useLocale, useTranslations } from "next-intl";
 import LoadImage from "../ImageLoad";
@@ -271,7 +271,7 @@ export function DashboardSidebar({
   const pathname = usePathname();
   const locale = useLocale();
   const t = useTranslations("Dashboard");
-  const session = useDashboardSession();
+  const { isStaff, can } = useAuthorization();
   const { has: hasAdminPermission } = useAdminPermissions();
   const userData = useAppSelector((s) => s.auth.data);
   const isFreePlan =
@@ -291,6 +291,13 @@ export function DashboardSidebar({
     return hasAdminPermission(permissionKey);
   };
 
+  const canShowStaffItem = (item: NavItem) => {
+    if (!isStaff) return true; // owner
+    if (item.ownerOnly) return false;
+    if (!item.permission) return true;
+    return can(item.permission);
+  };
+
   const navSectionsData = isAdmin
     ? adminNavSections
         .map((section) => ({
@@ -298,9 +305,12 @@ export function DashboardSidebar({
           items: section.items.filter(canShowAdminItem),
         }))
         .filter((section) => section.items.length > 0)
-    : session?.role === "staff" && session?.staffJobRole === "cashier"
-      ? cashierNavSections
-      : navSections;
+    : navSections
+        .map((section) => ({
+          ...section,
+          items: section.items.filter(canShowStaffItem),
+        }))
+        .filter((section) => section.items.length > 0);
 
   const { menu, loading } = useAppSelector((state) => state.menuData);
   const {

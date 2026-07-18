@@ -19,7 +19,6 @@ export async function refreshServerAccessToken(
     token: string;
     role: string;
     refreshToken: string;
-    staffJobRole?: string;
   };
 
   if (!tokenDecrypted.refreshToken || tokenDecrypted.role === "staff") {
@@ -46,9 +45,6 @@ export async function refreshServerAccessToken(
     refreshToken: data.refreshToken,
     role: tokenDecrypted.role ?? "",
   };
-  if (tokenDecrypted.staffJobRole) {
-    newCookies.staffJobRole = tokenDecrypted.staffJobRole;
-  }
 
   return {
     accessToken: data.accessToken,

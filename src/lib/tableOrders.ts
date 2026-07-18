@@ -9,7 +9,8 @@ export type OrderActionType =
   | "TABLE_CALL_CONFIRMED"
   | "TABLE_CALL_CANCELLED"
   | "TABLE_CALL_PREPARED"
-  | "TABLE_CALL_DELIVERED";
+  | "TABLE_CALL_DELIVERED"
+  | "TABLE_CALL_COMPLETED";
 
 export interface CallItemOption {
   nameAr?: string;
@@ -47,6 +48,15 @@ export interface EntryOrder {
   governorateNameAr?: string | null;
   governorateNameEn?: string | null;
   deliveryFee?: number | null;
+  itemsSubtotal?: number | null;
+  taxEnabled?: boolean | null;
+  taxPercent?: number | null;
+  taxAmount?: number | null;
+  serviceEnabled?: boolean | null;
+  servicePercent?: number | null;
+  serviceAmount?: number | null;
+  pendingGuestAddition?: boolean;
+  pendingBillRequest?: boolean;
 }
 
 export interface ActionDetail {
@@ -82,6 +92,17 @@ export interface CallEntry {
   deliveryFee?: number | null;
   totalPrice?: number;
   items?: CallItem[];
+  itemsSubtotal?: number | null;
+  taxEnabled?: boolean | null;
+  taxPercent?: number | null;
+  taxAmount?: number | null;
+  serviceEnabled?: boolean | null;
+  servicePercent?: number | null;
+  serviceAmount?: number | null;
+  /** Guest added/edited lines after staff already had the order — needs Accept again. */
+  pendingGuestAddition?: boolean;
+  /** Guest asked for the bill on this open table order. */
+  pendingBillRequest?: boolean;
   actionDetails?: ActionDetail[];
   category?: unknown;
   categoryName?: string;
@@ -93,6 +114,13 @@ export interface CallEntryDetail {
   orderId?: string | number;
   totalPrice?: number;
   items?: CallItem[];
+  itemsSubtotal?: number | null;
+  taxEnabled?: boolean | null;
+  taxPercent?: number | null;
+  taxAmount?: number | null;
+  serviceEnabled?: boolean | null;
+  servicePercent?: number | null;
+  serviceAmount?: number | null;
   actions?: EntryAction[];
   order?: EntryOrder | null;
   customerName?: string | null;
@@ -103,6 +131,8 @@ export interface CallEntryDetail {
   governorateNameAr?: string | null;
   governorateNameEn?: string | null;
   deliveryFee?: number | null;
+  pendingGuestAddition?: boolean;
+  pendingBillRequest?: boolean;
 }
 
 export interface ActivityCallsPayload {
@@ -157,6 +187,8 @@ export function orderStatusFromAction(action: OrderActionType): OrderStatus {
       return "prepared";
     case "TABLE_CALL_DELIVERED":
       return "delivered";
+    case "TABLE_CALL_COMPLETED":
+      return "delivered";
     default:
       return "pending";
   }
@@ -166,10 +198,22 @@ export function orderStatusFromAction(action: OrderActionType): OrderStatus {
 export function applyLocalEntryStatusUpdate(
   entry: CallEntry,
   status: OrderStatus,
+  opts?: {
+    clearPendingGuestAddition?: boolean;
+    clearPendingBillRequest?: boolean;
+  },
 ): CallEntry {
   const now = new Date().toISOString();
   return {
     ...entry,
+    ...(opts?.clearPendingGuestAddition
+      ? { pendingGuestAddition: false }
+      : {}),
+    ...(opts?.clearPendingBillRequest ||
+    status === "delivered" ||
+    status === "cancelled"
+      ? { pendingBillRequest: false }
+      : {}),
     actionDetails: [...(entry.actionDetails ?? []), { status, time: now }],
   };
 }
@@ -190,10 +234,23 @@ export function mergeOrderEntries(
 export type OrderActionResult = {
   entryId: string;
   status: OrderStatus;
+  clearPendingGuestAddition?: boolean;
 };
 
 export function isPendingOrder(entry: CallEntry): boolean {
-  return resolveListEntryStatus(entry) === "pending";
+  return (
+    resolveListEntryStatus(entry) === "pending" ||
+    entry.pendingGuestAddition === true ||
+    entry.pendingBillRequest === true
+  );
+}
+
+export function isEditableOrderStatus(status: OrderStatus): boolean {
+  return (
+    status === "pending" ||
+    status === "confirmed" ||
+    status === "prepared"
+  );
 }
 
 export function countPendingOrders(entries: CallEntry[]): number {
@@ -242,6 +299,7 @@ export const ORDER_ACTION_LABEL: Record<string, { en: string; ar: string }> = {
   TABLE_CALL_ITEMS_UPDATED: { en: "Items Updated", ar: "تم تحديث الأصناف" },
   TABLE_CALL_PREPARED: { en: "Order Prepared", ar: "تم تحضير الطلب" },
   TABLE_CALL_DELIVERED: { en: "Order Delivered", ar: "تم تسليم الطلب" },
+  TABLE_CALL_COMPLETED: { en: "Order Completed", ar: "تم إنهاء الطلب" },
 };
 
 export function orderActionLabel(action: string, locale: string): string {
@@ -300,6 +358,39 @@ export function isDeliveryEntry(entry: {
   if (typeRaw === "table") return false;
   const table = entry.tableNumber ?? entry.order?.tableNumber ?? "";
   return String(table).trim().toLowerCase() === "delivery";
+}
+
+export function resolveEntryDeliveryFee(entry: {
+  deliveryFee?: number | null;
+  order?: EntryOrder | null;
+}): number | null {
+  if (
+    entry.deliveryFee != null &&
+    Number.isFinite(Number(entry.deliveryFee))
+  ) {
+    return Number(entry.deliveryFee);
+  }
+  if (
+    entry.order?.deliveryFee != null &&
+    Number.isFinite(Number(entry.order.deliveryFee))
+  ) {
+    return Number(entry.order.deliveryFee);
+  }
+  return null;
+}
+
+/** Items subtotal plus delivery fee (when applicable). */
+export function deliveryGrandTotal(
+  itemsTotal: number,
+  deliveryFee?: number | null,
+): number {
+  const fee =
+    deliveryFee != null &&
+    Number.isFinite(Number(deliveryFee)) &&
+    Number(deliveryFee) > 0
+      ? Number(deliveryFee)
+      : 0;
+  return Math.round((itemsTotal + fee) * 100) / 100;
 }
 
 export function deliveryGovernorateLabel(

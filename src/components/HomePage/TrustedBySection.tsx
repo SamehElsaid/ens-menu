@@ -15,7 +15,7 @@ function TrustedBySkeleton() {
       {Array.from({ length: 8 }).map((_, index) => (
         <div
           key={index}
-          className="h-18 w-18 shrink-0 animate-pulse rounded-[1.35rem] bg-slate-200/80 sm:h-20 sm:w-20 dark:bg-slate-700/60"
+          className="h-[4.5rem] w-[4.5rem] shrink-0 animate-pulse rounded-[1.35rem] bg-slate-200/80 sm:h-20 sm:w-20 dark:bg-slate-700/60"
         />
       ))}
     </div>
@@ -81,14 +81,16 @@ export default function TrustedBySection() {
             {t("subtitle")}
           </p>
         </div>
+      </div>
 
-        <div aria-label={t("logosAriaLabel")} role="list">
-          {!loaded ? (
+      <div aria-label={t("logosAriaLabel")} role="list">
+        {!loaded ? (
+          <div className="container mx-auto px-6">
             <TrustedBySkeleton />
-          ) : (
-            <TrustedByLogosRow logos={logos} />
-          )}
-        </div>
+          </div>
+        ) : (
+          <TrustedByLogosRow logos={logos} />
+        )}
       </div>
     </section>
   );

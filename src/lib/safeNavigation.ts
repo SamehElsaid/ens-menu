@@ -1,4 +1,4 @@
-import { routing } from "@/i18n/routing";
+import { localePathPrefix, routing } from "@/i18n/routing";
 import { stopHolyLoader } from "holy-loader";
 
 export const CLOSE_NAV_OVERLAYS_EVENT = "ensmenu:close-nav-overlays";
@@ -180,7 +180,7 @@ export function createSafeLinkClickHandler(
       return;
     }
 
-    const currentUrl = `${window.location.origin}${currentLocale === routing.defaultLocale ? "" : `/${currentLocale}`}${currentPathname === "/" ? "" : currentPathname}`;
+    const currentUrl = `${window.location.origin}${localePathPrefix(currentLocale)}${currentPathname === "/" ? "" : currentPathname}`;
 
     const sameRoute =
       isSameRouteNavigation(window.location.href, targetHref) ||

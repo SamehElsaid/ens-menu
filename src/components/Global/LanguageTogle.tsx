@@ -1,3 +1,4 @@
+import { localizeHref } from "@/i18n/routing";
 import { flagIcons } from "@/svg/flags";
 
 interface LanguageToggleProps {
@@ -12,7 +13,7 @@ const LanguageToggle: React.FC<LanguageToggleProps> = ({
   const toggleLanguage = () => {
     const targetLocale = locale === "ar" ? "en" : "ar";
     const cleanPath = pathname.replace(/^\/(ar|en)/, "") || "/";
-    const targetPath = `/${targetLocale}${cleanPath === "/" ? "" : cleanPath}`;
+    const targetPath = localizeHref(cleanPath, targetLocale);
     const currentPath = window.location.pathname;
 
     if (currentPath === targetPath || currentPath === `${targetPath}/`) {

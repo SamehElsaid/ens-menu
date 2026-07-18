@@ -15,8 +15,9 @@ import {
   IoCloseOutline,
   IoSaveOutline,
   IoChatbubblesOutline,
+  IoReceiptOutline,
 } from "react-icons/io5";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
@@ -40,6 +41,10 @@ interface SettingsFormValues {
   currency: string;
   isActive: boolean;
   chatbotEnabled: boolean;
+  taxEnabled: boolean;
+  taxPercent?: number | null;
+  serviceEnabled: boolean;
+  servicePercent?: number | null;
 }
 
 const settingsSchema = (
@@ -52,6 +57,28 @@ const settingsSchema = (
     descriptionAr: yup.string().nullable(),
     currency: yup.string().required(t("validation.currencyRequired")),
     chatbotEnabled: yup.boolean().default(false),
+    taxEnabled: yup.boolean().default(false),
+    taxPercent: yup
+      .number()
+      .nullable()
+      .transform((value, original) =>
+        original === "" || original === null || original === undefined
+          ? null
+          : value,
+      )
+      .min(0)
+      .max(100),
+    serviceEnabled: yup.boolean().default(false),
+    servicePercent: yup
+      .number()
+      .nullable()
+      .transform((value, original) =>
+        original === "" || original === null || original === undefined
+          ? null
+          : value,
+      )
+      .min(0)
+      .max(100),
   }) as yup.ObjectSchema<SettingsFormValues>;
 
 export default function SettingsPage() {
@@ -128,8 +155,15 @@ export default function SettingsPage() {
       currency: menu?.currency ?? "AED",
       isActive: menu?.isActive ?? false,
       chatbotEnabled: menu?.chatbotEnabled ?? false,
+      taxEnabled: menu?.taxEnabled ?? false,
+      taxPercent: menu?.taxPercent ?? null,
+      serviceEnabled: menu?.serviceEnabled ?? false,
+      servicePercent: menu?.servicePercent ?? null,
     },
   });
+
+  const taxEnabledWatch = useWatch({ control, name: "taxEnabled" });
+  const serviceEnabledWatch = useWatch({ control, name: "serviceEnabled" });
 
   useEffect(() => {
     if (!menu) return;
@@ -142,6 +176,10 @@ export default function SettingsPage() {
       currency: menu.currency,
       isActive: menu.isActive,
       chatbotEnabled: menu.chatbotEnabled ?? false,
+      taxEnabled: menu.taxEnabled ?? false,
+      taxPercent: menu.taxPercent ?? null,
+      serviceEnabled: menu.serviceEnabled ?? false,
+      servicePercent: menu.servicePercent ?? null,
     });
     // Keep local active state in sync with latest menu data
     setLocalIsActive(menu.isActive);
@@ -274,6 +312,17 @@ export default function SettingsPage() {
         id: menuId,
         isActive: values.isActive,
         chatbotEnabled: values.chatbotEnabled,
+        taxEnabled: values.taxEnabled,
+        taxPercent:
+          values.taxPercent === null || values.taxPercent === undefined
+            ? null
+            : Number(values.taxPercent),
+        serviceEnabled: values.serviceEnabled,
+        servicePercent:
+          values.servicePercent === null ||
+          values.servicePercent === undefined
+            ? null
+            : Number(values.servicePercent),
         logo: logoUrl ?? menu?.logo ?? null,
       };
       const result = await axiosPatch<typeof payload, Menu>(
@@ -599,6 +648,178 @@ export default function SettingsPage() {
               )}
             />
           </div>
+        </div>
+      </section>
+
+      {/* Tax & service (optional) */}
+      <section
+        id="onboarding-settings-tax-service"
+        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6 space-y-5"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-300 flex items-center justify-center">
+            <IoReceiptOutline className="text-xl" />
+          </div>
+          <div>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+              {tSettings("taxServiceTitle")}
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              {tSettings("taxServiceDescription")}
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-slate-100 dark:border-slate-800 p-4">
+            <div>
+              <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                {tSettings("taxEnabled")}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                {tSettings("taxEnabledDescription")}
+              </p>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                {taxEnabledWatch
+                  ? tSettings("enabledOn")
+                  : tSettings("enabledOff")}
+              </span>
+              <Controller
+                name="taxEnabled"
+                control={control}
+                render={({ field }) => (
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={field.value}
+                    onClick={() => field.onChange(!field.value)}
+                    className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:ring-offset-2 ${
+                      field.value
+                        ? "bg-amber-500"
+                        : "bg-slate-200 dark:bg-slate-600"
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${
+                        field.value
+                          ? locale === "ar"
+                            ? "-translate-x-5"
+                            : "translate-x-5"
+                          : "translate-x-0"
+                      }`}
+                    />
+                  </button>
+                )}
+              />
+            </div>
+          </div>
+          {taxEnabledWatch && (
+            <div className="space-y-1.5 ps-1">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                {tSettings("taxPercent")}
+              </label>
+              <Controller
+                name="taxPercent"
+                control={control}
+                render={({ field }) => (
+                  <CustomInput
+                    type="number"
+                    value={
+                      field.value === null || field.value === undefined
+                        ? ""
+                        : String(field.value)
+                    }
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      field.onChange(raw === "" ? null : Number(raw));
+                    }}
+                    placeholder={tSettings("taxPercentPlaceholder")}
+                  />
+                )}
+              />
+              {errors.taxPercent?.message && (
+                <p className="text-xs text-red-500">{errors.taxPercent.message}</p>
+              )}
+            </div>
+          )}
+
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-slate-100 dark:border-slate-800 p-4">
+            <div>
+              <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                {tSettings("serviceEnabled")}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                {tSettings("serviceEnabledDescription")}
+              </p>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                {serviceEnabledWatch
+                  ? tSettings("enabledOn")
+                  : tSettings("enabledOff")}
+              </span>
+              <Controller
+                name="serviceEnabled"
+                control={control}
+                render={({ field }) => (
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={field.value}
+                    onClick={() => field.onChange(!field.value)}
+                    className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:ring-offset-2 ${
+                      field.value
+                        ? "bg-amber-500"
+                        : "bg-slate-200 dark:bg-slate-600"
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${
+                        field.value
+                          ? locale === "ar"
+                            ? "-translate-x-5"
+                            : "translate-x-5"
+                          : "translate-x-0"
+                      }`}
+                    />
+                  </button>
+                )}
+              />
+            </div>
+          </div>
+          {serviceEnabledWatch && (
+            <div className="space-y-1.5 ps-1">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                {tSettings("servicePercent")}
+              </label>
+              <Controller
+                name="servicePercent"
+                control={control}
+                render={({ field }) => (
+                  <CustomInput
+                    type="number"
+                    value={
+                      field.value === null || field.value === undefined
+                        ? ""
+                        : String(field.value)
+                    }
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      field.onChange(raw === "" ? null : Number(raw));
+                    }}
+                    placeholder={tSettings("servicePercentPlaceholder")}
+                  />
+                )}
+              />
+              {errors.servicePercent?.message && (
+                <p className="text-xs text-red-500">
+                  {errors.servicePercent.message}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </section>
 

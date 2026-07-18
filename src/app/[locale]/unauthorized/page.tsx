@@ -103,21 +103,38 @@ function ShieldIcon() {
   );
 }
 
-type ReasonKey = "cashier_dashboard" | "cashier_owner_pages" | "default";
+type ReasonKey =
+  | "staff_dashboard_root"
+  | "staff_owner_pages"
+  | "staff_no_permission"
+  | "staff_no_dashboard"
+  | "default";
 
 const reasonConfig: Record<
   ReasonKey,
   { titleKey: string; bodyKey: string; icon: React.ReactNode; badge: string }
 > = {
-  cashier_dashboard: {
-    titleKey: "cashierDashboardTitle",
-    bodyKey: "cashierDashboardBody",
+  staff_dashboard_root: {
+    titleKey: "staffDashboardRootTitle",
+    bodyKey: "staffDashboardRootBody",
     icon: <CashierIcon />,
     badge: "403",
   },
-  cashier_owner_pages: {
-    titleKey: "cashierOwnerPagesTitle",
-    bodyKey: "cashierOwnerPagesBody",
+  staff_owner_pages: {
+    titleKey: "staffOwnerPagesTitle",
+    bodyKey: "staffOwnerPagesBody",
+    icon: <ShieldIcon />,
+    badge: "403",
+  },
+  staff_no_permission: {
+    titleKey: "staffNoPermissionTitle",
+    bodyKey: "staffNoPermissionBody",
+    icon: <ShieldIcon />,
+    badge: "403",
+  },
+  staff_no_dashboard: {
+    titleKey: "staffNoDashboardTitle",
+    bodyKey: "staffNoDashboardBody",
     icon: <ShieldIcon />,
     badge: "403",
   },
@@ -129,15 +146,20 @@ const reasonConfig: Record<
   },
 };
 
+const REASON_KEYS: ReasonKey[] = [
+  "staff_dashboard_root",
+  "staff_owner_pages",
+  "staff_no_permission",
+  "staff_no_dashboard",
+];
+
 function UnauthorizedContent() {
   const t = useTranslations("Unauthorized");
   const searchParams = useSearchParams();
   const reason = searchParams.get("reason") as ReasonKey | null;
 
   const key: ReasonKey =
-    reason === "cashier_dashboard" || reason === "cashier_owner_pages"
-      ? reason
-      : "default";
+    reason && REASON_KEYS.includes(reason) ? reason : "default";
 
   const { titleKey, bodyKey, icon, badge } = reasonConfig[key];
 

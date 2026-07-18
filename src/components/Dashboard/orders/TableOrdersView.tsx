@@ -19,7 +19,7 @@ export default function TableOrdersView() {
 
   const {
     menuId,
-    isFreePlan,
+    tableOrderingEnabled,
     entries,
     loading,
     page,
@@ -42,9 +42,10 @@ export default function TableOrdersView() {
     modalEntry,
     modalLoading,
     handleActionComplete,
+    handleItemsUpdated,
   } = useMenuOrdersPage("table");
 
-  if (isFreePlan) {
+  if (!tableOrderingEnabled) {
     return (
       <div
         id="onboarding-orders-upgrade"
@@ -159,6 +160,7 @@ export default function TableOrdersView() {
           onClose={closeModal}
           menuId={menuId}
           onActionComplete={handleActionComplete}
+          onItemsUpdated={handleItemsUpdated}
         />
       )}
     </div>

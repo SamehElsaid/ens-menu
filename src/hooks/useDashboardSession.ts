@@ -6,12 +6,17 @@ import { decryptData } from "@/shared/encryption";
 
 export type DashboardSession = {
   role: string;
-  staffJobRole?: string;
-  /** Cashier: menu UUID from login cookie — used when Redux menu is not loaded. */
+  /** Staff RBAC: permissions of the staff member's role. */
+  permissions?: string[];
+  /** Staff RBAC: assigned role id. */
+  staffRoleId?: number;
+  /** Staff RBAC: display name of the assigned role. */
+  roleName?: string;
+  /** Staff: menu UUID from login cookie — used when Redux menu is not loaded. */
   menuUuid?: string;
 } | null;
 
-/** Reads encrypted `sub` cookie (role + optional staff job role for staff tokens). */
+/** Reads encrypted `sub` cookie (role + RBAC permissions for staff tokens). */
 export function useDashboardSession(): DashboardSession {
   const [session, setSession] = useState<DashboardSession>(null);
 
@@ -24,16 +29,24 @@ export function useDashboardSession(): DashboardSession {
     try {
       const d = decryptData(sub) as {
         role?: string;
-        staffJobRole?: string;
+        permissions?: unknown;
+        staffRoleId?: unknown;
+        roleName?: unknown;
         menuUuid?: string;
       };
       const menuUuid =
         typeof d.menuUuid === "string" && d.menuUuid.length > 0
           ? d.menuUuid
           : undefined;
+      const permissions = Array.isArray(d.permissions)
+        ? d.permissions.filter((p): p is string => typeof p === "string")
+        : undefined;
       setSession({
         role: String(d.role ?? ""),
-        staffJobRole: d.staffJobRole,
+        permissions,
+        staffRoleId:
+          typeof d.staffRoleId === "number" ? d.staffRoleId : undefined,
+        roleName: typeof d.roleName === "string" ? d.roleName : undefined,
         menuUuid,
       });
     } catch {

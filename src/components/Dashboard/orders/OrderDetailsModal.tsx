@@ -1,14 +1,16 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useReactToPrint } from "react-to-print";
+import { toast } from "react-toastify";
 import ViewTime from "@/shared/ViewTime";
-import { IoCalendarOutline, IoCallOutline, IoChatboxOutline, IoCheckmarkCircle, IoCloseCircle, IoCloseOutline, IoEllipseSharp, IoHomeOutline, IoListOutline, IoLocationOutline, IoPrintOutline, IoPersonOutline, IoReceiptOutline, IoTimeOutline } from "react-icons/io5";
+import { IoCalendarOutline, IoCallOutline, IoChatboxOutline, IoCheckmarkCircle, IoCloseCircle, IoCloseOutline, IoEllipseSharp, IoHomeOutline, IoListOutline, IoLocationOutline, IoPrintOutline, IoPersonOutline, IoReceiptOutline, IoTimeOutline, IoRemoveOutline, IoAddOutline, IoTrashOutline, IoCreateOutline } from "react-icons/io5";
 import {
   actionActorName,
   callItemOptionLabel,
   deliveryGovernorateLabel,
+  isEditableOrderStatus,
   isGuestOrderAction,
   lastStaffWaiterName,
   orderActionLabel,
@@ -19,10 +21,16 @@ import {
   type EntryAction,
   type EntryOrder,
   type OrderActionResult,
+  type OrderStatus,
 } from "@/lib/tableOrders";
+import { resolveOrderCharges } from "@/lib/menuOrderCharges";
+import { patchTableOrderItems } from "@/lib/tableOrderActions";
 import OrderActionButtons from "./OrderActionButtons";
+import OrderAddItemPicker from "./OrderAddItemPicker";
+import OrderChargesLines from "./OrderChargesLines";
 import { useAppSelector } from "@/store/hooks";
 import { isFreePlanUser } from "@/lib/subscription";
+import { useAuthorization } from "@/hooks/useAuthorization";
 
 function PrintableReceipt({
   orderId,
@@ -595,6 +603,7 @@ export default function OrderDetailsModal({
   variant = "table",
   menuId,
   onActionComplete,
+  onItemsUpdated,
 }: {
   entry: CallEntryDetail | null;
   loading: boolean;
@@ -603,12 +612,24 @@ export default function OrderDetailsModal({
   variant?: "table" | "delivery";
   menuId?: string;
   onActionComplete?: (result: OrderActionResult) => void;
+  onItemsUpdated?: (
+    entryId: string,
+    items: CallItem[],
+    orderTotal: number,
+    status: OrderStatus,
+  ) => void;
 }) {
   const t = useTranslations(variant === "delivery" ? "deliveryOrders" : "tableOrders");
   const locale = useLocale();
+  const { can } = useAuthorization();
 
   const userData = useAppSelector((s) => s.auth.data);
+  const menu = useAppSelector((s) => s.menuData.menu);
   const isPro = Boolean(userData) && !isFreePlanUser(userData);
+
+  const [editingItems, setEditingItems] = useState(false);
+  const [draftItems, setDraftItems] = useState<CallItem[]>([]);
+  const [savingItems, setSavingItems] = useState(false);
 
   const actions = entry?.actions ?? [];
   const lastAction =
@@ -618,8 +639,116 @@ export default function OrderDetailsModal({
     entry?.order ?? lastAction?.detail?.order ?? actions[0]?.detail?.order;
 
   const items: CallItem[] = entry?.items ?? order?.items ?? [];
-  const totalPrice = entry?.totalPrice ?? order?.orderTotal ?? 0;
   const status = resolveLatestOrderStatus(actions, order);
+  const canEditItems = isEditableOrderStatus(status) && can("orders:edit_items");
+
+  useEffect(() => {
+    setEditingItems(false);
+    if (entry) {
+      setDraftItems(entry.items ?? entry.order?.items ?? []);
+    }
+  }, [entry]);
+
+  const displayItems = editingItems ? draftItems : items;
+  const deliveryFee =
+    variant === "delivery"
+      ? order?.deliveryFee != null
+        ? Number(order.deliveryFee)
+        : entry?.deliveryFee != null
+          ? Number(entry.deliveryFee)
+          : null
+      : null;
+  const charges = useMemo(
+    () =>
+      resolveOrderCharges({
+        items: displayItems,
+        storedItemsSubtotal: editingItems
+          ? null
+          : (entry?.itemsSubtotal ?? order?.itemsSubtotal ?? null),
+        storedTaxAmount: editingItems
+          ? null
+          : (entry?.taxAmount ?? order?.taxAmount ?? null),
+        storedServiceAmount: editingItems
+          ? null
+          : (entry?.serviceAmount ?? order?.serviceAmount ?? null),
+        storedTaxPercent: entry?.taxPercent ?? order?.taxPercent ?? null,
+        storedServicePercent:
+          entry?.servicePercent ?? order?.servicePercent ?? null,
+        storedTotal: editingItems
+          ? null
+          : (entry?.totalPrice ?? order?.orderTotal ?? null),
+        deliveryFee,
+        menu,
+      }),
+    [
+      deliveryFee,
+      displayItems,
+      editingItems,
+      entry,
+      menu,
+      order,
+    ],
+  );
+  const printTotal = charges.grandTotal;
+
+  const adjustDraftQty = (index: number, delta: number) => {
+    setDraftItems((prev) =>
+      prev
+        .map((item, i) => {
+          if (i !== index) return item;
+          const nextQty = Math.max(1, (item.quantity ?? 1) + delta);
+          const unit = item.price ?? 0;
+          return {
+            ...item,
+            quantity: nextQty,
+            total: Math.round(unit * nextQty * 100) / 100,
+          };
+        })
+        .filter((item, i) => i !== index || (item.quantity ?? 0) > 0),
+    );
+  };
+
+  const removeDraftItem = (index: number) => {
+    setDraftItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const saveItemEdits = async () => {
+    if (!menuId || !entry?.id || savingItems) return;
+    setSavingItems(true);
+    try {
+      const payload = draftItems.map((item) => ({
+        menuItemId: item.menuItemId,
+        name: item.name,
+        quantity: item.quantity ?? 1,
+        price: item.price,
+        notes: (item as CallItem & { notes?: string }).notes,
+        size: item.size,
+        variant: item.variant,
+      }));
+      const result = await patchTableOrderItems(
+        menuId,
+        String(entry.id),
+        payload,
+        locale,
+      );
+      if (!result) {
+        toast.error(t("itemsSaveError"));
+        return;
+      }
+      toast.success(t("itemsSaveSuccess"));
+      setEditingItems(false);
+      onItemsUpdated?.(
+        String(entry.id),
+        result.items,
+        result.orderTotal,
+        result.status,
+      );
+    } catch {
+      toast.error(t("itemsSaveError"));
+    } finally {
+      setSavingItems(false);
+    }
+  };
 
   const summary =
     locale === "ar"
@@ -649,14 +778,6 @@ export default function OrderDetailsModal({
           { order: order ?? undefined, ...(entry ?? {}) },
           locale,
         )
-      : null;
-  const deliveryFee =
-    variant === "delivery"
-      ? order?.deliveryFee != null
-        ? Number(order.deliveryFee)
-        : entry?.deliveryFee != null
-          ? Number(entry.deliveryFee)
-          : null
       : null;
   const phoneDisplay =
     order?.customerPhone?.trim() || entry?.customerPhone?.trim() || null;
@@ -773,6 +894,12 @@ export default function OrderDetailsModal({
               {summary}
             </p>
           )}
+          {(entry?.pendingBillRequest === true ||
+            order?.pendingBillRequest === true) && (
+            <p className="mt-2 inline-flex rounded-full bg-red-100 px-2.5 py-0.5 text-[11px] font-semibold text-red-700 dark:bg-red-900/40 dark:text-red-200">
+              {t("billRequestBadge")}
+            </p>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto">
@@ -805,30 +932,72 @@ export default function OrderDetailsModal({
               )}
 
               <div className="px-5 py-4">
-                <h4 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 text-[10px] font-bold">
-                    {items.length}
-                  </span>
-                  {t("itemsTitle")}
-                </h4>
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 text-[10px] font-bold">
+                      {displayItems.length}
+                    </span>
+                    {t("itemsTitle")}
+                  </h4>
+                  {canEditItems && menuId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (editingItems) {
+                          setDraftItems(items);
+                          setEditingItems(false);
+                        } else {
+                          setEditingItems(true);
+                        }
+                      }}
+                      className="inline-flex items-center gap-1 rounded-lg border border-violet-200 px-2.5 py-1 text-xs font-semibold text-violet-700 hover:bg-violet-50 dark:border-violet-700/50 dark:text-violet-300 dark:hover:bg-violet-950/30"
+                    >
+                      <IoCreateOutline className="text-sm" />
+                      {editingItems ? t("editItemsCancel") : t("editItems")}
+                    </button>
+                  )}
+                </div>
 
-                {items.length === 0 ? (
+                {editingItems && menuId && (
+                  <OrderAddItemPicker
+                    menuId={menuId}
+                    open={editingItems}
+                    currency={currency}
+                    onAdd={(updater) => setDraftItems(updater)}
+                    labels={{
+                      addProduct: t("addProduct"),
+                      addProductSearch: t("addProductSearch"),
+                      addProductLoading: t("addProductLoading"),
+                      addProductEmpty: t("addProductEmpty"),
+                      addProductNoResults: t("addProductNoResults"),
+                      addProductSelectSize: t("addProductSelectSize"),
+                      addProductSelectVariant: t("addProductSelectVariant"),
+                      addProductConfirm: t("addProductConfirm"),
+                      addProductNone: t("addProductCancel"),
+                    }}
+                  />
+                )}
+
+                {displayItems.length === 0 ? (
                   <p className="text-sm text-slate-500 dark:text-slate-400 py-4 text-center">
                     {t("itemsEmpty")}
                   </p>
                 ) : (
                   <>
-                    <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 px-3 py-2 rounded-t-xl bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    <div
+                      className={`grid gap-x-4 px-3 py-2 rounded-t-xl bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 ${editingItems ? "grid-cols-[1fr_auto_auto_auto]" : "grid-cols-[1fr_auto_auto]"}`}
+                    >
                       <span>{t("colItemName")}</span>
                       <span className="text-center">{t("colQty")}</span>
                       <span className="text-end">{t("colTotal")}</span>
+                      {editingItems && <span />}
                     </div>
 
                     <div className="divide-y divide-slate-100 dark:divide-slate-800 border-x border-b border-slate-200 dark:border-slate-700 rounded-b-xl overflow-hidden">
-                      {items.map((item, idx) => (
+                      {displayItems.map((item, idx) => (
                         <div
                           key={`${item.menuItemId}-${idx}`}
-                          className="grid grid-cols-[1fr_auto_auto] gap-x-4 px-3 py-3 text-sm items-center odd:bg-white even:bg-slate-50/60 dark:odd:bg-slate-900 dark:even:bg-slate-800/40 hover:bg-violet-50/50 dark:hover:bg-violet-950/20 transition-colors"
+                          className={`grid gap-x-4 px-3 py-3 text-sm items-center odd:bg-white even:bg-slate-50/60 dark:odd:bg-slate-900 dark:even:bg-slate-800/40 ${editingItems ? "grid-cols-[1fr_auto_auto_auto]" : "grid-cols-[1fr_auto_auto]"}`}
                         >
                           <div className="min-w-0">
                             <p className="font-medium text-slate-800 dark:text-slate-100 truncate">
@@ -848,7 +1017,7 @@ export default function OrderDetailsModal({
                                   .join(" · ")}
                               </p>
                             )}
-                            {item.price != null && (
+                            {!editingItems && item.price != null && (
                               <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
                                 {item.price}
                                 {currency && (
@@ -858,9 +1027,31 @@ export default function OrderDetailsModal({
                               </p>
                             )}
                           </div>
-                          <span className="text-center min-w-8 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300">
-                            ×{item.quantity}
-                          </span>
+                          {editingItems ? (
+                            <div className="flex items-center justify-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => adjustDraftQty(idx, -1)}
+                                className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300"
+                              >
+                                <IoRemoveOutline />
+                              </button>
+                              <span className="min-w-6 text-center text-xs font-semibold">
+                                {item.quantity}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => adjustDraftQty(idx, 1)}
+                                className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300"
+                              >
+                                <IoAddOutline />
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-center min-w-8 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                              ×{item.quantity}
+                            </span>
+                          )}
                           <span className="text-end font-semibold text-slate-800 dark:text-slate-100 tabular-nums">
                             {item.total}
                             {currency && (
@@ -869,23 +1060,48 @@ export default function OrderDetailsModal({
                               </span>
                             )}
                           </span>
+                          {editingItems && (
+                            <button
+                              type="button"
+                              onClick={() => removeDraftItem(idx)}
+                              className="flex h-8 w-8 items-center justify-center rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
+                              aria-label={t("removeItem")}
+                            >
+                              <IoTrashOutline />
+                            </button>
+                          )}
                         </div>
                       ))}
                     </div>
 
-                    <div className="mt-3 flex items-center justify-between px-4 py-3 rounded-xl bg-linear-to-r from-violet-50 to-fuchsia-50/60 dark:from-violet-950/40 dark:to-fuchsia-950/20 border border-violet-200/60 dark:border-violet-700/40">
-                      <span className="text-sm font-semibold text-violet-800 dark:text-violet-300">
-                        {t("detailsTotal")}
-                      </span>
-                      <span className="text-lg font-bold text-violet-900 dark:text-violet-200 tabular-nums">
-                        {totalPrice}
-                        {currency && (
-                          <span className="ms-1.5 text-sm font-semibold text-violet-700 dark:text-violet-400">
-                            {currency}
-                          </span>
-                        )}
-                      </span>
+                    <div className="mt-3 px-4 py-3 rounded-xl bg-linear-to-r from-violet-50 to-fuchsia-50/60 dark:from-violet-950/40 dark:to-fuchsia-950/20 border border-violet-200/60 dark:border-violet-700/40">
+                      <OrderChargesLines
+                        charges={charges}
+                        currency={currency}
+                        labels={{
+                          subtotal: t("detailsSubtotal"),
+                          tax: t("detailsTax"),
+                          service: t("detailsService"),
+                          deliveryFee:
+                            variant === "delivery"
+                              ? t("detailsDeliveryFee" as never)
+                              : undefined,
+                          total: t("detailsTotal"),
+                        }}
+                        accent="violet"
+                      />
                     </div>
+
+                    {editingItems && (
+                      <button
+                        type="button"
+                        disabled={savingItems || draftItems.length === 0}
+                        onClick={() => void saveItemEdits()}
+                        className="mt-3 w-full rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-60"
+                      >
+                        {savingItems ? t("itemsSaving") : t("itemsSave")}
+                      </button>
+                    )}
                   </>
                 )}
               </div>
@@ -912,10 +1128,19 @@ export default function OrderDetailsModal({
           {entry && menuId && onActionComplete && !loading && (
             <OrderActionButtons
               menuId={menuId}
-              entry={entry as CallEntry}
+              entry={{
+                ...(entry as CallEntry),
+                pendingGuestAddition:
+                  entry.pendingGuestAddition === true ||
+                  order?.pendingGuestAddition === true,
+                pendingBillRequest:
+                  entry.pendingBillRequest === true ||
+                  order?.pendingBillRequest === true,
+              }}
               status={status}
               onComplete={onActionComplete}
               translationNs={variant === "delivery" ? "deliveryOrders" : "tableOrders"}
+              variant={variant}
             />
           )}
           <div className="flex justify-end gap-2">
@@ -947,7 +1172,7 @@ export default function OrderDetailsModal({
             orderId={entry.orderId}
             title={t("detailsTitle")}
             items={items}
-            totalPrice={totalPrice}
+            totalPrice={printTotal}
             currency={currency}
             customerDisplay={customerDisplay}
             phoneDisplay={phoneDisplay}

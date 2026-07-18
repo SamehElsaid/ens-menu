@@ -6,10 +6,12 @@ import { useRouter } from "@/i18n/navigation";
 import { axiosGet, axiosDelete, axiosPatch } from "@/shared/axiosCall";
 import LinkTo from "@/components/Global/LinkTo";
 import CreateMenuModal from "@/components/Dashboard/CreateMenuModal";
+import CopyMenuModal from "@/components/Dashboard/CopyMenuModal";
 import CreateMenuGroupModal from "@/components/Dashboard/CreateMenuGroupModal";
 import AddMenuToGroupModal, {
   ManageMenuGroupModal,
 } from "@/components/Dashboard/AddMenuToGroupModal";
+import RemoveMenuFromGroupConfirm from "@/components/Dashboard/RemoveMenuFromGroupConfirm";
 import ExtraMenusPurchaseModal from "@/components/Dashboard/ExtraMenusPurchaseModal";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import { pushFirstMenuCreatedEvent } from "@/shared/gtmEvents";
@@ -69,6 +71,8 @@ export default function DashboardPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
   const [addToGroupTarget, setAddToGroupTarget] = useState<Menu | null>(null);
+  const [removeFromGroupTarget, setRemoveFromGroupTarget] =
+    useState<Menu | null>(null);
   const [manageGroupTarget, setManageGroupTarget] =
     useState<MenuGroupSummary | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
@@ -76,6 +80,7 @@ export default function DashboardPage() {
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showExtraMenusModal, setShowExtraMenusModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Menu | null>(null);
+  const [copyTarget, setCopyTarget] = useState<Menu | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [togglingId, setTogglingId] = useState<number | null>(null);
@@ -190,6 +195,27 @@ export default function DashboardPage() {
     }
   };
 
+  const handleCopyClick = async (menu: Menu) => {
+    const sub = await resolveSubscription();
+    const effectiveMax = getEffectiveMaxMenus(sub);
+    if (menus.length >= effectiveMax) {
+      if (isProSubscription(sub)) {
+        setShowExtraMenusModal(true);
+      } else {
+        setShowLimitModal(true);
+      }
+      return;
+    }
+    setCopyTarget(menu);
+  };
+
+  const handleMenuCopied = (newMenu: Menu) => {
+    const normalized = normalizeMenuFromApi(newMenu) ?? newMenu;
+    setMenus((prev) => [normalized, ...prev]);
+    setCopyTarget(null);
+    router.push(menuDashboardPath(normalized));
+  };
+
   const handleDeleteMenu = async () => {
     if (!deleteTarget) return;
 
@@ -289,6 +315,14 @@ export default function DashboardPage() {
     setManageGroupTarget(group);
   };
 
+  const handleRemoveFromGroupClick = (menu: Menu) => {
+    if (!isProSubscription(subscription)) {
+      setShowLimitModal(true);
+      return;
+    }
+    setRemoveFromGroupTarget(menu);
+  };
+
   const refreshMenus = () => setRefreshing((n) => n + 1);
 
   const cardLabels = useMemo(
@@ -298,11 +332,13 @@ export default function DashboardPage() {
       pause: t("menuCard.pause"),
       play: t("menuCard.play"),
       deleteMenu: t("deleteMenu"),
+      copyMenu: t("menuCard.copyMenu"),
       createdAt: t("menuCard.createdAt"),
       updatedAt: t("menuCard.updatedAt"),
       manage: t("menuCard.manage"),
       preview: t("menuCard.preview"),
       addToGroup: canAddToExistingGroup ? t("menuCard.addToGroup") : undefined,
+      removeFromGroup: t("menuCard.removeFromGroup"),
     }),
     [t, canAddToExistingGroup],
   );
@@ -510,9 +546,10 @@ export default function DashboardPage() {
         getDashboardPath={(menu) => menuDashboardPath(menu)}
         onToggleActive={handleToggleActive}
         onDelete={setDeleteTarget}
+        onCopy={handleCopyClick}
         onAddToGroup={canAddToExistingGroup ? handleAddToGroupClick : undefined}
+        onRemoveFromGroup={handleRemoveFromGroupClick}
         onManageGroup={handleManageGroupClick}
-        hasUngroupedMenus={hasUngroupedMenus}
       />
 
       {/* Menus Grid — desktop/tablet */}
@@ -525,8 +562,7 @@ export default function DashboardPage() {
                 groupName={group.groupName}
                 memberCount={group.menus.length}
                 layout="desktop"
-                canAddMenus={hasUngroupedMenus}
-                onAddMenus={() =>
+                onManageGroup={() =>
                   handleManageGroupClick({
                     id: group.groupId,
                     name: group.groupName,
@@ -552,11 +588,13 @@ export default function DashboardPage() {
                         labels={cardLabels}
                         onToggleActive={handleToggleActive}
                         onDelete={setDeleteTarget}
+                        onCopy={handleCopyClick}
                         onAddToGroup={
                           canAddToExistingGroup
                             ? handleAddToGroupClick
                             : undefined
                         }
+                        onRemoveFromGroup={handleRemoveFromGroupClick}
                       />
                     ))}
               />
@@ -581,9 +619,11 @@ export default function DashboardPage() {
               labels={cardLabels}
               onToggleActive={handleToggleActive}
               onDelete={setDeleteTarget}
+              onCopy={handleCopyClick}
               onAddToGroup={
                 canAddToExistingGroup ? handleAddToGroupClick : undefined
               }
+              onRemoveFromGroup={handleRemoveFromGroupClick}
             />
           );
         })}
@@ -595,6 +635,15 @@ export default function DashboardPage() {
           onClose={() => setShowCreateModal(false)}
           onMenuCreated={handleMenuCreated}
           onRefresh={() => setRefreshing(refreshing + 1)}
+        />
+      )}
+
+      {copyTarget && (
+        <CopyMenuModal
+          menu={copyTarget}
+          menuName={getMenuName(copyTarget)}
+          onClose={() => setCopyTarget(null)}
+          onCopied={handleMenuCopied}
         />
       )}
 
@@ -624,6 +673,16 @@ export default function DashboardPage() {
           getMenuName={getMenuName}
           onClose={() => setManageGroupTarget(null)}
           onSaved={refreshMenus}
+        />
+      )}
+
+      {removeFromGroupTarget && (
+        <RemoveMenuFromGroupConfirm
+          menu={removeFromGroupTarget}
+          menus={menus}
+          getMenuName={getMenuName}
+          onClose={() => setRemoveFromGroupTarget(null)}
+          onRemoved={refreshMenus}
         />
       )}
 

@@ -21,9 +21,28 @@ const CtaOwnerApp = () => {
         <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4 leading-tight">
           {t("ctaTitle")}
         </h2>
-        <p className="text-violet-200 text-lg mb-10 max-w-xl mx-auto">
-          {t("ctaSubtitle")}
-        </p>
+        <div className="mb-10 flex flex-wrap items-center justify-center gap-2.5">
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm text-white backdrop-blur-sm">
+            <span className="size-1.5 shrink-0 rounded-full bg-emerald-400" aria-hidden />
+            <span dir="ltr" className="font-semibold tracking-tight">
+              Android
+            </span>
+            <span className="text-white/35" aria-hidden>
+              ·
+            </span>
+            <span className="text-violet-100">{t("ctaAndroidStatus")}</span>
+          </span>
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white/70">
+            <span className="size-1.5 shrink-0 rounded-full bg-white/35" aria-hidden />
+            <span dir="ltr" className="font-semibold tracking-tight">
+              iOS
+            </span>
+            <span className="text-white/25" aria-hidden>
+              ·
+            </span>
+            <span>{t("ctaIosStatus")}</span>
+          </span>
+        </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           {/* Google Play */}

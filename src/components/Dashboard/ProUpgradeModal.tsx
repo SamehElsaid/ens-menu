@@ -37,6 +37,7 @@ export default function ProUpgradeModal({
     "delivery-orders": t("proFeatureDescription.deliveryOrders"),
     staff: t("proFeatureDescription.staff"),
     advertisements: t("proFeatureDescription.advertisements"),
+    deliveryDistance: t("proFeatureDescription.deliveryDistance"),
   };
   const description =
     featureKey && featureDescriptions[featureKey]

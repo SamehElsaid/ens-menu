@@ -49,6 +49,7 @@ export function formatMenuCurrency(
       style: "currency",
       currency: currency || "EGP",
       maximumFractionDigits: 0,
+      numberingSystem: "latn",
     }).format(amount);
   } catch {
     return `${amount} ${currency}`;

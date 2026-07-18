@@ -16,8 +16,14 @@ import {
 
 function shouldIncludeVariant(variant: ImportVariant): boolean {
   const meta = variant.duplicateMeta;
-  if (meta?.resolution === "skip") return false;
-  if (meta?.status === "exact_duplicate") return false;
+  if (!meta) return true;
+  // Exact duplicates are always skipped
+  if (meta.status === "exact_duplicate") return false;
+  // Price conflicts are only saved when the user explicitly chose update
+  if (meta.status === "price_conflict") {
+    return meta.resolution === "update_price";
+  }
+  if (meta.resolution === "skip") return false;
   return true;
 }
 
@@ -34,8 +40,12 @@ function shouldIncludeItem(item: ImportItem): boolean {
   if (item.price === null || !Number.isFinite(item.price)) return false;
 
   const meta = item.duplicateMeta;
-  if (meta?.resolution === "skip") return false;
-  if (meta?.status === "exact_duplicate") return false;
+  if (!meta) return true;
+  if (meta.status === "exact_duplicate") return false;
+  if (meta.status === "price_conflict") {
+    return meta.resolution === "update_price";
+  }
+  if (meta.resolution === "skip") return false;
   return true;
 }
 

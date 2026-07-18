@@ -20,6 +20,7 @@ import {
 import { annotateDraftWithSnapshot, collectUnresolvedPriceConflicts } from "@/lib/menuImport/duplicateMatch";
 import { buildMenuImportSaveResponse } from "@/lib/menuImport/buildBulkCategoriesPayload";
 import { generateImportId } from "@/lib/menuImport/generateImportId";
+import type { MenuSnapshot } from "@/lib/menuImport/menuSnapshot";
 import type {
   ImportCategory,
   ImportDraft,
@@ -42,6 +43,7 @@ export interface MenuImportFlowState {
   isSaving: boolean;
   saveResult: SaveMenuImportResponse | null;
   duplicatesLoading: boolean;
+  menuSnapshot: MenuSnapshot | null;
 }
 
 type Action =
@@ -55,10 +57,14 @@ type Action =
     }
   | { type: "PROCESSING_FAIL"; error: ImportError }
   | { type: "SET_DRAFT"; draft: ImportDraft }
+  | {
+      type: "PATCH_DRAFT";
+      updater: (draft: ImportDraft) => ImportDraft;
+    }
   | { type: "OPEN_CONFIRM" }
   | { type: "CLOSE_CONFIRM" }
   | { type: "START_DUPLICATE_CHECK" }
-  | { type: "DUPLICATE_CHECK_DONE"; draft: ImportDraft }
+  | { type: "DUPLICATE_CHECK_DONE"; snapshot: MenuSnapshot }
   | { type: "DUPLICATE_CHECK_FAIL" }
   | { type: "START_SAVE" }
   | { type: "SAVE_SUCCESS"; result: SaveMenuImportResponse }
@@ -78,7 +84,20 @@ const initialState: MenuImportFlowState = {
   isSaving: false,
   saveResult: null,
   duplicatesLoading: false,
+  menuSnapshot: null,
 };
+
+function applyDraftUpdate(
+  draft: ImportDraft,
+  updater: (draft: ImportDraft) => ImportDraft,
+  snapshot: MenuSnapshot | null,
+): ImportDraft {
+  const next = updater(draft);
+  const annotated = snapshot
+    ? annotateDraftWithSnapshot(next, snapshot)
+    : next;
+  return withUpdatedDraftStats(annotated);
+}
 
 function reducer(
   state: MenuImportFlowState,
@@ -100,6 +119,7 @@ function reducer(
         isSaving: false,
         saveResult: null,
         duplicatesLoading: false,
+        menuSnapshot: null,
       };
     case "CLEAR_FILE":
       if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
@@ -114,6 +134,7 @@ function reducer(
         parseErrors: [],
         confirmOpen: false,
         saveResult: null,
+        menuSnapshot: null,
       };
     case "PROCESSING_SUCCESS":
       return {
@@ -124,17 +145,24 @@ function reducer(
         parseErrors: action.parseErrors,
         error: null,
         duplicatesLoading: true,
+        menuSnapshot: null,
       };
     case "START_DUPLICATE_CHECK":
       return { ...state, duplicatesLoading: true };
     case "DUPLICATE_CHECK_DONE":
       return {
         ...state,
-        draft: action.draft,
+        // Annotate the live draft so edits made during the snapshot fetch are kept
+        draft: state.draft
+          ? withUpdatedDraftStats(
+              annotateDraftWithSnapshot(state.draft, action.snapshot),
+            )
+          : null,
+        menuSnapshot: action.snapshot,
         duplicatesLoading: false,
       };
     case "DUPLICATE_CHECK_FAIL":
-      return { ...state, duplicatesLoading: false };
+      return { ...state, duplicatesLoading: false, menuSnapshot: null };
     case "PROCESSING_FAIL":
       return {
         ...state,
@@ -145,7 +173,22 @@ function reducer(
     case "SET_DRAFT":
       return {
         ...state,
-        draft: action.draft,
+        draft: state.menuSnapshot
+          ? withUpdatedDraftStats(
+              annotateDraftWithSnapshot(action.draft, state.menuSnapshot),
+            )
+          : action.draft,
+        saveResult: null,
+      };
+    case "PATCH_DRAFT":
+      if (!state.draft) return state;
+      return {
+        ...state,
+        draft: applyDraftUpdate(
+          state.draft,
+          action.updater,
+          state.menuSnapshot,
+        ),
         saveResult: null,
       };
     case "OPEN_CONFIRM":
@@ -219,13 +262,9 @@ export function useMenuImportFlow({
 
   const patchDraft = useCallback(
     (updater: (draft: ImportDraft) => ImportDraft) => {
-      if (!state.draft) return;
-      dispatch({
-        type: "SET_DRAFT",
-        draft: withUpdatedDraftStats(updater(state.draft)),
-      });
+      dispatch({ type: "PATCH_DRAFT", updater });
     },
-    [state.draft],
+    [],
   );
 
   const updateCategory = useCallback(
@@ -246,15 +285,29 @@ export function useMenuImportFlow({
       itemId: string,
       patch: Partial<ImportItem>,
     ) => {
+      const affectsDuplicateMatch =
+        patch.price !== undefined ||
+        patch.nameAr !== undefined ||
+        patch.nameEn !== undefined;
+
       patchDraft((draft) => ({
         ...draft,
         categories: draft.categories.map((c) =>
           c.id === categoryId
             ? {
                 ...c,
-                items: c.items.map((item) =>
-                  item.id === itemId ? { ...item, ...patch } : item,
-                ),
+                items: c.items.map((item) => {
+                  if (item.id !== itemId) return item;
+                  const next: ImportItem = { ...item, ...patch };
+                  if (
+                    affectsDuplicateMatch &&
+                    next.duplicateMeta?.resolution
+                  ) {
+                    const { resolution: _cleared, ...meta } = next.duplicateMeta;
+                    next.duplicateMeta = meta;
+                  }
+                  return next;
+                }),
               }
             : c,
         ),
@@ -270,6 +323,12 @@ export function useMenuImportFlow({
       variantId: string,
       patch: Partial<ImportVariant>,
     ) => {
+      const affectsDuplicateMatch =
+        patch.price !== undefined ||
+        patch.label !== undefined ||
+        patch.labelAr !== undefined ||
+        patch.labelEn !== undefined;
+
       patchDraft((draft) => ({
         ...draft,
         categories: draft.categories.map((c) =>
@@ -280,9 +339,21 @@ export function useMenuImportFlow({
                   item.id === itemId
                     ? {
                         ...item,
-                        variants: item.variants.map((v) =>
-                          v.id === variantId ? { ...v, ...patch } : v,
-                        ),
+                        variants: item.variants.map((v) => {
+                          if (v.id !== variantId) return v;
+                          const next: ImportVariant = { ...v, ...patch };
+                          if (
+                            affectsDuplicateMatch &&
+                            next.duplicateMeta?.resolution
+                          ) {
+                            const {
+                              resolution: _cleared,
+                              ...meta
+                            } = next.duplicateMeta;
+                            next.duplicateMeta = meta;
+                          }
+                          return next;
+                        }),
                       }
                     : item,
                 ),
@@ -516,11 +587,8 @@ export function useMenuImportFlow({
       try {
         const snapshot = await fetchExistingMenuSnapshot(menuId, locale);
         console.log("[MenuImport] Existing menu snapshot:", snapshot);
-        const annotated = annotateDraftWithSnapshot(
-          withUpdatedDraftStats(draft),
-          snapshot,
-        );
-        dispatch({ type: "DUPLICATE_CHECK_DONE", draft: annotated });
+        // Snapshot is applied onto whatever the user has edited in the reducer
+        dispatch({ type: "DUPLICATE_CHECK_DONE", snapshot });
       } catch {
         dispatch({ type: "DUPLICATE_CHECK_FAIL" });
       }

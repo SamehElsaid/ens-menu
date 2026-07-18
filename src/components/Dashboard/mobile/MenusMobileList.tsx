@@ -6,6 +6,7 @@ import MenuDeliveryGroupPanel from "@/components/Dashboard/MenuDeliveryGroupPane
 import {
   buildMenuDisplayGroups,
   resolveMenuGroupMeta,
+  type MenuGroupSummary,
 } from "@/lib/menuDeliveryGroups";
 import MenuMobileCard from "./MenuMobileCard";
 
@@ -20,9 +21,10 @@ type MenusMobileListProps = {
   getDashboardPath: (menu: Menu) => string;
   onToggleActive: (menu: Menu) => void;
   onDelete: (menu: Menu) => void;
+  onCopy?: (menu: Menu) => void;
   onAddToGroup?: (menu: Menu) => void;
-  onManageGroup?: (group: { groupId: number; groupName: string; menuIds: number[] }) => void;
-  hasUngroupedMenus?: boolean;
+  onRemoveFromGroup?: (menu: Menu) => void;
+  onManageGroup?: (group: MenuGroupSummary) => void;
 };
 
 export default function MenusMobileList({
@@ -36,9 +38,10 @@ export default function MenusMobileList({
   getDashboardPath,
   onToggleActive,
   onDelete,
+  onCopy,
   onAddToGroup,
+  onRemoveFromGroup,
   onManageGroup,
-  hasUngroupedMenus = false,
 }: MenusMobileListProps) {
   const groups = useMemo(() => buildMenuDisplayGroups(menus), [menus]);
 
@@ -60,11 +63,10 @@ export default function MenusMobileList({
               groupName={group.groupName}
               memberCount={group.menus.length}
               layout="mobile"
-              canAddMenus={hasUngroupedMenus}
-              onAddMenus={() =>
+              onManageGroup={() =>
                 onManageGroup?.({
-                  groupId: group.groupId,
-                  groupName: group.groupName,
+                  id: group.groupId,
+                  name: group.groupName,
                   menuIds: group.menus.map((m) => m.id),
                 })
               }
@@ -84,7 +86,9 @@ export default function MenusMobileList({
                       isNested
                       onToggleActive={onToggleActive}
                       onDelete={onDelete}
+                      onCopy={onCopy}
                       onAddToGroup={onAddToGroup}
+                      onRemoveFromGroup={onRemoveFromGroup}
                     />
                   ))}
             />
@@ -107,7 +111,9 @@ export default function MenusMobileList({
             groupMeta={resolveMenuGroupMeta(menu)}
             onToggleActive={onToggleActive}
             onDelete={onDelete}
+            onCopy={onCopy}
             onAddToGroup={onAddToGroup}
+            onRemoveFromGroup={onRemoveFromGroup}
           />
         );
       })}

@@ -10,8 +10,7 @@ import {
 } from "react";
 import { useLocale } from "next-intl";
 import { axiosGet } from "@/shared/axiosCall";
-import { useAppSelector } from "@/store/hooks";
-import { isFreePlanUser } from "@/lib/subscription";
+import { useCurrentPlanCapabilities } from "@/hooks/useCurrentPlanCapabilities";
 import { useMenuActivitySocket } from "@/hooks/useMenuActivitySocket";
 import { playNewOrderNotificationSound } from "@/lib/orderNotificationSound";
 import { isPendingOrder, isDeliveryEntry } from "@/lib/tableOrders";
@@ -45,28 +44,21 @@ export function PendingOrdersProvider({
   children: ReactNode;
 }) {
   const locale = useLocale();
-  const userData = useAppSelector((s) => s.auth.data);
-  const isFreePlan = !userData || isFreePlanUser(userData);
+  const capabilities = useCurrentPlanCapabilities();
+  const tableOrderingEnabled = capabilities.tableOrderingQr;
+  const liveNotificationsEnabled = capabilities.liveOrderNotifications;
 
   const [allEntries, setAllEntries] = useState<CallEntry[]>([]);
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    if (!segment || isFreePlan) {
+    if (!segment) {
       setAllEntries([]);
       return;
     }
     setLoading(true);
     try {
-      const [tableRes, deliveryRes] = await Promise.all([
-        axiosGet<ActivityCallsPayload>(
-          `/menus/${segment}/activity-logs`,
-          locale,
-          undefined,
-          { page: 1, limit: 50, channel: "table" },
-          undefined,
-          true,
-        ),
+      const requests = [
         axiosGet<ActivityCallsPayload>(
           `/menus/${segment}/activity-logs`,
           locale,
@@ -75,15 +67,31 @@ export function PendingOrdersProvider({
           undefined,
           true,
         ),
-      ]);
+      ];
+
+      if (tableOrderingEnabled) {
+        requests.unshift(
+          axiosGet<ActivityCallsPayload>(
+            `/menus/${segment}/activity-logs`,
+            locale,
+            undefined,
+            { page: 1, limit: 50, channel: "table" },
+            undefined,
+            true,
+          ),
+        );
+      }
+
+      const results = await Promise.all(requests);
 
       const tableEntries =
-        tableRes.status && tableRes.data
-          ? (tableRes.data.entries ?? tableRes.data.calls ?? [])
+        tableOrderingEnabled && results[0]?.status && results[0]?.data
+          ? (results[0].data.entries ?? results[0].data.calls ?? [])
           : [];
+      const deliveryResult = tableOrderingEnabled ? results[1] : results[0];
       const deliveryEntries =
-        deliveryRes.status && deliveryRes.data
-          ? (deliveryRes.data.entries ?? deliveryRes.data.calls ?? [])
+        deliveryResult?.status && deliveryResult?.data
+          ? (deliveryResult.data.entries ?? deliveryResult.data.calls ?? [])
           : [];
 
       setAllEntries([...tableEntries, ...deliveryEntries]);
@@ -92,13 +100,16 @@ export function PendingOrdersProvider({
     } finally {
       setLoading(false);
     }
-  }, [segment, locale, isFreePlan]);
+  }, [segment, locale, tableOrderingEnabled]);
 
   useEffect(() => {
     void refresh();
   }, [refresh]);
 
-  useMenuActivitySocket(isFreePlan || !segment ? "" : segment, refresh, {
+  useMenuActivitySocket(
+    !segment || !liveNotificationsEnabled ? "" : segment,
+    refresh,
+    {
     onNewOrder: playNewOrderNotificationSound,
   });
 
