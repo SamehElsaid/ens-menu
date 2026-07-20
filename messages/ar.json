@@ -4613,6 +4613,11 @@
   "application": {
     "view": "عرض"
   },
+  "contactFab": {
+    "label": "تواصل معنا",
+    "whatsapp": "واتساب",
+    "telegram": "تيليجرام"
+  },
   "chatWidget": {
     "openChat": "تحدث مع لينا",
     "contactWhatsApp": "تواصل عبر واتساب",

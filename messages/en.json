@@ -1210,6 +1210,11 @@
       "send": "Send"
     }
   },
+  "contactFab": {
+    "label": "Contact us",
+    "whatsapp": "WhatsApp",
+    "telegram": "Telegram"
+  },
   "chatWidget": {
     "openChat": "Chat with Lina",
     "contactWhatsApp": "Contact on WhatsApp",
