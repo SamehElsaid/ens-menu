@@ -382,14 +382,35 @@ export default function AdminBroadcastPage() {
             >
               {t("message")}
             </label>
+            <p className="mb-2 text-xs text-slate-500 dark:text-slate-400">
+              {t("messageHint")}
+            </p>
             <textarea
               id="broadcast-message"
-              rows={8}
+              rows={18}
+              dir="ltr"
+              spellCheck={false}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder={t("messagePlaceholder")}
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 font-mono text-sm leading-relaxed text-slate-800 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
             />
+            {message.trim() && (
+              <div className="mt-3 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-600">
+                <p className="border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-600 dark:bg-slate-800/60">
+                  {t("htmlPreview")}
+                </p>
+                <iframe
+                  title={t("htmlPreview")}
+                  srcDoc={message.replace(
+                    /\{\{\s*name\s*\}\}/gi,
+                    emailLocale === "ar" ? "اسم العميل" : "Customer Name",
+                  )}
+                  className="h-[420px] w-full border-0 bg-white"
+                  sandbox=""
+                />
+              </div>
+            )}
           </div>
 
           <div>
