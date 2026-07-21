@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { buildSeoMetadata } from "@/lib/seo";
 import { encryptDataApi } from "@/shared/encryption";
@@ -68,15 +69,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const article = id ? await fetchArticle(id, locale) : null;
 
+  if (!article) {
+    return { robots: { index: false, follow: false } };
+  }
+
   const title =
-    locale === "ar" && article?.titleAr
+    locale === "ar" && article.titleAr
       ? article.titleAr
-      : (article?.titleEn ?? t("knowledgeBasePage.title"));
+      : (article.titleEn ?? t("knowledgeBasePage.title"));
 
   const rawDescription =
-    locale === "ar" && article?.descriptionAr
+    locale === "ar" && article.descriptionAr
       ? article.descriptionAr
-      : (article?.descriptionEn ?? "");
+      : (article.descriptionEn ?? "");
 
   const description = rawDescription
     ? stripHtml(rawDescription)
@@ -95,8 +100,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function KnowledgeBaseArticlePage({ params }: Props) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const id = slug ? extractIdFromSlug(slug) : undefined;
+
+  if (!id) notFound();
+
+  const article = await fetchArticle(id, locale);
+  if (!article) notFound();
 
   return <KnowledgeBaseInner initialId={id} />;
 }

@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const dynamic = await fetchPageMetadata("pricing");
   return buildSeoMetadata({
     locale,
-    path: "Pricing",
+    path: "pricing",
     title: resolveMetaField(dynamic, locale, "title", t("pricingPage.title")),
     description: resolveMetaField(dynamic, locale, "description", t("pricingPage.description")),
     keywords: resolveMetaField(dynamic, locale, "keywords", t("pricingPage.keywords")),

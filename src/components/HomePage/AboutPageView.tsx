@@ -548,7 +548,7 @@ export default function AboutPageView() {
                     {t("cta.primary")}
                   </Link>
                   <Link
-                    href="/Pricing"
+                    href="/pricing"
                     prefetch={false}
                     className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-6 py-3 text-[14px] font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/10"
                   >

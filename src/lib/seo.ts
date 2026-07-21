@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { localizeHref } from "@/i18n/routing";
+import { getSiteOrigin } from "@/lib/sitemap/data";
 
 /**
  * Base URL for canonical and Open Graph URLs.
- * Set NEXT_PUBLIC_APP_URL in .env (e.g. https://ensmenu.com)
+ * Always resolves to a stable origin (prefers NEXT_PUBLIC_APP_URL, normalizes www).
  */
 function getBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL ?? "";
+  return getSiteOrigin();
 }
 
 export type SeoInput = {

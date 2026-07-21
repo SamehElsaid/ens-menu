@@ -129,7 +129,7 @@ export const getNavLinks = (headerT: TranslationFunction): NavLink[] => [
 
 export const getFooterNavLinks = (t: TranslationFunction): NavLink[] => [
   { name: t("linkAbout"), path: "/about" },
-  { name: t("linkPricing"), path: "/Pricing" },
+  { name: t("linkPricing"), path: "/pricing" },
   { name: t("linkKnowledge"), path: "/knowledge-base" },
   { name: t("linkContact"), path: "/contact" },
 ];
