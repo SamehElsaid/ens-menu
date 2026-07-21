@@ -39,7 +39,7 @@ export default function RevealScene() {
             <ForwardArrow />
           </MarketingButtonLink>
           <MarketingButtonLink
-            href="/Pricing"
+            href="/pricing"
             variant="secondary"
             prefetch={false}
           >

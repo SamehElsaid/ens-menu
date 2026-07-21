@@ -1,14 +1,30 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import LoginForm from "@/components/LoginForm";
 import LoginOnboardingVisual from "@/components/Auth/LoginOnboardingVisual";
 import { axiosGet } from "@/shared/axiosCall";
+import { buildSeoMetadata } from "@/lib/seo";
 
-type LoginPageViewProps = {
-  locale: string;
-};
+type Props = { params: Promise<{ locale: string }> };
 
-export default async function LoginPageView({ locale }: LoginPageViewProps) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "meta" });
+  return buildSeoMetadata({
+    locale,
+    path: "auth/login",
+    title: t("auth.loginTitle"),
+    description: t("auth.loginDescription"),
+    keywords: t("auth.loginKeywords"),
+    coreKeywords: t("coreKeywords"),
+    siteName: t("siteName"),
+    robots: "noindex, nofollow",
+  });
+}
+
+export default async function LoginPage({ params }: Props) {
+  const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "loginPage" });
   const promo = await axiosGet<{ data: { text: string; boolean: boolean } }>(
     "/promo",

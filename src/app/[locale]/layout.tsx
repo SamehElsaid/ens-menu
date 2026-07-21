@@ -13,10 +13,12 @@ import "react-toastify/dist/ReactToastify.css";
 import 'suneditor/dist/css/suneditor.min.css'
 import Script from "next/script";
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+import { getSiteOrigin } from "@/lib/sitemap/data";
+
+const appUrl = getSiteOrigin();
 
 export const metadata: Metadata = {
-  metadataBase: appUrl ? new URL(appUrl) : undefined,
+  metadataBase: new URL(appUrl),
   title: {
     default: "ENSmenu",
     template: "ENSmenu - %s",

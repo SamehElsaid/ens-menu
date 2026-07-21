@@ -17,7 +17,7 @@ export const MENUS_PER_SITEMAP_PAGE = URLS_PER_SITEMAP;
 const MAIN_PAGES = [
   { path: "", metaPageName: "home" },
   { path: "about", metaPageName: "about" },
-  { path: "Pricing", metaPageName: "pricing" },
+  { path: "pricing", metaPageName: "pricing" },
   { path: "contact", metaPageName: "contact" },
   { path: "faq", metaPageName: "faq" },
   { path: "mobile-app", metaPageName: "mobile-app" },
