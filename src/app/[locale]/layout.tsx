@@ -4,6 +4,7 @@ import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import RenderInProvider from "@/components/Global/RenderInProvider";
+import ContactFab from "@/components/Global/ContactFab";
 import ProgressBar from "@/components/Global/ProgressBar";
 import GoogleGtag from "@/components/Global/GoogleGtag";
 import GoogleTagManager from "@/components/Global/GoogleTagManager";
@@ -80,6 +81,7 @@ export default async function RootLayout({
         />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <RenderInProvider>{children}</RenderInProvider>
+          <ContactFab />
         </NextIntlClientProvider>
         <Script id="chatwoot-settings" strategy="beforeInteractive">
           {`window.chatwootSettings = { position: "left" };`}

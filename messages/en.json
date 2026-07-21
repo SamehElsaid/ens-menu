@@ -1210,6 +1210,11 @@
       "send": "Send"
     }
   },
+  "contactFab": {
+    "label": "Contact us",
+    "whatsapp": "WhatsApp",
+    "telegram": "Telegram"
+  },
   "chatWidget": {
     "openChat": "Chat with Lina",
     "contactWhatsApp": "Contact on WhatsApp",
@@ -3580,20 +3585,16 @@
       "with-menu": "Has menu",
       "products-no-image": "Products without images"
     },
-    "templates": {
-      "products-no-image": {
-        "subject": "Add images to your menu items on ensmenu",
-        "message": "Hello,\n\nWe noticed that some items in your menu don't have photos yet.\n\nAdding images makes your menu more appealing and helps customers choose with confidence.\n\nYou can add photos easily from your dashboard → Products.\n\nIf you need help, the ensmenu team is here for you.\n\nBest regards,\nThe ensmenu team"
-      }
-    },
     "searchUsers": "Search customers",
     "searchUsersPlaceholder": "Search by name or email…",
     "searching": "Searching…",
     "subject": "Subject",
     "subjectPlaceholder": "e.g. Special offer for ensmenu users",
-    "message": "Message",
-    "messagePlaceholder": "Write your message here… You can use multiple paragraphs.",
-    "emailLocale": "Email template language",
+    "message": "Full email HTML",
+    "messageHint": "Write the full email HTML including header and body. To personalize, put the word name between double curly braces in your template. The server adds no extra wrapper.",
+    "messagePlaceholder": "Paste the full email HTML here…",
+    "htmlPreview": "Email preview",
+    "emailLocale": "Default template language",
     "localeAr": "Arabic",
     "localeEn": "English",
     "send": "Send email",
@@ -3603,7 +3604,7 @@
     "sampleRecipients": "Sample recipients",
     "noRecipients": "No recipients for this selection",
     "cappedNotice": "Maximum {max} recipients per send",
-    "hint": "Suspended and deleted accounts are excluded. Email is sent from the official ensmenu address.",
+    "hint": "Suspended and deleted accounts are excluded. The HTML you write is the full email with no server wrapper.",
     "confirmTitle": "Confirm send",
     "confirmMessage": "Send this email to {count} customers?",
     "confirmSend": "Yes, send",
