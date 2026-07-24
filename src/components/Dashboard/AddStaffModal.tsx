@@ -331,7 +331,7 @@ export default function AddStaffModal({
                     validate: (v) => {
                       const s = (v ?? "").trim();
                       if (!s) return isEdit ? true : t("passwordRequired");
-                      if (s.length < 6) return t("passwordMin");
+                      if (s.length < 8) return t("passwordMin");
                       if (s.length > 128) return t("passwordMax");
                       return true;
                     },
