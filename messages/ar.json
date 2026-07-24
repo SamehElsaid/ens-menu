@@ -3486,11 +3486,15 @@
       "free": "الخطة المجانية",
       "no-menu": "بدون منيو",
       "with-menu": "لديهم منيو",
-      "products-no-image": "منتجات بدون صور"
+      "products-no-image": "منتجات بدون صور",
+      "test": "تيست"
     },
     "searchUsers": "بحث عن عملاء",
     "searchUsersPlaceholder": "ابحث بالاسم أو البريد…",
     "searching": "جاري البحث…",
+    "testEmails": "إيميلات الاختبار",
+    "testEmailsHint": "اكتب إيميل واحد أو أكثر مفصولين بفاصلة أو سطر جديد (حد أقصى 20).",
+    "testEmailsPlaceholder": "ensegypt20@gmail.com, other@example.com",
     "subject": "عنوان الرسالة",
     "subjectPlaceholder": "مثال: عرض خاص لمشتركي ensmenu",
     "message": "HTML الكامل للإيميل",

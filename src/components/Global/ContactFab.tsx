@@ -6,6 +6,7 @@ import { FaWhatsapp, FaTelegramPlane } from "react-icons/fa";
 import { FiX } from "react-icons/fi";
 import { BiSupport } from "react-icons/bi";
 import { useLocale, useTranslations } from "next-intl";
+import { usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { isRtlLocale } from "@/lib/localeDirection";
 import {
@@ -18,8 +19,10 @@ export default function ContactFab() {
   const [mounted, setMounted] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const locale = useLocale();
+  const pathname = usePathname();
   const isRtl = isRtlLocale(locale);
   const t = useTranslations("contactFab");
+  const isAdminRoute = pathname.startsWith("/admin");
 
   useEffect(() => {
     setMounted(true);
@@ -43,7 +46,7 @@ export default function ContactFab() {
     };
   }, [open]);
 
-  if (!mounted) return null;
+  if (!mounted || isAdminRoute) return null;
 
   const options = [
     {

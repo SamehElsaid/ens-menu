@@ -3583,11 +3583,15 @@
       "free": "Free plan",
       "no-menu": "No menu yet",
       "with-menu": "Has menu",
-      "products-no-image": "Products without images"
+      "products-no-image": "Products without images",
+      "test": "Test"
     },
     "searchUsers": "Search customers",
     "searchUsersPlaceholder": "Search by name or email…",
     "searching": "Searching…",
+    "testEmails": "Test emails",
+    "testEmailsHint": "Enter one or more emails separated by commas or new lines (max 20).",
+    "testEmailsPlaceholder": "ensegypt20@gmail.com, other@example.com",
     "subject": "Subject",
     "subjectPlaceholder": "e.g. Special offer for ensmenu users",
     "message": "Full email HTML",

@@ -337,7 +337,6 @@ export default function HeroPhoneMockup({
     [t],
   );
 
-
   const [quantities] = useState<QtyState>(() => buildInitialQty(turns));
   const [addedTurns, setAddedTurns] = useState<Set<string>>(new Set());
   const [turnIndex, setTurnIndex] = useState(0);
@@ -366,19 +365,25 @@ export default function HeroPhoneMockup({
     const timer = window.setTimeout(() => {
       if (phase === "done") {
         if (turnIndex < turns.length - 1) {
-          window.setTimeout(() => {
-            setTurnIndex((i) => i + 1);
-            setPhase("user");
-          }, reduceMotion ? 0 : BETWEEN_TURNS_MS);
+          window.setTimeout(
+            () => {
+              setTurnIndex((i) => i + 1);
+              setPhase("user");
+            },
+            reduceMotion ? 0 : BETWEEN_TURNS_MS,
+          );
           return;
         }
 
-        window.setTimeout(() => {
-          setAddedTurns(new Set());
-          setTurnIndex(0);
-          setPhase("user");
-          setLoopId((id) => id + 1);
-        }, reduceMotion ? 200 : LOOP_PAUSE_MS);
+        window.setTimeout(
+          () => {
+            setAddedTurns(new Set());
+            setTurnIndex(0);
+            setPhase("user");
+            setLoopId((id) => id + 1);
+          },
+          reduceMotion ? 200 : LOOP_PAUSE_MS,
+        );
         return;
       }
 
@@ -419,7 +424,7 @@ export default function HeroPhoneMockup({
       <div className="hero-lina-chat-card flex h-full min-h-0 w-full flex-col overflow-hidden rounded-xl border border-slate-200/60 bg-[#fafaf9] shadow-[0_1px_2px_rgba(15,23,42,0.03),0_16px_40px_-14px_rgba(15,23,42,0.1)] dark:border-slate-800/70 dark:bg-[#0f1115]">
         <header
           className={cn(
-            "shrink-0 border-b border-purple-100/50 bg-gradient-to-b from-purple-50/40 to-white/80 px-3 py-2 dark:border-purple-500/10 dark:from-purple-500/5 dark:to-slate-900/40 sm:px-3.5 sm:py-2.5",
+            "shrink-0 border-b border-purple-100/50 bg-linear-to-b from-purple-50/40 to-white/80 px-3 py-2 dark:border-purple-500/10 dark:from-purple-500/5 dark:to-slate-900/40 sm:px-3.5 sm:py-2.5",
             compact ? "h-[60px] sm:h-[68px] lg:h-[76px]" : "h-[72px]",
           )}
         >
@@ -444,7 +449,7 @@ export default function HeroPhoneMockup({
               </p>
               <p
                 className={cn(
-                  "mt-0.5 min-h-[14px] text-[10px] leading-snug text-slate-500 transition-opacity duration-300 dark:text-slate-400",
+                  "mt-0.5 min-h-3.5 text-[10px] leading-snug text-slate-500 transition-opacity duration-300 dark:text-slate-400",
                   cartItemCount > 0
                     ? "hero-chat-animate-in opacity-100"
                     : "opacity-0 lg:invisible",
