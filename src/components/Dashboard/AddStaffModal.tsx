@@ -287,15 +287,16 @@ export default function AddStaffModal({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t("email")}
+                  {t("email")} *
                 </label>
                 <Controller
                   name="email"
                   control={control}
                   rules={{
+                    required: t("emailRequired"),
                     validate: (v) => {
                       const s = v.trim();
-                      if (!s) return true;
+                      if (!s) return t("emailRequired");
                       return EMAIL_RE.test(s) ? true : t("emailInvalid");
                     },
                   }}
@@ -321,6 +322,7 @@ export default function AddStaffModal({
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {t("password")}
+                  {!isEdit && " *"}
                 </label>
                 <Controller
                   name="password"
@@ -328,8 +330,8 @@ export default function AddStaffModal({
                   rules={{
                     validate: (v) => {
                       const s = (v ?? "").trim();
-                      if (!s) return true;
-                      if (s.length < 6) return t("passwordMin");
+                      if (!s) return isEdit ? true : t("passwordRequired");
+                      if (s.length < 8) return t("passwordMin");
                       if (s.length > 128) return t("passwordMax");
                       return true;
                     },
