@@ -11,16 +11,8 @@ const nextConfig: NextConfig = {
   reactStrictMode: false,
   async redirects() {
     return [
-      {
-        source: "/Pricing",
-        destination: "/pricing",
-        permanent: true,
-      },
-      {
-        source: "/en/Pricing",
-        destination: "/en/pricing",
-        permanent: true,
-      },
+      // Do NOT add case-only redirects (e.g. /Pricing → /pricing):
+      // next.config redirects are case-insensitive and cause ERR_TOO_MANY_REDIRECTS.
       {
         source: "/sitemap-index.xml",
         destination: "/sitemap",

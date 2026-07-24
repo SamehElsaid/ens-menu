@@ -17,7 +17,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     locale,
     path: "",
     title: resolveMetaField(dynamic, locale, "title", t("home.title")),
-    description: resolveMetaField(dynamic, locale, "description", t("home.description")),
+    description: resolveMetaField(
+      dynamic,
+      locale,
+      "description",
+      t("home.description"),
+    ),
     keywords: resolveMetaField(dynamic, locale, "keywords", t("home.keywords")),
     coreKeywords: t("coreKeywords"),
     siteName: t("siteName"),
@@ -31,9 +36,9 @@ async function Page({ params }: Props) {
   return (
     <>
       <HeroContent locale={locale} />
-      <TrustedBySection />
       <TransformShowcaseSection locale={locale} />
       <HomeCTASection locale={locale} />
+      <TrustedBySection />
     </>
   );
 }
