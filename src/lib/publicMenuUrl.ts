@@ -73,7 +73,9 @@ export function sanitizeMenuSlugInput(raw: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-export function buildPublicMenuBaseUrl(slug: string | undefined | null): string {
+export function buildPublicMenuBaseUrl(
+  slug: string | undefined | null,
+): string {
   const normalized = resolvePublicMenuSlug(slug);
   if (!normalized) return "";
   return `https://${normalized}${menuHostSuffix()}`;

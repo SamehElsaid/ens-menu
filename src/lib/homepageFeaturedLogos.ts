@@ -1,5 +1,6 @@
 export type HomepageFeaturedLogo = {
   id: number;
+  slug: string;
   menuId: number;
   userId: number;
   logo: string;

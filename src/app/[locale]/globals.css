@@ -2305,7 +2305,7 @@ textarea {
   width: max-content;
   will-change: transform;
   animation-name: trusted-by-marquee;
-  animation-duration: 15s;
+  animation-duration: var(--trusted-by-marquee-duration, 60s);
   animation-timing-function: linear;
   animation-iteration-count: infinite;
 }

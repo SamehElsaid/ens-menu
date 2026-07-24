@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useLocale } from "next-intl";
 import type { HomepageFeaturedLogo } from "@/lib/homepageFeaturedLogos";
+import { publicMenuLinkUrl, resolvePublicMenuSlug } from "@/lib/publicMenuUrl";
 
 type TrustedByLogosRowProps = {
   logos: HomepageFeaturedLogo[];
@@ -10,6 +11,7 @@ type TrustedByLogosRowProps = {
 
 const TILE_SIZE = "h-[4.5rem] w-[4.5rem] sm:h-20 sm:w-20";
 const SET_CLASS = "trusted-by-marquee-set flex items-center gap-3 sm:gap-4";
+const TILE_CLASS = `group relative ${TILE_SIZE} shrink-0 overflow-hidden rounded-[1.35rem] border border-slate-200/90 bg-white shadow-md shadow-slate-200/50 ring-1 ring-slate-100/80 transition-all duration-300 hover:-translate-y-1 hover:border-purple-200/80 hover:shadow-xl hover:shadow-purple-200/30 hover:ring-purple-200/60 dark:border-slate-700/90 dark:bg-slate-800 dark:shadow-slate-950/40 dark:ring-slate-700/60 dark:hover:border-purple-500/40 dark:hover:shadow-purple-900/30 dark:hover:ring-purple-500/30`;
 
 /** Approximate tile + gap width used to fill the viewport with no empty gaps. */
 function estimateTileStridePx() {
@@ -27,14 +29,18 @@ function buildMarqueeLogos(logos: HomepageFeaturedLogo[], minCount: number) {
   return items;
 }
 
-function LogoTile({ item }: { item: HomepageFeaturedLogo }) {
+function LogoTile({
+  item,
+  decorative = false,
+}: {
+  item: HomepageFeaturedLogo;
+  decorative?: boolean;
+}) {
   const [failed, setFailed] = useState(false);
+  const href = publicMenuLinkUrl(resolvePublicMenuSlug(null, item.slug));
 
-  return (
-    <div
-      role="listitem"
-      className={`group relative ${TILE_SIZE} shrink-0 overflow-hidden rounded-[1.35rem] border border-slate-200/90 bg-white shadow-md shadow-slate-200/50 ring-1 ring-slate-100/80 transition-all duration-300 hover:-translate-y-1 hover:border-purple-200/80 hover:shadow-xl hover:shadow-purple-200/30 hover:ring-purple-200/60 dark:border-slate-700/90 dark:bg-slate-800 dark:shadow-slate-950/40 dark:ring-slate-700/60 dark:hover:border-purple-500/40 dark:hover:shadow-purple-900/30 dark:hover:ring-purple-500/30`}
-    >
+  const content = (
+    <>
       <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/0 via-white/0 to-purple-50/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:to-purple-500/10" />
 
       {!failed ? (
@@ -71,7 +77,29 @@ function LogoTile({ item }: { item: HomepageFeaturedLogo }) {
           />
         </span>
       ) : null}
-    </div>
+    </>
+  );
+
+  if (!href) {
+    return (
+      <div role="listitem" className={TILE_CLASS}>
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      role={decorative ? undefined : "listitem"}
+      tabIndex={decorative ? -1 : undefined}
+      aria-hidden={decorative || undefined}
+      className={TILE_CLASS}
+    >
+      {content}
+    </a>
   );
 }
 
@@ -98,7 +126,8 @@ export default function TrustedByLogosRow({ logos }: TrustedByLogosRowProps) {
     () => buildMarqueeLogos(logos, minLogoCount),
     [logos, minLogoCount],
   );
-  const durationSec = Math.max(marqueeLogos.length * 3.5, 28);
+  // Slow continuous scroll — ~7s per logo, never under 60s for a full loop.
+  const durationSec = Math.max(marqueeLogos.length * 7, 60);
 
   if (logos.length === 0) return null;
 
@@ -122,7 +151,7 @@ export default function TrustedByLogosRow({ logos }: TrustedByLogosRowProps) {
         </div>
         <div className={SET_CLASS} aria-hidden>
           {marqueeLogos.map((item, index) => (
-            <LogoTile key={`${item.id}-b-${index}`} item={item} />
+            <LogoTile key={`${item.id}-b-${index}`} item={item} decorative />
           ))}
         </div>
       </div>
