@@ -12,8 +12,7 @@ import { encryptData } from "@/shared/encryption";
 import Cookies from "js-cookie";
 import { useSearchParams } from "next/navigation";
 import { resolvePostLoginPath } from "@/lib/authRedirect";
-import { localizeHref } from "@/i18n/routing";
-import { getMenuDashboardRef, menuDashboardPath } from "@/lib/menuDashboardPath";
+import { getMenuDashboardRef } from "@/lib/menuDashboardPath";
 import LinkTo from "./Global/LinkTo";
 import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
 import { useAppDispatch } from "@/store/hooks";
@@ -112,8 +111,8 @@ export default function LoginForm() {
       };
 
       // Dashboard staff sign in through this same owner login form. They carry
-      // a scoped permission set and belong to a single menu, so persist the
-      // full staff context (permissions/role/menu) the proxy guard expects.
+      // a scoped permission set, so persist the full staff context
+      // (permissions/role) the proxy guard expects.
       const isStaff = user?.role === "staff";
 
       const saveTokens = isStaff
@@ -151,9 +150,14 @@ export default function LoginForm() {
         dispatch(SET_ACTIVE_USER({ user }));
       }
 
-      window.location.href = isStaff
-        ? localizeHref(menuDashboardPath(data.menu ?? {}), locale)
-        : resolvePostLoginPath(locale, user?.role, redirectParam);
+      // Staff land on the account dashboard like owners do: orders and staff
+      // are account-level now, and the menu list there is already filtered to
+      // whatever their grants and role allow.
+      window.location.href = resolvePostLoginPath(
+        locale,
+        user?.role,
+        redirectParam,
+      );
     } else {
       const payload = response.data as {
         message?: string;

@@ -1,7 +1,5 @@
-"use client";
+import LegacyOrdersRedirect from "@/components/Dashboard/orders/LegacyOrdersRedirect";
 
-import TableOrdersView from "@/components/Dashboard/orders/TableOrdersView";
-
-export default function TableOrdersPage() {
-  return <TableOrdersView />;
+export default function MenuTableOrdersRedirectPage() {
+  return <LegacyOrdersRedirect target="/dashboard/orders" />;
 }

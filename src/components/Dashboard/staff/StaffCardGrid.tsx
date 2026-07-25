@@ -35,6 +35,8 @@ interface StaffCardGridProps {
   loading: boolean;
   locale: string;
   togglingId: number | null;
+  /** Menu id to display name, used to label each member's grants. */
+  menuNameById?: Record<number, string>;
   onEdit: (staff: MenuStaff) => void;
   onToggleActive: (staff: MenuStaff) => void;
   onDelete: (staff: MenuStaff) => void;
@@ -46,6 +48,7 @@ export default function StaffCardGrid({
   loading,
   locale,
   togglingId,
+  menuNameById,
   onEdit,
   onToggleActive,
   onDelete,
@@ -88,6 +91,9 @@ export default function StaffCardGrid({
             staff={staff}
             locale={locale}
             togglingId={togglingId}
+            menuNames={(staff.menuIds ?? [])
+              .map((id) => menuNameById?.[id])
+              .filter((name): name is string => Boolean(name))}
             onEdit={onEdit}
             onToggleActive={onToggleActive}
             onDelete={onDelete}

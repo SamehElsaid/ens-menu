@@ -16,6 +16,8 @@ interface StaffCardProps {
   staff: MenuStaff;
   locale: string;
   togglingId: number | null;
+  /** Names of the menus this staff member is granted. */
+  menuNames?: string[];
   onEdit: (staff: MenuStaff) => void;
   onToggleActive: (staff: MenuStaff) => void;
   onDelete: (staff: MenuStaff) => void;
@@ -25,6 +27,7 @@ export default function StaffCard({
   staff,
   locale,
   togglingId,
+  menuNames,
   onEdit,
   onToggleActive,
   onDelete,
@@ -104,6 +107,20 @@ export default function StaffCard({
               {email}
             </span>
           </div>
+
+          {menuNames && menuNames.length > 0 && (
+            <div className="mt-2.5 flex flex-wrap justify-center gap-1.5">
+              {menuNames.map((name) => (
+                <span
+                  key={name}
+                  className="max-w-full truncate rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary"
+                  title={name}
+                >
+                  {name}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="mt-auto space-y-2 border-t border-slate-100 pt-3 dark:border-slate-700/80">

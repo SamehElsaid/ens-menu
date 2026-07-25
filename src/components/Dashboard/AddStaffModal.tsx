@@ -7,7 +7,9 @@ import { axiosPost, axiosPatch } from "@/shared/axiosCall";
 import CustomInput from "@/components/Custom/CustomInput";
 import { toast } from "react-toastify";
 import { MenuStaff } from "@/types/Menu";
-import { useMenuStaffRoles } from "@/hooks/useMenuStaffRoles";
+import { useAccountStaffRoles } from "@/hooks/useAccountStaffRoles";
+import { useDashboardMenus, localizedMenuName } from "@/hooks/useDashboardMenus";
+import { roleDisplayName } from "@/shared/roleDisplayName";
 import {
   IoCloseOutline,
   IoEllipseSharp,
@@ -15,6 +17,7 @@ import {
   IoRemoveCircle,
   IoAddCircleOutline,
   IoPeopleOutline,
+  IoRestaurantOutline,
   IoShieldCheckmarkOutline,
 } from "react-icons/io5";
 import CustomBtn from "../Custom/CustomBtn";
@@ -28,10 +31,10 @@ export interface AddStaffFormData {
   confirmPassword: string;
   isActive: boolean;
   roleId: number | null;
+  menuIds: number[];
 }
 
 interface AddStaffModalProps {
-  menuId: string;
   staff?: MenuStaff | null;
   onClose: () => void;
   onRefresh?: () => void;
@@ -41,6 +44,7 @@ function buildStaffPayload(data: AddStaffFormData): Record<string, unknown> {
   const payload: Record<string, unknown> = {
     name: data.name.trim(),
     isActive: data.isActive,
+    menuIds: data.menuIds,
   };
   if (data.roleId != null) payload.roleId = data.roleId;
   const email = data.email.trim();
@@ -51,7 +55,6 @@ function buildStaffPayload(data: AddStaffFormData): Record<string, unknown> {
 }
 
 export default function AddStaffModal({
-  menuId,
   staff = null,
   onClose,
   onRefresh,
@@ -61,7 +64,8 @@ export default function AddStaffModal({
   const isEdit = Boolean(staff?.id);
   const [isSaving, setIsSaving] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
-  const { roles, loading: rolesLoading } = useMenuStaffRoles(menuId);
+  const { roles, loading: rolesLoading } = useAccountStaffRoles();
+  const { menus, loading: menusLoading } = useDashboardMenus();
 
   const {
     control,
@@ -77,6 +81,7 @@ export default function AddStaffModal({
       confirmPassword: "",
       isActive: true,
       roleId: null,
+      menuIds: [],
     },
     mode: "onChange",
   });
@@ -92,6 +97,7 @@ export default function AddStaffModal({
         confirmPassword: "",
         isActive: staff.isActive ?? true,
         roleId: typeof staff.roleId === "number" ? staff.roleId : null,
+        menuIds: staff.menuIds ?? [],
       });
     } else {
       reset({
@@ -101,6 +107,7 @@ export default function AddStaffModal({
         confirmPassword: "",
         isActive: true,
         roleId: null,
+        menuIds: [],
       });
     }
   }, [staff, reset]);
@@ -122,7 +129,7 @@ export default function AddStaffModal({
         const result = await axiosPatch<
           Record<string, unknown>,
           { message?: string }
-        >(`/menus/${menuId}/staff/${staff.id}`, locale, payload);
+        >(`/dashboard/staff/${staff.id}`, locale, payload);
         if (result.status) {
           toast.success(t("editSuccess"));
           onClose();
@@ -134,7 +141,7 @@ export default function AddStaffModal({
         const result = await axiosPost<
           Record<string, unknown>,
           { message?: string; staff?: MenuStaff }
-        >(`/menus/${menuId}/staff`, locale, payload);
+        >("/dashboard/staff", locale, payload);
         if (result.status) {
           toast.success(t("createSuccess"));
           onClose();
@@ -246,7 +253,7 @@ export default function AddStaffModal({
                             >
                               <IoShieldCheckmarkOutline className="shrink-0 text-lg" />
                               <span className="min-w-0 flex-1 truncate">
-                                {role.name}
+                                {roleDisplayName(role, locale)}
                               </span>
                             </button>
                           );
@@ -258,6 +265,77 @@ export default function AddStaffModal({
                 {errors.roleId && (
                   <p className="mt-1.5 text-xs text-red-500">
                     {errors.roleId.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t("menusLabel")} *
+                </label>
+                <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
+                  {t("menusHint")}
+                </p>
+                <Controller
+                  name="menuIds"
+                  control={control}
+                  rules={{
+                    validate: (v) =>
+                      v.length > 0 ? true : t("menusRequired"),
+                  }}
+                  render={({ field }) => {
+                    if (menusLoading) {
+                      return (
+                        <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-500 dark:border-gray-600 dark:bg-gray-700/40 dark:text-gray-400">
+                          <span
+                            className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"
+                            aria-hidden
+                          />
+                          {t("menusLoading")}
+                        </div>
+                      );
+                    }
+                    if (menus.length === 0) {
+                      return (
+                        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300">
+                          {t("noMenusHint")}
+                        </p>
+                      );
+                    }
+                    return (
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        {menus.map((menu) => {
+                          const isSelected = field.value.includes(menu.id);
+                          return (
+                            <button
+                              key={menu.id}
+                              type="button"
+                              onClick={() =>
+                                field.onChange(
+                                  isSelected
+                                    ? field.value.filter((id) => id !== menu.id)
+                                    : [...field.value, menu.id],
+                                )
+                              }
+                              className={`flex items-center gap-2.5 rounded-xl border px-3.5 py-3 text-start text-sm font-medium transition-all duration-200 ${
+                                isSelected
+                                  ? "border-primary/50 bg-primary/5 text-primary ring-1 ring-primary/20 dark:bg-primary/10"
+                                  : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700/40"
+                              }`}
+                            >
+                              <IoRestaurantOutline className="shrink-0 text-lg" />
+                              <span className="min-w-0 flex-1 truncate">
+                                {localizedMenuName(menu, locale)}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    );
+                  }}
+                />
+                {errors.menuIds && (
+                  <p className="mt-1.5 text-xs text-red-500">
+                    {errors.menuIds.message}
                   </p>
                 )}
               </div>

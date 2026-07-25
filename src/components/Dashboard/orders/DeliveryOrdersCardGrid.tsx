@@ -2,7 +2,11 @@
 
 import { useTranslations } from "next-intl";
 import { MdOutlineDeliveryDining } from "react-icons/md";
-import type { CallEntry, OrderActionResult } from "@/lib/tableOrders";
+import type {
+  CallEntry,
+  OrderActionResult,
+  OrderMenuBadges,
+} from "@/lib/tableOrders";
 import MobileListPagination from "@/components/Dashboard/mobile/MobileListPagination";
 import DeliveryOrderMobileCard from "./DeliveryOrderMobileCard";
 
@@ -11,7 +15,9 @@ interface DeliveryOrdersCardGridProps {
   loading: boolean;
   locale: string;
   currency: string;
-  menuId: string;
+  /** Empty on account-level lists, where each entry carries its own menu. */
+  menuId?: string;
+  menuBadges?: OrderMenuBadges;
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
@@ -45,7 +51,8 @@ export default function DeliveryOrdersCardGrid({
   loading,
   locale,
   currency,
-  menuId,
+  menuId = "",
+  menuBadges,
   page,
   totalPages,
   onPageChange,
@@ -92,16 +99,20 @@ export default function DeliveryOrdersCardGrid({
   return (
     <div id="onboarding-delivery-orders-table" className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6 items-stretch">
-        {entries.map((entry) => (
-          <DeliveryOrderMobileCard
-            key={entry.id}
-            entry={entry}
-            currency={currency}
-            menuId={menuId}
-            onView={onView}
-            onActionComplete={onActionComplete}
-          />
-        ))}
+        {entries.map((entry) => {
+          const badge = entry.menuId != null ? menuBadges?.[entry.menuId] : undefined;
+          return (
+            <DeliveryOrderMobileCard
+              key={entry.id}
+              entry={entry}
+              currency={badge?.currency || currency}
+              menuId={menuId || (entry.menuId != null ? String(entry.menuId) : "")}
+              menuLabel={badge?.label}
+              onView={onView}
+              onActionComplete={onActionComplete}
+            />
+          );
+        })}
       </div>
 
       <MobileListPagination

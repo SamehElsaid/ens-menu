@@ -2,12 +2,14 @@
 
 import { useTranslations } from "next-intl";
 import type { MenuStaffRole } from "@/types/Menu";
+import { roleDisplayName } from "@/shared/roleDisplayName";
 import {
   IoCreateOutline,
   IoTrashOutline,
   IoShieldCheckmarkOutline,
   IoPeopleOutline,
   IoLockClosedOutline,
+  IoCopyOutline,
 } from "react-icons/io5";
 
 interface RoleCardProps {
@@ -15,6 +17,7 @@ interface RoleCardProps {
   locale: string;
   onEdit: (role: MenuStaffRole) => void;
   onDelete: (role: MenuStaffRole) => void;
+  onDuplicate: (role: MenuStaffRole) => void;
 }
 
 const MAX_VISIBLE_PERMISSIONS = 6;
@@ -24,12 +27,14 @@ export default function RoleCard({
   locale,
   onEdit,
   onDelete,
+  onDuplicate,
 }: RoleCardProps) {
   const t = useTranslations("Roles");
   const tRoot = useTranslations();
   const isRTL = locale === "ar";
 
-  const canDelete = role.staffCount === 0;
+  const canDelete = !role.isDefault && role.staffCount === 0;
+  const displayName = roleDisplayName(role, locale);
   const visible = role.permissions.slice(0, MAX_VISIBLE_PERMISSIONS);
   const extraCount = role.permissions.length - visible.length;
 
@@ -65,10 +70,10 @@ export default function RoleCard({
           <div className="min-w-0 flex-1">
             <h3
               className="truncate text-lg font-bold text-slate-900 dark:text-slate-50"
-              title={role.name}
+              title={displayName}
               dir={isRTL ? "rtl" : "ltr"}
             >
-              {role.name}
+              {displayName}
             </h3>
             <p className="mt-0.5 flex items-center gap-1 text-xs font-medium text-slate-500 dark:text-slate-400">
               <IoPeopleOutline className="text-sm" aria-hidden />
@@ -106,34 +111,66 @@ export default function RoleCard({
           )}
         </div>
 
-        <div className="mt-auto flex items-center gap-2 border-t border-slate-100 pt-3 dark:border-slate-700/80">
-          <button
-            type="button"
-            onClick={() => onEdit(role)}
-            title={t("edit")}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-700 transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary active:scale-[0.98] dark:border-slate-600 dark:bg-slate-700/50 dark:text-slate-200 dark:hover:border-primary/40 dark:hover:bg-primary/10 dark:hover:text-primary"
-          >
-            <IoCreateOutline className="text-base" aria-hidden />
-            {t("edit")}
-          </button>
-          <button
-            type="button"
-            onClick={() => canDelete && onDelete(role)}
-            disabled={!canDelete}
-            title={canDelete ? t("delete") : t("deleteBlocked")}
-            className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all active:scale-[0.98] ${
-              canDelete
-                ? "border-red-200/80 bg-red-50 text-red-600 hover:border-red-300 hover:bg-red-100 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300 dark:hover:border-red-800 dark:hover:bg-red-950/50"
-                : "cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-500"
-            }`}
-          >
-            {canDelete ? (
-              <IoTrashOutline className="text-base" aria-hidden />
-            ) : (
-              <IoLockClosedOutline className="text-base" aria-hidden />
-            )}
-            {t("delete")}
-          </button>
+        <div className="mt-auto border-t border-slate-100 pt-3 dark:border-slate-700/80">
+          {role.isDefault ? (
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => onDuplicate(role)}
+                title={t("duplicateHint")}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-primary/25 bg-primary/5 px-3 py-2.5 text-sm font-semibold text-primary transition-all hover:border-primary/40 hover:bg-primary/10 active:scale-[0.98] dark:border-primary/40 dark:bg-primary/10 dark:hover:bg-primary/20"
+              >
+                <IoCopyOutline className="text-base" aria-hidden />
+                {t("duplicate")}
+              </button>
+              <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
+                <IoLockClosedOutline
+                  className="mt-0.5 shrink-0 text-xs"
+                  aria-hidden
+                />
+                {t("defaultLocked")}
+              </p>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onEdit(role)}
+                title={t("edit")}
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-700 transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary active:scale-[0.98] dark:border-slate-600 dark:bg-slate-700/50 dark:text-slate-200 dark:hover:border-primary/40 dark:hover:bg-primary/10 dark:hover:text-primary"
+              >
+                <IoCreateOutline className="text-base" aria-hidden />
+                {t("edit")}
+              </button>
+              <button
+                type="button"
+                onClick={() => onDuplicate(role)}
+                title={t("duplicateHint")}
+                aria-label={t("duplicate")}
+                className="inline-flex size-[42px] shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary active:scale-[0.98] dark:border-slate-600 dark:bg-slate-700/50 dark:text-slate-300 dark:hover:border-primary/40 dark:hover:bg-primary/10 dark:hover:text-primary"
+              >
+                <IoCopyOutline className="text-base" aria-hidden />
+              </button>
+              <button
+                type="button"
+                onClick={() => canDelete && onDelete(role)}
+                disabled={!canDelete}
+                title={canDelete ? t("delete") : t("deleteBlocked")}
+                className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all active:scale-[0.98] ${
+                  canDelete
+                    ? "border-red-200/80 bg-red-50 text-red-600 hover:border-red-300 hover:bg-red-100 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300 dark:hover:border-red-800 dark:hover:bg-red-950/50"
+                    : "cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-500"
+                }`}
+              >
+                {canDelete ? (
+                  <IoTrashOutline className="text-base" aria-hidden />
+                ) : (
+                  <IoLockClosedOutline className="text-base" aria-hidden />
+                )}
+                {t("delete")}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </article>

@@ -80,6 +80,12 @@ export interface EntryAction {
 export interface CallEntry {
   id: string;
   orderId: string | number;
+  /** Set on account-level lists so an order can be traced back to its menu. */
+  menuId?: number | null;
+  menuSlug?: string | null;
+  menuNameAr?: string | null;
+  menuNameEn?: string | null;
+  menuLogo?: string | null;
   type?: StaffOrderType | string;
   tableNumber?: string | null;
   customerName?: string | null;
@@ -112,6 +118,8 @@ export interface CallEntry {
 export interface CallEntryDetail {
   id?: string;
   orderId?: string | number;
+  /** Set by the account-level detail endpoint so actions know their menu. */
+  menuId?: number | null;
   totalPrice?: number;
   items?: CallItem[];
   itemsSubtotal?: number | null;
@@ -141,6 +149,28 @@ export interface ActivityCallsPayload {
   totalPages?: number;
   total?: number;
 }
+
+/** Menu descriptor returned alongside account-level order lists. */
+export interface OrdersMenuOption {
+  id: number;
+  slug: string | null;
+  nameAr: string | null;
+  nameEn: string | null;
+  logo: string | null;
+  currency: string | null;
+}
+
+export interface DashboardOrdersPayload extends ActivityCallsPayload {
+  menus?: OrdersMenuOption[];
+}
+
+/** Per-menu display data for order cards in an account-level (mixed) list. */
+export interface OrderMenuBadge {
+  label: string;
+  currency: string;
+}
+
+export type OrderMenuBadges = Record<number, OrderMenuBadge>;
 
 const TERMINAL_STATUSES = new Set<OrderStatus>([
   "confirmed",

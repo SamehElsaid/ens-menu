@@ -50,6 +50,8 @@ import {
   menusAvailableToJoinGroup,
   type MenuGroupSummary,
 } from "@/lib/menuDeliveryGroups";
+import StaffMenusList from "@/components/Dashboard/StaffMenusList";
+import { useAuthorization } from "@/hooks/useAuthorization";
 import { getMenuDashboardRef, menuDashboardPath } from "@/lib/menuDashboardPath";
 import {
   publicMenuLinkUrl,
@@ -61,6 +63,25 @@ import {
 } from "@/lib/subscriptionMenus";
 
 export default function DashboardPage() {
+  const { isStaff, isResolved } = useAuthorization();
+
+  // Mounting the owner view before the session is known would fire the
+  // owner-only /menus request for a staff member and get a 403.
+  if (!isResolved) return <DashboardRootLoader />;
+  // Staff see only their granted menus and none of the owner-only actions.
+  if (isStaff) return <StaffMenusList />;
+  return <OwnerMenusPage />;
+}
+
+function DashboardRootLoader() {
+  return (
+    <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4 sm:min-h-[60vh]">
+      <div className="h-16 w-16 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
+    </div>
+  );
+}
+
+function OwnerMenusPage() {
   const t = useTranslations("Menus");
   const locale = useLocale();
   const router = useRouter();
@@ -553,7 +574,7 @@ export default function DashboardPage() {
       />
 
       {/* Menus Grid — desktop/tablet */}
-      <div className="hidden grid-cols-1 gap-6 md:grid md:grid-cols-2 xl:grid-cols-3">
+      <div className="hidden grid-cols-1 gap-6 md:grid md:grid-cols-1 xl:grid-cols-2">
         {menuDisplayGroups.map((group) => {
           if (group.type === "group") {
             return (

@@ -4,7 +4,7 @@ import { CLOSE_NAV_OVERLAYS_EVENT } from "@/lib/safeNavigation";
 import { isFreePlanUser } from "@/lib/subscription";
 import { useCallback, useEffect, useState } from "react";
 import LinkTo from "../Global/LinkTo";
-import { adminNavSections, navSections } from "./data";
+import { accountNavSections, adminNavSections, navSections } from "./data";
 import { useAuthorization } from "@/hooks/useAuthorization";
 import Drawer from "../Global/Drawer";
 import { useLocale, useTranslations } from "next-intl";
@@ -257,17 +257,23 @@ function NavGroup({
   );
 }
 
+/** `account` renders the /dashboard sidebar; `menu` the /dashboard/:menu one. */
+export type SidebarVariant = "account" | "menu";
+
 export function DashboardSidebar({
   isMenuOpen,
   segment,
   setIsMenuOpen,
   isAdmin = false,
+  variant = "menu",
 }: {
   isMenuOpen: boolean;
   segment: string | null;
   setIsMenuOpen: (isMenuOpen: boolean) => void;
   isAdmin?: boolean;
+  variant?: SidebarVariant;
 }) {
+  const isAccountVariant = variant === "account" && !isAdmin;
   const pathname = usePathname();
   const locale = useLocale();
   const t = useTranslations("Dashboard");
@@ -305,7 +311,7 @@ export function DashboardSidebar({
           items: section.items.filter(canShowAdminItem),
         }))
         .filter((section) => section.items.length > 0)
-    : navSections
+    : (isAccountVariant ? accountNavSections : navSections)
         .map((section) => ({
           ...section,
           items: section.items.filter(canShowStaffItem),
@@ -351,18 +357,22 @@ export function DashboardSidebar({
       window.removeEventListener(CLOSE_NAV_OVERLAYS_EVENT, closeDrawer);
   }, [setIsMenuOpen]);
 
-  const itemHref = (link: string) =>
-    isAdmin ? `/admin/${link}` : `/dashboard/${segment}/${link}`;
+  const itemHref = (link: string) => {
+    if (isAdmin) return `/admin/${link}`;
+    if (isAccountVariant) return link ? `/dashboard/${link}` : "/dashboard";
+    return `/dashboard/${segment}/${link}`;
+  };
 
-  const subscriptionHref = segment
-    ? `/dashboard/${segment}/subscription`
-    : "/dashboard/subscription";
+  const subscriptionHref = "/dashboard/subscription";
 
   const isItemActive = (item: NavItem) => {
     if (isItemLocked(item)) return false;
     const link = item.link ?? "";
     if (link === "") {
       if (isAdmin) return pathname === "/admin";
+      if (isAccountVariant) {
+        return pathname === "/dashboard" || pathname === "/dashboard/";
+      }
       return (
         pathname === `/dashboard/${segment}` ||
         pathname === `/dashboard/${segment}/`
@@ -382,7 +392,7 @@ export function DashboardSidebar({
       } flex h-dvh flex-col overflow-x-visible border-e border-slate-100 bg-white fixed top-0 start-0 dark:border-slate-800/80 dark:bg-[#0d1117]/95 lg:flex`}
       dir={locale === "ar" ? "rtl" : "ltr"}
     >
-      {isAdmin ? (
+      {isAdmin || isAccountVariant ? (
         <div className="flex h-[64px] shrink-0 items-center justify-center border-b border-slate-100 dark:border-slate-800/80">
           <Logo size="small" />
         </div>
@@ -423,7 +433,7 @@ export function DashboardSidebar({
         </LinkTo>
       )}
 
-      {!isAdmin && publicMenuUrl && (
+      {!isAdmin && !isAccountVariant && publicMenuUrl && (
         <div className="shrink-0 border-b border-slate-100 px-4 py-3 dark:border-slate-800/80">
           <a
             href={publicMenuUrl}

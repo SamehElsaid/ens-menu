@@ -7,7 +7,6 @@ import { MenuStaff } from "@/types/Menu";
 import DeleteEntityConfirmModal from "./DeleteEntityConfirmModal";
 
 interface DeleteStaffConfirmProps {
-  menuId: string;
   staff: MenuStaff;
   displayLabel: string;
   onClose: () => void;
@@ -15,7 +14,6 @@ interface DeleteStaffConfirmProps {
 }
 
 export default function DeleteStaffConfirm({
-  menuId,
   staff,
   displayLabel,
   onClose,
@@ -27,7 +25,7 @@ export default function DeleteStaffConfirm({
 
   const handleDelete = async () => {
     const result = await axiosDelete<unknown>(
-      `/menus/${menuId}/staff/${staff.id}`,
+      `/dashboard/staff/${staff.id}`,
       locale,
     );
     if (result.status) {

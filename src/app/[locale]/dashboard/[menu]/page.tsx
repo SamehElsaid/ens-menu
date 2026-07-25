@@ -94,6 +94,11 @@ export default function DashboardMenuPage() {
       includeProSources: Boolean(userData) && !isFreePlan,
     });
 
+  // Orders live on the account page; link there pre-filtered to this menu.
+  const accountOrdersHref = menu?.id
+    ? `/dashboard/orders?menuId=${menu.id}`
+    : "/dashboard/orders";
+
   const publicSlug = resolvePublicMenuSlug(menu?.slug, menu?.id);
   const menuLinkUrl = publicSlug ? publicMenuLinkUrl(publicSlug) : "";
   const menuQrUrl = publicSlug ? publicMenuQrUrl(publicSlug) : "";
@@ -230,7 +235,7 @@ export default function DashboardMenuPage() {
           )}
           {can("orders:view") && (
             <LinkTo
-              href={`/dashboard/${menuSlugOrId}/orders`}
+              href={accountOrdersHref}
               className={`${tabBase} ${tabInactive}`}
             >
               <IoReceiptOutline className="text-lg shrink-0" />
@@ -248,7 +253,7 @@ export default function DashboardMenuPage() {
           )}
           {can("staff:manage") && (
             <LinkTo
-              href={`/dashboard/${menuSlugOrId}/staff`}
+              href="/dashboard/staff"
               className={`${tabBase} ${tabInactive}`}
             >
               <MdPeopleOutline className="text-lg shrink-0" />

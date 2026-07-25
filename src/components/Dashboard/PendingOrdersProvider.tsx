@@ -5,13 +5,14 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
 import { useLocale } from "next-intl";
 import { axiosGet } from "@/shared/axiosCall";
-import { useCurrentPlanCapabilities } from "@/hooks/useCurrentPlanCapabilities";
-import { useMenuActivitySocket } from "@/hooks/useMenuActivitySocket";
+import { useDashboardMenus } from "@/hooks/useDashboardMenus";
+import { useMenusActivitySocket } from "@/hooks/useMenuActivitySocket";
 import { playNewOrderNotificationSound } from "@/lib/orderNotificationSound";
 import { isPendingOrder, isDeliveryEntry } from "@/lib/tableOrders";
 import type { ActivityCallsPayload, CallEntry } from "@/lib/tableOrders";
@@ -36,80 +37,66 @@ export function usePendingOrders(): PendingOrdersContextValue {
   return useContext(PendingOrdersContext);
 }
 
-export function PendingOrdersProvider({
-  segment,
-  children,
-}: {
-  segment: string | null;
-  children: ReactNode;
-}) {
+/**
+ * Pending-order badges are account-wide: they count open orders across every
+ * menu the signed-in account can reach, not just the menu currently open.
+ */
+export function PendingOrdersProvider({ children }: { children: ReactNode }) {
   const locale = useLocale();
-  const capabilities = useCurrentPlanCapabilities();
-  const tableOrderingEnabled = capabilities.tableOrderingQr;
-  const liveNotificationsEnabled = capabilities.liveOrderNotifications;
+  const { menus } = useDashboardMenus();
+
+  // Capabilities come from each menu owner's plan, so this also holds for a
+  // staff member whose own account has no plan of its own.
+  const tableOrderingEnabled = menus.some((m) => m.capabilities.tableOrderingQr);
+  const liveNotificationsEnabled = menus.some(
+    (m) => m.capabilities.liveOrderNotifications,
+  );
+
+  const menuIds = useMemo(() => menus.map((menu) => menu.id), [menus]);
 
   const [allEntries, setAllEntries] = useState<CallEntry[]>([]);
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    if (!segment) {
+    if (menuIds.length === 0) {
       setAllEntries([]);
       return;
     }
     setLoading(true);
     try {
-      const requests = [
+      const fetchChannel = (channel: "table" | "delivery") =>
         axiosGet<ActivityCallsPayload>(
-          `/menus/${segment}/activity-logs`,
+          "/dashboard/orders",
           locale,
           undefined,
-          { page: 1, limit: 50, channel: "delivery" },
+          { page: 1, limit: 50, channel },
           undefined,
           true,
-        ),
-      ];
-
-      if (tableOrderingEnabled) {
-        requests.unshift(
-          axiosGet<ActivityCallsPayload>(
-            `/menus/${segment}/activity-logs`,
-            locale,
-            undefined,
-            { page: 1, limit: 50, channel: "table" },
-            undefined,
-            true,
-          ),
         );
-      }
 
-      const results = await Promise.all(requests);
+      const [tableRes, deliveryRes] = await Promise.all([
+        tableOrderingEnabled ? fetchChannel("table") : Promise.resolve(null),
+        fetchChannel("delivery"),
+      ]);
 
-      const tableEntries =
-        tableOrderingEnabled && results[0]?.status && results[0]?.data
-          ? (results[0].data.entries ?? results[0].data.calls ?? [])
-          : [];
-      const deliveryResult = tableOrderingEnabled ? results[1] : results[0];
-      const deliveryEntries =
-        deliveryResult?.status && deliveryResult?.data
-          ? (deliveryResult.data.entries ?? deliveryResult.data.calls ?? [])
-          : [];
+      const readEntries = (
+        res: Awaited<ReturnType<typeof fetchChannel>> | null,
+      ): CallEntry[] =>
+        res?.status && res.data ? (res.data.entries ?? res.data.calls ?? []) : [];
 
-      setAllEntries([...tableEntries, ...deliveryEntries]);
+      setAllEntries([...readEntries(tableRes), ...readEntries(deliveryRes)]);
     } catch {
       setAllEntries([]);
     } finally {
       setLoading(false);
     }
-  }, [segment, locale, tableOrderingEnabled]);
+  }, [menuIds.length, locale, tableOrderingEnabled]);
 
   useEffect(() => {
     void refresh();
   }, [refresh]);
 
-  useMenuActivitySocket(
-    !segment || !liveNotificationsEnabled ? "" : segment,
-    refresh,
-    {
+  useMenusActivitySocket(liveNotificationsEnabled ? menuIds : [], refresh, {
     onNewOrder: playNewOrderNotificationSound,
   });
 

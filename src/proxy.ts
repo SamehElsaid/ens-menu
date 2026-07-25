@@ -6,8 +6,10 @@ import { decryptData } from "./shared/encryption";
 import { isSafeInternalRedirect } from "./lib/authRedirect";
 import {
   OWNER_ONLY,
+  permissionForAccountRoute,
   permissionForDashboardSubpath,
 } from "./lib/navPermissions";
+import { isNonGatingPermission } from "./types/StaffPermission";
 
 export interface DecryptedToken {
   role: string;
@@ -77,28 +79,18 @@ export default function proxy(request: NextRequest) {
         ? tokenDecrypted.permissions
         : [];
 
-      // Staff must have dashboard access at all.
-      if (!permissions.includes("dashboard:access")) {
-        const target = request.nextUrl.clone();
-        target.pathname = `${prefix}/unauthorized`;
-        target.searchParams.set("reason", "staff_no_dashboard");
-        return NextResponse.redirect(target);
-      }
+      // Account-level routes (/dashboard itself, /dashboard/orders, …) are not
+      // menu-scoped, so their permission comes from the first segment directly.
+      // Reading it as a `:menu` id would let `/dashboard/orders` through with
+      // no permission check at all.
+      const afterDashboard = pathname.replace(/^\/dashboard/, "");
+      const accountPermission = permissionForAccountRoute(afterDashboard);
 
-      // /dashboard (menu list) is owner-only — staff must use /dashboard/:menuId.
-      const isDashboardRoot =
-        pathname === "/dashboard" || pathname === "/dashboard/";
-      if (isDashboardRoot) {
-        const target = request.nextUrl.clone();
-        target.pathname = `${prefix}/unauthorized`;
-        target.searchParams.set("reason", "staff_dashboard_root");
-        return NextResponse.redirect(target);
-      }
-
-      // Nested route: /dashboard/:menu/<subpath> → required permission.
-      const nested = pathname.match(/^\/dashboard\/[^/]+\/?(.*)$/);
-      const subpath = nested?.[1] ?? "";
-      const required = permissionForDashboardSubpath(subpath);
+      const required =
+        accountPermission ??
+        permissionForDashboardSubpath(
+          pathname.match(/^\/dashboard\/[^/]+\/?(.*)$/)?.[1] ?? "",
+        );
 
       if (required === OWNER_ONLY) {
         const target = request.nextUrl.clone();
@@ -107,7 +99,7 @@ export default function proxy(request: NextRequest) {
         return NextResponse.redirect(target);
       }
 
-      if (!permissions.includes(required)) {
+      if (!isNonGatingPermission(required) && !permissions.includes(required)) {
         const target = request.nextUrl.clone();
         target.pathname = `${prefix}/unauthorized`;
         target.searchParams.set("reason", "staff_no_permission");

@@ -24,6 +24,8 @@ interface DeliveryOrderMobileCardProps {
   onView: (id: string) => void;
   onActionComplete: (result: OrderActionResult) => void;
   menuId: string;
+  /** Shown on account-level lists to tell orders from different menus apart. */
+  menuLabel?: string;
 }
 
 export default function DeliveryOrderMobileCard({
@@ -32,6 +34,7 @@ export default function DeliveryOrderMobileCard({
   onView,
   onActionComplete,
   menuId,
+  menuLabel,
 }: DeliveryOrderMobileCardProps) {
   const t = useTranslations("deliveryOrders");
   const locale = useLocale();
@@ -82,6 +85,11 @@ export default function DeliveryOrderMobileCard({
             {t(`orderStatus.${status}` as never)}
           </span>
         </div>
+        {menuLabel ? (
+          <p className="mt-2 inline-flex max-w-full truncate rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200">
+            {menuLabel}
+          </p>
+        ) : null}
       </div>
 
       <div className="space-y-2 px-4 py-3">

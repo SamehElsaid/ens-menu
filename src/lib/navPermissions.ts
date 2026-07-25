@@ -41,3 +41,33 @@ export function permissionForDashboardSubpath(subpath: string): RoutePermission 
   const first = clean.split("/")[0];
   return DASHBOARD_ROUTE_PERMISSIONS[first] ?? "dashboard:access";
 }
+
+/**
+ * Account-level routes that live directly under `/dashboard` instead of under
+ * `/dashboard/:menu`. Without this list the first path segment would be read as
+ * a menu id and `/dashboard/orders` would only require `dashboard:access`.
+ */
+export const ACCOUNT_ROUTE_PERMISSIONS: Record<string, RoutePermission> = {
+  orders: "orders:view",
+  "delivery-orders": "delivery:view",
+  staff: "staff:manage",
+  subscription: OWNER_ONLY,
+  advertisements: "ads:manage",
+};
+
+export function isAccountRouteSegment(segment: string): boolean {
+  return Object.prototype.hasOwnProperty.call(
+    ACCOUNT_ROUTE_PERMISSIONS,
+    segment,
+  );
+}
+
+/** Permission for a path under `/dashboard`, or null when it targets a menu. */
+export function permissionForAccountRoute(
+  pathAfterDashboard: string,
+): RoutePermission | null {
+  const clean = pathAfterDashboard.replace(/^\/+|\/+$/g, "");
+  if (clean === "") return "dashboard:access";
+  const first = clean.split("/")[0];
+  return ACCOUNT_ROUTE_PERMISSIONS[first] ?? null;
+}

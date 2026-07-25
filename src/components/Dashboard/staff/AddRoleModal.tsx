@@ -8,6 +8,7 @@ import CustomInput from "@/components/Custom/CustomInput";
 import CustomBtn from "@/components/Custom/CustomBtn";
 import StaffPermissionsEditor from "./StaffPermissionsEditor";
 import type { MenuStaffRole } from "@/types/Menu";
+import { roleDisplayName } from "@/shared/roleDisplayName";
 import {
   IoCloseOutline,
   IoShieldCheckmarkOutline,
@@ -15,8 +16,12 @@ import {
 } from "react-icons/io5";
 
 interface AddRoleModalProps {
-  menuId: string;
   role?: MenuStaffRole | null;
+  /**
+   * `duplicate` seeds the form from `role` but saves a brand new role — the way
+   * to get an editable version of a read-only default role.
+   */
+  mode?: "edit" | "duplicate";
   onClose: () => void;
   onSaved?: () => void;
 }
@@ -29,17 +34,26 @@ interface RoleErrorBody {
 }
 
 export default function AddRoleModal({
-  menuId,
   role = null,
+  mode = "edit",
   onClose,
   onSaved,
 }: AddRoleModalProps) {
   const t = useTranslations("Roles.modal");
   const locale = useLocale();
-  const isEdit = Boolean(role?.id);
+  const isDuplicate = mode === "duplicate" && Boolean(role);
+  const isEdit = Boolean(role?.id) && !isDuplicate;
   const modalRef = useRef<HTMLDivElement>(null);
 
-  const [name, setName] = useState(role?.name ?? "");
+  const [name, setName] = useState(() => {
+    if (!role) return "";
+    return isDuplicate ? t("copyName", { name: role.name }) : role.name;
+  });
+  const [nameEn, setNameEn] = useState(() => {
+    const source = role?.nameEn?.trim();
+    if (!source) return "";
+    return isDuplicate ? t("copyName", { name: source }) : source;
+  });
   const [permissions, setPermissions] = useState<string[]>(
     role?.permissions ?? [],
   );
@@ -63,15 +77,19 @@ export default function AddRoleModal({
     setNameError(undefined);
     setIsSaving(true);
     try {
-      const payload = { name: trimmed, permissions };
+      const payload = {
+        name: trimmed,
+        nameEn: nameEn.trim(),
+        permissions,
+      };
       const result = isEdit
         ? await axiosPatch<typeof payload, RoleErrorBody>(
-            `/menus/${menuId}/staff-roles/${role!.id}`,
+            `/dashboard/staff-roles/${role!.id}`,
             locale,
             payload,
           )
         : await axiosPost<typeof payload, RoleErrorBody>(
-            `/menus/${menuId}/staff-roles`,
+            "/dashboard/staff-roles",
             locale,
             payload,
           );
@@ -119,10 +137,18 @@ export default function AddRoleModal({
                   id="add-role-title"
                   className="text-xl font-bold tracking-tight text-gray-900 dark:text-white"
                 >
-                  {isEdit ? t("editTitle") : t("title")}
+                  {isDuplicate
+                    ? t("duplicateTitle")
+                    : isEdit
+                      ? t("editTitle")
+                      : t("title")}
                 </h2>
                 <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
-                  {t("subtitle")}
+                  {isDuplicate
+                    ? t("duplicateSubtitle", {
+                        name: roleDisplayName(role!, locale),
+                      })
+                    : t("subtitle")}
                 </p>
               </div>
             </div>
@@ -154,6 +180,22 @@ export default function AddRoleModal({
               error={nameError}
               className="px-4 py-3 border-gray-300 focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t("nameEnLabel")}
+            </label>
+            <CustomInput
+              type="text"
+              value={nameEn}
+              onChange={(e) => setNameEn(e.target.value)}
+              placeholder={t("nameEnPlaceholder")}
+              className="px-4 py-3 border-gray-300 focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            />
+            <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+              {t("nameEnHint")}
+            </p>
           </div>
 
           <div className="rounded-2xl border border-gray-100 bg-gray-50/80 p-4 dark:border-gray-600/50 dark:bg-gray-700/30">

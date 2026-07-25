@@ -42,7 +42,17 @@ interface MenusResponse {
   menuTables?: unknown[];
 }
 
-const TOP_LEVEL_SEGMENTS = new Set(["subscription", "advertisements"]);
+/**
+ * Segments directly under `/dashboard` that are *not* a menu id. Without them
+ * the layout would try to load `/menus/orders` and bounce to /unauthorized.
+ */
+const TOP_LEVEL_SEGMENTS = new Set([
+  "subscription",
+  "advertisements",
+  "orders",
+  "delivery-orders",
+  "staff",
+]);
 
 function isMenuRouteSegment(segment: string | null): segment is string {
   return Boolean(segment && !TOP_LEVEL_SEGMENTS.has(segment));
@@ -150,26 +160,31 @@ export default function DashboardClientLayout({
   );
 
   const sidebarSegment = routeMenuKey ?? segment;
+  // Anything that is not a menu route lives on the account shell: /dashboard
+  // itself plus the global orders/staff pages.
+  const sidebarVariant = isMenuRoute ? "menu" : "account";
 
   const isAppLoading =
     accountGateStatus === "loading" || profileGateStatus === "loading";
 
   return (
     <DashboardTitleProvider>
-      <PendingOrdersProvider segment={sidebarSegment}>
+      <PendingOrdersProvider>
         <AuthUserHydrate />
         <FcmTokenSync />
         <UpcomingFeaturesAnnouncement />
         {isAppLoading ? null : accountGateStatus === "suspended" ? (
-          <Layout segment={sidebarSegment} hideSidebar>
+          <Layout segment={sidebarSegment} variant={sidebarVariant} hideSidebar>
             <SuspendedAccountScreen />
           </Layout>
         ) : profileGateStatus === "incomplete" ? (
-          <Layout segment={sidebarSegment} hideSidebar>
+          <Layout segment={sidebarSegment} variant={sidebarVariant} hideSidebar>
             <RequirePhone enforce requireVerification={false} />
           </Layout>
         ) : (
-          <Layout segment={sidebarSegment}>{dashboardContent}</Layout>
+          <Layout segment={sidebarSegment} variant={sidebarVariant}>
+            {dashboardContent}
+          </Layout>
         )}
       </PendingOrdersProvider>
     </DashboardTitleProvider>

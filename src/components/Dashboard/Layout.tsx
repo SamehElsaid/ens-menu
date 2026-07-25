@@ -2,21 +2,28 @@
 import { useState, type ReactNode } from "react";
 import { DashboardContentSection } from "@/components/Dashboard/DashboardContentSection";
 import { DashboardHeader } from "@/components/Dashboard/DashboardHeader";
-import { DashboardSidebar } from "@/components/Dashboard/DashboardSidebar";
+import {
+  DashboardSidebar,
+  type SidebarVariant,
+} from "@/components/Dashboard/DashboardSidebar";
 
 export default function Layout({
   children,
   segment,
   isAdmin,
   hideSidebar,
+  variant = "menu",
 }: Readonly<{
   children: ReactNode;
   segment: string | null;
   isAdmin?: boolean;
   hideSidebar?: boolean;
+  variant?: SidebarVariant;
 }>) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const showSidebar = (segment || isAdmin) && !hideSidebar;
+  // The account sidebar has no `segment` — it is the /dashboard root itself.
+  const showSidebar =
+    (segment || isAdmin || variant === "account") && !hideSidebar;
 
   return (
     <div className="w-full bg-[#f6f8fb] text-slate-800 dark:bg-[#0d1117] dark:text-slate-100 lg:min-h-screen">
@@ -27,6 +34,7 @@ export default function Layout({
             setIsMenuOpen={setIsMenuOpen}
             segment={segment}
             isAdmin={isAdmin}
+            variant={variant}
           />
         )}
         <main
@@ -37,6 +45,7 @@ export default function Layout({
             segment={segment}
             isAdmin={isAdmin}
             hideSidebar={hideSidebar}
+            hasSidebar={Boolean(showSidebar)}
           />
           <div className="mx-auto mt-4 max-w-[1500px] px-4 pb-8 pt-1 sm:mt-6 sm:px-6 sm:pb-10">
             <DashboardContentSection>{children}</DashboardContentSection>
