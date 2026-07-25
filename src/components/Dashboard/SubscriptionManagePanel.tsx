@@ -66,13 +66,19 @@ function getProPlanPrice(
   plan: Plan | null,
   billing: "monthly" | "yearly",
   voucherDiscountedPrice: number | null,
+  /** Renewals never use the first-period intro price. */
+  useFullPrice = false,
 ): number {
   if (!plan) return 0;
   if (voucherDiscountedPrice != null) return voucherDiscountedPrice;
   if (billing === "yearly") {
-    return plan.firstYearlyPrice ?? plan.priceYearly;
+    return useFullPrice
+      ? plan.priceYearly
+      : (plan.firstYearlyPrice ?? plan.priceYearly);
   }
-  return plan.firstMonthlyPrice ?? plan.priceMonthly;
+  return useFullPrice
+    ? plan.priceMonthly
+    : (plan.firstMonthlyPrice ?? plan.priceMonthly);
 }
 
 export default function SubscriptionManagePanel({
@@ -140,6 +146,7 @@ export default function SubscriptionManagePanel({
     proPlan,
     proBillingChoice,
     canUpgradeToPro || canRenewPro ? voucherDiscountedPrice : null,
+    canRenewPro,
   );
   const extraMenusRenewalAmount = canRenewPro
     ? getExtraMenusRenewalAmount(
