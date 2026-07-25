@@ -5,9 +5,9 @@ import { axiosDelete } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import type { MenuStaffRole } from "@/types/Menu";
 import DeleteEntityConfirmModal from "@/components/Dashboard/DeleteEntityConfirmModal";
+import { roleDisplayName } from "@/shared/roleDisplayName";
 
 interface DeleteRoleConfirmProps {
-  menuId: string;
   role: MenuStaffRole;
   onClose: () => void;
   onDeleted?: () => void;
@@ -21,18 +21,17 @@ interface RoleErrorBody {
 }
 
 export default function DeleteRoleConfirm({
-  menuId,
   role,
   onClose,
   onDeleted,
 }: DeleteRoleConfirmProps) {
   const t = useTranslations("Roles");
   const locale = useLocale();
-  const labelText = role.name.trim();
+  const labelText = roleDisplayName(role, locale).trim();
 
   const handleDelete = async () => {
     const result = await axiosDelete<RoleErrorBody>(
-      `/menus/${menuId}/staff-roles/${role.id}`,
+      `/dashboard/staff-roles/${role.id}`,
       locale,
     );
     if (result.status) {

@@ -79,10 +79,19 @@ export function menuMatchesRouteKey(
   );
 }
 
+/** Account-level routes under `/dashboard` that are not menu identifiers. */
+const NON_MENU_DASHBOARD_SEGMENTS = new Set([
+  "subscription",
+  "advertisements",
+  "orders",
+  "delivery-orders",
+  "staff",
+]);
+
 export function extractDashboardMenuRouteKey(pathname: string): string | null {
   const match = pathname.match(/^\/dashboard\/([^/]+)/);
   if (!match) return null;
   const key = match[1];
-  if (key === "subscription" || key === "advertisements") return null;
+  if (NON_MENU_DASHBOARD_SEGMENTS.has(key)) return null;
   return key;
 }

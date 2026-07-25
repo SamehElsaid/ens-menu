@@ -37,6 +37,7 @@ interface RoleCardGridProps {
   locale: string;
   onEdit: (role: MenuStaffRole) => void;
   onDelete: (role: MenuStaffRole) => void;
+  onDuplicate: (role: MenuStaffRole) => void;
   onAdd: () => void;
 }
 
@@ -46,6 +47,7 @@ export default function RoleCardGrid({
   locale,
   onEdit,
   onDelete,
+  onDuplicate,
   onAdd,
 }: RoleCardGridProps) {
   const t = useTranslations("Roles");
@@ -95,6 +97,7 @@ export default function RoleCardGrid({
           locale={locale}
           onEdit={onEdit}
           onDelete={onDelete}
+          onDuplicate={onDuplicate}
         />
       ))}
     </div>

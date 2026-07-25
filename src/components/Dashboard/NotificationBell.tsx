@@ -107,10 +107,8 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
   }, [locale]);
 
   useEffect(() => {
-    if (segment) {
-      void fetchAccountNotifications();
-    }
-  }, [segment, fetchAccountNotifications]);
+    void fetchAccountNotifications();
+  }, [fetchAccountNotifications]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -154,7 +152,7 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
           icon: <MdPeopleOutline className="text-base" />,
           message: t("noStaff"),
           action: t("noStaffAction"),
-          href: `/dashboard/${segment}/staff`,
+          href: "/dashboard/staff",
         });
       }
       if (!menu.logo?.trim()) {
@@ -307,16 +305,18 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
     return () => document.removeEventListener("keydown", handler);
   }, [isOpen]);
 
+  // Orders live on the account-level pages, so the link carries the order's
+  // own menu as a filter instead of relying on the menu currently open.
   const handleOrderClick = useCallback(
     (entry: CallEntry) => {
-      const isDelivery = isDeliveryEntry(entry);
-      const path = isDelivery
-        ? `/dashboard/${segment}/delivery-orders`
-        : `/dashboard/${segment}/orders`;
-      router.push(`${path}?entry=${entry.id}`);
+      const path = isDeliveryEntry(entry)
+        ? "/dashboard/delivery-orders"
+        : "/dashboard/orders";
+      const menuFilter = entry.menuId ? `&menuId=${entry.menuId}` : "";
+      router.push(`${path}?entry=${entry.id}${menuFilter}`);
       setIsOpen(false);
     },
-    [router, segment],
+    [router],
   );
 
   const handleNavClick = useCallback(
@@ -326,8 +326,6 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
     },
     [router],
   );
-
-  if (!segment) return null;
 
   const dropdown =
     isOpen && mounted
@@ -491,7 +489,7 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
                   </p>
                   {isFreePlan && (
                     <LinkTo
-                      href={`/dashboard/${segment}/subscription`}
+                      href="/dashboard/subscription"
                       onClick={() => setIsOpen(false)}
                       className="text-[10px] font-semibold text-purple-600 hover:underline dark:text-purple-400"
                     >
@@ -647,9 +645,7 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
                   <div className="grid grid-cols-2 divide-x divide-slate-100 dark:divide-slate-800 rtl:divide-x-reverse">
                     {/* Table orders button */}
                     <button
-                      onClick={() =>
-                        handleNavClick(`/dashboard/${segment}/orders`)
-                      }
+                      onClick={() => handleNavClick("/dashboard/orders")}
                       className="flex flex-col items-center gap-1.5 px-3 py-3 transition-colors hover:bg-sky-50 dark:hover:bg-sky-500/10"
                     >
                       <div className="flex items-center gap-2">
@@ -670,7 +666,7 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
                     {/* Online/delivery orders button */}
                     <button
                       onClick={() =>
-                        handleNavClick(`/dashboard/${segment}/delivery-orders`)
+                        handleNavClick("/dashboard/delivery-orders")
                       }
                       className="flex flex-col items-center gap-1.5 px-3 py-3 transition-colors hover:bg-violet-50 dark:hover:bg-violet-500/10"
                     >

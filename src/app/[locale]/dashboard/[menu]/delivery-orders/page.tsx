@@ -1,7 +1,5 @@
-"use client";
+import LegacyOrdersRedirect from "@/components/Dashboard/orders/LegacyOrdersRedirect";
 
-import DeliveryOrdersView from "@/components/Dashboard/orders/DeliveryOrdersView";
-
-export default function DeliveryOrdersPage() {
-  return <DeliveryOrdersView />;
+export default function MenuDeliveryOrdersRedirectPage() {
+  return <LegacyOrdersRedirect target="/dashboard/delivery-orders" />;
 }

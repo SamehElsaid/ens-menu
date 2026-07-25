@@ -16,6 +16,11 @@ const STATUS_OPTIONS: OrderStatusFilter[] = [
 
 type OrdersFiltersTheme = "violet" | "emerald";
 
+export interface OrdersFilterMenu {
+  id: number;
+  label: string;
+}
+
 interface OrdersFiltersProps {
   translationNs: "tableOrders" | "deliveryOrders";
   theme: OrdersFiltersTheme;
@@ -28,6 +33,10 @@ interface OrdersFiltersProps {
   onClearFilters: () => void;
   hasActiveFilters: boolean;
   isRTL: boolean;
+  /** Account-level pages only: filter the aggregate down to a single menu. */
+  menus?: OrdersFilterMenu[];
+  menuFilter?: string;
+  onMenuFilterChange?: (value: string) => void;
 }
 
 const themeClasses: Record<
@@ -71,12 +80,50 @@ export default function OrdersFilters({
   onClearFilters,
   hasActiveFilters,
   isRTL,
+  menus,
+  menuFilter = "",
+  onMenuFilterChange,
 }: OrdersFiltersProps) {
   const t = useTranslations(translationNs);
   const styles = themeClasses[theme];
+  // A single menu needs no picker — the aggregate already is that menu.
+  const showMenuFilter = Boolean(onMenuFilterChange && (menus?.length ?? 0) > 1);
 
   return (
     <div className="mt-4 space-y-4 border-t border-white/60 pt-4 dark:border-slate-700/50">
+      {showMenuFilter && (
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            {t("filters.menu")}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => onMenuFilterChange?.("")}
+              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                menuFilter === "" ? styles.statusActive : styles.statusIdle
+              }`}
+            >
+              {t("filters.menuAll")}
+            </button>
+            {menus?.map((menu) => (
+              <button
+                key={menu.id}
+                type="button"
+                onClick={() => onMenuFilterChange?.(String(menu.id))}
+                className={`max-w-[14rem] truncate rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  menuFilter === String(menu.id)
+                    ? styles.statusActive
+                    : styles.statusIdle
+                }`}
+              >
+                {menu.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <label

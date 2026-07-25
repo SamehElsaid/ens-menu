@@ -25,6 +25,8 @@ interface OrderMobileCardProps {
   onView: (id: string) => void;
   onActionComplete: (result: OrderActionResult) => void;
   menuId: string;
+  /** Shown on account-level lists to tell orders from different menus apart. */
+  menuLabel?: string;
 }
 
 export default function OrderMobileCard({
@@ -33,6 +35,7 @@ export default function OrderMobileCard({
   onView,
   onActionComplete,
   menuId,
+  menuLabel,
 }: OrderMobileCardProps) {
   const t = useTranslations("tableOrders");
   const menu = useAppSelector((s) => s.menuData.menu);
@@ -80,10 +83,19 @@ export default function OrderMobileCard({
             {t(`orderStatus.${status}` as never)}
           </span>
         </div>
-        {entry.pendingGuestAddition ? (
-          <p className="mt-2 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
-            {t("guestAdditionBadge")}
-          </p>
+        {menuLabel || entry.pendingGuestAddition ? (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {menuLabel ? (
+              <span className="inline-flex max-w-full truncate rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold text-violet-800 dark:bg-violet-900/40 dark:text-violet-200">
+                {menuLabel}
+              </span>
+            ) : null}
+            {entry.pendingGuestAddition ? (
+              <span className="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
+                {t("guestAdditionBadge")}
+              </span>
+            ) : null}
+          </div>
         ) : null}
       </div>
 

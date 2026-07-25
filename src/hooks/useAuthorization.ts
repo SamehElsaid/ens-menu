@@ -1,8 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
-import { useDashboardSession } from "@/hooks/useDashboardSession";
-import type { StaffPermissionKey } from "@/types/StaffPermission";
+import { useDashboardSessionState } from "@/hooks/useDashboardSession";
+import {
+  isNonGatingPermission,
+  type StaffPermissionKey,
+} from "@/types/StaffPermission";
 
 type PermInput = StaffPermissionKey | string;
 
@@ -14,6 +17,11 @@ export interface AuthorizationApi {
   hasAll: (permissions: PermInput[]) => boolean;
   /** true when the current session is a staff member (vs. owner/admin). */
   isStaff: boolean;
+  /**
+   * false until the session cookie has been read. While false, `isStaff` is
+   * still its default `false`, so owner-only work must not start yet.
+   */
+  isResolved: boolean;
   permissions: string[];
   roleName?: string;
 }
@@ -26,7 +34,7 @@ export interface AuthorizationApi {
  * the encrypted `sub` cookie (set at login / refreshed via /staff-auth/me).
  */
 export function useAuthorization(): AuthorizationApi {
-  const session = useDashboardSession();
+  const { session, resolved } = useDashboardSessionState();
 
   return useMemo(() => {
     const isStaff = session?.role === "staff";
@@ -34,19 +42,19 @@ export function useAuthorization(): AuthorizationApi {
 
     const can = (permission: PermInput): boolean => {
       if (!isStaff) return true; // owner / admin
+      if (isNonGatingPermission(permission)) return true;
       return permissions.includes(permission);
     };
 
     return {
       can,
       cannot: (permission: PermInput) => !can(permission),
-      hasAny: (perms: PermInput[]) =>
-        !isStaff || perms.some((p) => permissions.includes(p)),
-      hasAll: (perms: PermInput[]) =>
-        !isStaff || perms.every((p) => permissions.includes(p)),
+      hasAny: (perms: PermInput[]) => !isStaff || perms.some(can),
+      hasAll: (perms: PermInput[]) => !isStaff || perms.every(can),
       isStaff,
+      isResolved: resolved,
       permissions,
       roleName: session?.roleName,
     };
-  }, [session]);
+  }, [session, resolved]);
 }

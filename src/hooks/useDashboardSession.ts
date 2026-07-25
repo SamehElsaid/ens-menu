@@ -16,14 +16,26 @@ export type DashboardSession = {
   menuUuid?: string;
 } | null;
 
-/** Reads encrypted `sub` cookie (role + RBAC permissions for staff tokens). */
-export function useDashboardSession(): DashboardSession {
+/**
+ * Reads encrypted `sub` cookie (role + RBAC permissions for staff tokens).
+ *
+ * The cookie is only readable after mount, so `resolved` tells callers whether
+ * `session` is a real answer or just the pre-read default. Anything that would
+ * treat a missing session as "owner" must wait for `resolved`, otherwise a
+ * staff member briefly renders owner-only UI and fires owner-only requests.
+ */
+export function useDashboardSessionState(): {
+  session: DashboardSession;
+  resolved: boolean;
+} {
   const [session, setSession] = useState<DashboardSession>(null);
+  const [resolved, setResolved] = useState(false);
 
   useEffect(() => {
     const sub = Cookies.get("sub");
     if (!sub) {
       setSession(null);
+      setResolved(true);
       return;
     }
     try {
@@ -51,8 +63,14 @@ export function useDashboardSession(): DashboardSession {
       });
     } catch {
       setSession(null);
+    } finally {
+      setResolved(true);
     }
   }, []);
 
-  return session;
+  return { session, resolved };
+}
+
+export function useDashboardSession(): DashboardSession {
+  return useDashboardSessionState().session;
 }

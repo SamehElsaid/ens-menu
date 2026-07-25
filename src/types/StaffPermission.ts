@@ -26,6 +26,19 @@ export const STAFF_PERMISSION_KEYS = [
 
 export type StaffPermissionKey = (typeof STAFF_PERMISSION_KEYS)[number];
 
+/**
+ * Kept in the catalog for backwards compatibility but no longer enforced: any
+ * staff member may sign in from either surface and open the dashboard shell.
+ * Mirrors `NON_GATING_PERMISSIONS` in the backend catalog.
+ */
+export const NON_GATING_PERMISSIONS: ReadonlySet<string> = new Set([
+  "dashboard:access",
+]);
+
+export function isNonGatingPermission(permission: string): boolean {
+  return NON_GATING_PERMISSIONS.has(permission);
+}
+
 export type StaffPermissionGroup =
   | "orders"
   | "menu"
