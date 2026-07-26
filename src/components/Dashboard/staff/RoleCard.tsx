@@ -2,7 +2,10 @@
 
 import { useTranslations } from "next-intl";
 import type { MenuStaffRole } from "@/types/Menu";
-import { roleDisplayName } from "@/shared/roleDisplayName";
+import {
+  roleDisplayName,
+  isComingSoonStaffRole,
+} from "@/shared/roleDisplayName";
 import {
   IoCreateOutline,
   IoTrashOutline,
@@ -10,6 +13,7 @@ import {
   IoPeopleOutline,
   IoLockClosedOutline,
   IoCopyOutline,
+  IoTimeOutline,
 } from "react-icons/io5";
 
 interface RoleCardProps {
@@ -33,7 +37,8 @@ export default function RoleCard({
   const tRoot = useTranslations();
   const isRTL = locale === "ar";
 
-  const canDelete = !role.isDefault && role.staffCount === 0;
+  const isComingSoon = isComingSoonStaffRole(role);
+  const canDelete = !role.isDefault && !isComingSoon && role.staffCount === 0;
   const displayName = roleDisplayName(role, locale);
   const visible = role.permissions.slice(0, MAX_VISIBLE_PERMISSIONS);
   const extraCount = role.permissions.length - visible.length;
@@ -49,20 +54,43 @@ export default function RoleCard({
   };
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm transition-all duration-300 hover:border-primary/25 hover:shadow-xl dark:border-slate-700/80 dark:bg-slate-800/95 dark:shadow-slate-950/20 dark:hover:border-primary/40 dark:hover:shadow-slate-950/40">
-      <div className="relative bg-linear-to-br from-primary/10 via-violet-50/80 to-fuchsia-50/40 px-4 pb-5 pt-4 dark:from-primary/15 dark:via-slate-900 dark:to-violet-950/40">
+    <article
+      className={`group flex h-full flex-col overflow-hidden rounded-2xl border shadow-sm transition-all duration-300 dark:shadow-slate-950/20 ${
+        isComingSoon
+          ? "border-dashed border-slate-300/90 bg-slate-50/80 opacity-90 dark:border-slate-600 dark:bg-slate-800/60"
+          : "border-slate-200/90 bg-white hover:border-primary/25 hover:shadow-xl dark:border-slate-700/80 dark:bg-slate-800/95 dark:hover:border-primary/40 dark:hover:shadow-slate-950/40"
+      }`}
+    >
+      <div
+        className={`relative px-4 pb-5 pt-4 ${
+          isComingSoon
+            ? "bg-slate-100/80 dark:bg-slate-900/50"
+            : "bg-linear-to-br from-primary/10 via-violet-50/80 to-fuchsia-50/40 dark:from-primary/15 dark:via-slate-900 dark:to-violet-950/40"
+        }`}
+      >
         <div className={`absolute top-3 ${isRTL ? "left-3" : "right-3"}`}>
-          {role.isDefault && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-primary/90 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm backdrop-blur-sm">
-              <IoShieldCheckmarkOutline className="text-xs" aria-hidden />
-              {t("defaultBadge")}
+          {isComingSoon ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-slate-500/90 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm backdrop-blur-sm">
+              <IoTimeOutline className="text-xs" aria-hidden />
+              {t("comingSoonBadge")}
             </span>
+          ) : (
+            role.isDefault && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/90 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm backdrop-blur-sm">
+                <IoShieldCheckmarkOutline className="text-xs" aria-hidden />
+                {t("defaultBadge")}
+              </span>
+            )
           )}
         </div>
 
         <div className="flex items-center gap-3">
           <div
-            className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-primary to-primary/75 text-xl text-white shadow-lg shadow-primary/25 ring-4 ring-white dark:ring-slate-800"
+            className={`flex size-12 shrink-0 items-center justify-center rounded-2xl text-xl text-white shadow-lg ring-4 ring-white dark:ring-slate-800 ${
+              isComingSoon
+                ? "bg-slate-400 shadow-slate-400/20 dark:bg-slate-600"
+                : "bg-linear-to-br from-primary to-primary/75 shadow-primary/25"
+            }`}
             aria-hidden
           >
             <IoShieldCheckmarkOutline />
@@ -112,7 +140,15 @@ export default function RoleCard({
         </div>
 
         <div className="mt-auto border-t border-slate-100 pt-3 dark:border-slate-700/80">
-          {role.isDefault ? (
+          {isComingSoon ? (
+            <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
+              <IoLockClosedOutline
+                className="mt-0.5 shrink-0 text-xs"
+                aria-hidden
+              />
+              {t("comingSoonLocked")}
+            </p>
+          ) : role.isDefault ? (
             <div className="space-y-2">
               <button
                 type="button"

@@ -2499,6 +2499,7 @@
       "roleLabel": "Role",
       "roleWaiter": "Waiter",
       "roleCashier": "Cashier",
+      "roleComingSoon": "Coming soon",
       "roleRequired": "Please select a role",
       "rolesLoading": "Loading roles...",
       "noRolesHint": "No roles yet. Create a role from the Roles tab first.",
@@ -2561,6 +2562,8 @@
     "duplicate": "Duplicate",
     "deleteBlocked": "Cannot delete a role assigned to staff",
     "defaultBadge": "Default",
+    "comingSoonBadge": "Coming soon",
+    "comingSoonLocked": "This role isn’t available yet — it’s coming soon",
     "defaultLocked": "Default roles can't be edited or deleted — duplicate one to get a copy you can change freely",
     "duplicateHint": "Copy this role with all its permissions into a new, editable role",
     "permissionsLabel": "Permissions",
@@ -2616,7 +2619,7 @@
       "ads": "Advertisements"
     },
     "keys": {
-      "orders:view": "View orders",
+      "orders:view": "View table orders",
       "orders:confirm": "Confirm orders",
       "orders:cancel": "Cancel orders",
       "orders:edit_items": "Edit order items",
@@ -2636,7 +2639,7 @@
       "ads:manage": "Manage advertisements"
     },
     "descriptions": {
-      "orders:view": "See incoming table and delivery orders.",
+      "orders:view": "See incoming table orders.",
       "orders:confirm": "Accept new orders and additions.",
       "orders:cancel": "Reject or cancel orders.",
       "orders:edit_items": "Add or edit items on an existing order.",
@@ -2649,7 +2652,7 @@
       "menu:items": "Create, edit and reorder items.",
       "menu:tables": "Manage tables and QR codes.",
       "menu:import": "Import a menu via AI or file.",
-      "delivery:view": "See and manage delivery orders.",
+      "delivery:view": "See incoming online/delivery orders.",
       "staff:manage": "Add staff and manage roles.",
       "settings:manage": "Change menu settings and design.",
       "analytics:view": "View analytics and reports.",
