@@ -188,7 +188,7 @@ export interface MenuStaff {
 /** Dynamic staff role (RBAC), defined once per account. */
 export interface MenuStaffRole {
   id: number;
-  menuId: number | null;
+  ownerUserId?: number | null;
   /** Primary (Arabic) name. */
   name: string;
   /** Optional English name — see `roleDisplayName`. */

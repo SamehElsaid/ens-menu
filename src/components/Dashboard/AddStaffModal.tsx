@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 import { MenuStaff } from "@/types/Menu";
 import { useAccountStaffRoles } from "@/hooks/useAccountStaffRoles";
 import { useDashboardMenus, localizedMenuName } from "@/hooks/useDashboardMenus";
-import { roleDisplayName } from "@/shared/roleDisplayName";
+import { roleDisplayName, isComingSoonStaffRole } from "@/shared/roleDisplayName";
 import {
   IoCloseOutline,
   IoEllipseSharp,
@@ -214,8 +214,20 @@ export default function AddStaffModal({
                   name="roleId"
                   control={control}
                   rules={{
-                    validate: (v) =>
-                      v != null && Number.isFinite(v) ? true : t("roleRequired"),
+                    validate: (v) => {
+                      if (v == null || !Number.isFinite(v)) {
+                        return t("roleRequired");
+                      }
+                      const role = roles.find((r) => r.id === v);
+                      if (
+                        role &&
+                        isComingSoonStaffRole(role) &&
+                        (!isEdit || staff?.roleId !== role.id)
+                      ) {
+                        return t("roleComingSoon");
+                      }
+                      return true;
+                    },
                   }}
                   render={({ field }) => {
                     if (rolesLoading) {
@@ -240,21 +252,34 @@ export default function AddStaffModal({
                       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                         {roles.map((role) => {
                           const isSelected = field.value === role.id;
+                          const isComingSoon = isComingSoonStaffRole(role);
                           return (
                             <button
                               key={role.id}
                               type="button"
-                              onClick={() => field.onChange(role.id)}
+                              disabled={isComingSoon}
+                              aria-disabled={isComingSoon}
+                              onClick={() => {
+                                if (isComingSoon) return;
+                                field.onChange(role.id);
+                              }}
                               className={`flex items-center gap-2.5 rounded-xl border px-3.5 py-3 text-start text-sm font-medium transition-all duration-200 ${
-                                isSelected
-                                  ? "border-primary/50 bg-primary/5 text-primary ring-1 ring-primary/20 dark:bg-primary/10"
-                                  : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700/40"
+                                isComingSoon
+                                  ? "cursor-not-allowed border-dashed border-gray-200 bg-gray-50/80 text-gray-400 opacity-80 dark:border-gray-700 dark:bg-gray-800/40 dark:text-gray-500"
+                                  : isSelected
+                                    ? "border-primary/50 bg-primary/5 text-primary ring-1 ring-primary/20 dark:bg-primary/10"
+                                    : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700/40"
                               }`}
                             >
                               <IoShieldCheckmarkOutline className="shrink-0 text-lg" />
                               <span className="min-w-0 flex-1 truncate">
                                 {roleDisplayName(role, locale)}
                               </span>
+                              {isComingSoon && (
+                                <span className="shrink-0 rounded-md bg-slate-200/80 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-700/80 dark:text-slate-400">
+                                  {t("roleComingSoon")}
+                                </span>
+                              )}
                             </button>
                           );
                         })}
