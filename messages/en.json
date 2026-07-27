@@ -1436,22 +1436,25 @@
   },
   "Landing": {
     "Hero": {
-      "badge": "Staff & Management Edition V2.0",
-      "titleStart": "All restaurant operations with one tap ",
+      "badge": "ENSMenu Staff — for your team",
+      "titleStart": "Run the floor with one tap ",
       "titleHighlight": "from your phone",
-      "description": "The fastest tool for cashiers & staff to track real-time orders, table management, and manager reports. Stable performance, zero browser lag.",
-      "downloadKicker": "Direct APK Download",
-      "downloadCta": "Download App Now",
+      "description": "A staff-only app for floor staff — live table map, order alerts, and status updates. Complements your ENSMenu website; it does not replace it.",
+      "downloadKicker": "Available on Google Play",
+      "downloadCta": "Get it on Google Play",
+      "getItOn": "GET IT ON",
+      "downloadOnThe": "Download on the",
+      "appleComingSoon": "Coming soon",
       "optimizedFor": "Optimized for:",
       "platform": "Android",
-      "safeInstall": "Safe install • Works instantly after download",
+      "safeInstall": "Android on Google Play now • iOS coming soon",
       "noSetupRequired": "No setup required • Works instantly",
-      "noBrowser": "No more browser needed",
+      "noBrowser": "Built for staff on the floor",
       "videoAlt": "App Preview",
       "features": {
-        "liveAlerts": "Real-time order tracking",
-        "cashier": "Smart cashier interface",
-        "admin": "Admin access"
+        "liveAlerts": "Real-time order alerts",
+        "tables": "Live table map",
+        "staffOnly": "Staff accounts only"
       },
       "floatingCards": {
         "liveOrderLabel": "Live Order",
@@ -1462,90 +1465,97 @@
     },
     "FaqApp": {
       "title": "Frequently Asked Questions",
-      "subtitle": "Everything you need to know before using the app",
+      "subtitle": "Everything you need to know before using the staff app",
       "mostAsked": "Most Asked",
       "items": [
         {
-          "q": "Is the app a replacement for the website?",
-          "a": "Yes, the app is built to be faster and more stable than the browser, especially for managing orders and daily operations."
+          "q": "Is this app a replacement for the website?",
+          "a": "No. ENSMenu Staff is for your team only — floor staff. Guests and owners keep using the website and Owner tools as usual."
         },
         {
-          "q": "Is the app safe even though it's a direct download?",
-          "a": "Yes, the app is fully secure and tested, and it doesn't request any unnecessary permissions."
+          "q": "Who is the app for?",
+          "a": "Restaurant staff: floor staff and anyone who needs live tables and orders on the phone — not a full cashier/POS system."
         },
         {
-          "q": "Can it be used by cashiers and staff?",
-          "a": "Absolutely. The app is designed for cashiers and staff with a simple, fast interface for managing orders."
-        },
-        {
-          "q": "Can the manager monitor everything?",
-          "a": "Yes, the app provides full reports and management for orders and staff from a single place."
+          "q": "Where can I download the staff app?",
+          "a": "Android is free on Google Play (ENSMenu Staff). iOS is coming soon — use the download button on this page for Google Play."
         },
         {
           "q": "Does it support real-time orders?",
-          "a": "Yes, orders are updated instantly with live notifications and zero delay."
+          "a": "Yes, orders and table status update instantly with live notifications so the floor stays in sync."
         },
         {
-          "q": "Does it require experience to use?",
-          "a": "No, the app is very simple and any staff member can use it easily from the first try."
+          "q": "Do staff need training?",
+          "a": "No — the interface is simple, and most team members can use it from the first shift."
+        },
+        {
+          "q": "Is iOS available?",
+          "a": "Not yet. Android is live on Google Play; the App Store version is coming soon."
         }
       ]
     },
     "FeaturesApp": {
-      "title": "Master Your Restaurant Operations",
-      "subtitle": "A comprehensive system connecting waiters, cashiers, and management in one seamless platform to ensure the fastest service for your guests.",
+      "title": "Built for floor staff",
+      "subtitle": "One app for floor staff — live tables, order alerts, and clear status — without replacing your website.",
       "items": [
         {
           "title": "Smart & Fast Ordering",
-          "desc": "An interactive menu that allows waiters to add items, adjust quantities, and select tables in just a few taps."
+          "desc": "Add items, adjust quantities, and assign tables in a few taps — made for floor staff on the move."
         },
         {
           "title": "Precision Table Management",
-          "desc": "Assign orders to specific tables with customer names to ensure a personalized and error-free dining experience."
+          "desc": "See the floor at a glance and keep each order tied to the right table and guest."
         },
         {
           "title": "Live Order Tracking",
-          "desc": "Real-time status updates (Confirmed, Pending) linking the dining floor to the kitchen and cashier instantly."
+          "desc": "Real-time status updates so the dining floor stays aligned from receive to ready."
         },
         {
           "title": "Review & Confirm System",
-          "desc": "A final review screen before sending orders to minimize mistakes, with easy options to edit or cancel on the fly."
+          "desc": "A final review before sending orders to cut mistakes, with easy edit or cancel."
         },
         {
           "title": "Multi-Language Support",
-          "desc": "A flexible UI supporting both Arabic and English, making it easy for a diverse team to work efficiently."
+          "desc": "Arabic and English UI so mixed teams can work comfortably."
         },
         {
-          "title": "Daily Order Reports",
-          "desc": "Full history of all incoming orders, displaying timing, totals, and guest details to track shift performance."
+          "title": "Shift Order History",
+          "desc": "A clear history of orders with timing and details to review the shift."
         }
       ]
     },
     "WorkflowApp": {
-      "title": "How the system works inside your restaurant",
-      "subtitle": "Every step calculated… from order to delivery",
+      "title": "How staff use it on the floor",
+      "subtitle": "From alert to ready — without leaving the dining room",
       "steps": [
         {
-          "title": "Receive Order",
-          "desc": "The order arrives instantly with a direct notification to the cashier."
+          "title": "Receive alert",
+          "desc": "New orders and calls reach staff instantly on the phone."
         },
         {
-          "title": "Cashier Management",
-          "desc": "Confirm the order and update its status with ease."
+          "title": "Handle the table",
+          "desc": "Confirm, update status, and keep the table map clear."
         },
         {
-          "title": "Order Execution",
-          "desc": "The kitchen receives the order and starts preparing it right away."
+          "title": "Follow the order",
+          "desc": "Track progress until the guest is served."
         },
         {
-          "title": "Manager Oversight",
-          "desc": "Full real-time view of all operations and reports."
+          "title": "Stay in sync",
+          "desc": "The whole floor sees the same live picture."
         }
       ]
     },
     "MobileAppCta": {
-      "title": "Ready to streamline your work?",
-      "button": "Download the App for Free"
+      "title": "Ready for your staff?",
+      "subtitle": "Install ENSMenu Staff on Android today. iOS is coming soon — for your team only, not a website replacement.",
+      "button": "Get it on Google Play",
+      "getItOn": "GET IT ON",
+      "downloadOnThe": "DOWNLOAD ON THE",
+      "googlePlay": "Google Play",
+      "appleComingSoon": "Coming soon",
+      "androidStatus": "Available now",
+      "iosStatus": "Coming soon"
     },
     "features": {
       "title": "Why restaurants, cafés, and hotels choose ENSMENU",

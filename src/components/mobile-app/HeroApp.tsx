@@ -1,133 +1,120 @@
 "use client";
 
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
+import { FaApple, FaGooglePlay } from "react-icons/fa";
+import HeroBackground from "@/components/HomePage/HeroBackground";
 import {
-  FiShield as Shield,
-  FiZap as Zap,
-  FiMonitor as Monitor,
-  FiBell as Bell,
-} from "react-icons/fi";
-import { FaAndroid } from "react-icons/fa";
+  MarketingAccent,
+  MarketingBadge,
+  MarketingHeading,
+  MarketingPill,
+  MarketingPillRow,
+  MarketingSection,
+  MarketingSplit,
+  MarketingSplitContent,
+  MarketingSplitVisual,
+  MarketingText,
+} from "@/components/marketing";
+import { ds } from "@/lib/designSystem";
+import { STAFF_GOOGLE_PLAY_URL } from "@/components/mobile-app/staffPlayStore";
 
 const APP_VIDEO_SRC = "/app/order.mp4";
 
-const AppLandingHero = () => {
+const FEATURE_KEYS = ["liveAlerts", "tables", "staffOnly"] as const;
+
+export default function HeroApp() {
   const t = useTranslations("Landing.Hero");
-  const locale = useLocale();
-  const isRTL = locale === "ar";
 
   return (
-    <section className="relative overflow-hidden bg-white dark:bg-[#0d1117] pt-24 pb-16 md:pt-32 md:pb-24">
-      {/* Background Glows */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full z-0 opacity-40 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-violet-500/20 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[5%] right-[-5%] w-[40%] h-[40%] bg-blue-500/20 blur-[100px] rounded-full" />
-      </div>
+    <MarketingSection
+      id="staff-app-hero"
+      variant="hero"
+      className="relative overflow-visible! pb-10! sm:pb-12! lg:pb-14!"
+    >
+      <HeroBackground />
 
-      <div className="container mx-auto px-6 relative z-10">
-        <div
-          className={`flex flex-col lg:flex-row items-center gap-12 lg:gap-16 ${isRTL ? "lg:flex-row-reverse" : ""}`}
-        >
-          {/* Content Left */}
-          <div className="lg:w-3/5 text-center lg:text-start">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 font-bold text-xs mb-6 border border-violet-100 dark:border-violet-500/20 shadow-sm">
-              <FaAndroid size={16} />
-              <span className="tracking-wide">{t("badge")}</span>
-            </div>
+      <div className="container relative z-10">
+        <MarketingSplit className="gap-8 sm:gap-10 lg:gap-14">
+          <MarketingSplitContent>
+            <MarketingBadge className="mb-6">{t("badge")}</MarketingBadge>
 
-            <h1 className="text-4xl md:text-5xl font-black leading-[1.1] mb-6 text-slate-900 dark:text-white tracking-tight">
-              {t("titleStart")}{" "}
-              <span className="text-transparent bg-clip-text bg-linear-to-r from-violet-600 to-indigo-500">
-                {t("titleHighlight")}
-              </span>
-            </h1>
+            <MarketingHeading as="h1" level="display" className="mb-5">
+              {t("titleStart")}
+              <MarketingAccent>{t("titleHighlight")}</MarketingAccent>
+            </MarketingHeading>
 
-            <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+            <MarketingText variant="subtitle" className="mb-8">
               {t("description")}
-            </p>
+            </MarketingText>
 
-            <div className="grid grid-cols-2 sm:flex sm:flex-wrap justify-center lg:justify-start gap-6 border-t border-slate-100 dark:border-slate-800 pt-8">
-              <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                <Zap size={20} className="text-amber-500" />
-                <span className="text-sm font-bold">
-                  {t("features.liveAlerts")}
+            <div className="mb-6 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap lg:justify-start">
+              <a
+                href={STAFF_GOOGLE_PLAY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-w-[180px] items-center gap-3 rounded-xl border border-white/10 bg-black px-5 py-3 text-white shadow-lg transition-all hover:scale-[1.03] hover:brightness-110 active:scale-95"
+              >
+                <FaGooglePlay size={26} className="shrink-0" />
+                <span className="text-start leading-tight">
+                  <span className="block text-[10px] font-medium tracking-wide opacity-75">
+                    {t("getItOn")}
+                  </span>
+                  <span className="block text-[17px] font-bold tracking-tight">
+                    Google Play
+                  </span>
+                </span>
+              </a>
+
+              <div className="relative inline-flex min-w-[180px] cursor-not-allowed select-none items-center gap-3 rounded-xl border border-white/10 bg-black/40 px-5 py-3 text-white/40">
+                <FaApple size={28} className="shrink-0" />
+                <span className="text-start leading-tight">
+                  <span className="block text-[10px] font-medium tracking-wide opacity-75">
+                    {t("downloadOnThe")}
+                  </span>
+                  <span className="block text-[17px] font-bold tracking-tight">
+                    App Store
+                  </span>
+                </span>
+                <span className="absolute -top-2.5 -end-2 rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold tracking-wide text-amber-900 uppercase shadow">
+                  {t("appleComingSoon")}
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                <Monitor size={20} className="text-blue-500" />
-                <span className="text-sm font-bold">
-                  {t("features.cashier")}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                <Shield size={20} className="text-green-500" />
-                <span className="text-sm font-bold">{t("features.admin")}</span>
+            </div>
+
+            <MarketingText variant="caption" className="mb-6">
+              {t("safeInstall")}
+            </MarketingText>
+
+            <MarketingPillRow>
+              {FEATURE_KEYS.map((key) => (
+                <MarketingPill key={key}>{t(`features.${key}`)}</MarketingPill>
+              ))}
+            </MarketingPillRow>
+          </MarketingSplitContent>
+
+          <MarketingSplitVisual className="mx-auto w-full max-w-[min(100%,280px)] sm:max-w-[300px] lg:mx-0 lg:w-[min(100%,320px)] lg:min-w-[280px] lg:max-w-[320px] lg:shrink-0 lg:py-4">
+            <div className="relative mx-auto w-full">
+              <div className={ds.glow} aria-hidden />
+              <div className="relative aspect-9/19 overflow-hidden rounded-[2.5rem] border-10 border-slate-900 bg-slate-950 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.4)] ring-2 ring-slate-700/30 dark:border-slate-800">
+                <div className="absolute top-3 left-1/2 z-20 flex h-6 w-24 -translate-x-1/2 items-center justify-center gap-2 rounded-full border border-slate-800 bg-slate-900">
+                  <div className="size-1.5 rounded-full bg-slate-800" />
+                  <div className="h-1 w-8 rounded-full bg-slate-800 opacity-40" />
+                </div>
+                <video
+                  src={APP_VIDEO_SRC}
+                  className="size-full object-cover"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="metadata"
+                  aria-label={t("videoAlt")}
+                />
               </div>
             </div>
-          </div>
-
-          {/* Phone Mockup Right */}
-          <div className="relative hidden w-full justify-center lg:flex lg:w-2/5">
-            <div className="relative w-[260px] sm:w-[300px] md:w-[330px] mx-auto">
-              <div className="pointer-events-none absolute inset-0 -m-10 bg-linear-to-br from-violet-500/25 via-transparent to-blue-500/20 blur-3xl rounded-full -z-10" />
-
-              <div className="relative animate-float">
-                <div className="relative rounded-[3rem] border-10 border-slate-900 dark:border-slate-800 bg-slate-950 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.4),0_0_50px_-15px_rgba(124,58,237,0.45)] overflow-hidden aspect-9/19 ring-2 ring-slate-700/30">
-                  <div className="absolute top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-slate-900 rounded-full z-20 flex items-center justify-center gap-2 border border-slate-800">
-                    <div className="size-1.5 bg-slate-800 rounded-full" />
-                    <div className="w-8 h-1 bg-slate-800 rounded-full opacity-40" />
-                  </div>
-
-                  <video
-                    src={APP_VIDEO_SRC}
-                    className="w-full h-full object-cover"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    preload="metadata"
-                  />
-                </div>
-              </div>
-
-              {/* Floating Cards */}
-              <div
-                className={`absolute top-12 hidden lg:flex items-center gap-3 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md p-3.5 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 animate-pulse-slow z-20 ${isRTL ? "-left-16" : "-right-16"}`}
-              >
-                <div className="size-10 rounded-2xl bg-linear-to-br from-emerald-400 to-green-600 flex items-center justify-center">
-                  <Bell size={18} className="text-white" />
-                </div>
-                <div className="text-start">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">
-                    {t("floatingCards.liveOrderLabel")}
-                  </p>
-                  <p className="text-sm font-black text-slate-900 dark:text-white leading-tight">
-                    {t("floatingCards.liveOrderText")}
-                  </p>
-                </div>
-              </div>
-
-              <div
-                className={`absolute bottom-24 hidden lg:flex items-center gap-3 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md p-3.5 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 animate-pulse-slow [animation-delay:1.5s] z-20 ${isRTL ? "-right-14" : "-left-14"}`}
-              >
-                <div className="size-10 rounded-2xl bg-linear-to-br from-violet-500 to-indigo-600 flex items-center justify-center shrink-0">
-                  <Zap size={18} className="text-white" />
-                </div>
-                <div className="text-start">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">
-                    {t("floatingCards.responseLabel")}
-                  </p>
-                  <p className="text-sm font-black text-slate-900 dark:text-white leading-tight">
-                    {t("floatingCards.responseText")}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+          </MarketingSplitVisual>
+        </MarketingSplit>
       </div>
-    </section>
+    </MarketingSection>
   );
-};
-
-export default AppLandingHero;
+}

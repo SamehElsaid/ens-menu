@@ -2,38 +2,49 @@
 
 import { useTranslations } from "next-intl";
 import { FiBell, FiShoppingCart, FiCoffee, FiBarChart2 } from "react-icons/fi";
+import {
+  MarketingHeading,
+  MarketingSection,
+  MarketingText,
+} from "@/components/marketing";
+import { cn } from "@/lib/cn";
 
 const icons = [FiBell, FiShoppingCart, FiCoffee, FiBarChart2] as const;
 
 type WorkflowStep = { title: string; desc: string };
 
-const WorkflowApp = () => {
+export default function WorkflowApp() {
   const t = useTranslations("Landing.WorkflowApp");
 
   const stepsRaw = t.raw("steps");
-  const steps: WorkflowStep[] = Array.isArray(stepsRaw) ? (stepsRaw as WorkflowStep[]) : [];
+  const steps: WorkflowStep[] = Array.isArray(stepsRaw)
+    ? (stepsRaw as WorkflowStep[])
+    : [];
 
   if (steps.length === 0) return null;
 
   return (
-    <section className="relative py-12 bg-white dark:bg-[#0d1117] overflow-hidden">
-      <div className="container mx-auto px-6 relative z-10 max-w-6xl">
-        {/* Header */}
-        <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-4">
+    <MarketingSection variant="muted">
+      <div className="container max-w-6xl">
+        <div className="mb-12 text-center sm:mb-16">
+          <MarketingHeading as="h2" level="section" className="mb-3">
             {t("title")}
-          </h2>
-          <p className="text-slate-500 dark:text-slate-400 text-lg">
+          </MarketingHeading>
+          <MarketingText
+            variant="subtitle"
+            className="mx-auto max-w-xl text-center"
+          >
             {t("subtitle")}
-          </p>
+          </MarketingText>
         </div>
 
-        {/* Flow */}
-        <div className="grid md:grid-cols-4 gap-8 relative">
-          {/* Line */}
-          <div className="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-linear-to-r from-violet-500/30 via-indigo-500/30 to-transparent -translate-y-1/2" />
+        <div className="relative grid gap-8 md:grid-cols-4">
+          <div
+            className="absolute top-8 right-0 left-0 hidden h-px bg-gradient-to-r from-transparent via-purple-200 to-transparent md:block dark:via-purple-500/30"
+            aria-hidden
+          />
 
-          {steps.map((step: WorkflowStep, i: number) => {
+          {steps.map((step, i) => {
             const Icon = icons[i];
 
             return (
@@ -41,17 +52,18 @@ const WorkflowApp = () => {
                 key={i}
                 className="relative flex flex-col items-center text-center"
               >
-                {/* Circle */}
-                <div className="relative z-10 w-16 h-16 flex items-center justify-center rounded-2xl bg-linear-to-br from-violet-600 to-indigo-600 text-white shadow-lg">
-                  <Icon size={22} />
+                <div
+                  className={cn(
+                    "relative z-10 flex size-14 items-center justify-center rounded-2xl bg-purple-600 text-white shadow-sm shadow-purple-600/20 dark:bg-purple-500 dark:shadow-purple-500/10",
+                  )}
+                >
+                  <Icon size={20} />
                 </div>
 
-                {/* Content */}
-                <h3 className="mt-6 font-bold text-slate-900 dark:text-white">
+                <h3 className="mt-5 text-sm font-semibold text-slate-900 dark:text-white sm:text-base">
                   {step.title}
                 </h3>
-
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xs">
+                <p className="mt-2 max-w-xs text-sm leading-relaxed text-slate-500 dark:text-slate-400">
                   {step.desc}
                 </p>
               </div>
@@ -59,8 +71,6 @@ const WorkflowApp = () => {
           })}
         </div>
       </div>
-    </section>
+    </MarketingSection>
   );
-};
-
-export default WorkflowApp;
+}
