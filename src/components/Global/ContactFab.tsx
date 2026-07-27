@@ -53,15 +53,13 @@ export default function ContactFab() {
       href: CONTACT_FAB_WHATSAPP_URL,
       label: t("whatsapp"),
       icon: <FaWhatsapp className="text-xl" aria-hidden />,
-      className:
-        "bg-[#25D366] hover:bg-[#20bd5a] shadow-green-500/30",
+      className: "bg-[#25D366] hover:bg-[#20bd5a] shadow-green-500/30",
     },
     {
       href: CONTACT_FAB_TELEGRAM_URL,
       label: t("telegram"),
       icon: <FaTelegramPlane className="text-xl" aria-hidden />,
-      className:
-        "bg-[#229ED9] hover:bg-[#1d8bc0] shadow-sky-500/30",
+      className: "bg-[#229ED9] hover:bg-[#1d8bc0] shadow-sky-500/30",
     },
   ];
 

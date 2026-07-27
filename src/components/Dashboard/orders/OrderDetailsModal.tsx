@@ -5,7 +5,26 @@ import { useLocale, useTranslations } from "next-intl";
 import { useReactToPrint } from "react-to-print";
 import { toast } from "react-toastify";
 import ViewTime from "@/shared/ViewTime";
-import { IoCalendarOutline, IoCallOutline, IoChatboxOutline, IoCheckmarkCircle, IoCloseCircle, IoCloseOutline, IoEllipseSharp, IoHomeOutline, IoListOutline, IoLocationOutline, IoPrintOutline, IoPersonOutline, IoReceiptOutline, IoTimeOutline, IoRemoveOutline, IoAddOutline, IoTrashOutline, IoCreateOutline } from "react-icons/io5";
+import {
+  IoCalendarOutline,
+  IoCallOutline,
+  IoChatboxOutline,
+  IoCheckmarkCircle,
+  IoCloseCircle,
+  IoCloseOutline,
+  IoEllipseSharp,
+  IoHomeOutline,
+  IoListOutline,
+  IoLocationOutline,
+  IoPrintOutline,
+  IoPersonOutline,
+  IoReceiptOutline,
+  IoTimeOutline,
+  IoRemoveOutline,
+  IoAddOutline,
+  IoTrashOutline,
+  IoCreateOutline,
+} from "react-icons/io5";
 import {
   actionActorName,
   callItemOptionLabel,
@@ -221,9 +240,7 @@ function PrintableReceipt({
               <td style={{ padding: 8, textAlign: "center" }}>
                 ×{item.quantity}
               </td>
-              <td
-                style={{ padding: 8, textAlign: alignEnd, fontWeight: 600 }}
-              >
+              <td style={{ padding: 8, textAlign: alignEnd, fontWeight: 600 }}>
                 {item.total != null ? `${item.total} ${currency}` : "—"}
               </td>
             </tr>
@@ -619,7 +636,9 @@ export default function OrderDetailsModal({
     status: OrderStatus,
   ) => void;
 }) {
-  const t = useTranslations(variant === "delivery" ? "deliveryOrders" : "tableOrders");
+  const t = useTranslations(
+    variant === "delivery" ? "deliveryOrders" : "tableOrders",
+  );
   const locale = useLocale();
   const { can } = useAuthorization();
 
@@ -640,7 +659,8 @@ export default function OrderDetailsModal({
 
   const items: CallItem[] = entry?.items ?? order?.items ?? [];
   const status = resolveLatestOrderStatus(actions, order);
-  const canEditItems = isEditableOrderStatus(status) && can("orders:edit_items");
+  const canEditItems =
+    isEditableOrderStatus(status) && can("orders:edit_items");
 
   useEffect(() => {
     setEditingItems(false);
@@ -680,14 +700,7 @@ export default function OrderDetailsModal({
         deliveryFee,
         menu,
       }),
-    [
-      deliveryFee,
-      displayItems,
-      editingItems,
-      entry,
-      menu,
-      order,
-    ],
+    [deliveryFee, displayItems, editingItems, entry, menu, order],
   );
   const printTotal = charges.grandTotal;
 
@@ -775,7 +788,17 @@ export default function OrderDetailsModal({
   const zoneLabel =
     variant === "delivery"
       ? deliveryGovernorateLabel(
-          { order: order ?? undefined, ...(entry ?? {}) },
+          {
+            governorateNameAr:
+              entry?.governorateNameAr ||
+              order?.governorateNameAr ||
+              null,
+            governorateNameEn:
+              entry?.governorateNameEn ||
+              order?.governorateNameEn ||
+              null,
+            order: order ?? null,
+          },
           locale,
         )
       : null;
@@ -785,9 +808,7 @@ export default function OrderDetailsModal({
     order?.customerAddress?.trim() || entry?.customerAddress?.trim() || null;
   const notesDisplay =
     order?.orderNotes?.trim() || entry?.orderNotes?.trim() || null;
-  const whenDisplay = (
-    <ViewTime data={lastAction?.time ?? actions[0]?.time} />
-  );
+  const whenDisplay = <ViewTime data={lastAction?.time ?? actions[0]?.time} />;
 
   const statusConfig = {
     confirmed: {
@@ -828,12 +849,7 @@ export default function OrderDetailsModal({
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: () =>
-      [
-        `#${entry?.orderId ?? ""}`,
-        customerDisplay,
-      ]
-        .filter(Boolean)
-        .join(" - "),
+      [`#${entry?.orderId ?? ""}`, customerDisplay].filter(Boolean).join(" - "),
   });
 
   return (
@@ -1006,7 +1022,11 @@ export default function OrderDetailsModal({
                             {(item.size || item.variant) && (
                               <p className="text-[11px] text-violet-600 dark:text-violet-400 mt-0.5 truncate">
                                 {[
-                                  callItemOptionLabel(item.size, locale, "size"),
+                                  callItemOptionLabel(
+                                    item.size,
+                                    locale,
+                                    "size",
+                                  ),
                                   callItemOptionLabel(
                                     item.variant,
                                     locale,
@@ -1139,7 +1159,9 @@ export default function OrderDetailsModal({
               }}
               status={status}
               onComplete={onActionComplete}
-              translationNs={variant === "delivery" ? "deliveryOrders" : "tableOrders"}
+              translationNs={
+                variant === "delivery" ? "deliveryOrders" : "tableOrders"
+              }
               variant={variant}
             />
           )}
@@ -1190,7 +1212,8 @@ export default function OrderDetailsModal({
               address: t("detailsAddress" as never),
               table: t("detailsTable" as never),
               notes: t("detailsNotes"),
-              deliveryFee: variant === "delivery" ? t("detailsDeliveryFee" as never) : "",
+              deliveryFee:
+                variant === "delivery" ? t("detailsDeliveryFee" as never) : "",
               total: t("detailsTotal"),
               itemName: t("colItemName"),
               qty: t("colQty"),

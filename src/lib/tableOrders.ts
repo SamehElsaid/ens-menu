@@ -236,9 +236,7 @@ export function applyLocalEntryStatusUpdate(
   const now = new Date().toISOString();
   return {
     ...entry,
-    ...(opts?.clearPendingGuestAddition
-      ? { pendingGuestAddition: false }
-      : {}),
+    ...(opts?.clearPendingGuestAddition ? { pendingGuestAddition: false } : {}),
     ...(opts?.clearPendingBillRequest ||
     status === "delivered" ||
     status === "cancelled"
@@ -277,9 +275,7 @@ export function isPendingOrder(entry: CallEntry): boolean {
 
 export function isEditableOrderStatus(status: OrderStatus): boolean {
   return (
-    status === "pending" ||
-    status === "confirmed" ||
-    status === "prepared"
+    status === "pending" || status === "confirmed" || status === "prepared"
   );
 }
 
@@ -394,10 +390,7 @@ export function resolveEntryDeliveryFee(entry: {
   deliveryFee?: number | null;
   order?: EntryOrder | null;
 }): number | null {
-  if (
-    entry.deliveryFee != null &&
-    Number.isFinite(Number(entry.deliveryFee))
-  ) {
+  if (entry.deliveryFee != null && Number.isFinite(Number(entry.deliveryFee))) {
     return Number(entry.deliveryFee);
   }
   if (
