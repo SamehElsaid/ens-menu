@@ -25,6 +25,7 @@ import {
 type BroadcastAudience =
   | "all"
   | "selected"
+  | "test"
   | "pro"
   | "free"
   | "no-menu"
@@ -61,7 +62,24 @@ const AUDIENCES: BroadcastAudience[] = [
   "with-menu",
   "products-no-image",
   "selected",
+  "test",
 ];
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
+
+function parseTestEmails(value: string): string[] {
+  const seen = new Set<string>();
+  const emails: string[] = [];
+
+  for (const part of value.split(/[\s,;]+/)) {
+    const email = part.trim().toLowerCase();
+    if (!email || !EMAIL_RE.test(email) || seen.has(email)) continue;
+    seen.add(email);
+    emails.push(email);
+  }
+
+  return emails;
+}
 
 export default function AdminBroadcastPage() {
   const locale = useLocale();
@@ -89,6 +107,7 @@ export default function AdminBroadcastPage() {
   const [searchResults, setSearchResults] = useState<UserSearchRow[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<UserSearchRow[]>([]);
+  const [testEmailsInput, setTestEmailsInput] = useState("");
 
   const [sending, setSending] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -100,6 +119,8 @@ export default function AdminBroadcastPage() {
       setMessage(template.message);
       return;
     }
+
+    if (nextAudience === "test") return;
 
     setSubject("");
     setMessage("");
@@ -124,11 +145,28 @@ export default function AdminBroadcastPage() {
     [selectedUsers],
   );
 
+  const testEmails = useMemo(
+    () => parseTestEmails(testEmailsInput),
+    [testEmailsInput],
+  );
+
   const loadPreview = useCallback(async () => {
+    if (audience === "selected" && selectedIds.length === 0) {
+      setPreview(null);
+      return;
+    }
+    if (audience === "test" && testEmails.length === 0) {
+      setPreview(null);
+      return;
+    }
+
     setPreviewLoading(true);
     const params: Record<string, string> = { audience };
     if (audience === "selected" && selectedIds.length > 0) {
       params.userIds = selectedIds.join(",");
+    }
+    if (audience === "test" && testEmails.length > 0) {
+      params.emails = testEmails.join(",");
     }
 
     const response = await axiosGet<PreviewResponse>(
@@ -146,15 +184,19 @@ export default function AdminBroadcastPage() {
 
     setPreview(null);
     toast.error(t("previewError"));
-  }, [audience, locale, selectedIds, t]);
+  }, [audience, locale, selectedIds, testEmails, t]);
 
   useEffect(() => {
     if (audience === "selected" && selectedIds.length === 0) {
       setPreview(null);
       return;
     }
+    if (audience === "test" && testEmails.length === 0) {
+      setPreview(null);
+      return;
+    }
     void loadPreview();
-  }, [audience, selectedIds, loadPreview]);
+  }, [audience, selectedIds, testEmails, loadPreview]);
 
   useEffect(() => {
     if (audience !== "selected") return;
@@ -201,6 +243,7 @@ export default function AdminBroadcastPage() {
     subject.trim().length >= 2 &&
     message.trim().length >= 5 &&
     (audience !== "selected" || selectedIds.length > 0) &&
+    (audience !== "test" || testEmails.length > 0) &&
     (preview?.count ?? 0) > 0;
 
   const handleSend = async () => {
@@ -209,6 +252,7 @@ export default function AdminBroadcastPage() {
       {
         audience: BroadcastAudience;
         userIds?: number[];
+        emails?: string[];
         subject: string;
         message: string;
         locale: "ar" | "en";
@@ -220,6 +264,7 @@ export default function AdminBroadcastPage() {
       {
         audience,
         userIds: audience === "selected" ? selectedIds : undefined,
+        emails: audience === "test" ? testEmails : undefined,
         subject: subject.trim(),
         message: message.trim(),
         locale: emailLocale,
@@ -240,7 +285,7 @@ export default function AdminBroadcastPage() {
         const template = getBroadcastTemplate(audience, emailLocale);
         setSubject(template.subject);
         setMessage(template.message);
-      } else {
+      } else if (audience !== "test") {
         setSubject("");
         setMessage("");
       }
@@ -361,6 +406,41 @@ export default function AdminBroadcastPage() {
                       </label>
                     );
                   })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {audience === "test" && (
+            <div className="space-y-2 rounded-2xl border border-dashed border-slate-200 p-4 dark:border-slate-600">
+              <label
+                htmlFor="broadcast-test-emails"
+                className="block text-sm font-semibold text-slate-700 dark:text-slate-200"
+              >
+                {t("testEmails")}
+              </label>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {t("testEmailsHint")}
+              </p>
+              <textarea
+                id="broadcast-test-emails"
+                rows={3}
+                dir="ltr"
+                value={testEmailsInput}
+                onChange={(e) => setTestEmailsInput(e.target.value)}
+                placeholder={t("testEmailsPlaceholder")}
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 font-mono text-sm text-slate-800 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+              />
+              {testEmails.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {testEmails.map((email) => (
+                    <span
+                      key={email}
+                      className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
+                    >
+                      {email}
+                    </span>
+                  ))}
                 </div>
               )}
             </div>

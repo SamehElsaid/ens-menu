@@ -156,36 +156,8 @@ export const navSections: NavSection[] = [
         icon: MdOutlineTableBar,
         key: "tables",
         link: "table",
-        subgroup: "tableOps",
         proFeature: true,
         permission: "menu:tables",
-      },
-      {
-        label: "orders",
-        icon: IoReceiptOutline,
-        key: "orders",
-        link: "orders",
-        subgroup: "tableOps",
-        proFeature: true,
-        dynamicBadge: "pendingOrders",
-        permission: "orders:view",
-      },
-      {
-        label: "deliveryOrders",
-        icon: MdOutlineDeliveryDining,
-        key: "delivery-orders",
-        link: "delivery-orders",
-        subgroup: "tableOps",
-        dynamicBadge: "pendingDeliveryOrders",
-        permission: "delivery:view",
-      },
-      {
-        label: "staff",
-        icon: MdPeopleOutline,
-        key: "staff",
-        link: "staff",
-        proFeature: true,
-        permission: "staff:manage",
       },
       {
         label: "Advertisements",
@@ -250,6 +222,68 @@ export const navSections: NavSection[] = [
         key: "ratings",
         link: "ratings",
         permission: "analytics:view",
+      },
+    ],
+  },
+];
+
+/**
+ * Sidebar for `/dashboard` itself. Orders and staff are account-level: they
+ * span every menu the signed-in account can reach, so they live here rather
+ * than inside a single menu's sidebar.
+ */
+export const accountNavSections: NavSection[] = [
+  {
+    id: "accountOverview",
+    items: [
+      {
+        label: "myMenus",
+        icon: IoLibraryOutline,
+        key: "menus",
+        link: "",
+        permission: "dashboard:access",
+      },
+    ],
+  },
+  {
+    id: "accountOperations",
+    items: [
+      {
+        label: "orders",
+        icon: IoReceiptOutline,
+        key: "orders",
+        link: "orders",
+        proFeature: true,
+        dynamicBadge: "pendingOrders",
+        permission: "orders:view",
+      },
+      {
+        label: "deliveryOrders",
+        icon: MdOutlineDeliveryDining,
+        key: "delivery-orders",
+        link: "delivery-orders",
+        dynamicBadge: "pendingDeliveryOrders",
+        permission: "delivery:view",
+      },
+      {
+        label: "staff",
+        icon: MdPeopleOutline,
+        key: "staff",
+        link: "staff",
+        proFeature: true,
+        permission: "staff:manage",
+      },
+    ],
+  },
+  {
+    id: "accountSettings",
+    items: [
+      {
+        label: "Subscription",
+        icon: FaCreditCard,
+        key: "subscription",
+        link: "subscription",
+        ownerOnly: true,
       },
     ],
   },

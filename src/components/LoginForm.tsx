@@ -12,6 +12,7 @@ import { encryptData } from "@/shared/encryption";
 import Cookies from "js-cookie";
 import { useSearchParams } from "next/navigation";
 import { resolvePostLoginPath } from "@/lib/authRedirect";
+import { getMenuDashboardRef } from "@/lib/menuDashboardPath";
 import LinkTo from "./Global/LinkTo";
 import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
 import { useAppDispatch } from "@/store/hooks";
@@ -102,12 +103,37 @@ export default function LoginForm() {
 
     if (response.status && response.data) {
       const { accessToken, refreshToken, user } = response.data;
-
-      const saveTokens = {
-        token: accessToken ?? "",
-        refreshToken: refreshToken ?? "",
-        role: user?.role ?? "",
+      const data = response.data as LoginResponse & {
+        permissions?: unknown;
+        menu?: { id?: number; uuid?: string };
+        role?: { id?: number; name?: string | null } | null;
+        staff?: { roleId?: number | null; roleName?: string | null };
       };
+
+      // Dashboard staff sign in through this same owner login form. They carry
+      // a scoped permission set, so persist the full staff context
+      // (permissions/role) the proxy guard expects.
+      const isStaff = user?.role === "staff";
+
+      const saveTokens = isStaff
+        ? {
+            token: accessToken ?? "",
+            refreshToken: refreshToken ?? "",
+            role: "staff",
+            permissions: Array.isArray(data.permissions)
+              ? data.permissions.filter(
+                  (p): p is string => typeof p === "string",
+                )
+              : [],
+            staffRoleId: data.role?.id ?? data.staff?.roleId ?? undefined,
+            roleName: data.role?.name ?? data.staff?.roleName ?? undefined,
+            menuUuid: getMenuDashboardRef(data.menu ?? {}),
+          }
+        : {
+            token: accessToken ?? "",
+            refreshToken: refreshToken ?? "",
+            role: user?.role ?? "",
+          };
 
       const encryptedData = encryptData(saveTokens);
 
@@ -120,14 +146,18 @@ export default function LoginForm() {
 
       void syncFcmToken(locale);
 
+      if (user) {
+        dispatch(SET_ACTIVE_USER({ user }));
+      }
+
+      // Staff land on the account dashboard like owners do: orders and staff
+      // are account-level now, and the menu list there is already filtered to
+      // whatever their grants and role allow.
       window.location.href = resolvePostLoginPath(
         locale,
         user?.role,
         redirectParam,
       );
-      if (user) {
-        dispatch(SET_ACTIVE_USER({ user }));
-      }
     } else {
       const payload = response.data as {
         message?: string;

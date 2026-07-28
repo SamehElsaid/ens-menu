@@ -4,7 +4,6 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Cookies from "js-cookie";
 import Loader from "./Global/Loader";
-import { getAuthHintsFromEncryptedSub } from "@/shared/jwtPayload";
 import { decryptData } from "@/shared/encryption";
 import { REMOVE_USER } from "@/store/authSlice/authSlice";
 import { MdOutlineDashboard } from "react-icons/md";
@@ -12,7 +11,6 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import LoadImage from "./ImageLoad";
 import { IoRestaurantOutline } from "react-icons/io5";
-import { getMenuDashboardRef, menuDashboardPath } from "@/lib/menuDashboardPath";
 import { useDashboardSession } from "@/hooks/useDashboardSession";
 import { axiosPost } from "@/shared/axiosCall";
 import {
@@ -50,22 +48,6 @@ function UserDropDown() {
   const isDashboardMenuRoute = /^\/dashboard\/[^/]+/.test(pathname);
   const showRestaurantLink = isDashboardMenuRoute && Boolean(publicMenuUrl);
 
-  /** Menu ref stored in encrypted cookie at staff login or patched after /staff-auth/me. */
-  const subCookie = Cookies.get("sub");
-  const subHints = subCookie ? getAuthHintsFromEncryptedSub(subCookie) : null;
-  const staffMenuUuidFromCookie = subHints?.menuUuid;
-  const staffMenuRefFromPath = pathname.match(/^\/dashboard\/([^/]+)/)?.[1];
-  const staffDashboardHref =
-    getMenuDashboardRef(menu)
-      ? menuDashboardPath(menu)
-      : staffMenuRefFromPath
-        ? `/dashboard/${staffMenuRefFromPath}`
-        : staffMenuUuidFromCookie
-          ? `/dashboard/${staffMenuUuidFromCookie}`
-          : session?.menuUuid
-            ? `/dashboard/${session.menuUuid}`
-            : null;
-
   const profileMenuItems = useMemo(() => {
     const items: {
       label: string;
@@ -74,21 +56,15 @@ function UserDropDown() {
       external?: boolean;
     }[] = [];
 
-    if (isStaff) {
-      if (staffDashboardHref) {
-        items.push({
-          label: t("userProfile.dashboard"),
-          href: staffDashboardHref,
-          icon: <MdOutlineDashboard />,
-        });
-      }
-    } else {
-      items.push({
-        label: t("userProfile.dashboard"),
-        href: profile.data?.user?.role === "admin" ? "/admin" : "/dashboard/",
-        icon: <MdOutlineDashboard />,
-      });
-    }
+    // Staff and owners share the account dashboard; only admins go elsewhere.
+    items.push({
+      label: t("userProfile.dashboard"),
+      href:
+        !isStaff && profile.data?.user?.role === "admin"
+          ? "/admin"
+          : "/dashboard",
+      icon: <MdOutlineDashboard />,
+    });
 
     if (showRestaurantLink) {
       items.push({
@@ -101,7 +77,6 @@ function UserDropDown() {
 
     return items;
   }, [
-    staffDashboardHref,
     isStaff,
     profile.data?.user?.role,
     publicMenuUrl,

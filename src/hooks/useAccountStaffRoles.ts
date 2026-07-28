@@ -5,17 +5,17 @@ import { useLocale } from "next-intl";
 import { axiosGet } from "@/shared/axiosCall";
 import type { MenuStaffRole } from "@/types/Menu";
 
-interface UseMenuStaffRoles {
+interface UseAccountStaffRoles {
   roles: MenuStaffRole[];
   loading: boolean;
   refresh: () => void;
 }
 
-/** Fetches the dynamic staff roles for a menu (RBAC). */
-export function useMenuStaffRoles(
-  menuId: string,
-  enabled = true,
-): UseMenuStaffRoles {
+/**
+ * Staff roles of the whole account (RBAC). A role grants the same permissions
+ * on every menu the staff member holds a grant for.
+ */
+export function useAccountStaffRoles(enabled = true): UseAccountStaffRoles {
   const locale = useLocale();
   const [roles, setRoles] = useState<MenuStaffRole[]>([]);
   const [loading, setLoading] = useState(enabled);
@@ -24,28 +24,27 @@ export function useMenuStaffRoles(
   const refresh = useCallback(() => setTick((n) => n + 1), []);
 
   useEffect(() => {
-    if (!menuId || !enabled) {
+    if (!enabled) {
       setLoading(false);
       return;
     }
     let active = true;
     setLoading(true);
-    axiosGet<{ roles: MenuStaffRole[] }>(
-      `/menus/${menuId}/staff-roles`,
-      locale,
-    ).then((result) => {
-      if (!active) return;
-      if (result.status && result.data && Array.isArray(result.data.roles)) {
-        setRoles(result.data.roles);
-      } else {
-        setRoles([]);
-      }
-      setLoading(false);
-    });
+    axiosGet<{ roles: MenuStaffRole[] }>("/dashboard/staff-roles", locale).then(
+      (result) => {
+        if (!active) return;
+        setRoles(
+          result.status && Array.isArray(result.data?.roles)
+            ? result.data.roles
+            : [],
+        );
+        setLoading(false);
+      },
+    );
     return () => {
       active = false;
     };
-  }, [menuId, locale, enabled, tick]);
+  }, [locale, enabled, tick]);
 
   return { roles, loading, refresh };
 }

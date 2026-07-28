@@ -169,7 +169,10 @@ export interface MenuTable {
 
 export interface MenuStaff {
   id: number;
+  /** @deprecated legacy anchor menu — access comes from `menuIds` (grants). */
   menuId: number;
+  /** Menus this staff member may work on. */
+  menuIds?: number[];
   name: string;
   /** @deprecated legacy job role text — replaced by roleId/roleName (RBAC). */
   role?: string;
@@ -182,11 +185,14 @@ export interface MenuStaff {
   [key: string]: unknown;
 }
 
-/** Dynamic per-menu staff role (RBAC). */
+/** Dynamic staff role (RBAC), defined once per account. */
 export interface MenuStaffRole {
   id: number;
-  menuId: number;
+  ownerUserId?: number | null;
+  /** Primary (Arabic) name. */
   name: string;
+  /** Optional English name — see `roleDisplayName`. */
+  nameEn?: string | null;
   permissions: string[];
   isDefault: boolean;
   staffCount: number;

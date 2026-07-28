@@ -5,13 +5,13 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import RenderInProvider from "@/components/Global/RenderInProvider";
 import ContactFab from "@/components/Global/ContactFab";
+import SupportChatwoot from "@/components/Global/SupportChatwoot";
 import ProgressBar from "@/components/Global/ProgressBar";
 import GoogleGtag from "@/components/Global/GoogleGtag";
 import GoogleTagManager from "@/components/Global/GoogleTagManager";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import 'suneditor/dist/css/suneditor.min.css'
-import Script from "next/script";
 
 import { getSiteOrigin } from "@/lib/sitemap/data";
 
@@ -84,14 +84,8 @@ export default async function RootLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           <RenderInProvider>{children}</RenderInProvider>
           <ContactFab />
+          <SupportChatwoot />
         </NextIntlClientProvider>
-        <Script id="chatwoot-settings" strategy="beforeInteractive">
-          {`window.chatwootSettings = { position: "left" };`}
-        </Script>
-        <Script
-          src="https://support.ens.eg/widget.js?key=ste_b9498147b00024bae6f9102153fa03e6"
-          strategy="lazyOnload"
-        />
       </body>
     </html>
   );

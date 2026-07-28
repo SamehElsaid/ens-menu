@@ -6,6 +6,7 @@ import { FaWhatsapp, FaTelegramPlane } from "react-icons/fa";
 import { FiX } from "react-icons/fi";
 import { BiSupport } from "react-icons/bi";
 import { useLocale, useTranslations } from "next-intl";
+import { usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { isRtlLocale } from "@/lib/localeDirection";
 import {
@@ -18,8 +19,10 @@ export default function ContactFab() {
   const [mounted, setMounted] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const locale = useLocale();
+  const pathname = usePathname();
   const isRtl = isRtlLocale(locale);
   const t = useTranslations("contactFab");
+  const isAdminRoute = pathname.startsWith("/admin");
 
   useEffect(() => {
     setMounted(true);
@@ -43,22 +46,20 @@ export default function ContactFab() {
     };
   }, [open]);
 
-  if (!mounted) return null;
+  if (!mounted || isAdminRoute) return null;
 
   const options = [
     {
       href: CONTACT_FAB_WHATSAPP_URL,
       label: t("whatsapp"),
       icon: <FaWhatsapp className="text-xl" aria-hidden />,
-      className:
-        "bg-[#25D366] hover:bg-[#20bd5a] shadow-green-500/30",
+      className: "bg-[#25D366] hover:bg-[#20bd5a] shadow-green-500/30",
     },
     {
       href: CONTACT_FAB_TELEGRAM_URL,
       label: t("telegram"),
       icon: <FaTelegramPlane className="text-xl" aria-hidden />,
-      className:
-        "bg-[#229ED9] hover:bg-[#1d8bc0] shadow-sky-500/30",
+      className: "bg-[#229ED9] hover:bg-[#1d8bc0] shadow-sky-500/30",
     },
   ];
 

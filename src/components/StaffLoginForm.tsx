@@ -15,7 +15,7 @@ import LinkTo from "@/components/Global/LinkTo";
 import { FaEnvelope } from "react-icons/fa";
 import { TbLockPassword } from "react-icons/tb";
 import { IoRestaurantOutline } from "react-icons/io5";
-import { getMenuDashboardRef, menuDashboardPath } from "@/lib/menuDashboardPath";
+import { getMenuDashboardRef } from "@/lib/menuDashboardPath";
 
 type StaffLoginFormValues = {
   menuSlug: string;
@@ -89,19 +89,10 @@ export default function StaffLoginForm() {
       ? result.data.permissions.filter((p): p is string => typeof p === "string")
       : [];
 
-    // Only staff whose role can access the dashboard may sign in here.
-    if (!permissions.includes("dashboard:access")) {
-      setApiError(t("staffNoDashboardAccess"));
-      setLoading(false);
-      return;
-    }
-
-    const menuRef = getMenuDashboardRef(menu as { id?: number; uuid?: string });
-    if (!menuRef) {
-      setApiError(t("staffLoginFailed"));
-      setLoading(false);
-      return;
-    }
+    // Only a display hint now: access comes from menu grants, so a staff member
+    // without an anchor menu still signs in and simply sees an empty menu list.
+    const menuRef =
+      getMenuDashboardRef(menu as { id?: number; uuid?: string }) || undefined;
 
     const roleName =
       result.data.role?.name ?? staff?.roleName ?? undefined;
@@ -134,7 +125,7 @@ export default function StaffLoginForm() {
       }),
     );
 
-    router.push(menuDashboardPath(menu as { id?: number; uuid?: string }));
+    router.push("/dashboard");
   };
 
   return (

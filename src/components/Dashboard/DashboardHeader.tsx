@@ -14,16 +14,18 @@ export function DashboardHeader({
   segment,
   isAdmin,
   hideSidebar,
+  hasSidebar,
 }: {
   setIsMenuOpen: (isMenuOpen: boolean | ((prev: boolean) => boolean)) => void;
   segment: string | null;
   isAdmin?: boolean;
   hideSidebar?: boolean;
+  hasSidebar?: boolean;
 }) {
   const locale = useLocale();
   const tCommon = useTranslations("common");
   const pathname = usePathname();
-  const showSidebarToggle = (segment || isAdmin) && !hideSidebar;
+  const showSidebarToggle = (segment || isAdmin || hasSidebar) && !hideSidebar;
   const pageTitle = useDashboardTitle();
 
   return (
