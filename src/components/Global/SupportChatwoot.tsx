@@ -10,6 +10,9 @@ type ChatwootWindow = Window & {
   };
 };
 
+/** TEMP: hide Chatwoot bubble site-wide. Set false to restore. */
+const TEMP_HIDE_CHATWOOT = true;
+
 export default function SupportChatwoot() {
   const pathname = usePathname();
   const isAdminRoute = pathname.startsWith("/admin");
@@ -17,10 +20,12 @@ export default function SupportChatwoot() {
   useEffect(() => {
     const chatwoot = (window as ChatwootWindow).$chatwoot;
     if (!chatwoot?.toggleBubbleVisibility) return;
-    chatwoot.toggleBubbleVisibility(isAdminRoute ? "hide" : "show");
+    chatwoot.toggleBubbleVisibility(
+      TEMP_HIDE_CHATWOOT || isAdminRoute ? "hide" : "show",
+    );
   }, [isAdminRoute]);
 
-  if (isAdminRoute) return null;
+  if (TEMP_HIDE_CHATWOOT || isAdminRoute) return null;
 
   return (
     <>
