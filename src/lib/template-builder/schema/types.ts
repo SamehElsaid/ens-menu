@@ -11,11 +11,11 @@ export type StyleProps = {
   alignItems?: string;
   gap?: string | number;
   gridTemplateColumns?: string;
-  width?: string;
-  maxWidth?: string;
+  width?: string | number;
+  maxWidth?: string | number;
   minWidth?: string | number;
-  minHeight?: string;
-  height?: string;
+  minHeight?: string | number;
+  height?: string | number;
   padding?: string;
   paddingTop?: string | number;
   paddingRight?: string | number;
