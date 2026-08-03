@@ -11,11 +11,15 @@ export const dynamic = "force-static";
 export function GET() {
   const origin = getSiteOrigin();
 
+  const bt = "`";
+  const menuHost = `${bt}{slug}${getSitemapMenuSuffix()}${bt}`;
+  const exampleHost = `${bt}{slug}.ensmenu.com${bt}`;
+
   const body = `# ENSmenu
 
 > ENSmenu is a bilingual (Arabic/English) SaaS platform for creating digital QR menus and ordering systems for restaurants, cafes, and hotels, with AI-powered menu import from photo or PDF.
 
-ENSmenu lets restaurant, cafe, and hotel owners build a free digital QR-code menu in minutes, manage items/prices/branches from a dashboard, and let guests order directly by scanning a code — no app install required. The product also powers a public menu for every customer at their own \`{slug}${getSitemapMenuSuffix()}\` subdomain.
+ENSmenu lets restaurant, cafe, and hotel owners build a free digital QR-code menu in minutes, manage items/prices/branches from a dashboard, and let guests order directly by scanning a code — no app install required. The product also powers a public menu for every customer at their own ${menuHost} subdomain.
 
 ## Key pages
 
@@ -29,10 +33,10 @@ ENSmenu lets restaurant, cafe, and hotel owners build a free digital QR-code men
 
 ## Notes for crawlers
 
-- Arabic is the default locale (no URL prefix); English is served under \`/en\`.
-- Every customer also gets a dedicated public menu subdomain (e.g. \`{slug}.ensmenu.com\`) — these are separate businesses' menus, not ENSmenu's own marketing content.
+- Arabic is the default locale (no URL prefix); English is served under ${bt}/en${bt}.
+- Every customer also gets a dedicated public menu subdomain (e.g. ${exampleHost}) — these are separate businesses' menus, not ENSmenu's own marketing content.
 - See [/sitemap](${origin}/sitemap) (Arabic) and [/en/sitemap](${origin}/en/sitemap) (English) for www.ensmenu.com marketing + knowledge-base URLs.
-- Customer menu hosts (`{slug}.ensmenu.com`) publish their own `/sitemap.xml` on each subdomain.
+- Customer menu hosts (${exampleHost}) publish their own ${bt}/sitemap.xml${bt} on each subdomain.
 `;
 
   return new Response(body, {
