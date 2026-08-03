@@ -303,18 +303,32 @@ export function menuSitemapPageCount(menuCount: number): number {
   return Math.ceil(menuCount / MENUS_PER_SITEMAP_PAGE);
 }
 
-/** Child sitemap locs for one locale index (`/sitemap` or `/en/sitemap`). */
+/**
+ * Child sitemap locs for one locale index (`/sitemap` or `/en/sitemap`).
+ *
+ * Only www.ensmenu.com URLs belong here. Customer menus live on `*.ensmenu.com`
+ * (different hosts). Listing them under the www sitemap made GSC report
+ * "Discovered URLs" per child (parsed XML locs) that never rolled into
+ * "Total discovered pages" for the www property — classic 181 vs 65 mismatch.
+ *
+ * Menu discovery: each storefront already serves `/sitemap.xml` on its own host.
+ * `/sitemap-menus/{page}` remains available for optional Domain-property
+ * cross-submit in Search Console, but is intentionally NOT linked from this index
+ * or from robots.txt.
+ */
 export function buildLocaleSitemapIndex(
   siteOrigin: string,
   locale: SitemapLocale,
   lastmodByChild: {
     main: string | undefined;
     knowledgeBase: string | undefined;
-    menus: string | undefined;
+    /** @deprecated Menus are no longer included in the www locale index. */
+    menus?: string | undefined;
   },
-  menuPageCount: number,
+  /** @deprecated Ignored — menus stay off the www index. Kept for call-site compat. */
+  _menuPageCount?: number,
 ): { loc: string; lastmod?: string }[] {
-  const children: { loc: string; lastmod?: string }[] = [
+  return [
     {
       loc: absoluteSitemapUrl(siteOrigin, locale, "/sitemap-main"),
       lastmod: lastmodByChild.main,
@@ -324,15 +338,6 @@ export function buildLocaleSitemapIndex(
       lastmod: lastmodByChild.knowledgeBase,
     },
   ];
-
-  for (let page = 1; page <= menuPageCount; page++) {
-    children.push({
-      loc: absoluteSitemapUrl(siteOrigin, locale, `/sitemap-menus/${page}`),
-      lastmod: lastmodByChild.menus,
-    });
-  }
-
-  return children;
 }
 
 /* ─────────────── Knowledge-base helpers ─────────────── */

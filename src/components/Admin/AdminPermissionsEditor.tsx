@@ -17,6 +17,7 @@ const PERMISSION_LABEL_KEYS: Record<AdminPermissionKey, string> = {
   "app-version": "appVersion",
   "knowledge-management": "knowledgeManagement",
   administrators: "administrators",
+  templates: "templateBuilder",
 };
 
 type AdminPermissionsEditorProps = {

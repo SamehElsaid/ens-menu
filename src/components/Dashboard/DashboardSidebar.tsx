@@ -320,8 +320,8 @@ export function DashboardSidebar({
 
   const { menu, loading } = useAppSelector((state) => state.menuData);
   const {
-    pendingTableCount: pendingOrdersCount,
-    pendingDeliveryCount: pendingDeliveryOrdersCount,
+    unseenTableCount: pendingOrdersCount,
+    unseenDeliveryCount: pendingDeliveryOrdersCount,
   } = usePendingOrders();
   const publicMenuUrl = !isAdmin
     ? publicMenuLinkUrl(resolvePublicMenuSlug(menu?.slug, menu?.id))
