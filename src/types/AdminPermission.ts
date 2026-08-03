@@ -9,7 +9,8 @@ export type AdminPermissionKey =
   | "promo"
   | "app-version"
   | "knowledge-management"
-  | "administrators";
+  | "administrators"
+  | "templates";
 
 export const ADMIN_PERMISSION_KEYS: AdminPermissionKey[] = [
   "analytics",
@@ -22,6 +23,7 @@ export const ADMIN_PERMISSION_KEYS: AdminPermissionKey[] = [
   "app-version",
   "knowledge-management",
   "administrators",
+  "templates",
 ];
 
 export type AdminPermissionsMap = Record<string, AdminPermissionKey[]>;

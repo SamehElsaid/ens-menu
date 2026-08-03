@@ -10,7 +10,12 @@ import { buildUrlset } from "@/lib/sitemap/xml";
 
 export const dynamic = "force-dynamic";
 
-/** Public menus for one locale — `/sitemap-menus/1` or `/en/sitemap-menus/1`. */
+/** Public menus for one locale — `/sitemap-menus/1` or `/en/sitemap-menus/1`.
+ *
+ * Not linked from `/sitemap` / robots.txt (cross-host vs www). Submit this URL
+ * manually in a Domain property if you want GSC to track customer-menu discovery
+ * from www; otherwise each `{slug}.ensmenu.com/sitemap.xml` is the host-local source.
+ */
 export async function GET(
   _request: NextRequest,
   context: { params: Promise<{ locale: string; page: string }> },

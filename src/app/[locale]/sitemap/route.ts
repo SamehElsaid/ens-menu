@@ -3,10 +3,8 @@ import {
   buildLocaleSitemapIndex,
   fetchAllKbArticles,
   fetchMetaLastmodByPage,
-  fetchPublicMenus,
   getSiteOrigin,
   isSitemapLocale,
-  menuSitemapPageCount,
   newestSitemapDate,
   toSitemapDate,
 } from "@/lib/sitemap/data";
@@ -16,9 +14,14 @@ import { buildSitemapIndex } from "@/lib/sitemap/xml";
 export const dynamic = "force-dynamic";
 
 /**
- * Locale sitemap index:
- * - Arabic (default): `/sitemap`
- * - English: `/en/sitemap`
+ * Locale sitemap index (www.ensmenu.com only):
+ * - Arabic (default): `/sitemap` → main + knowledge-base
+ * - English: `/en/sitemap` → main + knowledge-base
+ *
+ * Customer-menu hosts (`*.ensmenu.com`) are intentionally excluded — see
+ * `buildLocaleSitemapIndex` in `data.ts`. Those URLs inflated per-child
+ * "Discovered URLs" in GSC without counting toward "Total discovered pages"
+ * on the www property.
  */
 export async function GET(
   request: NextRequest,
@@ -30,15 +33,11 @@ export async function GET(
   }
 
   const siteOrigin = getSiteOrigin(request.nextUrl.origin);
-  const [menus, articles, metaLastmodByPage] = await Promise.all([
-    fetchPublicMenus(),
+  const [articles, metaLastmodByPage] = await Promise.all([
     fetchAllKbArticles(),
     fetchMetaLastmodByPage(),
   ]);
 
-  const newestFromMenus = newestSitemapDate(
-    ...menus.map((m) => toSitemapDate(m.updatedAt) ?? toSitemapDate(m.createdAt)),
-  );
   const newestFromKb = newestSitemapDate(
     ...articles.map(
       (a) => toSitemapDate(a.updatedAt) ?? toSitemapDate(a.createdAt),
@@ -46,23 +45,11 @@ export async function GET(
   );
   const newestFromMeta = newestSitemapDate(...metaLastmodByPage.values());
 
-  // Each child sitemap gets its own real newest date instead of one merged
-  // value applied uniformly — see findings/sitemap.md "suspiciously uniform"
-  // finding. `sitemap-main` covers marketing pages (newestFromMeta),
-  // `sitemap-knowledge-base` covers articles (newestFromKb), and the menu
-  // pages cover customer menus (newestFromMenus).
-  const pageCount = menuSitemapPageCount(menus.length);
   const xml = buildSitemapIndex(
-    buildLocaleSitemapIndex(
-      siteOrigin,
-      locale,
-      {
-        main: newestFromMeta,
-        knowledgeBase: newestFromKb,
-        menus: newestFromMenus,
-      },
-      pageCount,
-    ),
+    buildLocaleSitemapIndex(siteOrigin, locale, {
+      main: newestFromMeta,
+      knowledgeBase: newestFromKb,
+    }),
   );
   return xmlResponse(xml);
 }

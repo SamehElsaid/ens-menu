@@ -83,6 +83,7 @@ export function adminRouteToPermission(
     "app-version",
     "knowledge-management",
     "administrators",
+    "templates",
   ];
 
   if (segment === "broadcast") {
@@ -99,6 +100,10 @@ export function adminRouteToPermission(
 
   if (segment === "vouchers") {
     return "promo";
+  }
+
+  if (segment === "template") {
+    return "templates";
   }
 
   return allowed.includes(segment as AdminPermissionKey)

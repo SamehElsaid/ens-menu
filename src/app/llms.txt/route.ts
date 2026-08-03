@@ -31,7 +31,8 @@ ENSmenu lets restaurant, cafe, and hotel owners build a free digital QR-code men
 
 - Arabic is the default locale (no URL prefix); English is served under \`/en\`.
 - Every customer also gets a dedicated public menu subdomain (e.g. \`{slug}.ensmenu.com\`) — these are separate businesses' menus, not ENSmenu's own marketing content.
-- See [/sitemap](${origin}/sitemap) (Arabic) and [/en/sitemap](${origin}/en/sitemap) (English) for the full list of indexable URLs.
+- See [/sitemap](${origin}/sitemap) (Arabic) and [/en/sitemap](${origin}/en/sitemap) (English) for www.ensmenu.com marketing + knowledge-base URLs.
+- Customer menu hosts (`{slug}.ensmenu.com`) publish their own `/sitemap.xml` on each subdomain.
 `;
 
   return new Response(body, {

@@ -29,6 +29,7 @@ import {
   IoGlobeOutline,
   IoSearchOutline,
   IoStarOutline,
+  IoColorPaletteOutline,
 } from "react-icons/io5";
 
 export type NavItem = {
@@ -393,6 +394,12 @@ export const adminNavSections: NavSection[] = [
         icon: IoSearchOutline,
         key: "metadata",
         link: "metadata",
+      },
+      {
+        label: "templateBuilder",
+        icon: IoColorPaletteOutline,
+        key: "templates",
+        link: "template",
       },
     ],
   },
