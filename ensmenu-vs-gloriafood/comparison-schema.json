@@ -1,0 +1,73 @@
+{
+  "_comment": "Ready-to-use JSON-LD for /knowledge-base/ensmenu-vs-gloriafood-alternative. See COMPARISON-PAGE.md for placement/rationale. Do NOT add FAQPage (deprecated May 7, 2026) or Product/AggregateRating (no real review data exists to cite).",
+
+  "softwareApplication": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "ENSMENU",
+    "applicationCategory": "BusinessApplication",
+    "applicationSubCategory": "Restaurant QR Menu & Ordering Platform",
+    "operatingSystem": "Web",
+    "description": "AI-powered QR digital menu and ordering platform for restaurants, cafés, and hotels, with native Arabic/English support and table-side ordering.",
+    "url": "https://www.ensmenu.com",
+    "offers": [
+      {
+        "@type": "Offer",
+        "name": "Free",
+        "price": "0",
+        "priceCurrency": "EGP",
+        "description": "1 active menu, unlimited products, Smart QR guest menu, basic AI menu import."
+      },
+      {
+        "@type": "Offer",
+        "name": "Professional",
+        "price": "499",
+        "priceCurrency": "EGP",
+        "billingIncrement": "P1M",
+        "description": "4 active menus, full AI menu import, table ordering via QR, staff workflow, multi-language menus."
+      }
+    ]
+  },
+
+  "breadcrumbList": {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://www.ensmenu.com"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Knowledge Base",
+        "item": "https://www.ensmenu.com/knowledge-base"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "ENSMENU vs GloriaFood",
+        "item": "https://www.ensmenu.com/knowledge-base/ensmenu-vs-gloriafood-alternative"
+      }
+    ]
+  },
+
+  "article": {
+    "_comment": "Only add if this ships as a dated, authored knowledge-base article per the site's existing Article pattern (see ensmenu.com-audit/findings/schema.md) — fill in real author/date at publish time, do not fabricate.",
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "ENSMENU vs GloriaFood: Which QR Menu Platform Should You Switch To in 2027?",
+    "description": "GloriaFood is retiring April 30, 2027. Compare ENSMENU vs GloriaFood on pricing, AI menu tools, QR dine-in ordering, and multi-language support before you migrate.",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://www.ensmenu.com/knowledge-base/ensmenu-vs-gloriafood-alternative"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "ENSMENU",
+      "url": "https://www.ensmenu.com"
+    }
+  }
+}

@@ -14,6 +14,8 @@ import "react-toastify/dist/ReactToastify.css";
 import 'suneditor/dist/css/suneditor.min.css'
 
 import { getSiteOrigin } from "@/lib/sitemap/data";
+import { buildOrganizationJsonLd, buildWebSiteJsonLd } from "@/lib/organizationSchema";
+import JsonLd from "@/components/Global/JsonLd";
 
 const appUrl = getSiteOrigin();
 
@@ -62,6 +64,7 @@ export default async function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <JsonLd data={[buildOrganizationJsonLd(), buildWebSiteJsonLd()]} />
       </head>
       <body suppressHydrationWarning>
         <Suspense fallback={null}>

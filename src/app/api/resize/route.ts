@@ -106,24 +106,39 @@ export async function GET(request: Request) {
 
   // --- المرحلة الثانية: جلب الصورة ومعالجتها ---
   try {
-    const response = await axiosInstance.get(imageUrl, {
-      responseType: "arraybuffer",
-      headers: { "User-Agent": "Mozilla/5.0" },
-    });
+    let buffer: Buffer;
 
-    const contentType = String(
-      response.headers["content-type"] || "",
-    ).toLowerCase();
-    if (
-      contentType.includes("x-icon") ||
-      contentType.includes("ico") ||
-      contentType.includes("image/bmp") ||
-      contentType.includes("tiff")
-    ) {
-      return NextResponse.redirect(imageUrl, 302);
+    // Local public/ assets (e.g. /images/temp/waffle.png) — read from disk
+    // instead of HTTP, so TemplateShow and other marketing images can use
+    // this resize+WebP pipeline without needing an absolute URL.
+    if (imageUrl.startsWith("/") && !imageUrl.startsWith("//")) {
+      const localPath = path.join(process.cwd(), "public", imageUrl);
+      const publicRoot = path.join(process.cwd(), "public");
+      const resolved = path.resolve(localPath);
+      if (!resolved.startsWith(publicRoot)) {
+        return NextResponse.json({ error: "Invalid image path" }, { status: 400 });
+      }
+      buffer = await fs.readFile(resolved);
+    } else {
+      const response = await axiosInstance.get(imageUrl, {
+        responseType: "arraybuffer",
+        headers: { "User-Agent": "Mozilla/5.0" },
+      });
+
+      const contentType = String(
+        response.headers["content-type"] || "",
+      ).toLowerCase();
+      if (
+        contentType.includes("x-icon") ||
+        contentType.includes("ico") ||
+        contentType.includes("image/bmp") ||
+        contentType.includes("tiff")
+      ) {
+        return NextResponse.redirect(imageUrl, 302);
+      }
+
+      buffer = Buffer.from(response.data);
     }
-
-    const buffer = Buffer.from(response.data);
 
     // إعداد معالجة Sharp
     const pipeline = sharp(buffer, { failOnError: false });

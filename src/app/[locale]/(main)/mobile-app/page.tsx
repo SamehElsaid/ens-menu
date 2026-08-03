@@ -42,7 +42,7 @@ export default async function MobileAppPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-[#0d1117]">
       <HeroApp />
-      {/* <FeaturesApp /> */}
+      <FeaturesApp />
       <WorkflowApp />
       <FaqApp />
       <CtaApp />

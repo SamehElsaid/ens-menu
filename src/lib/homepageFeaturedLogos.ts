@@ -53,3 +53,22 @@ export async function fetchHomepageFeaturedLogosClient(): Promise<
     return [];
   }
 }
+
+/** Server-side fetch for SSR of the Trusted-by logo marquee. */
+export async function fetchHomepageFeaturedLogosServer(): Promise<
+  HomepageFeaturedLogo[]
+> {
+  const apiBase = process.env.NEXT_PUBLIC_BASE_URL?.trim();
+  if (!apiBase) return [];
+
+  try {
+    const res = await fetch(`${apiBase}/public/homepage-featured-logos`, {
+      next: { revalidate: 300 },
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) return [];
+    return parseLogosResponse(await res.json());
+  } catch {
+    return [];
+  }
+}

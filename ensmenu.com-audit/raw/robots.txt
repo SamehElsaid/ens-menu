@@ -1,0 +1,16 @@
+User-Agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /en/dashboard
+Disallow: /admin
+Disallow: /en/admin
+Disallow: /auth
+Disallow: /en/auth
+Disallow: /payment
+Disallow: /en/payment
+Disallow: /unauthorized
+Disallow: /en/unauthorized
+
+Host: www.ensmenu.com
+Sitemap: https://www.ensmenu.com/sitemap
+Sitemap: https://www.ensmenu.com/en/sitemap

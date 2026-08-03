@@ -197,6 +197,31 @@ export function buildMainSiteEntries(
   );
 }
 
+/**
+ * Internal/QA/placeholder account slugs that should never be indexed —
+ * `/public/menus` currently returns these alongside real customers, and two
+ * spot-checked live as soft-404 "menu not found" pages under HTTP 200.
+ * See ensmenu.com-audit/findings/sitemap.md.
+ */
+const TEST_MENU_SLUG_PATTERNS: RegExp[] = [
+  /^test\d*$/i,
+  /^testing\d*$/i,
+  /^tester\d*$/i,
+  /^your-slug-ensmenu-com/i,
+];
+
+export function isTestOrPlaceholderMenuSlug(slug: string): boolean {
+  const normalized = slug.trim().toLowerCase();
+  if (!normalized) return true;
+  return TEST_MENU_SLUG_PATTERNS.some((pattern) => pattern.test(normalized));
+}
+
+export function filterIndexableMenus(
+  menus: PublicMenuRef[],
+): PublicMenuRef[] {
+  return menus.filter((menu) => !isTestOrPlaceholderMenuSlug(menu.slug));
+}
+
 export function buildMenuEntries(
   menus: PublicMenuRef[],
   locale: SitemapLocale,
@@ -230,7 +255,7 @@ export async function fetchPublicMenus(): Promise<PublicMenuRef[]> {
     const payload = (await res.json()) as unknown;
     if (!Array.isArray(payload)) return [];
 
-    return payload
+    const menus = payload
       .map((item): PublicMenuRef | null => {
         if (typeof item === "string") {
           const slug = item.trim();
@@ -251,6 +276,10 @@ export async function fetchPublicMenus(): Promise<PublicMenuRef[]> {
         return null;
       })
       .filter((m): m is PublicMenuRef => Boolean(m));
+
+    // Exclude internal/QA/placeholder accounts before pagination + rendering —
+    // see findings/sitemap.md "Test/placeholder customer subdomains" (Critical).
+    return filterIndexableMenus(menus);
   } catch {
     return [];
   }
@@ -278,24 +307,28 @@ export function menuSitemapPageCount(menuCount: number): number {
 export function buildLocaleSitemapIndex(
   siteOrigin: string,
   locale: SitemapLocale,
-  lastmod: string | undefined,
+  lastmodByChild: {
+    main: string | undefined;
+    knowledgeBase: string | undefined;
+    menus: string | undefined;
+  },
   menuPageCount: number,
 ): { loc: string; lastmod?: string }[] {
   const children: { loc: string; lastmod?: string }[] = [
     {
       loc: absoluteSitemapUrl(siteOrigin, locale, "/sitemap-main"),
-      lastmod,
+      lastmod: lastmodByChild.main,
     },
     {
       loc: absoluteSitemapUrl(siteOrigin, locale, "/sitemap-knowledge-base"),
-      lastmod,
+      lastmod: lastmodByChild.knowledgeBase,
     },
   ];
 
   for (let page = 1; page <= menuPageCount; page++) {
     children.push({
       loc: absoluteSitemapUrl(siteOrigin, locale, `/sitemap-menus/${page}`),
-      lastmod,
+      lastmod: lastmodByChild.menus,
     });
   }
 
@@ -312,14 +345,18 @@ interface KbListResponse {
 
 const KB_FETCH_LIMIT = 100;
 
-/** Converts an article title + id into a URL slug, e.g. "Default Template" + 68 → "default-template-68" */
+/** Converts an article title + id into a URL slug, capped so total length stays near the 100-char guideline. */
 export function kbSlug(titleEn: string, id: number): string {
+  const idSuffix = `-${id}`;
+  const maxBaseLen = Math.max(20, 90 - idSuffix.length);
   const base = (titleEn ?? "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-  return base ? `${base}-${id}` : String(id);
+    .replace(/^-|-$/g, "")
+    .slice(0, maxBaseLen)
+    .replace(/-$/g, "");
+  return base ? `${base}${idSuffix}` : String(id);
 }
 
 /** Fetches every knowledge-base article (all pages) from the API. */

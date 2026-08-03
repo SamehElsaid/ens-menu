@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>https://www.ensmenu.com/en/sitemap-main</loc>
+    <lastmod>2026-07-26</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://www.ensmenu.com/en/sitemap-knowledge-base</loc>
+    <lastmod>2026-07-26</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://www.ensmenu.com/en/sitemap-menus/1</loc>
+    <lastmod>2026-07-26</lastmod>
+  </sitemap>
+</sitemapindex>
