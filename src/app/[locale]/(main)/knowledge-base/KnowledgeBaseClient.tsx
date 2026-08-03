@@ -19,28 +19,14 @@ import { FaSpinner } from "react-icons/fa";
 import { axiosGet } from "@/shared/axiosCall";
 import ViewTime from "@/shared/ViewTime";
 import ShowEditor from "@/components/Custom/ShowEditor";
+import {
+  PAGE_LIMIT,
+  type ArticleDetail,
+  type ArticleListItem,
+  type KbPagination as Pagination,
+} from "./fetchKb";
 
 /* ─────────────────────── types ─────────────────────── */
-
-interface ArticleListItem {
-  id: number;
-  titleAr: string;
-  titleEn: string;
-}
-
-interface ArticleDetail extends ArticleListItem {
-  descriptionAr: string;
-  descriptionEn: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-interface Pagination {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
 
 interface ListResponse {
   success: boolean;
@@ -53,7 +39,7 @@ interface DetailResponse {
   data: ArticleDetail;
 }
 
-const PAGE_LIMIT = 10;
+export { PAGE_LIMIT };
 
 /** Converts a title + id into a URL-friendly slug, e.g. "Default Template-68" → "default-template-68" */
 function toSlug(title: string, id: number): string {
@@ -68,33 +54,53 @@ function toSlug(title: string, id: number): string {
 
 /* ─────────────────────── inner component ───────────── */
 
-function KnowledgeBaseInner({ initialId }: { initialId?: number }) {
+function KnowledgeBaseInner({
+  initialId,
+  initialArticle,
+  initialArticles,
+  initialPagination,
+}: {
+  initialId?: number;
+  /** SSR-fetched article for `initialId`, so the raw HTML already contains the real body. */
+  initialArticle?: ArticleDetail | null;
+  /** SSR-fetched first page of the list, so the sidebar isn't empty in the raw HTML. */
+  initialArticles?: ArticleListItem[];
+  initialPagination?: Pagination;
+}) {
   const locale = useLocale();
   const t = useTranslations("knowledgeBase");
   const isRTL = locale === "ar";
   const router = useRouter();
 
   /* sidebar state */
-  const [articles, setArticles] = useState<ArticleListItem[]>([]);
-  const [pagination, setPagination] = useState<Pagination>({
-    total: 0,
-    page: 1,
-    limit: PAGE_LIMIT,
-    totalPages: 1,
-  });
+  const [articles, setArticles] = useState<ArticleListItem[]>(
+    initialArticles ?? [],
+  );
+  const [pagination, setPagination] = useState<Pagination>(
+    initialPagination ?? {
+      total: 0,
+      page: 1,
+      limit: PAGE_LIMIT,
+      totalPages: 1,
+    },
+  );
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [sidebarPage, setSidebarPage] = useState(1);
-  const [listLoading, setListLoading] = useState(true);
+  const [listLoading, setListLoading] = useState(!initialArticles);
 
   /* article detail state */
   const [selectedId, setSelectedId] = useState<number | null>(
     initialId ?? null,
   );
-  const [article, setArticle] = useState<ArticleDetail | null>(null);
+  const [article, setArticle] = useState<ArticleDetail | null>(
+    initialArticle ?? null,
+  );
   const [detailLoading, setDetailLoading] = useState(false);
 
   const firstLoad = useRef(true);
+  const skipInitialListFetch = useRef(Boolean(initialArticles));
+  const skipInitialDetailFetch = useRef(Boolean(initialArticle));
 
   /* ── debounce search → reset page ── */
   useEffect(() => {
@@ -151,13 +157,21 @@ function KnowledgeBaseInner({ initialId }: { initialId?: number }) {
   );
 
   useEffect(() => {
+    if (skipInitialListFetch.current) {
+      skipInitialListFetch.current = false;
+      return;
+    }
     fetchList(sidebarPage, debouncedSearch);
   }, [fetchList, sidebarPage, debouncedSearch]);
 
   /* ── sync initialId → selectedId when navigating between articles ── */
   useEffect(() => {
     setSelectedId(initialId ?? null);
-  }, [initialId]);
+    if (initialId && initialArticle && initialArticle.id === initialId) {
+      setArticle(initialArticle);
+      skipInitialDetailFetch.current = true;
+    }
+  }, [initialId, initialArticle]);
 
   /* ── fetch article detail by ID ── */
   const fetchDetail = useCallback(
@@ -180,7 +194,12 @@ function KnowledgeBaseInner({ initialId }: { initialId?: number }) {
   );
 
   useEffect(() => {
-    if (selectedId !== null) fetchDetail(selectedId);
+    if (selectedId === null) return;
+    if (skipInitialDetailFetch.current) {
+      skipInitialDetailFetch.current = false;
+      return;
+    }
+    fetchDetail(selectedId);
   }, [fetchDetail, selectedId]);
 
   const handleMobileBack = () => {

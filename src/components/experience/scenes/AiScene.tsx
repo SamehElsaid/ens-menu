@@ -18,7 +18,7 @@ export default function AiScene() {
         <div className="mb-8 flex justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/images/AiAvatar.png"
+            src="/images/AiAvatar.webp"
             alt="Lina"
             className="h-20 w-20 rounded-full border-2 border-purple-200 object-cover shadow-lg dark:border-purple-500/30"
           />

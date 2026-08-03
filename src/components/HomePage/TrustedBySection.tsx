@@ -22,14 +22,23 @@ function TrustedBySkeleton() {
   );
 }
 
-export default function TrustedBySection() {
+type TrustedBySectionProps = {
+  /** SSR-fetched logos so the marquee is present in the raw HTML for crawlers. */
+  initialLogos?: HomepageFeaturedLogo[];
+};
+
+export default function TrustedBySection({
+  initialLogos = [],
+}: TrustedBySectionProps) {
   const t = useTranslations("trustedBySection");
   const locale = useLocale();
   const isRTL = locale === "ar";
-  const [logos, setLogos] = useState<HomepageFeaturedLogo[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const [logos, setLogos] = useState<HomepageFeaturedLogo[]>(initialLogos);
+  const [loaded, setLoaded] = useState(initialLogos.length > 0);
 
   useEffect(() => {
+    if (initialLogos.length > 0) return;
+
     let cancelled = false;
 
     fetchHomepageFeaturedLogosClient()
@@ -43,7 +52,7 @@ export default function TrustedBySection() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [initialLogos.length]);
 
   if (loaded && logos.length === 0) return null;
 

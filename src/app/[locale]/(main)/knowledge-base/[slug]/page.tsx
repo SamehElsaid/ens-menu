@@ -2,8 +2,15 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { buildSeoMetadata } from "@/lib/seo";
-import { encryptDataApi } from "@/shared/encryption";
+import { getSiteOrigin } from "@/lib/sitemap/data";
+import JsonLd from "@/components/Global/JsonLd";
 import { KnowledgeBaseInner } from "../KnowledgeBaseClient";
+import {
+  fetchArticleDetail,
+  fetchArticleList,
+  stripHtml,
+  PAGE_LIMIT,
+} from "../fetchKb";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
@@ -12,62 +19,12 @@ function extractIdFromSlug(slug: string): number | undefined {
   return match ? Number(match[1]) : undefined;
 }
 
-interface ArticleDetail {
-  titleAr: string;
-  titleEn: string;
-  descriptionAr: string;
-  descriptionEn: string;
-}
-
-async function fetchArticle(
-  id: number,
-  locale: string,
-): Promise<ArticleDetail | null> {
-  try {
-    const secretKey = process.env.NEXT_PUBLIC_SECRET_KEY;
-    if (!secretKey) return null;
-
-    const utcTimestamp = parseFloat((Date.now() / 1000).toFixed(3));
-    const apiKey = `${secretKey}///${utcTimestamp}`;
-    const apiKeyEncrypt = encryptDataApi(apiKey, secretKey);
-
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/searchInformation/${id}`,
-      {
-        headers: {
-          "X-API-KEY": apiKeyEncrypt,
-          "Accept-Language": locale,
-        },
-        next: { revalidate: 3600 },
-      },
-    );
-
-    if (!res.ok) return null;
-    const json = await res.json();
-    return (json?.data as ArticleDetail) ?? null;
-  } catch {
-    return null;
-  }
-}
-
-function stripHtml(html: string): string {
-  return html
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
   const t = await getTranslations({ locale, namespace: "meta" });
   const id = slug ? extractIdFromSlug(slug) : undefined;
 
-  const article = id ? await fetchArticle(id, locale) : null;
+  const article = id ? await fetchArticleDetail(id, locale) : null;
 
   if (!article) {
     return { robots: { index: false, follow: false } };
@@ -99,14 +56,114 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
+function buildArticleJsonLd({
+  locale,
+  slug,
+  title,
+  description,
+  createdAt,
+  updatedAt,
+}: {
+  locale: string;
+  slug: string;
+  title: string;
+  description: string;
+  createdAt?: string;
+  updatedAt?: string;
+}) {
+  const siteOrigin = getSiteOrigin();
+  const articleUrl =
+    locale === "ar"
+      ? `${siteOrigin}/knowledge-base/${slug}`
+      : `${siteOrigin}/en/knowledge-base/${slug}`;
+  const homeUrl = locale === "ar" ? `${siteOrigin}/` : `${siteOrigin}/en`;
+  const kbUrl =
+    locale === "ar"
+      ? `${siteOrigin}/knowledge-base`
+      : `${siteOrigin}/en/knowledge-base`;
+
+  return [
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "@id": `${articleUrl}#article`,
+      headline: title,
+      description,
+      datePublished: createdAt,
+      dateModified: updatedAt || createdAt,
+      inLanguage: locale,
+      mainEntityOfPage: articleUrl,
+      author: {
+        "@type": "Organization",
+        "@id": `${siteOrigin}/#organization`,
+      },
+      publisher: { "@id": `${siteOrigin}/#organization` },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: locale === "ar" ? "الرئيسية" : "Home",
+          item: homeUrl,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: locale === "ar" ? "قاعدة المعرفة" : "Knowledge Base",
+          item: kbUrl,
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: title,
+          item: articleUrl,
+        },
+      ],
+    },
+  ];
+}
+
 export default async function KnowledgeBaseArticlePage({ params }: Props) {
   const { locale, slug } = await params;
   const id = slug ? extractIdFromSlug(slug) : undefined;
 
   if (!id) notFound();
 
-  const article = await fetchArticle(id, locale);
+  const [article, list] = await Promise.all([
+    fetchArticleDetail(id, locale),
+    fetchArticleList(locale, 1, PAGE_LIMIT),
+  ]);
+
   if (!article) notFound();
 
-  return <KnowledgeBaseInner initialId={id} />;
+  const title =
+    locale === "ar" && article.titleAr ? article.titleAr : article.titleEn;
+  const rawDescription =
+    locale === "ar" && article.descriptionAr
+      ? article.descriptionAr
+      : article.descriptionEn;
+
+  return (
+    <>
+      <JsonLd
+        data={buildArticleJsonLd({
+          locale,
+          slug,
+          title,
+          description: stripHtml(rawDescription || ""),
+          createdAt: article.createdAt,
+          updatedAt: article.updatedAt,
+        })}
+      />
+      <KnowledgeBaseInner
+        initialId={id}
+        initialArticle={article}
+        initialArticles={list?.items}
+        initialPagination={list?.pagination}
+      />
+    </>
+  );
 }

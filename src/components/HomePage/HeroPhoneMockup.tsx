@@ -262,8 +262,10 @@ function LinaAvatar({ size = "sm" }: { size?: "sm" | "md" | "lg" }) {
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/images/AiAvatar.png"
+        src="/images/AiAvatar.webp"
         alt=""
+        width={120}
+        height={120}
         className="h-full w-full object-cover"
       />
     </div>

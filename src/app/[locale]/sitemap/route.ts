@@ -9,7 +9,6 @@ import {
   menuSitemapPageCount,
   newestSitemapDate,
   toSitemapDate,
-  todayIsoDate,
 } from "@/lib/sitemap/data";
 import { xmlResponse } from "@/lib/sitemap/response";
 import { buildSitemapIndex } from "@/lib/sitemap/xml";
@@ -46,13 +45,24 @@ export async function GET(
     ),
   );
   const newestFromMeta = newestSitemapDate(...metaLastmodByPage.values());
-  const lastmod =
-    newestSitemapDate(newestFromMenus, newestFromKb, newestFromMeta) ??
-    todayIsoDate();
 
+  // Each child sitemap gets its own real newest date instead of one merged
+  // value applied uniformly — see findings/sitemap.md "suspiciously uniform"
+  // finding. `sitemap-main` covers marketing pages (newestFromMeta),
+  // `sitemap-knowledge-base` covers articles (newestFromKb), and the menu
+  // pages cover customer menus (newestFromMenus).
   const pageCount = menuSitemapPageCount(menus.length);
   const xml = buildSitemapIndex(
-    buildLocaleSitemapIndex(siteOrigin, locale, lastmod, pageCount),
+    buildLocaleSitemapIndex(
+      siteOrigin,
+      locale,
+      {
+        main: newestFromMeta,
+        knowledgeBase: newestFromKb,
+        menus: newestFromMenus,
+      },
+      pageCount,
+    ),
   );
   return xmlResponse(xml);
 }

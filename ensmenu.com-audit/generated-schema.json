@@ -1,0 +1,221 @@
+{
+  "_meta": {
+    "generated_by": "/seo-schema",
+    "generated_for": "ensmenu.com",
+    "note": "Ready-to-use JSON-LD templates. Values marked with [PLACEHOLDER: ...] must be confirmed before publishing — do not ship them as-is. All other values were sourced directly from the codebase (src/modules/Footer/data.ts, src/lib/contactConstants.ts, messages/en.json, src/app/[locale]/layout.tsx) and are truthful/verifiable as of this audit.",
+    "see_also": "findings/schema.md for the full validation report and implementation priority order"
+  },
+
+  "1_organization_and_website_root_layout": {
+    "implementation_note": "Add both blocks as a single <script type=\"application/ld+json\"> in src/app/[locale]/layout.tsx (server-rendered, so this is safe to add directly in the <head>).",
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "@id": "https://www.ensmenu.com/#organization",
+        "name": "ENSmenu",
+        "legalName": "[PLACEHOLDER: confirm ENSmenu's registered legal entity name]",
+        "url": "https://www.ensmenu.com",
+        "logo": "[PLACEHOLDER: confirm canonical hosted brand logo URL, ideally a square PNG/JPG >=112x112px]",
+        "description": "ENSmenu is a platform for creating digital QR menus and ordering systems for restaurants, cafes, and hotels.",
+        "email": "info@ensmenu.com",
+        "contactPoint": [
+          {
+            "@type": "ContactPoint",
+            "telephone": "+201500800050",
+            "contactType": "sales",
+            "areaServed": "EG",
+            "availableLanguage": ["ar", "en"]
+          },
+          {
+            "@type": "ContactPoint",
+            "telephone": "+201553841793",
+            "contactType": "technical support",
+            "areaServed": "EG",
+            "availableLanguage": ["ar", "en"]
+          },
+          {
+            "@type": "ContactPoint",
+            "telephone": "+971586551491",
+            "contactType": "customer service",
+            "areaServed": "AE",
+            "availableLanguage": ["ar", "en"]
+          }
+        ],
+        "sameAs": [
+          "https://www.instagram.com/ens.menu",
+          "https://www.facebook.com/Ensmenu/",
+          "https://www.tiktok.com/@ensmenu6",
+          "https://www.youtube.com/@EnsMENU"
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "@id": "https://www.ensmenu.com/#website",
+        "name": "ENSmenu",
+        "url": "https://www.ensmenu.com",
+        "inLanguage": ["ar", "en"],
+        "publisher": { "@id": "https://www.ensmenu.com/#organization" }
+      }
+    ]
+  },
+
+  "2_web_application_homepage": {
+    "implementation_note": "Add to src/app/[locale]/(main)/page.tsx. Confirm the offers.price/priceCurrency still matches the live free-tier plan (pricing is fetched dynamically via ProPlanPriceSelector.tsx, not hardcoded) before publishing.",
+    "jsonld": {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "ENSmenu",
+      "url": "https://www.ensmenu.com",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "description": "ENSmenu is a platform for creating digital QR menus and ordering systems for restaurants, cafes, and hotels \u2014 bilingual Arabic/English, with AI-powered menu import from photo or PDF.",
+      "inLanguage": ["ar", "en"],
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EGP",
+        "description": "[PLACEHOLDER: confirm exact free-plan scope/limits against the live /pricing page before publishing]"
+      },
+      "featureList": [
+        "QR code digital menu creation",
+        "AI-powered menu import from photo or PDF",
+        "Bilingual Arabic/English menus with RTL support",
+        "Real-time menu and price updates",
+        "Multi-branch and multi-location management"
+      ],
+      "publisher": { "@id": "https://www.ensmenu.com/#organization" }
+    },
+    "not_included_deliberately": "No aggregateRating or review property is included. Do not add one until real, genuine third-party reviews/testimonials exist (see content.md finding on missing testimonials) \u2014 fabricated or unsupported ratings risk a Google manual action."
+  },
+
+  "3_article_knowledge_base_template": {
+    "implementation_note": "This is a TEMPLATE to be populated per-article inside src/app/[locale]/(main)/knowledge-base/[slug]/page.tsx, server-rendered alongside the SSR fix already recommended in content.md finding #1. Requires adding createdAt/updatedAt to the local ArticleDetail interface in that file (the fields already exist in the API response and are already consumed by the client component in KnowledgeBaseClient.tsx, so this is a one-line type/fetch change, not a backend change).",
+    "jsonld": {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "@id": "{articleUrl}#article",
+      "headline": "{article.titleEn or article.titleAr per locale}",
+      "description": "{stripHtml(article.descriptionEn or article.descriptionAr per locale)}",
+      "datePublished": "{article.createdAt, ISO 8601}",
+      "dateModified": "{article.updatedAt or article.createdAt, ISO 8601}",
+      "inLanguage": "{locale}",
+      "mainEntityOfPage": "{articleUrl}",
+      "author": {
+        "@type": "Organization",
+        "@id": "https://www.ensmenu.com/#organization"
+      },
+      "publisher": { "@id": "https://www.ensmenu.com/#organization" },
+      "image": "[PLACEHOLDER: add once knowledge-base articles have a per-article hero image field in the data model]"
+    },
+    "future_improvement": "Once named authors/bylines are introduced (see content.md recommendation), change 'author' to a Person type with a 'worksFor' property pointing back to the Organization @id, instead of defaulting to the Organization as author."
+  },
+
+  "4_breadcrumblist_knowledge_base_template": {
+    "implementation_note": "Add alongside the Article schema on every knowledge-base article page.",
+    "jsonld": {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.ensmenu.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Knowledge Base", "item": "https://www.ensmenu.com/knowledge-base" },
+        { "@type": "ListItem", "position": 3, "name": "{article.titleEn}", "item": "{articleUrl}" }
+      ]
+    }
+  },
+
+  "5_faqpage_optional_low_priority": {
+    "implementation_note": "OPTIONAL, Info-priority only. Google retired FAQ rich results for all sites on 2026-05-07 \u2014 this schema currently yields no confirmed Google SERP or AI-citation benefit. Only implement if it is near-zero additional engineering cost; do not prioritize over items 1-4. Content sourced verbatim from messages/en.json 'faqPage' section (9 Q&A pairs already live on /faq).",
+    "jsonld": {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Can I create a QR menu for free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. You can create a fully free digital menu for your restaurant or cafe in minutes, add items, prices, and photos, and get a QR code ready to use\u2014no hassle."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the difference between the free plan and paid subscription?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The free plan covers the essentials to run a professional menu. Paid plans add features such as full design control, brand colours, promotions or ads, and a richer experience for your guests (see current pricing for details)."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does the menu support Arabic and English?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The platform supports Arabic and English so you can choose what works for your customers\u2014ideal for locals and tourists alike."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is the dashboard easy to use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We built a simple, fast dashboard where you can add or edit items and prices, update your menu anytime, and see changes go live without technical skills."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I manage more than one menu or branch?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "It depends on your plan: the free tier often allows one active menu, while higher plans support multiple menus or advanced features. Check pricing or your dashboard for your current limits."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I share the menu with customers?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "After you publish your menu you get a direct link and a QR code. Put the code on tables, printed menus, or social media\u2014customers scan or tap the link and browse instantly."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is my restaurant data and menu protected?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We work to keep the platform secure and host your data with reasonable safeguards. Read our privacy policy for details on collection and use, and use a strong password\u2014never share login credentials."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What if I need help or run into an issue?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Contact us via WhatsApp or email as shown on the site\u2014we can help you set up your menu or troubleshoot technical issues."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I customise the menu look, colours, and logo?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Depending on your plan you can upload a logo and adjust colours and layout to match your brand; higher tiers offer broader design control."
+          }
+        }
+      ]
+    }
+  },
+
+  "6_breadcrumblist_marketing_pages_template": {
+    "implementation_note": "Lower priority, nice-to-have consistency pass. Example for /pricing \u2014 replicate pattern for /about, /contact, etc.",
+    "jsonld": {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.ensmenu.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Pricing", "item": "https://www.ensmenu.com/pricing" }
+      ]
+    }
+  }
+}

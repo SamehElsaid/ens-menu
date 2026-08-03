@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 
-const AI_AVATAR_SRC = "/images/AiAvatar.png";
+const AI_AVATAR_SRC = "/images/AiAvatar.webp";
 
 type Props = {
   size?: number;

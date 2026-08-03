@@ -382,7 +382,7 @@ export default function ChatWidget() {
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/images/AiAvatar.png"
+                src="/images/AiAvatar.webp"
                 alt="لينا"
                 className="size-full object-cover object-center"
               />

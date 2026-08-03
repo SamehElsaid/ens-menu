@@ -1,0 +1,378 @@
+{
+  "summary": {
+    "health_score": 52,
+    "business_type": "B2B SaaS \u2014 QR/digital menu \u0026 ordering platform for restaurants, caf\u00e9s \u0026 hotels (bilingual AR/EN, Egypt-based, global ambition). Also runs large-scale programmatic SEO surface (172+ customer subdomains).",
+    "top_findings": [
+      "Zero structured data (JSON-LD) anywhere on the site \u2014 no Organization, SoftwareApplication, FAQPage, Article, or BreadcrumbList schema.",
+      "Knowledge-base article bodies are 100% client-rendered (fetched via useEffect/axios after hydration) \u2014 invisible to non-JS crawlers and most AI/LLM crawlers, killing your best AI-citation content.",
+      "No security response headers on HTML pages (no CSP, X-Frame-Options, Referrer-Policy, Permissions-Policy, X-Content-Type-Options).",
+      "robots.txt Disallow + meta noindex are both applied to /auth/* pages \u2014 the noindex is unreachable by crawlers and provides zero actual protection.",
+      "llms.txt is not implemented \u2014 the route falls through to the catch-all page and serves the full homepage (200 OK) instead of a proper llms.txt or 404.",
+      "New (/seo-sitemap deep dive): ~10 of 173 customer-menu sitemap URLs are internal/test accounts (test.ensmenu.com, your-slug-ensmenu-com*, etc.) returning HTTP 200 soft-404 \u201cmenu not found\u201d content \u2014 indexed junk wasting crawl budget under the production domain. See findings/sitemap.md.",
+      "New (/seo-images deep dive): three raw, unoptimized images on the homepage total ~6.4MB of easily-recoverable payload \u2014 a 2.19MB JPEG shown at 44x44px, and two 2.1MB PNGs in the template-showcase carousel that bypass an already-working resize/WebP pipeline. See findings/images.md.",
+      "Knowledge-base sitemap only lists 8 articles (ids 71\u201378) even though slugs reach id 78, suggesting ~70 previously-published article URLs were dropped without redirects \u2014 likely soft-404s/orphaned equity. Confirmed via /seo-sitemap: the sitemap-generation code correctly paginates through everything the API returns, so this is an upstream content/API gap, not a sitemap bug.",
+      "No testimonials, customer quotes, or third-party reviews exist anywhere on the site, despite 172 real active customers already on the platform \u2014 a significant, easily fixable Authoritativeness/Trust gap."
+    ],
+    "quick_wins": [
+      "Add Organization + WebSite JSON-LD to the root layout, and WebApplication schema to the homepage (ready-to-use code in generated-schema.json).",
+      "Add Article JSON-LD (headline, datePublished, dateModified, author) to knowledge-base pages.",
+      "Re-enable the commented-out <FeaturesApp /> section on /mobile-app \u2014 the content is already written and translated, just disabled.",
+      "Remove the leftover console.log(dynamic) in knowledge-base/page.tsx.",
+      "Give descriptive alt text to real customer logos in TrustedByLogosRow instead of alt=\"\".",
+      "Add a `headers()` block in next.config.ts for baseline security headers (X-Content-Type-Options, Referrer-Policy, Permissions-Policy, X-Frame-Options)."
+    ]
+  },
+  "categories": [
+    {
+      "name": "Technical SEO",
+      "score": 52,
+      "what_works": [
+        "robots.txt cleanly allows all public marketing/menu paths and disallows only private app surfaces (dashboard, admin, auth, payment, unauthorized) in both locale prefixes.",
+        "Sitemap architecture is a well-designed index (sitemap-main, sitemap-knowledge-base, sitemap-menus/N) with pagination support for the 50k URL limit, split per locale (/sitemap, /en/sitemap) \u2014 confirmed live via /seo-sitemap deep dive: valid XML, correct namespace, 0 non-HTTPS/duplicate/redirected URLs across all 381 indexed URLs. See findings/sitemap.md and VALIDATION-REPORT.md for the full analysis.",
+        "Legacy .xml sitemap URLs get a clean single-hop 308 redirect to the new routes (re-verified live); the codebase explicitly avoids case-only redirects to prevent redirect loops (documented in next.config.ts).",
+        "Canonical URLs are correctly generated per-page via buildSeoMetadata/alternates.canonical.",
+        "Bilingual hreflang is correctly reciprocated site-wide via HTTP Link headers (ar \u2194 en \u2194 x-default), verified on homepage and inner pages.",
+        "HSTS (Strict-Transport-Security) enabled; TLS cert is a valid wildcard (*.ensmenu.com, Let's Encrypt) covering all customer subdomains; hosted on Vercel edge (fra1/cdg1) for fast global TTFB.",
+        "No mixed content and no back-button-hijacking risk found (codebase-wide search for hardcoded http:// resources and history.pushState/replaceState both returned zero matches)."
+      ],
+      "findings": [
+        {
+          "title": "Test/placeholder customer subdomains are indexed in the sitemap and return soft-404 content",
+          "severity": "Critical",
+          "description": "A /seo-sitemap deep dive fetched all 381 live sitemap URLs and pattern-matched the 173 English-locale customer-menu URLs for placeholder-looking slugs, finding 10 (~5.8%): test.ensmenu.com, testing.ensmenu.com, test1/test5/tester.ensmenu.com, and 5 variants of your-slug-ensmenu-com*. Two were spot-checked live: test.ensmenu.com and testing.ensmenu.com both return HTTP 200 but render a \u2018This menu is not found\u2019 soft-404 template with junk titles (\u2018test\u2019, \u2018sss\u2019). These are almost certainly internal/QA accounts coming back unfiltered from the /public/menus API that feeds fetchPublicMenus() in src/lib/sitemap/data.ts.",
+          "recommendation": "Filter test/internal/unpublished accounts out of the /public/menus API response (or in fetchPublicMenus() as a stopgap) before they reach the sitemap. Manually review the full 173/172-URL list for other non-customer entries beyond the 10 pattern-matched here. See findings/sitemap.md and VALIDATION-REPORT.md for full evidence."
+        },
+        {
+          "title": "Homepage canonical tag and hreflang self-reference disagree on trailing slash",
+          "severity": "Medium",
+          "description": "A /seo-hreflang deep dive found the Arabic homepage's canonical tag renders as https://www.ensmenu.com (no trailing slash) while its own hreflang self-reference in the HTTP Link header is https://www.ensmenu.com/ (with trailing slash) \u2014 a real mismatch on the site's single highest-value page. Every other page checked (pricing, FAQ, KB article) is unaffected since their paths never end in a bare slash.",
+          "recommendation": "Confirm which layer strips the slash (Next.js metadata resolution vs. a rewrite) and standardize the homepage's canonical and hreflang self-reference to the same form. See findings/hreflang.md."
+        },
+        {
+          "title": "Customer-menu subdomains render relative-URL HTML hreflang tags alongside correct absolute-URL header hreflang",
+          "severity": "Medium",
+          "description": "All 172 customer-menu subdomains correctly inherit reciprocal, absolute-URL hreflang via the shared next-intl middleware's HTTP Link header (confirmed live on elwensh.ensmenu.com and others). However, the actual page HTML rendered by the separate customer-menu storefront deployment also includes its own <link rel=\"alternate\" hrefLang> tags using relative hrefs (href=\"/\", href=\"/en\") instead of the absolute URLs Google's documentation requires.",
+          "recommendation": "Fix the relative hreflang hrefs in the customer-menu storefront template to use absolute URLs \u2014 that codebase is a separate deployment not present in this repository. See findings/hreflang.md."
+        },
+        {
+          "title": "No security response headers on HTML routes",
+          "severity": "High",
+          "description": "Live response headers for the homepage and pricing page show only Strict-Transport-Security. There is no Content-Security-Policy, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, or Permissions-Policy. next.config.ts has no headers() function at all. The sitemap route separately sets X-Content-Type-Options, showing the team knows how to add headers but hasn't applied it site-wide. HSTS itself is also missing includeSubDomains/preload directives.",
+          "recommendation": "Add a headers() function in next.config.ts applying to '/(.*)' with at minimum X-Content-Type-Options: nosniff, X-Frame-Options: SAMEORIGIN, Referrer-Policy: strict-origin-when-cross-origin, Permissions-Policy (camera/microphone/geolocation disabled by default), a scoped Content-Security-Policy allowlisting Vercel, GTM/GA, Chatwoot, Firebase, and image CDNs, and add includeSubDomains to HSTS once all customer subdomains are confirmed HTTPS-ready."
+        },
+        {
+          "title": "robots.txt Disallow + meta noindex both applied to /auth/* pages \u2014 conflicting, self-defeating pattern",
+          "severity": "High",
+          "description": "login, register, reset-password, verify-email, and staff-login pages all set robots: \"noindex, nofollow\" via generateMetadata, but robots.txt already disallows /auth and /en/auth entirely. Per Google's own guidance, a robots.txt disallow prevents Googlebot from ever crawling the page to see the noindex tag, so if any /auth/* URL is discovered via an external link, Google can still show it in search results (as a bare URL, no snippet) because the noindex directive was never seen. The noindex tags on these five pages currently provide zero protection.",
+          "recommendation": "Pick one mechanism per page: remove /auth from robots.txt and rely on the noindex meta tag (guarantees de-indexing), or drop the noindex tags and rely solely on the robots.txt block (fine if these pages have no external backlinks and the goal is just crawl-budget savings)."
+        },
+        {
+          "title": "llms.txt not implemented \u2014 serves homepage instead of 404/proper file",
+          "severity": "Medium",
+          "description": "Requesting /llms.txt returns a full 200 OK homepage render (via the [...page] catch-all), not a plain-text llms.txt or a 404. This wastes AI-crawler budget and misses a cheap GEO win, and is also a check in Lighthouse's newer Agentic Browsing category.",
+          "recommendation": "Add a dedicated src/app/llms.txt/route.ts (or static file) returning a curated plain-text summary of the product, key pages, and knowledge-base links, and exclude /llms.txt from the catch-all route matcher."
+        },
+        {
+          "title": "~70 legacy knowledge-base article URLs missing from sitemap",
+          "severity": "Medium",
+          "description": "Article slugs end in sequential numeric ids; the newest 8 in the sitemap run 71\u201378, but no ids 1\u201370 appear anywhere. If those were ever published/indexed/linked externally, their URLs are now orphaned (return noindex via the generateMetadata fallback, or 404) with no redirect, silently dropping any accumulated link equity and rankings.",
+          "recommendation": "Confirm whether ids 1\u201370 were deleted, unpublished, or renumbered. If deleted permanently, add 301 redirects from old slugs to the closest current article or the knowledge-base index. If still valid content that's just missing from the sitemap query, fix the /searchInformation pagination/filter that feeds fetchAllKbArticles()."
+        },
+        {
+          "title": "2-hop redirect chain on the bare-apex HTTP entry point",
+          "severity": "Medium",
+          "description": "http://ensmenu.com/ \u2192 https://ensmenu.com/ (308) \u2192 https://www.ensmenu.com/ (308) is two hops, exceeding the max-1-hop guideline; http://www.ensmenu.com/ correctly single-hops. Verified live via curl -D (hop-by-hop header trace).",
+          "recommendation": "Redirect http://ensmenu.com/* directly to https://www.ensmenu.com/* in a single hop."
+        },
+        {
+          "title": "Knowledge-base URLs exceed 100 characters",
+          "severity": "Medium",
+          "description": "Sampled live KB article URLs measured 116\u2013136 characters (e.g. a 136-char URL for the \"AI menu for restaurants\" article) because slugs are generated from the full title plus a numeric id suffix (kbSlug() in src/lib/sitemap/data.ts).",
+          "recommendation": "Not urgent to change existing URLs (would need redirects), but cap future slug generation to the first ~8-10 significant words of the title."
+        },
+        {
+          "title": "IndexNow protocol not implemented",
+          "severity": "Medium",
+          "description": "No IndexNow key file or ping implementation found anywhere in the codebase. IndexNow lets Bing/Yandex index new or updated URLs immediately instead of waiting for a crawl \u2014 relevant given real update volume (weekly-changing KB articles and 172+ customer menu subdomains).",
+          "recommendation": "Generate an IndexNow key file, host it at the domain root, and ping the IndexNow API whenever a page is published or updated \u2014 ideally hooked into the same revalidation logic that already updates the sitemaps."
+        },
+        {
+          "title": "hreflang served only via HTTP header, not also via <link> tags or sitemap annotations",
+          "severity": "Low",
+          "description": "Google accepts hreflang via HTML <link>, HTTP header, or XML sitemap (only one method is required, so the header alone is technically sufficient), but relying on a single method with no fallback is fragile \u2014 any CDN/edge config change that strips custom headers would silently remove all hreflang signals with no compensating control. Next.js metadata's alternates.languages is not populated (buildSeoMetadata intentionally omits it, per a code comment stating locales are \"treated as separate sites\").",
+          "recommendation": "Add alternates.languages to buildSeoMetadata as a low-cost redundant signal, so hreflang survives independently of header delivery."
+        },
+        {
+          "title": "Core Web Vitals data unavailable for this audit",
+          "severity": "Info",
+          "description": "No Search Console/CrUX credentials were available, and a direct call to the public PageSpeed Insights API during this audit returned 429 RESOURCE_EXHAUSTED (daily quota is 0 for the anonymous consumer). Reported as unavailable rather than estimated.",
+          "recommendation": "Run claude-seo run pagespeed_check.py with a valid Google API key, or check PSI/Search Console manually for real field data."
+        }
+      ]
+    },
+    {
+      "name": "Content Quality",
+      "score": 44,
+      "eeat_breakdown": {
+        "experience": { "score": 10, "max": 20 },
+        "expertise": { "score": 8, "max": 25 },
+        "authoritativeness": { "score": 8, "max": 25 },
+        "trustworthiness": { "score": 20, "max": 30 },
+        "total": 46
+      },
+      "ai_citation_readiness": 25,
+      "what_works": [
+        "Knowledge-base targets genuinely useful, current, long-tail and comparison queries (e.g. \"ENSMENU vs GloriaFood\", \"15 QR menu ideas for restaurants\", \"AI menu for restaurants\") dated for 2026 \u2014 good topical relevance and freshness strategy.",
+        "Per-article metadata (title/description) is server-rendered with a sensible noindex fallback when an article can't be resolved (src/app/[locale]/(main)/knowledge-base/[slug]/page.tsx).",
+        "Word counts (measured directly from messages/en.json): homepage 689 words (passes the 500-word floor), FAQ 345 words across 9 well-formed Q&A pairs, Privacy Policy 620 words and Terms 689 words \u2014 both substantive with a dynamically rendered last-updated date.",
+        "Real product demo video (DemoVideoModal) plus interactive phone-mockup visualizations throughout \u2014 genuine, non-stock product demonstration (a real Experience signal).",
+        "Header navigation (src/modules/Header/data.ts) correctly links every main page including a Mobile Apps dropdown to /mobile-app and /ens_owner_app_owner \u2014 no orphaned marketing pages.",
+        "Multiple real, working contact channels (UAE + Egypt phone numbers, WhatsApp, email, live chat) and a Google Maps embed with real coordinates \u2014 strong baseline Trustworthiness signals."
+      ],
+      "findings": [
+        {
+          "title": "Knowledge-base article body content is entirely client-rendered",
+          "severity": "Critical",
+          "description": "KnowledgeBaseInner (src/app/[locale]/(main)/knowledge-base/KnowledgeBaseClient.tsx) is a \"use client\" component that fetches the article list and article HTML body via axiosGet inside useEffect, after mount. The server-rendered page (confirmed via curl on a live article URL) only contains the title/description in <head>; the actual guide content is absent from the initial HTML. A live WebFetch of /knowledge-base returned only the page chrome and the words \"\u0642\u0627\u0639\u062f\u0629 \u0627\u0644\u0645\u0639\u0631\u0641\u0629\" with no article list.",
+          "recommendation": "Move the article list and article body fetch into the server component (the page.tsx already fetches the article server-side for metadata \u2014 pass that data as props into a server-rendered content block, keeping only interactive bits like search/pagination as client components)."
+        },
+        {
+          "title": "No testimonials, customer quotes, or third-party reviews anywhere on the site",
+          "severity": "High",
+          "description": "A search across src/components/HomePage for testimonial/review-related components found nothing. The only social-proof element is the TrustedByLogosRow logo marquee (logos only, no attributed quotes or ratings). For a B2B SaaS with 172 real active customers already on the platform, this is a significant, easily-addressable Authoritativeness/Trust gap.",
+          "recommendation": "Add a testimonials section and/or dedicated case-studies page sourced from real customers on the 172 existing menu subdomains, ideally with named businesses, specific outcomes, and links to their live menus as proof."
+        },
+        {
+          "title": "/mobile-app page ships ~35% less content than already exists in the codebase",
+          "severity": "Medium",
+          "description": "src/app/[locale]/(main)/mobile-app/page.tsx renders Hero/Workflow/Faq/Cta but has `{/* <FeaturesApp /> */}` commented out. FeaturesApp.tsx and its backing translations (Landing.FeaturesApp + Landing.mobileApp, ~132 words, already written in both en.json and ar.json) are fully built but unused, leaving the live page at only ~368 rendered words.",
+          "recommendation": "Re-enable <FeaturesApp /> on the mobile-app page (verify layout fit first), or confirm the removal was intentional and remove the dead code/translations."
+        },
+        {
+          "title": "No visible author/byline or reviewer signals on knowledge-base content",
+          "severity": "Medium",
+          "description": "E-E-A-T signals (author name, credentials, last-reviewed date) were not found in the fetched article data model (ArticleDetail has titleAr/En, descriptionAr/En, timestamps only \u2014 no author field). This fails Google's \"Who created it?\" helpful-content test outright.",
+          "recommendation": "Add an author/reviewer byline and a visible \"last updated\" date to article pages, plus Article schema (see Schema findings) to make these signals machine-readable."
+        },
+        {
+          "title": "Large historical content gap in the blog (see Technical: orphaned URLs)",
+          "severity": "Medium",
+          "description": "Only 8 knowledge-base articles currently exist/are indexable versus ids reaching 78, suggesting most of the content library was removed or is unreachable.",
+          "recommendation": "See Technical SEO finding above; treat this as a content-strategy priority to restore or replace lost articles rather than only a redirect fix."
+        },
+        {
+          "title": "Location disclosed only as \"Egypt,\" not a full address",
+          "severity": "Low",
+          "description": "Footer/data.ts defines real map coordinates embedded via Google Maps, but the displayed location label (messages/en.json) is just the country name \u2014 a weak NAP (Name-Address-Phone) consistency signal next to an otherwise precise map pin.",
+          "recommendation": "Display a real city-level (or full) address alongside the map embed."
+        },
+        {
+          "title": "No visible registered legal entity name",
+          "severity": "Low",
+          "description": "Privacy Policy and Terms content refer to \"ENSMENU\" throughout but no formal registered company name was found in the legal copy or footer \u2014 a standard trust expectation once a product handles payments/subscriptions.",
+          "recommendation": "Confirm with the legal/business team whether a registered entity name should be added to Terms and Privacy Policy."
+        }
+      ]
+    },
+    {
+      "name": "On-Page SEO",
+      "score": 82,
+      "what_works": [
+        "Every main marketing route (home, about, pricing, contact, faq, mobile-app, owner-app, privacy-policy, terms, knowledge-base, knowledge-base/[slug]) implements generateMetadata with locale-aware title/description/keywords.",
+        "A CMS override layer (fetchPageMetadata + resolveMetaField) lets non-engineers update title/description/keywords per page without a deploy \u2014 good operational practice.",
+        "Homepage: exactly one <h1>, all 8 images carry alt attributes, title (~46 chars) and description (~105 chars) both sit within recommended length ranges, canonical resolves correctly to https://www.ensmenu.com.",
+        "Title templates use a consistent \"ENSmenu - %s\" pattern at the root layout level."
+      ],
+      "findings": [
+        {
+          "title": "og:locale hardcoded to ar_EG / en_GB regardless of target market",
+          "severity": "Low",
+          "description": "buildSeoMetadata hardcodes openGraph.locale to \"ar_EG\" or \"en_GB\". Given the homepage explicitly markets \"from all over the world\" / Worldwide positioning, en_GB may misrepresent the target audience for non-UK English readers (e.g. Gulf, US, or generic international visitors).",
+          "recommendation": "Consider en_US or a market-neutral value, or make it configurable per deployment if targeting multiple English-speaking regions differently."
+        },
+        {
+          "title": "On-page quality of the 172 customer menu subdomains not verifiable from this repo",
+          "severity": "Info",
+          "description": "The public storefront app that serves *.ensmenu.com customer menus (e.g. elwensh.ensmenu.com) is not part of this codebase and could not be assessed for per-page title/description uniqueness, thin-content risk, or duplicate templates at scale.",
+          "recommendation": "Run a dedicated programmatic-SEO/on-page audit against a sample of the 172 subdomains once that codebase is available."
+        }
+      ]
+    },
+    {
+      "name": "Schema & Structured Data",
+      "score": 10,
+      "what_works": [],
+      "findings": [
+        {
+          "title": "No JSON-LD structured data anywhere in the codebase",
+          "severity": "Critical",
+          "description": "A codebase-wide search for \"@type\", \"@context\", application/ld+json, and common helper names (JsonLd, StructuredData) returned zero matches across src/. No Organization, WebSite, SoftwareApplication, Product, FAQPage, Article, or BreadcrumbList schema exists on any page.",
+          "recommendation": "Prioritize: (1) Organization + WebSite schema in the root layout (logo, sameAs social links from Footer/data.ts, contact info), (2) WebApplication schema on the homepage, (3) Article schema (headline, author, datePublished, dateModified, image) on every knowledge-base article \u2014 pairs well with fixing the client-rendering issue above, (4) BreadcrumbList on knowledge-base articles. FAQPage on /faq is now Info-priority only (Google retired FAQ rich results for all sites May 7, 2026) \u2014 see findings/schema.md and generated-schema.json for the full deep-dive and ready-to-use JSON-LD."
+        }
+      ]
+    },
+    {
+      "name": "Performance (Core Web Vitals)",
+      "score": 78,
+      "what_works": [
+        "Fonts are self-hosted via @fontsource/cairo instead of Google Fonts \u2014 avoids a render-blocking third-party font request.",
+        "next.config.ts configures images.formats: [avif, webp]; homepage HTML confirms next/image responsive srcset + preload hints for the LCP demo image.",
+        "GTM and GA/gtag scripts use next/script strategy=\"lazyOnload\" gated behind a custom useDelayedLoad hook \u2014 deliberately deferring third-party analytics to protect INP/TBT.",
+        "@next/bundle-analyzer is wired into the build for ongoing bundle-size monitoring."
+      ],
+      "findings": [
+        {
+          "title": "No field/lab Core Web Vitals data available for this audit",
+          "severity": "Info",
+          "description": "No Google Search Console, CrUX, or PageSpeed Insights API access was available in this session, and no DataForSEO MCP was configured, so LCP/INP/CLS scores below are engineering-signal estimates, not measured values.",
+          "recommendation": "Re-run with the seo-google skill once Search Console/CrUX credentials are available, or run PageSpeed Insights manually against https://www.ensmenu.com and https://www.ensmenu.com/en for verified field data."
+        },
+        {
+          "title": "Trusted-by customer logo marquee bypasses next/image",
+          "severity": "Low",
+          "description": "TrustedByLogosRow.tsx renders raw <img> tags (with an eslint-disable for @next/next/no-img-element) for real customer logos and country flags, losing automatic AVIF/WebP conversion and Next.js responsive optimization for a marquee that duplicates images to fill the viewport (potentially 16+ image requests).",
+          "recommendation": "Where the logo source domain can be added to images.remotePatterns, migrate to next/image; if that's not feasible (arbitrary customer-controlled URLs), consider proxying/optimizing logos server-side at upload time instead of at request time."
+        }
+      ]
+    },
+    {
+      "name": "Images",
+      "score": 42,
+      "what_works": [
+        "next/image is used broadly across ~40+ components for responsive, modern-format delivery, and next.config.ts correctly configures formats: [avif, webp].",
+        "Images that do go through next/image (e.g. the homepage paper-menu transform image) get full responsive srcset generation and are genuinely well-optimized.",
+        "A capable Sharp-based resize+WebP pipeline (/api/resize) already exists and is correctly used for customer-uploaded logos on menu subdomains.",
+        "loading=\"lazy\" + decoding=\"async\" are used consistently on every below-the-fold raw <img> found, and every raw <img> usage includes an onError fallback.",
+        "Alt text is present and descriptive everywhere except the one alt=\"\" case flagged below \u2014 no keyword-stuffed or filename-as-alt patterns found."
+      ],
+      "findings": [
+        {
+          "title": "A 1536\u00d71024, 2.19MB JPEG is served raw for a 44\u00d744px homepage thumbnail",
+          "severity": "Critical",
+          "description": "A /seo-images deep dive found public/images/hero/chicken.jpg is 2,246,755 bytes at native 1536x1024 resolution, used as a 44x44px demo-product thumbnail in the homepage's animated hero chat mockup (HeroProductThumb.tsx) via a raw <img> tag that bypasses next/image entirely. Its three sibling images in the same data set are correctly sized (17-60KB) \u2014 this one file is a clear, isolated outlier.",
+          "recommendation": "Re-export chicken.jpg to ~400px matching its siblings (target <50KB) \u2014 recovers ~2.2MB on its own. See findings/images.md."
+        },
+        {
+          "title": "Homepage template-showcase carousel serves two more raw, multi-megabyte PNGs despite an unused resize pipeline",
+          "severity": "High",
+          "description": "TemplateShow.tsx (homepage) serves waffle.png (2.11MB) and vanilla.png (2.12MB) completely raw \u2014 confirmed live via curl. The app's own ImageLoad.tsx wrapper already has a working resize path (routes through /api/resize, a Sharp+WebP endpoint) whenever width/height props are passed, but TemplateShow.tsx never passes them, so every template image bypasses the pipeline.",
+          "recommendation": "Pass explicit width/height (matching the aspect-video display box) to every LoadImage call in TemplateShow.tsx \u2014 zero new infrastructure needed. See findings/images.md."
+        },
+        {
+          "title": "TrustedBySection (homepage logo marquee) is 100% client-rendered \u2014 invisible to non-JS crawlers and Google Images",
+          "severity": "High",
+          "description": "The 'Trusted by' customer-logo marquee fetches its data entirely client-side via useEffect + fetchHomepageFeaturedLogosClient() \u2014 none of these logo images or their context exist in the server-rendered HTML. This is the same CSR anti-pattern already flagged as the site's #1 Critical technical finding for the knowledge-base, recurring on the homepage's own social-proof section.",
+          "recommendation": "Fetch the featured-logos list server-side and pass it into TrustedByLogosRow as an SSR prop. See findings/images.md."
+        },
+        {
+          "title": "Hero chat avatar (AiAvatar.png) is an oversized, unconverted PNG rendered above the fold",
+          "severity": "Medium",
+          "description": "public/images/AiAvatar.png is 357x344px / 199,670 bytes, displayed at 28-44px in the above-the-fold, autoplaying hero chat mockup, via a raw <img> with no next/image, no format conversion, and no lazy loading.",
+          "recommendation": "Resize to ~120x120px and convert to WebP; consider migrating to next/image. See findings/images.md."
+        },
+        {
+          "title": "Real content images given empty alt text",
+          "severity": "Medium",
+          "description": "TrustedByLogosRow.tsx sets alt=\"\" on actual customer/partner logos and country flags. Empty alt is correct only for purely decorative imagery; here the logos are meaningful social-proof content (and, if descriptive, would also support image search visibility). Width/height (80x80) are correctly set, so there's no CLS risk \u2014 only the missing alt text.",
+          "recommendation": "Set alt to the restaurant/customer name (e.g. alt={item.name}) for the primary logo set; keep alt=\"\" only on the aria-hidden duplicate set used purely for the seamless marquee loop, and on the small flag icon overlays."
+        },
+        {
+          "title": "Payment-method SVG icon omits width/height it already has available",
+          "severity": "Low",
+          "description": "PricingComparisonPage.tsx's raw <img> fallback for the Etisalat SVG logo doesn't pass method.imageWidth/imageHeight (120x40), even though the sibling next/image branch uses the same data one line below.",
+          "recommendation": "Add width={method.imageWidth} height={method.imageHeight} to the <img> branch too."
+        }
+      ]
+    },
+    {
+      "name": "AI Search Readiness (GEO)",
+      "score": 35,
+      "what_works": [
+        "robots.txt uses a blanket Allow: / with no specific disallow rules targeting AI crawlers (GPTBot, ClaudeBot, PerplexityBot, Google-Extended, etc.), so AI crawlers are not being blocked outright.",
+        "Knowledge-base content topics (direct competitor comparisons, numbered listicles, how-to guides) are exactly the format AI answer engines favor once they can actually read it."
+      ],
+      "findings": [
+        {
+          "title": "/llms.txt not implemented (see Technical SEO)",
+          "severity": "Medium",
+          "description": "No machine-readable llms.txt summary exists for AI agents/crawlers to quickly understand site structure and key content.",
+          "recommendation": "See Technical SEO recommendation."
+        },
+        {
+          "title": "Best AI-citation content (comparison/how-to articles) is invisible to non-JS crawlers",
+          "severity": "Critical",
+          "description": "Because knowledge-base article bodies are fetched client-side after hydration (see Content Quality), most AI crawlers \u2014 which generally do not execute JavaScript at scale \u2014 will see empty or near-empty article pages. This directly blocks citation in AI Overviews, ChatGPT search, and Perplexity for exactly the pages built to win those placements.",
+          "recommendation": "Fixing the SSR issue in Content Quality is the single highest-leverage GEO improvement available on this site."
+        },
+        {
+          "title": "No Article schema to aid machine parsing",
+          "severity": "Medium",
+          "description": "AI engines increasingly use structured data as a trust/parsing signal for citation-worthy content (unconfirmed uplift, no primary source to cite); none exists. FAQPage was previously listed here too, but Google retired FAQ rich results for all sites May 7, 2026, and any AI-citation benefit for FAQPage specifically remains unconfirmed \u2014 downgraded to Info priority, see findings/schema.md.",
+          "recommendation": "See Schema findings."
+        }
+      ]
+    }
+  ],
+  "action_plan": {
+    "phases": [
+      {
+        "name": "Phase 1: Critical Fixes",
+        "timeframe": "Week 1",
+        "items": [
+          "Server-render knowledge-base article list and article body content (stop relying on client-side useEffect/axios fetch) so both search engines and AI crawlers can read it.",
+          "Filter test/internal customer-menu accounts (test.ensmenu.com, your-slug-ensmenu-com*, etc.) out of the /public/menus API so they stop being indexed in the sitemap as soft-404 pages (new finding from /seo-sitemap deep dive \u2014 see findings/sitemap.md).",
+          "Re-export the 2.19MB chicken.jpg homepage thumbnail and fix the 2 raw 2.1MB PNGs in the template-showcase carousel (new finding from /seo-images deep dive \u2014 see findings/images.md).",
+          "Investigate and fix the ~70 missing/orphaned knowledge-base article URLs (ids 1\u201370): restore, redirect, or confirm intentional retirement with 301s.",
+          "Add baseline security headers (X-Content-Type-Options, Referrer-Policy, Permissions-Policy, X-Frame-Options, scoped CSP) via next.config.ts headers().",
+          "Resolve the robots.txt Disallow + noindex conflict on /auth/* pages \u2014 pick one mechanism.",
+          "Remove the leftover console.log(dynamic) in knowledge-base/page.tsx."
+        ]
+      },
+      {
+        "name": "Phase 2: High-Impact Improvements",
+        "timeframe": "Weeks 2-3",
+        "items": [
+          "Add Organization + WebSite JSON-LD sitewide, WebApplication schema on the homepage (FAQPage on /faq downgraded to optional/Info-priority \u2014 see findings/schema.md).",
+          "Add Article schema (author, datePublished, dateModified) to every knowledge-base article, alongside the SSR fix.",
+          "Implement a real /llms.txt route with a curated summary of product + key pages + KB links.",
+          "Fix the 2-hop http://ensmenu.com redirect chain to a single hop to https://www.ensmenu.com.",
+          "Implement the IndexNow protocol (key file + publish/update hook) for faster Bing/Yandex indexing.",
+          "Add descriptive alt text to real customer/partner logos in TrustedByLogosRow.",
+          "Add author/byline and \"last updated\" visible signals to knowledge-base articles."
+        ]
+      },
+      {
+        "name": "Phase 3: Content & Authority",
+        "timeframe": "Month 2",
+        "items": [
+          "Rebuild or restore lost knowledge-base content volume; establish an editorial cadence to prevent future silent content loss.",
+          "Add BreadcrumbList schema to knowledge-base articles.",
+          "Add alternates.languages to buildSeoMetadata as a redundant hreflang signal alongside the existing HTTP header.",
+          "Add includeSubDomains (and consider preload) to the HSTS header once all customer subdomains are confirmed HTTPS-ready.",
+          "Reconsider og:locale (en_GB) against actual target English-speaking markets.",
+          "Audit a sample of the 172 customer menu subdomains for thin/duplicate content once that codebase is accessible."
+        ]
+      },
+      {
+        "name": "Phase 4: Monitoring & Iteration",
+        "timeframe": "Ongoing",
+        "items": [
+          "Connect Google Search Console and re-run with real CrUX/indexation field data.",
+          "Monitor knowledge-base sitemap article count over time to catch future silent content drops early.",
+          "Re-test AI crawler visibility (fetch article pages with JS disabled) after the SSR fix ships.",
+          "Track Core Web Vitals in the field via CrUX once available; validate the lab-based performance estimate in this report."
+        ]
+      }
+    ]
+  },
+  "artifacts": {
+    "findings_dir": "findings/",
+    "screenshots_dir": null
+  },
+  "limitations": [
+    "No claude-seo CLI, DataForSEO MCP, or Google API credentials were available in this session; findings rely on direct source-code analysis (Read/Grep across the ens-menu Next.js repo) plus live verification via WebFetch/curl against https://www.ensmenu.com (headers, robots.txt, sitemap.xml tree, rendered/raw HTML of a sample of pages).",
+    "The full site was not crawled page-by-page up to 500 URLs; instead the sitemap tree was enumerated (10 main pages, 8 KB articles, 172 customer menu subdomains) and a representative sample was fetched directly.",
+    "The public customer-menu storefront app (the 172 *.ensmenu.com subdomains) is a separate deployment not present in this repository and was only spot-checked via its sitemap listing, not source-reviewed.",
+    "No Lighthouse/PageSpeed Insights/CrUX data was collected; Performance category score is an engineering-signal estimate based on code review, not a measured score."
+  ]
+}
