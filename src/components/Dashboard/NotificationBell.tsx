@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import {
   IoNotificationsOutline,
@@ -26,7 +26,12 @@ import { isFreePlanUser } from "@/lib/subscription";
 import { isDeliveryEntry, resolveEntryTime } from "@/lib/tableOrders";
 import { usePendingOrders } from "@/components/Dashboard/PendingOrdersProvider";
 import { useRouter } from "@/i18n/navigation";
-import { axiosGet, axiosPatch, axiosDelete } from "@/shared/axiosCall";
+import {
+  axiosGet,
+  axiosPost,
+  axiosPatch,
+  axiosDelete,
+} from "@/shared/axiosCall";
 import { menuDashboardPath } from "@/lib/menuDashboardPath";
 import ViewTime from "@/shared/ViewTime";
 import LinkTo from "@/components/Global/LinkTo";
@@ -59,6 +64,19 @@ interface PlanTask {
 }
 
 const MAX_VISIBLE = 10;
+const SEEN_TASKS_STORAGE_KEY = "ensmenu:seen-notification-tasks";
+
+function readSeenTaskKeys(): string[] {
+  try {
+    const raw = window.localStorage.getItem(SEEN_TASKS_STORAGE_KEY);
+    const parsed: unknown = raw ? JSON.parse(raw) : null;
+    return Array.isArray(parsed)
+      ? parsed.filter((key): key is string => typeof key === "string")
+      : [];
+  } catch {
+    return [];
+  }
+}
 
 export default function NotificationBell({ segment }: NotificationBellProps) {
   const locale = useLocale();
@@ -71,8 +89,15 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
   const menu = useAppSelector((s) => s.menuData.menu);
   const currency = useAppSelector((s) => s.menuData.menu?.currency ?? "");
 
-  const { pendingEntries, pendingTableCount, pendingDeliveryCount, loading } =
-    usePendingOrders();
+  const {
+    pendingEntries,
+    pendingTableCount,
+    pendingDeliveryCount,
+    unseenTableCount,
+    unseenDeliveryCount,
+    markOrdersSeen,
+    loading,
+  } = usePendingOrders();
 
   const [accountNotifications, setAccountNotifications] = useState<
     UserNotification[]
@@ -91,7 +116,8 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
     setMounted(true);
   }, []);
 
-  const fetchAccountNotifications = useCallback(async () => {
+  /** Resolves with the unread count so callers can skip a needless read-all. */
+  const fetchAccountNotifications = useCallback(async (): Promise<number> => {
     setNotificationsLoading(true);
     const res = await axiosGet<UserNotificationsResponse>(
       "/user/notifications",
@@ -101,19 +127,17 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
     );
     setNotificationsLoading(false);
     if (res.status && res.data) {
+      const unread = Number(res.data.unreadCount ?? 0);
       setAccountNotifications(res.data.notifications ?? []);
-      setUnreadAccountCount(Number(res.data.unreadCount ?? 0));
+      setUnreadAccountCount(unread);
+      return unread;
     }
+    return 0;
   }, [locale]);
 
   useEffect(() => {
     void fetchAccountNotifications();
   }, [fetchAccountNotifications]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    void fetchAccountNotifications();
-  }, [isOpen, fetchAccountNotifications]);
 
   // Build plan tasks dynamically — only include when NOT yet done
   const pendingTasks: PlanTask[] = [];
@@ -172,8 +196,72 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
     (menu.categoriesCount ?? 0) === 0 &&
     (menu.itemsCount ?? 0) === 0;
 
-  const totalBadgeCount =
-    pendingEntries.length + pendingTasks.length + unreadAccountCount;
+  // Tasks belong to a single menu, so they are tracked per menu id.
+  const tracksTasks = Boolean(menu && segment);
+  const taskKeys = pendingTasks.map((task) => `${menu?.id ?? ""}:${task.id}`);
+  const taskKeysJoined = taskKeys.join("|");
+
+  const [seenTaskKeys, setSeenTaskKeys] = useState<string[]>([]);
+  const [seenTasksHydrated, setSeenTasksHydrated] = useState(false);
+
+  useEffect(() => {
+    setSeenTaskKeys(readSeenTaskKeys());
+    setSeenTasksHydrated(true);
+  }, []);
+
+  // Drop keys of tasks the user has since completed, so the badge speaks up
+  // again if the same task ever comes back.
+  useEffect(() => {
+    if (!seenTasksHydrated || !tracksTasks) return;
+    const stillPending = new Set(
+      taskKeysJoined ? taskKeysJoined.split("|") : [],
+    );
+    const prefix = `${menu?.id ?? ""}:`;
+    setSeenTaskKeys((prev) => {
+      const kept = prev.filter(
+        (key) => !key.startsWith(prefix) || stillPending.has(key),
+      );
+      return kept.length === prev.length ? prev : kept;
+    });
+  }, [seenTasksHydrated, tracksTasks, taskKeysJoined, menu?.id]);
+
+  useEffect(() => {
+    if (!seenTasksHydrated) return;
+    try {
+      window.localStorage.setItem(
+        SEEN_TASKS_STORAGE_KEY,
+        JSON.stringify(seenTaskKeys),
+      );
+    } catch {
+      /* storage unavailable — the badge just returns on reload */
+    }
+  }, [seenTasksHydrated, seenTaskKeys]);
+
+  const markTasksSeen = useCallback(() => {
+    const keys = taskKeysJoined ? taskKeysJoined.split("|") : [];
+    if (keys.length === 0) return;
+    setSeenTaskKeys((prev) => {
+      const merged = new Set(prev);
+      keys.forEach((key) => merged.add(key));
+      if (merged.size === prev.length) return prev;
+      return [...merged];
+    });
+  }, [taskKeysJoined]);
+
+  const seenTaskSet = useMemo(() => new Set(seenTaskKeys), [seenTaskKeys]);
+  const unseenTaskCount = seenTasksHydrated
+    ? taskKeys.filter((key) => !seenTaskSet.has(key)).length
+    : 0;
+
+  // The bell counts only what the user has not opened the panel on yet, while
+  // the panel header keeps showing everything it lists.
+  const unseenBadgeCount =
+    unseenTableCount +
+    unseenDeliveryCount +
+    unseenTaskCount +
+    unreadAccountCount;
+  const totalListedCount =
+    pendingEntries.length + pendingTasks.length + accountNotifications.length;
 
   const getNotificationLabel = useCallback(
     (notification: UserNotification) => {
@@ -249,19 +337,42 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
     [goToSubscriptionRenewal, handleDismissNotification],
   );
 
-  const handleMarkAllNotificationsRead = useCallback(async () => {
-    const res = await axiosPatch<Record<string, never>, { success?: boolean }>(
+  /**
+   * Clears the unread counter without flipping the local `isRead` flags, so the
+   * highlight on new alerts survives while the panel the user just opened stays
+   * on screen.
+   */
+  const markAllAccountRead = useCallback(async () => {
+    const res = await axiosPost<Record<string, never>, { success?: boolean }>(
       "/user/notifications/read-all",
       locale,
       {},
     );
-    if (res.status) {
-      setAccountNotifications((prev) =>
-        prev.map((item) => ({ ...item, isRead: true })),
-      );
-      setUnreadAccountCount(0);
-    }
+    if (res.status) setUnreadAccountCount(0);
   }, [locale]);
+
+  // Opening the panel means the user has seen everything in it, so the bell
+  // badge drops to zero until something new arrives.
+  useEffect(() => {
+    if (!isOpen) return;
+    markOrdersSeen();
+    markTasksSeen();
+  }, [isOpen, markOrdersSeen, markTasksSeen]);
+
+  // Read-all runs after the refetch so the response cannot revive the counter.
+  useEffect(() => {
+    if (!isOpen) return;
+    let cancelled = false;
+    void (async () => {
+      const unread = await fetchAccountNotifications();
+      if (cancelled || unread === 0) return;
+      await markAllAccountRead();
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, fetchAccountNotifications, markAllAccountRead]);
 
   const computeDropdownStyle = useCallback((): CSSProperties => {
     if (!triggerRef.current) return {};
@@ -339,9 +450,9 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
             <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-slate-800">
               <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
                 {t("title")}
-                {totalBadgeCount > 0 && (
+                {totalListedCount > 0 && (
                   <span className="ms-2 inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
-                    {totalBadgeCount}
+                    {totalListedCount}
                   </span>
                 )}
               </span>
@@ -702,9 +813,9 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
         className="relative rounded-full p-2 text-slate-600 transition-colors hover:bg-purple-50 dark:text-slate-300 dark:hover:bg-purple-500/20"
       >
         <IoNotificationsOutline size={20} />
-        {totalBadgeCount > 0 && (
+        {unseenBadgeCount > 0 && (
           <span className="absolute -end-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
-            {totalBadgeCount > 99 ? "99+" : totalBadgeCount}
+            {unseenBadgeCount > 99 ? "99+" : unseenBadgeCount}
           </span>
         )}
       </button>
