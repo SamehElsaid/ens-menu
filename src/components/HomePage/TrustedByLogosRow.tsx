@@ -47,7 +47,7 @@ function LogoTile({
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={item.logo}
-          alt=""
+          alt={decorative ? "" : `${item.slug} logo`}
           width={80}
           height={80}
           className="relative z-10 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"

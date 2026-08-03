@@ -8,13 +8,17 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
+      // /auth is intentionally NOT disallowed here: every /auth/* page already
+      // sets a "noindex, nofollow" meta tag in its own metadata. Blocking it in
+      // robots.txt would prevent Google from ever crawling the page to see that
+      // tag, which — per Google's own guidance — means a URL discovered via an
+      // external link could still surface in search results with no snippet.
+      // Allowing the crawl lets the noindex meta tag actually do its job.
       disallow: [
         "/dashboard",
         "/en/dashboard",
         "/admin",
         "/en/admin",
-        "/auth",
-        "/en/auth",
         "/payment",
         "/en/payment",
         "/unauthorized",

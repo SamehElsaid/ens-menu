@@ -7,6 +7,11 @@ const XML_STYLESHEET_PI =
 export type SitemapEntry = {
   loc: string;
   lastmod?: string;
+  /**
+   * @deprecated Google ignores both `changefreq` and `priority` entirely —
+   * kept optional on the type so existing call sites don't need to change,
+   * but `buildUrlset` no longer emits them. See findings/sitemap.md.
+   */
   changefreq?:
     | "always"
     | "hourly"
@@ -15,6 +20,7 @@ export type SitemapEntry = {
     | "monthly"
     | "yearly"
     | "never";
+  /** @deprecated See `changefreq`. */
   priority?: number;
 };
 
@@ -32,10 +38,6 @@ export function buildUrlset(entries: SitemapEntry[]): string {
     .map((e) => {
       const parts = [`    <loc>${escapeXml(e.loc)}</loc>`];
       if (e.lastmod) parts.push(`    <lastmod>${escapeXml(e.lastmod)}</lastmod>`);
-      if (e.changefreq) parts.push(`    <changefreq>${e.changefreq}</changefreq>`);
-      if (e.priority != null) {
-        parts.push(`    <priority>${e.priority.toFixed(1)}</priority>`);
-      }
       return `  <url>\n${parts.join("\n")}\n  </url>`;
     })
     .join("\n");

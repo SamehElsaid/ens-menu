@@ -91,6 +91,9 @@ export const TemplateShow = () => {
                     alt={
                       isRTL ? activeTemplate.titleAr : activeTemplate.titleEn
                     }
+                    width={960}
+                    height={540}
+                    cover
                     className="w-full h-full object-cover"
                   />
                 

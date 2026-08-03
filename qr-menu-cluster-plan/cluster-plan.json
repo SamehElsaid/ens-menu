@@ -1,0 +1,312 @@
+{
+  "version": "2.2.4",
+  "seed_keyword": "QR menu for restaurants",
+  "market": "English (global/US SERPs)",
+  "created_at": "2026-08-03",
+  "data_source_note": "SERP data collected via WebSearch (no DataForSEO MCP available in this session). Volume figures are qualitative tiers (High/Medium/Low) inferred from result-set competitiveness and content-density, NOT measured search volume. Re-run with DataForSEO for real volume/difficulty numbers before finalizing a publishing budget.",
+  "existing_content_note": "8 of 18 planned URLs already exist and are live in the ensmenu.com/knowledge-base (see ensmenu.com-audit/ for the technical/content audit of this existing content). This plan slots them into a hub-and-spoke architecture and identifies 9 spoke gaps + 1 missing pillar.",
+
+  "pillar": {
+    "title": "QR Menu for Restaurants: The Complete 2026 Guide",
+    "keyword": "qr menu for restaurants",
+    "volumeTier": "High",
+    "template": "ultimate-guide",
+    "wordCount": 3200,
+    "url": "/knowledge-base/qr-menu-for-restaurants-the-complete-guide",
+    "status": "planned",
+    "note": "No pillar currently exists. The homepage covers product features but is not a citable content hub. This is the single highest-leverage gap in the whole plan -- it is also the only page built to receive links from ALL 17 spokes, so it should ship first even though it is not a 'quick win'."
+  },
+
+  "clusters": [
+    {
+      "name": "Getting Started & Fundamentals",
+      "color": "#4E79A7",
+      "posts": [
+        {
+          "title": "How to Create a QR Menu for Your Restaurant in Under 10 Minutes",
+          "keyword": "how to create a qr menu",
+          "volumeTier": "Medium",
+          "template": "how-to",
+          "wordCount": 1400,
+          "url": "/knowledge-base/how-to-create-a-qr-menu-for-your-restaurant-in-under-10-minutes-71",
+          "status": "written"
+        },
+        {
+          "title": "How to Create an Online Menu for Your Restaurant: A Step-by-Step Guide (2026)",
+          "keyword": "how to create an online menu for restaurant",
+          "volumeTier": "Medium",
+          "template": "how-to",
+          "wordCount": 1600,
+          "url": "/knowledge-base/how-to-create-an-online-menu-for-your-restaurant-a-step-by-step-guide-2026-78",
+          "status": "written"
+        },
+        {
+          "title": "QR Menu vs Printed Menus: Which Is Better for Restaurants in 2026?",
+          "keyword": "qr menu vs printed menu",
+          "volumeTier": "Medium",
+          "template": "comparison",
+          "wordCount": 1500,
+          "url": "/knowledge-base/qr-menu-vs-printed-menus-which-is-better-for-restaurants-in-2026-72",
+          "status": "written"
+        },
+        {
+          "title": "What Is a QR Menu? The Complete Beginner's Guide (2026)",
+          "keyword": "what is a qr menu",
+          "volumeTier": "High",
+          "template": "explainer",
+          "wordCount": 1500,
+          "url": "/knowledge-base/what-is-a-qr-menu-complete-guide",
+          "status": "planned",
+          "gap_reason": "Every top-10 competitor SERP for this head term (restaurantmanage.com, finedinemenu.com, qrcodekit.com, pixplat.com, dev.to) is a dedicated definitional/explainer page. ensmenu has no equivalent -- guests searching the foundational query have nothing to land on."
+        }
+      ]
+    },
+    {
+      "name": "Benefits, ROI & Design Ideas",
+      "color": "#F28E2B",
+      "posts": [
+        {
+          "title": "How QR Menus Increase Restaurant Sales: 12 Proven Ways (2026)",
+          "keyword": "how qr menus increase restaurant sales",
+          "volumeTier": "Medium",
+          "template": "listicle",
+          "wordCount": 1600,
+          "url": "/knowledge-base/how-qr-menus-increase-restaurant-sales-12-proven-ways-in-2026-75",
+          "status": "written"
+        },
+        {
+          "title": "15 QR Menu Ideas for Restaurants to Improve the Customer Experience (2026)",
+          "keyword": "qr menu ideas for restaurants",
+          "volumeTier": "Low",
+          "template": "listicle",
+          "wordCount": 1500,
+          "url": "/knowledge-base/15-qr-menu-ideas-for-restaurants-to-improve-the-customer-experience-in-2026-74",
+          "status": "written"
+        },
+        {
+          "title": "QR Menu Statistics 2026: Adoption, Diner Preference & ROI Data",
+          "keyword": "qr menu statistics",
+          "volumeTier": "Medium",
+          "template": "explainer",
+          "wordCount": 1400,
+          "url": "/knowledge-base/qr-menu-statistics-2026",
+          "status": "planned",
+          "gap_reason": "Directly fixes the 'no cited third-party statistics' E-E-A-T finding from the earlier /seo-content audit. Cite: 75% of restaurants globally use QR menus, 78% of diners prefer them over paper (Intermenu/Technomic-sourced), $3,000-8,000/yr print savings, 15-30% table-turnover gains (fast-casual). Always attribute to the original source, not to competitor blogs."
+        },
+        {
+          "title": "Do QR-Only Menus Hurt Sales? What Fine-Dining Data Really Shows",
+          "keyword": "do qr menus hurt sales",
+          "volumeTier": "Low",
+          "template": "explainer",
+          "wordCount": 1500,
+          "url": "/knowledge-base/do-qr-only-menus-hurt-sales",
+          "status": "planned",
+          "gap_reason": "Contrarian/balanced angle (8-15% check-average drop documented in fine dining when menus go QR-only) that no ensmenu content currently addresses. Builds trustworthiness by acknowledging a real tradeoff, then positions hybrid QR+paper-on-request as the recommended pattern -- consistent with what competitor buyer's guides (restaurantvelocity.com, intermenu.io) already recommend."
+        }
+      ]
+    },
+    {
+      "name": "AI & Menu Digitization",
+      "color": "#E15759",
+      "posts": [
+        {
+          "title": "AI Menu for Restaurants: How Artificial Intelligence Improves Menu Management and Sales in 2026",
+          "keyword": "ai menu for restaurants",
+          "volumeTier": "Medium",
+          "template": "explainer",
+          "wordCount": 1700,
+          "url": "/knowledge-base/ai-menu-for-restaurants-how-artificial-intelligence-improves-menu-management-and-sales-in-2026-77",
+          "status": "written"
+        },
+        {
+          "title": "How to Digitize a Paper Menu with AI in Under 60 Seconds",
+          "keyword": "digitize paper menu with ai",
+          "volumeTier": "Low",
+          "template": "how-to",
+          "wordCount": 1300,
+          "url": "/knowledge-base/digitize-paper-menu-with-ai",
+          "status": "planned",
+          "gap_reason": "AI photo/PDF menu import is a headline feature on nearly every competitor homepage (Menued, NEMENU, Menyo, Restsify) and is one of ensmenu's own product features per the codebase, but has no dedicated how-to content -- only the higher-level 'ai-menu-for-restaurants' overview. This is a small, focused cluster (2 posts) deliberately kept separate from Cluster 1 because it targets a product-feature keyword, not a generic setup keyword."
+        }
+      ]
+    },
+    {
+      "name": "Platform Comparisons",
+      "color": "#76B7B2",
+      "posts": [
+        {
+          "title": "ENSMENU vs GloriaFood: Which QR Menu Platform Is Better for Restaurants in 2026?",
+          "keyword": "ensmenu vs gloriafood",
+          "volumeTier": "Low",
+          "template": "comparison",
+          "wordCount": 1600,
+          "url": "/knowledge-base/ensmenu-vs-gloriafood-which-qr-menu-platform-is-better-for-restaurants-in-2026-76",
+          "status": "written"
+        },
+        {
+          "title": "Best QR Menu for Restaurants in Egypt (2026): Comparison Guide",
+          "keyword": "best qr menu for restaurants in egypt",
+          "volumeTier": "Low",
+          "template": "best-of",
+          "wordCount": 1600,
+          "url": "/knowledge-base/best-qr-menu-for-restaurants-in-egypt-2026-comparison-guide-73",
+          "status": "written"
+        },
+        {
+          "title": "Best QR Menu Platforms for Restaurants in 2026 (Global Comparison)",
+          "keyword": "best qr menu platforms",
+          "volumeTier": "High",
+          "template": "best-of",
+          "wordCount": 1800,
+          "url": "/knowledge-base/best-qr-menu-platforms-2026",
+          "status": "planned",
+          "gap_reason": "The Egypt-specific best-of (73) cannot rank for the much larger global 'best QR menu platform' query cluster (SERP dominated by menuhoster.com, qrmenugenerator.io, menyo.pro, nemenu.app -- zero overlap with the Egypt-focused SERP). Keep 73 strictly Egypt-framed in title/examples to avoid cannibalizing this new global post."
+        }
+      ]
+    },
+    {
+      "name": "Pricing & Vertical Use Cases",
+      "color": "#59A14F",
+      "posts": [
+        {
+          "title": "How Much Does a QR Menu Cost in 2026? Free vs Paid Plans Compared",
+          "keyword": "qr menu cost",
+          "volumeTier": "Medium",
+          "template": "comparison",
+          "wordCount": 1500,
+          "url": "/knowledge-base/qr-menu-cost-2026",
+          "status": "planned",
+          "gap_reason": "Transactional-intent gap. Competing pages cite concrete price bands ($10-50/mo view-only, $15-60/mo full-featured, $50-150+/mo with ordering) -- use ensmenu's own real pricing tiers as the anchor comparison point."
+        },
+        {
+          "title": "Free QR Menu Maker: What You Actually Get (and What You Don't)",
+          "keyword": "free qr menu maker",
+          "volumeTier": "Medium",
+          "template": "review",
+          "wordCount": 1300,
+          "url": "/knowledge-base/free-qr-menu-maker-explained",
+          "status": "planned",
+          "gap_reason": "Captures budget-conscious searchers before they commit to a limited free tool, then upsells to ensmenu's own free/entry tier. Companion piece to the cost article -- deliberately split by intent (comparison vs. review-of-the-free-tier-concept) to avoid cannibalization."
+        },
+        {
+          "title": "QR Menu for Hotels: Multi-Outlet Room Service & Multilingual Guests",
+          "keyword": "qr menu for hotels",
+          "volumeTier": "Medium",
+          "template": "explainer",
+          "wordCount": 1500,
+          "url": "/knowledge-base/qr-menu-for-hotels",
+          "status": "planned",
+          "gap_reason": "Vertical gap matching ensmenu's own homepage positioning (multi-branch/hotel use case) but with zero supporting content. Competitor SERP here (iamenu.ai, wmenu.eu, servioo.ai) is entirely hotel-specific and does not overlap with the general restaurant SERP."
+        },
+        {
+          "title": "Multi-Language QR Menus: How Many Languages Does Your Restaurant Need?",
+          "keyword": "multilingual qr menu",
+          "volumeTier": "Low",
+          "template": "explainer",
+          "wordCount": 1300,
+          "url": "/knowledge-base/multilingual-qr-menu-guide",
+          "status": "planned",
+          "gap_reason": "Directly reinforces ensmenu's own Arabic/English bilingual product strength -- a genuine E-E-A-T/experience angle no competitor content localizes for the Egypt/MENA market the way ensmenu's own team could."
+        }
+      ]
+    }
+  ],
+
+  "links": [
+    { "from": "pillar", "to": "cluster-0-post-0", "type": "mandatory", "anchor": "how to create a QR menu" },
+    { "from": "cluster-0-post-0", "to": "pillar", "type": "mandatory", "anchor": "QR menu for restaurants" },
+    { "from": "pillar", "to": "cluster-0-post-1", "type": "mandatory", "anchor": "create an online menu step by step" },
+    { "from": "cluster-0-post-1", "to": "pillar", "type": "mandatory", "anchor": "QR menu for restaurants" },
+    { "from": "pillar", "to": "cluster-0-post-2", "type": "mandatory", "anchor": "QR menu vs printed menus" },
+    { "from": "cluster-0-post-2", "to": "pillar", "type": "mandatory", "anchor": "QR menu for restaurants" },
+    { "from": "pillar", "to": "cluster-0-post-3", "type": "mandatory", "anchor": "what is a QR menu" },
+    { "from": "cluster-0-post-3", "to": "pillar", "type": "mandatory", "anchor": "QR menu for restaurants" },
+
+    { "from": "pillar", "to": "cluster-1-post-0", "type": "mandatory", "anchor": "how QR menus increase sales" },
+    { "from": "cluster-1-post-0", "to": "pillar", "type": "mandatory", "anchor": "QR menu for restaurants" },
+    { "from": "pillar", "to": "cluster-1-post-1", "type": "mandatory", "anchor": "QR menu ideas for restaurants" },
+    { "from": "cluster-1-post-1", "to": "pillar", "type": "mandatory", "anchor": "QR menu for restaurants" },
+    { "from": "pillar", "to": "cluster-1-post-2", "type": "mandatory", "anchor": "QR menu statistics" },
+    { "from": "cluster-1-post-2", "to": "pillar", "type": "mandatory", "anchor": "QR menu for restaurants" },
+    { "from": "pillar", "to": "cluster-1-post-3", "type": "mandatory", "anchor": "do QR menus hurt sales" },
+    { "from": "cluster-1-post-3", "to": "pillar", "type": "mandatory", "anchor": "QR menu for restaurants" },
+
+    { "from": "pillar", "to": "cluster-2-post-0", "type": "mandatory", "anchor": "AI menu for restaurants" },
+    { "from": "cluster-2-post-0", "to": "pillar", "type": "mandatory", "anchor": "QR menu for restaurants" },
+    { "from": "pillar", "to": "cluster-2-post-1", "type": "mandatory", "anchor": "digitize a paper menu with AI" },
+    { "from": "cluster-2-post-1", "to": "pillar", "type": "mandatory", "anchor": "QR menu for restaurants" },
+
+    { "from": "pillar", "to": "cluster-3-post-0", "type": "mandatory", "anchor": "ENSMENU vs GloriaFood" },
+    { "from": "cluster-3-post-0", "to": "pillar", "type": "mandatory", "anchor": "QR menu for restaurants" },
+    { "from": "pillar", "to": "cluster-3-post-1", "type": "mandatory", "anchor": "best QR menu in Egypt" },
+    { "from": "cluster-3-post-1", "to": "pillar", "type": "mandatory", "anchor": "QR menu for restaurants" },
+    { "from": "pillar", "to": "cluster-3-post-2", "type": "mandatory", "anchor": "best QR menu platforms" },
+    { "from": "cluster-3-post-2", "to": "pillar", "type": "mandatory", "anchor": "QR menu for restaurants" },
+
+    { "from": "pillar", "to": "cluster-4-post-0", "type": "mandatory", "anchor": "how much does a QR menu cost" },
+    { "from": "cluster-4-post-0", "to": "pillar", "type": "mandatory", "anchor": "QR menu for restaurants" },
+    { "from": "pillar", "to": "cluster-4-post-1", "type": "mandatory", "anchor": "free QR menu maker" },
+    { "from": "cluster-4-post-1", "to": "pillar", "type": "mandatory", "anchor": "QR menu for restaurants" },
+    { "from": "pillar", "to": "cluster-4-post-2", "type": "mandatory", "anchor": "QR menu for hotels" },
+    { "from": "cluster-4-post-2", "to": "pillar", "type": "mandatory", "anchor": "QR menu for restaurants" },
+    { "from": "pillar", "to": "cluster-4-post-3", "type": "mandatory", "anchor": "multilingual QR menu" },
+    { "from": "cluster-4-post-3", "to": "pillar", "type": "mandatory", "anchor": "QR menu for restaurants" },
+
+    { "from": "cluster-0-post-0", "to": "cluster-0-post-1", "type": "recommended", "anchor": "creating an online menu step by step" },
+    { "from": "cluster-0-post-1", "to": "cluster-0-post-2", "type": "recommended", "anchor": "QR menu vs printed menus" },
+    { "from": "cluster-0-post-2", "to": "cluster-0-post-3", "type": "recommended", "anchor": "what is a QR menu" },
+    { "from": "cluster-0-post-3", "to": "cluster-0-post-0", "type": "recommended", "anchor": "create a QR menu in under 10 minutes" },
+
+    { "from": "cluster-1-post-0", "to": "cluster-1-post-1", "type": "recommended", "anchor": "QR menu ideas for restaurants" },
+    { "from": "cluster-1-post-1", "to": "cluster-1-post-2", "type": "recommended", "anchor": "QR menu statistics" },
+    { "from": "cluster-1-post-2", "to": "cluster-1-post-3", "type": "recommended", "anchor": "do QR-only menus hurt sales" },
+    { "from": "cluster-1-post-3", "to": "cluster-1-post-0", "type": "recommended", "anchor": "12 proven ways QR menus increase sales" },
+
+    { "from": "cluster-2-post-0", "to": "cluster-2-post-1", "type": "recommended", "anchor": "digitize a paper menu with AI" },
+    { "from": "cluster-2-post-1", "to": "cluster-2-post-0", "type": "recommended", "anchor": "AI menu management" },
+
+    { "from": "cluster-3-post-0", "to": "cluster-3-post-1", "type": "recommended", "anchor": "best QR menu in Egypt" },
+    { "from": "cluster-3-post-1", "to": "cluster-3-post-2", "type": "recommended", "anchor": "best QR menu platforms globally" },
+    { "from": "cluster-3-post-2", "to": "cluster-3-post-0", "type": "recommended", "anchor": "ENSMENU vs GloriaFood" },
+
+    { "from": "cluster-4-post-0", "to": "cluster-4-post-1", "type": "recommended", "anchor": "free QR menu maker" },
+    { "from": "cluster-4-post-1", "to": "cluster-4-post-2", "type": "recommended", "anchor": "QR menu for hotels" },
+    { "from": "cluster-4-post-2", "to": "cluster-4-post-3", "type": "recommended", "anchor": "multilingual QR menus" },
+    { "from": "cluster-4-post-3", "to": "cluster-4-post-0", "type": "recommended", "anchor": "QR menu pricing" },
+
+    { "from": "cluster-0-post-3", "to": "cluster-2-post-0", "type": "optional", "anchor": "AI menu for restaurants" },
+    { "from": "cluster-1-post-2", "to": "cluster-3-post-2", "type": "optional", "anchor": "best QR menu platforms" },
+    { "from": "cluster-4-post-0", "to": "cluster-3-post-0", "type": "optional", "anchor": "ENSMENU vs GloriaFood pricing" },
+    { "from": "cluster-2-post-1", "to": "cluster-0-post-1", "type": "optional", "anchor": "creating an online menu" },
+    { "from": "cluster-4-post-2", "to": "cluster-1-post-1", "type": "optional", "anchor": "QR menu ideas" }
+  ],
+
+  "serp_matrix": {
+    "note": "Sampled head-term SERPs via WebSearch (top-5-10 organic results shown by the search tool, not a full DataForSEO top-10 pull). Zero domain overlap was observed across all 6 sampled head terms, confirming they are correctly split into separate clusters rather than merged.",
+    "keywords": [
+      "qr menu for restaurants",
+      "best qr code menu maker",
+      "how does a qr menu work",
+      "qr code menu benefits statistics",
+      "qr menu for hotels multi-language",
+      "qr menu pricing cost free"
+    ],
+    "scores": [
+      [10, 0, 1, 0, 0, 0],
+      [0, 10, 0, 1, 0, 1],
+      [1, 0, 10, 0, 0, 0],
+      [0, 1, 0, 10, 0, 1],
+      [0, 0, 0, 0, 10, 0],
+      [0, 1, 0, 1, 0, 10]
+    ]
+  },
+
+  "scorecard": {
+    "coverage": 0.44,
+    "linkDensity": 3.2,
+    "orphanPages": 0,
+    "cannibalization": 0,
+    "contentGaps": 9,
+    "note": "Coverage = 8 written / 18 planned. Cannibalization checked manually (see gap_reason fields on 73 vs cluster-3-post-2, and 4 vs 4a in Pricing cluster) -- 0 confirmed conflicts as long as the Egypt-specific and hotel-specific framing notes are followed during writing."
+  }
+}

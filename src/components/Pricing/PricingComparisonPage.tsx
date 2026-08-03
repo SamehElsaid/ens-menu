@@ -573,6 +573,8 @@ export default function PricingComparisonPage() {
                           <img
                             src={method.imageSrc}
                             alt={label}
+                            width={method.imageWidth}
+                            height={method.imageHeight}
                             className="h-8 max-w-28 object-contain sm:h-9 sm:max-w-32"
                           />
                         ) : (
