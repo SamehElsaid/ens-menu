@@ -86,6 +86,17 @@ export type GlobalStyles = {
   spacingScale?: number[];
 };
 
+/** Catalog / publish metadata shown when saving a template */
+export type TemplateCatalogMeta = {
+  /** English display name (also used as document.name) */
+  name: string;
+  nameAr: string;
+  description: string;
+  descriptionAr: string;
+  /** Preview / catalog image (URL or data URL) */
+  image: string;
+};
+
 /** Full page document — free tree + theme tokens */
 export type TemplateDocument = {
   id: string;
@@ -96,6 +107,10 @@ export type TemplateDocument = {
   updatedAt: string;
   /** Visual base hint for starters */
   baseTheme?: "default" | "blank";
+  nameAr?: string;
+  description?: string;
+  descriptionAr?: string;
+  image?: string;
   seoMeta?: { title?: string; description?: string };
   globalStyles: GlobalStyles;
   customCode?: PageCustomCode;
@@ -105,6 +120,8 @@ export type TemplateDocument = {
 export type TemplateListItem = {
   id: string;
   name: string;
+  nameAr?: string;
+  image?: string;
   slug: string;
   updatedAt: string;
   createdAt: string;

@@ -80,9 +80,19 @@ export default function TemplateListPage() {
               <div className="min-w-0 flex-1">
                 <Link
                   href={`/${locale}/admin/template/${item.id}`}
-                  className="font-medium text-slate-900 hover:text-violet-600 dark:text-white"
+                  className="flex items-center gap-3 font-medium text-slate-900 hover:text-violet-600 dark:text-white"
                 >
-                  {item.name}
+                  {item.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={item.image}
+                      alt=""
+                      className="h-10 w-10 shrink-0 rounded-md object-cover"
+                    />
+                  ) : null}
+                  <span className="truncate">
+                    {locale === "ar" && item.nameAr ? item.nameAr : item.name}
+                  </span>
                 </Link>
                 <p className="mt-0.5 text-xs text-slate-500">
                   {item.slug} · {new Date(item.updatedAt).toLocaleString(locale)}

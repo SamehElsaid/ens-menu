@@ -50,7 +50,7 @@ type State = {
   pushHistory: () => void;
   undo: () => void;
   redo: () => void;
-  updateMeta: (patch: Partial<Pick<TemplateDocument, "name" | "slug" | "seoMeta" | "customCode" | "globalStyles">>) => void;
+  updateMeta: (patch: Partial<Pick<TemplateDocument, "name" | "nameAr" | "description" | "descriptionAr" | "image" | "slug" | "seoMeta" | "customCode" | "globalStyles">>) => void;
   updateSelectedProps: (props: Record<string, unknown>) => void;
   updateSelectedStyles: (bp: Breakpoint, styles: Record<string, unknown>) => void;
   updateSelectedCustomCode: (code: BuilderNode["customCode"]) => void;
@@ -62,7 +62,8 @@ type State = {
   pasteIntoSelected: () => void;
   moveSelected: (parentId: string, index: number) => void;
   reorderInParent: (parentId: string, from: number, to: number) => void;
-  save: () => Promise<void>;
+  /** Silent autosave of current document. Pass meta to apply catalog fields then persist. */
+  save: (meta?: Partial<Pick<TemplateDocument, "name" | "nameAr" | "description" | "descriptionAr" | "image">>) => Promise<void>;
 };
 
 function snap(doc: TemplateDocument): Hist {
@@ -314,12 +315,23 @@ export const useBuilderStore = create<State>((set, get) => ({
     });
   },
 
-  save: async () => {
+  save: async (meta) => {
     const { document: doc } = get();
     if (!doc) return;
     set({ saving: true });
     try {
-      const saved = await templateApi.saveTemplate(doc);
+      const toSave = meta
+        ? {
+            ...doc,
+            ...meta,
+            seoMeta: {
+              ...doc.seoMeta,
+              title: meta.name ?? doc.seoMeta?.title ?? doc.name,
+              description: meta.description ?? doc.seoMeta?.description,
+            },
+          }
+        : doc;
+      const saved = await templateApi.saveTemplate(toSave);
       set({ document: saved, dirty: false, saving: false });
     } catch {
       set({ saving: false });

@@ -28,6 +28,8 @@ function toListItem(doc: TemplateDocument): TemplateListItem {
   return {
     id: doc.id,
     name: doc.name,
+    nameAr: doc.nameAr,
+    image: doc.image,
     slug: doc.slug,
     updatedAt: doc.updatedAt,
     createdAt: doc.createdAt,

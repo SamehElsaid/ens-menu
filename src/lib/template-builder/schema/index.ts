@@ -5,6 +5,7 @@ export type {
   PageCustomCode,
   BuilderNode,
   GlobalStyles,
+  TemplateCatalogMeta,
   TemplateDocument,
   TemplateListItem,
 } from "./types";

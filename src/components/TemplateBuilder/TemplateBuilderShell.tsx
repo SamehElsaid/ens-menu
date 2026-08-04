@@ -10,6 +10,7 @@ import { BuilderDndProvider } from "./canvas/BuilderDndProvider";
 import { ComponentsPanel } from "./panels/ComponentsPanel";
 import { LayersPanel } from "./panels/LayersPanel";
 import { PropertiesPanel } from "./panels/PropertiesPanel";
+import { SaveTemplateModal } from "./SaveTemplateModal";
 import type { Breakpoint } from "@/lib/template-builder/schema";
 import { exportDocumentJson, exportDocumentToHtml } from "@/lib/template-builder/export/html";
 
@@ -72,6 +73,7 @@ export function TemplateBuilderShell() {
   const duplicateSelected = useBuilderStore((s) => s.duplicateSelected);
   const copySelected = useBuilderStore((s) => s.copySelected);
   const pasteIntoSelected = useBuilderStore((s) => s.pasteIntoSelected);
+  const [saveModalOpen, setSaveModalOpen] = useState(false);
 
   useEffect(() => {
     setPreviewLocale(locale === "ar" ? "ar" : "en");
@@ -79,6 +81,10 @@ export function TemplateBuilderShell() {
 
   const bpLabel = (bp: Breakpoint) =>
     bp === "desktop" ? t("desktop") : bp === "tablet" ? t("tablet") : t("mobile");
+
+  const openSaveModal = useCallback(() => {
+    setSaveModalOpen(true);
+  }, []);
 
   const onKey = useCallback(
     (e: KeyboardEvent) => {
@@ -95,7 +101,7 @@ export function TemplateBuilderShell() {
       if (editing) {
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
           e.preventDefault();
-          void save();
+          openSaveModal();
         }
         return;
       }
@@ -103,7 +109,7 @@ export function TemplateBuilderShell() {
       const meta = e.ctrlKey || e.metaKey;
       if (meta && e.key.toLowerCase() === "s") {
         e.preventDefault();
-        void save();
+        openSaveModal();
         return;
       }
       if (meta && e.key.toLowerCase() === "z" && !e.shiftKey) {
@@ -137,7 +143,7 @@ export function TemplateBuilderShell() {
         deleteSelected();
       }
     },
-    [save, undo, redo, copySelected, pasteIntoSelected, duplicateSelected, deleteSelected],
+    [openSaveModal, undo, redo, copySelected, pasteIntoSelected, duplicateSelected, deleteSelected],
   );
 
   useEffect(() => {
@@ -159,7 +165,9 @@ export function TemplateBuilderShell() {
     <div className={`flex h-screen flex-col overflow-hidden ${uiDark ? "bg-slate-950 text-slate-100" : "bg-slate-100 text-slate-900"}`}>
       <header className="flex h-12 shrink-0 items-center gap-2 border-b border-slate-700 bg-slate-950 px-3 text-slate-200">
         <Link href={`/${locale}/admin/template`} className="mr-2 text-xs text-slate-400 hover:text-white">{t("backToList")}</Link>
-        <span className="max-w-[200px] truncate text-sm font-semibold">{document.name}</span>
+        <span className="max-w-[200px] truncate text-sm font-semibold">
+          {locale === "ar" && document.nameAr ? document.nameAr : document.name}
+        </span>
         <span className="hidden text-[10px] text-slate-500 sm:inline">{t("fullControlHint")}</span>
         {dirty && <span className="text-[10px] uppercase text-amber-400">{t("unsaved")}</span>}
         <div className="flex-1" />
@@ -190,7 +198,7 @@ export function TemplateBuilderShell() {
         <button type="button" onClick={deleteSelected} className="rounded border border-slate-700 px-2 py-1 text-xs text-red-300">{t("delete")}</button>
         <button type="button" onClick={() => setCodeModalOpen(true)} className="rounded border border-slate-700 px-2 py-1 text-xs">{t("viewCode")}</button>
         <button type="button" onClick={() => setUiDark(!uiDark)} className="rounded border border-slate-700 px-2 py-1 text-xs">{uiDark ? t("light") : t("dark")}</button>
-        <button type="button" onClick={() => void save()} disabled={saving} className="rounded bg-violet-600 px-3 py-1 text-xs font-medium text-white disabled:opacity-50">{saving ? t("saving") : t("save")}</button>
+        <button type="button" onClick={openSaveModal} disabled={saving} className="rounded bg-violet-600 px-3 py-1 text-xs font-medium text-white disabled:opacity-50">{saving ? t("saving") : t("save")}</button>
       </header>
 
       <BuilderDndProvider>
@@ -209,6 +217,7 @@ export function TemplateBuilderShell() {
         </div>
       </BuilderDndProvider>
       <CodeModal />
+      <SaveTemplateModal open={saveModalOpen} onClose={() => setSaveModalOpen(false)} />
     </div>
   );
 }
