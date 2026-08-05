@@ -19,7 +19,7 @@ import { useAppDispatch } from "@/store/hooks";
 import { axiosPost } from "@/shared/axiosCall";
 import { useEffect, useRef, useState } from "react";
 import { LoginResponse } from "@/types/LoginResponse";
-import GoogleSignInButton from "@/components/Auth/GoogleSignInButton";
+import AuthSocialButtons from "@/components/Auth/AuthSocialButtons";
 import { syncFcmToken } from "@/shared/syncFcmToken";
 import CustomRecaptcha, {
   type RecaptchaGateHandle,
@@ -329,10 +329,9 @@ export default function LoginForm() {
         )}
       </button>
 
-      <GoogleSignInButton
+      <AuthSocialButtons
         dividerLabel="auth.orLoginWith"
         redirectParam={redirectParam}
-        variant="full"
         className="mt-4 sm:mt-5"
       />
 
