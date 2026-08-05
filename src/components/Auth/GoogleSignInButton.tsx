@@ -57,7 +57,7 @@ export default function GoogleSignInButton({
       if (response.status && response.data) {
         const { accessToken, refreshToken, user, isNew } = response.data;
         if (isNew) {
-          pushSignUpEvent();
+          pushSignUpEvent("google");
         }
         const saveTokens = {
           token: accessToken ?? "",

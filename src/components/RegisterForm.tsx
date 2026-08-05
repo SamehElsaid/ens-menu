@@ -17,7 +17,7 @@ import { toast } from "react-toastify";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { TbLockPassword } from "react-icons/tb";
-import GoogleSignInButton from "@/components/Auth/GoogleSignInButton";
+import AuthSocialButtons from "@/components/Auth/AuthSocialButtons";
 
 let emailCheckTimeout: ReturnType<typeof setTimeout> | null = null;
 let lastCheckedAvailableEmail: string | null = null;
@@ -445,9 +445,8 @@ export default function RegisterForm({ steps = [] }: RegisterFormProps) {
           )}
         </button>
 
-        <GoogleSignInButton
+        <AuthSocialButtons
           dividerLabel="auth.orRegisterWith"
-          variant="full"
           className="mt-3"
         />
       </RegisterSection>
