@@ -1,4 +1,4 @@
-export type SignUpMethod = "email" | "google";
+export type SignUpMethod = "email" | "google" | "apple";
 
 export function pushSignUpEvent(method: SignUpMethod = "email"): void {
   if (typeof window === "undefined") return;

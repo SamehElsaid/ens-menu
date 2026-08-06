@@ -43,6 +43,8 @@ export interface TemplateInfo {
   hidePreviewImage?: boolean;
   /** When true, show "under construction" badge on the design card. */
   isUnderConstruction?: boolean;
+  /** When true, this card is a published full-control builder template (theme id "builder"). */
+  isBuilder?: boolean;
 }
 export interface FeatureCardProps {
   icon: IconType;
