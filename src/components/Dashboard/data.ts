@@ -198,6 +198,14 @@ export const navSections: NavSection[] = [
         permission: "settings:manage",
       },
       {
+        label: "settingsGoogleReviews",
+        icon: IoStarOutline,
+        key: "settings-google-reviews",
+        link: "settings/google-reviews",
+        navId: "onboarding-sidebar-settings-google-reviews",
+        permission: "settings:manage",
+      },
+      {
         label: "settingsDelivery",
         icon: MdOutlineDeliveryDining,
         key: "settings-delivery",
