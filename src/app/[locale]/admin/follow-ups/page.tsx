@@ -86,7 +86,9 @@ export default function AdminFollowUpsPage() {
   > | null>(null);
 
   const [logTarget, setLogTarget] = useState<FollowUpQueueUser | null>(null);
-  const [callsTarget, setCallsTarget] = useState<FollowUpQueueUser | null>(null);
+  const [callsTarget, setCallsTarget] = useState<FollowUpQueueUser | null>(
+    null,
+  );
   const [agentTarget, setAgentTarget] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -131,8 +133,8 @@ export default function AdminFollowUpsPage() {
     }
   };
 
-  const mutedTextClass = "text-slate-500 dark:text-slate-400";
-  const dashClass = "text-slate-400 dark:text-slate-500";
+  const mutedTextClass = "text-fg-muted";
+  const dashClass = "text-fg-subtle";
 
   const columnDefs = useMemo<ColDef<FollowUpQueueUser>[]>(
     () => [
@@ -191,7 +193,7 @@ export default function AdminFollowUpsPage() {
           const call = params.data?.lastCall;
           if (!call) return <span className={dashClass}>—</span>;
           return (
-            <span className="text-sm text-slate-700 dark:text-slate-300">
+            <span className="text-sm text-fg-muted">
               {formatFollowUpDateTime(call.calledAt, locale).slice(0, 12)}
             </span>
           );
@@ -210,7 +212,7 @@ export default function AdminFollowUpsPage() {
               className={
                 overdue
                   ? "text-red-600 dark:text-red-400 font-medium"
-                  : "text-slate-700 dark:text-slate-300"
+                  : "text-fg-muted"
               }
             >
               {date}
@@ -253,10 +255,7 @@ export default function AdminFollowUpsPage() {
   );
 
   return (
-    <div
-      className="space-y-6 py-5 animate-fadeIn text-slate-800 dark:text-slate-100"
-      dir={textDir}
-    >
+    <div className="space-y-6 py-5 animate-fadeIn text-fg" dir={textDir}>
       <PageHeader
         title={t("title")}
         description={t("subtitle")}
@@ -291,7 +290,7 @@ export default function AdminFollowUpsPage() {
                 <p className={`text-xs ${mutedTextClass} mb-1`}>
                   {t("report.callsToday")}
                 </p>
-                <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
+                <p className="text-2xl font-bold tabular-nums text-fg">
                   {report.callsToday}
                 </p>
               </CardDashBoard>
@@ -299,7 +298,7 @@ export default function AdminFollowUpsPage() {
                 <p className={`text-xs ${mutedTextClass} mb-1`}>
                   {t("report.callsWeek")}
                 </p>
-                <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
+                <p className="text-2xl font-bold tabular-nums text-fg">
                   {report.callsThisWeek}
                 </p>
               </CardDashBoard>
@@ -315,7 +314,7 @@ export default function AdminFollowUpsPage() {
                 <p className={`text-xs ${mutedTextClass} mb-1`}>
                   {t("report.answeredRate")}
                 </p>
-                <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
+                <p className="text-2xl font-bold tabular-nums text-fg">
                   {report.answeredRate}%
                 </p>
               </CardDashBoard>

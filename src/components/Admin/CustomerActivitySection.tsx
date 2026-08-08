@@ -99,7 +99,9 @@ export default function CustomerActivitySection({ userId }: Props) {
                       {actionLabel(entry.action)}
                     </span>
                     {entry.details && (
-                      <span className="ms-2 text-fg-muted">{entry.details}</span>
+                      <span className="ms-2 text-fg-muted">
+                        {entry.details}
+                      </span>
                     )}
                     <span className="ms-2 text-fg-subtle">
                       · {entry.adminName}

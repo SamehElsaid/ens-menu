@@ -2,11 +2,8 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { buildSeoMetadata } from "@/lib/seo";
 import { fetchPageMetadata, resolveMetaField } from "@/lib/fetchPageMetadata";
-import HeroApp from "@/components/mobile-app/HeroApp";
-import FeaturesApp from "@/components/mobile-app/FeaturesApp";
-import WorkflowApp from "@/components/mobile-app/WorkflowApp";
-import FaqApp from "@/components/mobile-app/FaqApp";
-import CtaApp from "@/components/mobile-app/CtaApp";
+import StaffAppView from "@/components/site/apps/StaffAppView";
+import CtaBand from "@/components/site/CtaBand";
 
 type PageProps = { params: Promise<{ locale: string }> };
 
@@ -38,14 +35,11 @@ export async function generateMetadata({
   });
 }
 
-export default async function MobileAppPage() {
+export default function MobileAppPage() {
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0d1117]">
-      <HeroApp />
-      <FeaturesApp />
-      <WorkflowApp />
-      <FaqApp />
-      <CtaApp />
-    </div>
+    <>
+      <StaffAppView />
+      <CtaBand />
+    </>
   );
 }

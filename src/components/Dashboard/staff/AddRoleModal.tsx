@@ -8,10 +8,7 @@ import { Button, Field, Input, Modal } from "@/components/ui";
 import StaffPermissionsEditor from "./StaffPermissionsEditor";
 import type { MenuStaffRole } from "@/types/Menu";
 import { roleDisplayName } from "@/shared/roleDisplayName";
-import {
-  IoShieldCheckmarkOutline,
-  IoAddCircleOutline,
-} from "react-icons/io5";
+import { IoShieldCheckmarkOutline, IoAddCircleOutline } from "react-icons/io5";
 
 interface AddRoleModalProps {
   role?: MenuStaffRole | null;
@@ -155,7 +152,7 @@ export default function AddRoleModal({
           />
         </Field>
 
-        <div className="rounded-xl bg-surface-2 p-4">
+        <div className="rounded-lg bg-surface-2 p-4">
           <StaffPermissionsEditor
             value={permissions}
             onChange={setPermissions}

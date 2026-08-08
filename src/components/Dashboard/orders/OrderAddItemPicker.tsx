@@ -53,9 +53,8 @@ export default function OrderAddItemPicker({
   const [menuItems, setMenuItems] = useState<Item[]>([]);
   const [configItemId, setConfigItemId] = useState<number | null>(null);
   const [selectedSize, setSelectedSize] = useState<ItemSizeOption | null>(null);
-  const [selectedVariant, setSelectedVariant] = useState<ItemVariantOption | null>(
-    null,
-  );
+  const [selectedVariant, setSelectedVariant] =
+    useState<ItemVariantOption | null>(null);
 
   const fetchItems = useCallback(async () => {
     if (!menuId) return;
@@ -67,8 +66,11 @@ export default function OrderAddItemPicker({
       );
       if (result.status && result.data) {
         const raw = result.data as { items?: Item[] };
-        const list = (raw.items ?? (Array.isArray(result.data) ? result.data : []))
-          .filter((item) => item.available !== false && item.isAvailable !== false);
+        const list = (
+          raw.items ?? (Array.isArray(result.data) ? result.data : [])
+        ).filter(
+          (item) => item.available !== false && item.isAvailable !== false,
+        );
         setMenuItems(list);
       } else {
         setMenuItems([]);
@@ -101,9 +103,7 @@ export default function OrderAddItemPicker({
             item.category?.nameAr ??
             item.category?.nameEn ??
             "");
-      return (
-        name.includes(q) || String(category).toLowerCase().includes(q)
-      );
+      return name.includes(q) || String(category).toLowerCase().includes(q);
     });
   }, [menuItems, search, locale]);
 
@@ -120,7 +120,11 @@ export default function OrderAddItemPicker({
     setSelectedVariant(null);
   };
 
-  const commitAdd = (item: Item, size?: ItemSizeOption | null, variant?: ItemVariantOption | null) => {
+  const commitAdd = (
+    item: Item,
+    size?: ItemSizeOption | null,
+    variant?: ItemVariantOption | null,
+  ) => {
     const line = buildCallItemFromMenuItem(item, locale, size, variant, 1);
     onAdd((prev) => mergeCallItemIntoDraft(prev, line));
     resetConfig();
@@ -146,7 +150,7 @@ export default function OrderAddItemPicker({
   if (!open) return null;
 
   return (
-    <div className="mb-4 rounded-xl border border-dashed border-brand-line bg-brand-soft/40">
+    <div className="mb-4 rounded-lg border border-dashed border-brand-line bg-brand-soft/40">
       <Button
         type="button"
         variant="ghost"
@@ -210,7 +214,9 @@ export default function OrderAddItemPicker({
               {configVariants.length > 0 && (
                 <Field label={labels.addProductSelectVariant} className="mb-3">
                   <Select
-                    value={selectedVariant ? JSON.stringify(selectedVariant) : ""}
+                    value={
+                      selectedVariant ? JSON.stringify(selectedVariant) : ""
+                    }
                     onChange={(e) => {
                       try {
                         setSelectedVariant(

@@ -30,7 +30,7 @@ export default function CategoryMobileCard({
   const active = category.isActive;
 
   return (
-    <article className="dashboard-item-card flex gap-3 rounded-2xl border border-slate-200/90 bg-white p-3 shadow-[0_1px_8px_rgba(15,23,42,0.06)] transition-all duration-200 active:scale-[0.99] dark:border-slate-700/80 dark:bg-slate-800/95 dark:shadow-[0_1px_12px_rgba(0,0,0,0.25)]">
+    <article className="dashboard-item-card flex gap-3 rounded-lg border border-line/90 bg-white p-3 shadow-[0_1px_8px_rgba(15,23,42,0.06)] transition-all duration-200 active:scale-[0.99] dark:border-line/80 dark:shadow-[0_1px_12px_rgba(0,0,0,0.25)]">
       <ItemMobileThumbnail
         src={imageUrl}
         alt={name}
@@ -41,7 +41,7 @@ export default function CategoryMobileCard({
       <div className="flex min-w-0 flex-1 flex-col justify-between gap-1.5">
         <div className="min-w-0">
           <h3
-            className="truncate text-[15px] font-bold leading-tight text-slate-900 dark:text-slate-50"
+            className="truncate text-[15px] font-bold leading-tight text-fg"
             dir={locale === "ar" ? "rtl" : "ltr"}
             title={name}
           >
@@ -68,7 +68,7 @@ export default function CategoryMobileCard({
               type="button"
               onClick={() => onEdit(category)}
               aria-label={t("edit")}
-              className="inline-flex size-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition-colors active:scale-95 dark:border-slate-600 dark:bg-slate-700/60 dark:text-slate-200"
+              className="inline-flex size-9 items-center justify-center rounded-lg border border-line bg-slate-50 text-fg-muted transition-colors active:scale-95"
             >
               <IoCreateOutline className="text-[17px]" aria-hidden />
             </button>
@@ -76,7 +76,7 @@ export default function CategoryMobileCard({
               type="button"
               onClick={() => onDelete(category)}
               aria-label={t("delete")}
-              className="inline-flex size-9 items-center justify-center rounded-xl border border-red-200/80 bg-red-50 text-red-600 transition-colors active:scale-95 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300"
+              className="inline-flex size-9 items-center justify-center rounded-lg border border-red-200/80 bg-red-50 text-red-600 transition-colors active:scale-95 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300"
             >
               <IoTrashOutline className="text-[17px]" aria-hidden />
             </button>

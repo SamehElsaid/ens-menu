@@ -21,6 +21,9 @@ import {
 import { BiCategory } from "react-icons/bi";
 import { TbPhotoEdit } from "react-icons/tb";
 import { useLocale, useTranslations } from "next-intl";
+import { cn } from "@/lib/cn";
+import { Badge, Button, ButtonLink, CountBadge } from "@/components/ui";
+import { useIsClient } from "@/components/ui/useDialog";
 import { useAppSelector } from "@/store/hooks";
 import { isFreePlanUser } from "@/lib/subscription";
 import { isDeliveryEntry, resolveEntryTime } from "@/lib/tableOrders";
@@ -66,6 +69,24 @@ interface PlanTask {
 const MAX_VISIBLE = 10;
 const SEEN_TASKS_STORAGE_KEY = "ensmenu:seen-notification-tasks";
 
+/** Divides the panel into its three sources without adding another border. */
+function SectionEyebrow({
+  children,
+  action,
+}: {
+  children: ReactNode;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-2 px-3 pb-1 pt-2.5">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-subtle">
+        {children}
+      </p>
+      {action}
+    </div>
+  );
+}
+
 function readSeenTaskKeys(): string[] {
   try {
     const raw = window.localStorage.getItem(SEEN_TASKS_STORAGE_KEY);
@@ -81,6 +102,7 @@ function readSeenTaskKeys(): string[] {
 export default function NotificationBell({ segment }: NotificationBellProps) {
   const locale = useLocale();
   const t = useTranslations("notifications");
+  const tCommon = useTranslations("common");
   const isRTL = locale === "ar";
   const router = useRouter();
 
@@ -106,15 +128,11 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
   const [notificationsLoading, setNotificationsLoading] = useState(false);
 
   const [isOpen, setIsOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useIsClient();
   const [dropdownStyle, setDropdownStyle] = useState<CSSProperties>({});
 
   const triggerRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   /** Resolves with the unread count so callers can skip a needless read-all. */
   const fetchAccountNotifications = useCallback(async (): Promise<number> => {
@@ -444,45 +462,42 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
           <div
             ref={dropdownRef}
             style={dropdownStyle}
-            className="z-9999 w-80 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl animate-[fadeInDown_0.15s_ease-out] dark:border-purple-900/60 dark:bg-[#161b22]"
+            role="dialog"
+            aria-label={t("title")}
+            className="z-[9999] w-[22rem] overflow-hidden rounded-lg border border-line bg-raised shadow-lg motion-safe:animate-[ui-pop-in_140ms_cubic-bezier(0.16,1,0.3,1)]"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-slate-800">
-              <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+            <div className="flex items-center justify-between gap-2 border-b border-line px-3 py-2">
+              <span className="flex items-center gap-1.5 text-[13px] font-semibold text-fg">
                 {t("title")}
-                {totalListedCount > 0 && (
-                  <span className="ms-2 inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
-                    {totalListedCount}
-                  </span>
-                )}
+                <CountBadge count={totalListedCount} tone="neutral" />
               </span>
-              <button
+              <Button
+                type="button"
+                variant="ghost"
+                size="xs"
+                iconOnly
                 onClick={() => setIsOpen(false)}
-                className="rounded-full p-1 text-slate-400 transition-colors hover:text-slate-700 dark:hover:text-slate-200"
+                aria-label={tCommon("close")}
               >
-                <IoCloseOutline size={18} />
-              </button>
+                <IoCloseOutline className="size-4" />
+              </Button>
             </div>
 
-            <div className="max-h-[480px] overflow-y-auto">
+            <div className="max-h-[26rem] overflow-y-auto [scrollbar-width:thin]">
               {/* Account alerts — subscription expiry, downgrade, etc. */}
-              <div className="border-b border-slate-100 dark:border-slate-800">
-                <div className="flex items-center justify-between px-4 pb-1 pt-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                    {t("accountSection")}
-                  </p>
-                </div>
+              <div className="border-b border-line">
+                <SectionEyebrow>{t("accountSection")}</SectionEyebrow>
 
                 {notificationsLoading && accountNotifications.length === 0 ? (
-                  <p className="px-4 pb-3 text-xs text-slate-500 dark:text-slate-400">
+                  <p className="px-3 pb-2 text-xs text-fg-subtle">
                     {t("loading")}
                   </p>
                 ) : accountNotifications.length === 0 ? (
-                  <p className="px-4 pb-3 text-xs text-slate-500 dark:text-slate-400">
+                  <p className="px-3 pb-2 text-xs text-fg-subtle">
                     {t("noAccountAlerts")}
                   </p>
                 ) : (
-                  <ul className="divide-y divide-slate-100 pb-1 dark:divide-slate-800">
+                  <ul className="divide-y divide-line pb-1">
                     {accountNotifications.slice(0, 5).map((notification) => {
                       const { title, message } =
                         getNotificationLabel(notification);
@@ -502,11 +517,10 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
                       return (
                         <li
                           key={notification.id}
-                          className={`flex items-stretch ${
-                            !notification.isRead
-                              ? "bg-purple-50/60 dark:bg-purple-500/5"
-                              : ""
-                          }`}
+                          className={cn(
+                            "flex items-stretch",
+                            !notification.isRead && "bg-brand-soft/40",
+                          )}
                         >
                           <button
                             type="button"
@@ -514,41 +528,43 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
                               handleAccountNotificationClick(notification)
                             }
                             disabled={!isExpiringAlert}
-                            className={`min-w-0 flex-1 px-4 py-3 text-start transition-colors ${
+                            className={cn(
+                              "min-w-0 flex-1 px-3 py-2.5 text-start row-settle",
                               isExpiringAlert
-                                ? "cursor-pointer hover:bg-purple-50 dark:hover:bg-purple-500/10"
-                                : "cursor-default"
-                            }`}
+                                ? "cursor-pointer hover:bg-surface-2"
+                                : "cursor-default",
+                            )}
                           >
-                            <div className="flex items-start gap-3">
-                              <div
-                                className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${
-                                  isUrgent
-                                    ? "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"
-                                    : "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
-                                }`}
-                              >
-                                <Icon className="text-base" />
-                              </div>
+                            <div className="flex items-start gap-2">
+                              <Icon
+                                className={cn(
+                                  "mt-px size-4 shrink-0",
+                                  isUrgent ? "text-warning" : "text-fg-subtle",
+                                )}
+                                aria-hidden
+                              />
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-start justify-between gap-2">
-                                  <p className="text-xs font-semibold text-slate-800 dark:text-slate-100">
+                                  <p className="text-xs font-semibold text-fg">
                                     {title}
                                   </p>
                                   {!notification.isRead && (
-                                    <span className="mt-1 size-2 shrink-0 rounded-full bg-purple-500" />
+                                    <span
+                                      className="mt-1 size-1.5 shrink-0 rounded-full bg-brand"
+                                      aria-hidden
+                                    />
                                   )}
                                 </div>
-                                <p className="mt-0.5 line-clamp-2 text-[11px] text-slate-500 dark:text-slate-400">
+                                <p className="mt-0.5 line-clamp-2 text-[11px] text-fg-muted">
                                   {message}
                                 </p>
                                 {isExpiringAlert && (
-                                  <p className="mt-1 text-[10px] font-semibold text-purple-600 dark:text-purple-400">
+                                  <p className="mt-1 text-[11px] font-medium text-brand">
                                     {t("renewNow")}
                                   </p>
                                 )}
                                 {notification.createdAt && (
-                                  <p className="mt-1 text-[10px] text-slate-400 dark:text-slate-500">
+                                  <p className="mt-1 text-[11px] text-fg-subtle">
                                     <ViewTime data={notification.createdAt} />
                                   </p>
                                 )}
@@ -570,20 +586,17 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
                                 ? t("goToRenewal")
                                 : t("dismissAlert")
                             }
-                            className={`flex shrink-0 flex-col items-center justify-center border-s border-slate-100 px-3 transition-colors dark:border-slate-800 ${
+                            className={cn(
+                              "flex w-9 shrink-0 items-center justify-center border-s border-line row-settle",
                               isExpiringAlert
-                                ? "text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-500/10"
-                                : "text-slate-400 hover:bg-slate-50 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-                            }`}
+                                ? "text-brand hover:bg-surface-2"
+                                : "text-fg-subtle hover:bg-surface-2 hover:text-fg",
+                            )}
                           >
                             <IoArrowForwardOutline
-                              className={`text-lg ${isRTL ? "rotate-180" : ""}`}
+                              className={cn("size-4", isRTL && "rotate-180")}
+                              aria-hidden
                             />
-                            <span className="mt-0.5 text-[9px] font-medium">
-                              {isExpiringAlert
-                                ? t("goToRenewal")
-                                : t("dismissAlert")}
-                            </span>
                           </button>
                         </li>
                       );
@@ -593,30 +606,31 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
               </div>
 
               {/* Plan feature tasks — only shows items not yet done */}
-              <div className="border-b border-slate-100 dark:border-slate-800">
-                <div className="flex items-center justify-between px-4 pb-1 pt-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                    {t("planSection")}
-                  </p>
-                  {isFreePlan && (
-                    <LinkTo
-                      href="/dashboard/subscription"
-                      onClick={() => setIsOpen(false)}
-                      className="text-[10px] font-semibold text-purple-600 hover:underline dark:text-purple-400"
-                    >
-                      {t("upgradePlan")}
-                    </LinkTo>
-                  )}
-                </div>
+              <div className="border-b border-line">
+                <SectionEyebrow
+                  action={
+                    isFreePlan ? (
+                      <LinkTo
+                        href="/dashboard/subscription"
+                        onClick={() => setIsOpen(false)}
+                        className="text-[11px] font-medium text-brand hover:underline"
+                      >
+                        {t("upgradePlan")}
+                      </LinkTo>
+                    ) : null
+                  }
+                >
+                  {t("planSection")}
+                </SectionEyebrow>
 
                 {pendingTasks.length === 0 ? (
-                  /* All tasks done → green success state */
-                  <div className="flex items-center gap-2 px-4 pb-3 pt-1">
-                    <IoSparklesOutline className="shrink-0 text-base text-emerald-500" />
-                    <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                      {t("allTasksDone")}
-                    </p>
-                  </div>
+                  <p className="flex items-center gap-1.5 px-3 pb-2 text-xs text-success">
+                    <IoSparklesOutline
+                      className="size-3.5 shrink-0"
+                      aria-hidden
+                    />
+                    {t("allTasksDone")}
+                  </p>
                 ) : (
                   <>
                     <ul className="pb-1">
@@ -625,21 +639,28 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
                           <LinkTo
                             href={task.href}
                             onClick={() => setIsOpen(false)}
-                            className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-amber-50 dark:hover:bg-amber-500/10"
+                            className="flex items-center gap-2 px-3 py-2 row-settle hover:bg-surface-2"
                           >
-                            <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+                            <span
+                              className="shrink-0 text-fg-subtle"
+                              aria-hidden
+                            >
                               {task.icon}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className="block text-xs font-medium text-fg">
                                 {task.message}
-                              </p>
-                              <p className="text-[11px] text-amber-600 dark:text-amber-400">
+                              </span>
+                              <span className="block text-[11px] text-fg-muted">
                                 {task.action}
-                              </p>
-                            </div>
+                              </span>
+                            </span>
                             <IoArrowForwardOutline
-                              className={`shrink-0 text-sm text-amber-400 ${isRTL ? "rotate-180" : ""}`}
+                              className={cn(
+                                "size-3.5 shrink-0 text-fg-subtle",
+                                isRTL && "rotate-180",
+                              )}
+                              aria-hidden
                             />
                           </LinkTo>
                         </li>
@@ -647,26 +668,25 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
                     </ul>
 
                     {isMenuEmpty && segment && (
-                      <div className="px-4 pb-3">
-                        <p className="mb-1.5 text-[10px] text-slate-400 dark:text-slate-500">
+                      <div className="px-3 pb-2.5">
+                        <p className="mb-1.5 text-[11px] text-fg-subtle">
                           {t("aiImportHint")}
                         </p>
-                        <LinkTo
+                        <ButtonLink
                           href={`/dashboard/${segment}/import`}
                           onClick={() => setIsOpen(false)}
-                          className="flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-primary to-violet-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md active:scale-[0.98]"
+                          fullWidth
+                          startIcon={<IoSparklesOutline className="size-3.5" />}
                         >
-                          <IoSparklesOutline className="text-sm" />
                           {t("aiImportAction")}
-                          <IoCameraOutline className="text-sm" />
-                        </LinkTo>
+                        </ButtonLink>
                       </div>
                     )}
                   </>
                 )}
 
                 {isFreePlan && (
-                  <p className="mx-4 mb-3 rounded-lg bg-purple-50 px-2.5 py-2 text-[11px] text-purple-700 dark:bg-purple-900/20 dark:text-purple-300">
+                  <p className="mx-3 mb-2.5 rounded-md bg-surface-2 px-2 py-1.5 text-[11px] text-fg-muted">
                     {t("freePlanUpgradeHint")}
                   </p>
                 )}
@@ -676,59 +696,59 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
               {!isFreePlan && (
                 <>
                   {loading ? null : pendingEntries.length === 0 ? (
-                    <p className="py-6 text-center text-sm text-slate-500 dark:text-slate-400">
+                    <p className="py-5 text-center text-xs text-fg-subtle">
                       {t("empty")}
                     </p>
                   ) : (
                     <>
-                      <p className="px-4 pb-1 pt-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                        {t("recentOrders")}
-                      </p>
-                      <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+                      <SectionEyebrow>{t("recentOrders")}</SectionEyebrow>
+                      <ul className="divide-y divide-line">
                         {pendingEntries.slice(0, MAX_VISIBLE).map((entry) => {
                           const isDelivery = isDeliveryEntry(entry);
                           const time = resolveEntryTime(entry.actionDetails);
                           return (
                             <li key={entry.id}>
                               <button
+                                type="button"
                                 onClick={() => handleOrderClick(entry)}
-                                className="w-full px-4 py-3 text-start transition-colors hover:bg-purple-50 dark:hover:bg-purple-500/10"
+                                className="w-full px-3 py-2.5 text-start row-settle hover:bg-surface-2"
                               >
                                 <div className="flex items-start justify-between gap-2">
                                   <div className="min-w-0 flex-1">
-                                    <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
-                                      {t("order")} #{entry.orderId}
-                                      <span
-                                        className={`ms-2 inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold ${
-                                          isDelivery
-                                            ? "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300"
-                                            : "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300"
-                                        }`}
+                                    <p className="flex items-center gap-1.5 truncate text-[13px] font-semibold text-fg">
+                                      <span data-numeric>
+                                        {t("order")} #{entry.orderId}
+                                      </span>
+                                      <Badge
+                                        tone={isDelivery ? "brand" : "info"}
                                       >
                                         {isDelivery
                                           ? t("delivery")
                                           : t("table")}
-                                      </span>
+                                      </Badge>
                                     </p>
                                     {entry.customerName && (
-                                      <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                                      <p className="mt-0.5 truncate text-xs text-fg-muted">
                                         {entry.customerName}
                                       </p>
                                     )}
                                     {!isDelivery && entry.tableNumber && (
-                                      <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                                      <p className="mt-0.5 text-xs text-fg-muted">
                                         {t("tableNo")} {entry.tableNumber}
                                       </p>
                                     )}
                                   </div>
                                   <div className="shrink-0 text-end">
                                     {typeof entry.totalPrice === "number" && (
-                                      <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                                      <p
+                                        className="text-xs font-semibold text-fg"
+                                        data-numeric
+                                      >
                                         {entry.totalPrice} {currency}
                                       </p>
                                     )}
                                     {time && (
-                                      <p className="mt-0.5 text-[10px] text-slate-400 dark:text-slate-500">
+                                      <p className="mt-0.5 text-[11px] text-fg-subtle">
                                         <ViewTime data={time} />
                                       </p>
                                     )}
@@ -747,53 +767,36 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
 
             {/* Footer — order summary buttons (Pro only) */}
             {!isFreePlan && (
-              <div className="border-t border-slate-100 dark:border-slate-800">
+              <div className="border-t border-line">
                 {loading ? (
-                  <div className="flex items-center justify-center py-4 text-sm text-slate-500 dark:text-slate-400">
+                  <div className="flex items-center justify-center py-3 text-xs text-fg-subtle">
                     {t("loading")}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 divide-x divide-slate-100 dark:divide-slate-800 rtl:divide-x-reverse">
-                    {/* Table orders button */}
+                  <div className="grid grid-cols-2 divide-x divide-line rtl:divide-x-reverse">
                     <button
+                      type="button"
                       onClick={() => handleNavClick("/dashboard/orders")}
-                      className="flex flex-col items-center gap-1.5 px-3 py-3 transition-colors hover:bg-sky-50 dark:hover:bg-sky-500/10"
+                      className="flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium text-fg-muted row-settle hover:bg-surface-2 hover:text-fg"
                     >
-                      <div className="flex items-center gap-2">
-                        <div className="flex size-7 items-center justify-center rounded-lg bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400">
-                          <MdOutlineTableBar className="text-sm" />
-                        </div>
-                        {pendingTableCount > 0 && (
-                          <span className="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-xs font-bold text-sky-700 dark:bg-sky-900/30 dark:text-sky-300">
-                            {pendingTableCount}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[11px] font-medium text-slate-600 dark:text-slate-400">
-                        {t("tableOrders")}
-                      </p>
+                      <MdOutlineTableBar
+                        className="size-4 shrink-0"
+                        aria-hidden
+                      />
+                      {t("tableOrders")}
+                      <CountBadge count={pendingTableCount} />
                     </button>
 
-                    {/* Online/delivery orders button */}
                     <button
+                      type="button"
                       onClick={() =>
                         handleNavClick("/dashboard/delivery-orders")
                       }
-                      className="flex flex-col items-center gap-1.5 px-3 py-3 transition-colors hover:bg-violet-50 dark:hover:bg-violet-500/10"
+                      className="flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium text-fg-muted row-settle hover:bg-surface-2 hover:text-fg"
                     >
-                      <div className="flex items-center gap-2">
-                        <div className="flex size-7 items-center justify-center rounded-lg bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400">
-                          <IoCarOutline className="text-sm" />
-                        </div>
-                        {pendingDeliveryCount > 0 && (
-                          <span className="inline-flex items-center rounded-full bg-violet-100 px-2 py-0.5 text-xs font-bold text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">
-                            {pendingDeliveryCount}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[11px] font-medium text-slate-600 dark:text-slate-400">
-                        {t("onlineOrders")}
-                      </p>
+                      <IoCarOutline className="size-4 shrink-0" aria-hidden />
+                      {t("onlineOrders")}
+                      <CountBadge count={pendingDeliveryCount} />
                     </button>
                   </div>
                 )}
@@ -806,19 +809,26 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
 
   return (
     <>
-      <button
+      <Button
         ref={triggerRef}
+        type="button"
+        variant="ghost"
+        size="sm"
+        iconOnly
         onClick={() => (isOpen ? setIsOpen(false) : open())}
         aria-label={t("label")}
-        className="relative rounded-full p-2 text-slate-600 transition-colors hover:bg-purple-50 dark:text-slate-300 dark:hover:bg-purple-500/20"
+        aria-expanded={isOpen}
+        className="relative"
       >
-        <IoNotificationsOutline size={20} />
+        <IoNotificationsOutline className="size-4" />
         {unseenBadgeCount > 0 && (
-          <span className="absolute -end-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
-            {unseenBadgeCount > 99 ? "99+" : unseenBadgeCount}
-          </span>
+          <CountBadge
+            count={unseenBadgeCount}
+            tone="danger"
+            className="absolute -end-0.5 -top-0.5"
+          />
         )}
-      </button>
+      </Button>
       {dropdown}
     </>
   );

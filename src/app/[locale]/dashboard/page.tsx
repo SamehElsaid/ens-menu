@@ -52,11 +52,11 @@ import {
 } from "@/lib/menuDeliveryGroups";
 import StaffMenusList from "@/components/Dashboard/StaffMenusList";
 import { useAuthorization } from "@/hooks/useAuthorization";
-import { getMenuDashboardRef, menuDashboardPath } from "@/lib/menuDashboardPath";
 import {
-  publicMenuLinkUrl,
-  resolvePublicMenuSlug,
-} from "@/lib/publicMenuUrl";
+  getMenuDashboardRef,
+  menuDashboardPath,
+} from "@/lib/menuDashboardPath";
+import { publicMenuLinkUrl, resolvePublicMenuSlug } from "@/lib/publicMenuUrl";
 import {
   getEffectiveMaxMenus,
   isProSubscription,
@@ -147,24 +147,25 @@ function OwnerMenusPage() {
     }
   }, [locale]);
 
-  const resolveSubscription = useCallback(async (): Promise<Subscription | null> => {
-    if (subscription != null || !subscriptionLoading) {
-      return subscription;
-    }
-    try {
-      const result = await axiosGet<SubscriptionResponse>(
-        "/user/subscription",
-        locale,
-      );
-      if (result.status && result.data?.subscription) {
-        setSubscription(result.data.subscription);
-        return result.data.subscription;
+  const resolveSubscription =
+    useCallback(async (): Promise<Subscription | null> => {
+      if (subscription != null || !subscriptionLoading) {
+        return subscription;
       }
-    } catch (error) {
-      console.error("Error fetching subscription:", error);
-    }
-    return subscription;
-  }, [subscription, subscriptionLoading, locale]);
+      try {
+        const result = await axiosGet<SubscriptionResponse>(
+          "/user/subscription",
+          locale,
+        );
+        if (result.status && result.data?.subscription) {
+          setSubscription(result.data.subscription);
+          return result.data.subscription;
+        }
+      } catch (error) {
+        console.error("Error fetching subscription:", error);
+      }
+      return subscription;
+    }, [subscription, subscriptionLoading, locale]);
 
   useEffect(() => {
     fetchMenus();
@@ -173,7 +174,6 @@ function OwnerMenusPage() {
   useEffect(() => {
     fetchSubscription();
   }, [fetchSubscription]);
-
 
   useEffect(() => {
     if (!deleteTarget) setDeleteConfirmText("");
@@ -301,10 +301,7 @@ function OwnerMenusPage() {
 
   const showCreateGroupButton = menus.length >= 2;
 
-  const menuGroups = useMemo(
-    () => extractMenuGroupsFromMenus(menus),
-    [menus],
-  );
+  const menuGroups = useMemo(() => extractMenuGroupsFromMenus(menus), [menus]);
   const hasUngroupedMenus = menusAvailableToJoinGroup(menus).length > 0;
   const canAddToExistingGroup = menuGroups.length > 0 && hasUngroupedMenus;
 
@@ -580,33 +577,31 @@ function OwnerMenusPage() {
                   })
                 }
                 menuCards={group.menus.map((menu) => (
-                      <MenuDashboardCard
-                        key={menu.id}
-                        menu={menu}
-                        menuName={getMenuName(menu)}
-                        description={getMenuDescription(menu)}
-                        formatDate={formatDate}
-                        togglingId={togglingId}
-                        menuPublicUrl={getMenuPublicUrl(menu)}
-                        groupMeta={resolveMenuGroupMeta(menu)}
-                        manageLinkId={
-                          menu.id === firstManageMenuId
-                            ? "onboarding-manage-menu"
-                            : undefined
-                        }
-                        isNested
-                        labels={cardLabels}
-                        onToggleActive={handleToggleActive}
-                        onDelete={setDeleteTarget}
-                        onCopy={handleCopyClick}
-                        onAddToGroup={
-                          canAddToExistingGroup
-                            ? handleAddToGroupClick
-                            : undefined
-                        }
-                        onRemoveFromGroup={handleRemoveFromGroupClick}
-                      />
-                    ))}
+                  <MenuDashboardCard
+                    key={menu.id}
+                    menu={menu}
+                    menuName={getMenuName(menu)}
+                    description={getMenuDescription(menu)}
+                    formatDate={formatDate}
+                    togglingId={togglingId}
+                    menuPublicUrl={getMenuPublicUrl(menu)}
+                    groupMeta={resolveMenuGroupMeta(menu)}
+                    manageLinkId={
+                      menu.id === firstManageMenuId
+                        ? "onboarding-manage-menu"
+                        : undefined
+                    }
+                    isNested
+                    labels={cardLabels}
+                    onToggleActive={handleToggleActive}
+                    onDelete={setDeleteTarget}
+                    onCopy={handleCopyClick}
+                    onAddToGroup={
+                      canAddToExistingGroup ? handleAddToGroupClick : undefined
+                    }
+                    onRemoveFromGroup={handleRemoveFromGroupClick}
+                  />
+                ))}
               />
             );
           }
@@ -624,7 +619,9 @@ function OwnerMenusPage() {
               menuPublicUrl={getMenuPublicUrl(menu)}
               groupMeta={resolveMenuGroupMeta(menu)}
               manageLinkId={
-                menu.id === firstManageMenuId ? "onboarding-manage-menu" : undefined
+                menu.id === firstManageMenuId
+                  ? "onboarding-manage-menu"
+                  : undefined
               }
               labels={cardLabels}
               onToggleActive={handleToggleActive}
@@ -755,7 +752,7 @@ function OwnerMenusPage() {
           <p className="text-sm leading-relaxed text-fg-muted">
             {t("switchMenuLimitMessage")}
           </p>
-          <div className="mt-4 rounded-xl border border-line bg-surface-2 px-4 py-3">
+          <div className="mt-4 rounded-lg border border-line bg-surface-2 px-4 py-3">
             <p className="text-xs font-medium uppercase tracking-wide text-fg-subtle">
               {t("selectedMenu")}
             </p>
@@ -859,7 +856,7 @@ function LimitReachedModal({
         </>
       }
     >
-      <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-2 px-4 py-3">
+      <div className="flex items-center justify-between gap-3 rounded-lg bg-surface-2 px-4 py-3">
         <span className="text-[13px] text-fg-muted">{t("currentPlan")}</span>
         <span className="text-[13px] font-semibold text-fg">
           {planName} ({currentCount}/{maxMenus})

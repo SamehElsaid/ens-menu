@@ -8,24 +8,24 @@ import MobileListPagination from "@/components/Dashboard/mobile/MobileListPagina
 function AdCardSkeleton() {
   return (
     <div
-      className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800/80"
+      className="overflow-hidden rounded-lg border border-line bg-white"
       aria-hidden
     >
-      <div className="dashboard-mobile-shimmer aspect-video w-full bg-slate-100 dark:bg-slate-700/60" />
+      <div className="dashboard-mobile-shimmer aspect-video w-full bg-surface-3" />
       <div className="space-y-3 p-4">
-        <div className="dashboard-mobile-shimmer h-6 w-2/3 rounded-md bg-slate-100 dark:bg-slate-700/60" />
-        <div className="dashboard-mobile-shimmer h-4 w-full rounded-md bg-slate-100 dark:bg-slate-700/60" />
+        <div className="dashboard-mobile-shimmer h-6 w-2/3 rounded-md bg-surface-3" />
+        <div className="dashboard-mobile-shimmer h-4 w-full rounded-md bg-surface-3" />
         <div className="grid grid-cols-3 gap-1.5">
           {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className="dashboard-mobile-shimmer h-12 rounded-xl bg-slate-100 dark:bg-slate-700/60"
+              className="dashboard-mobile-shimmer h-12 rounded-lg bg-surface-3"
             />
           ))}
         </div>
-        <div className="flex gap-2 border-t border-slate-100 pt-3 dark:border-slate-700">
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-xl bg-slate-100 dark:bg-slate-700/60" />
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-xl bg-slate-100 dark:bg-slate-700/60" />
+        <div className="flex gap-2 border-t border-line pt-3 dark:border-line">
+          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-3" />
+          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-3" />
         </div>
       </div>
     </div>

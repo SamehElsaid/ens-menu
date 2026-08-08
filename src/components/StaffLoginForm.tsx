@@ -1,9 +1,6 @@
 "use client";
 
 import { Controller, useForm } from "react-hook-form";
-import { Alert } from "@/components/ui/Alert";
-import { Button } from "@/components/ui/Button";
-import { Field, Input } from "@/components/ui";
 import { useLocale, useTranslations } from "next-intl";
 import { axiosPost } from "@/shared/axiosCall";
 import { encryptData } from "@/shared/encryption";
@@ -12,11 +9,11 @@ import { useRouter } from "@/i18n/navigation";
 import { useState } from "react";
 import { useAppDispatch } from "@/store/hooks";
 import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
-import LinkTo from "@/components/Global/LinkTo";
-import { FaEnvelope } from "react-icons/fa";
-import { TbLockPassword } from "react-icons/tb";
+import { FiMail } from "react-icons/fi";
 import { IoRestaurantOutline } from "react-icons/io5";
 import { getMenuDashboardRef } from "@/lib/menuDashboardPath";
+import { Alert, Field, Input, PasswordInput } from "@/components/site/Form";
+import { SiteButton } from "@/components/site/Button";
 
 type StaffLoginFormValues = {
   menuSlug: string;
@@ -78,8 +75,7 @@ export default function StaffLoginForm() {
 
     if (!result.status || !result.data?.accessToken || !result.data?.menu) {
       const msg =
-        (result.data as { message?: string })?.message ||
-        t("staffLoginFailed");
+        (result.data as { message?: string })?.message || t("staffLoginFailed");
       setApiError(msg);
       setLoading(false);
       return;
@@ -87,7 +83,9 @@ export default function StaffLoginForm() {
 
     const { accessToken, refreshToken, staff, menu } = result.data;
     const permissions = Array.isArray(result.data.permissions)
-      ? result.data.permissions.filter((p): p is string => typeof p === "string")
+      ? result.data.permissions.filter(
+          (p): p is string => typeof p === "string",
+        )
       : [];
 
     // Only a display hint now: access comes from menu grants, so a staff member
@@ -95,8 +93,7 @@ export default function StaffLoginForm() {
     const menuRef =
       getMenuDashboardRef(menu as { id?: number; uuid?: string }) || undefined;
 
-    const roleName =
-      result.data.role?.name ?? staff?.roleName ?? undefined;
+    const roleName = result.data.role?.name ?? staff?.roleName ?? undefined;
 
     const saveTokens = {
       token: accessToken,
@@ -129,87 +126,97 @@ export default function StaffLoginForm() {
     router.push("/dashboard");
   };
 
+  const clearError = (run: () => void) => {
+    setApiError(null);
+    run();
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-      {apiError && <Alert tone="danger">{apiError}</Alert>}
+    <form onSubmit={handleSubmit(onSubmit)} noValidate>
+      {apiError ? <Alert className="mb-5">{apiError}</Alert> : null}
 
-      <Controller
-        control={control}
-        name="menuSlug"
-        rules={{ required: t("menuSlugRequired") }}
-        render={({ field: { value, onChange } }) => (
-          <Field label={t("menuSlug")} error={errors.menuSlug?.message}>
-            <Input
-              type="text"
-              inputSize="md"
-              startIcon={<IoRestaurantOutline size={14} />}
-              placeholder={t("menuSlugPlaceholder")}
-              value={value}
-              onChange={(e) => {
-                setApiError(null);
-                onChange(e);
-              }}
-            />
-          </Field>
-        )}
-      />
+      <div className="space-y-4">
+        <Controller
+          control={control}
+          name="menuSlug"
+          rules={{ required: t("menuSlugRequired") }}
+          render={({ field: { value, onChange } }) => (
+            <Field
+              label={t("menuSlug")}
+              error={errors.menuSlug?.message}
+              htmlFor="staff-venue"
+              hint={t("menuSlugPlaceholder")}
+            >
+              <Input
+                id="staff-venue"
+                type="text"
+                dir="ltr"
+                startIcon={<IoRestaurantOutline className="size-4" />}
+                invalid={Boolean(errors.menuSlug)}
+                value={value}
+                onChange={(e) => clearError(() => onChange(e))}
+              />
+            </Field>
+          )}
+        />
 
-      <Controller
-        control={control}
-        name="email"
-        rules={{ required: t("emailRequired") }}
-        render={({ field: { value, onChange } }) => (
-          <Field label={t("email")} error={errors.email?.message}>
-            <Input
-              type="email"
-              inputSize="md"
-              startIcon={<FaEnvelope size={14} />}
-              placeholder={t("email")}
-              autoComplete="email"
-              value={value}
-              onChange={(e) => {
-                setApiError(null);
-                onChange(e);
-              }}
-            />
-          </Field>
-        )}
-      />
+        <Controller
+          control={control}
+          name="email"
+          rules={{ required: t("emailRequired") }}
+          render={({ field: { value, onChange } }) => (
+            <Field
+              label={t("email")}
+              error={errors.email?.message}
+              htmlFor="staff-email"
+            >
+              <Input
+                id="staff-email"
+                type="email"
+                inputMode="email"
+                startIcon={<FiMail className="size-4" />}
+                autoComplete="email"
+                invalid={Boolean(errors.email)}
+                value={value}
+                onChange={(e) => clearError(() => onChange(e))}
+              />
+            </Field>
+          )}
+        />
 
-      <Controller
-        control={control}
-        name="password"
-        rules={{ required: t("passwordRequired") }}
-        render={({ field: { value, onChange } }) => (
-          <Field label={t("password")} error={errors.password?.message}>
-            <Input
-              type="password"
-              inputSize="md"
-              startIcon={<TbLockPassword size={15} />}
-              placeholder={t("password")}
-              autoComplete="current-password"
-              value={value}
-              onChange={(e) => {
-                setApiError(null);
-                onChange(e);
-              }}
-            />
-          </Field>
-        )}
-      />
+        <Controller
+          control={control}
+          name="password"
+          rules={{ required: t("passwordRequired") }}
+          render={({ field: { value, onChange } }) => (
+            <Field
+              label={t("password")}
+              error={errors.password?.message}
+              htmlFor="staff-password"
+            >
+              <PasswordInput
+                id="staff-password"
+                autoComplete="current-password"
+                invalid={Boolean(errors.password)}
+                showLabel={t("showPassword")}
+                hideLabel={t("hidePassword")}
+                value={value}
+                onChange={(e) => clearError(() => onChange(e))}
+              />
+            </Field>
+          )}
+        />
+      </div>
 
-      <Button type="submit" loading={loading} fullWidth size="lg" className="mt-1">
+      <SiteButton
+        type="submit"
+        loading={loading}
+        block
+        size="lg"
+        className="mt-6"
+      >
         {t("staffLoginSubmit")}
-      </Button>
-
-      <p className="pt-2 text-center text-[13px] text-fg-muted">
-        <LinkTo
-          href="/auth/login"
-          className="rounded-sm font-medium text-brand transition-colors hover:text-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-        >
-          {t("ownerLoginLink")}
-        </LinkTo>
-      </p>
+      </SiteButton>
     </form>
   );
 }

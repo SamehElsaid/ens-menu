@@ -82,7 +82,9 @@ export function PendingOrdersProvider({ children }: { children: ReactNode }) {
 
   // Capabilities come from each menu owner's plan, so this also holds for a
   // staff member whose own account has no plan of its own.
-  const tableOrderingEnabled = menus.some((m) => m.capabilities.tableOrderingQr);
+  const tableOrderingEnabled = menus.some(
+    (m) => m.capabilities.tableOrderingQr,
+  );
   const liveNotificationsEnabled = menus.some(
     (m) => m.capabilities.liveOrderNotifications,
   );
@@ -118,7 +120,9 @@ export function PendingOrdersProvider({ children }: { children: ReactNode }) {
       const readEntries = (
         res: Awaited<ReturnType<typeof fetchChannel>> | null,
       ): CallEntry[] =>
-        res?.status && res.data ? (res.data.entries ?? res.data.calls ?? []) : [];
+        res?.status && res.data
+          ? (res.data.entries ?? res.data.calls ?? [])
+          : [];
 
       setAllEntries([...readEntries(tableRes), ...readEntries(deliveryRes)]);
     } catch {
@@ -175,7 +179,9 @@ export function PendingOrdersProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!seenHydrated || !loadedOnce) return;
 
-    const stillPending = new Set(allPendingKeys ? allPendingKeys.split("|") : []);
+    const stillPending = new Set(
+      allPendingKeys ? allPendingKeys.split("|") : [],
+    );
     const toMark =
       viewedChannel && viewedChannelKeys ? viewedChannelKeys.split("|") : [];
 
@@ -183,7 +189,8 @@ export function PendingOrdersProvider({ children }: { children: ReactNode }) {
       const kept = prev.filter((key) => stillPending.has(key));
       const merged = new Set(kept);
       toMark.forEach((key) => merged.add(key));
-      if (merged.size === prev.length && kept.length === prev.length) return prev;
+      if (merged.size === prev.length && kept.length === prev.length)
+        return prev;
       return [...merged];
     });
   }, [

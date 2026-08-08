@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useTranslations, useLocale } from "next-intl";
@@ -79,15 +85,13 @@ export type ProfileGateStatus = "loading" | "complete" | "incomplete";
 
 export function useProfileGateStatus(): ProfileGateStatus {
   const authLoading = useAppSelector((s) => s.auth.loading);
-  const authData = useAppSelector((s) => s.auth.data) as
-    | {
-        user?: {
-          phoneNumber?: string | null;
-          restaurantName?: string | null;
-          role?: string;
-        };
-      }
-    | null;
+  const authData = useAppSelector((s) => s.auth.data) as {
+    user?: {
+      phoneNumber?: string | null;
+      restaurantName?: string | null;
+      role?: string;
+    };
+  } | null;
 
   const userProfile = authData?.user;
   const authLoaded = authLoading === "yes" && Boolean(userProfile);
@@ -126,18 +130,16 @@ export function RequirePhone({
   const searchParams = useSearchParams();
 
   const authLoading = useAppSelector((s) => s.auth.loading);
-  const authData = useAppSelector((s) => s.auth.data) as
-    | {
-      user?: {
-        phoneNumber?: string;
-        isPhoneVerified?: boolean;
-        role?: string;
-        name?: string;
-        profileImage?: string;
-        restaurantName?: string | null;
-      } & UserProfile;
-    }
-    | null;
+  const authData = useAppSelector((s) => s.auth.data) as {
+    user?: {
+      phoneNumber?: string;
+      isPhoneVerified?: boolean;
+      role?: string;
+      name?: string;
+      profileImage?: string;
+      restaurantName?: string | null;
+    } & UserProfile;
+  } | null;
 
   const [saving, setSaving] = useState(false);
   const [verificationReference, setVerificationReference] = useState(
@@ -155,7 +157,8 @@ export function RequirePhone({
   const hasPhone = Boolean(userProfile?.phoneNumber?.trim());
   const hasRestaurantName = Boolean(userProfile?.restaurantName?.trim());
   const isPhoneVerified = userProfile?.isPhoneVerified === true;
-  const requiresProfileDetails = authLoaded && (!hasPhone || !hasRestaurantName);
+  const requiresProfileDetails =
+    authLoaded && (!hasPhone || !hasRestaurantName);
   const requiresVerification =
     authLoaded &&
     requireVerification &&
@@ -221,7 +224,9 @@ export function RequirePhone({
       phone: "",
       restaurantName: "",
     },
-    resolver: yupResolver(profileSchema) as unknown as Resolver<RequirePhoneSchema>,
+    resolver: yupResolver(
+      profileSchema,
+    ) as unknown as Resolver<RequirePhoneSchema>,
     mode: "onChange",
   });
 
@@ -431,7 +436,8 @@ export function RequirePhone({
     }
     if (Object.keys(payload).length === 0) return;
 
-    const resolvedPhone = payload.phoneNumber ?? userProfile?.phoneNumber?.trim();
+    const resolvedPhone =
+      payload.phoneNumber ?? userProfile?.phoneNumber?.trim();
     const resolvedRestaurantName =
       payload.restaurantName ?? userProfile?.restaurantName?.trim();
 
@@ -459,7 +465,9 @@ export function RequirePhone({
           user: {
             ...userProfile,
             ...updatedUser,
-            ...(payload.phoneNumber ? { phoneNumber: payload.phoneNumber } : {}),
+            ...(payload.phoneNumber
+              ? { phoneNumber: payload.phoneNumber }
+              : {}),
             ...(payload.restaurantName
               ? { restaurantName: payload.restaurantName }
               : {}),
@@ -520,17 +528,19 @@ export function RequirePhone({
   const isModal = variant === "modal";
   const panelPadding = isModal ? "p-6" : "p-8";
   const gateTitle = requiresVerification ? t("verifyTitle") : t("title");
-  const gateSubtitle = requiresVerification ? t("verifySubtitle") : t("subtitle");
+  const gateSubtitle = requiresVerification
+    ? t("verifySubtitle")
+    : t("subtitle");
   const displayPhone = userProfile?.phoneNumber?.trim() ?? "";
 
   const verificationContent = (
     <div className={isModal ? "space-y-3" : "mb-7 space-y-4"}>
       {isModal && displayPhone && (
-        <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center dark:border-slate-700 dark:bg-slate-800/60">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+        <div className="rounded-lg border border-line bg-slate-50 px-4 py-3 text-center">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-fg-subtle">
             {t("verifyPhoneLabel")}
           </p>
-          <p className="mt-0.5 text-base font-bold tabular-nums text-slate-800 dir-ltr dark:text-slate-100">
+          <p className="mt-0.5 text-base font-bold tabular-nums text-fg dir-ltr">
             {displayPhone}
           </p>
         </div>
@@ -538,7 +548,7 @@ export function RequirePhone({
 
       {verificationReference ? (
         <div
-          className={`rounded-2xl border text-center ${
+          className={`rounded-lg border text-center ${
             isModal
               ? "border-brand-line bg-brand-soft px-4 py-5"
               : "border-line bg-surface-2 p-4"
@@ -547,10 +557,10 @@ export function RequirePhone({
           <p className="text-xs font-semibold uppercase tracking-wide text-brand">
             {t("timerLabel")}
           </p>
-          <p className="mt-1 text-3xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
+          <p className="mt-1 text-3xl font-bold tabular-nums text-fg">
             {formattedTime}
           </p>
-          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+          <p className="mt-2 text-xs text-fg-muted">
             {verificationExpired
               ? t("verificationExpired")
               : t("checkingStatus")}
@@ -558,14 +568,14 @@ export function RequirePhone({
         </div>
       ) : (
         <div
-          className={`rounded-2xl border ${
+          className={`rounded-lg border ${
             isModal
               ? "border-line bg-surface-2 px-4 py-4"
               : "border-line bg-surface-2 p-4 text-center"
           }`}
         >
           {isModal ? (
-            <ol className="space-y-2.5 text-sm text-slate-600 dark:text-slate-300">
+            <ol className="space-y-2.5 text-sm text-fg-muted">
               <li className="flex items-start gap-2.5">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#25D366]/15 text-[10px] font-bold text-[#25D366]">
                   1
@@ -581,10 +591,10 @@ export function RequirePhone({
             </ol>
           ) : (
             <>
-              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+              <p className="text-sm font-semibold text-fg">
                 {t("whatsappReadyTitle")}
               </p>
-              <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+              <p className="mt-2 text-xs leading-relaxed text-fg-muted">
                 {t("whatsappReadySubtitle")}
               </p>
             </>
@@ -596,7 +606,7 @@ export function RequirePhone({
         type="button"
         onClick={handleOpenWhatsapp}
         disabled={startingVerification || !canOpenWhatsapp}
-        className={`group relative w-full overflow-hidden rounded-xl py-3.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 ${
+        className={`group relative w-full overflow-hidden rounded-lg py-3.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 ${
           isModal
             ? "bg-[#25D366] shadow-[#25D366]/25 hover:bg-[#20BD5A] hover:shadow-md hover:shadow-[#25D366]/30"
             : "bg-brand hover:bg-brand-hover"
@@ -625,14 +635,14 @@ export function RequirePhone({
         <button
           type="button"
           onClick={handleRestartVerification}
-          className="w-full rounded-xl border border-line py-3 text-sm font-semibold text-fg transition hover:border-brand hover:text-brand"
+          className="w-full rounded-lg border border-line py-3 text-sm font-semibold text-fg transition hover:border-brand hover:text-brand"
         >
           {t("restartVerification")}
         </button>
       )}
 
       {verificationReference && !verificationExpired && (
-        <div className="flex items-center justify-center gap-2 text-xs text-slate-400 dark:text-slate-500">
+        <div className="flex items-center justify-center gap-2 text-xs text-fg-subtle">
           <Spinner size="sm" />
           <span>{t("checkingNow")}</span>
         </div>
@@ -643,7 +653,11 @@ export function RequirePhone({
   const profileFormContent = (
     <form onSubmit={handleSubmit} className="space-y-4">
       {!hasRestaurantName && (
-        <Field label={t("restaurantNameLabel")} required error={errors.restaurantName?.message}>
+        <Field
+          label={t("restaurantNameLabel")}
+          required
+          error={errors.restaurantName?.message}
+        >
           <Controller
             control={control}
             name="restaurantName"
@@ -690,7 +704,7 @@ export function RequirePhone({
         {t("submit")}
       </Button>
 
-      <div className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
+      <div className="flex items-center gap-1.5 text-xs text-fg-subtle">
         <HiOutlineLockClosed className="shrink-0" />
         <span>{t("trustBadge")}</span>
       </div>
@@ -719,7 +733,7 @@ export function RequirePhone({
         />
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-line bg-surface shadow-lg">
+      <div className="overflow-hidden rounded-lg border border-line bg-surface shadow-lg">
         <div className="h-1 w-full bg-brand" />
 
         <div className={panelPadding}>
@@ -739,10 +753,8 @@ export function RequirePhone({
                 </div>
               )}
               <div>
-                <p className="text-xs text-slate-400 dark:text-slate-500">
-                  {t("welcomeBack")}
-                </p>
-                <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                <p className="text-xs text-fg-subtle">{t("welcomeBack")}</p>
+                <p className="text-sm font-semibold text-fg-muted">
                   {userName}
                 </p>
               </div>
@@ -750,15 +762,13 @@ export function RequirePhone({
           )}
 
           <div className="mb-5 flex justify-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand shadow-sm">
+            <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-brand shadow-sm">
               <HiOutlinePhone className="text-2xl text-on-brand" />
             </div>
           </div>
 
-          <h1 className="mb-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
-            {gateTitle}
-          </h1>
-          <p className="mb-6 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+          <h1 className="mb-2 text-2xl font-bold text-fg">{gateTitle}</h1>
+          <p className="mb-6 text-sm leading-relaxed text-fg-muted">
             {gateSubtitle}
           </p>
 
@@ -772,13 +782,11 @@ export function RequirePhone({
                     <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-brand-soft">
                       <Icon className="text-sm text-brand" />
                     </span>
-                    <span className="text-sm text-slate-600 dark:text-slate-300">
-                      {t(key)}
-                    </span>
+                    <span className="text-sm text-fg-muted">{t(key)}</span>
                   </li>
                 ))}
               </ul>
-              <div className="mb-6 border-t border-slate-100 dark:border-slate-800" />
+              <div className="mb-6 border-t border-line" />
               {profileFormContent}
             </>
           )}

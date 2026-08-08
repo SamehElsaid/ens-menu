@@ -83,7 +83,7 @@ export default function AuditActivityView() {
         {loading ? (
           <div className="space-y-3" aria-busy="true" aria-live="polite">
             {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-24 w-full rounded-xl" />
+              <Skeleton key={i} className="h-24 w-full rounded-lg" />
             ))}
           </div>
         ) : entries.length === 0 ? (

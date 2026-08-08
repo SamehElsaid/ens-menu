@@ -19,8 +19,9 @@ export default function ChatSuggestions({
 
   const uniqueSuggestions = suggestions.filter(
     (item, index, arr) =>
-      arr.findIndex((s) => s.trim().toLowerCase() === item.trim().toLowerCase()) ===
-      index,
+      arr.findIndex(
+        (s) => s.trim().toLowerCase() === item.trim().toLowerCase(),
+      ) === index,
   );
 
   useEffect(() => {

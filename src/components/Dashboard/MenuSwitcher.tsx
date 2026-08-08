@@ -154,13 +154,16 @@ export function MenuSwitcher({ onNavigate }: { onNavigate?: () => void }) {
             role="listbox"
             aria-label={t("switchMenu")}
             className={cn(
-              "absolute inset-x-2 top-[calc(100%-4px)] z-50 overflow-hidden rounded-xl",
+              "absolute inset-x-2 top-[calc(100%-4px)] z-50 overflow-hidden rounded-lg",
               "border border-line bg-raised shadow-lg",
               "motion-safe:animate-[ui-pop-in_140ms_cubic-bezier(0.16,1,0.3,1)]",
             )}
           >
             <div className="flex items-center gap-2 border-b border-line px-2.5 py-2">
-              <FiSearch className="size-3.5 shrink-0 text-fg-subtle" aria-hidden />
+              <FiSearch
+                className="size-3.5 shrink-0 text-fg-subtle"
+                aria-hidden
+              />
               <input
                 ref={searchRef}
                 value={query}

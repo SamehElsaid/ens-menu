@@ -3,11 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "react-toastify";
-import {
-  axiosDelete,
-  axiosGet,
-  axiosPost,
-} from "@/shared/axiosCall";
+import { axiosDelete, axiosGet, axiosPost } from "@/shared/axiosCall";
 import { formatAdminDate } from "@/lib/fetchAdminAnalytics";
 import {
   Button,

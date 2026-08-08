@@ -38,7 +38,16 @@ function Shell({
   style: CSSProperties;
   ctx: RenderCtx;
   children?: ReactNode;
-  as?: "div" | "nav" | "header" | "footer" | "section" | "aside" | "article" | "p" | "a";
+  as?:
+    | "div"
+    | "nav"
+    | "header"
+    | "footer"
+    | "section"
+    | "aside"
+    | "article"
+    | "p"
+    | "a";
 }) {
   const selected = ctx.interactive && ctx.selectedId === node.id;
   return (
@@ -131,12 +140,26 @@ function ItemCards({
               <div style={{ flex: 1, padding: "8px 10px" }}>
                 <strong style={{ fontSize: 13 }}>{name}</strong>
                 {p.showPrice !== false && (
-                  <div style={{ color: colors.primary, fontWeight: 700, fontSize: 13 }}>
+                  <div
+                    style={{
+                      color: colors.primary,
+                      fontWeight: 700,
+                      fontSize: 13,
+                    }}
+                  >
                     {item.price}
                   </div>
                 )}
                 {p.showDescription !== false && (
-                  <p style={{ margin: "4px 0 0", fontSize: 11, color: colors.muted }}>{desc}</p>
+                  <p
+                    style={{
+                      margin: "4px 0 0",
+                      fontSize: 11,
+                      color: colors.muted,
+                    }}
+                  >
+                    {desc}
+                  </p>
                 )}
               </div>
             </article>
@@ -161,12 +184,29 @@ function ItemCards({
                 }}
               />
               <div style={{ padding: style === "cover" ? 12 : 8 }}>
-                <strong style={{ fontSize: style === "cover" ? 14 : 12 }}>{name}</strong>
+                <strong style={{ fontSize: style === "cover" ? 14 : 12 }}>
+                  {name}
+                </strong>
                 {p.showDescription !== false && (
-                  <p style={{ margin: "4px 0 0", fontSize: 11, color: colors.muted }}>{desc}</p>
+                  <p
+                    style={{
+                      margin: "4px 0 0",
+                      fontSize: 11,
+                      color: colors.muted,
+                    }}
+                  >
+                    {desc}
+                  </p>
                 )}
                 {p.showPrice !== false && (
-                  <div style={{ color: colors.primary, fontWeight: 700, fontSize: 12, marginTop: 4 }}>
+                  <div
+                    style={{
+                      color: colors.primary,
+                      fontWeight: 700,
+                      fontSize: 12,
+                      marginTop: 4,
+                    }}
+                  >
                     {item.price}
                   </div>
                 )}
@@ -191,7 +231,8 @@ function ItemCards({
                 style={{
                   position: "absolute",
                   inset: 0,
-                  backgroundImage: "linear-gradient(to top, rgba(0,0,0,.75), transparent 55%)",
+                  backgroundImage:
+                    "linear-gradient(to top, rgba(0,0,0,.75), transparent 55%)",
                 }}
               />
               <div
@@ -217,9 +258,13 @@ function ItemCards({
                     Available
                   </span>
                 )}
-                <strong style={{ display: "block", fontSize: 14 }}>{name}</strong>
+                <strong style={{ display: "block", fontSize: 14 }}>
+                  {name}
+                </strong>
                 {p.showPrice !== false && (
-                  <span style={{ fontWeight: 700, fontSize: 13 }}>{item.price} EGP</span>
+                  <span style={{ fontWeight: 700, fontSize: 13 }}>
+                    {item.price} EGP
+                  </span>
                 )}
               </div>
             </article>
@@ -239,12 +284,28 @@ function ItemCards({
             >
               <div style={{ aspectRatio: "16/10", ...img }} />
               <div style={{ padding: 12 }}>
-                <strong style={{ fontSize: 13, color: colors.text }}>{name}</strong>
+                <strong style={{ fontSize: 13, color: colors.text }}>
+                  {name}
+                </strong>
                 {p.showDescription !== false && (
-                  <p style={{ margin: "4px 0 0", fontSize: 11, color: colors.muted }}>{desc}</p>
+                  <p
+                    style={{
+                      margin: "4px 0 0",
+                      fontSize: 11,
+                      color: colors.muted,
+                    }}
+                  >
+                    {desc}
+                  </p>
                 )}
                 {p.showPrice !== false && (
-                  <div style={{ color: colors.primary, fontWeight: 700, marginTop: 6 }}>
+                  <div
+                    style={{
+                      color: colors.primary,
+                      fontWeight: 700,
+                      marginTop: 6,
+                    }}
+                  >
                     {item.price}
                   </div>
                 )}
@@ -296,7 +357,9 @@ function ItemCards({
               >
                 <strong style={{ fontSize: 13 }}>{name}</strong>
                 {p.showPrice !== false && (
-                  <span style={{ color: colors.primary, fontWeight: 700 }}>{item.price}</span>
+                  <span style={{ color: colors.primary, fontWeight: 700 }}>
+                    {item.price}
+                  </span>
                 )}
               </div>
             </article>
@@ -359,10 +422,18 @@ function ItemCards({
               )}
               <strong style={{ fontSize: 13 }}>{name}</strong>
               {p.showDescription !== false && (
-                <p style={{ margin: 0, fontSize: 11, color: colors.muted }}>{desc}</p>
+                <p style={{ margin: 0, fontSize: 11, color: colors.muted }}>
+                  {desc}
+                </p>
               )}
               {p.showPrice !== false && (
-                <span style={{ color: colors.primary, fontWeight: 700, fontSize: 13 }}>
+                <span
+                  style={{
+                    color: colors.primary,
+                    fontWeight: 700,
+                    fontSize: 13,
+                  }}
+                >
                   {item.price} EGP
                 </span>
               )}
@@ -397,7 +468,9 @@ export function BuilderNodeView({
     case "heading":
       return (
         <Shell node={node} style={style} ctx={ctx}>
-          <strong style={{ fontSize: "inherit" }}>{t(locale, p.text, p.textAr)}</strong>
+          <strong style={{ fontSize: "inherit" }}>
+            {t(locale, p.text, p.textAr)}
+          </strong>
         </Shell>
       );
     case "text":
@@ -435,7 +508,9 @@ export function BuilderNodeView({
       return (
         <Shell node={node} style={style} ctx={ctx} as="section">
           <h2 style={{ margin: 0 }}>{t(locale, p.title, p.titleAr)}</h2>
-          <p style={{ margin: 0, opacity: 0.9 }}>{t(locale, p.subtitle, p.subtitleAr)}</p>
+          <p style={{ margin: 0, opacity: 0.9 }}>
+            {t(locale, p.subtitle, p.subtitleAr)}
+          </p>
           {kids()}
         </Shell>
       );
@@ -532,7 +607,12 @@ export function BuilderNodeView({
               }
             : { textAlign: "center" };
       return (
-        <Shell node={node} style={{ ...style, ...heroExtra }} ctx={ctx} as="header">
+        <Shell
+          node={node}
+          style={{ ...style, ...heroExtra }}
+          ctx={ctx}
+          as="header"
+        >
           <h1 style={{ margin: "0 0 4px", fontSize: 22 }}>
             {locale === "ar" ? MOCK_MENU.nameAr : MOCK_MENU.name}
           </h1>
@@ -541,7 +621,10 @@ export function BuilderNodeView({
               style={{
                 margin: 0,
                 fontSize: 12,
-                color: heroStyle === "banner" ? "rgba(255,255,255,.85)" : colors.muted,
+                color:
+                  heroStyle === "banner"
+                    ? "rgba(255,255,255,.85)"
+                    : colors.muted,
               }}
             >
               Live Default preview — full control
@@ -552,7 +635,11 @@ export function BuilderNodeView({
     }
     case "menu.categories": {
       return (
-        <Shell node={node} style={{ ...style, display: "block", padding: style.padding ?? 16 }} ctx={ctx}>
+        <Shell
+          node={node}
+          style={{ ...style, display: "block", padding: style.padding ?? 16 }}
+          ctx={ctx}
+        >
           <CategoriesBlock
             layout={String(p.layout ?? "circles") as CategoryLayoutId}
             categories={MOCK_MENU.categories}
@@ -584,7 +671,9 @@ export function BuilderNodeView({
     case "menu.hours":
       return (
         <Shell node={node} style={style} ctx={ctx}>
-          <strong style={{ color: colors.primary, display: "block", marginBottom: 6 }}>
+          <strong
+            style={{ color: colors.primary, display: "block", marginBottom: 6 }}
+          >
             Working Hours
           </strong>
           {MOCK_MENU.hours.map((h) => (
@@ -598,7 +687,14 @@ export function BuilderNodeView({
       return (
         <Shell node={node} style={style} ctx={ctx}>
           {Object.keys(MOCK_MENU.social).map((k) => (
-            <span key={k} style={{ color: colors.primary, fontSize: 12, textTransform: "capitalize" }}>
+            <span
+              key={k}
+              style={{
+                color: colors.primary,
+                fontSize: 12,
+                textTransform: "capitalize",
+              }}
+            >
               {k}
             </span>
           ))}
@@ -614,16 +710,30 @@ export function BuilderNodeView({
               padding: "16px",
             }
           : footerStyle === "stacked"
-            ? { padding: "32px 16px", gap: 8, display: "flex", flexDirection: "column" }
+            ? {
+                padding: "32px 16px",
+                gap: 8,
+                display: "flex",
+                flexDirection: "column",
+              }
             : {};
       return (
-        <Shell node={node} style={{ ...style, ...footerExtra }} ctx={ctx} as="footer">
+        <Shell
+          node={node}
+          style={{ ...style, ...footerExtra }}
+          ctx={ctx}
+          as="footer"
+        >
           <div style={{ color: footerStyle === "bar" ? "#fff" : colors.text }}>
             {MOCK_MENU.name}
           </div>
-          <div style={{ opacity: footerStyle === "bar" ? 0.85 : 1 }}>{MOCK_MENU.phone}</div>
+          <div style={{ opacity: footerStyle === "bar" ? 0.85 : 1 }}>
+            {MOCK_MENU.phone}
+          </div>
           {p.showPoweredBy !== false && (
-            <div style={{ marginTop: 6, opacity: 0.7, fontSize: 11 }}>Powered by ENS Menu</div>
+            <div style={{ marginTop: 6, opacity: 0.7, fontSize: 11 }}>
+              Powered by ENS Menu
+            </div>
           )}
         </Shell>
       );
@@ -643,7 +753,7 @@ export function BuilderNodeView({
       return (
         <Shell node={node} style={style} ctx={ctx}>
           {kids()}
-          {ctx.interactive && !(node.children?.length) && (
+          {ctx.interactive && !node.children?.length && (
             <div
               style={{
                 border: "1px dashed #cbd5e1",

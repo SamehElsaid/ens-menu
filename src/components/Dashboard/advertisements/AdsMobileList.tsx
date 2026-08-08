@@ -8,23 +8,23 @@ import MobileListPagination from "@/components/Dashboard/mobile/MobileListPagina
 function AdCardSkeleton() {
   return (
     <div
-      className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800/80"
+      className="overflow-hidden rounded-lg border border-line bg-white"
       aria-hidden
     >
-      <div className="dashboard-mobile-shimmer aspect-[16/9] w-full bg-slate-100 dark:bg-slate-700/60" />
+      <div className="dashboard-mobile-shimmer aspect-[16/9] w-full bg-surface-3" />
       <div className="space-y-3 p-3.5">
-        <div className="dashboard-mobile-shimmer h-5 w-3/4 rounded-md bg-slate-100 dark:bg-slate-700/60" />
+        <div className="dashboard-mobile-shimmer h-5 w-3/4 rounded-md bg-surface-3" />
         <div className="grid grid-cols-3 gap-1.5">
           {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className="dashboard-mobile-shimmer h-12 rounded-xl bg-slate-100 dark:bg-slate-700/60"
+              className="dashboard-mobile-shimmer h-12 rounded-lg bg-surface-3"
             />
           ))}
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <div className="dashboard-mobile-shimmer h-10 rounded-xl bg-slate-100 dark:bg-slate-700/60" />
-          <div className="dashboard-mobile-shimmer h-10 rounded-xl bg-slate-100 dark:bg-slate-700/60" />
+          <div className="dashboard-mobile-shimmer h-10 rounded-lg bg-surface-3" />
+          <div className="dashboard-mobile-shimmer h-10 rounded-lg bg-surface-3" />
         </div>
       </div>
     </div>

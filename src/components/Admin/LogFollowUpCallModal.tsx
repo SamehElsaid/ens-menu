@@ -11,14 +11,7 @@ import type {
   FollowUpPurpose,
   UpdateFollowUpCallPayload,
 } from "@/types/AdminFollowUp";
-import {
-  Button,
-  Field,
-  Input,
-  Modal,
-  Select,
-  Textarea,
-} from "@/components/ui";
+import { Button, Field, Input, Modal, Select, Textarea } from "@/components/ui";
 import PhoneDisplay from "@/components/Global/PhoneDisplay";
 
 type LogFollowUpCallModalProps = {
@@ -187,7 +180,10 @@ export default function LogFollowUpCallModal({
         <div>
           <p className="text-sm font-medium text-fg">{userName}</p>
           {phoneNumber ? (
-            <PhoneDisplay value={phoneNumber} className="text-sm text-fg-muted" />
+            <PhoneDisplay
+              value={phoneNumber}
+              className="text-sm text-fg-muted"
+            />
           ) : (
             <p className="text-sm text-fg-subtle">{t("noPhone")}</p>
           )}
@@ -218,10 +214,7 @@ export default function LogFollowUpCallModal({
               placeholder={t("cafeNamePlaceholder")}
             />
           </Field>
-          <Field
-            label={t("otherContactNumbers")}
-            optionalLabel={t("optional")}
-          >
+          <Field label={t("otherContactNumbers")} optionalLabel={t("optional")}>
             <Input
               type="tel"
               inputMode="tel"

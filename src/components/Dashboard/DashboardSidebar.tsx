@@ -19,10 +19,7 @@ import { FiLock } from "react-icons/fi";
 import { IoOpenOutline } from "react-icons/io5";
 import { cn } from "@/lib/cn";
 import { Sheet, focusRing } from "@/components/ui";
-import {
-  publicMenuLinkUrl,
-  resolvePublicMenuSlug,
-} from "@/lib/publicMenuUrl";
+import { publicMenuLinkUrl, resolvePublicMenuSlug } from "@/lib/publicMenuUrl";
 
 /** Sidebar rail width. `Layout` offsets the main column by the same value. */
 export const SIDEBAR_WIDTH = 240;
@@ -403,7 +400,10 @@ export function DashboardSidebar({
               focusRing,
             )}
           >
-            <IoOpenOutline className="size-4 shrink-0 text-fg-subtle" aria-hidden />
+            <IoOpenOutline
+              className="size-4 shrink-0 text-fg-subtle"
+              aria-hidden
+            />
             <span className="flex-1 text-start">{t("viewMenu")}</span>
           </a>
         </div>

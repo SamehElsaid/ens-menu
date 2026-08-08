@@ -26,11 +26,17 @@ function Row({
 }) {
   const selectedId = useBuilderStore((s) => s.selectedId);
   const select = useBuilderStore((s) => s.select);
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({
-      id: node.id,
-      data: { from: "layer", parentId, index, nodeId: node.id },
-    });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: node.id,
+    data: { from: "layer", parentId, index, nodeId: node.id },
+  });
 
   return (
     <>

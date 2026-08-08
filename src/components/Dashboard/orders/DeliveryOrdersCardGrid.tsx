@@ -29,17 +29,17 @@ interface DeliveryOrdersCardGridProps {
 function OrderCardSkeleton() {
   return (
     <div
-      className="overflow-hidden rounded-2xl border border-emerald-200/70 bg-white dark:border-emerald-800/40 dark:bg-slate-800/80"
+      className="overflow-hidden rounded-lg border border-emerald-200/70 bg-white dark:border-emerald-800/40"
       aria-hidden
     >
       <div className="dashboard-mobile-shimmer h-16 bg-emerald-50 dark:bg-emerald-950/30" />
       <div className="space-y-3 p-4">
-        <div className="dashboard-mobile-shimmer h-4 w-2/3 rounded-md bg-slate-100 dark:bg-slate-700/60" />
-        <div className="dashboard-mobile-shimmer h-4 w-1/2 rounded-md bg-slate-100 dark:bg-slate-700/60" />
-        <div className="dashboard-mobile-shimmer h-6 w-1/3 rounded-md bg-slate-100 dark:bg-slate-700/60" />
-        <div className="flex gap-2 border-t border-slate-100 pt-3 dark:border-slate-700">
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-xl bg-slate-100 dark:bg-slate-700/60" />
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-xl bg-slate-100 dark:bg-slate-700/60" />
+        <div className="dashboard-mobile-shimmer h-4 w-2/3 rounded-md bg-surface-3" />
+        <div className="dashboard-mobile-shimmer h-4 w-1/2 rounded-md bg-surface-3" />
+        <div className="dashboard-mobile-shimmer h-6 w-1/3 rounded-md bg-surface-3" />
+        <div className="flex gap-2 border-t border-line pt-3 dark:border-line">
+          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-3" />
+          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-3" />
         </div>
       </div>
     </div>
@@ -81,16 +81,14 @@ export default function DeliveryOrdersCardGrid({
     return (
       <div
         id="onboarding-delivery-orders-table"
-        className="rounded-2xl border border-dashed border-emerald-200 bg-white px-6 py-14 text-center dark:border-emerald-800/40 dark:bg-slate-800/50"
+        className="rounded-lg border border-dashed border-emerald-200 bg-white px-6 py-14 text-center dark:border-emerald-800/40"
       >
         <MdOutlineDeliveryDining className="mx-auto mb-3 text-4xl text-emerald-400" />
-        <p className="text-sm text-slate-600 dark:text-slate-300">
+        <p className="text-sm text-fg-muted">
           {isFiltered ? t("noSearchResults") : t("empty")}
         </p>
         {!isFiltered && (
-          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-            {t("emptyHint")}
-          </p>
+          <p className="mt-2 text-xs text-fg-muted">{t("emptyHint")}</p>
         )}
       </div>
     );
@@ -100,13 +98,16 @@ export default function DeliveryOrdersCardGrid({
     <div id="onboarding-delivery-orders-table" className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6 items-stretch">
         {entries.map((entry) => {
-          const badge = entry.menuId != null ? menuBadges?.[entry.menuId] : undefined;
+          const badge =
+            entry.menuId != null ? menuBadges?.[entry.menuId] : undefined;
           return (
             <DeliveryOrderMobileCard
               key={entry.id}
               entry={entry}
               currency={badge?.currency || currency}
-              menuId={menuId || (entry.menuId != null ? String(entry.menuId) : "")}
+              menuId={
+                menuId || (entry.menuId != null ? String(entry.menuId) : "")
+              }
               menuLabel={badge?.label}
               onView={onView}
               onActionComplete={onActionComplete}

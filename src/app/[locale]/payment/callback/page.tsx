@@ -3,9 +3,10 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
 import { pushPurchaseEvent } from "@/shared/gtmEvents";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
+import StatusScreen, { type StatusTone } from "@/components/site/StatusScreen";
+import { SiteButton, SiteButtonLink, SiteSpinner } from "@/components/site";
 
 type ApiRedirectResponse = {
   success?: boolean;
@@ -27,9 +28,9 @@ function PaymentCallbackContent() {
   const searchParams = useSearchParams();
   const locale = useLocale();
   const t = useTranslations("personalProfile");
-  const [phase, setPhase] = useState<"loading" | "success" | "pending" | "error">(
-    "loading",
-  );
+  const [phase, setPhase] = useState<
+    "loading" | "success" | "pending" | "error"
+  >("loading");
   const [message, setMessage] = useState("");
 
   const redirectParams = useMemo(() => {
@@ -105,17 +106,14 @@ function PaymentCallbackContent() {
       }
 
       const ps = String(data.data?.payment_status ?? "").toLowerCase();
-      const redirectStatus = String(data.data?.redirect_status ?? "").toUpperCase();
+      const redirectStatus = String(
+        data.data?.redirect_status ?? "",
+      ).toUpperCase();
       const synced = data.data?.synced_from_redirect === true;
       const subscriptionSynced = data.data?.subscription_synced === true;
       const redirectPaid = redirectStatus === "PAID";
 
-      if (
-        ps === "completed" ||
-        synced ||
-        subscriptionSynced ||
-        redirectPaid
-      ) {
+      if (ps === "completed" || synced || subscriptionSynced || redirectPaid) {
         finishSuccess(data);
         return;
       }
@@ -149,12 +147,13 @@ function PaymentCallbackContent() {
           })()
         : "";
 
-    const res = await axiosPost<
-      { orderId?: string },
-      { message?: string }
-    >("/user/subscription/recover-payment", locale, {
-      orderId: orderId || undefined,
-    });
+    const res = await axiosPost<{ orderId?: string }, { message?: string }>(
+      "/user/subscription/recover-payment",
+      locale,
+      {
+        orderId: orderId || undefined,
+      },
+    );
 
     if (res.status) {
       setPhase("success");
@@ -166,54 +165,48 @@ function PaymentCallbackContent() {
     setMessage(t("paymentResultFailedStatus"));
   };
 
+  /* The glyph carries the verdict, so it is the one thing a returning payer
+     reads before anything else. */
+  const { code, tone } = (
+    {
+      loading: { code: "···", tone: "brand" },
+      success: { code: "✓", tone: "positive" },
+      pending: { code: "⏳", tone: "warm" },
+      error: { code: "!", tone: "danger" },
+    } as const satisfies Record<
+      typeof phase,
+      { code: string; tone: StatusTone }
+    >
+  )[phase];
+
   return (
-    <div className="min-h-[60vh] flex flex-col items-center justify-center px-4 py-16">
-      <div className="max-w-md w-full rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg p-8 text-center">
-        <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-          {t("paymentResultTitle")}
-        </h1>
-        {phase === "loading" && (
-          <p className="text-slate-600 dark:text-slate-300">
-            {t("paymentResultChecking")}
-          </p>
-        )}
-        {phase !== "loading" && (
-          <p
-            className={`text-sm ${
-              phase === "success"
-                ? "text-emerald-600 dark:text-emerald-400"
-                : phase === "pending"
-                  ? "text-amber-700 dark:text-amber-300"
-                  : "text-red-600 dark:text-red-400"
-            }`}
-          >
-            {message}
-          </p>
-        )}
-        {phase === "success" && (
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-4">
-            {t("yourPlanUpdateHint")}
-          </p>
-        )}
-        <div className="mt-8 flex flex-col gap-3">
-          {phase === "error" && (
-            <button
+    <StatusScreen
+      code={code}
+      tone={tone}
+      label={t("paymentResultTitle")}
+      title={phase === "loading" ? t("paymentResultChecking") : message}
+      body={phase === "success" ? t("yourPlanUpdateHint") : undefined}
+    >
+      {phase === "loading" ? (
+        <SiteSpinner className="size-6 text-site-brand" />
+      ) : (
+        <>
+          {phase === "error" ? (
+            <SiteButton
               type="button"
               onClick={() => void handleRecover()}
-              className="inline-flex justify-center rounded-xl border border-primary px-4 py-3 text-sm font-semibold text-primary hover:bg-primary/5"
+              variant="secondary"
+              size="lg"
             >
               {t("paymentRecoverCta")}
-            </button>
-          )}
-          <Link
-            href="/dashboard"
-            className="inline-flex justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
-          >
+            </SiteButton>
+          ) : null}
+          <SiteButtonLink href="/dashboard" size="lg">
             {t("paymentBackToPersonal")}
-          </Link>
-        </div>
-      </div>
-    </div>
+          </SiteButtonLink>
+        </>
+      )}
+    </StatusScreen>
   );
 }
 
@@ -221,8 +214,8 @@ export default function PaymentCallbackPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-[40vh] flex items-center justify-center text-slate-500">
-          …
+        <div className="public-world flex min-h-dvh items-center justify-center bg-site-bg">
+          <SiteSpinner className="size-6 text-site-brand" />
         </div>
       }
     >

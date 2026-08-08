@@ -38,9 +38,7 @@ export default function AdminPermissionsEditor({
   const toggle = (key: AdminPermissionKey) => {
     if (disabled) return;
     onChange(
-      value.includes(key)
-        ? value.filter((k) => k !== key)
-        : [...value, key],
+      value.includes(key) ? value.filter((k) => k !== key) : [...value, key],
     );
   };
 

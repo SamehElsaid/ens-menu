@@ -1,8 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import {
+  Badge,
   Button,
+  Card,
+  CardHeader,
   Field,
   Input,
   Spinner,
@@ -12,18 +21,7 @@ import {
 import CurrencySelector from "@/components/Global/CurrencySelector";
 import { useTranslations, useLocale } from "next-intl";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import {
-  IoPricetagOutline,
-  IoDocumentTextOutline,
-  IoCashOutline,
-  IoWarningOutline,
-  IoImageOutline,
-  IoCloudUploadOutline,
-  IoCloseOutline,
-  IoSaveOutline,
-  IoChatbubblesOutline,
-  IoReceiptOutline,
-} from "react-icons/io5";
+import { IoCloudUploadOutline, IoCloseOutline } from "react-icons/io5";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -38,6 +36,33 @@ import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import ImageLoad from "@/components/ImageLoad";
 import { Subscription, SubscriptionResponse } from "@/types/Subscription";
 import { getEffectiveMaxMenus } from "@/lib/subscriptionMenus";
+
+/**
+ * A labelled setting with its control on the trailing edge. Every toggle on
+ * this page reads the same way, so the eye can scan the column of switches
+ * without re-parsing each row.
+ */
+function SettingRow({
+  label,
+  description,
+  children,
+}: {
+  label: ReactNode;
+  description?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 rounded-md border border-line px-3 py-2.5">
+      <div className="min-w-0">
+        <p className="text-[13px] font-medium text-fg">{label}</p>
+        {description ? (
+          <p className="mt-0.5 text-xs text-fg-muted">{description}</p>
+        ) : null}
+      </div>
+      <div className="flex shrink-0 items-center gap-2">{children}</div>
+    </div>
+  );
+}
 
 interface SettingsFormValues {
   name: string;
@@ -209,7 +234,7 @@ export default function SettingsPage() {
 
   if (!menu) {
     return (
-      <div className="py-16 text-center text-slate-500 dark:text-slate-400">
+      <div className="py-16 text-center text-fg-muted">
         <p className="font-medium">
           {locale === "ar"
             ? "لم يتم العثور على بيانات القائمة. يرجى العودة واختيار قائمة صالحة."
@@ -326,8 +351,7 @@ export default function SettingsPage() {
             : Number(values.taxPercent),
         serviceEnabled: values.serviceEnabled,
         servicePercent:
-          values.servicePercent === null ||
-          values.servicePercent === undefined
+          values.servicePercent === null || values.servicePercent === undefined
             ? null
             : Number(values.servicePercent),
         logo: logoUrl ?? menu?.logo ?? null,
@@ -354,38 +378,39 @@ export default function SettingsPage() {
     }
   };
 
+  const dirty = isDirty || logoDirty;
+
+  const handleDiscard = () => {
+    reset();
+    setLogoFile(null);
+    setLogoPreview(null);
+    setLogoDirty(false);
+    setLocalIsActive(menu.isActive);
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-      <PageTitleWithHelp className="mb-2">
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100">
-          {tSettings("generalSettings")}
-        </h1>
-      </PageTitleWithHelp>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+      <PageTitleWithHelp
+        className="mb-3"
+        title={tSettings("generalSettings")}
+        description={
+          locale === "ar"
+            ? "اسم القائمة ووصفها وشعارها والضرائب وحالة النشر."
+            : "Name, description, logo, charges and publish state for this menu."
+        }
+      />
 
-      {/* General information */}
-      <section
-        id="onboarding-settings-general"
-        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6 space-y-6"
-      >
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <IoPricetagOutline className="text-xl" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                {tSettings("generalSettings")}
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                {locale === "ar"
-                  ? "قم بمراجعة معلومات قائمتك الأساسية من الاسم والوصف."
-                  : "Review the basic information of your menu like name and description."}
-              </p>
-            </div>
-          </div>
-        </div>
+      <Card as="section" id="onboarding-settings-general">
+        <CardHeader
+          title={tSettings("generalSettings")}
+          description={
+            locale === "ar"
+              ? "قم بمراجعة معلومات قائمتك الأساسية من الاسم والوصف."
+              : "Review the basic information of your menu like name and description."
+          }
+        />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
           <Controller
             name="name"
             control={control}
@@ -427,7 +452,7 @@ export default function SettingsPage() {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
           <Controller
             name="description"
             control={control}
@@ -460,107 +485,97 @@ export default function SettingsPage() {
             )}
           />
         </div>
-      </section>
+      </Card>
 
-      {/* Logo, currency & status */}
+      <div
+        id="onboarding-settings-branding"
+        className="grid grid-cols-1 gap-3 lg:grid-cols-3"
+      >
+        <Card as="section">
+          <CardHeader
+            title={tMenusCreate("logo")}
+            description={
+              locale === "ar"
+                ? "قم بتحديث شعار قائمتك الذي يظهر في الواجهة."
+                : "Update the logo for your menu as shown in the UI."
+            }
+          />
 
-      <section id="onboarding-settings-branding" className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Logo card */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6 space-y-4">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                <IoImageOutline className="text-lg" />
-              </div>
-              <div>
-                <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-                  {tMenusCreate("logo")}
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  {locale === "ar"
-                    ? "قم بتحديث شعار قائمتك الذي يظهر في الواجهة."
-                    : "Update the logo for your menu as shown in the UI."}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-col items-center gap-4">
-              <div className="relative">
-                <div className="w-28 h-28 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center bg-slate-50 dark:bg-slate-800/60 overflow-hidden">
-                  {logoPreview || initialLogo ? (
-                     
-                    <ImageLoad
-                      width={100}
-                      height={100}
-                      src={logoPreview ?? initialLogo ?? ""}
-                      alt="Logo preview"
-                      className="w-full h-full object-contain"
-                    />
-                  ) : (
-                    <span className="text-slate-300 dark:text-slate-500 text-xs">
-                      {tSettings("noLogo")}
-                    </span>
-                  )}
-                </div>
-                {(logoPreview || initialLogo) && (
-                  <Button
-                    type="button"
-                    variant="danger"
-                    size="sm"
-                    iconOnly
-                    onClick={handleRemoveLogo}
-                    className="absolute -top-2 -end-2 size-7 rounded-full!"
-                    aria-label={tCommon("remove")}
-                  >
-                    <IoCloseOutline className="text-sm" />
-                  </Button>
+          <div className="mt-3 flex flex-col items-center gap-3">
+            <div className="relative">
+              <div className="flex size-24 items-center justify-center overflow-hidden rounded-lg border border-dashed border-line-strong bg-surface-2">
+                {logoPreview || initialLogo ? (
+                  <ImageLoad
+                    width={100}
+                    height={100}
+                    src={logoPreview ?? initialLogo ?? ""}
+                    alt="Logo preview"
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <span className="text-xs text-fg-subtle">
+                    {tSettings("noLogo")}
+                  </span>
                 )}
               </div>
-
-              <div className="flex flex-col items-center gap-2 w-full">
-                <input
-                  ref={logoInputRef}
-                  type="file"
-                  accept=".png,.ico,.jpg,.jpeg,image/png,image/x-icon,image/vnd.microsoft.icon,image/jpeg"
-                  onChange={handleLogoChange}
-                  className="sr-only"
-                />
+              {(logoPreview || initialLogo) && (
                 <Button
                   type="button"
-                  onClick={() => logoInputRef.current?.click()}
-                  startIcon={<IoCloudUploadOutline className="text-xl" />}
+                  variant="danger"
+                  size="sm"
+                  iconOnly
+                  onClick={handleRemoveLogo}
+                  className="absolute -top-2 -end-2 size-7 rounded-full!"
+                  aria-label={tCommon("remove")}
                 >
-                  {tMenusCreate("logoUpload")}
+                  <IoCloseOutline className="text-sm" />
                 </Button>
-                <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
-                  {tMenusCreate("logoHint")}
-                </p>
-              </div>
+              )}
+            </div>
+
+            <div className="flex w-full flex-col items-center gap-1.5">
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept=".png,.ico,.jpg,.jpeg,image/png,image/x-icon,image/vnd.microsoft.icon,image/jpeg"
+                onChange={handleLogoChange}
+                className="sr-only"
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => logoInputRef.current?.click()}
+                startIcon={<IoCloudUploadOutline className="size-3.5" />}
+              >
+                {tMenusCreate("logoUpload")}
+              </Button>
+              <p className="text-center text-xs text-fg-subtle">
+                {tMenusCreate("logoHint")}
+              </p>
             </div>
           </div>
+        </Card>
 
-          {/* Currency card */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6 space-y-4 lg:col-span-2">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                <IoCashOutline className="text-lg" />
-              </div>
-              <div>
-                <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-                  {tMenusCreate("currency")}
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  {locale === "ar"
-                    ? "العملة المستخدمة في جميع أسعار قائمتك."
-                    : "Currency used for all prices in your menu."}
-                </p>
-              </div>
-            </div>
+        <Card as="section" className="lg:col-span-2">
+          <CardHeader
+            title={tMenusCreate("currency")}
+            description={
+              locale === "ar"
+                ? "العملة المستخدمة في جميع أسعار قائمتك."
+                : "Currency used for all prices in your menu."
+            }
+          />
 
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                {tMenusCreate("currencyLabel")}
-              </label>
+          <div className="mt-3">
+            <Field
+              label={tMenusCreate("currencyLabel")}
+              error={errors.currency?.message}
+              hint={
+                locale === "ar"
+                  ? "لا يمكن تعديل العملة من هذه الصفحة. قم بإنشاء قائمة جديدة إذا كنت بحاجة لتغيير العملة."
+                  : "Currency is read-only here. Create a new menu if you need to change it."
+              }
+            >
               <Controller
                 name="currency"
                 control={control}
@@ -572,118 +587,65 @@ export default function SettingsPage() {
                   />
                 )}
               />
-              {errors.currency?.message && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.currency.message}
-                </p>
-              )}
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                {locale === "ar"
-                  ? "لا يمكن تعديل العملة من هذه الصفحة. قم بإنشاء قائمة جديدة إذا كنت بحاجة لتغيير العملة."
-                  : "Currency is read-only here. Create a new menu if you need to change it."}
-              </p>
-            </div>
+            </Field>
           </div>
-        </div>
-      </section>
+        </Card>
+      </div>
 
-      {/* Chatbot toggle */}
-      <section
-        id="onboarding-settings-chatbot"
-        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6"
-      >
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-300 flex items-center justify-center">
-              <IoChatbubblesOutline className="text-xl" />
-            </div>
-            <div>
-              <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-                {tSettings("chatbotEnabled")}
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                {tSettings("chatbotEnabledDescription")}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 shrink-0">
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-              <Controller
-                name="chatbotEnabled"
-                control={control}
-                render={({ field }) => (
-                  <span>
-                    {field.value
-                      ? tSettings("chatbotEnabledOn")
-                      : tSettings("chatbotEnabledOff")}
-                  </span>
-                )}
-              />
-            </span>
-            <Controller
-              name="chatbotEnabled"
-              control={control}
-              render={({ field }) => (
+      <Card as="section" id="onboarding-settings-chatbot">
+        <SettingRow
+          label={tSettings("chatbotEnabled")}
+          description={tSettings("chatbotEnabledDescription")}
+        >
+          <Controller
+            name="chatbotEnabled"
+            control={control}
+            render={({ field }) => (
+              <>
+                <span className="text-xs text-fg-muted">
+                  {field.value
+                    ? tSettings("chatbotEnabledOn")
+                    : tSettings("chatbotEnabledOff")}
+                </span>
                 <Switch
                   checked={field.value}
                   onChange={(e) => field.onChange(e.target.checked)}
                   aria-label={tSettings("chatbotEnabled")}
                 />
+              </>
+            )}
+          />
+        </SettingRow>
+      </Card>
+
+      <Card as="section" id="onboarding-settings-tax-service">
+        <CardHeader
+          title={tSettings("taxServiceTitle")}
+          description={tSettings("taxServiceDescription")}
+        />
+
+        <div className="mt-3 space-y-2.5">
+          <SettingRow
+            label={tSettings("taxEnabled")}
+            description={tSettings("taxEnabledDescription")}
+          >
+            <span className="text-xs text-fg-muted">
+              {taxEnabledWatch
+                ? tSettings("enabledOn")
+                : tSettings("enabledOff")}
+            </span>
+            <Controller
+              name="taxEnabled"
+              control={control}
+              render={({ field }) => (
+                <Switch
+                  checked={field.value}
+                  onChange={(e) => field.onChange(e.target.checked)}
+                  aria-label={tSettings("taxEnabled")}
+                />
               )}
             />
-          </div>
-        </div>
-      </section>
-
-      {/* Tax & service (optional) */}
-      <section
-        id="onboarding-settings-tax-service"
-        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6 space-y-5"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-300 flex items-center justify-center">
-            <IoReceiptOutline className="text-xl" />
-          </div>
-          <div>
-            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-              {tSettings("taxServiceTitle")}
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              {tSettings("taxServiceDescription")}
-            </p>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex items-center justify-between gap-4 rounded-xl border border-slate-100 dark:border-slate-800 p-4">
-            <div>
-              <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                {tSettings("taxEnabled")}
-              </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                {tSettings("taxEnabledDescription")}
-              </p>
-            </div>
-            <div className="flex items-center gap-3 shrink-0">
-              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                {taxEnabledWatch
-                  ? tSettings("enabledOn")
-                  : tSettings("enabledOff")}
-              </span>
-              <Controller
-                name="taxEnabled"
-                control={control}
-                render={({ field }) => (
-                  <Switch
-                    checked={field.value}
-                    onChange={(e) => field.onChange(e.target.checked)}
-                    aria-label={tSettings("taxEnabled")}
-                  />
-                )}
-              />
-            </div>
-          </div>
+          </SettingRow>
           {taxEnabledWatch && (
             <Controller
               name="taxPercent"
@@ -712,34 +674,27 @@ export default function SettingsPage() {
             />
           )}
 
-          <div className="flex items-center justify-between gap-4 rounded-xl border border-slate-100 dark:border-slate-800 p-4">
-            <div>
-              <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                {tSettings("serviceEnabled")}
-              </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                {tSettings("serviceEnabledDescription")}
-              </p>
-            </div>
-            <div className="flex items-center gap-3 shrink-0">
-              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                {serviceEnabledWatch
-                  ? tSettings("enabledOn")
-                  : tSettings("enabledOff")}
-              </span>
-              <Controller
-                name="serviceEnabled"
-                control={control}
-                render={({ field }) => (
-                  <Switch
-                    checked={field.value}
-                    onChange={(e) => field.onChange(e.target.checked)}
-                    aria-label={tSettings("serviceEnabled")}
-                  />
-                )}
-              />
-            </div>
-          </div>
+          <SettingRow
+            label={tSettings("serviceEnabled")}
+            description={tSettings("serviceEnabledDescription")}
+          >
+            <span className="text-xs text-fg-muted">
+              {serviceEnabledWatch
+                ? tSettings("enabledOn")
+                : tSettings("enabledOff")}
+            </span>
+            <Controller
+              name="serviceEnabled"
+              control={control}
+              render={({ field }) => (
+                <Switch
+                  checked={field.value}
+                  onChange={(e) => field.onChange(e.target.checked)}
+                  aria-label={tSettings("serviceEnabled")}
+                />
+              )}
+            />
+          </SettingRow>
           {serviceEnabledWatch && (
             <Controller
               name="servicePercent"
@@ -768,91 +723,56 @@ export default function SettingsPage() {
             />
           )}
         </div>
-      </section>
+      </Card>
 
-      {/* Locked / advanced sections */}
-      <section className="flex flex-col gap-6 lg:flex-row w-full">        {/* Favicon / logo for menu */}
-        {/* Status card */}
-        <div
-          id="onboarding-settings-status"
-          className="bg-white dark:bg-slate-900 rounded-2xl border min-w-[32%] border-slate-100 dark:border-slate-800 shadow-sm p-6 flex flex-col justify-between"
-        >
-          <div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 flex items-center justify-center">
-                <IoDocumentTextOutline className="text-lg" />
-              </div>
-              <div>
-                <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-                  {tSettings("menuStatus")}
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  {locale === "ar"
-                    ? "عرض ما إذا كانت القائمة مفعلة أو متوقفة."
-                    : "See whether this menu is active or paused."}
-                </p>
-              </div>
-            </div>
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        <Card as="section" id="onboarding-settings-status">
+          <CardHeader
+            title={tSettings("menuStatus")}
+            description={
+              locale === "ar"
+                ? "عرض ما إذا كانت القائمة مفعلة أو متوقفة."
+                : "See whether this menu is active or paused."
+            }
+          />
 
-            <div className="flex items-center justify-between mt-2">
-              <span className="text-sm text-slate-600 dark:text-slate-300">
-                {tSettings("currentStatus")}
-              </span>
-              <span
-                className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${
-                  localIsActive
-                    ? "bg-emerald-50 text-emerald-700"
-                    : "bg-red-50 text-red-600"
-                }`}
-              >
-                <span
-                  className={`w-2 h-2 rounded-full ${
-                    localIsActive ? "bg-emerald-500" : "bg-red-500"
-                  }`}
-                />
-                {localIsActive ? tMenuCard("active") : tMenuCard("inactive")}
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-4 flex items-center justify-between">
-            <p className="text-xs text-slate-400 dark:text-slate-500">
-              {locale === "ar"
-                ? "قم بتفعيل أو إيقاف القائمة من هنا."
-                : "Activate or pause this menu from here."}
-            </p>
-            <Button
-              type="button"
-              variant={localIsActive ? "dangerGhost" : "primary"}
-              size="sm"
-              onClick={handleToggleStatus}
-              disabled={togglingStatus}
-              loading={togglingStatus}
+          <div className="mt-3">
+            <SettingRow
+              label={tSettings("currentStatus")}
+              description={
+                locale === "ar"
+                  ? "قم بتفعيل أو إيقاف القائمة من هنا."
+                  : "Activate or pause this menu from here."
+              }
             >
-              {localIsActive ? tMenuCard("pause") : tMenuCard("play")}
-            </Button>
+              <Badge tone={localIsActive ? "success" : "danger"} dot>
+                {localIsActive ? tMenuCard("active") : tMenuCard("inactive")}
+              </Badge>
+              <Button
+                type="button"
+                variant={localIsActive ? "dangerGhost" : "secondary"}
+                size="sm"
+                onClick={handleToggleStatus}
+                disabled={togglingStatus}
+                loading={togglingStatus}
+              >
+                {localIsActive ? tMenuCard("pause") : tMenuCard("play")}
+              </Button>
+            </SettingRow>
           </div>
-        </div>
+        </Card>
 
-        {/* Danger zone */}
-        <div className="bg-linear-to-r w-full from-red-50 to-rose-50 dark:from-red-950/30 dark:to-rose-950/20 border border-red-200 dark:border-red-900/60 rounded-2xl p-5 flex flex-col gap-3">
-          <div className="flex items-center gap-3 mb-2 ">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-300">
-              <IoWarningOutline className="text-lg" />
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-red-800 dark:text-red-200">
-                {tSettings("dangerZone")}
-              </h3>
-              <p className="mt-1 text-xs text-red-700/80 dark:text-red-300/80">
-                {locale === "ar"
-                  ? "إجراءات حساسة مثل حذف القائمة سيتم نقلها لاحقًا إلى هذه المنطقة."
-                  : "Sensitive actions like deleting this menu will be moved here in the future."}
-              </p>
-            </div>
-          </div>
+        <Card as="section" className="border-danger-line">
+          <CardHeader
+            title={tSettings("dangerZone")}
+            description={
+              locale === "ar"
+                ? "لحذف القائمة اكتب اسمها في النافذة المنبثقة للتأكيد."
+                : "To delete this menu, type its name in the confirmation dialog."
+            }
+          />
 
-          <div className="flex flex-wrap items-center gap-3 mt-auto">
+          <div className="mt-3">
             <Button
               type="button"
               variant="dangerGhost"
@@ -861,34 +781,39 @@ export default function SettingsPage() {
             >
               {tSettings("deleteThisMenu")}
             </Button>
-            <p className="text-[11px] text-red-500/80 dark:text-red-300/80">
-              {locale === "ar"
-                ? "لحذف القائمة اكتب اسمها في النافذة المنبثقة للتأكيد."
-                : "To delete this menu, type its name in the confirmation dialog."}
-            </p>
+          </div>
+        </Card>
+      </div>
+
+      {/*
+        The save bar rides the bottom of the viewport once something changes,
+        so a long settings page never hides its own commit action below the
+        fold. It is absent entirely while the form is pristine.
+      */}
+      {dirty ? (
+        <div
+          id="onboarding-settings-save"
+          className="sticky bottom-3 z-20 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line bg-raised/95 px-3 py-2 shadow-md backdrop-blur-sm motion-safe:animate-[ui-pop-in_140ms_cubic-bezier(0.16,1,0.3,1)]"
+          role="status"
+        >
+          <p className="text-xs text-fg-muted">
+            {locale === "ar" ? "لديك تغييرات غير محفوظة" : "Unsaved changes"}
+          </p>
+          <div className="flex items-center gap-1.5">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleDiscard}
+              disabled={isSubmitting}
+            >
+              {tCommon("cancel")}
+            </Button>
+            <Button type="submit" loading={isSubmitting}>
+              {tSettings("saveChanges")}
+            </Button>
           </div>
         </div>
-      </section>
-
-      {/* Footer actions (visual only) */}
-      <div
-        id="onboarding-settings-save"
-        className="flex flex-col md:flex-row justify-end gap-3 pt-4 pb-10 border-t border-slate-100 dark:border-slate-800 mt-4"
-      >
-        <Button type="button" variant="secondary" disabled>
-          {tCommon("cancel")}
-        </Button>
-        <Button
-          type="submit"
-          loading={isSubmitting}
-          disabled={(!isDirty && !logoDirty) || isSubmitting}
-          size="lg"
-          className="w-fit!"
-          startIcon={<IoSaveOutline className="text-xl" />}
-        >
-          {tSettings("saveChanges")}
-        </Button>
-      </div>
+      ) : null}
 
       {isDeleteModalOpen && (
         <DeleteMenuConfirm

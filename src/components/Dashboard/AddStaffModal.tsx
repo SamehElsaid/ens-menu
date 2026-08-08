@@ -7,8 +7,14 @@ import { axiosPost, axiosPatch } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import { MenuStaff } from "@/types/Menu";
 import { useAccountStaffRoles } from "@/hooks/useAccountStaffRoles";
-import { useDashboardMenus, localizedMenuName } from "@/hooks/useDashboardMenus";
-import { roleDisplayName, isComingSoonStaffRole } from "@/shared/roleDisplayName";
+import {
+  useDashboardMenus,
+  localizedMenuName,
+} from "@/hooks/useDashboardMenus";
+import {
+  roleDisplayName,
+  isComingSoonStaffRole,
+} from "@/shared/roleDisplayName";
 import {
   IoEllipseSharp,
   IoCheckmarkCircle,
@@ -18,7 +24,14 @@ import {
   IoRestaurantOutline,
   IoShieldCheckmarkOutline,
 } from "react-icons/io5";
-import { Button, Field, Input, Modal, Spinner, focusRing } from "@/components/ui";
+import {
+  Button,
+  Field,
+  Input,
+  Modal,
+  Spinner,
+  focusRing,
+} from "@/components/ui";
 import { cn } from "@/lib/cn";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -407,7 +420,10 @@ export default function AddStaffModal({
             />
           </Field>
 
-          <Field label={t("confirmPassword")} error={errors.confirmPassword?.message}>
+          <Field
+            label={t("confirmPassword")}
+            error={errors.confirmPassword?.message}
+          >
             <Controller
               name="confirmPassword"
               control={control}
@@ -438,7 +454,10 @@ export default function AddStaffModal({
 
         <section className="flex flex-col gap-3">
           <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
-            <IoEllipseSharp className="size-3 shrink-0 text-fg-subtle" aria-hidden />
+            <IoEllipseSharp
+              className="size-3 shrink-0 text-fg-subtle"
+              aria-hidden
+            />
             {t("status")}
           </h3>
           <Controller

@@ -71,26 +71,26 @@ export default function MenusMobileList({
                 })
               }
               menuCards={group.menus.map((menu) => (
-                    <MenuMobileCard
-                      key={menu.id}
-                      menu={menu}
-                      menuName={getMenuName(menu)}
-                      description={getMenuDescription(menu) || undefined}
-                      locale={locale}
-                      formatDate={formatDate}
-                      isFirst={menu.id === firstManageMenuId}
-                      togglingId={togglingId}
-                      menuPublicUrl={getMenuPublicUrl(menu)}
-                      dashboardPath={getDashboardPath(menu)}
-                      groupMeta={resolveMenuGroupMeta(menu)}
-                      isNested
-                      onToggleActive={onToggleActive}
-                      onDelete={onDelete}
-                      onCopy={onCopy}
-                      onAddToGroup={onAddToGroup}
-                      onRemoveFromGroup={onRemoveFromGroup}
-                    />
-                  ))}
+                <MenuMobileCard
+                  key={menu.id}
+                  menu={menu}
+                  menuName={getMenuName(menu)}
+                  description={getMenuDescription(menu) || undefined}
+                  locale={locale}
+                  formatDate={formatDate}
+                  isFirst={menu.id === firstManageMenuId}
+                  togglingId={togglingId}
+                  menuPublicUrl={getMenuPublicUrl(menu)}
+                  dashboardPath={getDashboardPath(menu)}
+                  groupMeta={resolveMenuGroupMeta(menu)}
+                  isNested
+                  onToggleActive={onToggleActive}
+                  onDelete={onDelete}
+                  onCopy={onCopy}
+                  onAddToGroup={onAddToGroup}
+                  onRemoveFromGroup={onRemoveFromGroup}
+                />
+              ))}
             />
           );
         }

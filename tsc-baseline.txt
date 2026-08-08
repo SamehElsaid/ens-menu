@@ -1,0 +1,11 @@
+﻿.next/dev/types/validator.ts(25,44): error TS2344: Type 'Route' does not satisfy the constraint 'LayoutRoutes'.
+  Type 'import("D:/Projects/Ens/ens-menu/.next/dev/types/routes").LayoutRoutes' is not assignable to type 'import("D:/Projects/Ens/ens-menu/.next/types/routes").LayoutRoutes'.
+    Type '"/[locale]/admin/template/[id]"' is not assignable to type 'LayoutRoutes'.
+.next/dev/types/validator.ts(25,75): error TS2344: Type 'Route' does not satisfy the constraint 'LayoutRoutes'.
+  Type 'import("D:/Projects/Ens/ens-menu/.next/dev/types/routes").LayoutRoutes' is not assignable to type 'import("D:/Projects/Ens/ens-menu/.next/types/routes").LayoutRoutes'.
+    Type '"/[locale]/admin/template/[id]"' is not assignable to type 'LayoutRoutes'.
+src/app/[locale]/(main)/auth/reset-password/page.tsx(62,16): error TS2304: Cannot find name 'Card'.
+src/app/[locale]/(main)/auth/reset-password/page.tsx(64,20): error TS2304: Cannot find name 'CustomLogo'.
+src/app/[locale]/(main)/auth/reset-password/page.tsx(77,17): error TS2304: Cannot find name 'Card'.
+src/components/Custom/CustomInput.tsx(188,45): error TS2345: Argument of type 'false | "" | 0 | 0n | "[&_.select__control]:ps-10" | null | undefined' is not assignable to parameter of type 'string | false | null | undefined'.
+  Type '0' is not assignable to type 'string | false | null | undefined'.

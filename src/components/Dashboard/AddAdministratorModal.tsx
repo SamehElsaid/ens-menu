@@ -14,7 +14,10 @@ import {
   type AdministratorFormSchema,
 } from "@/schemas/administratorSchema";
 import AdminPermissionsEditor from "@/components/Admin/AdminPermissionsEditor";
-import { setAdminPermissionsByEmail, removeAdminPermissionsByEmail } from "@/lib/adminPermissions";
+import {
+  setAdminPermissionsByEmail,
+  removeAdminPermissionsByEmail,
+} from "@/lib/adminPermissions";
 import {
   ADMIN_PERMISSION_KEYS,
   type AdminPermissionKey,
@@ -54,7 +57,7 @@ export default function AddAdministratorModal({
       password: "",
     },
     resolver: yupResolver(
-      createAdministratorSchema(tAuth)
+      createAdministratorSchema(tAuth),
     ) as unknown as Resolver<AddAdministratorFormData>,
     mode: "onChange",
   });
@@ -73,11 +76,10 @@ export default function AddAdministratorModal({
             : permissions,
       };
 
-      const result = await axiosPost<typeof payload, { id: number; name: string; email: string }>(
-        "/admin/admins",
-        locale,
-        payload
-      );
+      const result = await axiosPost<
+        typeof payload,
+        { id: number; name: string; email: string }
+      >("/admin/admins", locale, payload);
 
       if (result.status && result.data) {
         if (permissions.length >= ADMIN_PERMISSION_KEYS.length) {

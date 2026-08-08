@@ -303,7 +303,9 @@ export default function AddAdvertisementModal({
         className="flex flex-col gap-6"
       >
         <section className="flex flex-col gap-3">
-          <h3 className="text-[13px] font-semibold text-fg">{t("sectionTitles")}</h3>
+          <h3 className="text-[13px] font-semibold text-fg">
+            {t("sectionTitles")}
+          </h3>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field label={t("titleEn")} required error={errors.title?.message}>
               <Controller
@@ -321,7 +323,11 @@ export default function AddAdvertisementModal({
                 )}
               />
             </Field>
-            <Field label={t("titleAr")} required error={errors.titleAr?.message}>
+            <Field
+              label={t("titleAr")}
+              required
+              error={errors.titleAr?.message}
+            >
               <Controller
                 name="titleAr"
                 control={control}
@@ -341,9 +347,15 @@ export default function AddAdvertisementModal({
         </section>
 
         <section className="flex flex-col gap-3">
-          <h3 className="text-[13px] font-semibold text-fg">{t("sectionContent")}</h3>
+          <h3 className="text-[13px] font-semibold text-fg">
+            {t("sectionContent")}
+          </h3>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <Field label={t("contentEn")} required error={errors.content?.message}>
+            <Field
+              label={t("contentEn")}
+              required
+              error={errors.content?.message}
+            >
               <Controller
                 name="content"
                 control={control}
@@ -358,7 +370,11 @@ export default function AddAdvertisementModal({
                 )}
               />
             </Field>
-            <Field label={t("contentAr")} required error={errors.contentAr?.message}>
+            <Field
+              label={t("contentAr")}
+              required
+              error={errors.contentAr?.message}
+            >
               <Controller
                 name="contentAr"
                 control={control}
@@ -378,11 +394,13 @@ export default function AddAdvertisementModal({
         </section>
 
         <section className="flex flex-col gap-3">
-          <h3 className="text-[13px] font-semibold text-fg">{t("sectionMedia")}</h3>
+          <h3 className="text-[13px] font-semibold text-fg">
+            {t("sectionMedia")}
+          </h3>
           <Field label={t("image")} required error={errors.imageUrl?.message}>
             <label
               className={cn(
-                "relative block w-full cursor-pointer rounded-xl border border-dashed transition-colors duration-150",
+                "relative block w-full cursor-pointer rounded-lg border border-dashed transition-colors duration-150",
                 isDragOver
                   ? "border-brand bg-brand-soft"
                   : errors.imageUrl?.message
@@ -435,7 +453,9 @@ export default function AddAdvertisementModal({
               </div>
             </label>
             <UnmountClosed isOpened={Boolean(errors.imageUrl?.message)}>
-              <p className="mt-1 text-xs text-danger">{errors.imageUrl?.message}</p>
+              <p className="mt-1 text-xs text-danger">
+                {errors.imageUrl?.message}
+              </p>
             </UnmountClosed>
           </Field>
 

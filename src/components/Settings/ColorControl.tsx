@@ -92,7 +92,7 @@ function ColorControl({
         className="p-0! bg-transparent!"
       >
         {showColorPicker === tooltipId && (
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 shadow-lg p-3">
+          <div className="rounded-lg border border-line bg-raised shadow-lg p-3">
             <Sketch
               color={toHex(value)}
               onChange={(color: ColorResult) => {

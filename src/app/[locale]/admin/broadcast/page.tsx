@@ -348,7 +348,7 @@ export default function AdminBroadcastPage() {
           </div>
 
           {audience === "selected" && (
-            <div className="space-y-3 rounded-2xl border border-dashed border-slate-200 p-4 dark:border-slate-600">
+            <div className="space-y-3 rounded-lg border border-dashed border-line p-4">
               <CustomInput
                 type="text"
                 id="broadcast-user-search"
@@ -375,7 +375,7 @@ export default function AdminBroadcastPage() {
               )}
 
               {searchLoading ? (
-                <p className="text-sm text-slate-500">{t("searching")}</p>
+                <p className="text-sm text-fg-subtle">{t("searching")}</p>
               ) : (
                 <div className="max-h-56 space-y-2 overflow-y-auto">
                   {searchResults.map((user) => {
@@ -385,7 +385,7 @@ export default function AdminBroadcastPage() {
                     return (
                       <label
                         key={user.id}
-                        className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 px-3 py-2 dark:border-slate-600"
+                        className="flex cursor-pointer items-center gap-3 rounded-lg border border-line px-3 py-2"
                       >
                         <input
                           type="checkbox"
@@ -393,10 +393,10 @@ export default function AdminBroadcastPage() {
                           onChange={() => toggleUser(user)}
                         />
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate text-sm font-medium text-slate-800 dark:text-slate-100">
+                          <span className="block truncate text-sm font-medium text-fg">
                             {user.name}
                           </span>
-                          <span className="block truncate text-xs text-slate-500">
+                          <span className="block truncate text-xs text-fg-subtle">
                             {user.email}
                           </span>
                         </span>
@@ -409,16 +409,14 @@ export default function AdminBroadcastPage() {
           )}
 
           {audience === "test" && (
-            <div className="space-y-2 rounded-2xl border border-dashed border-slate-200 p-4 dark:border-slate-600">
+            <div className="space-y-2 rounded-lg border border-dashed border-line p-4">
               <label
                 htmlFor="broadcast-test-emails"
-                className="block text-sm font-semibold text-slate-700 dark:text-slate-200"
+                className="block text-sm font-semibold text-fg-muted"
               >
                 {t("testEmails")}
               </label>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {t("testEmailsHint")}
-              </p>
+              <p className="text-xs text-fg-muted">{t("testEmailsHint")}</p>
               <textarea
                 id="broadcast-test-emails"
                 rows={3}
@@ -426,7 +424,7 @@ export default function AdminBroadcastPage() {
                 value={testEmailsInput}
                 onChange={(e) => setTestEmailsInput(e.target.value)}
                 placeholder={t("testEmailsPlaceholder")}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 font-mono text-sm text-slate-800 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                className="w-full rounded-lg border border-line bg-white px-4 py-3 font-mono text-sm text-fg outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
               {testEmails.length > 0 && (
                 <div className="flex flex-wrap gap-2">
@@ -469,21 +467,21 @@ export default function AdminBroadcastPage() {
             />
           </Field>
           {message.trim() ? (
-              <div className="mt-3 overflow-hidden rounded-xl border border-line">
-                <p className="border-b border-line bg-surface-2 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-fg-muted">
-                  {t("htmlPreview")}
-                </p>
-                <iframe
-                  title={t("htmlPreview")}
-                  srcDoc={message.replace(
-                    /\{\{\s*name\s*\}\}/gi,
-                    emailLocale === "ar" ? "اسم العميل" : "Customer Name",
-                  )}
-                  className="h-[420px] w-full border-0 bg-white"
-                  sandbox=""
-                />
-              </div>
-            ) : null}
+            <div className="mt-3 overflow-hidden rounded-lg border border-line">
+              <p className="border-b border-line bg-surface-2 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-fg-muted">
+                {t("htmlPreview")}
+              </p>
+              <iframe
+                title={t("htmlPreview")}
+                srcDoc={message.replace(
+                  /\{\{\s*name\s*\}\}/gi,
+                  emailLocale === "ar" ? "اسم العميل" : "Customer Name",
+                )}
+                className="h-[420px] w-full border-0 bg-white"
+                sandbox=""
+              />
+            </div>
+          ) : null}
 
           <div>
             <label className="mb-2 block text-sm font-semibold text-fg">
@@ -511,33 +509,31 @@ export default function AdminBroadcastPage() {
         </CardDashBoard>
 
         <CardDashBoard className="h-fit space-y-4 p-5">
-          <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200">
+          <div className="flex items-center gap-2 text-fg-muted">
             <IoPeopleOutline className="text-primary" />
             <h2 className="font-semibold">{t("previewTitle")}</h2>
           </div>
 
           {previewLoading ? (
-            <p className="text-sm text-slate-500">{t("previewLoading")}</p>
+            <p className="text-sm text-fg-subtle">{t("previewLoading")}</p>
           ) : preview ? (
             <>
               <p className="text-3xl font-bold text-primary">{preview.count}</p>
-              <p className="text-sm text-slate-500">{t("recipientsCount")}</p>
+              <p className="text-sm text-fg-subtle">{t("recipientsCount")}</p>
               {preview.capped && (
                 <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
                   {t("cappedNotice", { max: preview.maxRecipients })}
                 </p>
               )}
               {preview.sample.length > 0 && (
-                <div className="space-y-2 border-t border-slate-200 pt-4 dark:border-slate-700">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <div className="space-y-2 border-t border-line pt-4 dark:border-line">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-fg-subtle">
                     {t("sampleRecipients")}
                   </p>
                   {preview.sample.map((user) => (
                     <div key={user.id} className="text-sm">
-                      <p className="font-medium text-slate-800 dark:text-slate-100">
-                        {user.name}
-                      </p>
-                      <p className="truncate text-xs text-slate-500">
+                      <p className="font-medium text-fg">{user.name}</p>
+                      <p className="truncate text-xs text-fg-subtle">
                         {user.email}
                       </p>
                     </div>
@@ -546,10 +542,10 @@ export default function AdminBroadcastPage() {
               )}
             </>
           ) : (
-            <p className="text-sm text-slate-500">{t("noRecipients")}</p>
+            <p className="text-sm text-fg-subtle">{t("noRecipients")}</p>
           )}
 
-          <div className="rounded-xl bg-slate-50 p-3 text-xs text-slate-600 dark:bg-slate-800/60 dark:text-slate-300">
+          <div className="rounded-lg bg-slate-50 p-3 text-xs text-slate-600">
             <IoMailOutline className="mb-2 text-base text-primary" />
             {t("hint")}
           </div>

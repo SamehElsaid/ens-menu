@@ -7,11 +7,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import PhoneInput from "react-phone-number-input";
 import ar from "react-phone-number-input/locale/ar";
 import en from "react-phone-number-input/locale/en";
-import Select, {
-  GroupBase,
-  OptionsOrGroups,
-  SingleValue,
-} from "react-select";
+import Select, { GroupBase, OptionsOrGroups, SingleValue } from "react-select";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { ar as arLocale } from "date-fns/locale/ar";
 import { enUS as enLocale } from "date-fns/locale/en-US";
@@ -149,7 +145,9 @@ export default function CustomInput({
             role="group"
             className={cn(
               "flex items-center gap-1 rounded-lg border p-1",
-              error ? "border-danger bg-danger-soft" : "border-line bg-surface-2",
+              error
+                ? "border-danger bg-danger-soft"
+                : "border-line bg-surface-2",
             )}
           >
             {(props.options as OptionType[])?.map((option) => {
@@ -316,7 +314,9 @@ export default function CustomInput({
               type === "textarea" ? "items-start" : "items-center",
             )}
           >
-            {icon ? affix(icon, type === "textarea" ? "textarea" : "center") : null}
+            {icon
+              ? affix(icon, type === "textarea" ? "textarea" : "center")
+              : null}
 
             {type === "textarea" ? (
               <textarea
@@ -398,7 +398,11 @@ export default function CustomInput({
         {loading && type !== "tel" && fieldLoadingHint}
 
         <UnmountClosed isOpened={Boolean(error)}>
-          <p id={errorId} role="alert" className="mt-1.5 text-xs font-medium text-danger">
+          <p
+            id={errorId}
+            role="alert"
+            className="mt-1.5 text-xs font-medium text-danger"
+          >
             {error}
           </p>
         </UnmountClosed>

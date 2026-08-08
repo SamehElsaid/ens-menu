@@ -27,11 +27,15 @@ export default function ChatMessage({ message }: Props) {
         }`}
       >
         {isUser ? (
-          <span className="whitespace-pre-wrap break-words">{message.content}</span>
+          <span className="whitespace-pre-wrap break-words">
+            {message.content}
+          </span>
         ) : (
-          renderAiMessageContent(message.content) ?? (
-            <span className="whitespace-pre-wrap break-words">{message.content}</span>
-          )
+          (renderAiMessageContent(message.content) ?? (
+            <span className="whitespace-pre-wrap break-words">
+              {message.content}
+            </span>
+          ))
         )}
       </div>
 

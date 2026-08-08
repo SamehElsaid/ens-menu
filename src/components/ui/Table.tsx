@@ -195,7 +195,10 @@ export function DataTable<T>({
             ))}
           </div>
           {Array.from({ length: skeletonRows }).map((_, i) => (
-            <div key={i} className="flex gap-3 border-b border-line px-3 py-2.5 last:border-b-0">
+            <div
+              key={i}
+              className="flex gap-3 border-b border-line px-3 py-2.5 last:border-b-0"
+            >
               {columns.map((c) => (
                 <Skeleton key={c.id} className="h-3 flex-1" />
               ))}
@@ -204,7 +207,10 @@ export function DataTable<T>({
         </div>
         <div className="flex flex-col gap-2 md:hidden">
           {Array.from({ length: Math.min(skeletonRows, 3) }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-line bg-surface p-3">
+            <div
+              key={i}
+              className="rounded-xl border border-line bg-surface p-3"
+            >
               <Skeleton className="h-3.5 w-1/2" />
               <div className="mt-2.5 flex flex-col gap-1.5">
                 <Skeleton className="h-3 w-full" />

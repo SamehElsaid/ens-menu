@@ -24,7 +24,7 @@ export default function MobileFloatingAddButton({
       startIcon={<IoAdd className="size-5" />}
       className={cn(
         "dashboard-mobile-fab fixed z-40 end-4 bottom-[calc(1.25rem+env(safe-area-inset-bottom))] md:hidden",
-        "rounded-2xl shadow-md",
+        "rounded-lg shadow-md",
       )}
     >
       {label}

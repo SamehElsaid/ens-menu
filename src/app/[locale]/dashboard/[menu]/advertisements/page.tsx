@@ -31,7 +31,7 @@ export default function AdvertisementsPage() {
     typeof menuParam === "string"
       ? menuParam
       : Array.isArray(menuParam)
-        ? menuParam[0] ?? ""
+        ? (menuParam[0] ?? "")
         : "";
 
   const [ads, setAds] = useState<Advertisement[]>([]);
@@ -208,7 +208,7 @@ export default function AdvertisementsPage() {
 
   if (!menuId) {
     return (
-      <div className="py-20 text-center text-slate-500 dark:text-slate-400">
+      <div className="py-20 text-center text-fg-muted">
         <p>{t("noMenuId")}</p>
       </div>
     );
@@ -221,7 +221,7 @@ export default function AdvertisementsPage() {
     <>
       {maxAdsPerMenu >= 0 && (
         <div
-          className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-100"
+          className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-100"
           dir={textDir}
         >
           {t("freePlanLimitBanner", { max: maxAdsPerMenu })}

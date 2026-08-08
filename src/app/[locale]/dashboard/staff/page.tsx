@@ -14,7 +14,10 @@ import LinkTo from "@/components/Global/LinkTo";
 import { Button, buttonClasses } from "@/components/ui";
 import { MenuStaff, MenuStaffRole } from "@/types/Menu";
 import { useAccountStaffRoles } from "@/hooks/useAccountStaffRoles";
-import { useDashboardMenus, localizedMenuName } from "@/hooks/useDashboardMenus";
+import {
+  useDashboardMenus,
+  localizedMenuName,
+} from "@/hooks/useDashboardMenus";
 import {
   IoAddCircleOutline,
   IoPeopleOutline,
@@ -178,7 +181,10 @@ export default function AccountStaffPage() {
         />
         <LinkTo
           href="/dashboard/subscription"
-          className={buttonClasses({ variant: "primary", className: "mt-2 md:mt-4" })}
+          className={buttonClasses({
+            variant: "primary",
+            className: "mt-2 md:mt-4",
+          })}
         >
           {t("upgradeShort")}
         </LinkTo>
@@ -191,7 +197,9 @@ export default function AccountStaffPage() {
       <div className="dashboard-staff-header mb-5 min-w-0 md:mb-6">
         <PageTitleWithHelp
           title={t("title")}
-          description={activeTab === "staff" ? t("subtitle") : tRoles("subtitle")}
+          description={
+            activeTab === "staff" ? t("subtitle") : tRoles("subtitle")
+          }
           meta={
             activeTab === "staff" && !loading && staffList.length > 0 ? (
               <span className="text-xs font-medium text-fg-subtle">
@@ -230,10 +238,7 @@ export default function AccountStaffPage() {
           }
         />
 
-        <div
-          className="mt-5 flex gap-1 border-b border-slate-200 dark:border-slate-700/80"
-          role="tablist"
-        >
+        <div className="mt-5 flex gap-1 border-b border-line/80" role="tablist">
           <button
             type="button"
             role="tab"
@@ -242,7 +247,7 @@ export default function AccountStaffPage() {
             className={`-mb-px inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors ${
               activeTab === "staff"
                 ? "border-primary text-primary"
-                : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                : "border-transparent text-fg-subtle hover:text-fg-muted dark:hover:text-slate-200"
             }`}
           >
             <IoPeopleOutline className="text-base" aria-hidden />
@@ -256,7 +261,7 @@ export default function AccountStaffPage() {
             className={`-mb-px inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors ${
               activeTab === "roles"
                 ? "border-primary text-primary"
-                : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                : "border-transparent text-fg-subtle hover:text-fg-muted dark:hover:text-slate-200"
             }`}
           >
             <IoShieldCheckmarkOutline className="text-base" aria-hidden />

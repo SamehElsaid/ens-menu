@@ -37,9 +37,7 @@ export default function OrderChargesLines({
       ? "text-emerald-700/80 dark:text-emerald-300/80"
       : "text-fg-muted";
   const strong =
-    accent === "emerald"
-      ? "text-emerald-900 dark:text-emerald-100"
-      : "text-fg";
+    accent === "emerald" ? "text-emerald-900 dark:text-emerald-100" : "text-fg";
 
   if (!charges.hasExtraCharges) {
     return (

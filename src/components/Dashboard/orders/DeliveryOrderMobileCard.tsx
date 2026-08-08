@@ -60,19 +60,19 @@ export default function DeliveryOrderMobileCard({
   );
 
   return (
-    <article className="dashboard-order-card flex h-full flex-col overflow-hidden rounded-2xl border border-emerald-200/70 bg-white shadow-[0_2px_16px_rgba(16,185,129,0.08)] dark:border-emerald-800/40 dark:bg-slate-800/95 dark:shadow-[0_2px_20px_rgba(0,0,0,0.3)]">
+    <article className="dashboard-order-card flex h-full flex-col overflow-hidden rounded-lg border border-emerald-200/70 bg-white shadow-[0_2px_16px_rgba(16,185,129,0.08)] dark:border-emerald-800/40 dark:shadow-[0_2px_20px_rgba(0,0,0,0.3)]">
       <div className="bg-linear-to-r from-emerald-600/10 via-teal-500/5 to-transparent px-4 py-3 dark:from-emerald-900/30">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-emerald-200/80 dark:bg-slate-900 dark:ring-emerald-700/50">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm ring-1 ring-emerald-200/80 dark:ring-emerald-700/50">
               <MdOutlineDeliveryDining className="text-xl text-emerald-600 dark:text-emerald-400" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-bold text-slate-900 dark:text-slate-50">
+              <p className="text-sm font-bold text-fg">
                 {t("colOrderId")} #{entry.orderId}
               </p>
               {zoneLabel && (
-                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                <p className="text-xs text-fg-muted truncate">
                   {t("colZone")}: {zoneLabel}
                 </p>
               )}
@@ -94,41 +94,33 @@ export default function DeliveryOrderMobileCard({
 
       <div className="space-y-2 px-4 py-3">
         {entry.customerName?.trim() && (
-          <p className="text-sm text-slate-700 dark:text-slate-200">
-            <span className="text-slate-400 dark:text-slate-500">
-              {t("colCustomer")}:{" "}
-            </span>
+          <p className="text-sm text-fg-muted">
+            <span className="text-fg-subtle">{t("colCustomer")}: </span>
             {entry.customerName.trim()}
           </p>
         )}
         {entry.customerPhone?.trim() && (
-          <p className="text-sm text-slate-700 dark:text-slate-200">
-            <span className="text-slate-400 dark:text-slate-500">
-              {t("colPhone")}:{" "}
-            </span>
+          <p className="text-sm text-fg-muted">
+            <span className="text-fg-subtle">{t("colPhone")}: </span>
             <span dir="ltr">{entry.customerPhone.trim()}</span>
           </p>
         )}
         {entry.customerAddress?.trim() && (
-          <p className="text-sm text-slate-700 dark:text-slate-200 line-clamp-2">
-            <span className="text-slate-400 dark:text-slate-500">
-              {t("colAddress")}:{" "}
-            </span>
+          <p className="text-sm text-fg-muted line-clamp-2">
+            <span className="text-fg-subtle">{t("colAddress")}: </span>
             {entry.customerAddress.trim()}
           </p>
         )}
         {/* {entry.orderNotes?.trim() && (
-          <p className="text-sm text-slate-700 dark:text-slate-200 line-clamp-2">
-            <span className="text-slate-400 dark:text-slate-500">
+          <p className="text-sm text-fg-muted line-clamp-2">
+            <span className="text-fg-subtle">
               {t("colNotes")}:{" "}
             </span>
             {entry.orderNotes.trim()}
           </p>
         )} */}
-        <p className="text-sm text-slate-700 dark:text-slate-200">
-          <span className="text-slate-400 dark:text-slate-500">
-            {t("colItems")}:{" "}
-          </span>
+        <p className="text-sm text-fg-muted">
+          <span className="text-fg-subtle">{t("colItems")}: </span>
           {entry.items?.length ?? 0}
         </p>
         <div className="space-y-2">
@@ -145,14 +137,14 @@ export default function DeliveryOrderMobileCard({
             accent="emerald"
           />
           {time && (
-            <time className="block text-end text-xs text-slate-500 dark:text-slate-400">
+            <time className="block text-end text-xs text-fg-muted">
               <ViewTime data={time} />
             </time>
           )}
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-2 border-t border-slate-100 px-4 py-3 dark:border-slate-700/80">
+      <div className="flex flex-1 flex-col gap-2 border-t border-line px-4 py-3 dark:border-line/80">
         <OrderActionButtons
           menuId={menuId}
           entry={entry}
@@ -165,7 +157,7 @@ export default function DeliveryOrderMobileCard({
         <button
           type="button"
           onClick={() => onView(entry.id)}
-          className="mt-auto inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 dark:border-emerald-700/50 dark:bg-emerald-950/30 dark:text-emerald-300 dark:hover:bg-emerald-900/40"
+          className="mt-auto inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 dark:border-emerald-700/50 dark:bg-emerald-950/30 dark:text-emerald-300 dark:hover:bg-emerald-900/40"
         >
           <IoEyeOutline className="text-base" />
           {t("view")}

@@ -364,7 +364,7 @@ export default function CopyMenuModal({
             <IoOptionsOutline className="text-fg-muted" aria-hidden />
             {t("whatToCopy")}
           </p>
-          <div className="flex flex-col gap-3 rounded-xl bg-surface-2 p-4">
+          <div className="flex flex-col gap-3 rounded-lg bg-surface-2 p-4">
             {COPY_OPTION_KEYS.map((key) => (
               <Checkbox
                 key={key}

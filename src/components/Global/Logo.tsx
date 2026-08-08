@@ -88,8 +88,10 @@ function LogoTitle({ pageTitle }: { pageTitle?: string }) {
     return (
       <span className="inline-flex max-w-full items-center gap-x-1.5">
         <span className="shrink-0">ENSmenu</span>
-        <span className="hidden shrink-0 font-bold text-slate-400 sm:inline">-</span>
-        <span className="hidden truncate font-semibold text-slate-700 sm:inline sm:max-w-56 dark:text-slate-200">
+        <span className="hidden shrink-0 font-bold text-fg-subtle sm:inline">
+          -
+        </span>
+        <span className="hidden truncate font-semibold text-fg-muted sm:inline sm:max-w-56">
           {pageTitle}
         </span>
       </span>
@@ -128,9 +130,7 @@ export function Logo({
           ? "gap-2.5"
           : "gap-4";
   const textAlignClass =
-    size === "header" ||
-    size === "compact" ||
-    size === "micro"
+    size === "header" || size === "compact" || size === "micro"
       ? "items-start text-start"
       : "items-center text-center";
   const textMaxWidthClass =

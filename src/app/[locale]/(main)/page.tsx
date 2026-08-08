@@ -4,10 +4,17 @@ import { buildSeoMetadata } from "@/lib/seo";
 import { fetchPageMetadata, resolveMetaField } from "@/lib/fetchPageMetadata";
 import { getSiteOrigin } from "@/lib/sitemap/data";
 import { fetchHomepageFeaturedLogosServer } from "@/lib/homepageFeaturedLogos";
-import HeroContent from "@/components/HomePage/HeroContent";
-import TrustedBySection from "@/components/HomePage/TrustedBySection";
-import TransformShowcaseSection from "@/components/HomePage/TransformShowcaseSection";
-import HomeCTASection from "@/components/HomePage/HomeCTASection";
+import Hero from "@/components/site/home/Hero";
+import LogoStrip from "@/components/site/home/LogoStrip";
+import {
+  Features,
+  HomeFaq,
+  HowItWorks,
+  Plans,
+  Showcase,
+} from "@/components/site/home/Sections";
+import CtaBand from "@/components/site/CtaBand";
+import HashScroll from "@/components/site/HashScroll";
 import JsonLd from "@/components/Global/JsonLd";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -68,11 +75,16 @@ async function Page({ params }: Props) {
 
   return (
     <>
+      <HashScroll />
       <JsonLd data={buildWebApplicationJsonLd()} />
-      <HeroContent locale={locale} />
-      <TransformShowcaseSection locale={locale} />
-      <HomeCTASection locale={locale} />
-      <TrustedBySection initialLogos={featuredLogos} />
+      <Hero locale={locale} />
+      <LogoStrip initialLogos={featuredLogos} />
+      <HowItWorks />
+      <Features />
+      <Showcase />
+      <Plans />
+      <HomeFaq />
+      <CtaBand />
     </>
   );
 }

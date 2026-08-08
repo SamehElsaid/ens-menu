@@ -202,6 +202,271 @@
       ]
     }
   },
+  "site": {
+    "demo": {
+      "previewLabel": "Preview of a live ENSMENU guest menu on a phone",
+      "tableLabel": "Table 12",
+      "venueName": "Your restaurant",
+      "searchPlaceholder": "Search the menu",
+      "catAll": "All",
+      "catGrills": "Grills",
+      "catDrinks": "Drinks",
+      "catDesserts": "Desserts",
+      "currency": "EGP",
+      "orderButton": "Send order to the kitchen",
+      "items": {
+        "grilledChicken": "Grilled chicken",
+        "orangeJuice": "Fresh orange juice",
+        "cheesecake": "Cheesecake",
+        "potatoWedges": "Potato wedges"
+      }
+    },
+    "hero": {
+      "eyebrow": "AI menu import",
+      "titleLead": "Your paper menu, live on every table",
+      "titleAccent": "by tonight",
+      "lead": "Photograph the menu you already have. ENSMENU reads the dishes, prices and categories, then publishes a QR menu your guests can order from — in Arabic and English.",
+      "primaryCta": "Start free",
+      "secondaryCta": "See how it works",
+      "paperAlt": "A printed restaurant menu",
+      "beforeLabel": "Your printed menu",
+      "afterLabel": "Live in minutes",
+      "assurances": {
+        "freePlan": "Free plan to start",
+        "noGuestApp": "No app for your guests",
+        "bilingual": "Arabic and English"
+      }
+    },
+    "trustedBy": {
+      "title": "Venues already serving guests with ENSMENU"
+    },
+    "how": {
+      "eyebrow": "How it works",
+      "title": "From paper to live in four steps",
+      "lead": "No typing your menu in by hand. Upload what you already print, and correct anything the import got wrong before it goes live.",
+      "upload": {
+        "title": "Upload your menu",
+        "body": "A photo of the printed menu, or a PDF. One page or twenty."
+      },
+      "extract": {
+        "title": "AI reads it",
+        "body": "Dishes, prices and categories are pulled out and organised for you."
+      },
+      "review": {
+        "title": "Check and adjust",
+        "body": "Fix a price, rename a dish, add a photo. Nothing publishes until you say so."
+      },
+      "publish": {
+        "title": "Publish and print the QR",
+        "body": "Guests scan at the table and order from their own phone."
+      }
+    },
+    "features": {
+      "eyebrow": "What you get",
+      "title": "Everything a venue needs once the menu is live",
+      "lead": "The menu is only the start. Ordering, delivery, staff and the numbers behind them all run from the same dashboard.",
+      "qr": {
+        "title": "QR menu",
+        "body": "One code for the venue, or a separate code per table so every order arrives tagged."
+      },
+      "tableOrders": {
+        "title": "Table ordering",
+        "body": "Guests order from their own phone and the order reaches your dashboard immediately."
+      },
+      "delivery": {
+        "title": "Delivery orders",
+        "body": "Take delivery through the same menu, with customer addresses and order status."
+      },
+      "analytics": {
+        "title": "Analytics",
+        "body": "See which dishes get opened, which ones sell, and when your busy hours actually are."
+      },
+      "staff": {
+        "title": "Staff and roles",
+        "body": "Give waiters and kitchen staff their own logins, with only the access they need."
+      },
+      "bilingual": {
+        "title": "Arabic and English",
+        "body": "Bilingual and right-to-left by default — in the guest menu and in your dashboard."
+      }
+    },
+    "showcase": {
+      "eyebrow": "Templates",
+      "title": "Choose how your menu looks",
+      "lead": "Every template is responsive, bilingual, and yours to recolour with your own brand.",
+      "previewAlt": "Preview of the {name}",
+      "freeBadge": "Free",
+      "proBadge": "Pro",
+      "newBadge": "New",
+      "cta": "Browse templates in your dashboard"
+    },
+    "plans": {
+      "eyebrow": "Plans",
+      "title": "Start free, upgrade when the tables need it",
+      "lead": "The free plan publishes a real menu. Pro adds ordering, staff, and the numbers behind them.",
+      "free": {
+        "name": "Free",
+        "body": "Everything you need to put a working QR menu in front of guests.",
+        "cta": "Create a free account",
+        "items": {
+          "menu": "One published menu",
+          "qr": "QR code for your venue",
+          "items": "Categories, dishes and photos",
+          "bilingual": "Arabic and English"
+        }
+      },
+      "pro": {
+        "badge": "Most venues",
+        "name": "Pro",
+        "body": "For venues taking orders, running a team, and watching the numbers.",
+        "cta": "See plans and prices",
+        "items": {
+          "tables": "A QR code for every table",
+          "orders": "Table ordering",
+          "delivery": "Delivery with addresses",
+          "staff": "Staff accounts and roles",
+          "analytics": "Full analytics",
+          "domain": "Your own domain"
+        }
+      }
+    },
+    "faq": {
+      "eyebrow": "Questions",
+      "title": "Before you start",
+      "lead": "The things restaurant owners ask us most.",
+      "more": "Have another question?",
+      "moreLink": "Read the full FAQ",
+      "howLong": {
+        "q": "How long does it take to get my menu online?",
+        "a": "Most venues publish the same day. The import does the typing; your time goes into checking prices and adding photos."
+      },
+      "needApp": {
+        "q": "Do my guests need to install anything?",
+        "a": "No. They point a phone camera at the QR code and the menu opens in the browser."
+      },
+      "arabic": {
+        "q": "Does it work properly in Arabic?",
+        "a": "Yes. Arabic is the default language and the whole interface is built right-to-left — for your guests and for your dashboard."
+      },
+      "existingMenu": {
+        "q": "What if the import gets something wrong?",
+        "a": "You review everything before it publishes. Prices, names and categories are all editable, and you can keep editing after it is live."
+      },
+      "cost": {
+        "q": "What does it cost?",
+        "a": "There is a free plan you can publish on. Paid plans are listed on the pricing page with exactly what each one adds."
+      },
+      "orders": {
+        "q": "Can guests order, or is it only a menu?",
+        "a": "Both. A QR menu on the free plan; table ordering and delivery on Pro, with orders arriving in your dashboard."
+      }
+    },
+    "auth": {
+      "backToHome": "Back to the ENSMENU home page",
+      "login": {
+        "title": "Sign in",
+        "description": "Your menus, orders and staff are where you left them.",
+        "asideTitle": "One dashboard for the whole venue",
+        "pointA": "Edit dishes and prices, and see the change on every table",
+        "pointB": "Table and delivery orders in one place",
+        "pointC": "Arabic and English, right to left throughout",
+        "noAccount": "New to ENSMENU?",
+        "createAccount": "Create a free account",
+        "staffLink": "Signing in as staff?"
+      },
+      "register": {
+        "title": "Create your free account",
+        "description": "Publish a real QR menu on the free plan. No card needed.",
+        "asideTitle": "From your printed menu to a live one",
+        "pointA": "Upload the menu you already print — the import does the typing",
+        "pointB": "Review every dish and price before anything publishes",
+        "pointC": "Bilingual from the first screen, for you and your guests",
+        "haveAccount": "Already have an account?",
+        "signIn": "Sign in",
+        "passwordHint": "At least 8 characters"
+      },
+      "reset": {
+        "title": "Reset your password",
+        "description": "Enter the email on your account and we will send a reset link.",
+        "setTitle": "Choose a new password",
+        "setDescription": "Pick something you have not used here before.",
+        "asideTitle": "Back into your account safely",
+        "pointA": "The reset link goes only to the email on the account",
+        "pointB": "Your menus and orders stay untouched while you reset",
+        "pointC": "Sign in again with the new password on any device"
+      },
+      "staff": {
+        "title": "Staff sign-in",
+        "description": "Use the venue code your manager gave you, with your own email and password.",
+        "asideTitle": "Built for the floor, not the office",
+        "pointA": "Live table map and order alerts on your phone",
+        "pointB": "Confirm and update orders without leaving the dining room",
+        "pointC": "Each staff account uses the venue code your manager shared"
+      },
+      "verify": {
+        "title": "Verifying your email",
+        "asideTitle": "One step before your menu goes live",
+        "pointA": "Confirming the email locks the account to you",
+        "pointB": "After that you can publish and edit from the dashboard",
+        "pointC": "The link in the email expires — open it soon"
+      }
+    },
+    "pricing": {
+      "eyebrow": "Plans",
+      "title": "Start free. Pay when the tables need it.",
+      "lead": "The free plan publishes a real QR menu — no card, no trial clock. Pro adds table ordering, staff accounts and the numbers behind them."
+    },
+    "about": {
+      "eyebrow": "About ENSMENU",
+      "title": "The menu, rebuilt for how venues actually work",
+      "lead": "We started from one observation: every restaurant already has a menu, and almost none of them have a good way to change it. The import, the QR menu, the ordering and the dashboard are all built around that single problem — in Arabic first, for venues in this region.",
+      "purposeEyebrow": "Why we build this"
+    },
+    "cta": {
+      "title": "Put your menu on every table tonight",
+      "body": "Create a free account, upload the menu you already print, and publish it.",
+      "primary": "Start free",
+      "secondary": "Talk to us first",
+      "note": "Free plan available. No card needed to publish your first menu."
+    },
+    "authPhone": {
+      "login": {
+        "label": "Preview of the ENSMENU owner dashboard on a phone",
+        "eyebrow": "Dashboard",
+        "heading": "Your venues",
+        "liveOrders": "3 live orders waiting",
+        "menuA": "Downtown branch",
+        "menuAMeta": "Live · 42 dishes",
+        "menuB": "Mall kiosk",
+        "menuBMeta": "Draft · finishing photos",
+        "footer": "Same account on every device"
+      },
+      "register": {
+        "label": "Preview of a live ENSMENU guest menu on a phone"
+      },
+      "reset": {
+        "label": "Preview of a password reset confirmation on a phone",
+        "heading": "Check your email",
+        "body": "We sent a reset link to the address on the account.",
+        "email": "you@restaurant.com",
+        "status": "Link expires in 30 minutes"
+      },
+      "staff": {
+        "label": "Preview of the ENSMENU staff floor map on a phone",
+        "eyebrow": "Floor",
+        "heading": "Live tables",
+        "alert": "New order",
+        "alertBody": "Table 8 · 2 items",
+        "table": "T"
+      },
+      "verify": {
+        "label": "Preview of a successful email verification on a phone",
+        "heading": "Email confirmed",
+        "body": "Your account is ready. Open the dashboard to publish the menu.",
+        "cta": "Go to dashboard"
+      }
+    }
+  },
   "header": {
     "home": "Home",
     "about": "About",
@@ -213,7 +478,21 @@
     "androidApp": "Staff App",
     "ownerApp": "Owner App",
     "mobileApps": "Mobile Apps",
-    "pricingPage": "Pricing"
+    "pricingPage": "Pricing",
+    "product": "Product",
+    "resources": "Resources",
+    "company": "Company",
+    "primaryNavigation": "Main navigation",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "descHowItWorks": "From a paper menu to a live QR menu in four steps",
+    "descFeatures": "QR menus, table ordering, delivery and analytics",
+    "descOwnerApp": "Run your menu and watch orders from your phone",
+    "descStaffApp": "Order screen for waiters and the kitchen",
+    "descKnowledge": "Guides and answers for setting up your menu",
+    "descFaq": "The questions restaurant owners ask most",
+    "descAbout": "Who builds ENSMENU and why",
+    "descContact": "Talk to the team on WhatsApp or email"
   },
   "home": {
     "title": "Home",
@@ -282,15 +561,15 @@
     "centerDescription": "Join our network of centers",
     "firstName": "First Name",
     "lastName": "Last Name",
-    "phone": "Phone Number",
+    "phone": "Phone number",
     "email": "Email",
     "password": "Password",
     "confirmPassword": "Confirm Password",
     "gender": "Gender",
     "birthDate": "Birth Date",
     "specialization": "Specialization",
-    "fullName": "Full Name (as on certificate)",
-    "resturantName": "Restaurant or Cafe Name",
+    "fullName": "Full name",
+    "resturantName": "Restaurant or cafe name",
     "nationalID": "National ID",
     "attachments": "Attachments",
     "ownsCenter": "I own a center",
@@ -304,7 +583,7 @@
     "facebook": "Facebook",
     "instagram": "Instagram",
     "whatsapp": "WhatsApp",
-    "register": "Register",
+    "register": "Create account",
     "selectGender": "Select Gender",
     "male": "Male",
     "female": "Female",
@@ -384,7 +663,7 @@
     "specialityInvalid": "Please select a valid speciality",
     "search": "Search",
     "invalidCredentials": "Invalid credentials",
-    "login": "Login",
+    "login": "Sign in",
     "displayName": "Display Name",
     "displayNameEn": "Display Name (English)",
     "displayNameAr": "Display Name (Arabic)",
@@ -2001,8 +2280,10 @@
     },
     "header": {
       "signIn": "Sign In",
-      "startNow": "Start Now",
-      "aiBadge": "Smart Menu"
+      "startNow": "Start free",
+      "aiBadge": "Smart Menu",
+      "skipToContent": "Skip to content",
+      "loading": "Loading"
     },
     "templateShow": {
       "choosePrefix": "Choose the ",
@@ -4926,6 +5207,7 @@
     "staffNoPermissionBody": "Your role does not have permission to view this page. Contact the menu owner if you need access.",
     "staffNoDashboardTitle": "No dashboard access",
     "staffNoDashboardBody": "Your role does not have dashboard access. Contact the menu owner.",
+    "mistakeHint": "If you believe this is a mistake, contact ENSMENU support.",
     "backHome": "Back to home"
   },
   "userProfile": {

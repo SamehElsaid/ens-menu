@@ -134,8 +134,10 @@ export default function AdminPromoPage() {
         <CardDashBoard hover>
           <div className="flex items-center gap-4">
             <div
-              className={`flex size-14 items-center justify-center rounded-xl ${
-                promoEnabled ? "bg-success-soft text-success-fg" : "bg-surface-2 text-fg-subtle"
+              className={`flex size-14 items-center justify-center rounded-lg ${
+                promoEnabled
+                  ? "bg-success-soft text-success-fg"
+                  : "bg-surface-2 text-fg-subtle"
               }`}
             >
               <IoMegaphoneOutline className="text-2xl" aria-hidden />
@@ -153,7 +155,7 @@ export default function AdminPromoPage() {
 
         <CardDashBoard hover>
           <div className="flex items-center gap-4">
-            <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-info-soft text-info-fg">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-info-soft text-info-fg">
               <IoMegaphoneOutline className="text-2xl" aria-hidden />
             </div>
             <div className="min-w-0 flex-1 space-y-1">

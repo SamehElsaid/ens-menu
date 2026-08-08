@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  normalizePhoneNumber,
-  PHONE_DISPLAY_CLASS,
-} from "@/lib/formatPhone";
+import { normalizePhoneNumber, PHONE_DISPLAY_CLASS } from "@/lib/formatPhone";
 
 type PhoneDisplayProps = {
   value: string | null | undefined;

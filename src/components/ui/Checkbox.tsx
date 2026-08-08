@@ -1,6 +1,11 @@
 "use client";
 
-import { forwardRef, useId, type InputHTMLAttributes, type ReactNode } from "react";
+import {
+  forwardRef,
+  useId,
+  type InputHTMLAttributes,
+  type ReactNode,
+} from "react";
 import { cn } from "@/lib/cn";
 import { focusRing } from "./styles";
 
@@ -20,7 +25,10 @@ const boxBase = cn(
 );
 
 export const Checkbox = forwardRef<HTMLInputElement, ToggleProps>(
-  function Checkbox({ label, hint, className, wrapperClassName, id, ...props }, ref) {
+  function Checkbox(
+    { label, hint, className, wrapperClassName, id, ...props },
+    ref,
+  ) {
     const generated = useId();
     const inputId = id ?? generated;
 
@@ -63,7 +71,9 @@ export const Checkbox = forwardRef<HTMLInputElement, ToggleProps>(
             {label}
           </label>
           {hint ? (
-            <span className="text-xs leading-relaxed text-fg-muted">{hint}</span>
+            <span className="text-xs leading-relaxed text-fg-muted">
+              {hint}
+            </span>
           ) : null}
         </span>
       </div>
@@ -148,7 +158,10 @@ export function ChoiceCard({
         {...props}
       />
       {icon ? (
-        <span className="mt-0.5 shrink-0 text-lg text-fg-muted group-has-checked:text-brand" aria-hidden>
+        <span
+          className="mt-0.5 shrink-0 text-lg text-fg-muted group-has-checked:text-brand"
+          aria-hidden
+        >
           {icon}
         </span>
       ) : null}

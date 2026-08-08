@@ -37,10 +37,7 @@ import {
   getAdminProductLabel,
 } from "@/lib/fetchAdminAnalytics";
 import { formatMenuPrice } from "@/lib/formatMenuPrice";
-import {
-  publicMenuLinkUrl,
-  resolvePublicMenuSlug,
-} from "@/lib/publicMenuUrl";
+import { publicMenuLinkUrl, resolvePublicMenuSlug } from "@/lib/publicMenuUrl";
 import type {
   AdminAnalyticsPeriod,
   AdminAnalyticsResponse,
@@ -212,9 +209,7 @@ export default function AdminAnalyticsPage() {
 
   const topBannerMenus = useMemo(
     () =>
-      (
-        analytics?.freeBannerMetrics?.topMenusByClicks ?? []
-      ).map((m) => {
+      (analytics?.freeBannerMetrics?.topMenusByClicks ?? []).map((m) => {
         const slug = resolvePublicMenuSlug(m.slug, m.id);
         return {
           id: m.id,
@@ -290,7 +285,7 @@ export default function AdminAnalyticsPage() {
         <SkeletonRegion label={tCommon("loading")}>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-64 w-full rounded-xl" />
+              <Skeleton key={i} className="h-64 w-full rounded-lg" />
             ))}
           </div>
         </SkeletonRegion>
@@ -308,7 +303,11 @@ export default function AdminAnalyticsPage() {
             }
             dir={textDir}
           >
-            <AdminMetricsGrid items={summaryMetrics} columns={4} dir={textDir} />
+            <AdminMetricsGrid
+              items={summaryMetrics}
+              columns={4}
+              dir={textDir}
+            />
           </AdminSectionCard>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -328,7 +327,9 @@ export default function AdminAnalyticsPage() {
             {(analytics.revenueOverTime?.length ?? 0) > 0 && (
               <AdminSectionCard
                 title={t("revenueOverTime")}
-                icon={<FaCreditCard className="text-primary text-xl shrink-0" />}
+                icon={
+                  <FaCreditCard className="text-primary text-xl shrink-0" />
+                }
                 dir={textDir}
               >
                 <AdminMonthGrid
@@ -379,8 +380,8 @@ export default function AdminAnalyticsPage() {
               columns={3}
               dir={textDir}
             />
-            <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
-              <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+            <div className="mt-6 pt-6 border-t border-line">
+              <p className="text-sm font-medium text-fg-muted mb-3">
                 {t("topMenusByBannerClicks")}
               </p>
               <AdminRankedList
@@ -413,7 +414,9 @@ export default function AdminAnalyticsPage() {
           {geoItems.length > 0 && (
             <AdminSectionCard
               title={t("geoDistribution")}
-              icon={<IoGlobeOutline className="text-primary text-xl shrink-0" />}
+              icon={
+                <IoGlobeOutline className="text-primary text-xl shrink-0" />
+              }
               dir={textDir}
             >
               <AdminRankedList items={geoItems} dir={textDir} />
@@ -424,7 +427,9 @@ export default function AdminAnalyticsPage() {
             <AdminSectionCard
               title={t("expiringSoon")}
               subtitle={t("expiringSoonHint")}
-              icon={<IoPeopleOutline className="text-primary text-xl shrink-0" />}
+              icon={
+                <IoPeopleOutline className="text-primary text-xl shrink-0" />
+              }
               dir={textDir}
               action={
                 <LinkTo
@@ -438,28 +443,33 @@ export default function AdminAnalyticsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400">
-                      <th className={`py-2 ${textDir === "rtl" ? "text-right" : "text-left"}`}>
+                    <tr className="border-b border-line text-fg-muted">
+                      <th
+                        className={`py-2 ${textDir === "rtl" ? "text-right" : "text-left"}`}
+                      >
                         {t("userName")}
                       </th>
-                      <th className={`py-2 ${textDir === "rtl" ? "text-right" : "text-left"}`}>
+                      <th
+                        className={`py-2 ${textDir === "rtl" ? "text-right" : "text-left"}`}
+                      >
                         {t("userEmail")}
                       </th>
-                      <th className={`py-2 ${textDir === "rtl" ? "text-right" : "text-left"}`}>
+                      <th
+                        className={`py-2 ${textDir === "rtl" ? "text-right" : "text-left"}`}
+                      >
                         {t("plan")}
                       </th>
-                      <th className={`py-2 ${textDir === "rtl" ? "text-right" : "text-left"}`}>
+                      <th
+                        className={`py-2 ${textDir === "rtl" ? "text-right" : "text-left"}`}
+                      >
                         {t("endDate")}
                       </th>
                     </tr>
                   </thead>
                   <tbody>
                     {analytics.subscriptions!.expiringSoon.map((row) => (
-                      <tr
-                        key={row.userId}
-                        className="border-b border-slate-100 dark:border-slate-800"
-                      >
-                        <td className="py-3 font-medium text-slate-800 dark:text-slate-200">
+                      <tr key={row.userId} className="border-b border-line">
+                        <td className="py-3 font-medium text-fg">
                           <LinkTo
                             href={`/admin/users/${row.userId}`}
                             className="hover:text-primary"
@@ -467,9 +477,7 @@ export default function AdminAnalyticsPage() {
                             {row.name}
                           </LinkTo>
                         </td>
-                        <td className="py-3 text-slate-600 dark:text-slate-400">
-                          {row.email}
-                        </td>
+                        <td className="py-3 text-fg-muted">{row.email}</td>
                         <td className="py-3">{row.planName}</td>
                         <td className="py-3 tabular-nums">
                           {formatAdminDate(row.endDate, locale)}

@@ -62,7 +62,7 @@ export default function CallNowPhoneModal({
         </>
       }
     >
-      <div className="flex justify-center rounded-xl border border-line bg-surface-2 px-4 py-5">
+      <div className="flex justify-center rounded-lg border border-line bg-surface-2 px-4 py-5">
         <PhoneDisplay
           value={formatted}
           className="text-2xl font-semibold tracking-wide text-fg"

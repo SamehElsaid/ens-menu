@@ -119,7 +119,10 @@ export default function TablesPage() {
         />
         <LinkTo
           href={`/dashboard/${menuId}/subscription`}
-          className={buttonClasses({ variant: "primary", className: "mt-2 md:mt-4" })}
+          className={buttonClasses({
+            variant: "primary",
+            className: "mt-2 md:mt-4",
+          })}
         >
           {buttonLabel}
         </LinkTo>
@@ -129,7 +132,10 @@ export default function TablesPage() {
 
   return (
     <>
-      <div id="onboarding-tables-header" className="dashboard-tables-header mb-5 min-w-0 md:mb-6">
+      <div
+        id="onboarding-tables-header"
+        className="dashboard-tables-header mb-5 min-w-0 md:mb-6"
+      >
         <LinkTo
           href={`/dashboard/${menuId}`}
           className="mb-3 inline-flex items-center gap-1 text-xs font-medium text-fg-muted transition-colors hover:text-brand"
@@ -164,7 +170,10 @@ export default function TablesPage() {
         />
       </div>
 
-      <div id="onboarding-tables-table" className="dashboard-tables-page min-w-0 pb-6">
+      <div
+        id="onboarding-tables-table"
+        className="dashboard-tables-page min-w-0 pb-6"
+      >
         <TablesCardGrid
           tables={tables}
           loading={loading}

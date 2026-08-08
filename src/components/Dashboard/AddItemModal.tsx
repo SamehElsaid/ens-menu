@@ -111,8 +111,12 @@ function parseItemSizes(item: Item): ItemSizeRow[] {
     const row = size as Record<string, unknown>;
     return {
       id: crypto.randomUUID(),
-      nameAr: String(row.nameAr ?? row.name_ar ?? row.labelAr ?? row.label ?? ""),
-      nameEn: String(row.nameEn ?? row.name_en ?? row.labelEn ?? row.label ?? ""),
+      nameAr: String(
+        row.nameAr ?? row.name_ar ?? row.labelAr ?? row.label ?? "",
+      ),
+      nameEn: String(
+        row.nameEn ?? row.name_en ?? row.labelEn ?? row.label ?? "",
+      ),
       price: row.price != null ? String(row.price) : "",
     };
   });
@@ -456,7 +460,9 @@ export default function AddItemModal({
           onClose();
           onRefresh?.();
         } else {
-          toast.error(getApiErrorMessage(result.data, locale) ?? t("editError"));
+          toast.error(
+            getApiErrorMessage(result.data, locale) ?? t("editError"),
+          );
         }
       } else {
         const result = await axiosPost<typeof payload, Item>(
@@ -469,7 +475,9 @@ export default function AddItemModal({
           onClose();
           onRefresh?.();
         } else {
-          toast.error(getApiErrorMessage(result.data, locale) ?? t("createError"));
+          toast.error(
+            getApiErrorMessage(result.data, locale) ?? t("createError"),
+          );
         }
       }
     } catch {
@@ -629,7 +637,11 @@ export default function AddItemModal({
         footer={
           isItemLoading ? undefined : (
             <>
-              <Button variant="secondary" onClick={onClose} disabled={isCreating}>
+              <Button
+                variant="secondary"
+                onClick={onClose}
+                disabled={isCreating}
+              >
                 {t("cancel")}
               </Button>
               <Button
@@ -659,12 +671,15 @@ export default function AddItemModal({
           >
             <section className="flex flex-col gap-3">
               <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
-                <IoImageOutline className="size-4 shrink-0 text-fg-muted" aria-hidden />
+                <IoImageOutline
+                  className="size-4 shrink-0 text-fg-muted"
+                  aria-hidden
+                />
                 {t("image")}
               </h3>
               <div
                 className={cn(
-                  "relative rounded-xl border border-dashed transition-colors duration-150",
+                  "relative rounded-lg border border-dashed transition-colors duration-150",
                   isDragOver
                     ? "border-brand bg-brand-soft"
                     : "border-line-strong bg-surface-2",
@@ -686,7 +701,7 @@ export default function AddItemModal({
                   disabled={isImageBusy}
                   onClick={() => setPexelsModalOpen(true)}
                   className={cn(
-                    "flex min-h-40 w-full flex-col items-center justify-center rounded-xl px-6 py-8 disabled:opacity-70",
+                    "flex min-h-40 w-full flex-col items-center justify-center rounded-lg px-6 py-8 disabled:opacity-70",
                     focusRing,
                   )}
                 >
@@ -734,11 +749,18 @@ export default function AddItemModal({
 
             <section className="flex flex-col gap-3">
               <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
-                <IoPricetagOutline className="size-4 shrink-0 text-fg-muted" aria-hidden />
+                <IoPricetagOutline
+                  className="size-4 shrink-0 text-fg-muted"
+                  aria-hidden
+                />
                 {t("nameEn")} / {t("nameAr")}
               </h3>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <Field label={t("nameEn")} required error={errors.nameEn?.message}>
+                <Field
+                  label={t("nameEn")}
+                  required
+                  error={errors.nameEn?.message}
+                >
                   <Controller
                     name="nameEn"
                     control={control}
@@ -755,7 +777,11 @@ export default function AddItemModal({
                     )}
                   />
                 </Field>
-                <Field label={t("nameAr")} required error={errors.nameAr?.message}>
+                <Field
+                  label={t("nameAr")}
+                  required
+                  error={errors.nameAr?.message}
+                >
                   <Controller
                     name="nameAr"
                     control={control}
@@ -780,7 +806,10 @@ export default function AddItemModal({
                 {t("descriptionEn")} / {t("descriptionAr")}
               </h3>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <Field label={t("descriptionEn")} error={errors.descriptionEn?.message}>
+                <Field
+                  label={t("descriptionEn")}
+                  error={errors.descriptionEn?.message}
+                >
                   <Controller
                     name="descriptionEn"
                     control={control}
@@ -795,7 +824,10 @@ export default function AddItemModal({
                     )}
                   />
                 </Field>
-                <Field label={t("descriptionAr")} error={errors.descriptionAr?.message}>
+                <Field
+                  label={t("descriptionAr")}
+                  error={errors.descriptionAr?.message}
+                >
                   <Controller
                     name="descriptionAr"
                     control={control}
@@ -815,7 +847,11 @@ export default function AddItemModal({
             </section>
 
             <section className="flex flex-col gap-3">
-              <Field label={t("category")} required error={errors.categoryId?.message}>
+              <Field
+                label={t("category")}
+                required
+                error={errors.categoryId?.message}
+              >
                 <Controller
                   name="categoryId"
                   control={control}
@@ -841,7 +877,9 @@ export default function AddItemModal({
             </section>
 
             <section className="flex flex-col gap-3">
-              <h3 className="text-[13px] font-semibold text-fg">{t("price")}</h3>
+              <h3 className="text-[13px] font-semibold text-fg">
+                {t("price")}
+              </h3>
               <div className="mb-2 flex w-fit gap-1 rounded-lg border border-line bg-surface-2 p-1">
                 <button
                   type="button"
@@ -872,7 +910,12 @@ export default function AddItemModal({
               </div>
 
               {priceMode === "single" ? (
-                <Field label={t("price")} required error={errors.price?.message} className="max-w-md">
+                <Field
+                  label={t("price")}
+                  required
+                  error={errors.price?.message}
+                  className="max-w-md"
+                >
                   <Controller
                     name="price"
                     control={control}
@@ -902,7 +945,11 @@ export default function AddItemModal({
                       key={size.id}
                       className="grid grid-cols-1 items-start gap-3 rounded-lg border border-line bg-surface p-4 md:grid-cols-[1fr_1fr_1fr_auto]"
                     >
-                      <Field label={t("sizeNameAr")} required error={sizeFieldErrors[size.id]?.nameAr}>
+                      <Field
+                        label={t("sizeNameAr")}
+                        required
+                        error={sizeFieldErrors[size.id]?.nameAr}
+                      >
                         <Input
                           type="text"
                           value={size.nameAr}
@@ -913,7 +960,11 @@ export default function AddItemModal({
                           dir="rtl"
                         />
                       </Field>
-                      <Field label={t("sizeNameEn")} required error={sizeFieldErrors[size.id]?.nameEn}>
+                      <Field
+                        label={t("sizeNameEn")}
+                        required
+                        error={sizeFieldErrors[size.id]?.nameEn}
+                      >
                         <Input
                           type="text"
                           value={size.nameEn}
@@ -923,7 +974,11 @@ export default function AddItemModal({
                           placeholder="e.g. Small"
                         />
                       </Field>
-                      <Field label={t("price")} required error={sizeFieldErrors[size.id]?.price}>
+                      <Field
+                        label={t("price")}
+                        required
+                        error={sizeFieldErrors[size.id]?.price}
+                      >
                         <Input
                           type="number"
                           min={0}
@@ -993,7 +1048,9 @@ export default function AddItemModal({
                           return;
                         }
                         const num = Number(raw);
-                        field.onChange(Math.min(100, Math.max(0, num)).toString());
+                        field.onChange(
+                          Math.min(100, Math.max(0, num)).toString(),
+                        );
                       }}
                       onBlur={field.onBlur}
                       placeholder="0"
@@ -1004,7 +1061,9 @@ export default function AddItemModal({
             </section>
 
             <section className="flex flex-col gap-3">
-              <h3 className="text-[13px] font-semibold text-fg">{t("addOns")}</h3>
+              <h3 className="text-[13px] font-semibold text-fg">
+                {t("addOns")}
+              </h3>
               <p className="text-sm text-fg-muted">{t("addOnsHint")}</p>
 
               <div className="space-y-4">
@@ -1094,10 +1153,15 @@ export default function AddItemModal({
 
             <section className="flex flex-col gap-3">
               <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
-                <IoEllipseSharp className="size-3 shrink-0 text-fg-subtle" aria-hidden />
+                <IoEllipseSharp
+                  className="size-3 shrink-0 text-fg-subtle"
+                  aria-hidden
+                />
                 {t("currentlyAvailable")}
               </h3>
-              <p className="text-sm text-fg-muted">{tItems("availableToOrderNow")}</p>
+              <p className="text-sm text-fg-muted">
+                {tItems("availableToOrderNow")}
+              </p>
               <Controller
                 name="isAvailable"
                 control={control}
@@ -1118,7 +1182,9 @@ export default function AddItemModal({
                       <IoCheckmarkCircle
                         className={cn(
                           "size-4",
-                          field.value === true ? "text-success" : "text-fg-subtle",
+                          field.value === true
+                            ? "text-success"
+                            : "text-fg-subtle",
                         )}
                         aria-hidden
                       />
@@ -1139,7 +1205,9 @@ export default function AddItemModal({
                       <IoRemoveCircle
                         className={cn(
                           "size-4",
-                          field.value === false ? "text-danger" : "text-fg-subtle",
+                          field.value === false
+                            ? "text-danger"
+                            : "text-fg-subtle",
                         )}
                         aria-hidden
                       />

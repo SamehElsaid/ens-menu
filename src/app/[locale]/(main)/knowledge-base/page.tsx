@@ -14,9 +14,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return buildSeoMetadata({
     locale,
     path: "knowledge-base",
-    title: resolveMetaField(dynamic, locale, "title", t("knowledgeBasePage.title")),
-    description: resolveMetaField(dynamic, locale, "description", t("knowledgeBasePage.description")),
-    keywords: resolveMetaField(dynamic, locale, "keywords", t("knowledgeBasePage.keywords")),
+    title: resolveMetaField(
+      dynamic,
+      locale,
+      "title",
+      t("knowledgeBasePage.title"),
+    ),
+    description: resolveMetaField(
+      dynamic,
+      locale,
+      "description",
+      t("knowledgeBasePage.description"),
+    ),
+    keywords: resolveMetaField(
+      dynamic,
+      locale,
+      "keywords",
+      t("knowledgeBasePage.keywords"),
+    ),
     coreKeywords: t("coreKeywords"),
     siteName: t("siteName"),
     robots: "index, follow",

@@ -7,12 +7,7 @@ import { IoArrowBack } from "react-icons/io5";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
-import {
-  Button,
-  EmptyState,
-  LoadingBlock,
-  PageHeader,
-} from "@/components/ui";
+import { Button, EmptyState, LoadingBlock, PageHeader } from "@/components/ui";
 
 interface AppVersionData {
   latestVersion: string;
@@ -131,11 +126,10 @@ export default function AppVersionPage() {
         releaseNotes_en: releaseNotesEn.trim(),
       };
 
-      const result = await axiosPost<AppVersionPayload, AppVersionCreateResponse>(
-        "/admin/app-version",
-        locale,
-        payload,
-      );
+      const result = await axiosPost<
+        AppVersionPayload,
+        AppVersionCreateResponse
+      >("/admin/app-version", locale, payload);
 
       if (result.status) {
         toast.success(t("saveSuccess"));
@@ -245,7 +239,7 @@ export default function AppVersionPage() {
               placeholder="1.0.2"
               value={latestVersion}
               onChange={(e) => setLatestVersion(e.target.value)}
-              className="w-full rounded-xl border border-line-strong bg-surface px-4 py-2.5 text-fg"
+              className="w-full rounded-lg border border-line-strong bg-surface px-4 py-2.5 text-fg"
               dir="ltr"
             />
           </div>
@@ -258,7 +252,10 @@ export default function AppVersionPage() {
               onChange={(e) => setForceUpdate(e.target.checked)}
               className="size-4 rounded border-line-strong text-brand focus:ring-brand"
             />
-            <label htmlFor="forceUpdate" className="text-sm font-medium text-fg-muted">
+            <label
+              htmlFor="forceUpdate"
+              className="text-sm font-medium text-fg-muted"
+            >
               {t("fields.forceUpdate")}
             </label>
           </div>
@@ -273,7 +270,7 @@ export default function AppVersionPage() {
               value={downloadUrl}
               onChange={(e) => setDownloadUrl(e.target.value)}
               placeholder="https://..."
-              className="w-full rounded-xl border border-line-strong bg-surface px-4 py-2.5 text-fg"
+              className="w-full rounded-lg border border-line-strong bg-surface px-4 py-2.5 text-fg"
               dir="ltr"
             />
           </div>
@@ -286,7 +283,7 @@ export default function AppVersionPage() {
               rows={3}
               value={releaseNotesAr}
               onChange={(e) => setReleaseNotesAr(e.target.value)}
-              className="w-full resize-y rounded-xl border border-line-strong bg-surface px-4 py-2.5 text-fg"
+              className="w-full resize-y rounded-lg border border-line-strong bg-surface px-4 py-2.5 text-fg"
               dir="rtl"
             />
           </div>
@@ -299,7 +296,7 @@ export default function AppVersionPage() {
               rows={3}
               value={releaseNotesEn}
               onChange={(e) => setReleaseNotesEn(e.target.value)}
-              className="w-full resize-y rounded-xl border border-line-strong bg-surface px-4 py-2.5 text-fg"
+              className="w-full resize-y rounded-lg border border-line-strong bg-surface px-4 py-2.5 text-fg"
               dir="ltr"
             />
           </div>

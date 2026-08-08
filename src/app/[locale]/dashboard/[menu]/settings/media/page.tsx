@@ -16,13 +16,7 @@ import {
   FaWhatsapp,
 } from "react-icons/fa";
 import CustomInput from "@/components/Custom/CustomInput";
-import {
-  Button,
-  Checkbox,
-  Field,
-  Input,
-  Switch,
-} from "@/components/ui";
+import { Button, Checkbox, Field, Input, Switch } from "@/components/ui";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { axiosPatch } from "@/shared/axiosCall";
 import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
@@ -54,12 +48,14 @@ type DayKey = (typeof DAY_KEYS)[number];
 
 type SocialKey = "facebook" | "instagram" | "twitter" | "whatsapp";
 
-const SOCIAL_URL_PLACEHOLDERS: Record<Exclude<SocialKey, "whatsapp">, string> =
-  {
-    facebook: "https://www.facebook.com/...",
-    instagram: "https://www.instagram.com/...",
-    twitter: "https://x.com/...",
-  };
+const SOCIAL_URL_PLACEHOLDERS: Record<
+  Exclude<SocialKey, "whatsapp">,
+  string
+> = {
+  facebook: "https://www.facebook.com/...",
+  instagram: "https://www.instagram.com/...",
+  twitter: "https://x.com/...",
+};
 
 interface SocialLinkRow {
   id: SocialKey;
@@ -246,25 +242,25 @@ export default function MediaPage() {
           <HiOutlineShare className="text-sm" />
           <span>{t("badge")}</span>
         </div>
-        <PageTitleWithHelp className="my-4 ">
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100">
+        <PageTitleWithHelp className="my-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-fg">
             {t("title")}
           </h1>
         </PageTitleWithHelp>
       </header>
 
-      <div className="space-y-6 ">
+      <div className="space-y-6">
         {/* Social media links */}
         <section
           id="onboarding-media-social"
-          className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 md:p-6 space-y-4"
+          className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6 space-y-4"
         >
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center">
               <HiOutlineShare className="text-lg text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+              <h2 className="text-base font-semibold text-fg">
                 {t("socialLinks.title")}
               </h2>
             </div>
@@ -278,7 +274,7 @@ export default function MediaPage() {
               return (
                 <div key={row.id} className="flex items-center gap-3 flex-wrap">
                   <div
-                    className={`h-10 w-10 min-w-10 rounded-xl flex items-center justify-center shrink-0 ${colorClass}`}
+                    className={`h-10 w-10 min-w-10 rounded-lg flex items-center justify-center shrink-0 ${colorClass}`}
                   >
                     <Icon className="text-lg" />
                   </div>
@@ -300,9 +296,7 @@ export default function MediaPage() {
                         <Input
                           type="text"
                           value={row.value}
-                          onChange={(e) =>
-                            updateSocial(row.id, e.target.value)
-                          }
+                          onChange={(e) => updateSocial(row.id, e.target.value)}
                           onBlur={() => {
                             const trimmed = row.value.trim();
                             if (!trimmed) return;
@@ -318,7 +312,7 @@ export default function MediaPage() {
             })}
           </div>
 
-          <div className="rounded-xl flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800/50 p-3">
+          <div className="rounded-lg flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800/50 p-3">
             <span className="text-blue-600 dark:text-blue-400 shrink-0 mt-0.5">
               ℹ
             </span>
@@ -331,14 +325,14 @@ export default function MediaPage() {
         {/* Contact information */}
         <section
           id="onboarding-media-contact"
-          className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 md:p-6 space-y-4"
+          className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6 space-y-4"
         >
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
               <HiOutlineMail className="text-lg text-primary" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+              <h2 className="text-base font-semibold text-fg">
                 {t("contact.title")}
               </h2>
             </div>
@@ -384,36 +378,36 @@ export default function MediaPage() {
         {/* Wi‑Fi (optional) */}
         <section
           id="onboarding-media-wifi"
-          className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 md:p-6 space-y-4"
+          className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6 space-y-4"
         >
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
                 <HiOutlineWifi className="text-lg text-primary" />
               </div>
               <div>
-                <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                <h2 className="text-base font-semibold text-fg">
                   {t("wifi.title")}
                 </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                <p className="text-xs text-fg-muted mt-0.5">
                   {t("wifi.description")}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-3 shrink-0">
-              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              <span className="text-xs font-medium text-fg-muted">
                 {wifi.wifiEnabled ? t("wifi.enabledOn") : t("wifi.enabledOff")}
               </span>
-            <Switch
-              checked={wifi.wifiEnabled}
-              onChange={(e) =>
-                setWifi((prev) => ({
-                  ...prev,
-                  wifiEnabled: e.target.checked,
-                }))
-              }
-              aria-label={t("wifi.enabled")}
-            />
+              <Switch
+                checked={wifi.wifiEnabled}
+                onChange={(e) =>
+                  setWifi((prev) => ({
+                    ...prev,
+                    wifiEnabled: e.target.checked,
+                  }))
+                }
+                aria-label={t("wifi.enabled")}
+              />
             </div>
           </div>
 
@@ -452,14 +446,14 @@ export default function MediaPage() {
         {/* Business hours */}
         <section
           id="onboarding-media-hours"
-          className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 md:p-6 space-y-4"
+          className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6 space-y-4"
         >
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
               <HiOutlineClock className="text-lg text-primary" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+              <h2 className="text-base font-semibold text-fg">
                 {t("businessHours.title")}
               </h2>
             </div>
@@ -474,7 +468,7 @@ export default function MediaPage() {
                   key={day}
                   className={`flex flex-wrap items-center gap-2 sm:gap-3 ${isClosed ? "opacity-75" : ""}`}
                 >
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300 w-24 shrink-0">
+                  <span className="text-sm font-medium text-fg-muted w-24 shrink-0">
                     {t(`businessHours.days.${day}`)}
                   </span>
                   <div className="flex items-center gap-2 flex-1 min-w-[200px]">
@@ -522,7 +516,7 @@ export default function MediaPage() {
             })}
           </div>
 
-          <div className="rounded-xl flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800/50 p-3">
+          <div className="rounded-lg flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800/50 p-3">
             <span className="text-blue-600 dark:text-blue-400 shrink-0 mt-0.5">
               ℹ
             </span>

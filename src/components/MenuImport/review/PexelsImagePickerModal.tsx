@@ -49,47 +49,54 @@ export default function PexelsImagePickerModal({
   const [searchCompleted, setSearchCompleted] = useState(false);
   const [selectingId, setSelectingId] = useState<number | null>(null);
 
-  const runSearch = useCallback(async (searchQuery: string, signal?: AbortSignal) => {
-    const trimmed = searchQuery.trim();
-    if (!trimmed || trimmed.length < MIN_SEARCH_QUERY_LENGTH) {
-      setPhotos([]);
-      setSearchCompleted(false);
-      return;
-    }
-
-    setIsSearching(true);
-    setSearchCompleted(false);
-    try {
-      const params = new URLSearchParams({ query: trimmed, per_page: "15" });
-      const response = await fetch(`/api/pexels/search?${params.toString()}`, {
-        signal,
-      });
-      const data = (await response.json()) as PexelsSearchResponse & {
-        error?: string;
-      };
-
-      if (!response.ok) {
-        toast.error(
-          data.error === "pexels_not_configured"
-            ? t("pexelsNotConfigured")
-            : t("pexelsSearchError"),
-        );
+  const runSearch = useCallback(
+    async (searchQuery: string, signal?: AbortSignal) => {
+      const trimmed = searchQuery.trim();
+      if (!trimmed || trimmed.length < MIN_SEARCH_QUERY_LENGTH) {
         setPhotos([]);
-        setSearchCompleted(true);
+        setSearchCompleted(false);
         return;
       }
 
-      setPhotos(data.photos ?? []);
-      setSearchCompleted(true);
-    } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") return;
-      toast.error(t("pexelsSearchError"));
-      setPhotos([]);
-      setSearchCompleted(true);
-    } finally {
-      setIsSearching(false);
-    }
-  }, [t]);
+      setIsSearching(true);
+      setSearchCompleted(false);
+      try {
+        const params = new URLSearchParams({ query: trimmed, per_page: "15" });
+        const response = await fetch(
+          `/api/pexels/search?${params.toString()}`,
+          {
+            signal,
+          },
+        );
+        const data = (await response.json()) as PexelsSearchResponse & {
+          error?: string;
+        };
+
+        if (!response.ok) {
+          toast.error(
+            data.error === "pexels_not_configured"
+              ? t("pexelsNotConfigured")
+              : t("pexelsSearchError"),
+          );
+          setPhotos([]);
+          setSearchCompleted(true);
+          return;
+        }
+
+        setPhotos(data.photos ?? []);
+        setSearchCompleted(true);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError")
+          return;
+        toast.error(t("pexelsSearchError"));
+        setPhotos([]);
+        setSearchCompleted(true);
+      } finally {
+        setIsSearching(false);
+      }
+    },
+    [t],
+  );
 
   useEffect(() => {
     if (!open) {
@@ -197,7 +204,10 @@ export default function PexelsImagePickerModal({
         />
 
         {showSearchLoading ? (
-          <LoadingBlock label={t("pexelsSearching")} className="min-h-[220px]" />
+          <LoadingBlock
+            label={t("pexelsSearching")}
+            className="min-h-[220px]"
+          />
         ) : showNoResults ? (
           <NoResultsState title={t("pexelsNoResults")} />
         ) : photos.length === 0 ? (

@@ -39,7 +39,9 @@ export function SaveTemplateModal({ open, onClose }: Props) {
   const [descriptionAr, setDescriptionAr] = useState("");
   const [image, setImage] = useState("");
   const [imageBusy, setImageBusy] = useState(false);
-  const [errors, setErrors] = useState<Partial<Record<keyof TemplateCatalogMeta, string>>>({});
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof TemplateCatalogMeta, string>>
+  >({});
 
   useEffect(() => {
     if (!open || !document) return;
@@ -58,8 +60,10 @@ export function SaveTemplateModal({ open, onClose }: Props) {
     const next: Partial<Record<keyof TemplateCatalogMeta, string>> = {};
     if (!name.trim()) next.name = t("saveModal.nameEnRequired");
     if (!nameAr.trim()) next.nameAr = t("saveModal.nameArRequired");
-    if (!description.trim()) next.description = t("saveModal.descriptionEnRequired");
-    if (!descriptionAr.trim()) next.descriptionAr = t("saveModal.descriptionArRequired");
+    if (!description.trim())
+      next.description = t("saveModal.descriptionEnRequired");
+    if (!descriptionAr.trim())
+      next.descriptionAr = t("saveModal.descriptionArRequired");
     if (!image.trim()) next.image = t("saveModal.imageRequired");
     setErrors(next);
     if (Object.keys(next).length) return null;
@@ -105,14 +109,20 @@ export function SaveTemplateModal({ open, onClose }: Props) {
   const errorClass = "mt-1 text-[11px] text-red-400";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      role="dialog"
+      aria-modal="true"
+    >
       <form
         onSubmit={(e) => void onSubmit(e)}
         dir={isRTL ? "rtl" : "ltr"}
         className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-slate-700 bg-slate-900 shadow-2xl"
       >
         <div className="flex items-center gap-2 border-b border-slate-700 px-4 py-3">
-          <h2 className="text-sm font-semibold text-white">{t("saveModal.title")}</h2>
+          <h2 className="text-sm font-semibold text-white">
+            {t("saveModal.title")}
+          </h2>
           <div className="flex-1" />
           <button
             type="button"
@@ -143,9 +153,17 @@ export function SaveTemplateModal({ open, onClose }: Props) {
               className="flex w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-600 bg-slate-950/60 px-3 py-4 text-xs text-slate-400 hover:border-violet-500 hover:text-slate-200 disabled:opacity-50"
             >
               {image ? (
-                <img src={image} alt="" className="h-28 w-full rounded-md object-cover" />
+                <img
+                  src={image}
+                  alt=""
+                  className="h-28 w-full rounded-md object-cover"
+                />
               ) : (
-                <span className="py-6">{imageBusy ? t("saveModal.imageLoading") : t("saveModal.imageHint")}</span>
+                <span className="py-6">
+                  {imageBusy
+                    ? t("saveModal.imageLoading")
+                    : t("saveModal.imageHint")}
+                </span>
               )}
               {image ? <span>{t("saveModal.changeImage")}</span> : null}
             </button>
@@ -180,7 +198,9 @@ export function SaveTemplateModal({ open, onClose }: Props) {
                 disabled={saving}
                 dir="rtl"
               />
-              {errors.nameAr ? <p className={errorClass}>{errors.nameAr}</p> : null}
+              {errors.nameAr ? (
+                <p className={errorClass}>{errors.nameAr}</p>
+              ) : null}
             </div>
           </div>
 
@@ -197,7 +217,9 @@ export function SaveTemplateModal({ open, onClose }: Props) {
               disabled={saving}
               rows={3}
             />
-            {errors.description ? <p className={errorClass}>{errors.description}</p> : null}
+            {errors.description ? (
+              <p className={errorClass}>{errors.description}</p>
+            ) : null}
           </div>
 
           <div>
@@ -214,7 +236,9 @@ export function SaveTemplateModal({ open, onClose }: Props) {
               rows={3}
               dir="rtl"
             />
-            {errors.descriptionAr ? <p className={errorClass}>{errors.descriptionAr}</p> : null}
+            {errors.descriptionAr ? (
+              <p className={errorClass}>{errors.descriptionAr}</p>
+            ) : null}
           </div>
         </div>
 

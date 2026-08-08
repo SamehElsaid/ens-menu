@@ -64,7 +64,7 @@ export default function TemplateListPage() {
         <SkeletonRegion label={t("loading")}>
           <div className="space-y-2">
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-16 w-full rounded-xl" />
+              <Skeleton key={i} className="h-16 w-full rounded-lg" />
             ))}
           </div>
         </SkeletonRegion>
@@ -87,7 +87,7 @@ export default function TemplateListPage() {
           {items.map((item) => (
             <li
               key={item.id}
-              className="flex flex-wrap items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3"
+              className="flex flex-wrap items-center gap-3 rounded-lg border border-line bg-surface px-4 py-3"
             >
               <div className="min-w-0 flex-1">
                 <Link
@@ -107,7 +107,8 @@ export default function TemplateListPage() {
                   </span>
                 </Link>
                 <p className="mt-0.5 text-xs text-fg-muted">
-                  {item.slug} · {new Date(item.updatedAt).toLocaleString(locale)}
+                  {item.slug} ·{" "}
+                  {new Date(item.updatedAt).toLocaleString(locale)}
                 </p>
               </div>
               <ButtonLink

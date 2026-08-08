@@ -28,7 +28,10 @@ export default function SafeNavigationGuard() {
 
     window.addEventListener(SAME_ROUTE_REFRESH_EVENT, handleSameRouteRefresh);
     return () =>
-      window.removeEventListener(SAME_ROUTE_REFRESH_EVENT, handleSameRouteRefresh);
+      window.removeEventListener(
+        SAME_ROUTE_REFRESH_EVENT,
+        handleSameRouteRefresh,
+      );
   }, [router]);
 
   useEffect(() => {

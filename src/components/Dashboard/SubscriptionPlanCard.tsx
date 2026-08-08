@@ -18,7 +18,13 @@ import ProPlanPriceSelector, {
 } from "@/components/Pricing/ProPlanPriceSelector";
 import { formatEgpPrice } from "@/lib/subscriptionPayment";
 import type { Plan } from "@/types/Plan";
-import { Alert, Badge, Button, Skeleton, SkeletonRegion } from "@/components/ui";
+import {
+  Alert,
+  Badge,
+  Button,
+  Skeleton,
+  SkeletonRegion,
+} from "@/components/ui";
 
 type SubscriptionPlanCardProps = {
   plan: Plan;
@@ -187,7 +193,7 @@ export default function SubscriptionPlanCard({
   return (
     <article
       className={[
-        "group relative flex h-full flex-col rounded-2xl p-6 md:p-7 transition-all duration-300",
+        "group relative flex h-full flex-col rounded-lg p-6 md:p-7 transition-all duration-300",
         isProPlan && !isCurrentPlan
           ? "border-2 border-brand-line bg-surface shadow-md z-[1]"
           : isCurrentPlan
@@ -219,7 +225,7 @@ export default function SubscriptionPlanCard({
         className={`mb-5 ${isRTL ? "text-right" : "text-left"} ${isCurrentPlan ? "pe-20" : ""}`}
       >
         <div
-          className={`mb-3 flex h-11 w-11 items-center justify-center rounded-2xl ${
+          className={`mb-3 flex h-11 w-11 items-center justify-center rounded-lg ${
             isProPlan
               ? "bg-brand-soft text-brand-soft-fg"
               : isFreePlan
@@ -247,9 +253,7 @@ export default function SubscriptionPlanCard({
 
       <div className={`mb-5 ${isRTL ? "text-right" : "text-left"}`}>
         {isFreePlan && plan.priceMonthly === 0 ? (
-          <span className="text-4xl font-black text-fg">
-            {freePriceLabel}
-          </span>
+          <span className="text-4xl font-black text-fg">{freePriceLabel}</span>
         ) : showProBilling && isProPlan ? (
           <ProPlanPriceSelector
             billingChoice={proBillingChoice}
@@ -280,9 +284,7 @@ export default function SubscriptionPlanCard({
             ) : null}
           </div>
         ) : (
-          <p className="text-sm text-fg-muted">
-            {contactForDetailsLabel}
-          </p>
+          <p className="text-sm text-fg-muted">{contactForDetailsLabel}</p>
         )}
       </div>
 
@@ -292,7 +294,7 @@ export default function SubscriptionPlanCard({
 
       <div className="mt-6 flex flex-col gap-2 pt-2">
         {isCurrentPlan && !canRenew && (
-          <span className="inline-flex items-center justify-center gap-2 rounded-xl border border-brand-line bg-brand-soft px-4 py-3 text-sm font-semibold text-brand-soft-fg">
+          <span className="inline-flex items-center justify-center gap-2 rounded-lg border border-brand-line bg-brand-soft px-4 py-3 text-sm font-semibold text-brand-soft-fg">
             <HiCheck className="h-4 w-4" />
             {currentPlanLabel}
           </span>
@@ -310,7 +312,9 @@ export default function SubscriptionPlanCard({
               ) : undefined
             }
           >
-            {proPayLoading || renewLoading ? payingLabel : renewLabel ?? currentPlanLabel}
+            {proPayLoading || renewLoading
+              ? payingLabel
+              : (renewLabel ?? currentPlanLabel)}
           </Button>
         )}
         {canUpgrade && (
@@ -326,7 +330,11 @@ export default function SubscriptionPlanCard({
               onClick={onUpgrade}
               disabled={proPayLoading || Boolean(voucherDurationHint)}
               loading={proPayLoading}
-              startIcon={!proPayLoading ? <HiArrowUp className="h-4 w-4 shrink-0" /> : undefined}
+              startIcon={
+                !proPayLoading ? (
+                  <HiArrowUp className="h-4 w-4 shrink-0" />
+                ) : undefined
+              }
             >
               {proPayLoading ? payingLabel : upgradeLabel}
             </Button>
@@ -341,7 +349,9 @@ export default function SubscriptionPlanCard({
             disabled={downgradeLoading}
             loading={downgradeLoading}
             startIcon={
-              !downgradeLoading ? <HiArrowDown className="h-4 w-4 shrink-0" /> : undefined
+              !downgradeLoading ? (
+                <HiArrowDown className="h-4 w-4 shrink-0" />
+              ) : undefined
             }
           >
             {downgradeLoading ? downgradingLabel : downgradeLabel}
@@ -357,7 +367,7 @@ export function SubscriptionPlanCardSkeleton() {
   return (
     <SkeletonRegion
       label="Loading plan"
-      className="flex h-full min-h-[420px] flex-col rounded-2xl border border-line bg-surface p-6 md:p-7"
+      className="flex h-full min-h-[420px] flex-col rounded-lg border border-line bg-surface p-6 md:p-7"
     >
       <Skeleton className="mb-5 h-11 w-11" rounded="lg" />
       <Skeleton className="mb-2 h-6 w-2/5" rounded="md" />
@@ -402,7 +412,7 @@ export function CustomSubscriptionPlanCard({
   return (
     <article
       className={[
-        "relative flex h-full flex-col rounded-2xl border border-line bg-surface p-6 md:p-7 shadow-sm transition-all duration-300 hover:border-line-strong hover:shadow-md",
+        "relative flex h-full flex-col rounded-lg border border-line bg-surface p-6 md:p-7 shadow-sm transition-all duration-300 hover:border-line-strong hover:shadow-md",
         isCurrentCustomPlan &&
           "border-2 border-brand ring-1 ring-brand-line shadow-md",
         className,
@@ -411,33 +421,27 @@ export function CustomSubscriptionPlanCard({
         .join(" ")}
     >
       {isCurrentCustomPlan && (
-        <div
-          className={`absolute top-4 ${isRTL ? "start-4" : "end-4"}`}
-        >
+        <div className={`absolute top-4 ${isRTL ? "start-4" : "end-4"}`}>
           <Badge tone="brand">{currentPlanLabel}</Badge>
         </div>
       )}
 
       <header className={`mb-5 ${isRTL ? "text-right" : "text-left"}`}>
         <div
-          className={`mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-success-soft text-success-fg ${
+          className={`mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-success-soft text-success-fg ${
             isRTL ? "ms-auto" : ""
           }`}
         >
           <HiOutlineChat className="h-6 w-6" />
         </div>
-        <h3 className="text-xl font-bold text-fg">
-          {planCustomLabel}
-        </h3>
+        <h3 className="text-xl font-bold text-fg">{planCustomLabel}</h3>
         <p className="mt-1 text-sm text-fg-muted">
           {planDescription ?? contactForDetailsLabel}
         </p>
       </header>
 
       <div className={`mb-5 ${isRTL ? "text-right" : "text-left"}`}>
-        <span className="text-2xl font-black text-fg">
-          {customPriceLabel}
-        </span>
+        <span className="text-2xl font-black text-fg">{customPriceLabel}</span>
       </div>
 
       <div className="mb-5 h-px bg-line" />
@@ -446,7 +450,7 @@ export function CustomSubscriptionPlanCard({
 
       <div className="mt-6 pt-2">
         {isCurrentCustomPlan ? (
-          <span className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-brand-line bg-brand-soft px-4 py-3 text-sm font-semibold text-brand-soft-fg">
+          <span className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-brand-line bg-brand-soft px-4 py-3 text-sm font-semibold text-brand-soft-fg">
             <HiCheck className="h-4 w-4" />
             {currentPlanLabel}
           </span>
@@ -456,7 +460,9 @@ export function CustomSubscriptionPlanCard({
             fullWidth
             className="bg-success text-white hover:bg-success-hover"
             startIcon={<HiOutlineChat className="h-5 w-5" />}
-            onClick={() => window.open(whatsappUrl, "_blank", "noopener,noreferrer")}
+            onClick={() =>
+              window.open(whatsappUrl, "_blank", "noopener,noreferrer")
+            }
           >
             {contactWhatsAppLabel}
           </Button>

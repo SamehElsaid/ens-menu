@@ -149,7 +149,7 @@ export default function DataTable<T extends object>({
     <div className={`w-full relative ${className}`} dir={isRTL ? "rtl" : "ltr"}>
       {installLoadingState && (
         <div className="absolute inset-0 bg-white dark:bg-[#0d1117]/70 overflow-hidden z-10 flex items-center justify-center loading-overlay">
-          <div className="w-[calc(100%-3px)] z-10 h-[calc(100%-3px)] bg-white dark:bg-slate-900 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]"></div>
+          <div className="w-[calc(100%-3px)] z-10 h-[calc(100%-3px)] bg-raised absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]"></div>
           <div className="blob"></div>
           <div className="z-20">
             <Loader />
@@ -600,8 +600,7 @@ export default function DataTable<T extends object>({
                     minWidth: "100%",
                   }
                 : {
-                    height:
-                      typeof height === "number" ? `${height}px` : height,
+                    height: typeof height === "number" ? `${height}px` : height,
                     minWidth: "100%",
                   }),
           }}
@@ -639,7 +638,7 @@ export default function DataTable<T extends object>({
 
         {isServerPagination && pagination && totalPages > 0 && (
           <div
-            className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border border-slate-200 border-t-0 dark:border-slate-700 dark:bg-slate-800/50 bg-slate-50/80 text-slate-700 dark:text-slate-300 rounded-b-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.1)]"
+            className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border border-line border-t-0 bg-slate-50/80 text-fg-muted rounded-b-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.1)]"
             dir={isRTL ? "rtl" : "ltr"}
           >
             <div className="flex items-center gap-2 text-sm">
@@ -654,7 +653,7 @@ export default function DataTable<T extends object>({
                     type="button"
                     onClick={() => onPageChange?.(1)}
                     disabled={page <= 1}
-                    className="inline-flex items-center justify-center w-10 h-10 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-lg border border-line-strong bg-raised text-fg-muted hover:bg-slate-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
                     aria-label={t("first")}
                   >
                     <IconPaginationPrev className="text-xl rtl:rotate-180" />
@@ -663,19 +662,19 @@ export default function DataTable<T extends object>({
                     type="button"
                     onClick={() => onPageChange?.(page - 1)}
                     disabled={page <= 1}
-                    className="inline-flex items-center justify-center w-10 h-10 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-lg border border-line-strong bg-raised text-fg-muted hover:bg-slate-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
                     aria-label={t("prev")}
                   >
                     <IconPaginationPrev className="text-xl rtl:rotate-180" />
                   </button>
-                  <span className="inline-flex items-center justify-center min-w-10 h-10 px-2 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary font-semibold text-sm border border-primary/20">
+                  <span className="inline-flex items-center justify-center min-w-10 h-10 px-2 rounded-lg bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary font-semibold text-sm border border-primary/20">
                     {page}
                   </span>
                   <button
                     type="button"
                     onClick={() => onPageChange?.(page + 1)}
                     disabled={page >= totalPages}
-                    className="inline-flex items-center justify-center w-10 h-10 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-lg border border-line-strong bg-raised text-fg-muted hover:bg-slate-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
                     aria-label={t("next")}
                   >
                     <IconPaginationNext className="text-xl rtl:rotate-180" />
@@ -684,7 +683,7 @@ export default function DataTable<T extends object>({
                     type="button"
                     onClick={() => onPageChange?.(totalPages)}
                     disabled={page >= totalPages}
-                    className="inline-flex items-center justify-center w-10 h-10 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-lg border border-line-strong bg-raised text-fg-muted hover:bg-slate-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
                     aria-label={t("last")}
                   >
                     <IconPaginationNext className="text-xl rtl:rotate-180" />

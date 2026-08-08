@@ -33,7 +33,7 @@ export default function RatingStars({
         return (
           <IoStarOutline
             key={n}
-            className={`${sizeClassName} text-slate-300 dark:text-slate-600`}
+            className={`${sizeClassName} text-slate-300 dark:text-fg-muted`}
           />
         );
       })}

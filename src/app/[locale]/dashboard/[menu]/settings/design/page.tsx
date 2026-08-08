@@ -15,14 +15,17 @@ import type { Menu } from "@/types/Menu";
 import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
 import { FaCheck, FaSpinner, FaCrown } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { menuRefFromRouteParam, menuDashboardPath } from "@/lib/menuDashboardPath";
+import {
+  menuRefFromRouteParam,
+  menuDashboardPath,
+} from "@/lib/menuDashboardPath";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import { isFreePlanUser } from "@/lib/subscription";
 import ProUpgradeModal from "@/components/Dashboard/ProUpgradeModal";
 import { useCurrentPlanCapabilities } from "@/hooks/useCurrentPlanCapabilities";
 
 const customizeButtonClassName =
-  "flex-1 inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-xs font-medium border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors";
+  "flex-1 inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-xs font-medium border border-line text-fg-muted bg-raised hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors";
 
 export default function DesignPage() {
   const locale = useLocale();
@@ -111,21 +114,15 @@ export default function DesignPage() {
 
         if (isSwitchingTheme) {
           const newTemplate = templatesInfo.find((t) => t.id === templateId);
-          const defaultColors =
-            newTemplate?.defaultColors ??
-            newTemplate?.colors ??
-            ["#9333EA", "#7C3AED"];
+          const defaultColors = newTemplate?.defaultColors ??
+            newTemplate?.colors ?? ["#9333EA", "#7C3AED"];
           const [primaryColor, secondaryColor] = defaultColors;
-          await axiosPatch(
-            `/menus/${resolvedMenuId}/customizations`,
-            locale,
-            {
-              primaryColor: primaryColor ?? "#9333EA",
-              secondaryColor: secondaryColor ?? primaryColor ?? "#7C3AED",
-              backgroundColor: "#ffffff",
-              textColor: "#0f172a",
-            },
-          );
+          await axiosPatch(`/menus/${resolvedMenuId}/customizations`, locale, {
+            primaryColor: primaryColor ?? "#9333EA",
+            secondaryColor: secondaryColor ?? primaryColor ?? "#7C3AED",
+            backgroundColor: "#ffffff",
+            textColor: "#0f172a",
+          });
         }
 
         return true;
@@ -149,9 +146,7 @@ export default function DesignPage() {
 
     if (!resolvedMenuId) {
       toast.error(
-        locale === "ar"
-          ? "لا توجد قائمة محددة."
-          : "No menu selected.",
+        locale === "ar" ? "لا توجد قائمة محددة." : "No menu selected.",
       );
       return;
     }
@@ -210,11 +205,11 @@ export default function DesignPage() {
       >
         <div className="min-w-0 flex-1">
           <PageTitleWithHelp>
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-0">
+            <h1 className="text-2xl md:text-3xl font-bold text-fg mb-0">
               {t("title")}
             </h1>
           </PageTitleWithHelp>
-          <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 max-w-2xl mt-2">
+          <p className="text-sm md:text-base text-fg-muted max-w-2xl mt-2">
             {t("subtitle")}
           </p>
         </div>
@@ -231,10 +226,8 @@ export default function DesignPage() {
       </header>
 
       {/* Helpful tips */}
-      <div className="rounded-2xl border border-sky-100 dark:border-sky-900/50 bg-sky-50/70 dark:bg-sky-900/30 px-4 py-4 md:px-6 md:py-5 flex flex-col gap-3">
-        <div
-          className={`flex items-center gap-2`}
-        >
+      <div className="rounded-lg border border-sky-100 dark:border-sky-900/50 bg-sky-50/70 dark:bg-sky-900/30 px-4 py-4 md:px-6 md:py-5 flex flex-col gap-3">
+        <div className={`flex items-center gap-2`}>
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-sky-100 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 text-sm font-bold">
             ✨
           </div>
@@ -242,9 +235,7 @@ export default function DesignPage() {
             {t("tips.title")}
           </h3>
         </div>
-        <ul
-          className={`text-[11px] md:text-xs text-slate-600 dark:text-slate-400 space-y-1.5`}
-        >
+        <ul className={`text-[11px] md:text-xs text-fg-muted space-y-1.5`}>
           <li>{t("tips.tip1")}</li>
           <li>{t("tips.tip2")}</li>
           <li>{t("tips.tip3")}</li>
@@ -255,7 +246,7 @@ export default function DesignPage() {
       <section
         id="onboarding-design-templates"
         aria-label={t("headerCta")}
-        className="bg-slate-50/60 dark:bg-slate-800/60 rounded-3xl border border-slate-100 dark:border-slate-700 p-4 md:p-6 lg:p-8 scroll-mt-24"
+        className="bg-slate-50/60 rounded-lg border border-line p-4 md:p-6 lg:p-8 scroll-mt-24"
       >
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {templatesForMenu.map((template, templateIndex) => {
@@ -269,17 +260,17 @@ export default function DesignPage() {
             return (
               <div
                 key={template.id}
-                className={`group relative cursor-pointer rounded-[28px] border bg-white dark:bg-slate-800 shadow-sm transition-all duration-200 overflow-hidden flex flex-col ${
+                className={`group relative cursor-pointer rounded-[28px] border bg-raised shadow-sm transition-all duration-200 overflow-hidden flex flex-col ${
                   isActive
                     ? "border-primary ring-2 ring-primary/30 shadow-xl shadow-primary/10 dark:shadow-primary/20"
                     : isLocked
                       ? "border-amber-200 dark:border-amber-700/50 opacity-90"
-                      : "border-slate-100 dark:border-slate-700 hover:border-primary/60 dark:hover:border-primary/50 hover:shadow-md"
+                      : "border-line hover:border-primary/60 dark:hover:border-primary/50 hover:shadow-md"
                 }`}
               >
                 {/* Top status & image */}
                 <div className="relative p-4 pb-0">
-                  <div className="relative rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-700 aspect-4/3">
+                  <div className="relative rounded-lg overflow-hidden bg-surface-3 aspect-4/3">
                     <div className="relative h-full w-full overflow-hidden">
                       {template.hidePreviewImage ? (
                         <div
@@ -299,7 +290,7 @@ export default function DesignPage() {
                       )}
                       {template.hidePreviewImage ? (
                         <div
-                          className="absolute inset-0 backdrop-blur-xl bg-white/25 dark:bg-slate-900/35"
+                          className="absolute inset-0 backdrop-blur-xl bg-white/25"
                           aria-hidden
                         />
                       ) : null}
@@ -317,15 +308,18 @@ export default function DesignPage() {
                     )}
 
                     {template.isUnderConstruction && (
-                      <span className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full bg-slate-600/90 dark:bg-slate-700/95 text-white px-2.5 py-0.5 text-[11px] font-semibold shadow-sm border border-slate-500/40">
+                      <span className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full bg-slate-600/90 text-white px-2.5 py-0.5 text-[11px] font-semibold shadow-sm border border-slate-500/40">
                         {t("badges.underConstruction")}
                       </span>
                     )}
-                    {isNew && !isActive && !template.isUnderConstruction && !isLocked && (
-                      <span className="absolute top-3 right-3 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 px-2.5 py-0.5 text-[11px] font-semibold shadow-sm border border-amber-200/50 dark:border-amber-500/30">
-                        {t("badges.new")}
-                      </span>
-                    )}
+                    {isNew &&
+                      !isActive &&
+                      !template.isUnderConstruction &&
+                      !isLocked && (
+                        <span className="absolute top-3 right-3 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 px-2.5 py-0.5 text-[11px] font-semibold shadow-sm border border-amber-200/50 dark:border-amber-500/30">
+                          {t("badges.new")}
+                        </span>
+                      )}
 
                     {/* Pro lock overlay */}
                     {isLocked && (
@@ -342,11 +336,11 @@ export default function DesignPage() {
                 {/* Content */}
                 <div className="p-5 pt-4 flex flex-col flex-1">
                   <div className={`flex items-center justify-between gap-2`}>
-                    <div >
-                      <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                    <div>
+                      <h2 className="text-base font-semibold text-fg">
                         {isRTL ? template.nameAr : template.name}
                       </h2>
-                      <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">
+                      <p className="mt-1 text-[11px] text-fg-subtle">
                         {template.id === "default"
                           ? t("cards.defaultHelper")
                           : t("cards.templateHelper")}
@@ -367,7 +361,7 @@ export default function DesignPage() {
                   </div>
 
                   <p
-                    className={`text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 mt-3 ${
+                    className={`text-xs text-fg-muted leading-relaxed line-clamp-2 mt-3 ${
                       isRTL ? "text-right" : "text-left"
                     }`}
                   >
@@ -415,16 +409,17 @@ export default function DesignPage() {
                         isLoading === template.id ? (
                           <FaSpinner className="animate-spin text-sm md:text-base" />
                         ) : (
-                          <FaCheck className=" text-sm md:text-base" />
+                          <FaCheck className="text-sm md:text-base" />
                         )
                       ) : !isActive ? (
                         <HiOutlineHand className="text-sm md:text-base" />
                       ) : (
-                        <FaCheck className=" text-sm md:text-base" />
+                        <FaCheck className="text-sm md:text-base" />
                       )}
-                      {!isLocked && (isActive
-                        ? t("cards.buttonActive")
-                        : t("cards.buttonUse"))}
+                      {!isLocked &&
+                        (isActive
+                          ? t("cards.buttonActive")
+                          : t("cards.buttonUse"))}
                     </button>
 
                     {/* Secondary actions row: preview + customize */}
@@ -439,7 +434,7 @@ export default function DesignPage() {
                           e.stopPropagation();
                           window.open(linkView, "_blank");
                         }}
-                        className="flex-1 inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-xs font-medium border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
+                        className="flex-1 inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-xs font-medium border border-line text-fg-muted bg-raised hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
                       >
                         <FiEye className="text-sm" />
                         {t("cards.preview")}

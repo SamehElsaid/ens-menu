@@ -12,7 +12,10 @@ import {
 } from "react-icons/fi";
 import { HiOutlineSparkles } from "react-icons/hi";
 import LinkTo from "@/components/Global/LinkTo";
-import { getMenuDashboardRef, menuDashboardPath } from "@/lib/menuDashboardPath";
+import {
+  getMenuDashboardRef,
+  menuDashboardPath,
+} from "@/lib/menuDashboardPath";
 import { useAppSelector } from "@/store/hooks";
 import { templatesInfo } from "@/modules/TemplateShow/data";
 import { toast } from "react-toastify";
@@ -185,13 +188,15 @@ export default function TemplateDesignCustomizePanel({
       ? customColors[1]
       : (activePalette.colors[1] ?? gradientStart);
 
-  const gradientSecondary =
-    colorSlots >= 2 ? gradientEnd : gradientStart;
+  const gradientSecondary = colorSlots >= 2 ? gradientEnd : gradientStart;
 
   useEffect(() => {
     if (!menuApiRef) return;
 
-    axiosGet<CustomizationResponse>(`/menus/${menuApiRef}/customizations`, locale)
+    axiosGet<CustomizationResponse>(
+      `/menus/${menuApiRef}/customizations`,
+      locale,
+    )
       .then((res) => {
         if (!res.status || !res.data) return;
 
@@ -250,10 +255,10 @@ export default function TemplateDesignCustomizePanel({
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
         <div className={isRTL ? "text-right space-y-2" : "text-left space-y-2"}>
-          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+          <h1 className="text-xl font-semibold text-fg">
             {t("notEditable.title")}
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md">
+          <p className="text-sm text-fg-muted max-w-md">
             {t("notEditable.description")}
           </p>
           <div className={isRTL ? "flex justify-start" : "flex justify-start"}>
@@ -261,7 +266,7 @@ export default function TemplateDesignCustomizePanel({
               <button
                 type="button"
                 onClick={onClose}
-                className="inline-flex items-center gap-2 mt-3 rounded-full border border-slate-200 dark:border-slate-600 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+                className="inline-flex items-center gap-2 mt-3 rounded-full border border-line px-4 py-2 text-xs font-semibold text-fg-muted hover:bg-surface-2"
               >
                 {isRTL ? (
                   <FiArrowRight className="text-sm" />
@@ -273,7 +278,7 @@ export default function TemplateDesignCustomizePanel({
             ) : (
               <LinkTo
                 href={designListPath}
-                className="inline-flex items-center gap-2 mt-3 rounded-full border border-slate-200 dark:border-slate-600 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+                className="inline-flex items-center gap-2 mt-3 rounded-full border border-line px-4 py-2 text-xs font-semibold text-fg-muted hover:bg-surface-2"
               >
                 {isRTL ? (
                   <FiArrowRight className="text-sm" />
@@ -371,13 +376,13 @@ export default function TemplateDesignCustomizePanel({
       <Loader />
     </div>
   ) : (
-    <div className="min-h-[calc(100vh-160px)] ">
+    <div className="min-h-[calc(100vh-160px)]">
       {/* Page header */}
       {embedded && onClose ? (
         <button
           type="button"
           onClick={onClose}
-          className="inline-flex items-center mb-4 justify-center gap-2 rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2.5 text-xs md:text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/80"
+          className="inline-flex items-center mb-4 justify-center gap-2 rounded-full border border-line bg-raised px-4 py-2.5 text-xs md:text-sm font-medium text-fg-muted hover:bg-surface-2"
         >
           {isRTL ? (
             <FiArrowRight className="text-sm" />
@@ -389,7 +394,7 @@ export default function TemplateDesignCustomizePanel({
       ) : (
         <LinkTo
           href={designListPath}
-          className="inline-flex items-center mb-4 justify-center gap-2 rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2.5 text-xs md:text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/80"
+          className="inline-flex items-center mb-4 justify-center gap-2 rounded-full border border-line bg-raised px-4 py-2.5 text-xs md:text-sm font-medium text-fg-muted hover:bg-surface-2"
         >
           {isRTL ? (
             <FiArrowRight className="text-sm" />
@@ -406,10 +411,10 @@ export default function TemplateDesignCustomizePanel({
           <HiOutlineSparkles className="text-xs" />
           <span>{t("badge")}</span>
         </div>
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 mt-2">
+        <h1 className="text-2xl md:text-3xl font-bold text-fg mt-2">
           {t("title", { name: displayName || "—" })}
         </h1>
-        <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 max-w-2xl mt-1">
+        <p className="text-sm md:text-base text-fg-muted max-w-2xl mt-1">
           {showHeroTexts ? t("description") : t("descriptionColorsOnly")}
         </p>
       </header>
@@ -418,13 +423,13 @@ export default function TemplateDesignCustomizePanel({
         {/* Left preview card */}
         <aside className="order-2 lg:order-1">
           <div className="sticky top-24">
-            <div className="rounded-[32px] bg-white/95 dark:bg-slate-800/95 shadow-xl border border-slate-100/90 dark:border-slate-700/90 overflow-hidden backdrop-blur">
-              <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between gap-3">
+            <div className="rounded-[32px] bg-white/95 shadow-xl border border-line/90 dark:border-line/90 overflow-hidden backdrop-blur">
+              <div className="px-5 py-4 border-b border-line flex items-center justify-between gap-3">
                 <div className={isRTL ? "text-right" : "text-left"}>
-                  <p className="text-[11px] uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                  <p className="text-[11px] uppercase tracking-wide text-fg-subtle">
                     {t("preview.livePreview")}
                   </p>
-                  <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mt-1">
+                  <h2 className="text-sm font-semibold text-fg mt-1">
                     {menu ? (isRTL ? menu.nameAr : menu.nameEn) : displayName}
                   </h2>
                 </div>
@@ -473,19 +478,19 @@ export default function TemplateDesignCustomizePanel({
                   )}
                 </div>
 
-                <div className="rounded-[24px] border border-slate-100 dark:border-slate-600 bg-slate-50/80 dark:bg-slate-900/50 p-3.5 space-y-3">
+                <div className="rounded-[24px] border border-line bg-slate-50/80 p-3.5 space-y-3">
                   <div className="flex items-center gap-2">
                     <div
-                      className="h-8 w-8 min-w-8 rounded-xl border border-slate-200 dark:border-slate-600 overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center"
+                      className="h-8 w-8 min-w-8 rounded-lg border border-line overflow-hidden bg-surface-2 flex items-center justify-center"
                       style={{
                         background: `linear-gradient(135deg, ${gradientStart}, ${gradientSecondary})`,
                       }}
                     />
                     <div className={isRTL ? "text-right" : "text-left"}>
-                      <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                      <p className="text-xs font-semibold text-fg">
                         {t("preview.currentColorsTitle")}
                       </p>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      <p className="text-[11px] text-fg-muted">
                         {t("preview.currentColorsDescription")}
                       </p>
                     </div>
@@ -498,9 +503,9 @@ export default function TemplateDesignCustomizePanel({
                     ).map((color, index) => (
                       <div
                         key={`current-color-${index}-${color}`}
-                        className="flex-1 rounded-xl h-8 border border-slate-200 dark:border-slate-600 flex items-center justify-between px-3 text-[11px] font-mono bg-white dark:bg-slate-800"
+                        className="flex-1 rounded-lg h-8 border border-line flex items-center justify-between px-3 text-[11px] font-mono bg-raised"
                       >
-                        <span className="truncate text-slate-700 dark:text-slate-300">{color}</span>
+                        <span className="truncate text-fg-muted">{color}</span>
                         <span
                           className="ml-2 h-4 w-4 rounded-full border border-slate-200 dark:border-slate-500"
                           style={{ backgroundColor: color }}
@@ -512,7 +517,7 @@ export default function TemplateDesignCustomizePanel({
               </div>
             </div>
 
-            <div className="mt-4 flex items-center justify-between gap-3 text-[11px] text-slate-500 dark:text-slate-400">
+            <div className="mt-4 flex items-center justify-between gap-3 text-[11px] text-fg-muted">
               <p className={isRTL ? "text-right" : "text-left"}>
                 {showHeroTexts
                   ? t("preview.footerNote")
@@ -525,17 +530,17 @@ export default function TemplateDesignCustomizePanel({
         {/* Right side controls */}
         <main className="order-1 lg:order-2 space-y-5 lg:space-y-6">
           {/* Ready colors */}
-          <section className="bg-white dark:bg-slate-800/80 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 md:p-6 space-y-4">
+          <section className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6 space-y-4">
             <div className="flex items-center justify-between gap-3">
               <div className={isRTL ? "text-right" : "text-left"}>
                 <div className="inline-flex items-center gap-2 rounded-full bg-sky-50 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300 px-3 py-1 text-[11px] font-semibold mb-1">
                   <FiDroplet className="text-xs" />
                   <span>{t("sections.readyColors.pill")}</span>
                 </div>
-                <h2 className="text-sm md:text-base font-semibold text-slate-900 dark:text-slate-100">
+                <h2 className="text-sm md:text-base font-semibold text-fg">
                   {t("sections.readyColors.title")}
                 </h2>
-                <p className="text-[11px] md:text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <p className="text-[11px] md:text-xs text-fg-muted mt-1">
                   {t("sections.readyColors.description")}
                 </p>
               </div>
@@ -549,15 +554,15 @@ export default function TemplateDesignCustomizePanel({
                     key={palette.id + index}
                     type="button"
                     onClick={() => handleSelectPalette(palette)}
-                    className={`group relative rounded-2xl border text-left overflow-hidden p-3 transition-all duration-150 ${
+                    className={`group relative rounded-lg border text-left overflow-hidden p-3 transition-all duration-150 ${
                       isActive
                         ? "border-primary ring-2 ring-primary/20 bg-primary/5 dark:bg-primary/10"
-                        : "border-slate-200 dark:border-slate-600 bg-slate-50/60 dark:bg-slate-900/40 hover:border-primary/60 hover:bg-primary/5 dark:hover:bg-primary/10"
+                        : "border-line bg-slate-50/60  hover:border-primary/60 hover:bg-primary/5 dark:hover:bg-primary/10"
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex-1 space-y-1">
-                        <p className="text-[11px] font-semibold text-slate-800 dark:text-slate-200">
+                        <p className="text-[11px] font-semibold text-fg">
                           {t(palette.labelKey)}
                         </p>
                         <div className="flex items-center gap-1.5">
@@ -573,7 +578,7 @@ export default function TemplateDesignCustomizePanel({
                         </div>
                       </div>
                       {isActive && (
-                        <span className="text-[10px] font-semibold text-primary dark:text-primary bg-white dark:bg-slate-800 border border-primary/30 dark:border-primary/40 rounded-full px-2 py-0.5">
+                        <span className="text-[10px] font-semibold text-primary dark:text-primary bg-raised border border-primary/30 dark:border-primary/40 rounded-full px-2 py-0.5">
                           {t("sections.readyColors.inUse")}
                         </span>
                       )}
@@ -586,15 +591,15 @@ export default function TemplateDesignCustomizePanel({
               <button
                 type="button"
                 onClick={() => setSelectedPaletteId("custom")}
-                className={`group relative rounded-2xl border text-left overflow-hidden p-3 transition-all duration-150 ${
+                className={`group relative rounded-lg border text-left overflow-hidden p-3 transition-all duration-150 ${
                   selectedPaletteId === "custom"
                     ? "border-primary ring-2 ring-primary/20 bg-primary/5 dark:bg-primary/10"
-                    : "border-dashed border-slate-300 dark:border-slate-600 bg-slate-50/40 dark:bg-slate-900/30 hover:border-primary/60 hover:bg-primary/5 dark:hover:bg-primary/10"
+                    : "border-dashed border-line-strong bg-slate-50/40  hover:border-primary/60 hover:bg-primary/5 dark:hover:bg-primary/10"
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <div className="flex-1 space-y-1">
-                    <p className="text-[11px] font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                    <p className="text-[11px] font-semibold text-fg flex items-center gap-1.5">
                       <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs">
                         +
                       </span>
@@ -611,7 +616,7 @@ export default function TemplateDesignCustomizePanel({
                           />
                         ))}
                     </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                    <p className="text-[11px] text-fg-muted mt-1">
                       {t("sections.customColors.pill")}
                     </p>
                   </div>
@@ -622,17 +627,17 @@ export default function TemplateDesignCustomizePanel({
 
           {/* Custom colors */}
           {selectedPaletteId === "custom" && (
-            <section className="bg-white dark:bg-slate-800/80 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 md:p-6 space-y-4">
+            <section className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6 space-y-4">
               <div className="flex items-center justify-between gap-3">
                 <div className={isRTL ? "text-right" : "text-left"}>
                   <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 px-3 py-1 text-[11px] font-semibold mb-1">
                     <FiDroplet className="text-xs" />
                     <span>{t("sections.customColors.pill")}</span>
                   </div>
-                  <h2 className="text-sm md:text-base font-semibold text-slate-900 dark:text-slate-100">
+                  <h2 className="text-sm md:text-base font-semibold text-fg">
                     {t("sections.customColors.title")}
                   </h2>
-                  <p className="text-[11px] md:text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  <p className="text-[11px] md:text-xs text-fg-muted mt-1">
                     {t("sections.customColors.description")}
                   </p>
                 </div>
@@ -666,18 +671,18 @@ export default function TemplateDesignCustomizePanel({
                               : `color-picker-${tooltipId}`,
                           )
                         }
-                        className={`w-full rounded-2xl border bg-slate-50/70 dark:bg-slate-900/50 p-3 flex items-center gap-3 text-left transition-colors ${
+                        className={`w-full rounded-lg border bg-slate-50/70  p-3 flex items-center gap-3 text-left transition-colors ${
                           isActive
                             ? "border-primary/70 ring-2 ring-primary/20 bg-primary/5 dark:bg-primary/10"
-                            : "border-slate-100 dark:border-slate-600 hover:border-primary/40"
+                            : "border-line hover:border-primary/40"
                         }`}
                       >
                         <div
-                          className="h-10 w-10 rounded-xl border border-slate-200 dark:border-slate-600 shadow-sm"
+                          className="h-10 w-10 rounded-lg border border-line shadow-sm"
                           style={{ backgroundColor: color }}
                         />
                         <div className="flex-1 space-y-1">
-                          <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                          <p className="text-xs font-semibold text-fg">
                             {label}
                           </p>
                           <div className="flex items-center gap-2">
@@ -690,7 +695,7 @@ export default function TemplateDesignCustomizePanel({
                                   e.target.value,
                                 )
                               }
-                              className="flex-1 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-2 py-1.5 text-[11px] font-mono text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-primary/60"
+                              className="flex-1 rounded-lg border border-line bg-raised px-2 py-1.5 text-[11px] font-mono text-fg-muted focus:outline-none focus:ring-1 focus:ring-primary/60"
                             />
                           </div>
                         </div>
@@ -717,25 +722,25 @@ export default function TemplateDesignCustomizePanel({
 
           {/* Texts — only for templates that use hero copy on the live menu */}
           {showHeroTexts && (
-            <section className="bg-white dark:bg-slate-800/80 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 md:p-6 space-y-4">
+            <section className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6 space-y-4">
               <div className="flex items-center justify-between gap-3">
                 <div className={isRTL ? "text-right" : "text-left"}>
                   <div className="inline-flex items-center gap-2 rounded-full bg-violet-50 dark:bg-violet-500/15 text-violet-700 dark:text-violet-300 px-3 py-1 text-[11px] font-semibold mb-1">
                     <FiType className="text-xs" />
                     <span>{t("sections.texts.pill")}</span>
                   </div>
-                  <h2 className="text-sm md:text-base font-semibold text-slate-900 dark:text-slate-100">
+                  <h2 className="text-sm md:text-base font-semibold text-fg">
                     {t("sections.texts.title")}
                   </h2>
-                  <p className="text-[11px] md:text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  <p className="text-[11px] md:text-xs text-fg-muted mt-1">
                     {t("sections.texts.description")}
                   </p>
                 </div>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-2xl border border-slate-100 dark:border-slate-600 bg-linear-to-br from-emerald-50 via-sky-50 to-white dark:from-slate-800/90 dark:via-slate-800/80 dark:to-slate-900/90 p-4 space-y-2">
-                  <p className="text-[11px] font-semibold text-slate-800 dark:text-slate-200">
+                <div className="rounded-lg border border-line bg-linear-to-br from-emerald-50 via-sky-50 to-white dark:from-slate-800/90 dark:via-slate-800/80 dark:to-slate-900/90 p-4 space-y-2">
+                  <p className="text-[11px] font-semibold text-fg">
                     {t("sections.texts.heroTitleAr")}
                   </p>
                   <textarea
@@ -743,16 +748,16 @@ export default function TemplateDesignCustomizePanel({
                     onChange={(e) =>
                       handleChangeText("heroTitleAr", e.target.value)
                     }
-                    className="w-full resize-none rounded-xl border border-slate-200 dark:border-slate-600 bg-white/70 dark:bg-slate-900/70 px-3 py-2 text-xs text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-primary/60"
+                    className="w-full resize-none rounded-lg border border-line bg-white/70 px-3 py-2 text-xs text-fg placeholder:text-slate-400 dark:placeholder:text-fg-subtle focus:outline-none focus:ring-1 focus:ring-primary/60"
                     rows={2}
                   />
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                  <p className="text-[10px] text-fg-muted">
                     {t("sections.texts.helperShortAr")}
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-slate-100 dark:border-slate-600 bg-linear-to-br from-sky-50 via-violet-50 to-white dark:from-slate-800/90 dark:via-slate-800/80 dark:to-slate-900/90 p-4 space-y-2">
-                  <p className="text-[11px] font-semibold text-slate-800 dark:text-slate-200">
+                <div className="rounded-lg border border-line bg-linear-to-br from-sky-50 via-violet-50 to-white dark:from-slate-800/90 dark:via-slate-800/80 dark:to-slate-900/90 p-4 space-y-2">
+                  <p className="text-[11px] font-semibold text-fg">
                     {t("sections.texts.heroTitleEn")}
                   </p>
                   <textarea
@@ -760,16 +765,16 @@ export default function TemplateDesignCustomizePanel({
                     onChange={(e) =>
                       handleChangeText("heroTitleEn", e.target.value)
                     }
-                    className="w-full resize-none rounded-xl border border-slate-200 dark:border-slate-600 bg-white/70 dark:bg-slate-900/70 px-3 py-2 text-xs text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-primary/60"
+                    className="w-full resize-none rounded-lg border border-line bg-white/70 px-3 py-2 text-xs text-fg placeholder:text-slate-400 dark:placeholder:text-fg-subtle focus:outline-none focus:ring-1 focus:ring-primary/60"
                     rows={2}
                   />
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                  <p className="text-[10px] text-fg-muted">
                     {t("sections.texts.helperShortEn")}
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-slate-100 dark:border-slate-600 bg-linear-to-br from-emerald-50/60 via-sky-50/40 to-white dark:from-slate-800/90 dark:via-slate-800/75 dark:to-slate-900/90 p-4 space-y-2">
-                  <p className="text-[11px] font-semibold text-slate-800 dark:text-slate-200">
+                <div className="rounded-lg border border-line bg-linear-to-br from-emerald-50/60 via-sky-50/40 to-white dark:from-slate-800/90 dark:via-slate-800/75 dark:to-slate-900/90 p-4 space-y-2">
+                  <p className="text-[11px] font-semibold text-fg">
                     {t("sections.texts.shortDescriptionAr")}
                   </p>
                   <textarea
@@ -777,13 +782,13 @@ export default function TemplateDesignCustomizePanel({
                     onChange={(e) =>
                       handleChangeText("heroSubtitleAr", e.target.value)
                     }
-                    className="w-full resize-none rounded-xl border border-slate-200 dark:border-slate-600 bg-white/70 dark:bg-slate-900/70 px-3 py-2 text-xs text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-primary/60"
+                    className="w-full resize-none rounded-lg border border-line bg-white/70 px-3 py-2 text-xs text-fg placeholder:text-slate-400 dark:placeholder:text-fg-subtle focus:outline-none focus:ring-1 focus:ring-primary/60"
                     rows={3}
                   />
                 </div>
 
-                <div className="rounded-2xl border border-slate-100 dark:border-slate-600 bg-linear-to-br from-sky-50/60 via-violet-50/40 to-white dark:from-slate-800/90 dark:via-slate-800/75 dark:to-slate-900/90 p-4 space-y-2">
-                  <p className="text-[11px] font-semibold text-slate-800 dark:text-slate-200">
+                <div className="rounded-lg border border-line bg-linear-to-br from-sky-50/60 via-violet-50/40 to-white dark:from-slate-800/90 dark:via-slate-800/75 dark:to-slate-900/90 p-4 space-y-2">
+                  <p className="text-[11px] font-semibold text-fg">
                     {t("sections.texts.shortDescriptionEn")}
                   </p>
                   <textarea
@@ -791,7 +796,7 @@ export default function TemplateDesignCustomizePanel({
                     onChange={(e) =>
                       handleChangeText("heroSubtitleEn", e.target.value)
                     }
-                    className="w-full resize-none rounded-xl border border-slate-200 dark:border-slate-600 bg-white/70 dark:bg-slate-900/70 px-3 py-2 text-xs text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-primary/60"
+                    className="w-full resize-none rounded-lg border border-line bg-white/70 px-3 py-2 text-xs text-fg placeholder:text-slate-400 dark:placeholder:text-fg-subtle focus:outline-none focus:ring-1 focus:ring-primary/60"
                     rows={3}
                   />
                 </div>
@@ -800,7 +805,7 @@ export default function TemplateDesignCustomizePanel({
           )}
 
           {/* Footer actions */}
-          <div className=" justify-between gap-3 pt-2 pb-6">
+          <div className="justify-between gap-3 pt-2 pb-6">
             <div className="flex flex-wrap gap-2 justify-end w-fit ms-auto mb-3">
               <Button
                 onClick={handleReset}
@@ -823,7 +828,7 @@ export default function TemplateDesignCustomizePanel({
               </Button>
             </div>
 
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 max-w-md">
+            <p className="text-[11px] text-fg-muted max-w-md">
               {showHeroTexts
                 ? t("preview.footerNote")
                 : t("preview.footerNoteColorsOnly")}

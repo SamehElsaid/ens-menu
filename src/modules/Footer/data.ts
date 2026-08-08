@@ -118,8 +118,6 @@ export const getSocialLinks = () => [
 export const getNavLinks = (headerT: TranslationFunction): NavLink[] => [
   { name: headerT("home"), path: "/#hero" },
   { name: headerT("about"), path: "/about" },
-  { name: headerT("features"), path: "/#features" },
-  { name: headerT("team"), path: "/#how-it-works" },
   { name: headerT("knowledgeBase"), path: "/knowledge-base" },
   {
     name: headerT("contact"),

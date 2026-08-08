@@ -42,7 +42,7 @@ export default function RatingCard({ rating }: RatingCardProps) {
   const tone = starTone[stars] ?? starTone[3];
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_1px_8px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:border-amber-300/60 hover:shadow-[0_10px_28px_rgba(245,158,11,0.12)] dark:border-slate-700/80 dark:bg-slate-800/95 dark:shadow-[0_1px_12px_rgba(0,0,0,0.25)] dark:hover:border-amber-700/45 dark:hover:shadow-[0_10px_28px_rgba(0,0,0,0.35)]">
+    <article className="group flex h-full flex-col overflow-hidden rounded-lg border border-line/90 bg-white shadow-[0_1px_8px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:border-amber-300/60 hover:shadow-[0_10px_28px_rgba(245,158,11,0.12)] dark:border-line/80 dark:shadow-[0_1px_12px_rgba(0,0,0,0.25)] dark:hover:border-amber-700/45 dark:hover:shadow-[0_10px_28px_rgba(0,0,0,0.35)]">
       <div className="relative bg-linear-to-br from-amber-500/12 via-orange-50/80 to-yellow-50/50 px-4 pb-5 pt-4 dark:from-amber-500/15 dark:via-slate-900 dark:to-amber-950/35">
         <div className="absolute end-3 top-3">
           <span
@@ -53,14 +53,12 @@ export default function RatingCard({ rating }: RatingCardProps) {
         </div>
 
         <div className="flex items-center gap-3 pe-16">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600 ring-2 ring-white dark:text-amber-400 dark:ring-slate-800">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-600 ring-2 ring-white dark:text-amber-400 dark:ring-slate-800">
             <IoPersonOutline className="text-xl" aria-hidden />
           </span>
           <div className="min-w-0">
-            <h3 className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">
-              {name}
-            </h3>
-            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+            <h3 className="truncate text-sm font-bold text-fg">{name}</h3>
+            <p className="mt-0.5 text-xs text-fg-muted">
               {formatDate(rating.createdAt, locale)}
             </p>
           </div>
@@ -73,8 +71,8 @@ export default function RatingCard({ rating }: RatingCardProps) {
 
       <div className="flex flex-1 flex-col gap-3 px-4 py-4">
         {comment ? (
-          <div className="rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2.5 dark:border-slate-700/70 dark:bg-slate-900/40">
-            <p className="flex gap-2 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+          <div className="rounded-lg border border-line bg-slate-50/80 px-3 py-2.5 dark:border-line/70">
+            <p className="flex gap-2 text-sm leading-relaxed text-fg-muted">
               <IoChatbubbleEllipsesOutline
                 className="mt-0.5 shrink-0 text-amber-500/80"
                 aria-hidden
@@ -85,18 +83,16 @@ export default function RatingCard({ rating }: RatingCardProps) {
             </p>
           </div>
         ) : (
-          <p className="text-sm italic text-slate-400 dark:text-slate-500">
-            {t("noComment")}
-          </p>
+          <p className="text-sm italic text-fg-subtle">{t("noComment")}</p>
         )}
 
         {(phone || email) && (
-          <div className="mt-auto flex flex-wrap gap-2 border-t border-slate-100 pt-3 dark:border-slate-700">
+          <div className="mt-auto flex flex-wrap gap-2 border-t border-line pt-3 dark:border-line">
             {phone ? (
               <a
                 href={`tel:${phone}`}
                 dir="ltr"
-                className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-slate-200/80 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-primary/30 hover:text-primary dark:border-slate-600 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:text-primary"
+                className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-line/80 bg-white px-2.5 py-1.5 text-xs font-medium text-fg-muted transition-colors hover:border-primary/30 hover:text-primary dark:hover:text-primary"
               >
                 <IoCallOutline className="shrink-0 text-sm" aria-hidden />
                 <span className="truncate">{phone}</span>
@@ -106,7 +102,7 @@ export default function RatingCard({ rating }: RatingCardProps) {
               <a
                 href={`mailto:${email}`}
                 dir="ltr"
-                className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-slate-200/80 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-primary/30 hover:text-primary dark:border-slate-600 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:text-primary"
+                className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-line/80 bg-white px-2.5 py-1.5 text-xs font-medium text-fg-muted transition-colors hover:border-primary/30 hover:text-primary dark:hover:text-primary"
               >
                 <IoMailOutline className="shrink-0 text-sm" aria-hidden />
                 <span className="truncate">{email}</span>

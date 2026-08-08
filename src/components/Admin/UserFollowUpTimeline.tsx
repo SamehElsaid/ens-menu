@@ -10,7 +10,12 @@ import {
 } from "@/lib/fetchAdminFollowUp";
 import type { FollowUpCall } from "@/types/AdminFollowUp";
 import { FiAlertTriangle } from "react-icons/fi";
-import { Button, ConfirmDialog, SectionHeader, Skeleton } from "@/components/ui";
+import {
+  Button,
+  ConfirmDialog,
+  SectionHeader,
+  Skeleton,
+} from "@/components/ui";
 import CallNowPhoneModal from "@/components/Admin/CallNowPhoneModal";
 import FollowUpCallsList from "@/components/Admin/FollowUpCallsList";
 import LogFollowUpCallModal from "@/components/Admin/LogFollowUpCallModal";
@@ -24,9 +29,7 @@ type UserFollowUpTimelineProps = {
 };
 
 type ActiveLogModal =
-  | { kind: "create" }
-  | { kind: "edit"; call: FollowUpCall }
-  | null;
+  { kind: "create" } | { kind: "edit"; call: FollowUpCall } | null;
 
 export default function UserFollowUpTimeline({
   userId,
@@ -143,7 +146,7 @@ export default function UserFollowUpTimeline({
       {loading ? (
         <div className="space-y-3" aria-busy="true">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-16 w-full rounded-xl" />
+            <Skeleton key={i} className="h-16 w-full rounded-lg" />
           ))}
         </div>
       ) : (

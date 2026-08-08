@@ -32,10 +32,7 @@ export default function CreateMenuGroupModal({
   const t = useTranslations("Menus.createGroupModal");
   const locale = useLocale();
 
-  const availableMenus = useMemo(
-    () => menusAvailableForGroup(menus),
-    [menus],
-  );
+  const availableMenus = useMemo(() => menusAvailableForGroup(menus), [menus]);
 
   const [name, setName] = useState("");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);

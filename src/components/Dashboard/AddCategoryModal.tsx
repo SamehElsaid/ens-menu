@@ -22,7 +22,14 @@ import {
   IoRemoveCircle,
 } from "react-icons/io5";
 import { BiCategory } from "react-icons/bi";
-import { Button, Field, Input, Modal, Spinner, focusRing } from "@/components/ui";
+import {
+  Button,
+  Field,
+  Input,
+  Modal,
+  Spinner,
+  focusRing,
+} from "@/components/ui";
 import { cn } from "@/lib/cn";
 
 export interface AddCategoryFormData {
@@ -260,12 +267,15 @@ export default function AddCategoryModal({
         >
           <section className="flex flex-col gap-3">
             <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
-              <IoImageOutline className="size-4 shrink-0 text-fg-muted" aria-hidden />
+              <IoImageOutline
+                className="size-4 shrink-0 text-fg-muted"
+                aria-hidden
+              />
               {t("image")}
             </h3>
             <div
               className={cn(
-                "relative rounded-xl border border-dashed transition-colors duration-150",
+                "relative rounded-lg border border-dashed transition-colors duration-150",
                 isDragOver
                   ? "border-brand bg-brand-soft"
                   : "border-line-strong bg-surface-2",
@@ -287,7 +297,7 @@ export default function AddCategoryModal({
                 disabled={isImageBusy}
                 onClick={() => setPexelsModalOpen(true)}
                 className={cn(
-                  "flex min-h-40 w-full flex-col items-center justify-center rounded-xl px-6 py-8 disabled:opacity-70",
+                  "flex min-h-40 w-full flex-col items-center justify-center rounded-lg px-6 py-8 disabled:opacity-70",
                   focusRing,
                 )}
               >
@@ -335,11 +345,18 @@ export default function AddCategoryModal({
 
           <section className="flex flex-col gap-3">
             <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
-              <IoPricetagOutline className="size-4 shrink-0 text-fg-muted" aria-hidden />
+              <IoPricetagOutline
+                className="size-4 shrink-0 text-fg-muted"
+                aria-hidden
+              />
               {t("names")}
             </h3>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <Field label={t("nameEn")} required error={errors.nameEn?.message}>
+              <Field
+                label={t("nameEn")}
+                required
+                error={errors.nameEn?.message}
+              >
                 <Controller
                   name="nameEn"
                   control={control}
@@ -356,7 +373,11 @@ export default function AddCategoryModal({
                   )}
                 />
               </Field>
-              <Field label={t("nameAr")} required error={errors.nameAr?.message}>
+              <Field
+                label={t("nameAr")}
+                required
+                error={errors.nameAr?.message}
+              >
                 <Controller
                   name="nameAr"
                   control={control}
@@ -378,7 +399,10 @@ export default function AddCategoryModal({
 
           <section className="flex flex-col gap-3">
             <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
-              <IoEllipseSharp className="size-3 shrink-0 text-fg-subtle" aria-hidden />
+              <IoEllipseSharp
+                className="size-3 shrink-0 text-fg-subtle"
+                aria-hidden
+              />
               {t("status")}
             </h3>
             <Controller
@@ -401,7 +425,9 @@ export default function AddCategoryModal({
                     <IoCheckmarkCircle
                       className={cn(
                         "size-4",
-                        field.value === true ? "text-success" : "text-fg-subtle",
+                        field.value === true
+                          ? "text-success"
+                          : "text-fg-subtle",
                       )}
                       aria-hidden
                     />
@@ -422,7 +448,9 @@ export default function AddCategoryModal({
                     <IoRemoveCircle
                       className={cn(
                         "size-4",
-                        field.value === false ? "text-danger" : "text-fg-subtle",
+                        field.value === false
+                          ? "text-danger"
+                          : "text-fg-subtle",
                       )}
                       aria-hidden
                     />

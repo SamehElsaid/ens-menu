@@ -8,21 +8,18 @@ import MobileListPagination from "@/components/Dashboard/mobile/MobileListPagina
 
 function TableCardSkeleton() {
   return (
-    <div
-      className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800/80"
-      aria-hidden
-    >
+    <div className="rounded-lg border border-line bg-white p-4" aria-hidden>
       <div className="mb-3 flex items-center justify-between gap-2">
-        <div className="dashboard-mobile-shimmer h-5 w-28 rounded-md bg-slate-100 dark:bg-slate-700/60" />
-        <div className="dashboard-mobile-shimmer h-5 w-14 rounded-full bg-slate-100 dark:bg-slate-700/60" />
+        <div className="dashboard-mobile-shimmer h-5 w-28 rounded-md bg-surface-3" />
+        <div className="dashboard-mobile-shimmer h-5 w-14 rounded-full bg-surface-3" />
       </div>
-      <div className="dashboard-mobile-shimmer mx-auto mb-4 size-24 rounded-xl bg-slate-100 dark:bg-slate-700/60" />
-      <div className="dashboard-mobile-shimmer mb-2 h-10 w-full rounded-xl bg-slate-100 dark:bg-slate-700/60" />
+      <div className="dashboard-mobile-shimmer mx-auto mb-4 size-24 rounded-lg bg-surface-3" />
+      <div className="dashboard-mobile-shimmer mb-2 h-10 w-full rounded-lg bg-surface-3" />
       <div className="grid grid-cols-3 gap-1.5">
         {Array.from({ length: 3 }).map((_, i) => (
           <div
             key={i}
-            className="dashboard-mobile-shimmer h-9 rounded-xl bg-slate-100 dark:bg-slate-700/60"
+            className="dashboard-mobile-shimmer h-9 rounded-lg bg-surface-3"
           />
         ))}
       </div>

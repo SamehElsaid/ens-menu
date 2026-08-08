@@ -44,7 +44,7 @@ export function CardGridSkeleton({
       {Array.from({ length: count }).map((_, index) => (
         <div
           key={index}
-          className="overflow-hidden rounded-xl border border-line bg-surface"
+          className="overflow-hidden rounded-lg border border-line bg-surface"
         >
           {media ? (
             <Skeleton className="aspect-[4/3] w-full" rounded="sm" />

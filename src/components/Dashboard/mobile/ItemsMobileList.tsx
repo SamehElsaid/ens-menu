@@ -43,13 +43,9 @@ export default function ItemsMobileList({
 
   if (items.length === 0) {
     return (
-      <div className="dashboard-mobile-empty rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center dark:border-slate-600 dark:bg-slate-800/40 md:hidden">
-        <p className="text-base font-semibold text-slate-800 dark:text-slate-100">
-          {t("noItems")}
-        </p>
-        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-          {t("noItemsDescription")}
-        </p>
+      <div className="dashboard-mobile-empty rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center md:hidden">
+        <p className="text-base font-semibold text-fg">{t("noItems")}</p>
+        <p className="mt-2 text-sm text-fg-muted">{t("noItemsDescription")}</p>
       </div>
     );
   }

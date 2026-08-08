@@ -60,7 +60,7 @@ export default function OrderMobileCard({
   return (
     <article
       className={[
-        "dashboard-order-card flex h-full flex-col overflow-hidden rounded-2xl bg-surface shadow-sm",
+        "dashboard-order-card flex h-full flex-col overflow-hidden rounded-lg bg-surface shadow-sm",
         entry.pendingBillRequest
           ? "border-2 border-red-500 shadow-sm dark:border-red-500"
           : "border border-line",
@@ -69,15 +69,15 @@ export default function OrderMobileCard({
       <div className="border-b border-line bg-surface-2 px-4 py-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface ring-1 ring-line">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface ring-1 ring-line">
               <IoReceiptOutline className="text-xl text-brand" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-bold text-slate-900 dark:text-slate-50">
+              <p className="text-sm font-bold text-fg">
                 {t("colOrderId")} #{entry.orderId}
               </p>
               {entry.tableNumber && (
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-fg-muted">
                   {t("colTable")}: {entry.tableNumber}
                 </p>
               )}
@@ -113,25 +113,19 @@ export default function OrderMobileCard({
 
       <div className="space-y-2 px-4 py-3">
         {entry.customerName?.trim() && (
-          <p className="text-sm text-slate-700 dark:text-slate-200">
-            <span className="text-slate-400 dark:text-slate-500">
-              {t("colCustomer")}:{" "}
-            </span>
+          <p className="text-sm text-fg-muted">
+            <span className="text-fg-subtle">{t("colCustomer")}: </span>
             {entry.customerName.trim()}
           </p>
         )}
         {entry.orderNotes?.trim() && (
-          <p className="text-sm text-slate-700 dark:text-slate-200 line-clamp-2">
-            <span className="text-slate-400 dark:text-slate-500">
-              {t("colNotes")}:{" "}
-            </span>
+          <p className="text-sm text-fg-muted line-clamp-2">
+            <span className="text-fg-subtle">{t("colNotes")}: </span>
             {entry.orderNotes.trim()}
           </p>
         )}
-        <p className="text-sm text-slate-700 dark:text-slate-200">
-          <span className="text-slate-400 dark:text-slate-500">
-            {t("colItems")}:{" "}
-          </span>
+        <p className="text-sm text-fg-muted">
+          <span className="text-fg-subtle">{t("colItems")}: </span>
           {entry.items?.length ?? 0}
         </p>
         <div className="space-y-2">
@@ -147,14 +141,14 @@ export default function OrderMobileCard({
             accent="brand"
           />
           {time && (
-            <time className="block text-end text-xs text-slate-500 dark:text-slate-400">
+            <time className="block text-end text-xs text-fg-muted">
               <ViewTime data={time} />
             </time>
           )}
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-2 border-t border-slate-100 px-4 py-3 dark:border-slate-700/80">
+      <div className="flex flex-1 flex-col gap-2 border-t border-line px-4 py-3 dark:border-line/80">
         <OrderActionButtons
           menuId={menuId}
           entry={entry}
@@ -166,7 +160,7 @@ export default function OrderMobileCard({
         <button
           type="button"
           onClick={() => onView(entry.id)}
-          className="mt-auto inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-line bg-surface-2 px-3 py-2.5 text-xs font-semibold text-fg transition-colors hover:bg-surface-3"
+          className="mt-auto inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-xs font-semibold text-fg transition-colors hover:bg-surface-3"
         >
           <IoEyeOutline className="text-base" />
           {t("view")}

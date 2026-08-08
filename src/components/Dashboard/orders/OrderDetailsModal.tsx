@@ -50,7 +50,13 @@ import OrderChargesLines from "./OrderChargesLines";
 import { useAppSelector } from "@/store/hooks";
 import { isFreePlanUser } from "@/lib/subscription";
 import { useAuthorization } from "@/hooks/useAuthorization";
-import { Badge, Button, Modal, Skeleton, SkeletonRegion } from "@/components/ui";
+import {
+  Badge,
+  Button,
+  Modal,
+  Skeleton,
+  SkeletonRegion,
+} from "@/components/ui";
 
 function PrintableReceipt({
   orderId,
@@ -394,13 +400,13 @@ function ActionsTimeline({
             <div className="flex flex-col items-center">
               <ActionDot status={act.status ?? ""} />
               {!isLast && (
-                <div className="mt-1 flex-1 w-px min-h-6 bg-slate-200 dark:bg-slate-700" />
+                <div className="mt-1 flex-1 w-px min-h-6 bg-surface-3" />
               )}
             </div>
 
             <div className={`flex-1 min-w-0 ${isLast ? "pb-0" : "pb-4"}`}>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                <span className="text-sm font-semibold text-fg">
                   {orderActionLabel(act.action ?? "", locale)}
                 </span>
                 <span
@@ -411,21 +417,19 @@ function ActionsTimeline({
               </div>
 
               {actorName && (
-                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                <p className="mt-0.5 text-xs text-fg-muted flex items-center gap-1">
                   <IoPersonOutline className="shrink-0" />
-                  <span className="text-slate-400 dark:text-slate-500">
-                    {actorLabel}:
-                  </span>
+                  <span className="text-fg-subtle">{actorLabel}:</span>
                   {actorName}
                 </p>
               )}
 
-              <time className="mt-1 block text-[11px] text-slate-400 dark:text-slate-500 tabular-nums">
+              <time className="mt-1 block text-[11px] text-fg-subtle tabular-nums">
                 {act.time ? <ViewTime data={act.time} /> : "—"}
               </time>
 
               {summary && (
-                <p className="mt-1.5 text-xs text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/60 rounded-lg px-3 py-2">
+                <p className="mt-1.5 text-xs text-fg-muted leading-relaxed bg-surface-2 rounded-lg px-3 py-2">
                   {summary}
                 </p>
               )}
@@ -457,19 +461,19 @@ function DetailRow({
 
   return (
     <div
-      className={`flex gap-3 rounded-xl border border-slate-100 bg-white px-3.5 py-3 dark:border-slate-700/80 dark:bg-slate-900/50 ${
+      className={`flex gap-3 rounded-lg border border-line bg-white px-3.5 py-3 dark:border-line/80  ${
         multiline ? "items-start" : "items-center"
       }`}
     >
       <span
-        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-lg dark:bg-slate-800 ${
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-lg  ${
           multiline ? "mt-0.5" : ""
         }`}
       >
         {icon}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-fg-subtle">
           {label}
         </p>
         {hasValue ? (
@@ -483,7 +487,7 @@ function DetailRow({
             </a>
           ) : (
             <p
-              className={`mt-0.5 text-sm font-semibold text-slate-800 dark:text-slate-100 ${
+              className={`mt-0.5 text-sm font-semibold text-fg ${
                 multiline ? "whitespace-pre-wrap leading-relaxed" : "truncate"
               }`}
             >
@@ -491,9 +495,7 @@ function DetailRow({
             </p>
           )
         ) : (
-          <p className="mt-0.5 text-sm text-slate-400 dark:text-slate-500">
-            {emptyLabel ?? "—"}
-          </p>
+          <p className="mt-0.5 text-sm text-fg-subtle">{emptyLabel ?? "—"}</p>
         )}
       </div>
     </div>
@@ -532,10 +534,8 @@ function OrderCustomerSection({
     variant === "delivery" ? t("deliveryDetailsTitle") : t("orderDetailsTitle");
 
   return (
-    <section className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 space-y-3">
-      <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-        {sectionTitle}
-      </h4>
+    <section className="px-5 py-4 border-b border-line space-y-3">
+      <h4 className="text-sm font-bold text-fg">{sectionTitle}</h4>
 
       <div className="grid gap-2.5 sm:grid-cols-2">
         <DetailRow
@@ -594,7 +594,7 @@ function OrderCustomerSection({
       />
 
       {variant === "delivery" && deliveryFee != null && deliveryFee > 0 && (
-        <div className="flex items-center justify-between rounded-xl border border-emerald-200/70 bg-emerald-50/80 px-3.5 py-3 dark:border-emerald-800/40 dark:bg-emerald-950/20">
+        <div className="flex items-center justify-between rounded-lg border border-emerald-200/70 bg-emerald-50/80 px-3.5 py-3 dark:border-emerald-800/40 dark:bg-emerald-950/20">
           <span className="text-sm font-medium text-emerald-800 dark:text-emerald-200">
             {t("detailsDeliveryFee")}
           </span>
@@ -788,13 +788,9 @@ export default function OrderDetailsModal({
       ? deliveryGovernorateLabel(
           {
             governorateNameAr:
-              entry?.governorateNameAr ||
-              order?.governorateNameAr ||
-              null,
+              entry?.governorateNameAr || order?.governorateNameAr || null,
             governorateNameEn:
-              entry?.governorateNameEn ||
-              order?.governorateNameEn ||
-              null,
+              entry?.governorateNameEn || order?.governorateNameEn || null,
             order: order ?? null,
           },
           locale,
@@ -887,7 +883,9 @@ export default function OrderDetailsModal({
         }
       >
         {summary && (
-          <p className="mb-3 text-xs leading-relaxed text-fg-muted">{summary}</p>
+          <p className="mb-3 text-xs leading-relaxed text-fg-muted">
+            {summary}
+          </p>
         )}
         {(entry?.pendingBillRequest === true ||
           order?.pendingBillRequest === true) && (
@@ -900,235 +898,231 @@ export default function OrderDetailsModal({
           <ModalSkeleton />
         ) : entry ? (
           <>
-              <OrderCustomerSection
-                variant={variant}
-                t={t}
-                customerDisplay={customerDisplay}
-                phoneDisplay={phoneDisplay}
-                zoneLabel={zoneLabel}
-                addressDisplay={addressDisplay}
-                notesDisplay={notesDisplay}
-                tableNumber={order?.tableNumber}
-                deliveryFee={deliveryFee}
-                currency={currency}
-                when={whenDisplay}
-              />
+            <OrderCustomerSection
+              variant={variant}
+              t={t}
+              customerDisplay={customerDisplay}
+              phoneDisplay={phoneDisplay}
+              zoneLabel={zoneLabel}
+              addressDisplay={addressDisplay}
+              notesDisplay={notesDisplay}
+              tableNumber={order?.tableNumber}
+              deliveryFee={deliveryFee}
+              currency={currency}
+              when={whenDisplay}
+            />
 
-              {waiterDisplay && (
-                <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800">
-                  <DetailRow
-                    icon={<IoPersonOutline className="text-brand" />}
-                    label={t("colWaiter")}
-                    value={waiterDisplay}
-                  />
-                </div>
-              )}
+            {waiterDisplay && (
+              <div className="px-5 py-3 border-b border-line">
+                <DetailRow
+                  icon={<IoPersonOutline className="text-brand" />}
+                  label={t("colWaiter")}
+                  value={waiterDisplay}
+                />
+              </div>
+            )}
 
-              <div className="px-5 py-4">
-                <div className="mb-3 flex items-center justify-between gap-2">
-                  <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-brand-soft text-brand-soft-fg text-[10px] font-bold">
-                      {displayItems.length}
-                    </span>
-                    {t("itemsTitle")}
-                  </h4>
-                  {canEditItems && menuId && (
-                    <Button
-                      type="button"
-                      variant="subtle"
-                      size="sm"
-                      onClick={() => {
-                        if (editingItems) {
-                          setDraftItems(items);
-                          setEditingItems(false);
-                        } else {
-                          setEditingItems(true);
-                        }
-                      }}
-                      startIcon={<IoCreateOutline className="text-sm" />}
-                    >
-                      {editingItems ? t("editItemsCancel") : t("editItems")}
-                    </Button>
-                  )}
-                </div>
-
-                {editingItems && menuId && (
-                  <OrderAddItemPicker
-                    menuId={menuId}
-                    open={editingItems}
-                    currency={currency}
-                    onAdd={(updater) => setDraftItems(updater)}
-                    labels={{
-                      addProduct: t("addProduct"),
-                      addProductSearch: t("addProductSearch"),
-                      addProductLoading: t("addProductLoading"),
-                      addProductEmpty: t("addProductEmpty"),
-                      addProductNoResults: t("addProductNoResults"),
-                      addProductSelectSize: t("addProductSelectSize"),
-                      addProductSelectVariant: t("addProductSelectVariant"),
-                      addProductConfirm: t("addProductConfirm"),
-                      addProductNone: t("addProductCancel"),
+            <div className="px-5 py-4">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <h4 className="text-sm font-semibold text-fg flex items-center gap-2">
+                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-brand-soft text-brand-soft-fg text-[10px] font-bold">
+                    {displayItems.length}
+                  </span>
+                  {t("itemsTitle")}
+                </h4>
+                {canEditItems && menuId && (
+                  <Button
+                    type="button"
+                    variant="subtle"
+                    size="sm"
+                    onClick={() => {
+                      if (editingItems) {
+                        setDraftItems(items);
+                        setEditingItems(false);
+                      } else {
+                        setEditingItems(true);
+                      }
                     }}
-                  />
-                )}
-
-                {displayItems.length === 0 ? (
-                  <p className="text-sm text-slate-500 dark:text-slate-400 py-4 text-center">
-                    {t("itemsEmpty")}
-                  </p>
-                ) : (
-                  <>
-                    <div
-                      className={`grid gap-x-4 px-3 py-2 rounded-t-xl bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 ${editingItems ? "grid-cols-[1fr_auto_auto_auto]" : "grid-cols-[1fr_auto_auto]"}`}
-                    >
-                      <span>{t("colItemName")}</span>
-                      <span className="text-center">{t("colQty")}</span>
-                      <span className="text-end">{t("colTotal")}</span>
-                      {editingItems && <span />}
-                    </div>
-
-                    <div className="divide-y divide-slate-100 dark:divide-slate-800 border-x border-b border-slate-200 dark:border-slate-700 rounded-b-xl overflow-hidden">
-                      {displayItems.map((item, idx) => (
-                        <div
-                          key={`${item.menuItemId}-${idx}`}
-                          className={`grid gap-x-4 px-3 py-3 text-sm items-center odd:bg-white even:bg-slate-50/60 dark:odd:bg-slate-900 dark:even:bg-slate-800/40 ${editingItems ? "grid-cols-[1fr_auto_auto_auto]" : "grid-cols-[1fr_auto_auto]"}`}
-                        >
-                          <div className="min-w-0">
-                            <p className="font-medium text-slate-800 dark:text-slate-100 truncate">
-                              {item.name}
-                            </p>
-                            {(item.size || item.variant) && (
-                              <p className="text-[11px] text-fg-muted mt-0.5 truncate">
-                                {[
-                                  callItemOptionLabel(
-                                    item.size,
-                                    locale,
-                                    "size",
-                                  ),
-                                  callItemOptionLabel(
-                                    item.variant,
-                                    locale,
-                                    "variant",
-                                  ),
-                                ]
-                                  .filter(Boolean)
-                                  .join(" · ")}
-                              </p>
-                            )}
-                            {!editingItems && item.price != null && (
-                              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
-                                {item.price}
-                                {currency && (
-                                  <span className="ms-0.5">{currency}</span>
-                                )}{" "}
-                                × {item.quantity}
-                              </p>
-                            )}
-                          </div>
-                          {editingItems ? (
-                            <div className="flex items-center justify-center gap-1">
-                              <Button
-                                type="button"
-                                variant="secondary"
-                                size="xs"
-                                iconOnly
-                                onClick={() => adjustDraftQty(idx, -1)}
-                                aria-label="-"
-                              >
-                                <IoRemoveOutline />
-                              </Button>
-                              <span className="min-w-6 text-center text-xs font-semibold">
-                                {item.quantity}
-                              </span>
-                              <Button
-                                type="button"
-                                variant="secondary"
-                                size="xs"
-                                iconOnly
-                                onClick={() => adjustDraftQty(idx, 1)}
-                                aria-label="+"
-                              >
-                                <IoAddOutline />
-                              </Button>
-                            </div>
-                          ) : (
-                            <span className="text-center min-w-8 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300">
-                              ×{item.quantity}
-                            </span>
-                          )}
-                          <span className="text-end font-semibold text-slate-800 dark:text-slate-100 tabular-nums">
-                            {item.total}
-                            {currency && (
-                              <span className="ms-1 text-xs font-normal text-slate-500 dark:text-slate-400">
-                                {currency}
-                              </span>
-                            )}
-                          </span>
-                          {editingItems && (
-                            <Button
-                              type="button"
-                              variant="dangerGhost"
-                              size="sm"
-                              iconOnly
-                              onClick={() => removeDraftItem(idx)}
-                              aria-label={t("removeItem")}
-                            >
-                              <IoTrashOutline />
-                            </Button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="mt-3 px-4 py-3 rounded-xl border border-line bg-surface-2">
-                      <OrderChargesLines
-                        charges={charges}
-                        currency={currency}
-                        labels={{
-                          subtotal: t("detailsSubtotal"),
-                          tax: t("detailsTax"),
-                          service: t("detailsService"),
-                          deliveryFee:
-                            variant === "delivery"
-                              ? t("detailsDeliveryFee" as never)
-                              : undefined,
-                          total: t("detailsTotal"),
-                        }}
-                        accent="brand"
-                      />
-                    </div>
-
-                    {editingItems && (
-                      <Button
-                        type="button"
-                        fullWidth
-                        disabled={savingItems || draftItems.length === 0}
-                        loading={savingItems}
-                        onClick={() => void saveItemEdits()}
-                        className="mt-3"
-                      >
-                        {savingItems ? t("itemsSaving") : t("itemsSave")}
-                      </Button>
-                    )}
-                  </>
+                    startIcon={<IoCreateOutline className="text-sm" />}
+                  >
+                    {editingItems ? t("editItemsCancel") : t("editItems")}
+                  </Button>
                 )}
               </div>
 
-              {entry.actions && entry.actions.length > 0 && (
-                <div className="px-5 pb-5 border-t border-slate-100 dark:border-slate-800 pt-4">
-                  <h4 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                    <IoListOutline className="text-brand text-base" />
-                    {t("actionsTitle")}
-                  </h4>
-                  <ActionsTimeline
-                    actions={entry.actions}
-                    locale={locale}
-                    t={t}
-                    order={order}
-                  />
-                </div>
+              {editingItems && menuId && (
+                <OrderAddItemPicker
+                  menuId={menuId}
+                  open={editingItems}
+                  currency={currency}
+                  onAdd={(updater) => setDraftItems(updater)}
+                  labels={{
+                    addProduct: t("addProduct"),
+                    addProductSearch: t("addProductSearch"),
+                    addProductLoading: t("addProductLoading"),
+                    addProductEmpty: t("addProductEmpty"),
+                    addProductNoResults: t("addProductNoResults"),
+                    addProductSelectSize: t("addProductSelectSize"),
+                    addProductSelectVariant: t("addProductSelectVariant"),
+                    addProductConfirm: t("addProductConfirm"),
+                    addProductNone: t("addProductCancel"),
+                  }}
+                />
               )}
-            </>
+
+              {displayItems.length === 0 ? (
+                <p className="text-sm text-fg-muted py-4 text-center">
+                  {t("itemsEmpty")}
+                </p>
+              ) : (
+                <>
+                  <div
+                    className={`grid gap-x-4 px-3 py-2 rounded-t-xl bg-surface-2 text-[11px] font-semibold uppercase tracking-wide text-fg-muted ${editingItems ? "grid-cols-[1fr_auto_auto_auto]" : "grid-cols-[1fr_auto_auto]"}`}
+                  >
+                    <span>{t("colItemName")}</span>
+                    <span className="text-center">{t("colQty")}</span>
+                    <span className="text-end">{t("colTotal")}</span>
+                    {editingItems && <span />}
+                  </div>
+
+                  <div className="divide-y divide-line border-x border-b border-line rounded-b-xl overflow-hidden">
+                    {displayItems.map((item, idx) => (
+                      <div
+                        key={`${item.menuItemId}-${idx}`}
+                        className={`grid gap-x-4 px-3 py-3 text-sm items-center odd:bg-white even:bg-slate-50/60 dark:odd:bg-slate-900 dark:even:bg-slate-800/40 ${editingItems ? "grid-cols-[1fr_auto_auto_auto]" : "grid-cols-[1fr_auto_auto]"}`}
+                      >
+                        <div className="min-w-0">
+                          <p className="font-medium text-fg truncate">
+                            {item.name}
+                          </p>
+                          {(item.size || item.variant) && (
+                            <p className="text-[11px] text-fg-muted mt-0.5 truncate">
+                              {[
+                                callItemOptionLabel(item.size, locale, "size"),
+                                callItemOptionLabel(
+                                  item.variant,
+                                  locale,
+                                  "variant",
+                                ),
+                              ]
+                                .filter(Boolean)
+                                .join(" · ")}
+                            </p>
+                          )}
+                          {!editingItems && item.price != null && (
+                            <p className="text-[11px] text-fg-subtle mt-0.5">
+                              {item.price}
+                              {currency && (
+                                <span className="ms-0.5">{currency}</span>
+                              )}{" "}
+                              × {item.quantity}
+                            </p>
+                          )}
+                        </div>
+                        {editingItems ? (
+                          <div className="flex items-center justify-center gap-1">
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="xs"
+                              iconOnly
+                              onClick={() => adjustDraftQty(idx, -1)}
+                              aria-label="-"
+                            >
+                              <IoRemoveOutline />
+                            </Button>
+                            <span className="min-w-6 text-center text-xs font-semibold">
+                              {item.quantity}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="xs"
+                              iconOnly
+                              onClick={() => adjustDraftQty(idx, 1)}
+                              aria-label="+"
+                            >
+                              <IoAddOutline />
+                            </Button>
+                          </div>
+                        ) : (
+                          <span className="text-center min-w-8 px-2 py-0.5 rounded-md bg-surface-3 text-xs font-semibold text-fg-muted">
+                            ×{item.quantity}
+                          </span>
+                        )}
+                        <span className="text-end font-semibold text-fg tabular-nums">
+                          {item.total}
+                          {currency && (
+                            <span className="ms-1 text-xs font-normal text-fg-muted">
+                              {currency}
+                            </span>
+                          )}
+                        </span>
+                        {editingItems && (
+                          <Button
+                            type="button"
+                            variant="dangerGhost"
+                            size="sm"
+                            iconOnly
+                            onClick={() => removeDraftItem(idx)}
+                            aria-label={t("removeItem")}
+                          >
+                            <IoTrashOutline />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-3 px-4 py-3 rounded-lg border border-line bg-surface-2">
+                    <OrderChargesLines
+                      charges={charges}
+                      currency={currency}
+                      labels={{
+                        subtotal: t("detailsSubtotal"),
+                        tax: t("detailsTax"),
+                        service: t("detailsService"),
+                        deliveryFee:
+                          variant === "delivery"
+                            ? t("detailsDeliveryFee" as never)
+                            : undefined,
+                        total: t("detailsTotal"),
+                      }}
+                      accent="brand"
+                    />
+                  </div>
+
+                  {editingItems && (
+                    <Button
+                      type="button"
+                      fullWidth
+                      disabled={savingItems || draftItems.length === 0}
+                      loading={savingItems}
+                      onClick={() => void saveItemEdits()}
+                      className="mt-3"
+                    >
+                      {savingItems ? t("itemsSaving") : t("itemsSave")}
+                    </Button>
+                  )}
+                </>
+              )}
+            </div>
+
+            {entry.actions && entry.actions.length > 0 && (
+              <div className="px-5 pb-5 border-t border-line pt-4">
+                <h4 className="mb-3 text-sm font-semibold text-fg flex items-center gap-2">
+                  <IoListOutline className="text-brand text-base" />
+                  {t("actionsTitle")}
+                </h4>
+                <ActionsTimeline
+                  actions={entry.actions}
+                  locale={locale}
+                  t={t}
+                  order={order}
+                />
+              </div>
+            )}
+          </>
         ) : null}
       </Modal>
 

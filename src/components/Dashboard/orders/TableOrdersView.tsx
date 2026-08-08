@@ -52,16 +52,16 @@ export default function TableOrdersView() {
         className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4 text-center md:min-h-[60vh] md:gap-4"
       >
         <PageTitleWithHelp className="justify-center">
-          <h1 className="text-xl font-bold text-slate-800 sm:text-2xl md:text-3xl dark:text-slate-100">
+          <h1 className="text-xl font-bold text-fg sm:text-2xl md:text-3xl">
             {t("proOnlyTitle")}
           </h1>
         </PageTitleWithHelp>
-        <p className="max-w-md text-sm text-slate-500 md:text-base dark:text-slate-400">
+        <p className="max-w-md text-sm text-fg-subtle md:text-base dark:text-fg-subtle">
           {t("proOnlyDescription")}
         </p>
         <LinkTo
           href={`/dashboard/${menuId}/subscription`}
-          className="mt-2 inline-flex items-center justify-center gap-2 rounded-2xl bg-linear-to-r from-primary to-primary/80 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] md:mt-4 md:px-8"
+          className="mt-2 inline-flex items-center justify-center gap-2 rounded-lg bg-linear-to-r from-primary to-primary/80 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] md:mt-4 md:px-8"
         >
           {t("upgradeShort")}
         </LinkTo>
@@ -75,11 +75,11 @@ export default function TableOrdersView() {
 
       <header
         id="onboarding-orders-header"
-        className="rounded-2xl border border-line bg-surface p-6 shadow-sm md:p-8"
+        className="rounded-lg border border-line bg-surface p-6 shadow-sm md:p-8"
       >
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-brand text-on-brand shadow-sm">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-brand text-on-brand shadow-sm">
               <IoReceiptOutline className="text-2xl" aria-hidden />
             </div>
             <div>
@@ -114,7 +114,7 @@ export default function TableOrdersView() {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder={t("searchPlaceholder")}
-            className={`w-full rounded-xl border border-line-strong bg-surface py-3 text-sm text-fg placeholder:text-fg-subtle focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/35 ${isRTL ? "pe-11 ps-4" : "ps-11 pe-4"}`}
+            className={`w-full rounded-lg border border-line-strong bg-surface py-3 text-sm text-fg placeholder:text-fg-subtle focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/35 ${isRTL ? "pe-11 ps-4" : "ps-11 pe-4"}`}
             autoComplete="off"
           />
         </div>

@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { FiX } from "react-icons/fi";
 import { cn } from "@/lib/cn";
 import { Button } from "./Button";
-import { useDialogBehavior } from "./useDialog";
+import { useDialogBehavior, useIsClient } from "./useDialog";
 
 const sizes = {
   xs: "sm:max-w-sm",
@@ -64,14 +64,13 @@ export function Modal({
   bare = false,
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
-  const [mounted, setMounted] = useState(false);
+  const isClient = useIsClient();
   const titleId = useId();
   const descriptionId = useId();
 
-  useEffect(() => setMounted(true), []);
   useDialogBehavior({ open, onClose, panelRef, dismissible });
 
-  if (!mounted || !open) return null;
+  if (!isClient || !open) return null;
 
   return createPortal(
     <div
@@ -175,7 +174,10 @@ export function Modal({
         ) : null}
 
         {/* Keeps the sheet's action row clear of the home indicator. */}
-        <div className="h-[env(safe-area-inset-bottom)] shrink-0 sm:hidden" aria-hidden />
+        <div
+          className="h-[env(safe-area-inset-bottom)] shrink-0 sm:hidden"
+          aria-hidden
+        />
       </div>
     </div>,
     document.body,

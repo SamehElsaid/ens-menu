@@ -41,8 +41,11 @@ function getStepStates(
   analyzing: boolean,
   analysisDone: boolean,
 ): StepState[] {
-  const step2: StepState =
-    analyzing ? "active" : analysisDone || status !== "pending" ? "done" : "pending";
+  const step2: StepState = analyzing
+    ? "active"
+    : analysisDone || status !== "pending"
+      ? "done"
+      : "pending";
 
   const step3: StepState =
     status === "awaiting_user"
@@ -88,7 +91,7 @@ function TimelineStep({
               ? "border-emerald-500 bg-emerald-500 text-white"
               : state === "active"
                 ? "border-brand bg-brand-soft text-brand motion-safe:animate-pulse"
-                : "border-slate-200 bg-slate-50 text-slate-400 dark:border-slate-700 dark:bg-slate-800"
+                : "border-line bg-slate-50 text-slate-400  "
           }`}
         >
           {state === "done" ? (
@@ -100,7 +103,7 @@ function TimelineStep({
         {!isLast && (
           <div
             className={`mt-1 w-0.5 flex-1 min-h-[2rem] transition-colors duration-500 ${
-              state === "done" ? "bg-emerald-500" : "bg-slate-200 dark:bg-slate-700"
+              state === "done" ? "bg-emerald-500" : "bg-surface-3"
             }`}
           />
         )}
@@ -108,9 +111,7 @@ function TimelineStep({
       <div className={`pb-8 ${isLast ? "pb-0" : ""}`}>
         <p
           className={`font-semibold transition-colors ${
-            state === "pending"
-              ? "text-slate-400 dark:text-slate-500"
-              : "text-slate-900 dark:text-white"
+            state === "pending" ? "text-fg-subtle" : "text-fg"
           }`}
         >
           {title}
@@ -118,9 +119,7 @@ function TimelineStep({
         {description && (
           <p
             className={`mt-1 text-sm leading-relaxed ${
-              state === "active"
-                ? "text-slate-600 dark:text-slate-300"
-                : "text-slate-500 dark:text-slate-400"
+              state === "active" ? "text-fg-muted" : "text-fg-muted"
             }`}
           >
             {description}
@@ -295,13 +294,11 @@ export default function DomainTransferPageContent() {
   return (
     <div className="mx-auto max-w-2xl space-y-6" dir={textDir}>
       <div>
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-900 dark:text-white">
+        <h1 className="flex items-center gap-2 text-2xl font-bold text-fg">
           <IoGlobeOutline className="text-primary" />
           {t("title")}
         </h1>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-          {t("description")}
-        </p>
+        <p className="mt-2 text-sm text-fg-muted">{t("description")}</p>
       </div>
 
       {!request ? (
@@ -310,7 +307,7 @@ export default function DomainTransferPageContent() {
             <div>
               <label
                 htmlFor="domainUrl"
-                className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
+                className="mb-2 block text-sm font-medium text-fg-muted"
               >
                 {t("domainLabel")}
               </label>
@@ -320,17 +317,15 @@ export default function DomainTransferPageContent() {
                 value={domainUrl}
                 onChange={(e) => setDomainUrl(e.target.value)}
                 placeholder={t("domainPlaceholder")}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                className="w-full rounded-lg border border-line bg-white px-4 py-3 text-sm text-fg outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:text-white"
                 dir="ltr"
               />
-              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                {t("domainHint")}
-              </p>
+              <p className="mt-2 text-xs text-fg-muted">{t("domainHint")}</p>
             </div>
             <button
               type="submit"
               disabled={submitting || !domainUrl.trim()}
-              className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting ? t("submitting") : t("submit")}
             </button>
@@ -339,15 +334,10 @@ export default function DomainTransferPageContent() {
       ) : (
         <div className="space-y-4">
           <CardDashBoard>
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4 dark:border-slate-800">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4 dark:border-line">
               <div>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {t("domainLabel")}
-                </p>
-                <p
-                  className="font-mono font-semibold text-slate-900 dark:text-white"
-                  dir="ltr"
-                >
+                <p className="text-xs text-fg-muted">{t("domainLabel")}</p>
+                <p className="font-mono font-semibold text-fg" dir="ltr">
                   {request.domainUrl}
                 </p>
               </div>
@@ -359,14 +349,14 @@ export default function DomainTransferPageContent() {
                       ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
                       : request.status === "awaiting_user"
                         ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-                        : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                        : "bg-slate-100 text-slate-700  "
                 }`}
               >
                 {t(`status.${request.status}`)}
               </span>
             </div>
 
-            <div className="mb-2 flex items-center gap-2 text-xs text-slate-500">
+            <div className="mb-2 flex items-center gap-2 text-xs text-fg-subtle">
               <IoHardwareChipOutline />
               <span>{t("automatedProcess")}</span>
               <span>·</span>
@@ -432,9 +422,7 @@ export default function DomainTransferPageContent() {
             <CardDashBoard>
               <div className="flex items-center gap-3 py-2">
                 <IoRefreshOutline className="animate-spin text-xl text-primary" />
-                <p className="text-sm text-slate-600 dark:text-slate-300">
-                  {t("waitingForDns")}
-                </p>
+                <p className="text-sm text-fg-muted">{t("waitingForDns")}</p>
               </div>
             </CardDashBoard>
           )}
@@ -443,27 +431,25 @@ export default function DomainTransferPageContent() {
             <CardDashBoard className="border-primary/20 bg-primary/[0.02]">
               <div className="mb-3 flex items-center gap-2">
                 <IoHardwareChipOutline className="text-primary" />
-                <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                <h2 className="text-sm font-semibold text-fg">
                   {t("dnsConfigTitle")}
                 </h2>
               </div>
-              <div className="rounded-xl bg-white/80 p-4 text-sm leading-relaxed whitespace-pre-wrap text-slate-700 dark:bg-slate-800/50 dark:text-slate-300">
+              <div className="rounded-lg bg-white/80 p-4 text-sm leading-relaxed whitespace-pre-wrap text-slate-700">
                 {dnsConfigMessage.message}
               </div>
-              <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                {t("dnsNote")}
-              </p>
+              <p className="mt-3 text-xs text-fg-muted">{t("dnsNote")}</p>
 
               {request.status === "awaiting_user" && (
-                <div className="mt-5 border-t border-slate-100 pt-5 dark:border-slate-800">
-                  <p className="mb-4 text-sm text-slate-600 dark:text-slate-400">
+                <div className="mt-5 border-t border-line pt-5 dark:border-line">
+                  <p className="mb-4 text-sm text-fg-muted">
                     {t("confirmPrompt")}
                   </p>
                   <button
                     type="button"
                     onClick={() => void handleConfirm()}
                     disabled={confirming}
-                    className="rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                    className="rounded-lg bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
                   >
                     {confirming ? t("confirming") : t("confirmDone")}
                   </button>
@@ -495,15 +481,13 @@ export default function DomainTransferPageContent() {
               </button>
             ) : (
               <div className="space-y-3">
-                <p className="text-sm text-slate-600 dark:text-slate-300">
-                  {t("cancelConfirm")}
-                </p>
+                <p className="text-sm text-fg-muted">{t("cancelConfirm")}</p>
                 <div className="flex flex-wrap gap-3">
                   <button
                     type="button"
                     onClick={() => void handleCancel()}
                     disabled={cancelling}
-                    className="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+                    className="rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
                   >
                     {cancelling ? t("cancelling") : t("confirmCancel")}
                   </button>
@@ -511,7 +495,7 @@ export default function DomainTransferPageContent() {
                     type="button"
                     onClick={() => setShowCancelConfirm(false)}
                     disabled={cancelling}
-                    className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                    className="rounded-lg border border-line px-5 py-2.5 text-sm font-medium text-fg-muted hover:bg-slate-50 dark:hover:bg-slate-800"
                   >
                     {t("cancelDismiss")}
                   </button>

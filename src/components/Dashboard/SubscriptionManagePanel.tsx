@@ -51,7 +51,10 @@ type SubscriptionManagePanelProps = {
   onRenewExtraMenusChange: (count: number) => void;
   appliedVoucherCode: string | null;
   voucherValidation: VoucherValidationResult | null;
-  onVoucherApplied: (code: string, result: VoucherValidationResult | null) => void;
+  onVoucherApplied: (
+    code: string,
+    result: VoucherValidationResult | null,
+  ) => void;
   onRenew: () => void;
   onUpgrade: () => void;
   onRedeemDuration: () => void;
@@ -140,7 +143,9 @@ export default function SubscriptionManagePanel({
   const showExtraMenus = isProUser;
   const extraMenusMin = canRenewPro ? 0 : 1;
   const extraMenusValue = canRenewPro ? renewExtraMenusCount : purchaseQty;
-  const setExtraMenusValue = canRenewPro ? onRenewExtraMenusChange : setPurchaseQty;
+  const setExtraMenusValue = canRenewPro
+    ? onRenewExtraMenusChange
+    : setPurchaseQty;
 
   const proPlanPrice = getProPlanPrice(
     proPlan,
@@ -155,9 +160,8 @@ export default function SubscriptionManagePanel({
         monthlyPrice,
       )
     : 0;
-  const extraMenusPurchaseTotal = !canRenewPro && isProUser
-    ? purchaseQty * pricePerMenu
-    : 0;
+  const extraMenusPurchaseTotal =
+    !canRenewPro && isProUser ? purchaseQty * pricePerMenu : 0;
 
   const orderTotal = useMemo(() => {
     if (hasDurationVoucher) return 0;
@@ -293,10 +297,7 @@ export default function SubscriptionManagePanel({
   ]);
 
   const showPanel =
-    canRenewPro ||
-    canUpgradeToPro ||
-    isProUser ||
-    Boolean(appliedVoucherCode);
+    canRenewPro || canUpgradeToPro || isProUser || Boolean(appliedVoucherCode);
 
   if (!showPanel) return null;
 
@@ -305,24 +306,24 @@ export default function SubscriptionManagePanel({
 
   return (
     <section
-      className={`rounded-3xl border border-slate-200/90 bg-white shadow-sm dark:border-slate-700/80 dark:bg-slate-900 ${className}`}
+      className={`rounded-lg border border-line/90 bg-white shadow-sm dark:border-line/80  ${className}`}
       aria-labelledby="subscription-manage-heading"
     >
-      <div className="border-b border-slate-100 px-5 py-4 dark:border-slate-800 md:px-6">
+      <div className="border-b border-line px-5 py-4 dark:border-line md:px-6">
         <div
           className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse text-right" : "text-left"}`}
         >
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
             <HiOutlineCreditCard className="h-5 w-5" />
           </span>
           <div>
             <h2
               id="subscription-manage-heading"
-              className="text-lg font-bold text-slate-900 dark:text-slate-100"
+              className="text-lg font-bold text-fg"
             >
               {t("managePanelTitle")}
             </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-sm text-fg-muted">
               {t("managePanelDescription")}
             </p>
           </div>
@@ -332,7 +333,7 @@ export default function SubscriptionManagePanel({
       <div className="space-y-5 p-5 md:p-6">
         {canRenewPro && subscription && (
           <p
-            className={`rounded-xl border border-primary/15 bg-primary/5 px-3 py-2.5 text-sm text-slate-600 dark:text-slate-300 ${isRTL ? "text-right" : "text-left"}`}
+            className={`rounded-lg border border-primary/15 bg-primary/5 px-3 py-2.5 text-sm text-fg-muted ${isRTL ? "text-right" : "text-left"}`}
           >
             {t("renewKeepsRemainingDays", {
               days: String(getSubscriptionDaysRemaining(subscription)),
@@ -343,12 +344,12 @@ export default function SubscriptionManagePanel({
         {showBilling && (
           <div>
             <p
-              className={`mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 ${isRTL ? "text-right" : "text-left"}`}
+              className={`mb-2 text-xs font-semibold uppercase tracking-wide text-fg-muted ${isRTL ? "text-right" : "text-left"}`}
             >
               {t("selectBillingCycle")}
             </p>
             <div
-              className={`inline-flex w-full rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-950 ${isRTL ? "flex-row-reverse" : ""}`}
+              className={`inline-flex w-full rounded-lg border border-line bg-slate-50 p-1  dark:bg-slate-950 ${isRTL ? "flex-row-reverse" : ""}`}
               role="group"
               aria-label={t("selectBillingCycle")}
             >
@@ -361,7 +362,7 @@ export default function SubscriptionManagePanel({
                   className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${
                     proBillingChoice === cycle
                       ? "bg-brand text-on-brand shadow-sm"
-                      : "text-slate-600 hover:bg-white dark:text-slate-300 dark:hover:bg-slate-800"
+                      : "text-fg-muted hover:bg-white  dark:hover:bg-slate-800"
                   }`}
                 >
                   {cycle === "monthly" ? t("monthly") : t("yearly")}
@@ -372,14 +373,16 @@ export default function SubscriptionManagePanel({
         )}
 
         {showExtraMenus && (
-          <div className="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 dark:border-slate-700/80 dark:bg-slate-950/50">
+          <div className="rounded-lg border border-line/80 bg-slate-50/80 p-4 dark:border-line/80 dark:bg-slate-950/50">
             <p
-              className={`mb-1 text-sm font-semibold text-slate-800 dark:text-slate-100 ${isRTL ? "text-right" : "text-left"}`}
+              className={`mb-1 text-sm font-semibold text-fg ${isRTL ? "text-right" : "text-left"}`}
             >
-              {canRenewPro ? t("renewExtraMenusTitle") : t("purchaseExtraMenusSectionTitle")}
+              {canRenewPro
+                ? t("renewExtraMenusTitle")
+                : t("purchaseExtraMenusSectionTitle")}
             </p>
             <p
-              className={`mb-4 text-xs text-slate-500 dark:text-slate-400 ${isRTL ? "text-right" : "text-left"}`}
+              className={`mb-4 text-xs text-fg-muted ${isRTL ? "text-right" : "text-left"}`}
             >
               {canRenewPro
                 ? t("renewExtraMenusDescription", {
@@ -401,7 +404,7 @@ export default function SubscriptionManagePanel({
             {showShortPeriodWarning && (
               <div
                 role="alert"
-                className={`mb-4 flex gap-2 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2.5 dark:border-amber-700 dark:bg-amber-950/40 ${isRTL ? "flex-row-reverse text-right" : "text-left"}`}
+                className={`mb-4 flex gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2.5 dark:border-amber-700 dark:bg-amber-950/40 ${isRTL ? "flex-row-reverse text-right" : "text-left"}`}
               >
                 <IoWarningOutline className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
                 <p className="text-xs font-medium text-amber-900 dark:text-amber-100">
@@ -420,9 +423,11 @@ export default function SubscriptionManagePanel({
                 type="button"
                 disabled={isBusy || extraMenusValue <= extraMenusMin}
                 onClick={() =>
-                  setExtraMenusValue(Math.max(extraMenusMin, extraMenusValue - 1))
+                  setExtraMenusValue(
+                    Math.max(extraMenusMin, extraMenusValue - 1),
+                  )
                 }
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-lg font-bold disabled:opacity-40 dark:border-slate-600 dark:bg-slate-900"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-lg font-bold disabled:opacity-40"
                 aria-label={t("renewExtraMenusDecrease")}
               >
                 −
@@ -439,7 +444,7 @@ export default function SubscriptionManagePanel({
                     setExtraMenusValue(v);
                   }
                 }}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-center text-lg font-semibold dark:border-slate-600 dark:bg-slate-900 disabled:opacity-60"
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-center text-lg font-semibold disabled:opacity-60"
                 aria-label={t("renewExtraMenusQuantityLabel")}
               />
               <button
@@ -448,7 +453,7 @@ export default function SubscriptionManagePanel({
                 onClick={() =>
                   setExtraMenusValue(Math.min(50, extraMenusValue + 1))
                 }
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-lg font-bold disabled:opacity-40 dark:border-slate-600 dark:bg-slate-900"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-lg font-bold disabled:opacity-40"
                 aria-label={t("renewExtraMenusIncrease")}
               >
                 +
@@ -456,7 +461,7 @@ export default function SubscriptionManagePanel({
             </div>
 
             <p
-              className={`mt-3 text-xs text-slate-500 dark:text-slate-400 ${isRTL ? "text-right" : "text-left"}`}
+              className={`mt-3 text-xs text-fg-muted ${isRTL ? "text-right" : "text-left"}`}
             >
               {t("renewExtraMenusTotalMenus", {
                 total: String(baseMax + extraMenusValue),
@@ -487,9 +492,9 @@ export default function SubscriptionManagePanel({
 
         {(canRenewPro || canUpgradeToPro || (isProUser && !canRenewPro)) &&
           !hasDurationVoucher && (
-            <div className="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 dark:border-slate-700/80 dark:bg-slate-950/50">
+            <div className="rounded-lg border border-line/80 bg-slate-50/80 p-4 dark:border-line/80 dark:bg-slate-950/50">
               <p
-                className={`mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 ${isRTL ? "text-right" : "text-left"}`}
+                className={`mb-3 text-xs font-semibold uppercase tracking-wide text-fg-muted ${isRTL ? "text-right" : "text-left"}`}
               >
                 {t("orderSummaryTitle")}
               </p>
@@ -498,11 +503,13 @@ export default function SubscriptionManagePanel({
                   <li
                     className={`flex items-center justify-between text-sm ${isRTL ? "flex-row-reverse" : ""}`}
                   >
-                    <span className="text-slate-600 dark:text-slate-300">
-                      {canRenewPro ? t("summaryRenewPro") : t("summaryUpgradePro")}{" "}
+                    <span className="text-fg-muted">
+                      {canRenewPro
+                        ? t("summaryRenewPro")
+                        : t("summaryUpgradePro")}{" "}
                       ({periodLabel})
                     </span>
-                    <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">
+                    <span className="font-semibold tabular-nums text-fg">
                       {formatEgpPrice(proPlanPrice)} {currencyLabel}
                     </span>
                   </li>
@@ -511,12 +518,12 @@ export default function SubscriptionManagePanel({
                   <li
                     className={`flex items-center justify-between text-sm ${isRTL ? "flex-row-reverse" : ""}`}
                   >
-                    <span className="text-slate-600 dark:text-slate-300">
+                    <span className="text-fg-muted">
                       {t("summaryExtraMenusRenewal", {
                         count: String(renewExtraMenusCount),
                       })}
                     </span>
-                    <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">
+                    <span className="font-semibold tabular-nums text-fg">
                       {formatEgpPrice(extraMenusRenewalAmount)} {currencyLabel}
                     </span>
                   </li>
@@ -525,12 +532,12 @@ export default function SubscriptionManagePanel({
                   <li
                     className={`flex items-center justify-between text-sm ${isRTL ? "flex-row-reverse" : ""}`}
                   >
-                    <span className="text-slate-600 dark:text-slate-300">
+                    <span className="text-fg-muted">
                       {t("summaryExtraMenusPurchase", {
                         count: String(purchaseQty),
                       })}
                     </span>
-                    <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">
+                    <span className="font-semibold tabular-nums text-fg">
                       {formatEgpPrice(extraMenusPurchaseTotal)} {currencyLabel}
                     </span>
                   </li>
@@ -550,9 +557,9 @@ export default function SubscriptionManagePanel({
                   )}
               </ul>
               <div
-                className={`mt-4 flex items-center justify-between border-t border-slate-200 pt-3 dark:border-slate-700 ${isRTL ? "flex-row-reverse" : ""}`}
+                className={`mt-4 flex items-center justify-between border-t border-line pt-3 dark:border-line ${isRTL ? "flex-row-reverse" : ""}`}
               >
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                <span className="text-sm font-semibold text-fg-muted">
                   {t("orderSummaryTotal")}
                 </span>
                 <span className="text-xl font-black tabular-nums text-primary">
@@ -567,7 +574,7 @@ export default function SubscriptionManagePanel({
             type="button"
             onClick={primaryAction.onClick}
             disabled={primaryAction.disabled}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-4 text-base font-bold text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-4 text-base font-bold text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <primaryAction.icon className="h-5 w-5 shrink-0" />
             {isBusy && !voucherRedeemLoading
@@ -580,7 +587,7 @@ export default function SubscriptionManagePanel({
 
         {canUpgradeToPro && !canRenewPro && !isProUser && (
           <p
-            className={`text-center text-xs text-slate-500 dark:text-slate-400 ${isRTL ? "text-right" : "text-left"}`}
+            className={`text-center text-xs text-fg-muted ${isRTL ? "text-right" : "text-left"}`}
           >
             {t("managePanelUpgradeHint")}
           </p>

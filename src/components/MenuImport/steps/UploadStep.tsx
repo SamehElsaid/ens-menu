@@ -42,9 +42,7 @@ export default function UploadStep({
   const [isDragOver, setIsDragOver] = useState(false);
 
   const validateAndSet = async (selected: File) => {
-    if (
-      !_checkFileType(selected, [...MENU_IMPORT_ACCEPTED_TYPES])
-    ) {
+    if (!_checkFileType(selected, [...MENU_IMPORT_ACCEPTED_TYPES])) {
       toast.error(t("invalidFileType"));
       return;
     }
@@ -114,7 +112,9 @@ export default function UploadStep({
           </span>
           <div className="text-center">
             <p className="font-semibold text-fg">{t("dropzoneTitle")}</p>
-            <p className="mt-1 text-[13px] text-fg-muted">{t("dropzoneHint")}</p>
+            <p className="mt-1 text-[13px] text-fg-muted">
+              {t("dropzoneHint")}
+            </p>
           </div>
         </div>
       ) : (

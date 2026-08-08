@@ -83,8 +83,11 @@ export default function StaffPermissionsEditor({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-          <IoInformationCircleOutline className="shrink-0 text-sm" aria-hidden />
+        <div className="flex items-center gap-1.5 text-xs text-fg-muted">
+          <IoInformationCircleOutline
+            className="shrink-0 text-sm"
+            aria-hidden
+          />
           <span>{t("dependencyHint")}</span>
         </div>
         <div className="flex shrink-0 gap-2 text-xs">
@@ -96,12 +99,12 @@ export default function StaffPermissionsEditor({
           >
             {t("selectAll")}
           </button>
-          <span className="text-slate-300 dark:text-slate-600">|</span>
+          <span className="text-slate-300 dark:text-fg-muted">|</span>
           <button
             type="button"
             disabled={disabled}
             onClick={clearAll}
-            className="font-medium text-slate-500 hover:underline disabled:opacity-50 dark:text-slate-400"
+            className="font-medium text-fg-subtle hover:underline disabled:opacity-50 dark:text-fg-subtle"
           >
             {t("clearAll")}
           </button>
@@ -114,11 +117,8 @@ export default function StaffPermissionsEditor({
           if (perms.length === 0) return null;
           const groupLabelKey = GROUP_LABEL_KEYS[group];
           return (
-            <fieldset
-              key={group}
-              className="rounded-xl border border-slate-200 dark:border-slate-700/70"
-            >
-              <legend className="mx-3 px-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <fieldset key={group} className="rounded-lg border border-line/70">
+              <legend className="mx-3 px-1.5 text-xs font-semibold uppercase tracking-wide text-fg-muted">
                 {groupLabelKey ? t(groupLabelKey) : group}
               </legend>
               <div className="grid grid-cols-1 gap-1.5 p-3 sm:grid-cols-2">
@@ -131,36 +131,32 @@ export default function StaffPermissionsEditor({
                       className={`group flex items-start gap-2.5 rounded-lg border px-3 py-2 text-sm transition-colors ${
                         isChecked
                           ? "border-primary/40 bg-primary/5 dark:border-primary/40 dark:bg-primary/10"
-                          : "border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50"
+                          : "border-line hover:bg-slate-50  dark:hover:bg-slate-800/50"
                       } ${
                         disabled || isLocked
                           ? "cursor-not-allowed opacity-80"
                           : "cursor-pointer"
                       }`}
-                      title={
-                        isLocked ? t("lockedByDependency") : undefined
-                      }
+                      title={isLocked ? t("lockedByDependency") : undefined}
                     >
                       <input
                         type="checkbox"
                         checked={isChecked}
                         disabled={disabled || isLocked}
                         onChange={() => toggle(perm.key)}
-                        className="mt-0.5 rounded border-slate-300 text-primary focus:ring-primary/30 disabled:opacity-60 dark:border-slate-600"
+                        className="mt-0.5 rounded border-slate-300 text-primary focus:ring-primary/30 disabled:opacity-60"
                       />
                       <span className="min-w-0 flex-1">
-                        <span className="flex items-center gap-1.5 font-medium text-slate-800 dark:text-slate-100">
-                          {tRoot(
-                            perm.labelKey as Parameters<typeof tRoot>[0],
-                          )}
+                        <span className="flex items-center gap-1.5 font-medium text-fg">
+                          {tRoot(perm.labelKey as Parameters<typeof tRoot>[0])}
                           {isLocked && (
                             <IoLockClosedOutline
-                              className="shrink-0 text-[11px] text-slate-400 dark:text-slate-500"
+                              className="shrink-0 text-[11px] text-fg-subtle"
                               aria-hidden
                             />
                           )}
                         </span>
-                        <span className="mt-0.5 block text-xs leading-snug text-slate-500 dark:text-slate-400">
+                        <span className="mt-0.5 block text-xs leading-snug text-fg-muted">
                           {tRoot(
                             perm.descriptionKey as Parameters<typeof tRoot>[0],
                           )}

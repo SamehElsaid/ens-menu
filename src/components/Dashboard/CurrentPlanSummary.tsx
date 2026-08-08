@@ -2,10 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 
-import {
-  HiOutlineGift,
-  HiOutlineSparkles,
-} from "react-icons/hi2";
+import { HiOutlineGift, HiOutlineSparkles } from "react-icons/hi2";
 import { IoWarningOutline } from "react-icons/io5";
 
 import {
@@ -27,10 +24,7 @@ type CurrentPlanSummaryProps = {
   className?: string;
 };
 
-function formatPlanDate(
-  d: string | null | undefined,
-  locale: string,
-): string {
+function formatPlanDate(d: string | null | undefined, locale: string): string {
   if (d == null || d === "") return "—";
 
   try {
@@ -44,7 +38,9 @@ function formatPlanDate(
   }
 }
 
-function getSubscriptionProgress(subscription: Subscription | null): number | null {
+function getSubscriptionProgress(
+  subscription: Subscription | null,
+): number | null {
   const endRaw = subscription?.endDate;
   const startRaw = subscription?.startDate;
   if (!endRaw || !startRaw) return null;
@@ -96,7 +92,9 @@ export default function CurrentPlanSummary({
   const effectiveMaxMenus = getEffectiveMaxMenus(subscriptionInfo);
   const baseMenus = Number(subscriptionInfo?.maxMenus ?? 1);
   const extraMenus = Number(subscriptionInfo?.extraMenus ?? 0);
-  const progressPercent = isPro ? getSubscriptionProgress(subscriptionInfo) : null;
+  const progressPercent = isPro
+    ? getSubscriptionProgress(subscriptionInfo)
+    : null;
 
   const statusLabel = (() => {
     if (isInGracePeriod) return t("subscriptionGraceStatus");
@@ -131,7 +129,7 @@ export default function CurrentPlanSummary({
     return (
       <SkeletonRegion
         label={t("currentPlanSummary")}
-        className={`rounded-2xl border border-line bg-surface p-5 md:p-6 space-y-4 ${className}`}
+        className={`rounded-lg border border-line bg-surface p-5 md:p-6 space-y-4 ${className}`}
       >
         <Skeleton className="h-4 w-1/3" rounded="md" />
         <Skeleton className="h-8 w-1/4" rounded="md" />
@@ -146,7 +144,7 @@ export default function CurrentPlanSummary({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl border border-brand-line bg-surface p-5 md:p-6 shadow-sm ${isRTL ? "text-right" : "text-left"} ${className}`}
+      className={`relative overflow-hidden rounded-lg border border-brand-line bg-surface p-5 md:p-6 shadow-sm ${isRTL ? "text-right" : "text-left"} ${className}`}
     >
       <div
         className={`absolute top-0 ${isRTL ? "left-0 rounded-br-[80px]" : "right-0 rounded-bl-[80px]"} h-24 w-24 bg-primary/10 dark:bg-primary/15 pointer-events-none`}
@@ -163,7 +161,7 @@ export default function CurrentPlanSummary({
         <div
           className={`flex items-center gap-2.5 ${isRTL ? "flex-row-reverse" : ""}`}
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-soft text-brand-soft-fg">
+          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-soft text-brand-soft-fg">
             {isPro ? (
               <HiOutlineSparkles className="h-5 w-5" />
             ) : (
@@ -171,9 +169,7 @@ export default function CurrentPlanSummary({
             )}
           </span>
 
-          <span className="text-xl font-bold text-fg">
-            {displayPlanName}
-          </span>
+          <span className="text-xl font-bold text-fg">{displayPlanName}</span>
         </div>
 
         <span
@@ -190,7 +186,7 @@ export default function CurrentPlanSummary({
       {isInGracePeriod && (
         <div
           role="alert"
-          className={`relative mb-5 flex gap-3 rounded-xl border border-warning-line bg-warning-soft px-4 py-3 ${isRTL ? "flex-row-reverse text-right" : "text-left"}`}
+          className={`relative mb-5 flex gap-3 rounded-lg border border-warning-line bg-warning-soft px-4 py-3 ${isRTL ? "flex-row-reverse text-right" : "text-left"}`}
         >
           <IoWarningOutline className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
           <p className="text-sm text-warning-fg">
@@ -204,20 +200,22 @@ export default function CurrentPlanSummary({
           <div
             className={`flex items-center justify-between gap-2 text-sm ${isRTL ? "flex-row-reverse" : ""}`}
           >
-            <span className="font-medium text-slate-700 dark:text-slate-200">
+            <span className="font-medium text-fg-muted">
               {t("daysRemainingLabel", { days: String(daysRemaining) })}
             </span>
-            <span className="text-xs text-slate-500 dark:text-slate-400">
+            <span className="text-xs text-fg-muted">
               {formatPlanDate(subscriptionInfo?.endDate as string, locale)}
             </span>
           </div>
           <div
-            className="h-2 overflow-hidden rounded-full bg-slate-200/80 dark:bg-slate-700/80"
+            className="h-2 overflow-hidden rounded-full bg-slate-200/80"
             role="progressbar"
             aria-valuenow={progressPercent}
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-label={t("daysRemainingLabel", { days: String(daysRemaining) })}
+            aria-label={t("daysRemainingLabel", {
+              days: String(daysRemaining),
+            })}
           >
             <div
               className={`h-full rounded-full transition-all duration-500 ${
@@ -238,17 +236,17 @@ export default function CurrentPlanSummary({
           <div
             className={`mb-2 flex items-center justify-between text-sm ${isRTL ? "flex-row-reverse" : ""}`}
           >
-            <span className="font-medium text-slate-700 dark:text-slate-200">
+            <span className="font-medium text-fg-muted">
               {t("menusUsedLabel", {
                 used: String(menusUsed),
                 total: String(effectiveMaxMenus),
               })}
             </span>
-            <span className="text-xs text-slate-500 dark:text-slate-400">
+            <span className="text-xs text-fg-muted">
               {Math.round((menusUsed / effectiveMaxMenus) * 100)}%
             </span>
           </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-slate-200/80 dark:bg-slate-700/80">
+          <div className="h-1.5 overflow-hidden rounded-full bg-slate-200/80">
             <div
               className={`h-full rounded-full ${
                 menusUsed >= effectiveMaxMenus
@@ -298,15 +296,11 @@ export default function CurrentPlanSummary({
         ].map((item) => (
           <div
             key={item.label}
-            className="rounded-xl border border-line bg-surface-2 px-3 py-2.5"
+            className="rounded-lg border border-line bg-surface-2 px-3 py-2.5"
           >
-            <dt className="text-xs text-fg-muted mb-0.5">
-              {item.label}
-            </dt>
+            <dt className="text-xs text-fg-muted mb-0.5">{item.label}</dt>
 
-            <dd className="text-sm font-semibold text-fg">
-              {item.value}
-            </dd>
+            <dd className="text-sm font-semibold text-fg">{item.value}</dd>
           </div>
         ))}
       </dl>

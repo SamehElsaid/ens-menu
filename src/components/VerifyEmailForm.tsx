@@ -3,9 +3,9 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { FiAlertCircle, FiArrowRight, FiCheck, FiMail } from "react-icons/fi";
+import { FiAlertCircle, FiCheck, FiMail } from "react-icons/fi";
 import LinkTo from "@/components/Global/LinkTo";
-import { Button } from "@/components/ui/Button";
+import { SiteButton, SiteSpinner } from "@/components/site/Button";
 import { localizeHref } from "@/i18n/routing";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import { cn } from "@/lib/cn";
@@ -25,38 +25,28 @@ function getApiErrorMessage(data: unknown) {
   return payload?.error || payload?.message || null;
 }
 
-const TONE = {
-  loading: {
-    shell: "bg-brand-soft text-brand ring-brand-line",
-    title: "text-fg",
-  },
-  success: {
-    shell: "bg-success-soft text-success ring-success-line",
-    title: "text-success-fg",
-  },
-  error: {
-    shell: "bg-danger-soft text-danger ring-danger-line",
-    title: "text-danger-fg",
-  },
-} as const;
+const TONE: Record<StatusVariant, string> = {
+  loading: "bg-site-brand-tint text-site-brand ring-site-brand-line",
+  success: "bg-site-positive-tint text-site-positive ring-site-positive/20",
+  error: "bg-site-critical-tint text-site-critical ring-site-critical/20",
+};
 
 function StatusIcon({ variant }: { variant: StatusVariant }) {
-  const shellClass = cn(
-    "relative flex size-16 items-center justify-center rounded-2xl ring-1",
-    TONE[variant].shell,
+  const shell = cn(
+    "flex size-16 items-center justify-center rounded-site-lg ring-1 ring-inset",
+    TONE[variant],
   );
 
   if (variant === "loading") {
     return (
-      <div className={shellClass} aria-hidden>
+      <div className={shell} aria-hidden>
         <FiMail className="size-7" />
-        <span className="absolute -inset-1 animate-spin rounded-2xl border-2 border-brand-line border-t-brand" />
       </div>
     );
   }
 
   return (
-    <div className={shellClass} aria-hidden>
+    <div className={shell} aria-hidden>
       {variant === "success" ? (
         <FiCheck className="size-8 stroke-[2.5]" />
       ) : (
@@ -67,50 +57,37 @@ function StatusIcon({ variant }: { variant: StatusVariant }) {
 }
 
 /**
- * Single panel for all three verification outcomes. The result is announced
- * politely because it arrives after the page has already settled.
+ * One panel for all three verification outcomes. The result arrives after the
+ * page has settled, so it is announced politely rather than interrupting.
  */
 function VerifyStatusPanel({
   variant,
   title,
   description,
-  detail,
   children,
 }: {
   variant: StatusVariant;
   title: string;
   description: string;
-  detail?: string;
   children?: ReactNode;
 }) {
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      className="w-full text-center"
-    >
-      <div className="mx-auto flex max-w-sm flex-col items-center gap-5">
+    <div role="status" aria-live="polite" className="text-center">
+      <div className="flex flex-col items-center gap-6">
         <StatusIcon variant={variant} />
 
-        <div className="space-y-1.5">
-          <h2
-            className={cn(
-              "text-lg font-semibold tracking-[-0.014em]",
-              TONE[variant].title,
-            )}
-          >
-            {title}
-          </h2>
-          <p className="text-sm leading-relaxed text-fg-muted">{description}</p>
-          {detail ? (
-            <p className="text-[13px] leading-relaxed text-fg-subtle">
-              {detail}
-            </p>
-          ) : null}
+        <div>
+          <h1 className="text-site-h3">{title}</h1>
+          <p className="mt-2.5 text-site-body text-site-fg">
+            {description}
+            {variant === "loading" ? (
+              <SiteSpinner className="ms-2 inline-block align-[-0.2em]" />
+            ) : null}
+          </p>
         </div>
 
         {children ? (
-          <div className="flex w-full flex-col items-stretch gap-3 pt-1">
+          <div className="flex w-full flex-col items-stretch gap-3">
             {children}
           </div>
         ) : null}
@@ -164,13 +141,10 @@ export default function VerifyEmailForm() {
     }
 
     setResending(true);
-    const response = await axiosPost<{ email: string; locale: string }, unknown>(
-      "/auth/resend-verification",
-      locale,
-      { email, locale },
-      false,
-      true,
-    );
+    const response = await axiosPost<
+      { email: string; locale: string },
+      unknown
+    >("/auth/resend-verification", locale, { email, locale }, false, true);
     setResending(false);
 
     if (response.status) {
@@ -178,8 +152,19 @@ export default function VerifyEmailForm() {
       return;
     }
 
-    toast.error(getApiErrorMessage(response.data) || t("auth.verifyEmailFailed"));
+    toast.error(
+      getApiErrorMessage(response.data) || t("auth.verifyEmailFailed"),
+    );
   };
+
+  const backToLogin = (
+    <LinkTo
+      href="/auth/login"
+      className="text-site-sm text-site-muted underline underline-offset-4 hover:text-site-ink"
+    >
+      {t("auth.backToLogin")}
+    </LinkTo>
+  );
 
   if (state === "loading") {
     return (
@@ -187,7 +172,6 @@ export default function VerifyEmailForm() {
         variant="loading"
         title={t("auth.verifyEmailTitle")}
         description={t("auth.verifyEmailLoading")}
-        detail={t("auth.verifyEmailDescription")}
       />
     );
   }
@@ -199,14 +183,15 @@ export default function VerifyEmailForm() {
         title={t("auth.verifyEmailSuccessTitle")}
         description={t("auth.verifyEmailSuccess")}
       >
-        <Button
+        <SiteButton
+          size="lg"
+          block
           onClick={() => {
             window.location.href = localizeHref("/auth/login", locale);
           }}
-          fullWidth
         >
           {t("auth.login")}
-        </Button>
+        </SiteButton>
       </VerifyStatusPanel>
     );
   }
@@ -222,17 +207,11 @@ export default function VerifyEmailForm() {
       }
     >
       {email ? (
-        <Button onClick={handleResend} loading={resending} fullWidth>
+        <SiteButton size="lg" block onClick={handleResend} loading={resending}>
           {t("auth.resendVerification")}
-        </Button>
+        </SiteButton>
       ) : null}
-      <LinkTo
-        href="/auth/login"
-        className="inline-flex items-center justify-center gap-2 rounded-md py-1 text-[13px] font-medium text-fg-muted transition-colors hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-      >
-        <FiArrowRight className="size-4 shrink-0 rtl:rotate-180" aria-hidden />
-        <span>{t("auth.backToLogin")}</span>
-      </LinkTo>
+      {backToLogin}
     </VerifyStatusPanel>
   );
 }

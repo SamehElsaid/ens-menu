@@ -76,13 +76,7 @@ function UserDropDown() {
     }
 
     return items;
-  }, [
-    isStaff,
-    profile.data?.user?.role,
-    publicMenuUrl,
-    showRestaurantLink,
-    t,
-  ]);
+  }, [isStaff, profile.data?.user?.role, publicMenuUrl, showRestaurantLink, t]);
 
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);

@@ -12,7 +12,10 @@ import { LayersPanel } from "./panels/LayersPanel";
 import { PropertiesPanel } from "./panels/PropertiesPanel";
 import { SaveTemplateModal } from "./SaveTemplateModal";
 import type { Breakpoint } from "@/lib/template-builder/schema";
-import { exportDocumentJson, exportDocumentToHtml } from "@/lib/template-builder/export/html";
+import {
+  exportDocumentJson,
+  exportDocumentToHtml,
+} from "@/lib/template-builder/export/html";
 
 const Monaco = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
@@ -35,14 +38,48 @@ function CodeModal() {
       <div className="flex h-[80vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-slate-700 bg-slate-900 shadow-2xl">
         <div className="flex items-center gap-2 border-b border-slate-700 px-4 py-3">
           <h2 className="text-sm font-semibold text-white">{t("viewCode")}</h2>
-          <button type="button" onClick={() => setMode("json")} className={`ml-3 px-2 py-1 text-xs ${mode === "json" ? "bg-violet-600 text-white" : "text-slate-400"}`}>JSON</button>
-          <button type="button" onClick={() => setMode("html")} className={`px-2 py-1 text-xs ${mode === "html" ? "bg-violet-600 text-white" : "text-slate-400"}`}>HTML</button>
+          <button
+            type="button"
+            onClick={() => setMode("json")}
+            className={`ml-3 px-2 py-1 text-xs ${mode === "json" ? "bg-violet-600 text-white" : "text-slate-400"}`}
+          >
+            JSON
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("html")}
+            className={`px-2 py-1 text-xs ${mode === "html" ? "bg-violet-600 text-white" : "text-slate-400"}`}
+          >
+            HTML
+          </button>
           <div className="flex-1" />
-          <button type="button" onClick={() => void navigator.clipboard.writeText(code)} className="text-xs text-slate-300">{t("copy")}</button>
-          <button type="button" onClick={() => setOpen(false)} className="text-xs text-slate-400">{t("close")}</button>
+          <button
+            type="button"
+            onClick={() => void navigator.clipboard.writeText(code)}
+            className="text-xs text-slate-300"
+          >
+            {t("copy")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="text-xs text-slate-400"
+          >
+            {t("close")}
+          </button>
         </div>
         <div className="min-h-0 flex-1">
-          <Monaco height="100%" language={mode === "json" ? "json" : "html"} theme="vs-dark" value={code} options={{ readOnly: true, minimap: { enabled: false }, fontSize: 12 }} />
+          <Monaco
+            height="100%"
+            language={mode === "json" ? "json" : "html"}
+            theme="vs-dark"
+            value={code}
+            options={{
+              readOnly: true,
+              minimap: { enabled: false },
+              fontSize: 12,
+            }}
+          />
         </div>
       </div>
     </div>
@@ -80,7 +117,11 @@ export function TemplateBuilderShell() {
   }, [locale, setPreviewLocale]);
 
   const bpLabel = (bp: Breakpoint) =>
-    bp === "desktop" ? t("desktop") : bp === "tablet" ? t("tablet") : t("mobile");
+    bp === "desktop"
+      ? t("desktop")
+      : bp === "tablet"
+        ? t("tablet")
+        : t("mobile");
 
   const openSaveModal = useCallback(() => {
     setSaveModalOpen(true);
@@ -143,7 +184,15 @@ export function TemplateBuilderShell() {
         deleteSelected();
       }
     },
-    [openSaveModal, undo, redo, copySelected, pasteIntoSelected, duplicateSelected, deleteSelected],
+    [
+      openSaveModal,
+      undo,
+      redo,
+      copySelected,
+      pasteIntoSelected,
+      duplicateSelected,
+      deleteSelected,
+    ],
   );
 
   useEffect(() => {
@@ -158,25 +207,52 @@ export function TemplateBuilderShell() {
   }, [dirty, document, save]);
 
   if (!document) {
-    return <div className="flex h-screen items-center justify-center bg-slate-950 text-slate-400">{t("loading")}</div>;
+    return (
+      <div className="flex h-screen items-center justify-center bg-slate-950 text-slate-400">
+        {t("loading")}
+      </div>
+    );
   }
 
   return (
-    <div className={`flex h-screen flex-col overflow-hidden ${uiDark ? "bg-slate-950 text-slate-100" : "bg-slate-100 text-slate-900"}`}>
+    <div
+      className={`flex h-screen flex-col overflow-hidden ${uiDark ? "bg-slate-950 text-slate-100" : "bg-slate-100 text-slate-900"}`}
+    >
       <header className="flex h-12 shrink-0 items-center gap-2 border-b border-slate-700 bg-slate-950 px-3 text-slate-200">
-        <Link href={`/${locale}/admin/template`} className="mr-2 text-xs text-slate-400 hover:text-white">{t("backToList")}</Link>
+        <Link
+          href={`/${locale}/admin/template`}
+          className="mr-2 text-xs text-slate-400 hover:text-white"
+        >
+          {t("backToList")}
+        </Link>
         <span className="max-w-[200px] truncate text-sm font-semibold">
           {locale === "ar" && document.nameAr ? document.nameAr : document.name}
         </span>
-        <span className="hidden text-[10px] text-slate-500 sm:inline">{t("fullControlHint")}</span>
-        {dirty && <span className="text-[10px] uppercase text-amber-400">{t("unsaved")}</span>}
+        <span className="hidden text-[10px] text-slate-500 sm:inline">
+          {t("fullControlHint")}
+        </span>
+        {dirty && (
+          <span className="text-[10px] uppercase text-amber-400">
+            {t("unsaved")}
+          </span>
+        )}
         <div className="flex-1" />
         <div className="flex overflow-hidden rounded-md border border-slate-700">
           {(["desktop", "tablet", "mobile"] as Breakpoint[]).map((bp) => (
-            <button key={bp} type="button" onClick={() => setBreakpoint(bp)} className={`px-2.5 py-1 text-[11px] ${breakpoint === bp ? "bg-violet-600 text-white" : "bg-slate-900 text-slate-400"}`}>{bpLabel(bp)}</button>
+            <button
+              key={bp}
+              type="button"
+              onClick={() => setBreakpoint(bp)}
+              className={`px-2.5 py-1 text-[11px] ${breakpoint === bp ? "bg-violet-600 text-white" : "bg-slate-900 text-slate-400"}`}
+            >
+              {bpLabel(bp)}
+            </button>
           ))}
         </div>
-        <div className="flex overflow-hidden rounded-md border border-slate-700" title={t("previewLang")}>
+        <div
+          className="flex overflow-hidden rounded-md border border-slate-700"
+          title={t("previewLang")}
+        >
           <button
             type="button"
             onClick={() => setPreviewLocale("en")}
@@ -192,32 +268,98 @@ export function TemplateBuilderShell() {
             AR
           </button>
         </div>
-        <button type="button" disabled={!past.length} onClick={undo} className="rounded border border-slate-700 px-2 py-1 text-xs disabled:opacity-30">{t("undo")}</button>
-        <button type="button" disabled={!future.length} onClick={redo} className="rounded border border-slate-700 px-2 py-1 text-xs disabled:opacity-30">{t("redo")}</button>
-        <button type="button" onClick={duplicateSelected} className="rounded border border-slate-700 px-2 py-1 text-xs">{t("duplicate")}</button>
-        <button type="button" onClick={deleteSelected} className="rounded border border-slate-700 px-2 py-1 text-xs text-red-300">{t("delete")}</button>
-        <button type="button" onClick={() => setCodeModalOpen(true)} className="rounded border border-slate-700 px-2 py-1 text-xs">{t("viewCode")}</button>
-        <button type="button" onClick={() => setUiDark(!uiDark)} className="rounded border border-slate-700 px-2 py-1 text-xs">{uiDark ? t("light") : t("dark")}</button>
-        <button type="button" onClick={openSaveModal} disabled={saving} className="rounded bg-violet-600 px-3 py-1 text-xs font-medium text-white disabled:opacity-50">{saving ? t("saving") : t("save")}</button>
+        <button
+          type="button"
+          disabled={!past.length}
+          onClick={undo}
+          className="rounded border border-slate-700 px-2 py-1 text-xs disabled:opacity-30"
+        >
+          {t("undo")}
+        </button>
+        <button
+          type="button"
+          disabled={!future.length}
+          onClick={redo}
+          className="rounded border border-slate-700 px-2 py-1 text-xs disabled:opacity-30"
+        >
+          {t("redo")}
+        </button>
+        <button
+          type="button"
+          onClick={duplicateSelected}
+          className="rounded border border-slate-700 px-2 py-1 text-xs"
+        >
+          {t("duplicate")}
+        </button>
+        <button
+          type="button"
+          onClick={deleteSelected}
+          className="rounded border border-slate-700 px-2 py-1 text-xs text-red-300"
+        >
+          {t("delete")}
+        </button>
+        <button
+          type="button"
+          onClick={() => setCodeModalOpen(true)}
+          className="rounded border border-slate-700 px-2 py-1 text-xs"
+        >
+          {t("viewCode")}
+        </button>
+        <button
+          type="button"
+          onClick={() => setUiDark(!uiDark)}
+          className="rounded border border-slate-700 px-2 py-1 text-xs"
+        >
+          {uiDark ? t("light") : t("dark")}
+        </button>
+        <button
+          type="button"
+          onClick={openSaveModal}
+          disabled={saving}
+          className="rounded bg-violet-600 px-3 py-1 text-xs font-medium text-white disabled:opacity-50"
+        >
+          {saving ? t("saving") : t("save")}
+        </button>
       </header>
 
       <BuilderDndProvider>
         <div className="flex min-h-0 flex-1">
-          <aside className={`flex w-64 shrink-0 flex-col border-r ${uiDark ? "border-slate-700 bg-slate-900" : "border-slate-300 bg-white"}`}>
+          <aside
+            className={`flex w-64 shrink-0 flex-col border-r ${uiDark ? "border-slate-700 bg-slate-900" : "border-slate-300 bg-white"}`}
+          >
             <div className="flex border-b border-slate-700">
-              <button type="button" onClick={() => setLeftTab("components")} className={`flex-1 py-2 text-[11px] uppercase ${leftTab === "components" ? "border-b-2 border-violet-500 text-violet-400" : "text-slate-500"}`}>{t("components")}</button>
-              <button type="button" onClick={() => setLeftTab("layers")} className={`flex-1 py-2 text-[11px] uppercase ${leftTab === "layers" ? "border-b-2 border-violet-500 text-violet-400" : "text-slate-500"}`}>{t("layers")}</button>
+              <button
+                type="button"
+                onClick={() => setLeftTab("components")}
+                className={`flex-1 py-2 text-[11px] uppercase ${leftTab === "components" ? "border-b-2 border-violet-500 text-violet-400" : "text-slate-500"}`}
+              >
+                {t("components")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setLeftTab("layers")}
+                className={`flex-1 py-2 text-[11px] uppercase ${leftTab === "layers" ? "border-b-2 border-violet-500 text-violet-400" : "text-slate-500"}`}
+              >
+                {t("layers")}
+              </button>
             </div>
-            <div className="min-h-0 flex-1">{leftTab === "components" ? <ComponentsPanel /> : <LayersPanel />}</div>
+            <div className="min-h-0 flex-1">
+              {leftTab === "components" ? <ComponentsPanel /> : <LayersPanel />}
+            </div>
           </aside>
           <BuilderCanvas />
-          <aside className={`w-80 shrink-0 border-l ${uiDark ? "border-slate-700 bg-slate-900" : "border-slate-300 bg-white"}`}>
+          <aside
+            className={`w-80 shrink-0 border-l ${uiDark ? "border-slate-700 bg-slate-900" : "border-slate-300 bg-white"}`}
+          >
             <PropertiesPanel />
           </aside>
         </div>
       </BuilderDndProvider>
       <CodeModal />
-      <SaveTemplateModal open={saveModalOpen} onClose={() => setSaveModalOpen(false)} />
+      <SaveTemplateModal
+        open={saveModalOpen}
+        onClose={() => setSaveModalOpen(false)}
+      />
     </div>
   );
 }

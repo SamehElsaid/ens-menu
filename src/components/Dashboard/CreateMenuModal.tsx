@@ -319,7 +319,10 @@ export default function CreateMenuModal({
       >
         <section className="flex flex-col gap-3">
           <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
-            <IoPricetagOutline className="size-4 shrink-0 text-fg-muted" aria-hidden />
+            <IoPricetagOutline
+              className="size-4 shrink-0 text-fg-muted"
+              aria-hidden
+            />
             {t("menuNames")}
           </h3>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -360,7 +363,10 @@ export default function CreateMenuModal({
 
         <section className="flex flex-col gap-3">
           <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
-            <IoDocumentTextOutline className="size-4 shrink-0 text-fg-muted" aria-hidden />
+            <IoDocumentTextOutline
+              className="size-4 shrink-0 text-fg-muted"
+              aria-hidden
+            />
             {t("descriptions")}
           </h3>
           <Field label={t("descriptionEn")}>
@@ -400,12 +406,15 @@ export default function CreateMenuModal({
 
         <section className="flex flex-col gap-3">
           <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
-            <IoImageOutline className="size-4 shrink-0 text-fg-muted" aria-hidden />
+            <IoImageOutline
+              className="size-4 shrink-0 text-fg-muted"
+              aria-hidden
+            />
             {t("logo")} *
           </h3>
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
-              <div className="flex size-32 items-center justify-center overflow-hidden rounded-xl border border-dashed border-line-strong bg-surface-2">
+              <div className="flex size-32 items-center justify-center overflow-hidden rounded-lg border border-dashed border-line-strong bg-surface-2">
                 {logoPreview ? (
                   <img
                     src={logoPreview}
@@ -447,18 +456,23 @@ export default function CreateMenuModal({
                   {t("logoUpload")}
                 </span>
               </label>
-              <p className="text-center text-xs text-fg-muted">{t("logoHint")}</p>
-              <p className="text-center text-xs text-fg-subtle">{t("supportedFormats")}</p>
-              {logoError && (
-                <p className="text-xs text-danger">{logoError}</p>
-              )}
+              <p className="text-center text-xs text-fg-muted">
+                {t("logoHint")}
+              </p>
+              <p className="text-center text-xs text-fg-subtle">
+                {t("supportedFormats")}
+              </p>
+              {logoError && <p className="text-xs text-danger">{logoError}</p>}
             </div>
           </div>
         </section>
 
         <section className="flex flex-col gap-3">
           <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
-            <IoCashOutline className="size-4 shrink-0 text-fg-muted" aria-hidden />
+            <IoCashOutline
+              className="size-4 shrink-0 text-fg-muted"
+              aria-hidden
+            />
             {t("currency")}
           </h3>
           <Field label={t("currencyLabel")} required>
@@ -478,7 +492,10 @@ export default function CreateMenuModal({
 
         <section className="flex flex-col gap-3">
           <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
-            <IoLinkOutline className="size-4 shrink-0 text-fg-muted" aria-hidden />
+            <IoLinkOutline
+              className="size-4 shrink-0 text-fg-muted"
+              aria-hidden
+            />
             {t("urlSettings")}
           </h3>
           <Field label={t("slug")} required error={errors.slug?.message}>
@@ -532,21 +549,25 @@ export default function CreateMenuModal({
             slugStatus.available === false &&
             slugStatus.suggestions.length > 0 && (
               <div className="rounded-lg border border-line bg-surface-2 p-3">
-                <p className="mb-2 text-xs font-medium text-fg">{t("slugSuggestions")}</p>
+                <p className="mb-2 text-xs font-medium text-fg">
+                  {t("slugSuggestions")}
+                </p>
                 <div className="flex flex-wrap gap-2">
-                  {slugStatus.suggestions.map((suggestion: string, index: number) => (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => handleSuggestionClick(suggestion)}
-                      className={cn(
-                        "rounded-lg border border-line bg-surface px-3 py-1.5 font-mono text-xs text-fg transition-colors hover:border-brand/30 hover:bg-brand-soft",
-                        focusRing,
-                      )}
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
+                  {slugStatus.suggestions.map(
+                    (suggestion: string, index: number) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        className={cn(
+                          "rounded-lg border border-line bg-surface px-3 py-1.5 font-mono text-xs text-fg transition-colors hover:border-brand/30 hover:bg-brand-soft",
+                          focusRing,
+                        )}
+                      >
+                        {suggestion}
+                      </button>
+                    ),
+                  )}
                 </div>
               </div>
             )}
@@ -555,7 +576,9 @@ export default function CreateMenuModal({
             <div className="flex items-start gap-2">
               <IoInformationCircleOutline className="mt-0.5 size-4 shrink-0 text-brand" />
               <div className="min-w-0 flex-1">
-                <p className="mb-1 text-xs font-medium text-fg">{t("slugHint")}</p>
+                <p className="mb-1 text-xs font-medium text-fg">
+                  {t("slugHint")}
+                </p>
                 <p
                   className="font-mono text-xs text-fg-muted select-none"
                   dir="ltr"

@@ -30,7 +30,9 @@ function formatDateTime(value: string, locale: string): string {
   }).format(new Date(value));
 }
 
-function statusBadgeClass(status: AdminDomainTransferRequest["status"]): string {
+function statusBadgeClass(
+  status: AdminDomainTransferRequest["status"],
+): string {
   switch (status) {
     case "completed":
       return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400";
@@ -41,7 +43,7 @@ function statusBadgeClass(status: AdminDomainTransferRequest["status"]): string 
     case "cancelled":
       return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
     default:
-      return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+      return "bg-slate-100 text-slate-700  ";
   }
 }
 
@@ -102,11 +104,9 @@ export default function AdminDomainTransfersPage() {
     const result = await axiosPost<
       { message: string },
       { request: AdminDomainTransferRequest }
-    >(
-      `/admin/domain-transfers/${selected.id}/message`,
-      locale,
-      { message: message.trim() },
-    );
+    >(`/admin/domain-transfers/${selected.id}/message`, locale, {
+      message: message.trim(),
+    });
     setSending(false);
 
     if (result.status && result.data?.request) {
@@ -128,11 +128,7 @@ export default function AdminDomainTransfersPage() {
     const result = await axiosPost<
       Record<string, never>,
       { request: AdminDomainTransferRequest }
-    >(
-      `/admin/domain-transfers/${selected.id}/complete`,
-      locale,
-      {},
-    );
+    >(`/admin/domain-transfers/${selected.id}/complete`, locale, {});
     setCompleting(false);
 
     if (result.status && result.data?.request) {
@@ -181,7 +177,9 @@ export default function AdminDomainTransfersPage() {
         headerName: t("colDomain"),
         flex: 1.2,
         minWidth: 160,
-        cellRenderer: (params: ICellRendererParams<AdminDomainTransferRequest>) => (
+        cellRenderer: (
+          params: ICellRendererParams<AdminDomainTransferRequest>,
+        ) => (
           <span dir="ltr" className="font-mono text-sm">
             {params.value}
           </span>
@@ -191,7 +189,9 @@ export default function AdminDomainTransfersPage() {
         field: "status",
         headerName: t("colStatus"),
         width: 150,
-        cellRenderer: (params: ICellRendererParams<AdminDomainTransferRequest>) => (
+        cellRenderer: (
+          params: ICellRendererParams<AdminDomainTransferRequest>,
+        ) => (
           <span
             className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusBadgeClass(params.value)}`}
           >
@@ -204,16 +204,16 @@ export default function AdminDomainTransfersPage() {
         headerName: t("colDate"),
         width: 170,
         valueFormatter: (params) =>
-          params.value
-            ? formatDateTime(String(params.value), locale)
-            : "",
+          params.value ? formatDateTime(String(params.value), locale) : "",
       },
       {
         headerName: t("colActions"),
         width: 120,
         sortable: false,
         filter: false,
-        cellRenderer: (params: ICellRendererParams<AdminDomainTransferRequest>) => (
+        cellRenderer: (
+          params: ICellRendererParams<AdminDomainTransferRequest>,
+        ) => (
           <button
             type="button"
             onClick={() => void openDetail(params.data!.id)}
@@ -282,7 +282,7 @@ export default function AdminDomainTransfersPage() {
           <LoadingBlock label={tCommon("loading")} className="min-h-[200px]" />
         ) : selected ? (
           <div className="space-y-5">
-            <div className="grid gap-3 rounded-xl bg-surface-2 p-4 text-sm sm:grid-cols-2">
+            <div className="grid gap-3 rounded-lg bg-surface-2 p-4 text-sm sm:grid-cols-2">
               <div>
                 <span className="text-fg-muted">{t("colUser")}: </span>
                 <span className="font-medium">{selected.userName}</span>
@@ -309,160 +309,156 @@ export default function AdminDomainTransfersPage() {
               </div>
             </div>
 
-                {selected.status === "user_confirmed" && (
-                  <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
-                    {t("userConfirmedAlert")}
-                  </div>
-                )}
+            {selected.status === "user_confirmed" && (
+              <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
+                {t("userConfirmedAlert")}
+              </div>
+            )}
 
-                {selected.messages && selected.messages.length > 0 && (
-                  <div className="space-y-3">
-                    <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                      {t("messagesHistory")}
-                    </h3>
-                    <div className="max-h-60 space-y-2 overflow-y-auto">
-                      {selected.messages.map((msg) => (
-                        <div
-                          key={msg.id}
-                          className={`rounded-xl p-3 text-sm ${
-                            msg.senderType === "admin"
-                              ? "bg-primary/5 border border-primary/10"
-                              : "bg-emerald-50 border border-emerald-100 dark:bg-emerald-900/10 dark:border-emerald-800"
-                          }`}
-                        >
-                          <div className="mb-1 flex items-center justify-between gap-2 text-xs text-slate-500">
-                            <span>
-                              {msg.senderType === "user"
-                                ? t("customer")
-                                : msg.message.startsWith("__system:") ||
-                                    msg.adminName === "ENS System"
-                                  ? t("system")
-                                  : msg.adminName || t("admin")}
-                            </span>
-                            <span>
-                              {formatDateTime(msg.createdAt, locale)}
-                            </span>
-                          </div>
-                          <p className="whitespace-pre-wrap text-slate-700 dark:text-slate-300">
-                            {msg.message === "confirmed_steps"
-                              ? t("userConfirmedSteps")
-                              : msg.message}
-                          </p>
-                        </div>
-                      ))}
+            {selected.messages && selected.messages.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-fg">
+                  {t("messagesHistory")}
+                </h3>
+                <div className="max-h-60 space-y-2 overflow-y-auto">
+                  {selected.messages.map((msg) => (
+                    <div
+                      key={msg.id}
+                      className={`rounded-lg p-3 text-sm ${
+                        msg.senderType === "admin"
+                          ? "bg-primary/5 border border-primary/10"
+                          : "bg-emerald-50 border border-emerald-100 dark:bg-emerald-900/10 dark:border-emerald-800"
+                      }`}
+                    >
+                      <div className="mb-1 flex items-center justify-between gap-2 text-xs text-fg-subtle">
+                        <span>
+                          {msg.senderType === "user"
+                            ? t("customer")
+                            : msg.message.startsWith("__system:") ||
+                                msg.adminName === "ENS System"
+                              ? t("system")
+                              : msg.adminName || t("admin")}
+                        </span>
+                        <span>{formatDateTime(msg.createdAt, locale)}</span>
+                      </div>
+                      <p className="whitespace-pre-wrap text-fg-muted">
+                        {msg.message === "confirmed_steps"
+                          ? t("userConfirmedSteps")
+                          : msg.message}
+                      </p>
                     </div>
-                  </div>
-                )}
+                  ))}
+                </div>
+              </div>
+            )}
 
-                {selected.status === "cancelled" && selected.cancelledAt && (
-                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
-                    {t("cancelledInfo", {
-                      by:
-                        selected.cancelledBy === "user"
-                          ? t("cancelledByUser")
-                          : t("cancelledByAdmin"),
-                      date: formatDateTime(selected.cancelledAt, locale),
-                    })}
-                  </div>
-                )}
+            {selected.status === "cancelled" && selected.cancelledAt && (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                {t("cancelledInfo", {
+                  by:
+                    selected.cancelledBy === "user"
+                      ? t("cancelledByUser")
+                      : t("cancelledByAdmin"),
+                  date: formatDateTime(selected.cancelledAt, locale),
+                })}
+              </div>
+            )}
 
-                {selected.status !== "completed" &&
-                  selected.status !== "cancelled" && (
-                  <div className="space-y-3 border-t border-slate-200 pt-4 dark:border-slate-700">
-                    {selected.status === "pending" && (
-                      <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
-                        {t("pendingDnsAlert")}
+            {selected.status !== "completed" &&
+              selected.status !== "cancelled" && (
+                <div className="space-y-3 border-t border-line pt-4 dark:border-line">
+                  {selected.status === "pending" && (
+                    <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
+                      {t("pendingDnsAlert")}
+                    </div>
+                  )}
+
+                  <label className="block text-sm font-medium text-fg-muted">
+                    {selected.status === "pending" ||
+                    !selected.messages?.some(
+                      (m) =>
+                        m.senderType === "admin" &&
+                        !m.message.startsWith("__system:"),
+                    )
+                      ? t("dnsConfigLabel")
+                      : t("replyLabel")}
+                  </label>
+                  <textarea
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    rows={6}
+                    placeholder={
+                      selected.status === "pending"
+                        ? t("dnsConfigPlaceholder")
+                        : t("replyPlaceholder")
+                    }
+                    className="w-full rounded-lg border border-line bg-white px-4 py-3 font-mono text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:text-white"
+                    dir="ltr"
+                  />
+                  <p className="text-xs text-fg-muted">{t("dnsConfigHint")}</p>
+                  <div className="flex flex-wrap gap-3">
+                    <Button
+                      onClick={() => void handleSendMessage()}
+                      disabled={sending || !message.trim()}
+                      loading={sending}
+                    >
+                      {selected.status === "pending"
+                        ? t("sendDnsConfig")
+                        : t("sendMessage")}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      startIcon={<IoCheckmarkCircleOutline />}
+                      onClick={() => void handleComplete()}
+                      loading={completing}
+                    >
+                      {t("markComplete")}
+                    </Button>
+                    {!showCancelConfirm ? (
+                      <Button
+                        variant="dangerGhost"
+                        startIcon={<IoCloseCircleOutline />}
+                        onClick={() => setShowCancelConfirm(true)}
+                      >
+                        {t("cancelRequest")}
+                      </Button>
+                    ) : (
+                      <div className="flex w-full flex-wrap items-center gap-2 border-t border-danger-line pt-3">
+                        <span className="text-sm text-fg-muted">
+                          {t("cancelConfirm")}
+                        </span>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => void handleCancel()}
+                          loading={cancelling}
+                        >
+                          {t("confirmCancel")}
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => setShowCancelConfirm(false)}
+                          disabled={cancelling}
+                        >
+                          {t("cancelDismiss")}
+                        </Button>
                       </div>
                     )}
-
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                      {selected.status === "pending" ||
-                      !selected.messages?.some(
-                        (m) =>
-                          m.senderType === "admin" &&
-                          !m.message.startsWith("__system:"),
-                      )
-                        ? t("dnsConfigLabel")
-                        : t("replyLabel")}
-                    </label>
-                    <textarea
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      rows={6}
-                      placeholder={
-                        selected.status === "pending"
-                          ? t("dnsConfigPlaceholder")
-                          : t("replyPlaceholder")
-                      }
-                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 font-mono text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                      dir="ltr"
-                    />
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      {t("dnsConfigHint")}
-                    </p>
-                    <div className="flex flex-wrap gap-3">
-                      <Button
-                        onClick={() => void handleSendMessage()}
-                        disabled={sending || !message.trim()}
-                        loading={sending}
-                      >
-                        {selected.status === "pending"
-                          ? t("sendDnsConfig")
-                          : t("sendMessage")}
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        startIcon={<IoCheckmarkCircleOutline />}
-                        onClick={() => void handleComplete()}
-                        loading={completing}
-                      >
-                        {t("markComplete")}
-                      </Button>
-                      {!showCancelConfirm ? (
-                        <Button
-                          variant="dangerGhost"
-                          startIcon={<IoCloseCircleOutline />}
-                          onClick={() => setShowCancelConfirm(true)}
-                        >
-                          {t("cancelRequest")}
-                        </Button>
-                      ) : (
-                        <div className="flex w-full flex-wrap items-center gap-2 border-t border-danger-line pt-3">
-                          <span className="text-sm text-fg-muted">
-                            {t("cancelConfirm")}
-                          </span>
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() => void handleCancel()}
-                            loading={cancelling}
-                          >
-                            {t("confirmCancel")}
-                          </Button>
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => setShowCancelConfirm(false)}
-                            disabled={cancelling}
-                          >
-                            {t("cancelDismiss")}
-                          </Button>
-                        </div>
-                      )}
-                    </div>
                   </div>
-                )}
+                </div>
+              )}
 
-                {selected.status === "completed" && (
-                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300">
-                    {t("completedBy", {
-                      name: selected.completedByAdminName || t("admin"),
-                      date: selected.completedAt
-                        ? formatDateTime(selected.completedAt, locale)
-                        : "",
-                    })}
-                  </div>
-                )}
+            {selected.status === "completed" && (
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300">
+                {t("completedBy", {
+                  name: selected.completedByAdminName || t("admin"),
+                  date: selected.completedAt
+                    ? formatDateTime(selected.completedAt, locale)
+                    : "",
+                })}
+              </div>
+            )}
           </div>
         ) : null}
       </Modal>

@@ -2,7 +2,11 @@
 
 import { useTranslations } from "next-intl";
 import type { ImportStep } from "@/types/menuImport";
-import { IoCheckmarkCircle, IoEllipseOutline, IoRadioButtonOn } from "react-icons/io5";
+import {
+  IoCheckmarkCircle,
+  IoEllipseOutline,
+  IoRadioButtonOn,
+} from "react-icons/io5";
 import { cn } from "@/lib/cn";
 
 const STEPS: ImportStep[] = ["upload", "processing", "review"];

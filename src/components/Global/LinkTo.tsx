@@ -19,14 +19,10 @@ interface LinkToProps {
  * articles can sit in the sitemap as "URL unknown / no referring sitemaps".
  */
 function LinkTo({ href, children, onSameRoute, ...props }: LinkToProps) {
-  const normalizedHref = (`/${href}`).replaceAll("//", "/");
+  const normalizedHref = `/${href}`.replaceAll("//", "/");
 
   return (
-    <SafeLink
-      {...props}
-      href={normalizedHref}
-      onSameRoute={onSameRoute}
-    >
+    <SafeLink {...props} href={normalizedHref} onSameRoute={onSameRoute}>
       {children}
     </SafeLink>
   );

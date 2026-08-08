@@ -14,25 +14,23 @@ import { pushSignUpEvent } from "@/shared/gtmEvents";
 import { encryptData } from "@/shared/encryption";
 import { LoginResponse } from "@/types/LoginResponse";
 import { resolvePostLoginPath } from "@/lib/authRedirect";
+import { SiteButton } from "@/components/site/Button";
+
 const hasGoogleClientId = !!(
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
   process.env.NEXT_PUBLIC_GOOGLE_AUTH_URL
 );
 
 type GoogleSignInButtonProps = {
-  dividerLabel?: string;
   ariaLabel?: string;
   className?: string;
   redirectParam?: string | null;
-  variant?: "icon" | "full";
 };
 
 export default function GoogleSignInButton({
-  dividerLabel,
   ariaLabel,
-  className = "",
+  className,
   redirectParam = null,
-  variant = "icon",
 }: GoogleSignInButtonProps) {
   const t = useTranslations("");
   const dispatch = useAppDispatch();
@@ -108,55 +106,20 @@ export default function GoogleSignInButton({
   }
 
   return (
-    <div className={className}>
-      {dividerLabel && (
-        <div className="auth-social-divider auth-social-divider--subtle mb-3.5 flex w-full items-center gap-2.5">
-          <span
-            aria-hidden
-            className="h-px flex-1 bg-slate-200/70 dark:bg-slate-700/60"
-          />
-          <span className="shrink-0 text-[10px] font-normal text-slate-400/90 dark:text-slate-500/90">
-            {t(dividerLabel)}
-          </span>
-          <span
-            aria-hidden
-            className="h-px flex-1 bg-slate-200/70 dark:bg-slate-700/60"
-          />
-        </div>
+    <SiteButton
+      type="button"
+      variant="secondary"
+      size="lg"
+      block
+      onClick={() => googleLogin()}
+      loading={loading}
+      className={className}
+      aria-label={ariaLabel || t("auth.loginWithGoogle")}
+    >
+      {loading ? null : (
+        <FaGoogle className="size-4 text-[#4285F4]" aria-hidden />
       )}
-
-      {variant === "full" ? (
-        <button
-          type="button"
-          onClick={() => googleLogin()}
-          disabled={loading}
-          className="login-google-btn flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200/90 bg-white px-4 py-2.5 text-[13px] font-medium text-slate-600 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50/90 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600/80 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:bg-slate-800/90"
-          aria-label={ariaLabel || t("auth.loginWithGoogle")}
-        >
-          {loading ? (
-            <span className="size-4 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" />
-          ) : (
-            <FaGoogle className="size-3.5 text-[#4285F4]" aria-hidden />
-          )}
-          <span>{t("auth.continueWithGoogle")}</span>
-        </button>
-      ) : (
-        <div className="flex justify-center">
-          <button
-            type="button"
-            onClick={() => googleLogin()}
-            disabled={loading}
-            className="flex h-[3.25rem] w-[3.25rem] items-center justify-center rounded-full border border-slate-200/80 bg-white text-xl shadow-sm transition-all hover:-translate-y-0.5 hover:border-purple-200/80 hover:bg-purple-50/80 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700/80 dark:bg-slate-900/60 dark:hover:border-purple-500/30 dark:hover:bg-purple-500/10"
-            aria-label={ariaLabel || t("auth.loginWithGoogle")}
-          >
-            {loading ? (
-              <span className="size-5 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" />
-            ) : (
-              <FaGoogle className="text-purple-600" />
-            )}
-          </button>
-        </div>
-      )}
-    </div>
+      <span>{t("auth.continueWithGoogle")}</span>
+    </SiteButton>
   );
 }

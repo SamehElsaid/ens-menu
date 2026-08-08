@@ -1,7 +1,11 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { IoCheckmark, IoGitNetworkOutline, IoRestaurant } from "react-icons/io5";
+import {
+  IoCheckmark,
+  IoGitNetworkOutline,
+  IoRestaurant,
+} from "react-icons/io5";
 import LoadImage from "@/components/ImageLoad";
 import { Alert, Badge, Button, Modal } from "@/components/ui";
 import { cn } from "@/lib/cn";
@@ -10,7 +14,7 @@ import type { Menu } from "@/types/Menu";
 /** Selectable row chrome shared by the menu and group pickers. */
 const pickRow = (selected: boolean) =>
   cn(
-    "group flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition-colors duration-150",
+    "group flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors duration-150",
     "has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring",
     selected
       ? "border-brand bg-brand-soft"
@@ -189,7 +193,7 @@ export function MenuGroupPickItem({
 
 export function MenuGroupPickList({ children }: { children: ReactNode }) {
   return (
-    <ul className="flex max-h-64 flex-col gap-2 overflow-y-auto rounded-xl bg-surface-2 p-2 sm:max-h-72">
+    <ul className="flex max-h-64 flex-col gap-2 overflow-y-auto rounded-lg bg-surface-2 p-2 sm:max-h-72">
       {children}
     </ul>
   );
@@ -205,7 +209,7 @@ export function MenuGroupMenuPreview({
   hint?: string;
 }) {
   return (
-    <div className="mb-5 flex items-center gap-3 rounded-xl bg-surface-2 p-3">
+    <div className="mb-5 flex items-center gap-3 rounded-lg bg-surface-2 p-3">
       <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-line bg-surface">
         {menu.logo ? (
           <LoadImage
@@ -258,9 +262,7 @@ export function MenuGroupGroupOption({
       <span
         className={cn(
           "flex size-10 shrink-0 items-center justify-center rounded-lg",
-          selected
-            ? "bg-brand text-on-brand"
-            : "bg-surface-2 text-fg-muted",
+          selected ? "bg-brand text-on-brand" : "bg-surface-2 text-fg-muted",
         )}
         aria-hidden
       >
@@ -275,9 +277,7 @@ export function MenuGroupGroupOption({
       <span
         className={cn(
           "size-5 shrink-0 rounded-full border transition-colors duration-150",
-          selected
-            ? "border-brand bg-brand"
-            : "border-line-strong bg-surface",
+          selected ? "border-brand bg-brand" : "border-line-strong bg-surface",
         )}
         aria-hidden
       />

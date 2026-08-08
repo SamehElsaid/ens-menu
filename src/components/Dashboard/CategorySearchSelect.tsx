@@ -141,7 +141,9 @@ export default function CategorySearchSelect({
     }
     if (selectedOption?.value === value) return;
 
-    const fromOptions = categoryOptions.find((option) => option.value === value);
+    const fromOptions = categoryOptions.find(
+      (option) => option.value === value,
+    );
     if (fromOptions) {
       setSelectedOption(fromOptions);
     }
@@ -160,7 +162,7 @@ export default function CategorySearchSelect({
             aria-hidden
           />
         ) : (
-          <IoSearchOutline className="text-slate-400 dark:text-slate-500 text-xl" />
+          <IoSearchOutline className="text-fg-subtle text-xl" />
         )}
       </div>
       <Select<CategoryOption>

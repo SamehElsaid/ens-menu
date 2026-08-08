@@ -87,7 +87,9 @@ function CardThumb({ id, active }: { id: CardStyleId; active: boolean }) {
       );
     case "bordered":
       return (
-        <div className={`${base} border border-slate-400 bg-slate-900/40 p-1.5`}>
+        <div
+          className={`${base} border border-slate-400 bg-slate-900/40 p-1.5`}
+        >
           <div className="mb-1 h-5 rounded bg-slate-600" />
           <div className="h-1 w-8 rounded bg-slate-400" />
         </div>
@@ -138,7 +140,10 @@ function CategoryThumb({
       return (
         <div className={base}>
           {[0, 1].map((i) => (
-            <div key={i} className="h-4 w-7 rounded-md border border-slate-400" />
+            <div
+              key={i}
+              className="h-4 w-7 rounded-md border border-slate-400"
+            />
           ))}
         </div>
       );
@@ -153,7 +158,10 @@ function CategoryThumb({
       return (
         <div className={`${base} rounded-full bg-slate-700`}>
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-4 w-4 rounded-full border border-violet-400" />
+            <div
+              key={i}
+              className="h-4 w-4 rounded-full border border-violet-400"
+            />
           ))}
         </div>
       );
@@ -169,7 +177,10 @@ function CategoryThumb({
       return (
         <div className={base}>
           {[0, 1].map((i) => (
-            <div key={i} className="h-8 w-7 overflow-hidden rounded bg-slate-700">
+            <div
+              key={i}
+              className="h-8 w-7 overflow-hidden rounded bg-slate-700"
+            >
               <div className="h-4 bg-slate-500" />
               <div className="mx-auto mt-0.5 h-1 w-4 rounded bg-slate-400" />
             </div>
@@ -195,14 +206,19 @@ function CategoryThumb({
       return (
         <div className={base}>
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="h-4 w-4 rounded-full border border-violet-400" />
+            <div
+              key={i}
+              className="h-4 w-4 rounded-full border border-violet-400"
+            />
           ))}
         </div>
       );
     case "numbered":
       return (
         <div className={`${base} text-[9px] text-violet-300`}>
-          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-violet-600">1</span>
+          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-violet-600">
+            1
+          </span>
           <span className="h-1.5 w-8 rounded bg-slate-500" />
         </div>
       );
@@ -210,7 +226,10 @@ function CategoryThumb({
       return (
         <div className={base}>
           {[0, 1].map((i) => (
-            <div key={i} className="h-4 w-8 rounded-full border border-white/30 bg-white/10" />
+            <div
+              key={i}
+              className="h-4 w-8 rounded-full border border-white/30 bg-white/10"
+            />
           ))}
         </div>
       );
@@ -248,7 +267,9 @@ function AdThumb({ id, active }: { id: AdStyleId; active: boolean }) {
       );
     case "coverCenter":
       return (
-        <div className={`${base} flex items-center justify-center bg-slate-500`}>
+        <div
+          className={`${base} flex items-center justify-center bg-slate-500`}
+        >
           <div className="h-2 w-8 rounded bg-white/90" />
         </div>
       );
@@ -381,9 +402,9 @@ export function CardStylePicker({
 }) {
   const t = useTranslations("templateBuilder");
   const labelOf = usePresetLabel();
-  const current = (CARD_STYLE_PRESETS.some((p) => p.id === value)
-    ? value
-    : "split") as CardStyleId;
+  const current = (
+    CARD_STYLE_PRESETS.some((p) => p.id === value) ? value : "split"
+  ) as CardStyleId;
 
   return (
     <div>
@@ -416,15 +437,17 @@ export function CategoryStylePicker({
 }) {
   const t = useTranslations("templateBuilder");
   const labelOf = usePresetLabel();
-  const current = (CATEGORY_LAYOUT_PRESETS.some((p) => p.id === value)
-    ? value
-    : "circles") as CategoryLayoutId;
+  const current = (
+    CATEGORY_LAYOUT_PRESETS.some((p) => p.id === value) ? value : "circles"
+  ) as CategoryLayoutId;
   return (
     <div>
       <p className="mb-1 text-[10px] uppercase tracking-wide text-violet-400">
         {t("categoryShapes", { count: CATEGORY_LAYOUT_PRESETS.length })}
       </p>
-      <p className="mb-2 text-[10px] text-slate-500">{t("categoryShapesHint")}</p>
+      <p className="mb-2 text-[10px] text-slate-500">
+        {t("categoryShapesHint")}
+      </p>
       <PresetGrid
         presets={CATEGORY_LAYOUT_PRESETS}
         value={current}
@@ -450,9 +473,9 @@ export function AdStylePicker({
 }) {
   const t = useTranslations("templateBuilder");
   const labelOf = usePresetLabel();
-  const current = (AD_STYLE_PRESETS.some((p) => p.id === value)
-    ? value
-    : "promo") as AdStyleId;
+  const current = (
+    AD_STYLE_PRESETS.some((p) => p.id === value) ? value : "promo"
+  ) as AdStyleId;
   return (
     <div>
       <p className="mb-1 text-[10px] uppercase tracking-wide text-violet-400">
@@ -484,9 +507,9 @@ export function NavbarStylePicker({
 }) {
   const t = useTranslations("templateBuilder");
   const labelOf = usePresetLabel();
-  const current = (NAVBAR_STYLE_PRESETS.some((p) => p.id === value)
-    ? value
-    : "transparent") as NavbarStyleId;
+  const current = (
+    NAVBAR_STYLE_PRESETS.some((p) => p.id === value) ? value : "transparent"
+  ) as NavbarStyleId;
   return (
     <div>
       <p className="mb-1.5 text-[10px] uppercase tracking-wide text-slate-500">
@@ -522,9 +545,9 @@ export function HeroStylePicker({
 }) {
   const t = useTranslations("templateBuilder");
   const labelOf = usePresetLabel();
-  const current = (HERO_STYLE_PRESETS.some((p) => p.id === value)
-    ? value
-    : "centered") as HeroStyleId;
+  const current = (
+    HERO_STYLE_PRESETS.some((p) => p.id === value) ? value : "centered"
+  ) as HeroStyleId;
   return (
     <div>
       <p className="mb-1.5 text-[10px] uppercase tracking-wide text-slate-500">
@@ -560,9 +583,9 @@ export function FooterStylePicker({
 }) {
   const t = useTranslations("templateBuilder");
   const labelOf = usePresetLabel();
-  const current = (FOOTER_STYLE_PRESETS.some((p) => p.id === value)
-    ? value
-    : "simple") as FooterStyleId;
+  const current = (
+    FOOTER_STYLE_PRESETS.some((p) => p.id === value) ? value : "simple"
+  ) as FooterStyleId;
   return (
     <div>
       <p className="mb-1.5 text-[10px] uppercase tracking-wide text-slate-500">
@@ -595,14 +618,18 @@ function HeaderThumb({ id, active }: { id: HeaderStyleId; active: boolean }) {
   switch (id) {
     case "floatingLogo":
       return (
-        <div className={`${base} bg-gradient-to-br from-violet-500 to-fuchsia-600`}>
+        <div
+          className={`${base} bg-gradient-to-br from-violet-500 to-fuchsia-600`}
+        >
           <div className="absolute bottom-0 inset-x-0 h-7 rounded-t-2xl bg-white" />
           <div className="absolute left-1/2 top-5 h-6 w-6 -translate-x-1/2 rounded-full border-2 border-white bg-slate-200" />
         </div>
       );
     case "coffeeDark":
       return (
-        <div className={`${base} bg-[#17120F] flex flex-col items-center justify-center gap-1`}>
+        <div
+          className={`${base} bg-[#17120F] flex flex-col items-center justify-center gap-1`}
+        >
           <div className="h-2 w-10 rounded bg-amber-400" />
           <div className="h-px w-8 bg-white/30" />
         </div>
@@ -617,7 +644,10 @@ function HeaderThumb({ id, active }: { id: HeaderStyleId; active: boolean }) {
           <div className="mx-auto h-2 w-12 rounded-full border border-teal-500" />
           <div className="mt-auto mx-1 mb-1 flex gap-1 overflow-hidden rounded-full bg-slate-100 px-1 py-0.5">
             {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="h-2 w-2 shrink-0 rounded-full bg-teal-500/70" />
+              <div
+                key={i}
+                className="h-2 w-2 shrink-0 rounded-full bg-teal-500/70"
+              />
             ))}
           </div>
         </div>
@@ -637,21 +667,27 @@ function HeaderThumb({ id, active }: { id: HeaderStyleId; active: boolean }) {
       );
     case "poster":
       return (
-        <div className={`${base} bg-gradient-to-b from-violet-700 to-fuchsia-600 p-1.5`}>
+        <div
+          className={`${base} bg-gradient-to-b from-violet-700 to-fuchsia-600 p-1.5`}
+        >
           <div className="h-1 w-6 bg-white/40" />
           <div className="mt-1 h-3 w-10 bg-white/90" />
         </div>
       );
     case "elegantLine":
       return (
-        <div className={`${base} bg-[#1a1512] flex flex-col items-center justify-center gap-1`}>
+        <div
+          className={`${base} bg-[#1a1512] flex flex-col items-center justify-center gap-1`}
+        >
           <div className="h-3 w-3 rounded-full bg-slate-400" />
           <div className="h-px w-6 bg-amber-500" />
         </div>
       );
     default:
       return (
-        <div className={`${base} bg-gradient-to-br from-violet-500 to-indigo-600 flex items-end`}>
+        <div
+          className={`${base} bg-gradient-to-br from-violet-500 to-indigo-600 flex items-end`}
+        >
           <div className="w-full h-5 rounded-t-xl bg-white/95" />
         </div>
       );
@@ -667,9 +703,9 @@ export function HeaderStylePicker({
 }) {
   const t = useTranslations("templateBuilder");
   const labelOf = usePresetLabel();
-  const current = (HEADER_STYLE_PRESETS.some((p) => p.id === value)
-    ? value
-    : "floatingLogo") as HeaderStyleId;
+  const current = (
+    HEADER_STYLE_PRESETS.some((p) => p.id === value) ? value : "floatingLogo"
+  ) as HeaderStyleId;
 
   return (
     <div>

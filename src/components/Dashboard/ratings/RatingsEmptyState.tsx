@@ -18,7 +18,9 @@ export default function RatingsEmptyState({
     <EmptyState
       icon={<Icon aria-hidden />}
       title={isSearch ? t("emptySearchTitle") : t("emptyTitle")}
-      description={isSearch ? t("emptySearchDescription") : t("emptyDescription")}
+      description={
+        isSearch ? t("emptySearchDescription") : t("emptyDescription")
+      }
     />
   );
 }

@@ -24,17 +24,17 @@ interface ItemsCardGridProps {
 function ItemCardSkeleton() {
   return (
     <div
-      className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800/80"
+      className="overflow-hidden rounded-lg border border-line bg-white"
       aria-hidden
     >
-      <div className="dashboard-mobile-shimmer aspect-4/3 bg-slate-100 dark:bg-slate-700/60" />
+      <div className="dashboard-mobile-shimmer aspect-4/3 bg-surface-3" />
       <div className="space-y-3 p-4">
-        <div className="dashboard-mobile-shimmer h-6 w-2/3 rounded-md bg-slate-100 dark:bg-slate-700/60" />
-        <div className="dashboard-mobile-shimmer h-4 w-1/3 rounded-md bg-slate-100 dark:bg-slate-700/60" />
-        <div className="dashboard-mobile-shimmer h-7 w-1/4 rounded-md bg-slate-100 dark:bg-slate-700/60" />
-        <div className="flex gap-2 border-t border-slate-100 pt-3 dark:border-slate-700">
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-xl bg-slate-100 dark:bg-slate-700/60" />
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-xl bg-slate-100 dark:bg-slate-700/60" />
+        <div className="dashboard-mobile-shimmer h-6 w-2/3 rounded-md bg-surface-3" />
+        <div className="dashboard-mobile-shimmer h-4 w-1/3 rounded-md bg-surface-3" />
+        <div className="dashboard-mobile-shimmer h-7 w-1/4 rounded-md bg-surface-3" />
+        <div className="flex gap-2 border-t border-line pt-3 dark:border-line">
+          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-3" />
+          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-3" />
         </div>
       </div>
     </div>
@@ -74,14 +74,12 @@ export default function ItemsCardGrid({
 
   if (items.length === 0) {
     return (
-      <div
-        className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center dark:border-slate-600 dark:bg-slate-800/40"
-      >
-        <p className="text-lg font-semibold text-slate-800 dark:text-slate-100">
+      <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
+        <p className="text-lg font-semibold text-fg">
           {isFiltered ? t("noSearchResults") : t("noItems")}
         </p>
         {!isFiltered && (
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+          <p className="mt-2 text-sm text-fg-muted">
             {t("noItemsDescription")}
           </p>
         )}

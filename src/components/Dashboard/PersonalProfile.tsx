@@ -22,7 +22,13 @@ import {
   menuDashboardPath,
 } from "@/lib/menuDashboardPath";
 import CustomInput from "@/components/Custom/CustomInput";
-import { Button, ButtonLink, Field, Input, ReadonlyValue } from "@/components/ui";
+import {
+  Button,
+  ButtonLink,
+  Field,
+  Input,
+  ReadonlyValue,
+} from "@/components/ui";
 import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
 import { _resizeImage } from "@/shared/_shared";
 import { useAppDispatch } from "@/store/hooks";
@@ -200,7 +206,6 @@ export default function PersonalProfile({
       })
       .finally(() => setSubscriptionInfoLoading(false));
   }, [locale, authData?.user, t]);
-
 
   // Revoke blob URL on unmount or when profileImage changes to avoid memory leaks
   useEffect(() => {
@@ -385,7 +390,7 @@ export default function PersonalProfile({
         <div className={isRTL ? "text-right mb-4" : "text-left mb-4"}>
           <LinkTo
             href={defaultBackLink}
-            className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors"
+            className="inline-flex items-center gap-2 text-sm font-medium text-fg-muted hover:text-primary dark:hover:text-primary transition-colors"
           >
             <HiOutlineArrowRight
               className={`text-lg ${isRTL ? "order-2 rotate-180" : ""}`}
@@ -405,15 +410,15 @@ export default function PersonalProfile({
       <div className="space-y-8">
         <section
           id="onboarding-personal-info"
-          className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 md:p-6"
+          className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6"
         >
-          <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-5">
+          <h3 className="text-base font-semibold text-fg mb-5">
             {t("personalInfo")}
           </h3>
 
           {/* Profile image with Personal Information */}
           <div
-            className={`flex flex-wrap items-start gap-6 mb-6 pb-6 border-b border-slate-100 dark:border-slate-800 ${isRTL ? "flex-row-reverse" : ""}`}
+            className={`flex flex-wrap items-start gap-6 mb-6 pb-6 border-b border-line ${isRTL ? "flex-row-reverse" : ""}`}
           >
             <input
               ref={fileInputRef}
@@ -450,7 +455,7 @@ export default function PersonalProfile({
 
             {/* Drop zone */}
             <div className="flex-1 min-w-[220px]">
-              <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <p className="text-sm font-medium text-fg-muted mb-2">
                 {t("profilePicture")}
               </p>
               <div
@@ -461,24 +466,24 @@ export default function PersonalProfile({
                 onDrop={onDrop}
                 role="button"
                 tabIndex={0}
-                className={`relative rounded-2xl border-2 border-dashed transition-all duration-200 cursor-pointer flex flex-col items-center justify-center gap-3 py-8 px-6 min-h-[140px] ${
+                className={`relative rounded-lg border-2 border-dashed transition-all duration-200 cursor-pointer flex flex-col items-center justify-center gap-3 py-8 px-6 min-h-[140px] ${
                   dragOver
                     ? "border-primary bg-primary/5 dark:bg-primary/10 scale-[1.01]"
-                    : "border-slate-200 dark:border-slate-600 hover:border-primary/40 hover:bg-slate-50/50 dark:hover:bg-slate-800/50"
+                    : "border-line hover:border-primary/40 hover:bg-slate-50/50 dark:hover:bg-slate-800/50"
                 }`}
               >
                 <div
-                  className={`rounded-full p-3 transition-colors ${dragOver ? "bg-primary/15 dark:bg-primary/20" : "bg-slate-100 dark:bg-slate-800"}`}
+                  className={`rounded-full p-3 transition-colors ${dragOver ? "bg-primary/15 dark:bg-primary/20" : "bg-surface-2"}`}
                 >
                   <HiOutlineCloudUpload
-                    className={`w-8 h-8 ${dragOver ? "text-primary" : "text-slate-400 dark:text-slate-500"}`}
+                    className={`w-8 h-8 ${dragOver ? "text-primary" : "text-fg-subtle"}`}
                   />
                 </div>
                 <div className="text-center">
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <p className="text-sm font-medium text-fg-muted">
                     {t("dragDropOrClick")}
                   </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  <p className="text-xs text-fg-muted mt-0.5">
                     PNG, JPG, GIF · {t("maxFileSize")}
                   </p>
                 </div>
@@ -493,7 +498,7 @@ export default function PersonalProfile({
                   {t("uploadImage")}
                 </button>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+              <p className="text-xs text-fg-muted mt-2">
                 {t("recommendedImage")}
               </p>
               {profileImageFile && (
@@ -506,7 +511,7 @@ export default function PersonalProfile({
                   <button
                     type="button"
                     onClick={clearProfileImage}
-                    className="inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                    className="inline-flex items-center gap-1 text-xs text-fg-muted hover:text-red-600 dark:hover:text-red-400 transition-colors"
                   >
                     <HiOutlineX className="w-3.5 h-3.5" />
                     {t("remove")}
@@ -528,9 +533,7 @@ export default function PersonalProfile({
               />
             </Field>
             <Field label={t("email")} hint={t("emailCannotChange")}>
-              <ReadonlyValue>
-                {profile?.email ?? ""}
-              </ReadonlyValue>
+              <ReadonlyValue>{profile?.email ?? ""}</ReadonlyValue>
             </Field>
             <Field label={t("phone")}>
               <CustomInput
@@ -601,9 +604,9 @@ export default function PersonalProfile({
 
         <section
           id="onboarding-personal-password"
-          className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 md:p-6"
+          className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6"
         >
-          <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-5">
+          <h3 className="text-base font-semibold text-fg mb-5">
             {t("changePassword")}
           </h3>
           <form
@@ -691,9 +694,9 @@ export default function PersonalProfile({
         {!hideSubscriptionSection && (
           <section
             id="onboarding-personal-subscription"
-            className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 md:p-6"
+            className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6"
           >
-            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-5">
+            <h3 className="text-base font-semibold text-fg mb-5">
               {t("subscription")}
             </h3>
             <CurrentPlanSummary

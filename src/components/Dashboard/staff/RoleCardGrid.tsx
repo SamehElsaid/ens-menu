@@ -9,7 +9,7 @@ import { Button, EmptyState } from "@/components/ui";
 function RoleCardSkeleton() {
   return (
     <div
-      className="overflow-hidden rounded-2xl border border-line bg-surface"
+      className="overflow-hidden rounded-lg border border-line bg-surface"
       aria-hidden
     >
       <div className="dashboard-mobile-shimmer h-24 bg-brand-soft" />
@@ -24,8 +24,8 @@ function RoleCardSkeleton() {
           ))}
         </div>
         <div className="flex gap-2 border-t border-line pt-3">
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-xl bg-surface-2" />
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-xl bg-surface-2" />
+          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-2" />
+          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-2" />
         </div>
       </div>
     </div>

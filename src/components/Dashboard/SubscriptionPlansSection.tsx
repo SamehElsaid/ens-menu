@@ -417,7 +417,12 @@ export default function SubscriptionPlansSection({
         email: activeUser?.email?.trim() || undefined,
         mobile: phoneToSend,
         currency: "EGP",
-        ...(isRenew ? { renew: true, extraMenus: options?.extraMenus ?? renewExtraMenusCount } : {}),
+        ...(isRenew
+          ? {
+              renew: true,
+              extraMenus: options?.extraMenus ?? renewExtraMenusCount,
+            }
+          : {}),
         ...(appliedVoucherCode && voucherValidation?.voucher.type === "discount"
           ? { voucherCode: appliedVoucherCode }
           : {}),
@@ -532,7 +537,7 @@ export default function SubscriptionPlansSection({
           <div className={isRTL ? "text-right mb-4" : "text-left mb-4"}>
             <LinkTo
               href={backLink}
-              className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors"
+              className="inline-flex items-center gap-2 text-sm font-medium text-fg-muted hover:text-primary dark:hover:text-primary transition-colors"
             >
               <HiOutlineArrowRight
                 className={`text-lg ${isRTL ? "order-2 rotate-180" : ""}`}
@@ -593,7 +598,7 @@ export default function SubscriptionPlansSection({
 
         <section
           id="onboarding-subscription-plans"
-          className="rounded-2xl border border-line bg-surface shadow-sm p-5 md:p-8"
+          className="rounded-lg border border-line bg-surface shadow-sm p-5 md:p-8"
         >
           <div className={`mb-6 ${isRTL ? "text-right" : "text-left"}`}>
             <h2 className="text-lg font-bold text-fg">
@@ -626,7 +631,7 @@ export default function SubscriptionPlansSection({
                   const planKey = String(plan.name).toLowerCase();
                   const isCurrentPlanBool = Boolean(
                     currentPlanName &&
-                      planKey === String(currentPlanName).toLowerCase(),
+                    planKey === String(currentPlanName).toLowerCase(),
                   );
                   const isCustomPlan = planKey.includes("custom");
                   const isMostPopular = index === 1 && plans.length > 1;

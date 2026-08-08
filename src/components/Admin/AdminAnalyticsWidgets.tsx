@@ -15,7 +15,8 @@ export type MetricItem = {
   label: string;
   value: string | number;
   /** Retained for call-site compatibility; metrics no longer carry a tint. */
-  tone?: "amber" | "emerald" | "primary" | "sky" | "slate" | "orange" | "purple";
+  tone?:
+    "amber" | "emerald" | "primary" | "sky" | "slate" | "orange" | "purple";
 };
 
 export function DemoDataBanner({

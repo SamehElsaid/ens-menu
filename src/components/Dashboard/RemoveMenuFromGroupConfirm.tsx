@@ -53,9 +53,7 @@ export default function RemoveMenuFromGroupConfirm({
       );
 
       if (res.status) {
-        toast.success(
-          willDissolveGroup ? t("successDissolved") : t("success"),
-        );
+        toast.success(willDissolveGroup ? t("successDissolved") : t("success"));
         onRemoved();
         onClose();
       }

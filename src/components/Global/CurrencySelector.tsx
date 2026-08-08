@@ -20,17 +20,37 @@ const currencies: Currency[] = [
   { code: "GBP", name: "British Pound", nameAr: "جنيه إسترليني", symbol: "£" },
   { code: "KWD", name: "Kuwaiti Dinar", nameAr: "دينار كويتي", symbol: "د.ك" },
   { code: "QAR", name: "Qatari Riyal", nameAr: "ريال قطري", symbol: "ر.ق" },
-  { code: "BHD", name: "Bahraini Dinar", nameAr: "دينار بحريني", symbol: "د.ب" },
+  {
+    code: "BHD",
+    name: "Bahraini Dinar",
+    nameAr: "دينار بحريني",
+    symbol: "د.ب",
+  },
   { code: "OMR", name: "Omani Rial", nameAr: "ريال عماني", symbol: "ر.ع" },
-  { code: "JOD", name: "Jordanian Dinar", nameAr: "دينار أردني", symbol: "د.أ" },
-  { code: "LBP", name: "Lebanese Pound", nameAr: "ليرة لبنانية", symbol: "ل.ل" },
+  {
+    code: "JOD",
+    name: "Jordanian Dinar",
+    nameAr: "دينار أردني",
+    symbol: "د.أ",
+  },
+  {
+    code: "LBP",
+    name: "Lebanese Pound",
+    nameAr: "ليرة لبنانية",
+    symbol: "ل.ل",
+  },
   { code: "MAD", name: "Moroccan Dirham", nameAr: "درهم مغربي", symbol: "د.م" },
   { code: "TND", name: "Tunisian Dinar", nameAr: "دينار تونسي", symbol: "د.ت" },
   { code: "LYD", name: "Libyan Dinar", nameAr: "دينار ليبي", symbol: "د.ل" },
   { code: "IQD", name: "Iraqi Dinar", nameAr: "دينار عراقي", symbol: "ع.د" },
   { code: "TRY", name: "Turkish Lira", nameAr: "ليرة تركية", symbol: "₺" },
   { code: "INR", name: "Indian Rupee", nameAr: "روبية هندية", symbol: "₹" },
-  { code: "PKR", name: "Pakistani Rupee", nameAr: "روبية باكستانية", symbol: "₨" },
+  {
+    code: "PKR",
+    name: "Pakistani Rupee",
+    nameAr: "روبية باكستانية",
+    symbol: "₨",
+  },
 ];
 
 interface CurrencySelectorProps {
@@ -55,7 +75,7 @@ export default function CurrencySelector({
     (c) =>
       c.code.toLowerCase().includes(search.toLowerCase()) ||
       c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.nameAr.includes(search)
+      c.nameAr.includes(search),
   );
 
   useEffect(() => {
@@ -76,15 +96,13 @@ export default function CurrencySelector({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all flex items-center justify-between"
+        className="w-full px-4 py-3 border border-line-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:text-white transition-all flex items-center justify-between"
       >
         <span className="flex items-center gap-2">
           <span className="text-lg">{selectedCurrency?.symbol}</span>
           <span>
-            {showArabOnly
-              ? selectedCurrency?.nameAr
-              : selectedCurrency?.name}{" "}
-            ({selectedCurrency?.code})
+            {showArabOnly ? selectedCurrency?.nameAr : selectedCurrency?.name} (
+            {selectedCurrency?.code})
           </span>
         </span>
         <IoChevronDownOutline
@@ -93,16 +111,16 @@ export default function CurrencySelector({
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-2 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-xl max-h-64 overflow-hidden">
-          <div className="p-2 border-b border-gray-200 dark:border-gray-600">
+        <div className="absolute z-50 mt-2 w-full bg-raised border border-line rounded-lg shadow-xl max-h-64 overflow-hidden">
+          <div className="p-2 border-b border-line">
             <div className="relative">
-              <IoSearchOutline className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <IoSearchOutline className="absolute start-3 top-1/2 -translate-y-1/2 text-fg-subtle" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={tCommon("search")}
-                className="w-full ps-9 pe-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
+                className="w-full ps-9 pe-3 py-2 border border-line rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-white"
               />
             </div>
           </div>
@@ -116,10 +134,10 @@ export default function CurrencySelector({
                   setIsOpen(false);
                   setSearch("");
                 }}
-                className={`w-full px-4 py-2.5 text-start flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm ${
+                className={`w-full px-4 py-2.5 text-start flex items-center gap-3 hover:bg-surface-2 transition-colors text-sm ${
                   value === currency.code
                     ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400"
-                    : "text-gray-700 dark:text-gray-300"
+                    : "text-fg-muted"
                 }`}
               >
                 <span className="text-base w-6 text-center">

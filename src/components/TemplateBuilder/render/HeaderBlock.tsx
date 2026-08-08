@@ -11,7 +11,12 @@ export type HeaderRenderData = {
   logo?: string | null;
   colors: Record<string, string>;
   locale?: "en" | "ar";
-  categories?: { id: number; name: string; nameAr?: string; image?: string | null }[];
+  categories?: {
+    id: number;
+    name: string;
+    nameAr?: string;
+    image?: string | null;
+  }[];
 };
 
 type Props = {
@@ -57,9 +62,19 @@ function LogoCircle({
     >
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        <img
+          src={src}
+          alt=""
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
       ) : (
-        <span style={{ fontWeight: 800, color: colors.primary, fontSize: size * 0.28 }}>
+        <span
+          style={{
+            fontWeight: 800,
+            color: colors.primary,
+            fontSize: size * 0.28,
+          }}
+        >
           {name.slice(0, 2)}
         </span>
       )}
@@ -94,7 +109,9 @@ function TopChrome({
     >
       <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
         {left}
-        {props.showSocial !== false && !left && <span style={{ opacity: 0.9 }}>Social</span>}
+        {props.showSocial !== false && !left && (
+          <span style={{ opacity: 0.9 }}>Social</span>
+        )}
       </div>
       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
         {right}
@@ -122,9 +139,7 @@ function CategoryRail({
   data: HeaderRenderData;
   colors: Record<string, string>;
 }) {
-  const cats = data.categories?.length
-    ? data.categories
-    : MOCK_MENU.categories;
+  const cats = data.categories?.length ? data.categories : MOCK_MENU.categories;
   const isAr = data.locale === "ar";
   return (
     <div
@@ -184,7 +199,9 @@ function CategoryRail({
           >
             {!c.image && "◉"}
           </div>
-          <span style={{ fontSize: 9, color: colors.primary, whiteSpace: "nowrap" }}>
+          <span
+            style={{ fontSize: 9, color: colors.primary, whiteSpace: "nowrap" }}
+          >
             {isAr ? c.nameAr || c.name : c.name}
           </span>
         </div>
@@ -206,8 +223,7 @@ export function HeaderBlock({
   const isAr = data.locale === "ar";
   const name = isAr ? data.nameAr || data.name : data.name;
   const desc =
-    data.description ||
-    (isAr ? "معاينة كاملة للهيدر" : "Full header preview");
+    data.description || (isAr ? "معاينة كاملة للهيدر" : "Full header preview");
   const logoSize = Number(props.logoSize) || 110;
   const sheetRadius = Number(props.sheetRadius) || 80;
   const showDesc = props.showDescription !== false;
@@ -257,19 +273,46 @@ export function HeaderBlock({
             colors={colors}
             left={
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <LogoCircle src={data.logo} size={28} name={name} colors={colors} border={false} />
-                <strong style={{ color: colors.secondary || "#f2b705", fontSize: 14 }}>
+                <LogoCircle
+                  src={data.logo}
+                  size={28}
+                  name={name}
+                  colors={colors}
+                  border={false}
+                />
+                <strong
+                  style={{ color: colors.secondary || "#f2b705", fontSize: 14 }}
+                >
                   {name}
                 </strong>
               </div>
             }
           />
-          <div style={{ textAlign: "center", padding: "48px 20px 56px", color: "#fff" }}>
-            <h1 style={{ margin: 0, fontSize: 40, fontWeight: 800, color: colors.secondary || "#f2b705" }}>
+          <div
+            style={{
+              textAlign: "center",
+              padding: "48px 20px 56px",
+              color: "#fff",
+            }}
+          >
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 40,
+                fontWeight: 800,
+                color: colors.secondary || "#f2b705",
+              }}
+            >
               {name}
             </h1>
             {showDesc && (
-              <p style={{ margin: "10px 0 0", color: "rgba(255,255,255,.65)", fontSize: 14 }}>
+              <p
+                style={{
+                  margin: "10px 0 0",
+                  color: "rgba(255,255,255,.65)",
+                  fontSize: 14,
+                }}
+              >
                 {desc}
               </p>
             )}
@@ -345,9 +388,21 @@ export function HeaderBlock({
             <strong style={{ fontSize: 14, color: colors.text }}>
               {isAr ? "الرئيسية" : "Home"}
             </strong>
-            <LogoCircle src={data.logo} size={logoSize} name={name} colors={colors} border={false} />
+            <LogoCircle
+              src={data.logo}
+              size={logoSize}
+              name={name}
+              colors={colors}
+              border={false}
+            />
           </div>
-          <div style={{ textAlign: "center", padding: "20px 16px 8px", background: colors.surface || "#fff" }}>
+          <div
+            style={{
+              textAlign: "center",
+              padding: "20px 16px 8px",
+              background: colors.surface || "#fff",
+            }}
+          >
             <span
               style={{
                 display: "inline-flex",
@@ -364,7 +419,15 @@ export function HeaderBlock({
               ★ {isAr ? "استكشف قائمتنا" : "Explore our menu"}
             </span>
             {showDesc && (
-              <p style={{ margin: "10px 0 0", fontSize: 12, color: colors.muted }}>{desc}</p>
+              <p
+                style={{
+                  margin: "10px 0 0",
+                  fontSize: 12,
+                  color: colors.muted,
+                }}
+              >
+                {desc}
+              </p>
             )}
           </div>
           {showCats && <CategoryRail data={data} colors={colors} />}
@@ -387,13 +450,31 @@ export function HeaderBlock({
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <LogoCircle src={data.logo} size={logoSize} name={name} colors={colors} border={false} />
+              <LogoCircle
+                src={data.logo}
+                size={logoSize}
+                name={name}
+                colors={colors}
+                border={false}
+              />
               <strong>{name}</strong>
             </div>
-            {props.showLang !== false && <span style={{ fontSize: 12 }}>EN | AR</span>}
+            {props.showLang !== false && (
+              <span style={{ fontSize: 12 }}>EN | AR</span>
+            )}
           </div>
-          <div style={{ padding: "20px 16px", background: colors.surface || "#fff", textAlign: "center" }}>
-            {showDesc && <p style={{ margin: 0, color: colors.muted, fontSize: 13 }}>{desc}</p>}
+          <div
+            style={{
+              padding: "20px 16px",
+              background: colors.surface || "#fff",
+              textAlign: "center",
+            }}
+          >
+            {showDesc && (
+              <p style={{ margin: 0, color: colors.muted, fontSize: 13 }}>
+                {desc}
+              </p>
+            )}
           </div>
         </>,
       );
@@ -402,11 +483,26 @@ export function HeaderBlock({
       return wrap(
         <>
           <TopChrome props={props} colors={colors} />
-          <div style={{ textAlign: "center", padding: "64px 20px 72px", color: "#fff" }}>
-            <LogoCircle src={data.logo} size={logoSize} name={name} colors={colors} />
-            <h1 style={{ margin: "16px 0 0", fontSize: 32, fontWeight: 800 }}>{name}</h1>
+          <div
+            style={{
+              textAlign: "center",
+              padding: "64px 20px 72px",
+              color: "#fff",
+            }}
+          >
+            <LogoCircle
+              src={data.logo}
+              size={logoSize}
+              name={name}
+              colors={colors}
+            />
+            <h1 style={{ margin: "16px 0 0", fontSize: 32, fontWeight: 800 }}>
+              {name}
+            </h1>
             {showDesc && (
-              <p style={{ margin: "8px 0 0", opacity: 0.85, fontSize: 14 }}>{desc}</p>
+              <p style={{ margin: "8px 0 0", opacity: 0.85, fontSize: 14 }}>
+                {desc}
+              </p>
             )}
           </div>
         </>,
@@ -426,11 +522,20 @@ export function HeaderBlock({
               color: "#fff",
             }}
           >
-            <LogoCircle src={data.logo} size={logoSize} name={name} colors={colors} />
+            <LogoCircle
+              src={data.logo}
+              size={logoSize}
+              name={name}
+              colors={colors}
+            />
             <div style={{ textAlign: "start" }}>
-              <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800 }}>{name}</h1>
+              <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800 }}>
+                {name}
+              </h1>
               {showDesc && (
-                <p style={{ margin: "6px 0 0", opacity: 0.85, fontSize: 13 }}>{desc}</p>
+                <p style={{ margin: "6px 0 0", opacity: 0.85, fontSize: 13 }}>
+                  {desc}
+                </p>
               )}
             </div>
           </div>
@@ -458,7 +563,13 @@ export function HeaderBlock({
                 boxShadow: `0 0 24px ${colors.primary}`,
               }}
             >
-              <LogoCircle src={data.logo} size={logoSize} name={name} colors={colors} border={false} />
+              <LogoCircle
+                src={data.logo}
+                size={logoSize}
+                name={name}
+                colors={colors}
+                border={false}
+              />
             </div>
             <h1
               style={{
@@ -472,7 +583,13 @@ export function HeaderBlock({
               {name}
             </h1>
             {showDesc && (
-              <p style={{ margin: "8px 0 0", color: "rgba(255,255,255,.6)", fontSize: 13 }}>
+              <p
+                style={{
+                  margin: "8px 0 0",
+                  color: "rgba(255,255,255,.6)",
+                  fontSize: 13,
+                }}
+              >
                 {desc}
               </p>
             )}
@@ -483,15 +600,48 @@ export function HeaderBlock({
 
     case "magazine":
       return wrap(
-        <div style={{ background: colors.surface || "#fff", padding: "12px 16px 28px" }}>
+        <div
+          style={{
+            background: colors.surface || "#fff",
+            padding: "12px 16px 28px",
+          }}
+        >
           <TopChrome props={props} colors={colors} light />
-          <div style={{ borderTop: `1px solid ${colors.border}`, borderBottom: `1px solid ${colors.border}`, padding: "20px 0", textAlign: "center" }}>
-            <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: colors.muted, marginBottom: 8 }}>
+          <div
+            style={{
+              borderTop: `1px solid ${colors.border}`,
+              borderBottom: `1px solid ${colors.border}`,
+              padding: "20px 0",
+              textAlign: "center",
+            }}
+          >
+            <div
+              style={{
+                fontSize: 11,
+                letterSpacing: 3,
+                textTransform: "uppercase",
+                color: colors.muted,
+                marginBottom: 8,
+              }}
+            >
               Menu
             </div>
-            <h1 style={{ margin: 0, fontSize: 34, fontWeight: 900, color: colors.text }}>{name}</h1>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 34,
+                fontWeight: 900,
+                color: colors.text,
+              }}
+            >
+              {name}
+            </h1>
             {showDesc && (
-              <p style={{ margin: "8px 0 0", fontSize: 13, color: colors.muted }}>{desc}</p>
+              <p
+                style={{ margin: "8px 0 0", fontSize: 13, color: colors.muted }}
+              >
+                {desc}
+              </p>
             )}
           </div>
         </div>,
@@ -510,15 +660,33 @@ export function HeaderBlock({
               borderBottom: `1px solid ${colors.border}`,
             }}
           >
-            <LogoCircle src={data.logo} size={logoSize} name={name} colors={colors} border={false} />
+            <LogoCircle
+              src={data.logo}
+              size={logoSize}
+              name={name}
+              colors={colors}
+              border={false}
+            />
             {props.showLang !== false && (
               <span style={{ fontSize: 11, color: colors.muted }}>EN | AR</span>
             )}
           </div>
-          <div style={{ padding: "20px 16px", textAlign: "center", background: colors.surface || "#fff" }}>
-            <h1 style={{ margin: 0, fontSize: 24, color: colors.text }}>{name}</h1>
+          <div
+            style={{
+              padding: "20px 16px",
+              textAlign: "center",
+              background: colors.surface || "#fff",
+            }}
+          >
+            <h1 style={{ margin: 0, fontSize: 24, color: colors.text }}>
+              {name}
+            </h1>
             {showDesc && (
-              <p style={{ margin: "6px 0 0", fontSize: 12, color: colors.muted }}>{desc}</p>
+              <p
+                style={{ margin: "6px 0 0", fontSize: 12, color: colors.muted }}
+              >
+                {desc}
+              </p>
             )}
           </div>
         </>,
@@ -528,7 +696,13 @@ export function HeaderBlock({
       return wrap(
         <>
           <TopChrome props={props} colors={colors} />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", minHeight: 160 }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              minHeight: 160,
+            }}
+          >
             <div
               style={{
                 background: colors.primary,
@@ -538,7 +712,12 @@ export function HeaderBlock({
                 padding: 16,
               }}
             >
-              <LogoCircle src={data.logo} size={logoSize} name={name} colors={colors} />
+              <LogoCircle
+                src={data.logo}
+                size={logoSize}
+                name={name}
+                colors={colors}
+              />
             </div>
             <div
               style={{
@@ -552,7 +731,9 @@ export function HeaderBlock({
             >
               <h1 style={{ margin: 0, fontSize: 22 }}>{name}</h1>
               {showDesc && (
-                <p style={{ margin: "6px 0 0", fontSize: 12, opacity: 0.9 }}>{desc}</p>
+                <p style={{ margin: "6px 0 0", fontSize: 12, opacity: 0.9 }}>
+                  {desc}
+                </p>
               )}
             </div>
           </div>
@@ -565,8 +746,22 @@ export function HeaderBlock({
       return wrap(
         <>
           <TopChrome props={props} colors={colors} />
-          <div style={{ display: "flex", justifyContent: "center", marginTop: 8, marginBottom: -logoSize / 2, position: "relative", zIndex: 5 }}>
-            <LogoCircle src={data.logo} size={logoSize} name={name} colors={colors} />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginTop: 8,
+              marginBottom: -logoSize / 2,
+              position: "relative",
+              zIndex: 5,
+            }}
+          >
+            <LogoCircle
+              src={data.logo}
+              size={logoSize}
+              name={name}
+              colors={colors}
+            />
           </div>
           <div
             style={{
@@ -578,9 +773,15 @@ export function HeaderBlock({
               textAlign: "center",
             }}
           >
-            <h1 style={{ margin: 0, fontSize: 22, color: colors.text }}>{name}</h1>
+            <h1 style={{ margin: 0, fontSize: 22, color: colors.text }}>
+              {name}
+            </h1>
             {showDesc && (
-              <p style={{ margin: "6px 0 0", fontSize: 12, color: colors.muted }}>{desc}</p>
+              <p
+                style={{ margin: "6px 0 0", fontSize: 12, color: colors.muted }}
+              >
+                {desc}
+              </p>
             )}
           </div>
         </>,
@@ -599,11 +800,19 @@ export function HeaderBlock({
             color: "#fff",
           }}
         >
-          <LogoCircle src={data.logo} size={logoSize} name={name} colors={colors} border={false} />
+          <LogoCircle
+            src={data.logo}
+            size={logoSize}
+            name={name}
+            colors={colors}
+            border={false}
+          />
           <div style={{ flex: 1, minWidth: 0 }}>
             <strong style={{ fontSize: 14 }}>{name}</strong>
           </div>
-          {props.showLang !== false && <span style={{ fontSize: 11 }}>EN|AR</span>}
+          {props.showLang !== false && (
+            <span style={{ fontSize: 11 }}>EN|AR</span>
+          )}
         </div>,
       );
 
@@ -612,12 +821,37 @@ export function HeaderBlock({
         <>
           <TopChrome props={props} colors={colors} />
           <div style={{ padding: "36px 20px 48px", color: "#fff" }}>
-            <div style={{ fontSize: 12, letterSpacing: 4, textTransform: "uppercase", opacity: 0.7 }}>
+            <div
+              style={{
+                fontSize: 12,
+                letterSpacing: 4,
+                textTransform: "uppercase",
+                opacity: 0.7,
+              }}
+            >
               Digital Menu
             </div>
-            <h1 style={{ margin: "8px 0 0", fontSize: 48, fontWeight: 900, lineHeight: 1 }}>{name}</h1>
+            <h1
+              style={{
+                margin: "8px 0 0",
+                fontSize: 48,
+                fontWeight: 900,
+                lineHeight: 1,
+              }}
+            >
+              {name}
+            </h1>
             {showDesc && (
-              <p style={{ margin: "12px 0 0", fontSize: 14, opacity: 0.85, maxWidth: 280 }}>{desc}</p>
+              <p
+                style={{
+                  margin: "12px 0 0",
+                  fontSize: 14,
+                  opacity: 0.85,
+                  maxWidth: 280,
+                }}
+              >
+                {desc}
+              </p>
             )}
           </div>
         </>,
@@ -626,10 +860,32 @@ export function HeaderBlock({
 
     case "elegantLine":
       return wrap(
-        <div style={{ background: "#1a1512", color: "#f5f0e8", padding: "16px 20px 40px", textAlign: "center" }}>
+        <div
+          style={{
+            background: "#1a1512",
+            color: "#f5f0e8",
+            padding: "16px 20px 40px",
+            textAlign: "center",
+          }}
+        >
           <TopChrome props={{ ...props, showSocial: false }} colors={colors} />
-          <LogoCircle src={data.logo} size={logoSize} name={name} colors={colors} border={false} />
-          <h1 style={{ margin: "16px 0 0", fontSize: 28, fontWeight: 500, letterSpacing: 1 }}>{name}</h1>
+          <LogoCircle
+            src={data.logo}
+            size={logoSize}
+            name={name}
+            colors={colors}
+            border={false}
+          />
+          <h1
+            style={{
+              margin: "16px 0 0",
+              fontSize: 28,
+              fontWeight: 500,
+              letterSpacing: 1,
+            }}
+          >
+            {name}
+          </h1>
           <div
             style={{
               width: 48,
@@ -649,11 +905,24 @@ export function HeaderBlock({
       return wrap(
         <>
           <TopChrome props={props} colors={colors} />
-          <div style={{ textAlign: "center", padding: "28px 16px 36px", color: "#fff" }}>
-            <LogoCircle src={data.logo} size={logoSize} name={name} colors={colors} />
+          <div
+            style={{
+              textAlign: "center",
+              padding: "28px 16px 36px",
+              color: "#fff",
+            }}
+          >
+            <LogoCircle
+              src={data.logo}
+              size={logoSize}
+              name={name}
+              colors={colors}
+            />
             <h1 style={{ margin: "14px 0 0", fontSize: 26 }}>{name}</h1>
             {showDesc && (
-              <p style={{ margin: "8px 0 0", opacity: 0.85, fontSize: 13 }}>{desc}</p>
+              <p style={{ margin: "8px 0 0", opacity: 0.85, fontSize: 13 }}>
+                {desc}
+              </p>
             )}
           </div>
           <div

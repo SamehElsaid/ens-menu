@@ -39,8 +39,7 @@ export default function StaffCard({
   const initials = getStaffInitials(staff.name);
   const email = staff.email?.trim() || t("emptyCell");
 
-  const roleLabel =
-    staff.roleName?.trim() || staff.role?.trim() || t("noRole");
+  const roleLabel = staff.roleName?.trim() || staff.role?.trim() || t("noRole");
 
   const hasRole = Boolean(staff.roleName?.trim() || staff.role?.trim());
 
@@ -52,7 +51,7 @@ export default function StaffCard({
     >
       <div className="flex items-start gap-3">
         <span
-          className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-sm font-semibold text-brand-soft-fg"
+          className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-sm font-semibold text-brand-soft-fg"
           aria-hidden
         >
           {initials}

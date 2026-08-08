@@ -150,7 +150,8 @@ export default function SaveResultPanel({
           <p className="mt-1.5 text-[13px] leading-relaxed text-fg-muted">
             {ok && !allSkipped
               ? t("saveSuccessDetail", {
-                  categories: summary.categoriesAdded + summary.categoriesReused,
+                  categories:
+                    summary.categoriesAdded + summary.categoriesReused,
                   items: summary.itemsAdded + summary.itemsUpdated,
                 })
               : partial

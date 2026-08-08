@@ -11,10 +11,13 @@ import GoogleGtag from "@/components/Global/GoogleGtag";
 import GoogleTagManager from "@/components/Global/GoogleTagManager";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import 'suneditor/dist/css/suneditor.min.css'
+import "suneditor/dist/css/suneditor.min.css";
 
 import { getSiteOrigin } from "@/lib/sitemap/data";
-import { buildOrganizationJsonLd, buildWebSiteJsonLd } from "@/lib/organizationSchema";
+import {
+  buildOrganizationJsonLd,
+  buildWebSiteJsonLd,
+} from "@/lib/organizationSchema";
 import JsonLd from "@/components/Global/JsonLd";
 
 const appUrl = getSiteOrigin();

@@ -1,6 +1,26 @@
 "use client";
 
-import { useEffect, useRef, type RefObject } from "react";
+import {
+  useEffect,
+  useRef,
+  useSyncExternalStore,
+  type RefObject,
+} from "react";
+
+const noopSubscribe = () => () => {};
+
+/**
+ * `false` while server-rendering and on the hydration pass, `true` afterwards.
+ * Overlays portal into `document.body`, so they must not render until the
+ * client has taken over.
+ */
+export function useIsClient(): boolean {
+  return useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
+  );
+}
 
 const FOCUSABLE = [
   "a[href]",
@@ -67,7 +87,9 @@ export function useDialogBehavior({
   autoFocus?: boolean;
 }) {
   const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!open) return;

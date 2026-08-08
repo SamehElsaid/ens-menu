@@ -44,7 +44,9 @@ const emptyForm = {
 
 export default function CustomerAddressesSection({ userId }: Props) {
   const locale = useLocale();
-  const t = useTranslations("adminUsers.userDetails.customerSections.addresses");
+  const t = useTranslations(
+    "adminUsers.userDetails.customerSections.addresses",
+  );
   const tCommon = useTranslations("common");
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
   const [loading, setLoading] = useState(true);

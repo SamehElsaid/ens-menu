@@ -71,9 +71,15 @@ export function StatCard({
               )}
             >
               {delta.direction === "up" ? (
-                <FiArrowUpRight className="size-3.5 rtl:-scale-x-100" aria-hidden />
+                <FiArrowUpRight
+                  className="size-3.5 rtl:-scale-x-100"
+                  aria-hidden
+                />
               ) : (
-                <FiArrowDownRight className="size-3.5 rtl:-scale-x-100" aria-hidden />
+                <FiArrowDownRight
+                  className="size-3.5 rtl:-scale-x-100"
+                  aria-hidden
+                />
               )}
               {delta.value}
             </span>

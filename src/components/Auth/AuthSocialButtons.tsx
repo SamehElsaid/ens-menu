@@ -29,30 +29,17 @@ export default function AuthSocialButtons({
 
   return (
     <div className={className}>
-      <div className="auth-social-divider auth-social-divider--subtle mb-3.5 flex w-full items-center gap-2.5">
-        <span
-          aria-hidden
-          className="h-px flex-1 bg-slate-200/70 dark:bg-slate-700/60"
-        />
-        <span className="shrink-0 text-[10px] font-normal text-slate-400/90 dark:text-slate-500/90">
+      <div className="mb-4 flex w-full items-center gap-3">
+        <span aria-hidden className="h-px flex-1 bg-site-line" />
+        <span className="shrink-0 text-site-xs text-site-muted">
           {t(dividerLabel)}
         </span>
-        <span
-          aria-hidden
-          className="h-px flex-1 bg-slate-200/70 dark:bg-slate-700/60"
-        />
+        <span aria-hidden className="h-px flex-1 bg-site-line" />
       </div>
 
-      <div className="flex flex-col gap-2.5">
-        <GoogleSignInButton
-          redirectParam={redirectParam}
-          variant="full"
-        />
-        <AppleSignInButton
-          redirectParam={redirectParam}
-          variant="full"
-          showDivider={false}
-        />
+      <div className="flex flex-col gap-3">
+        <GoogleSignInButton redirectParam={redirectParam} />
+        <AppleSignInButton redirectParam={redirectParam} />
       </div>
     </div>
   );

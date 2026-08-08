@@ -89,9 +89,15 @@ export function CategoriesBlock({
         justifyContent: "center",
         flexWrap: layout === "stacked" ? undefined : "wrap",
         alignItems: "center",
-        overflowX: ["rail", "imageStrip", "pills", "chips", "gradient", "soft", "glass"].includes(
-          String(layout),
-        )
+        overflowX: [
+          "rail",
+          "imageStrip",
+          "pills",
+          "chips",
+          "gradient",
+          "soft",
+          "glass",
+        ].includes(String(layout))
           ? "auto"
           : undefined,
         flexDirection: layout === "stacked" ? "column" : "row",
@@ -116,7 +122,8 @@ export function CategoriesBlock({
           style={{
             width: 56,
             height: layout === "cards" ? 44 : 56,
-            borderRadius: layout === "squares" || layout === "cards" ? 12 : "50%",
+            borderRadius:
+              layout === "squares" || layout === "cards" ? 12 : "50%",
             border: `2px solid ${activeId === 0 ? colors.primary : colors.border || colors.primary}`,
             margin: "0 auto 4px",
             display: "flex",
@@ -129,7 +136,9 @@ export function CategoriesBlock({
         >
           {isAr ? "الكل" : "All"}
         </div>
-        {(layout === "circles" || layout === "squares" || layout === "rail") && (
+        {(layout === "circles" ||
+          layout === "squares" ||
+          layout === "rail") && (
           <span style={{ fontSize: 10, color: colors.primary }}>
             {isAr ? "الكل" : "All"}
           </span>
@@ -207,7 +216,13 @@ export function CategoriesBlock({
               >
                 {!c.image && "◉"}
               </div>
-              <span style={{ fontSize: 9, color: colors.primary, whiteSpace: "nowrap" }}>
+              <span
+                style={{
+                  fontSize: 9,
+                  color: colors.primary,
+                  whiteSpace: "nowrap",
+                }}
+              >
                 {labelOf(c, isAr)}
               </span>
             </div>,
@@ -265,7 +280,9 @@ export function CategoriesBlock({
                   }}
                 />
               )}
-              <span style={{ fontSize: 14, fontWeight: 600, color: colors.text }}>
+              <span
+                style={{ fontSize: 14, fontWeight: 600, color: colors.text }}
+              >
                 {labelOf(c, isAr)}
               </span>
             </div>,
@@ -405,7 +422,8 @@ export function CategoriesBlock({
                   fontSize: 10,
                   fontWeight: 700,
                   color: "#fff",
-                  backgroundImage: "linear-gradient(transparent, rgba(0,0,0,.65))",
+                  backgroundImage:
+                    "linear-gradient(transparent, rgba(0,0,0,.65))",
                 }}
               >
                 {label}
@@ -433,7 +451,14 @@ export function CategoriesBlock({
                   ...thumbFill(colors, c.image),
                 }}
               />
-              <div style={{ padding: "6px 4px", fontSize: 10, fontWeight: 600, color: colors.text }}>
+              <div
+                style={{
+                  padding: "6px 4px",
+                  fontSize: 10,
+                  fontWeight: 600,
+                  color: colors.text,
+                }}
+              >
                 {label}
               </div>
             </div>,
@@ -466,7 +491,9 @@ export function CategoriesBlock({
                 height: 56,
                 borderRadius: square ? 14 : "50%",
                 border: `2px solid ${
-                  activeId === c.id ? colors.primary : colors.border || colors.primary
+                  activeId === c.id
+                    ? colors.primary
+                    : colors.border || colors.primary
                 }`,
                 margin: "0 auto 4px",
                 overflow: "hidden",

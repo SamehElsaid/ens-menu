@@ -130,9 +130,12 @@ export default function KnowledgeManagementPage() {
     router.push("/admin/knowledge-management/add");
   }, [router]);
 
-  const openEdit = useCallback((item: SearchInformation) => {
-    router.push(`/admin/knowledge-management/add?id=${item.id}`);
-  }, [router]);
+  const openEdit = useCallback(
+    (item: SearchInformation) => {
+      router.push(`/admin/knowledge-management/add?id=${item.id}`);
+    },
+    [router],
+  );
 
   const handleDelete = useCallback(async () => {
     if (!deleteModal.item) return;
@@ -159,7 +162,15 @@ export default function KnowledgeManagementPage() {
     } finally {
       setLoadingItemId(null);
     }
-  }, [deleteModal.item, locale, t, fetchItems, items.length, page, debouncedSearch]);
+  }, [
+    deleteModal.item,
+    locale,
+    t,
+    fetchItems,
+    items.length,
+    page,
+    debouncedSearch,
+  ]);
 
   return (
     <div className="space-y-6 pb-10">
@@ -179,16 +190,19 @@ export default function KnowledgeManagementPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <CardDashBoard borderColor="border-violet-200 dark:border-violet-500/20" hover>
+        <CardDashBoard
+          borderColor="border-violet-200 dark:border-violet-500/20"
+          hover
+        >
           <div className="flex items-center gap-4">
-            <div className="flex size-14 items-center justify-center rounded-xl bg-brand-soft">
+            <div className="flex size-14 items-center justify-center rounded-lg bg-brand-soft">
               <IoLibraryOutline className="text-2xl text-brand-soft-fg" />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+              <p className="text-sm font-medium text-fg-muted mb-1">
                 {t("totalItems")}
               </p>
-              <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+              <p className="text-3xl font-bold text-fg">
                 {loading ? (
                   <Spinner size="md" label={tCommon("loading")} />
                 ) : (
@@ -199,13 +213,16 @@ export default function KnowledgeManagementPage() {
           </div>
         </CardDashBoard>
 
-        <CardDashBoard borderColor="border-sky-200 dark:border-sky-500/20" hover>
+        <CardDashBoard
+          borderColor="border-sky-200 dark:border-sky-500/20"
+          hover
+        >
           <div className="flex items-center gap-4">
-            <div className="flex size-14 items-center justify-center rounded-xl bg-info-soft">
+            <div className="flex size-14 items-center justify-center rounded-lg bg-info-soft">
               <IoSearchOutline className="text-2xl text-info-fg" />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+              <p className="text-sm font-medium text-fg-muted mb-1">
                 {t("filteredItems")}
               </p>
               <p className="text-3xl font-bold text-sky-600 dark:text-sky-400">
@@ -220,7 +237,9 @@ export default function KnowledgeManagementPage() {
         </CardDashBoard>
       </div>
 
-      <div className={`flex flex-wrap items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
+      <div
+        className={`flex flex-wrap items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}
+      >
         <SearchInput
           value={search}
           onChange={setSearch}
@@ -274,36 +293,52 @@ export default function KnowledgeManagementPage() {
             {items.map((item) => {
               const isBusy = loadingItemId === item.id;
               return (
-                <CardDashBoard key={item.id} hover className="transition-all duration-200 hover:shadow-lg">
-                  <div className={`flex items-start justify-between gap-4 ${isRTL ? "flex-row-reverse" : ""}`}>
+                <CardDashBoard
+                  key={item.id}
+                  hover
+                  className="transition-all duration-200 hover:shadow-lg"
+                >
+                  <div
+                    className={`flex items-start justify-between gap-4 ${isRTL ? "flex-row-reverse" : ""}`}
+                  >
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-3 line-clamp-1">
+                      <h3 className="text-lg font-bold text-fg mb-3 line-clamp-1">
                         {getTitle(item)}
                       </h3>
 
                       {/* Bilingual titles */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg mb-4 text-xs">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-surface-2 rounded-lg mb-4 text-xs">
                         <div>
-                          <span className="font-semibold text-slate-700 dark:text-slate-300">{t("titleAr")}: </span>
-                          <span className="text-slate-500 dark:text-slate-400">{item.titleAr}</span>
+                          <span className="font-semibold text-fg-muted">
+                            {t("titleAr")}:{" "}
+                          </span>
+                          <span className="text-fg-muted">{item.titleAr}</span>
                         </div>
                         <div>
-                          <span className="font-semibold text-slate-700 dark:text-slate-300">{t("titleEn")}: </span>
-                          <span className="text-slate-500 dark:text-slate-400">{item.titleEn}</span>
+                          <span className="font-semibold text-fg-muted">
+                            {t("titleEn")}:{" "}
+                          </span>
+                          <span className="text-fg-muted">{item.titleEn}</span>
                         </div>
                       </div>
 
                       {/* Timestamps */}
-                      <div className={`flex items-center gap-4 flex-wrap mb-4 text-xs text-slate-500 dark:text-slate-400 ${isRTL ? "flex-row-reverse" : ""}`}>
+                      <div
+                        className={`flex items-center gap-4 flex-wrap mb-4 text-xs text-fg-muted ${isRTL ? "flex-row-reverse" : ""}`}
+                      >
                         {item.createdAt && (
-                          <span className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg">
-                            <span className="font-semibold text-slate-600 dark:text-slate-300">{t("createdAt")}:</span>
+                          <span className="flex items-center gap-1.5 bg-surface-2 px-2.5 py-1 rounded-lg">
+                            <span className="font-semibold text-fg-muted">
+                              {t("createdAt")}:
+                            </span>
                             <ViewTime data={item.createdAt} />
                           </span>
                         )}
                         {item.updatedAt && (
                           <span className="flex items-center gap-1.5 bg-violet-50 dark:bg-violet-500/10 px-2.5 py-1 rounded-lg">
-                            <span className="font-semibold text-violet-600 dark:text-violet-400">{t("updatedAt")}:</span>
+                            <span className="font-semibold text-violet-600 dark:text-violet-400">
+                              {t("updatedAt")}:
+                            </span>
                             <span className="text-violet-700 dark:text-violet-300">
                               <ViewTime data={item.updatedAt} />
                             </span>
@@ -311,7 +346,9 @@ export default function KnowledgeManagementPage() {
                         )}
                       </div>
 
-                      <div className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
+                      <div
+                        className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
+                      >
                         <Button
                           variant="secondary"
                           size="sm"
@@ -347,7 +384,10 @@ export default function KnowledgeManagementPage() {
             disabled={loading}
             summary={tCommon("paginationInfo", {
               from: ((page - 1) * pagination.limit + 1).toLocaleString(),
-              to: Math.min(page * pagination.limit, pagination.total).toLocaleString(),
+              to: Math.min(
+                page * pagination.limit,
+                pagination.total,
+              ).toLocaleString(),
               total: pagination.total.toLocaleString(),
             })}
             labels={{
@@ -375,7 +415,6 @@ export default function KnowledgeManagementPage() {
         tone="danger"
         icon={<FiAlertTriangle />}
       />
-
     </div>
   );
 }

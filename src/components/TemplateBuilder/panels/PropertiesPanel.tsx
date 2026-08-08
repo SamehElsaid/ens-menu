@@ -86,9 +86,15 @@ function ContentFields({
           </p>
           {pair("text", "textAr", t("textEn"), t("textAr"))}
           <Field label={t("level")}>
-            <select className={input} value={Number(props.level) || 2} onChange={(e) => set("level", Number(e.target.value))}>
+            <select
+              className={input}
+              value={Number(props.level) || 2}
+              onChange={(e) => set("level", Number(e.target.value))}
+            >
               {[1, 2, 3, 4, 5, 6].map((n) => (
-                <option key={n} value={n}>H{n}</option>
+                <option key={n} value={n}>
+                  H{n}
+                </option>
               ))}
             </select>
           </Field>
@@ -108,7 +114,11 @@ function ContentFields({
         <>
           {pair("label", "labelAr", t("labelEn"), t("labelAr"))}
           <Field label={t("href")}>
-            <input className={input} value={String(props.href ?? "")} onChange={(e) => set("href", e.target.value)} />
+            <input
+              className={input}
+              value={String(props.href ?? "")}
+              onChange={(e) => set("href", e.target.value)}
+            />
           </Field>
         </>
       );
@@ -116,7 +126,11 @@ function ContentFields({
       return (
         <>
           <Field label={t("src")}>
-            <input className={input} value={String(props.src ?? "")} onChange={(e) => set("src", e.target.value)} />
+            <input
+              className={input}
+              value={String(props.src ?? "")}
+              onChange={(e) => set("src", e.target.value)}
+            />
           </Field>
           {pair("alt", "altAr", t("altEn"), t("altAr"))}
         </>
@@ -124,7 +138,11 @@ function ContentFields({
     case "html":
       return (
         <Field label={t("html")}>
-          <textarea className={`${input} min-h-[100px] font-mono`} value={String(props.html ?? "")} onChange={(e) => set("html", e.target.value)} />
+          <textarea
+            className={`${input} min-h-[100px] font-mono`}
+            value={String(props.html ?? "")}
+            onChange={(e) => set("html", e.target.value)}
+          />
         </Field>
       );
     case "cta":
@@ -137,66 +155,156 @@ function ContentFields({
     case "menu.items":
       return (
         <>
-          <CardStylePicker value={String(props.cardStyle ?? "split")} onChange={onChange} />
+          <CardStylePicker
+            value={String(props.cardStyle ?? "split")}
+            onChange={onChange}
+          />
           <Field label={t("columns")}>
-            <input type="number" min={1} max={3} className={input} value={Number(props.columns) || 2} onChange={(e) => set("columns", Number(e.target.value))} />
+            <input
+              type="number"
+              min={1}
+              max={3}
+              className={input}
+              value={Number(props.columns) || 2}
+              onChange={(e) => set("columns", Number(e.target.value))}
+            />
           </Field>
-          <Field label={`${t("radius")} (${Number(props.borderRadius) || 28}px)`}>
-            <input type="range" min={8} max={40} value={Number(props.borderRadius) || 28} onChange={(e) => set("borderRadius", Number(e.target.value))} className="w-full" />
+          <Field
+            label={`${t("radius")} (${Number(props.borderRadius) || 28}px)`}
+          >
+            <input
+              type="range"
+              min={8}
+              max={40}
+              value={Number(props.borderRadius) || 28}
+              onChange={(e) => set("borderRadius", Number(e.target.value))}
+              className="w-full"
+            />
           </Field>
-          {(String(props.cardStyle ?? "split") === "split" || String(props.cardStyle) === "glass") && (
-            <Field label={`${t("imageRatio")} (${Math.round(Number(props.imageRatio || 0.85) * 100)}%)`}>
-              <input type="range" min={45} max={90} value={Math.round(Number(props.imageRatio || 0.85) * 100)} onChange={(e) => set("imageRatio", Number(e.target.value) / 100)} className="w-full" />
+          {(String(props.cardStyle ?? "split") === "split" ||
+            String(props.cardStyle) === "glass") && (
+            <Field
+              label={`${t("imageRatio")} (${Math.round(Number(props.imageRatio || 0.85) * 100)}%)`}
+            >
+              <input
+                type="range"
+                min={45}
+                max={90}
+                value={Math.round(Number(props.imageRatio || 0.85) * 100)}
+                onChange={(e) =>
+                  set("imageRatio", Number(e.target.value) / 100)
+                }
+                className="w-full"
+              />
             </Field>
           )}
           <Field label={t("showBadge")}>
-            <input type="checkbox" checked={props.showBadge !== false} onChange={(e) => set("showBadge", e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={props.showBadge !== false}
+              onChange={(e) => set("showBadge", e.target.checked)}
+            />
           </Field>
           <Field label={t("showDescription")}>
-            <input type="checkbox" checked={props.showDescription !== false} onChange={(e) => set("showDescription", e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={props.showDescription !== false}
+              onChange={(e) => set("showDescription", e.target.checked)}
+            />
           </Field>
           <Field label={t("showPrice")}>
-            <input type="checkbox" checked={props.showPrice !== false} onChange={(e) => set("showPrice", e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={props.showPrice !== false}
+              onChange={(e) => set("showPrice", e.target.checked)}
+            />
           </Field>
         </>
       );
     case "menu.header":
       return (
         <>
-          <HeaderStylePicker value={String(props.headerStyle ?? "floatingLogo")} onChange={onChange} />
-          <Field label={`${t("logoSize")} (${Number(props.logoSize) || 110}px)`}>
-            <input type="range" min={28} max={160} value={Number(props.logoSize) || 110} onChange={(e) => set("logoSize", Number(e.target.value))} className="w-full" />
+          <HeaderStylePicker
+            value={String(props.headerStyle ?? "floatingLogo")}
+            onChange={onChange}
+          />
+          <Field
+            label={`${t("logoSize")} (${Number(props.logoSize) || 110}px)`}
+          >
+            <input
+              type="range"
+              min={28}
+              max={160}
+              value={Number(props.logoSize) || 110}
+              onChange={(e) => set("logoSize", Number(e.target.value))}
+              className="w-full"
+            />
           </Field>
-          <Field label={`${t("sheetRadius")} (${Number(props.sheetRadius) || 80}px)`}>
-            <input type="range" min={0} max={120} value={Number(props.sheetRadius) || 80} onChange={(e) => set("sheetRadius", Number(e.target.value))} className="w-full" />
+          <Field
+            label={`${t("sheetRadius")} (${Number(props.sheetRadius) || 80}px)`}
+          >
+            <input
+              type="range"
+              min={0}
+              max={120}
+              value={Number(props.sheetRadius) || 80}
+              onChange={(e) => set("sheetRadius", Number(e.target.value))}
+              className="w-full"
+            />
           </Field>
           <Field label={t("showLanguage")}>
-            <input type="checkbox" checked={props.showLang !== false} onChange={(e) => set("showLang", e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={props.showLang !== false}
+              onChange={(e) => set("showLang", e.target.checked)}
+            />
           </Field>
           <Field label={t("showSocial")}>
-            <input type="checkbox" checked={props.showSocial !== false} onChange={(e) => set("showSocial", e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={props.showSocial !== false}
+              onChange={(e) => set("showSocial", e.target.checked)}
+            />
           </Field>
           <Field label={t("showDescription")}>
-            <input type="checkbox" checked={props.showDescription !== false} onChange={(e) => set("showDescription", e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={props.showDescription !== false}
+              onChange={(e) => set("showDescription", e.target.checked)}
+            />
           </Field>
           <Field label={t("showCategoriesInHeader")}>
-            <input type="checkbox" checked={props.showCategories === true} onChange={(e) => set("showCategories", e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={props.showCategories === true}
+              onChange={(e) => set("showCategories", e.target.checked)}
+            />
           </Field>
         </>
       );
     case "menu.categories":
       return (
         <>
-          <CategoryStylePicker value={String(props.layout ?? "circles")} onChange={onChange} />
+          <CategoryStylePicker
+            value={String(props.layout ?? "circles")}
+            onChange={onChange}
+          />
           <Field label={t("showAll")}>
-            <input type="checkbox" checked={props.showAll !== false} onChange={(e) => set("showAll", e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={props.showAll !== false}
+              onChange={(e) => set("showAll", e.target.checked)}
+            />
           </Field>
         </>
       );
     case "menu.ads":
       return (
         <>
-          <AdStylePicker value={String(props.adStyle ?? "promo")} onChange={onChange} />
+          <AdStylePicker
+            value={String(props.adStyle ?? "promo")}
+            onChange={onChange}
+          />
           <Field label={t("titleEn")}>
             <input
               className={input}
@@ -220,7 +328,9 @@ function ContentFields({
               onChange={(e) => set("image", e.target.value)}
             />
           </Field>
-          <Field label={`${t("radius")} (${Number(props.borderRadius) || 16}px)`}>
+          <Field
+            label={`${t("radius")} (${Number(props.borderRadius) || 16}px)`}
+          >
             <input
               type="range"
               min={0}
@@ -235,41 +345,77 @@ function ContentFields({
     case "menu.navbar":
       return (
         <>
-          <NavbarStylePicker value={String(props.navStyle ?? "transparent")} onChange={(navStyle: NavbarStyleId) => set("navStyle", navStyle)} />
+          <NavbarStylePicker
+            value={String(props.navStyle ?? "transparent")}
+            onChange={(navStyle: NavbarStyleId) => set("navStyle", navStyle)}
+          />
           <Field label={t("showLanguage")}>
-            <input type="checkbox" checked={props.showLang !== false} onChange={(e) => set("showLang", e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={props.showLang !== false}
+              onChange={(e) => set("showLang", e.target.checked)}
+            />
           </Field>
           <Field label={t("showSocial")}>
-            <input type="checkbox" checked={props.showSocial !== false} onChange={(e) => set("showSocial", e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={props.showSocial !== false}
+              onChange={(e) => set("showSocial", e.target.checked)}
+            />
           </Field>
         </>
       );
     case "menu.hero":
       return (
         <>
-          <HeroStylePicker value={String(props.heroStyle ?? "centered")} onChange={(heroStyle: HeroStyleId) => set("heroStyle", heroStyle)} />
+          <HeroStylePicker
+            value={String(props.heroStyle ?? "centered")}
+            onChange={(heroStyle: HeroStyleId) => set("heroStyle", heroStyle)}
+          />
           <Field label={t("showDescription")}>
-            <input type="checkbox" checked={props.showDescription !== false} onChange={(e) => set("showDescription", e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={props.showDescription !== false}
+              onChange={(e) => set("showDescription", e.target.checked)}
+            />
           </Field>
         </>
       );
     case "menu.footer":
       return (
         <>
-          <FooterStylePicker value={String(props.footerStyle ?? "simple")} onChange={(footerStyle: FooterStyleId) => set("footerStyle", footerStyle)} />
+          <FooterStylePicker
+            value={String(props.footerStyle ?? "simple")}
+            onChange={(footerStyle: FooterStyleId) =>
+              set("footerStyle", footerStyle)
+            }
+          />
           <Field label={t("showPoweredBy")}>
-            <input type="checkbox" checked={props.showPoweredBy !== false} onChange={(e) => set("showPoweredBy", e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={props.showPoweredBy !== false}
+              onChange={(e) => set("showPoweredBy", e.target.checked)}
+            />
           </Field>
         </>
       );
     case "menu.logo":
       return (
         <Field label={`${t("size")} (${Number(props.size) || 110}px)`}>
-          <input type="range" min={64} max={160} value={Number(props.size) || 110} onChange={(e) => set("size", Number(e.target.value))} className="w-full" />
+          <input
+            type="range"
+            min={64}
+            max={160}
+            value={Number(props.size) || 110}
+            onChange={(e) => set("size", Number(e.target.value))}
+            className="w-full"
+          />
         </Field>
       );
     default:
-      return <p className="text-xs text-slate-500">{t("fullControlHintBlock")}</p>;
+      return (
+        <p className="text-xs text-slate-500">{t("fullControlHintBlock")}</p>
+      );
   }
 }
 
@@ -318,7 +464,11 @@ function StyleFields({
         </Field>
       ))}
       <Field label={t("display")}>
-        <select className={input} value={String(styles.display ?? "")} onChange={(e) => set("display", e.target.value || undefined)}>
+        <select
+          className={input}
+          value={String(styles.display ?? "")}
+          onChange={(e) => set("display", e.target.value || undefined)}
+        >
           <option value="">—</option>
           <option value="flex">flex</option>
           <option value="grid">grid</option>
@@ -327,14 +477,22 @@ function StyleFields({
         </select>
       </Field>
       <Field label={t("flexDirection")}>
-        <select className={input} value={String(styles.flexDirection ?? "")} onChange={(e) => set("flexDirection", e.target.value || undefined)}>
+        <select
+          className={input}
+          value={String(styles.flexDirection ?? "")}
+          onChange={(e) => set("flexDirection", e.target.value || undefined)}
+        >
           <option value="">—</option>
           <option value="row">row</option>
           <option value="column">column</option>
         </select>
       </Field>
       <Field label={t("justify")}>
-        <select className={input} value={String(styles.justifyContent ?? "")} onChange={(e) => set("justifyContent", e.target.value || undefined)}>
+        <select
+          className={input}
+          value={String(styles.justifyContent ?? "")}
+          onChange={(e) => set("justifyContent", e.target.value || undefined)}
+        >
           <option value="">—</option>
           <option value="flex-start">start</option>
           <option value="center">center</option>
@@ -343,7 +501,11 @@ function StyleFields({
         </select>
       </Field>
       <Field label={t("align")}>
-        <select className={input} value={String(styles.alignItems ?? "")} onChange={(e) => set("alignItems", e.target.value || undefined)}>
+        <select
+          className={input}
+          value={String(styles.alignItems ?? "")}
+          onChange={(e) => set("alignItems", e.target.value || undefined)}
+        >
           <option value="">—</option>
           <option value="stretch">stretch</option>
           <option value="center">center</option>
@@ -366,15 +528,20 @@ export function PropertiesPanel() {
   const setBreakpoint = useBuilderStore((s) => s.setBreakpoint);
   const updateSelectedProps = useBuilderStore((s) => s.updateSelectedProps);
   const updateSelectedStyles = useBuilderStore((s) => s.updateSelectedStyles);
-  const updateSelectedCustomCode = useBuilderStore((s) => s.updateSelectedCustomCode);
+  const updateSelectedCustomCode = useBuilderStore(
+    (s) => s.updateSelectedCustomCode,
+  );
   const updateSelectedName = useBuilderStore((s) => s.updateSelectedName);
   const updateMeta = useBuilderStore((s) => s.updateMeta);
 
   if (!document || !selectedId) {
-    return <div className="p-3 text-xs text-slate-500">{t("selectElement")}</div>;
+    return (
+      <div className="p-3 text-xs text-slate-500">{t("selectElement")}</div>
+    );
   }
   const node = findNode(document.root, selectedId);
-  if (!node) return <div className="p-3 text-xs text-slate-500">{t("notFound")}</div>;
+  if (!node)
+    return <div className="p-3 text-xs text-slate-500">{t("notFound")}</div>;
 
   const tabs = [
     { id: "content" as const, label: t("content") },
@@ -384,7 +551,11 @@ export function PropertiesPanel() {
   ];
 
   const bpLabel = (bp: Breakpoint) =>
-    bp === "desktop" ? t("desktop") : bp === "tablet" ? t("tablet") : t("mobile");
+    bp === "desktop"
+      ? t("desktop")
+      : bp === "tablet"
+        ? t("tablet")
+        : t("mobile");
 
   const activeStyles =
     breakpoint === "desktop"
@@ -431,7 +602,9 @@ export function PropertiesPanel() {
               type="button"
               onClick={() => setBreakpoint(bp)}
               className={`flex-1 rounded py-0.5 text-[10px] ${
-                breakpoint === bp ? "bg-violet-600 text-white" : "bg-slate-800 text-slate-400"
+                breakpoint === bp
+                  ? "bg-violet-600 text-white"
+                  : "bg-slate-800 text-slate-400"
               }`}
             >
               {bpLabel(bp)}
@@ -441,10 +614,17 @@ export function PropertiesPanel() {
       )}
       <div className="flex-1 overflow-y-auto p-3">
         {rightTab === "content" && (
-          <ContentFields type={node.type} props={node.props} onChange={updateSelectedProps} />
+          <ContentFields
+            type={node.type}
+            props={node.props}
+            onChange={updateSelectedProps}
+          />
         )}
         {rightTab === "style" && (
-          <StyleFields styles={activeStyles} onChange={(s) => updateSelectedStyles(breakpoint, s)} />
+          <StyleFields
+            styles={activeStyles}
+            onChange={(s) => updateSelectedStyles(breakpoint, s)}
+          />
         )}
         {rightTab === "code" && (
           <div className="space-y-2">
@@ -461,7 +641,13 @@ export function PropertiesPanel() {
             {(["css", "html", "js"] as const).map((lang) => (
               <Field
                 key={lang}
-                label={lang === "css" ? t("nodeCss") : lang === "html" ? t("nodeHtml") : t("nodeJs")}
+                label={
+                  lang === "css"
+                    ? t("nodeCss")
+                    : lang === "html"
+                      ? t("nodeHtml")
+                      : t("nodeJs")
+                }
               >
                 <textarea
                   className={codeArea}
@@ -499,37 +685,45 @@ export function PropertiesPanel() {
             <p className="mb-2 mt-3 text-[10px] uppercase tracking-wide text-violet-400">
               {t("theme")}
             </p>
-            {Object.entries(document.globalStyles.colors).map(([key, value]) => (
-              <Field key={key} label={key}>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={value.startsWith("#") ? value : "#7000B5"}
-                    onChange={(e) =>
-                      updateMeta({
-                        globalStyles: {
-                          ...document.globalStyles,
-                          colors: { ...document.globalStyles.colors, [key]: e.target.value },
-                        },
-                      })
-                    }
-                    className="h-7 w-8 rounded border border-slate-700 bg-transparent"
-                  />
-                  <input
-                    className={input}
-                    value={value}
-                    onChange={(e) =>
-                      updateMeta({
-                        globalStyles: {
-                          ...document.globalStyles,
-                          colors: { ...document.globalStyles.colors, [key]: e.target.value },
-                        },
-                      })
-                    }
-                  />
-                </div>
-              </Field>
-            ))}
+            {Object.entries(document.globalStyles.colors).map(
+              ([key, value]) => (
+                <Field key={key} label={key}>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={value.startsWith("#") ? value : "#7000B5"}
+                      onChange={(e) =>
+                        updateMeta({
+                          globalStyles: {
+                            ...document.globalStyles,
+                            colors: {
+                              ...document.globalStyles.colors,
+                              [key]: e.target.value,
+                            },
+                          },
+                        })
+                      }
+                      className="h-7 w-8 rounded border border-slate-700 bg-transparent"
+                    />
+                    <input
+                      className={input}
+                      value={value}
+                      onChange={(e) =>
+                        updateMeta({
+                          globalStyles: {
+                            ...document.globalStyles,
+                            colors: {
+                              ...document.globalStyles.colors,
+                              [key]: e.target.value,
+                            },
+                          },
+                        })
+                      }
+                    />
+                  </div>
+                </Field>
+              ),
+            )}
             <Field label={t("css")}>
               <textarea
                 className={`${codeArea} min-h-[144px]`}

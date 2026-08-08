@@ -158,14 +158,14 @@ export default function ExtraMenusPurchaseModal({
           </Alert>
         )}
 
-        <p className="rounded-xl bg-surface-2 px-4 py-3 text-sm text-fg-muted">
+        <p className="rounded-lg bg-surface-2 px-4 py-3 text-sm text-fg-muted">
           {t("extraMenusMonthlyBreakdown", {
             monthly: String(monthlyPrice),
             unit: String(pricePerMenu),
           })}
         </p>
 
-        <div className="rounded-xl bg-surface-2 p-4">
+        <div className="rounded-lg bg-surface-2 p-4">
           <Field
             label={t("extraMenusQuantityLabel")}
             hint={t("extraMenusRenewalNote")}
@@ -208,7 +208,7 @@ export default function ExtraMenusPurchaseModal({
           </Field>
         </div>
 
-        <div className="flex items-center justify-between rounded-xl border border-brand-line bg-brand-soft px-4 py-3">
+        <div className="flex items-center justify-between rounded-lg border border-brand-line bg-brand-soft px-4 py-3">
           <span className="text-sm text-brand-soft-fg">
             {t("extraMenusTotal")}
           </span>

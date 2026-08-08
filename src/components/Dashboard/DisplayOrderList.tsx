@@ -283,10 +283,8 @@ export function DisplayOrderCategoryStrip({
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
-      <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">
-        {t("categoriesStripHint")}
-      </p>
+    <div className="rounded-lg border border-line/80 bg-slate-50/70 p-4 shadow-sm">
+      <p className="mb-3 text-sm text-fg-muted">{t("categoriesStripHint")}</p>
       <div
         className="flex flex-wrap gap-2.5 sm:gap-3"
         dir={isRTL ? "rtl" : "ltr"}
@@ -294,10 +292,10 @@ export function DisplayOrderCategoryStrip({
         <button
           type="button"
           onClick={() => onSelect(DISPLAY_ORDER_ALL_CATEGORY_ID)}
-          className={`inline-flex min-h-11 items-center gap-2.5 rounded-full border bg-white pe-4 ps-1.5 py-1.5 text-sm font-bold shadow-[0_1px_4px_rgba(15,23,42,0.06)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 dark:bg-slate-800 ${
+          className={`inline-flex min-h-11 items-center gap-2.5 rounded-full border bg-white pe-4 ps-1.5 py-1.5 text-sm font-bold shadow-[0_1px_4px_rgba(15,23,42,0.06)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35  ${
             allActive
               ? "border-primary text-primary shadow-[0_2px_10px_rgba(124,58,237,0.18)]"
-              : "border-slate-200/90 text-slate-800 hover:-translate-y-0.5 hover:border-primary/30 dark:border-slate-600 dark:text-slate-100"
+              : "border-line/90 text-fg hover:-translate-y-0.5 hover:border-primary/30  "
           }`}
           aria-pressed={allActive}
         >
@@ -333,12 +331,12 @@ export function DisplayOrderCategoryStrip({
                 isDragging
                   ? "border-dashed border-primary/45 bg-primary/5 opacity-35 shadow-none"
                   : active
-                    ? "border-primary bg-white text-primary shadow-[0_2px_10px_rgba(124,58,237,0.18)] dark:bg-slate-800"
-                    : "border-slate-200/90 bg-white text-slate-800 hover:-translate-y-0.5 hover:border-primary/30 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                    ? "border-primary bg-white text-primary shadow-[0_2px_10px_rgba(124,58,237,0.18)] "
+                    : "border-line/90 bg-white text-fg hover:-translate-y-0.5 hover:border-primary/30   "
               } ${disabled ? "pointer-events-none" : "cursor-grab active:cursor-grabbing"}`}
               aria-pressed={active}
             >
-              <span className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 ring-2 ring-white dark:bg-slate-700 dark:ring-slate-800">
+              <span className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 ring-2 ring-white dark:ring-slate-800">
                 {!isDragging && row.imageUrl ? (
                   <LoadImage
                     src={row.imageUrl}
@@ -351,7 +349,10 @@ export function DisplayOrderCategoryStrip({
                     wrapperClassName="!block h-full w-full"
                   />
                 ) : !isDragging ? (
-                  <IoRestaurantOutline className="text-base text-primary" aria-hidden />
+                  <IoRestaurantOutline
+                    className="text-base text-primary"
+                    aria-hidden
+                  />
                 ) : null}
                 <span className="absolute -bottom-1 -end-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-white shadow-sm">
                   {index + 1}
@@ -368,7 +369,7 @@ export function DisplayOrderCategoryStrip({
       {ghost && typeof document !== "undefined"
         ? createPortal(
             <div
-              className="pointer-events-none fixed z-200 inline-flex min-h-11 items-center gap-2.5 rounded-full border-2 border-primary bg-white pe-4 ps-1.5 py-1.5 text-sm font-bold text-primary shadow-[0_18px_40px_-12px_rgba(15,23,42,0.45)] ring-4 ring-primary/25 dark:bg-slate-800"
+              className="pointer-events-none fixed z-200 inline-flex min-h-11 items-center gap-2.5 rounded-full border-2 border-primary bg-white pe-4 ps-1.5 py-1.5 text-sm font-bold text-primary shadow-[0_18px_40px_-12px_rgba(15,23,42,0.45)] ring-4 ring-primary/25"
               style={{
                 left: ghost.x,
                 top: ghost.y,
@@ -377,7 +378,7 @@ export function DisplayOrderCategoryStrip({
                 transform: "rotate(-2deg) scale(1.05)",
               }}
             >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 ring-2 ring-primary/20 dark:bg-slate-700">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 ring-2 ring-primary/20">
                 {ghost.imageUrl ? (
                   <LoadImage
                     src={ghost.imageUrl}
@@ -437,7 +438,7 @@ function ProductCardFace({
 
   return (
     <>
-      <div className="relative w-[42%] shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-700">
+      <div className="relative w-[42%] shrink-0 overflow-hidden bg-surface-3">
         {row.imageUrl ? (
           <LoadImage
             src={row.imageUrl}
@@ -450,7 +451,7 @@ function ProductCardFace({
             wrapperClassName="!block h-full w-full pointer-events-none"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-slate-400">
+          <div className="flex h-full items-center justify-center text-fg-subtle">
             <IoImageOutline className="text-3xl" aria-hidden />
           </div>
         )}
@@ -470,7 +471,7 @@ function ProductCardFace({
         dir={isRTL ? "rtl" : "ltr"}
       >
         {!hideChrome ? (
-          <div className="mb-1 flex items-center gap-1 text-slate-400">
+          <div className="mb-1 flex items-center gap-1 text-fg-subtle">
             <IoMenuOutline className="text-lg" aria-hidden />
             <span className="text-[10px] font-semibold uppercase tracking-wide">
               {t("dragHandle")}
@@ -483,16 +484,16 @@ function ProductCardFace({
             {row.categoryLabel}
           </span>
         ) : null}
-        <h3 className="line-clamp-2 text-base font-black text-slate-900 dark:text-slate-50">
+        <h3 className="line-clamp-2 text-base font-black text-fg">
           {row.label}
         </h3>
         {row.description ? (
-          <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+          <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-fg-muted">
             {row.description}
           </p>
         ) : null}
         <div className="mt-auto flex items-center justify-between gap-2 pt-3">
-          <span className="text-sm font-bold text-slate-800 dark:text-slate-100">
+          <span className="text-sm font-bold text-fg">
             {typeof row.price === "number"
               ? formatMenuPrice(row.price, currency, locale)
               : "—"}
@@ -504,7 +505,7 @@ function ProductCardFace({
                 disabled={disabled || !canMoveEarlier}
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={onMoveEarlier}
-                className="rounded-full border border-slate-200 p-1.5 text-slate-500 transition hover:border-primary/40 hover:text-primary disabled:opacity-30 dark:border-slate-600"
+                className="rounded-full border border-line p-1.5 text-fg-subtle transition hover:border-primary/40 hover:text-primary disabled:opacity-30"
                 aria-label={t("moveUp")}
               >
                 <PrevIcon className="text-base" />
@@ -514,7 +515,7 @@ function ProductCardFace({
                 disabled={disabled || !canMoveLater}
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={onMoveLater}
-                className="rounded-full border border-slate-200 p-1.5 text-slate-500 transition hover:border-primary/40 hover:text-primary disabled:opacity-30 dark:border-slate-600"
+                className="rounded-full border border-line p-1.5 text-fg-subtle transition hover:border-primary/40 hover:text-primary disabled:opacity-30"
                 aria-label={t("moveDown")}
               >
                 <NextIcon className="text-base" />
@@ -719,8 +720,7 @@ export function DisplayOrderProductGrid({
             : null,
         )
         .find(
-          (node) =>
-            node && node.dataset.displayOrderItem !== String(activeId),
+          (node) => node && node.dataset.displayOrderItem !== String(activeId),
         );
 
       if (!host) return;
@@ -810,10 +810,10 @@ export function DisplayOrderProductGrid({
                       onPointerDown(e, index, row, categoryId)
                     }
                     onDragStart={(e) => e.preventDefault()}
-                    className={`group relative flex min-h-44 touch-none select-none overflow-hidden rounded-[1.75rem] border bg-white shadow-sm transition-[box-shadow,opacity,border-color,transform] duration-150 dark:bg-slate-800/90 ${
+                    className={`group relative flex min-h-44 touch-none select-none overflow-hidden rounded-[1.75rem] border bg-white shadow-sm transition-[box-shadow,opacity,border-color,transform] duration-150  ${
                       isDragging
                         ? "scale-[0.98] border-dashed border-primary/50 bg-primary/5 opacity-35 shadow-none dark:bg-primary/10"
-                        : "border-primary/10 hover:shadow-md dark:border-slate-700"
+                        : "border-primary/10 hover:shadow-md dark:border-line"
                     } ${disabled ? "pointer-events-none opacity-60" : "cursor-grab active:cursor-grabbing"}`}
                   >
                     {isDragging ? (
@@ -853,7 +853,7 @@ export function DisplayOrderProductGrid({
       {ghost && typeof document !== "undefined"
         ? createPortal(
             <div
-              className="pointer-events-none fixed z-200 flex overflow-hidden rounded-[1.75rem] border-2 border-primary bg-white shadow-[0_24px_60px_-16px_rgba(15,23,42,0.45)] ring-4 ring-primary/30 dark:bg-slate-800"
+              className="pointer-events-none fixed z-200 flex overflow-hidden rounded-[1.75rem] border-2 border-primary bg-white shadow-[0_24px_60px_-16px_rgba(15,23,42,0.45)] ring-4 ring-primary/30"
               style={{
                 left: ghost.x,
                 top: ghost.y,

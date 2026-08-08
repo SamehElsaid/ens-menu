@@ -1,13 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { focusRing } from "./styles";
 import { getFocusable } from "./useDialog";
@@ -123,7 +117,9 @@ export function Menu({
           className={cn(
             "absolute top-[calc(100%+4px)] z-50 min-w-48 overflow-hidden rounded-lg border border-line bg-raised p-1 shadow-lg",
             "motion-safe:animate-[ui-pop-in_140ms_cubic-bezier(0.16,1,0.3,1)]",
-            align === "start" ? "start-0 origin-top-left" : "end-0 origin-top-right",
+            align === "start"
+              ? "start-0 origin-top-left"
+              : "end-0 origin-top-right",
             panelClassName,
           )}
           onClick={() => setOpen(false)}
@@ -169,7 +165,10 @@ export function MenuItem({
   const content = (
     <>
       {icon ? (
-        <span className="shrink-0 text-[15px] text-current opacity-65" aria-hidden>
+        <span
+          className="shrink-0 text-[15px] text-current opacity-65"
+          aria-hidden
+        >
           {icon}
         </span>
       ) : null}

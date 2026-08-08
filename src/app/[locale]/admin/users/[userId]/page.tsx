@@ -212,8 +212,7 @@ export default function UserDetailsPage() {
     const activeSub =
       userData.subscriptions?.find((sub) => sub.status === "active") ||
       userData.subscriptions?.[0];
-    const extra =
-      userData.user.extraMenus ?? activeSub?.extraMenus ?? 0;
+    const extra = userData.user.extraMenus ?? activeSub?.extraMenus ?? 0;
     setExtraMenusInput(String(extra));
   }, [userData]);
 
@@ -225,26 +224,24 @@ export default function UserDetailsPage() {
     const activeSubscription =
       userData?.subscriptions?.find((sub) => sub.status === "active") ||
       userData?.subscriptions?.[0];
-    const subEnd =
-      activeSubscription?.endDate ?? u.endDate ?? null;
+    const subEnd = activeSubscription?.endDate ?? u.endDate ?? null;
 
     const activeMenus = menuList.filter((m) => m.isActive).length;
-    const totalItems = menuList.reduce((sum, m) => sum + (m.itemsCount ?? 0), 0);
+    const totalItems = menuList.reduce(
+      (sum, m) => sum + (m.itemsCount ?? 0),
+      0,
+    );
     const activeItems = menuList.reduce(
       (sum, m) => sum + (m.activeItemsCount ?? 0),
       0,
     );
     const daysSinceLogin = u.lastLoginAt
-      ? Math.floor(
-          (Date.now() - new Date(u.lastLoginAt).getTime()) / 86400000,
-        )
+      ? Math.floor((Date.now() - new Date(u.lastLoginAt).getTime()) / 86400000)
       : null;
     const subscriptionEnd = subEnd ? new Date(subEnd) : null;
     const daysUntilExpiry =
       subscriptionEnd && subscriptionEnd > new Date()
-        ? Math.ceil(
-            (subscriptionEnd.getTime() - Date.now()) / 86400000,
-          )
+        ? Math.ceil((subscriptionEnd.getTime() - Date.now()) / 86400000)
         : null;
 
     return {
@@ -278,11 +275,10 @@ export default function UserDetailsPage() {
     }
     setPasswordSubmitting(true);
     try {
-      const result = await axiosPatch<{ newPassword: string }, { message?: string }>(
-        `/admin/users/${userId}/password`,
-        locale,
-        { newPassword },
-      );
+      const result = await axiosPatch<
+        { newPassword: string },
+        { message?: string }
+      >(`/admin/users/${userId}/password`, locale, { newPassword });
       if (result.status) {
         toast.success(tAccount("passwordSuccess"));
         setPasswordModalOpen(false);
@@ -365,11 +361,10 @@ export default function UserDetailsPage() {
   const handleSaveProfile = useCallback(async () => {
     setProfileSubmitting(true);
     try {
-      const result = await axiosPatch<typeof profileForm, { success?: boolean }>(
-        `/admin/users/${userId}/profile`,
-        locale,
-        profileForm,
-      );
+      const result = await axiosPatch<
+        typeof profileForm,
+        { success?: boolean }
+      >(`/admin/users/${userId}/profile`, locale, profileForm);
       if (result.status) {
         toast.success(tCustomer("profile.saveSuccess"));
         setEditProfileOpen(false);
@@ -398,7 +393,9 @@ export default function UserDetailsPage() {
       });
       if (result.status) {
         toast.success(
-          isBlocked ? tCustomer("block.blockSuccess") : tCustomer("block.unblockSuccess"),
+          isBlocked
+            ? tCustomer("block.blockSuccess")
+            : tCustomer("block.unblockSuccess"),
         );
         setBlockModalOpen(false);
         setBlockReason("");
@@ -409,16 +406,22 @@ export default function UserDetailsPage() {
     } finally {
       setBlockSubmitting(false);
     }
-  }, [userData?.user?.isBlocked, userId, locale, blockReason, tCustomer, fetchUserDetails]);
+  }, [
+    userData?.user?.isBlocked,
+    userId,
+    locale,
+    blockReason,
+    tCustomer,
+    fetchUserDetails,
+  ]);
 
   const handleSoftDelete = useCallback(async () => {
     setSoftDeleteLoading(true);
     try {
-      const result = await axiosPost<Record<string, never>, { success?: boolean }>(
-        `/admin/users/${userId}/soft-delete`,
-        locale,
-        {},
-      );
+      const result = await axiosPost<
+        Record<string, never>,
+        { success?: boolean }
+      >(`/admin/users/${userId}/soft-delete`, locale, {});
       if (result.status) {
         toast.success(tCustomer("softDelete.success"));
         setSoftDeleteConfirmOpen(false);
@@ -434,11 +437,10 @@ export default function UserDetailsPage() {
   const handleRestoreUser = useCallback(async () => {
     setAccountActionLoading(true);
     try {
-      const result = await axiosPost<Record<string, never>, { success?: boolean }>(
-        `/admin/users/${userId}/restore`,
-        locale,
-        {},
-      );
+      const result = await axiosPost<
+        Record<string, never>,
+        { success?: boolean }
+      >(`/admin/users/${userId}/restore`, locale, {});
       if (result.status) {
         toast.success(tCustomer("restore.success"));
         fetchUserDetails();
@@ -652,8 +654,7 @@ export default function UserDetailsPage() {
     status: user.subscriptionStatus,
   };
 
-  const planBaseMenus =
-    user.maxMenus ?? activeSubscription?.maxMenus ?? 1;
+  const planBaseMenus = user.maxMenus ?? activeSubscription?.maxMenus ?? 1;
   const currentExtraMenus =
     user.extraMenus ?? activeSubscription?.extraMenus ?? 0;
   const effectiveMenuLimit =
@@ -1315,7 +1316,10 @@ export default function UserDetailsPage() {
             <Input
               value={profileForm.restaurantName}
               onChange={(e) =>
-                setProfileForm((f) => ({ ...f, restaurantName: e.target.value }))
+                setProfileForm((f) => ({
+                  ...f,
+                  restaurantName: e.target.value,
+                }))
               }
               placeholder={t("basicInfo.restaurantName")}
             />
@@ -1354,7 +1358,10 @@ export default function UserDetailsPage() {
         size="sm"
         footer={
           <>
-            <Button variant="secondary" onClick={() => setBlockModalOpen(false)}>
+            <Button
+              variant="secondary"
+              onClick={() => setBlockModalOpen(false)}
+            >
               {t("lists.cancel")}
             </Button>
             <Button onClick={handleToggleBlock} loading={blockSubmitting}>

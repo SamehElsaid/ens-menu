@@ -56,7 +56,10 @@ export default function SaveProgressOverlay({
       showClose={false}
       size="xs"
     >
-      <div className="flex flex-col items-center gap-4 text-center" role="status">
+      <div
+        className="flex flex-col items-center gap-4 text-center"
+        role="status"
+      >
         <Spinner size="xl" className="text-brand" />
 
         <div>

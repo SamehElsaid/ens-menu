@@ -36,23 +36,17 @@ export default function DomainTransferHistory({
   return (
     <CardDashBoard>
       <div className="mb-4 flex items-center gap-2">
-        <IoTimeOutline className="text-lg text-slate-500" />
-        <h2 className="text-base font-semibold text-slate-900 dark:text-white">
-          {t("title")}
-        </h2>
+        <IoTimeOutline className="text-lg text-fg-subtle" />
+        <h2 className="text-base font-semibold text-fg">{t("title")}</h2>
       </div>
 
       {history.length === 0 ? (
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          {t("empty")}
-        </p>
+        <p className="text-sm text-fg-muted">{t("empty")}</p>
       ) : (
-        <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+        <ul className="divide-y divide-line">
           {history.map((item) => {
             const resolvedAt =
-              item.status === "completed"
-                ? item.completedAt
-                : item.cancelledAt;
+              item.status === "completed" ? item.completedAt : item.cancelledAt;
 
             return (
               <li
@@ -61,12 +55,12 @@ export default function DomainTransferHistory({
               >
                 <div className="min-w-0 flex-1">
                   <p
-                    className="truncate font-mono text-sm font-medium text-slate-900 dark:text-white"
+                    className="truncate font-mono text-sm font-medium text-fg"
                     dir="ltr"
                   >
                     {item.domainUrl}
                   </p>
-                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  <p className="mt-1 text-xs text-fg-muted">
                     {t("submitted", {
                       date: formatDateTime(item.createdAt, locale),
                     })}

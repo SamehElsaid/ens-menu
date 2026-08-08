@@ -107,16 +107,34 @@ surfaces.
   sidebar, header, cards, tables, toolbars — and earns its quality through
   craft, not through inventing a house style on top. The reference bar is
   **Linear**: dense, fast, keyboard-reachable, precise in its details.
-- **Density is compact.** The product is read by someone who uses it every day,
-  not by a first-time visitor; information per screen is favoured over air.
+- **Density is compact — inside the product only.** The dashboard is read by
+  someone who uses it every day; information per screen is favoured over air.
+  This does not govern the public site, whose visitor is seeing ENSMENU for the
+  first time.
+- **The public site follows the SaaS marketing-page convention, deliberately.**
+  Asked a second time, for the public surface, the owner again chose the
+  category standard over four dealt alternatives. The reference bar is **Stripe**
+  for precision, typography and pricing presentation, and **Framer** for
+  scroll-driven motion. Executed straight: no irony, no smuggled house quirk.
+- **The two halves are allowed to diverge, and do.** The dashboard is a compact
+  13px working tool; the public site is a generous marketing surface with its
+  own token layer. They share the name, the logo and the brand hue — nothing
+  else. The public layer is scoped so it can never reach into the product.
+- **The public primary action is "create a free account".** Every public page
+  resolves to it; sales-assisted paths are secondary.
 - Nothing else is binding. Colour, typography, spacing and component vocabulary
-  are open, as long as they serve the convention above.
+  are open, as long as they serve the conventions above.
 - Arabic/English with correct RTL is a product requirement rather than a brand
   commitment, and it stays.
 
 ## Evidence on Hand
 
 - Real customer logos rendered in the trusted-by strip, fetched from the API.
+- A real, publicly quotable count of venues on the platform. The owner confirmed
+  this figure exists but has not yet supplied it; it lives in one place,
+  `src/lib/publicProof.ts`, marked for replacement. Nothing else quantitative
+  is confirmed — no testimonials, no named case studies, no uptime or benchmark
+  numbers — so the public site must not state any.
 - Real plan and pricing data from the plans API; pricing comparison rows in
   `src/lib/pricingComparison.ts`.
 - Real legal copy for privacy and terms in `messages/{ar,en}.json`.

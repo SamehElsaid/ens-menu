@@ -29,17 +29,17 @@ interface OrdersCardGridProps {
 function OrderCardSkeleton() {
   return (
     <div
-      className="overflow-hidden rounded-2xl border border-line bg-surface"
+      className="overflow-hidden rounded-lg border border-line bg-surface"
       aria-hidden
     >
       <div className="dashboard-mobile-shimmer h-16 bg-surface-2" />
       <div className="space-y-3 p-4">
-        <div className="dashboard-mobile-shimmer h-4 w-2/3 rounded-md bg-slate-100 dark:bg-slate-700/60" />
-        <div className="dashboard-mobile-shimmer h-4 w-1/2 rounded-md bg-slate-100 dark:bg-slate-700/60" />
-        <div className="dashboard-mobile-shimmer h-6 w-1/3 rounded-md bg-slate-100 dark:bg-slate-700/60" />
-        <div className="flex gap-2 border-t border-slate-100 pt-3 dark:border-slate-700">
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-xl bg-slate-100 dark:bg-slate-700/60" />
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-xl bg-slate-100 dark:bg-slate-700/60" />
+        <div className="dashboard-mobile-shimmer h-4 w-2/3 rounded-md bg-surface-3" />
+        <div className="dashboard-mobile-shimmer h-4 w-1/2 rounded-md bg-surface-3" />
+        <div className="dashboard-mobile-shimmer h-6 w-1/3 rounded-md bg-surface-3" />
+        <div className="flex gap-2 border-t border-line pt-3 dark:border-line">
+          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-3" />
+          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-3" />
         </div>
       </div>
     </div>
@@ -81,7 +81,7 @@ export default function OrdersCardGrid({
     return (
       <div
         id="onboarding-orders-table"
-        className="rounded-2xl border border-dashed border-line bg-surface px-6 py-14 text-center"
+        className="rounded-lg border border-dashed border-line bg-surface px-6 py-14 text-center"
       >
         <IoReceiptOutline className="mx-auto mb-3 text-4xl text-brand" />
         <p className="text-sm text-fg-muted">
@@ -95,13 +95,16 @@ export default function OrdersCardGrid({
     <div id="onboarding-orders-table" className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6 items-stretch">
         {entries.map((entry) => {
-          const badge = entry.menuId != null ? menuBadges?.[entry.menuId] : undefined;
+          const badge =
+            entry.menuId != null ? menuBadges?.[entry.menuId] : undefined;
           return (
             <OrderMobileCard
               key={entry.id}
               entry={entry}
               currency={badge?.currency || currency}
-              menuId={menuId || (entry.menuId != null ? String(entry.menuId) : "")}
+              menuId={
+                menuId || (entry.menuId != null ? String(entry.menuId) : "")
+              }
               menuLabel={badge?.label}
               onView={onView}
               onActionComplete={onActionComplete}

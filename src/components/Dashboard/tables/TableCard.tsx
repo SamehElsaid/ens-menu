@@ -89,7 +89,7 @@ export default function TableCard({
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-xl border border-line bg-surface p-2 transition-colors hover:border-brand-line"
+              className="rounded-lg border border-line bg-surface p-2 transition-colors hover:border-brand-line"
               title={t("qrOpensMenu")}
             >
               <StyledQrCode

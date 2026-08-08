@@ -84,7 +84,11 @@ export default function ItemsPage() {
         setItems(list);
         const pagination = (
           result.data as unknown as {
-            pagination?: { totalPages?: number; totalItems?: number; total?: number };
+            pagination?: {
+              totalPages?: number;
+              totalItems?: number;
+              total?: number;
+            };
           }
         ).pagination;
         setTotalPages(pagination?.totalPages ?? 0);
@@ -285,11 +289,7 @@ export default function ItemsPage() {
       </Card>
 
       {!loading && items.some((item) => !getImageUrl(item)) ? (
-        <Alert
-          tone="info"
-          icon={<IoCameraOutline />}
-          className="mb-3"
-        >
+        <Alert tone="info" icon={<IoCameraOutline />} className="mb-3">
           {t("missingImagesHint")}
         </Alert>
       ) : null}

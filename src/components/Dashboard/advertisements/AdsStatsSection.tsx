@@ -29,24 +29,24 @@ export default function AdsStatsSection({ items, dir }: AdsStatsSectionProps) {
 
   return (
     <section
-      className="dashboard-ads-stats mb-4 rounded-2xl border border-slate-100 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 md:mb-6 md:p-5"
+      className="dashboard-ads-stats mb-4 rounded-lg border border-line bg-white p-3 shadow-sm md:mb-6 md:p-5"
       dir={dir}
     >
-      <h2 className="mb-2 text-sm font-semibold text-slate-900 md:mb-3 md:text-base dark:text-slate-100">
+      <h2 className="mb-2 text-sm font-semibold text-fg md:mb-3 md:text-base">
         {t("metricsTitle")}
       </h2>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:gap-3">
         {items.map((item, index) => (
           <div
             key={item.id}
-            className={`rounded-xl border px-3 py-2.5 md:px-4 md:py-3 ${toneClasses[item.tone]} ${
+            className={`rounded-lg border px-3 py-2.5 md:px-4 md:py-3 ${toneClasses[item.tone]} ${
               index === 2 ? "col-span-2 sm:col-span-1" : ""
             }`}
           >
-            <p className="mb-0.5 text-[10px] font-medium text-slate-500 md:text-xs dark:text-slate-400">
+            <p className="mb-0.5 text-[10px] font-medium text-fg-subtle md:text-xs dark:text-fg-subtle">
               {item.label}
             </p>
-            <p className="text-lg font-bold tabular-nums text-slate-900 md:text-2xl dark:text-slate-100">
+            <p className="text-lg font-bold tabular-nums text-fg md:text-2xl">
               {item.value}
             </p>
           </div>

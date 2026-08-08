@@ -49,19 +49,17 @@ const themeClasses: Record<
   }
 > = {
   brand: {
-    dateInput:
-      "border-line bg-surface focus:border-brand focus:ring-brand/35",
+    dateInput: "border-line bg-surface focus:border-brand focus:ring-brand/35",
     statusActive: "bg-brand text-on-brand shadow-sm",
-    statusIdle:
-      "bg-surface text-fg-muted ring-1 ring-line hover:bg-brand-soft",
+    statusIdle: "bg-surface text-fg-muted ring-1 ring-line hover:bg-brand-soft",
     clearBtn: "text-brand hover:bg-brand-soft",
   },
   emerald: {
     dateInput:
-      "border-emerald-200/90 bg-white/90 focus:border-emerald-400 focus:ring-emerald-500/35 dark:border-emerald-500/30 dark:bg-slate-800/90 dark:focus:border-emerald-400 dark:focus:ring-emerald-400/25",
+      "border-emerald-200/90 bg-white/90 focus:border-emerald-400 focus:ring-emerald-500/35 dark:border-emerald-500/30  dark:focus:border-emerald-400 dark:focus:ring-emerald-400/25",
     statusActive: "bg-emerald-600 text-white shadow-sm dark:bg-emerald-500",
     statusIdle:
-      "bg-white/80 text-slate-600 ring-1 ring-emerald-200/80 hover:bg-emerald-50 dark:bg-slate-800/80 dark:text-slate-300 dark:ring-emerald-500/25 dark:hover:bg-emerald-950/40",
+      "bg-white/80 text-fg-muted ring-1 ring-emerald-200/80 hover:bg-emerald-50   dark:ring-emerald-500/25 dark:hover:bg-emerald-950/40",
     clearBtn:
       "text-emerald-700 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-950/40",
   },
@@ -86,13 +84,15 @@ export default function OrdersFilters({
   const t = useTranslations(translationNs);
   const styles = themeClasses[theme];
   // A single menu needs no picker — the aggregate already is that menu.
-  const showMenuFilter = Boolean(onMenuFilterChange && (menus?.length ?? 0) > 1);
+  const showMenuFilter = Boolean(
+    onMenuFilterChange && (menus?.length ?? 0) > 1,
+  );
 
   return (
     <div className="mt-4 space-y-4 border-t border-line pt-4">
       {showMenuFilter && (
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-fg-muted">
             {t("filters.menu")}
           </p>
           <div className="flex flex-wrap gap-2">
@@ -127,7 +127,7 @@ export default function OrdersFilters({
         <div>
           <label
             htmlFor={`${translationNs}-date-from`}
-            className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+            className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-fg-muted"
           >
             {t("filters.dateFrom")}
           </label>
@@ -137,13 +137,13 @@ export default function OrdersFilters({
             value={dateFrom}
             max={dateTo || undefined}
             onChange={(e) => onDateFromChange(e.target.value)}
-            className={`w-full rounded-xl border py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 dark:text-slate-100 ${styles.dateInput} ${isRTL ? "ps-3 pe-3" : "px-3"}`}
+            className={`w-full rounded-lg border py-2.5 text-sm text-fg focus:outline-none focus:ring-2  ${styles.dateInput} ${isRTL ? "ps-3 pe-3" : "px-3"}`}
           />
         </div>
         <div>
           <label
             htmlFor={`${translationNs}-date-to`}
-            className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+            className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-fg-muted"
           >
             {t("filters.dateTo")}
           </label>
@@ -153,13 +153,13 @@ export default function OrdersFilters({
             value={dateTo}
             min={dateFrom || undefined}
             onChange={(e) => onDateToChange(e.target.value)}
-            className={`w-full rounded-xl border py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 dark:text-slate-100 ${styles.dateInput} ${isRTL ? "ps-3 pe-3" : "px-3"}`}
+            className={`w-full rounded-lg border py-2.5 text-sm text-fg focus:outline-none focus:ring-2  ${styles.dateInput} ${isRTL ? "ps-3 pe-3" : "px-3"}`}
           />
         </div>
       </div>
 
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-fg-muted">
           {t("filters.status")}
         </p>
         <div className="flex flex-wrap gap-2">
@@ -169,7 +169,9 @@ export default function OrdersFilters({
               type="button"
               onClick={() => onStatusFilterChange(status)}
               className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-                statusFilter === status ? styles.statusActive : styles.statusIdle
+                statusFilter === status
+                  ? styles.statusActive
+                  : styles.statusIdle
               }`}
             >
               {status === "all"

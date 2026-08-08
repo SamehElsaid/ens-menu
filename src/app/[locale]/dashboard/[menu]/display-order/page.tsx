@@ -111,7 +111,9 @@ export default function DisplayOrderPage() {
         available: item.isAvailable ?? item.available,
         categoryId,
         categoryLabel:
-          (categoryId != null ? categoryLabelById.get(categoryId) : undefined) ??
+          (categoryId != null
+            ? categoryLabelById.get(categoryId)
+            : undefined) ??
           item.categoryName ??
           "",
       };
@@ -278,12 +280,12 @@ export default function DisplayOrderPage() {
       ) : null}
 
       {loading ? (
-        <div className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center text-slate-500 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-400">
+        <div className="rounded-lg border border-line bg-white px-6 py-16 text-center text-slate-500 dark:text-fg-subtle">
           {t("loading")}
         </div>
       ) : categoryRows.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center dark:border-slate-600 dark:bg-slate-800/40">
-          <p className="text-lg font-semibold text-slate-800 dark:text-slate-100">
+        <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
+          <p className="text-lg font-semibold text-fg">
             {t("emptyCategories")}
           </p>
         </div>
@@ -304,26 +306,22 @@ export default function DisplayOrderPage() {
                 <h2 className="text-xl font-black text-primary">
                   {selectedCategoryLabel}
                 </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
+                <p className="text-sm text-fg-muted">
                   {t("productsInCategory")}
                 </p>
               </div>
             </div>
           ) : showingAll ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              {t("allGroupedHint")}
-            </p>
+            <p className="text-sm text-fg-muted">{t("allGroupedHint")}</p>
           ) : null}
 
           {itemsInitialLoading ? (
-            <div className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center text-slate-500 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-400">
+            <div className="rounded-lg border border-line bg-white px-6 py-16 text-center text-slate-500 dark:text-fg-subtle">
               {t("loading")}
             </div>
           ) : itemRows.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center dark:border-slate-600 dark:bg-slate-800/40">
-              <p className="text-lg font-semibold text-slate-800 dark:text-slate-100">
-                {t("emptyItems")}
-              </p>
+            <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
+              <p className="text-lg font-semibold text-fg">{t("emptyItems")}</p>
             </div>
           ) : (
             <>
@@ -343,15 +341,15 @@ export default function DisplayOrderPage() {
                 aria-hidden={!itemsHasMore && !itemsLoadingMore}
               >
                 {itemsLoadingMore ? (
-                  <span className="text-sm text-slate-500 dark:text-slate-400">
+                  <span className="text-sm text-fg-muted">
                     {t("loadingMore")}
                   </span>
                 ) : itemsHasMore ? (
-                  <span className="text-sm text-slate-400 dark:text-slate-500">
+                  <span className="text-sm text-fg-subtle">
                     {t("scrollForMore")}
                   </span>
                 ) : (
-                  <span className="text-sm text-slate-400 dark:text-slate-500">
+                  <span className="text-sm text-fg-subtle">
                     {t("endOfList")}
                   </span>
                 )}

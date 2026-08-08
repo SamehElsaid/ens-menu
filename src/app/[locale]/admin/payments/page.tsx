@@ -4,10 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import type { ColDef, ICellRendererParams } from "ag-grid-community";
-import {
-  IoArrowBack,
-  IoRefreshOutline,
-} from "react-icons/io5";
+import { IoArrowBack, IoRefreshOutline } from "react-icons/io5";
 import {
   FaCheckCircle,
   FaClock,
@@ -79,11 +76,11 @@ function subscriptionStatusTone(status: AdminSubscriptionRecordStatus): string {
     case "active":
       return "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300";
     case "expired":
-      return "bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300";
+      return "bg-slate-100 text-slate-700 dark:bg-slate-500/20 ";
     case "cancelled":
       return "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300";
     default:
-      return "bg-slate-100 text-slate-600";
+      return "bg-slate-100 text-fg-muted";
   }
 }
 
@@ -97,9 +94,9 @@ function statusTone(status: AdminPaymentStatus): string {
     case "cancelled":
       return "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300";
     case "refunded":
-      return "bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300";
+      return "bg-slate-100 text-slate-700 dark:bg-slate-500/20 ";
     default:
-      return "bg-slate-100 text-slate-600";
+      return "bg-slate-100 text-fg-muted";
   }
 }
 
@@ -176,7 +173,9 @@ export default function AdminPaymentsPage() {
         headerName: t("columns.customer"),
         flex: 1,
         minWidth: 160,
-        cellRenderer: (params: ICellRendererParams<AdminPaymentTransaction>) => {
+        cellRenderer: (
+          params: ICellRendererParams<AdminPaymentTransaction>,
+        ) => {
           const row = params.data;
           if (!row) return null;
           return (
@@ -188,7 +187,7 @@ export default function AdminPaymentsPage() {
               <span className="block font-medium text-primary hover:underline">
                 {row.userName}
               </span>
-              <span className="block text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px]">
+              <span className="block text-xs text-fg-muted truncate max-w-[200px]">
                 {row.userEmail}
               </span>
             </button>
@@ -204,7 +203,9 @@ export default function AdminPaymentsPage() {
         headerName: t("columns.subscriptionSource"),
         field: "subscriptionSource",
         width: 130,
-        cellRenderer: (params: ICellRendererParams<AdminPaymentTransaction>) => {
+        cellRenderer: (
+          params: ICellRendererParams<AdminPaymentTransaction>,
+        ) => {
           const source = params.value as AdminSubscriptionSource;
           return (
             <span
@@ -219,11 +220,12 @@ export default function AdminPaymentsPage() {
         headerName: t("columns.subscriptionStatus"),
         field: "subscriptionStatus",
         width: 110,
-        cellRenderer: (params: ICellRendererParams<AdminPaymentTransaction>) => {
+        cellRenderer: (
+          params: ICellRendererParams<AdminPaymentTransaction>,
+        ) => {
           const subStatus = params.value as
-            | AdminSubscriptionRecordStatus
-            | undefined;
-          if (!subStatus) return <span className="text-slate-400">—</span>;
+            AdminSubscriptionRecordStatus | undefined;
+          if (!subStatus) return <span className="text-fg-subtle">—</span>;
           return (
             <span
               className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${subscriptionStatusTone(subStatus)}`}
@@ -244,12 +246,16 @@ export default function AdminPaymentsPage() {
         headerName: t("columns.amount"),
         field: "amount",
         width: 120,
-        cellRenderer: (params: ICellRendererParams<AdminPaymentTransaction>) => {
+        cellRenderer: (
+          params: ICellRendererParams<AdminPaymentTransaction>,
+        ) => {
           const row = params.data;
           if (!row) return null;
           if (row.subscriptionSource === "admin" || row.amount <= 0) {
             return (
-              <span className="text-slate-400 tabular-nums">{t("amountFree")}</span>
+              <span className="text-fg-subtle tabular-nums">
+                {t("amountFree")}
+              </span>
             );
           }
           return (
@@ -263,7 +269,9 @@ export default function AdminPaymentsPage() {
         headerName: t("columns.status"),
         field: "status",
         width: 110,
-        cellRenderer: (params: ICellRendererParams<AdminPaymentTransaction>) => {
+        cellRenderer: (
+          params: ICellRendererParams<AdminPaymentTransaction>,
+        ) => {
           const status = params.value as AdminPaymentStatus;
           return (
             <span
@@ -284,7 +292,9 @@ export default function AdminPaymentsPage() {
         headerName: t("columns.startDate"),
         field: "subscriptionStartAt",
         width: 140,
-        cellRenderer: (params: ICellRendererParams<AdminPaymentTransaction>) => {
+        cellRenderer: (
+          params: ICellRendererParams<AdminPaymentTransaction>,
+        ) => {
           const row = params.data;
           const value =
             row?.subscriptionStartAt ?? row?.createdAt ?? params.value;
@@ -302,7 +312,9 @@ export default function AdminPaymentsPage() {
         headerName: t("columns.date"),
         field: "paidAt",
         width: 140,
-        cellRenderer: (params: ICellRendererParams<AdminPaymentTransaction>) => {
+        cellRenderer: (
+          params: ICellRendererParams<AdminPaymentTransaction>,
+        ) => {
           const row = params.data;
           const value = row?.paidAt ?? row?.createdAt;
           return formatPaymentDate(value as string, locale);
@@ -442,10 +454,8 @@ export default function AdminPaymentsPage() {
                     <Icon className={`text-lg ${colors.text}`} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
-                      {card.label}
-                    </p>
-                    <p className="text-lg font-bold text-slate-900 dark:text-slate-100 tabular-nums truncate">
+                    <p className="text-xs text-fg-muted mb-1">{card.label}</p>
+                    <p className="text-lg font-bold text-fg tabular-nums truncate">
                       {card.value}
                     </p>
                   </div>

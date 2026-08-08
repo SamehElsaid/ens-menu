@@ -2,16 +2,14 @@
 
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FaEnvelope } from "react-icons/fa";
-import { TbLockPassword } from "react-icons/tb";
+import { FiMail } from "react-icons/fi";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { useState } from "react";
 
-import { Alert } from "@/components/ui/Alert";
-import { Button } from "@/components/ui/Button";
-import { Field, Input } from "@/components/ui";
+import { Alert, Field, Input, PasswordInput } from "@/components/site/Form";
+import { SiteButton } from "@/components/site/Button";
 import LinkTo from "@/components/Global/LinkTo";
 import { axiosPost } from "@/shared/axiosCall";
 import { useRouter } from "@/i18n/navigation";
@@ -55,14 +53,20 @@ function SubmitAndReturn({
 }) {
   return (
     <>
-      <Button type="submit" loading={loading} fullWidth size="lg" className="mt-5">
+      <SiteButton
+        type="submit"
+        loading={loading}
+        block
+        size="lg"
+        className="mt-6"
+      >
         {label}
-      </Button>
+      </SiteButton>
 
-      <div className="mt-4 flex items-center justify-center">
+      <div className="mt-5 text-center">
         <LinkTo
           href="/auth/login"
-          className="rounded-sm text-[13px] font-medium text-fg-muted transition-colors hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          className="text-site-sm text-site-muted underline underline-offset-4 hover:text-site-ink"
         >
           {backLabel}
         </LinkTo>
@@ -160,7 +164,8 @@ export default function ResetPasswordForm() {
     return (
       <form
         onSubmit={resetForm.handleSubmit(onSubmitResetPassword)}
-        className="space-y-3"
+        noValidate
+        className="space-y-4"
       >
         <Controller
           control={resetForm.control}
@@ -169,13 +174,14 @@ export default function ResetPasswordForm() {
             <Field
               label={t("auth.newPassword")}
               error={resetForm.formState.errors.newPassword?.message}
+              htmlFor="new-password"
             >
-              <Input
-                type="password"
-                inputSize="md"
-                startIcon={<TbLockPassword size={15} />}
-                placeholder={t("auth.newPassword")}
+              <PasswordInput
+                id="new-password"
                 autoComplete="new-password"
+                invalid={Boolean(resetForm.formState.errors.newPassword)}
+                showLabel={t("auth.showPassword")}
+                hideLabel={t("auth.hidePassword")}
                 value={value}
                 onChange={onChange}
               />
@@ -190,13 +196,14 @@ export default function ResetPasswordForm() {
             <Field
               label={t("auth.confirmNewPassword")}
               error={resetForm.formState.errors.confirmNewPassword?.message}
+              htmlFor="confirm-new-password"
             >
-              <Input
-                type="password"
-                inputSize="md"
-                startIcon={<TbLockPassword size={15} />}
-                placeholder={t("auth.confirmNewPassword")}
+              <PasswordInput
+                id="confirm-new-password"
                 autoComplete="new-password"
+                invalid={Boolean(resetForm.formState.errors.confirmNewPassword)}
+                showLabel={t("auth.showPassword")}
+                hideLabel={t("auth.hidePassword")}
                 value={value}
                 onChange={onChange}
               />
@@ -216,7 +223,8 @@ export default function ResetPasswordForm() {
   return (
     <form
       onSubmit={forgotForm.handleSubmit(onSubmitForgotPassword)}
-      className="space-y-3"
+      noValidate
+      className="space-y-4"
     >
       <Controller
         control={forgotForm.control}
@@ -225,13 +233,15 @@ export default function ResetPasswordForm() {
           <Field
             label={t("auth.email")}
             error={forgotForm.formState.errors.email?.message}
+            htmlFor="forgot-email"
           >
             <Input
+              id="forgot-email"
               type="email"
-              inputSize="md"
-              startIcon={<FaEnvelope size={14} />}
-              placeholder={t("auth.email")}
+              inputMode="email"
+              startIcon={<FiMail className="size-4" />}
               autoComplete="email"
+              invalid={Boolean(forgotForm.formState.errors.email)}
               value={value}
               onChange={onChange}
             />
@@ -240,7 +250,7 @@ export default function ResetPasswordForm() {
       />
 
       {linkSent ? (
-        <Alert tone="success">{t("auth.resetLinkSent")}</Alert>
+        <Alert tone="positive">{t("auth.resetLinkSent")}</Alert>
       ) : null}
 
       <SubmitAndReturn

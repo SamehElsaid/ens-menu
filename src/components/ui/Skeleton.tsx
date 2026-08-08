@@ -59,7 +59,12 @@ export function SkeletonRegion({
   children: React.ReactNode;
 }) {
   return (
-    <div className={className} role="status" aria-busy="true" aria-live="polite">
+    <div
+      className={className}
+      role="status"
+      aria-busy="true"
+      aria-live="polite"
+    >
       <span className="sr-only">{label}</span>
       {children}
     </div>

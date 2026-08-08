@@ -483,12 +483,16 @@ export default function AdminVouchersPage() {
         <StatGrid columns={4}>
           <StatCard
             label={t("statsTotal")}
-            value={stats.total.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")}
+            value={stats.total.toLocaleString(
+              locale === "ar" ? "ar-EG" : "en-US",
+            )}
             icon={<IoTicketOutline />}
           />
           <StatCard
             label={t("statsActive")}
-            value={stats.active.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")}
+            value={stats.active.toLocaleString(
+              locale === "ar" ? "ar-EG" : "en-US",
+            )}
             icon={<IoCheckmarkCircleOutline />}
           />
           <StatCard
@@ -648,7 +652,7 @@ export default function AdminVouchersPage() {
                 {redemptions.map((r) => (
                   <li
                     key={r.id}
-                    className="rounded-xl border border-line px-3 py-2.5"
+                    className="rounded-lg border border-line px-3 py-2.5"
                   >
                     <p className="text-[13px] font-medium text-fg">
                       {r.userName || r.userEmail || `#${r.userId}`}

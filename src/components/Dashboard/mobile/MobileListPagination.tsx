@@ -27,7 +27,7 @@ export default function MobileListPagination({
     <nav
       aria-label={t("pagination")}
       className={cn(
-        "dashboard-mobile-pagination mt-4 flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-3 py-3",
+        "dashboard-mobile-pagination mt-4 flex items-center justify-between gap-3 rounded-lg border border-line bg-surface px-3 py-3",
       )}
       dir={isRTL ? "rtl" : "ltr"}
     >

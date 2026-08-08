@@ -44,6 +44,8 @@ export default function PageTitleWithHelp({
   }
 
   return (
-    <div id={id} dir={dir} className={className?.trim() || undefined}>{children}</div>
+    <div id={id} dir={dir} className={className?.trim() || undefined}>
+      {children}
+    </div>
   );
 }

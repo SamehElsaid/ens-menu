@@ -165,7 +165,10 @@ export function FieldHint({
   ...props
 }: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <p className={cn("text-xs leading-relaxed text-fg-muted", className)} {...props}>
+    <p
+      className={cn("text-xs leading-relaxed text-fg-muted", className)}
+      {...props}
+    >
       {children}
     </p>
   );

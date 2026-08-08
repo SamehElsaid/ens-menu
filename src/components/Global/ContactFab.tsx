@@ -24,6 +24,18 @@ export default function ContactFab() {
   const t = useTranslations("contactFab");
   const isAdminRoute = pathname.startsWith("/admin");
 
+  /**
+   * The trigger is loud by design inside the product, where it is the only way
+   * out to a human. On the marketing site it would be the brightest thing on
+   * every page and it is not the primary action, so the public surface gets a
+   * quiet pill instead. The dashboard branch below is unchanged.
+   *
+   * The FAB is portalled to `document.body`, so it cannot inherit
+   * `.public-world`; the surface has to be decided from the route.
+   */
+  const isProductRoute =
+    pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -102,34 +114,51 @@ export default function ContactFab() {
         </div>
       )}
 
-      <div className="whatsapp-fab-wrap animate-whatsapp-fab-in">
-        {!open && (
-          <>
-            <span className="whatsapp-fab-ripple" aria-hidden />
-            <span
-              className="whatsapp-fab-ripple whatsapp-fab-ripple--delay"
-              aria-hidden
-            />
-          </>
-        )}
+      {isProductRoute ? (
+        <div className="whatsapp-fab-wrap animate-whatsapp-fab-in">
+          {!open && (
+            <>
+              <span className="whatsapp-fab-ripple" aria-hidden />
+              <span
+                className="whatsapp-fab-ripple whatsapp-fab-ripple--delay"
+                aria-hidden
+              />
+            </>
+          )}
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-label={t("label")}
+            aria-expanded={open}
+            aria-haspopup="menu"
+            className={cn(
+              "whatsapp-fab-btn relative flex size-14 items-center justify-center rounded-full border-2 border-white text-white dark:border-line",
+              open ? "bg-slate-600 hover:bg-slate-700" : "bg-[#25D366]",
+            )}
+          >
+            {open ? (
+              <FiX className="text-[1.6rem]" aria-hidden />
+            ) : (
+              <BiSupport className="text-[1.75rem]" aria-hidden />
+            )}
+          </button>
+        </div>
+      ) : (
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          aria-label={t("label")}
           aria-expanded={open}
           aria-haspopup="menu"
-          className={cn(
-            "whatsapp-fab-btn relative flex size-14 items-center justify-center rounded-full border-2 border-white text-white dark:border-slate-700",
-            open ? "bg-slate-600 hover:bg-slate-700" : "bg-[#25D366]",
-          )}
+          className="flex h-12 items-center gap-2 rounded-full bg-[#12111c] ps-4 pe-5 text-[0.9375rem] font-semibold text-white shadow-[0_8px_28px_-8px_rgb(18_17_28/0.45)] transition-transform duration-150 ease-out hover:bg-[#26243a] motion-safe:hover:-translate-y-px dark:bg-white dark:text-[#12111c] dark:hover:bg-white/90"
         >
           {open ? (
-            <FiX className="text-[1.6rem]" aria-hidden />
+            <FiX className="size-5 shrink-0" aria-hidden />
           ) : (
-            <BiSupport className="text-[1.75rem]" aria-hidden />
+            <BiSupport className="size-5 shrink-0" aria-hidden />
           )}
+          <span>{t("label")}</span>
         </button>
-      </div>
+      )}
     </div>
   );
 

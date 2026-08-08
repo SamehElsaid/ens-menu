@@ -35,7 +35,12 @@ import {
 import { FaChartLine } from "react-icons/fa";
 import { MdOutlineFastfood, MdOutlineTableBar } from "react-icons/md";
 import { BiCategory } from "react-icons/bi";
-import { Button, SegmentedControl, Skeleton, SkeletonRegion } from "@/components/ui";
+import {
+  Button,
+  SegmentedControl,
+  Skeleton,
+  SkeletonRegion,
+} from "@/components/ui";
 
 const PERIODS: MenuAnalyticsPeriod[] = ["7d", "30d", "90d"];
 
@@ -45,7 +50,7 @@ function InsightsPanelSkeleton() {
   return (
     <SkeletonRegion
       label="Loading analytics"
-      className="rounded-2xl border border-line bg-surface shadow-sm p-6"
+      className="rounded-lg border border-line bg-surface shadow-sm p-6"
     >
       <Skeleton className="mb-4 h-6 w-36" rounded="md" />
       <div className="grid grid-cols-2 gap-3">
@@ -73,13 +78,11 @@ function SectionCard({
   return (
     <div
       dir={dir}
-      className="rounded-2xl border border-line bg-surface shadow-sm p-6 transition-all duration-200 hover:shadow-md"
+      className="rounded-lg border border-line bg-surface shadow-sm p-6 transition-all duration-200 hover:shadow-md"
     >
       <div className="flex items-center gap-2 mb-1">
         <span className="text-brand text-xl shrink-0">{icon}</span>
-        <h2 className="text-lg font-semibold text-fg">
-          {title}
-        </h2>
+        <h2 className="text-lg font-semibold text-fg">{title}</h2>
       </div>
       {hint ? (
         <p className="text-xs text-fg-muted mb-4">{hint}</p>
@@ -102,12 +105,16 @@ function ChangeBadge({
 }) {
   const isUp = value > 0;
   const isDown = value < 0;
-  const Icon = isUp ? IoTrendingUpOutline : isDown ? IoTrendingDownOutline : IoRemoveOutline;
+  const Icon = isUp
+    ? IoTrendingUpOutline
+    : isDown
+      ? IoTrendingDownOutline
+      : IoRemoveOutline;
   const color = isUp
     ? "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10"
     : isDown
       ? "text-red-600 dark:text-red-400 bg-red-500/10"
-      : "text-slate-500 bg-slate-500/10";
+      : "text-fg-subtle bg-slate-500/10";
 
   return (
     <span
@@ -150,7 +157,7 @@ function PeakHoursChart({
               }}
             />
           </div>
-          <span className="text-[10px] text-slate-500 dark:text-slate-400 tabular-nums">
+          <span className="text-[10px] text-fg-muted tabular-nums">
             {new Date(2000, 0, 1, point.hour).toLocaleTimeString(
               locale === "ar" ? "ar-EG" : "en-US",
               { hour: "numeric", hour12: true },
@@ -196,13 +203,13 @@ function StatusBreakdown({
             key={item.status}
             className="flex items-center justify-between text-sm"
           >
-            <span className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+            <span className="flex items-center gap-2 text-fg-muted">
               <span
                 className={`w-2.5 h-2.5 rounded-full ${colors[item.status] ?? "bg-slate-400"}`}
               />
               {item.label}
             </span>
-            <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">
+            <span className="font-semibold tabular-nums text-fg">
               {item.count.toLocaleString("en-US")} (
               {Math.round((item.count / total) * 100)}%)
             </span>
@@ -228,14 +235,12 @@ function GapItemsList({
       {items.map((item) => (
         <li
           key={item.id}
-          className="rounded-xl border border-amber-200/60 dark:border-amber-500/20 bg-amber-50/50 dark:bg-amber-500/5 p-3"
+          className="rounded-lg border border-amber-200/60 dark:border-amber-500/20 bg-amber-50/50 dark:bg-amber-500/5 p-3"
         >
-          <p className="text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">
-            {item.label}
-          </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            {item.views.toLocaleString("en-US")}{" "}
-            · {item.orders.toLocaleString("en-US")}{" "}
+          <p className="text-sm font-medium text-fg mb-1">{item.label}</p>
+          <p className="text-xs text-fg-muted">
+            {item.views.toLocaleString("en-US")} ·{" "}
+            {item.orders.toLocaleString("en-US")}{" "}
             {locale === "ar" ? "طلب" : "orders"}
           </p>
         </li>
@@ -257,7 +262,7 @@ function DeadItemsList({
       {items.map((item) => (
         <li
           key={item.id}
-          className="rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300"
+          className="rounded-lg border border-line bg-surface-3 px-3 py-1.5 text-sm text-fg-muted"
         >
           {item.label}
         </li>
@@ -282,9 +287,7 @@ function RevenueBarChart({
   const chartPoints = points.map((p) => ({ date: p.date, count: p.amount }));
   if (chartPoints.length === 0) {
     return (
-      <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-12">
-        {emptyMessage}
-      </p>
+      <p className="text-sm text-fg-muted text-center py-12">{emptyMessage}</p>
     );
   }
 
@@ -308,7 +311,7 @@ function RevenueBarChart({
               }}
             />
           </div>
-          <span className="text-[10px] text-slate-500 dark:text-slate-400 text-center truncate w-full">
+          <span className="text-[10px] text-fg-muted text-center truncate w-full">
             {formatMenuChartDate(point.date, locale)}
           </span>
         </div>
@@ -578,10 +581,7 @@ export default function MenuProAnalytics({
     () =>
       (analytics?.orderStatusBreakdown ?? []).map((s) => ({
         status: s.status,
-        label:
-          locale === "ar"
-            ? s.labelAr || s.status
-            : s.labelEn || s.status,
+        label: locale === "ar" ? s.labelAr || s.status : s.labelEn || s.status,
         count: s.count,
       })),
     [analytics?.orderStatusBreakdown, locale],
@@ -615,7 +615,7 @@ export default function MenuProAnalytics({
     return (
       <div className="space-y-4" dir={textDir}>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-fg flex items-center gap-2">
             <IoStatsChartOutline className="text-primary text-xl" />
             {t("quickInsightsTitle")}
           </h2>
@@ -637,7 +637,7 @@ export default function MenuProAnalytics({
         <div
           className={`grid grid-cols-1 gap-4 ${isFreePlan ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}
         >
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5">
+          <div className="bg-raised rounded-lg border border-line shadow-sm p-5">
             <AdminMetricsGrid
               items={quickSummaryMetrics}
               columns={2}
@@ -645,8 +645,8 @@ export default function MenuProAnalytics({
             />
           </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5">
-            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">
+          <div className="bg-raised rounded-lg border border-line shadow-sm p-5">
+            <p className="text-sm font-semibold text-fg mb-3">
               {t("topVisitedItems")}
             </p>
             <AdminRankedList
@@ -657,8 +657,8 @@ export default function MenuProAnalytics({
           </div>
 
           {!isFreePlan && (
-            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5">
-              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">
+            <div className="bg-raised rounded-lg border border-line shadow-sm p-5">
+              <p className="text-sm font-semibold text-fg mb-3">
                 {t("topOrderedItems")}
               </p>
               <AdminRankedList
@@ -680,7 +680,7 @@ export default function MenuProAnalytics({
           <DemoDataBanner message={t("demoDataBanner")} dir={textDir} />
         )}
 
-        <div className="rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
+        <div className="rounded-lg border border-line bg-surface-2 px-4 py-3 text-sm text-fg-muted">
           {t("freePlanLimit7d")}
         </div>
 
@@ -914,7 +914,7 @@ export default function MenuProAnalytics({
               dir={textDir}
             >
               {gapItems.length === 0 ? (
-                <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-8">
+                <p className="text-sm text-fg-muted text-center py-8">
                   {t("noGapData")}
                 </p>
               ) : (
@@ -929,7 +929,7 @@ export default function MenuProAnalytics({
               dir={textDir}
             >
               {deadItems.length === 0 ? (
-                <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-8">
+                <p className="text-sm text-fg-muted text-center py-8">
                   {t("noDeadItems")}
                 </p>
               ) : (

@@ -15,8 +15,7 @@ function useDarkMode() {
     return () => observer.disconnect();
   };
 
-  const getSnapshot = () =>
-    document.documentElement.classList.contains("dark");
+  const getSnapshot = () => document.documentElement.classList.contains("dark");
 
   const getServerSnapshot = () => false;
 
@@ -42,7 +41,11 @@ const DarkModeToggle: React.FC = () => {
       aria-pressed={isDarkMode}
       aria-label={isDarkMode ? t("useLightTheme") : t("useDarkTheme")}
     >
-      {isDarkMode ? <FiSun className="size-4" /> : <FiMoon className="size-4" />}
+      {isDarkMode ? (
+        <FiSun className="size-4" />
+      ) : (
+        <FiMoon className="size-4" />
+      )}
     </Button>
   );
 };

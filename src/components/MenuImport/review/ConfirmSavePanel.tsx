@@ -4,10 +4,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import type { ImportDraft } from "@/types/menuImport";
 import { computeConfirmSavePreview } from "@/lib/menuImport/buildBulkCategoriesPayload";
-import {
-  formatMenuPrice,
-  formatMenuPriceRange,
-} from "@/lib/formatMenuPrice";
+import { formatMenuPrice, formatMenuPriceRange } from "@/lib/formatMenuPrice";
 import { cn } from "@/lib/cn";
 import { Alert, Button, Card, Checkbox, Modal } from "@/components/ui";
 
@@ -57,16 +54,12 @@ export default function ConfirmSavePanel({
   const t = useTranslations("MenuImport");
   const tCommon = useTranslations("common");
   const [agreed, setAgreed] = useState(false);
-  const preview = useMemo(
-    () => computeConfirmSavePreview(draft),
-    [draft],
-  );
+  const preview = useMemo(() => computeConfirmSavePreview(draft), [draft]);
   const locale = draft.locale;
   const currency = draft.currency;
 
   const showVariants =
-    preview.variantCount > 0 &&
-    preview.variantCount !== preview.itemsInPayload;
+    preview.variantCount > 0 && preview.variantCount !== preview.itemsInPayload;
 
   const handleClose = () => {
     if (!isSaving) onClose();
@@ -85,11 +78,7 @@ export default function ConfirmSavePanel({
           <Button variant="secondary" onClick={onClose} disabled={isSaving}>
             {t("backToEdit")}
           </Button>
-          <Button
-            onClick={onConfirm}
-            disabled={!agreed}
-            loading={isSaving}
-          >
+          <Button onClick={onConfirm} disabled={!agreed} loading={isSaving}>
             {isSaving ? t("saving") : t("confirmSave")}
           </Button>
         </>

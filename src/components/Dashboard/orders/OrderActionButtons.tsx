@@ -147,9 +147,11 @@ export default function OrderActionButtons({
   const { can } = useAuthorization();
   const [localActing, setLocalActing] = useState(false);
   const pendingGuestAddition = entry.pendingGuestAddition === true;
-  const actions = actionsForStatus(status, variant, pendingGuestAddition).filter(
-    (cfg) => can(ACTION_PERMISSION[cfg.action]),
-  );
+  const actions = actionsForStatus(
+    status,
+    variant,
+    pendingGuestAddition,
+  ).filter((cfg) => can(ACTION_PERMISSION[cfg.action]));
 
   if (actions.length === 0) return null;
 
@@ -197,7 +199,7 @@ export default function OrderActionButtons({
           type="button"
           disabled={isBusy}
           onClick={() => void handleAction(cfg.action)}
-          className={`inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold transition-colors disabled:opacity-60 ${compact ? "w-full" : "flex-1 sm:flex-none sm:min-w-28"} ${cfg.className}`}
+          className={`inline-flex items-center justify-center rounded-lg px-3 py-2 text-xs font-semibold transition-colors disabled:opacity-60 ${compact ? "w-full" : "flex-1 sm:flex-none sm:min-w-28"} ${cfg.className}`}
         >
           {t(cfg.labelKey)}
         </button>

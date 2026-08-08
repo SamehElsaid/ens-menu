@@ -5,7 +5,12 @@ import { FiChevronDown } from "react-icons/fi";
 import { cn } from "@/lib/cn";
 import { useFieldControl } from "./Field";
 import { inputBase } from "./Input";
-import { controlHeight, controlRadius, controlText, type ControlSize } from "./styles";
+import {
+  controlHeight,
+  controlRadius,
+  controlText,
+  type ControlSize,
+} from "./styles";
 
 export type SelectProps = Omit<
   SelectHTMLAttributes<HTMLSelectElement>,
@@ -26,7 +31,9 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ) {
     const fieldProps = useFieldControl();
     return (
-      <div className={cn("relative flex w-full items-center", wrapperClassName)}>
+      <div
+        className={cn("relative flex w-full items-center", wrapperClassName)}
+      >
         <select
           ref={ref}
           className={cn(

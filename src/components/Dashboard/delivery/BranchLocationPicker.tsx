@@ -2,7 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { IoLocationSharp, IoLocateOutline, IoSearchOutline } from "react-icons/io5";
+import {
+  IoLocationSharp,
+  IoLocateOutline,
+  IoSearchOutline,
+} from "react-icons/io5";
 import { Button } from "@/components/ui";
 import { loadGoogleMaps } from "@/lib/loadGoogleMaps";
 
@@ -20,7 +24,10 @@ export function formatBranchCoordinate(value: number): string {
   return String(value);
 }
 
-export function getDefaultBranchFormCoords(): { latitude: string; longitude: string } {
+export function getDefaultBranchFormCoords(): {
+  latitude: string;
+  longitude: string;
+} {
   return {
     latitude: formatBranchCoordinate(DEFAULT_LAT),
     longitude: formatBranchCoordinate(DEFAULT_LNG),
@@ -276,7 +283,7 @@ export default function BranchLocationPicker({
 
   if (disabled) {
     return (
-      <div className="rounded-2xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 h-56 flex items-center justify-center text-sm text-slate-400">
+      <div className="rounded-lg border border-line bg-surface-2 h-56 flex items-center justify-center text-sm text-fg-subtle">
         {mapHint}
       </div>
     );
@@ -284,7 +291,7 @@ export default function BranchLocationPicker({
 
   if (loadError) {
     return (
-      <div className="rounded-2xl border border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 p-4 text-sm text-red-600 dark:text-red-300">
+      <div className="rounded-lg border border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 p-4 text-sm text-red-600 dark:text-red-300">
         {mapHint}
       </div>
     );
@@ -293,7 +300,7 @@ export default function BranchLocationPicker({
   return (
     <div className="space-y-3" dir={isRTL ? "rtl" : "ltr"}>
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <label className="text-sm font-medium text-fg-muted">
           {searchLabel}
         </label>
         <div className="flex flex-col sm:flex-row gap-2">
@@ -304,9 +311,9 @@ export default function BranchLocationPicker({
               dir={isRTL ? "rtl" : "ltr"}
               placeholder={searchPlaceholder}
               onKeyDown={handleSearchKeyDown}
-              className="w-full py-3.5 ps-10 pe-4 outline-none rounded-2xl border border-accent-purple/20 focus:border-accent-purple focus:ring-2 focus:ring-accent-purple/20 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600 dark:placeholder:text-slate-400 dark:focus:border-accent-purple text-sm text-start"
+              className="w-full py-3.5 ps-10 pe-4 outline-none rounded-lg border border-accent-purple/20 focus:border-accent-purple focus:ring-2 focus:ring-accent-purple/20 dark:placeholder:text-slate-400 dark:focus:border-accent-purple text-sm text-start"
             />
-            <div className="absolute start-3 top-1/2 -translate-y-1/2 text-slate-400">
+            <div className="absolute start-3 top-1/2 -translate-y-1/2 text-fg-subtle">
               <IoSearchOutline className="text-lg" />
             </div>
           </div>
@@ -315,14 +322,16 @@ export default function BranchLocationPicker({
               type="button"
               onClick={handleCurrentLocation}
               disabled={isLoading || isLocating}
-              className="inline-flex items-center justify-center gap-1.5 rounded-2xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-line bg-raised px-3 py-2.5 text-sm font-medium text-fg-muted hover:bg-surface-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
             >
               {isLocating ? (
                 <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
               ) : (
                 <IoLocateOutline className="text-lg text-primary shrink-0" />
               )}
-              <span className="hidden sm:inline">{t("currentLocationBtn")}</span>
+              <span className="hidden sm:inline">
+                {t("currentLocationBtn")}
+              </span>
             </button>
             <Button
               type="button"
@@ -342,9 +351,9 @@ export default function BranchLocationPicker({
         ) : null}
       </div>
 
-      <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-600">
+      <div className="relative rounded-lg overflow-hidden border border-line">
         {isLoading && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-100/80 dark:bg-slate-800/80">
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-100/80">
             <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
           </div>
         )}
@@ -359,9 +368,7 @@ export default function BranchLocationPicker({
         )}
       </div>
 
-      {mapHint ? (
-        <p className="text-xs text-slate-500 dark:text-slate-400">{mapHint}</p>
-      ) : null}
+      {mapHint ? <p className="text-xs text-fg-muted">{mapHint}</p> : null}
     </div>
   );
 }

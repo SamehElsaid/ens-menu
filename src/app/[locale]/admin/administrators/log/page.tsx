@@ -140,7 +140,7 @@ export default function AdminActivityLogPage() {
           const entry = params.data;
           if (!entry) return null;
           return (
-            <span className="text-slate-600 dark:text-slate-400 text-sm">
+            <span className="text-fg-muted text-sm">
               {formatAdminDate(entry.createdAt, locale)}
             </span>
           );
@@ -152,7 +152,7 @@ export default function AdminActivityLogPage() {
         flex: 1,
         minWidth: 140,
         cellRenderer: (params: { data: AdminActivityLogEntry }) => (
-          <span className="font-medium text-slate-900 dark:text-slate-100">
+          <span className="font-medium text-fg">
             {params.data?.actorAdminName ?? "—"}
           </span>
         ),
@@ -166,7 +166,7 @@ export default function AdminActivityLogPage() {
           const entry = params.data;
           if (!entry) return null;
           return (
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-surface-2 text-fg-muted">
               {actionLabel(entry.action)}
             </span>
           );
@@ -181,11 +181,9 @@ export default function AdminActivityLogPage() {
           if (!entry) return null;
           return (
             <div>
-              <p className="font-medium text-slate-900 dark:text-slate-100">
-                {entry.targetName}
-              </p>
+              <p className="font-medium text-fg">{entry.targetName}</p>
               {entry.targetEmail && (
-                <p className="text-xs text-slate-500">{entry.targetEmail}</p>
+                <p className="text-xs text-fg-subtle">{entry.targetEmail}</p>
               )}
             </div>
           );
@@ -199,7 +197,7 @@ export default function AdminActivityLogPage() {
           const type = params.data?.targetType;
           if (!type) return null;
           return (
-            <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+            <span className="text-xs font-medium text-fg-muted">
               {t(`targetTypes.${type}` as Parameters<typeof t>[0])}
             </span>
           );
@@ -213,7 +211,7 @@ export default function AdminActivityLogPage() {
           const entry = params.data;
           if (!entry) return null;
           return (
-            <span className="text-sm text-slate-600 dark:text-slate-400">
+            <span className="text-sm text-fg-muted">
               {formatDetails(entry)}
             </span>
           );
@@ -244,7 +242,7 @@ export default function AdminActivityLogPage() {
           className={`flex flex-wrap items-end gap-4 mb-6 ${isRTL ? "flex-row-reverse" : ""}`}
         >
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">
+            <label className="block text-xs font-medium text-fg-subtle mb-1">
               {t("filters.action")}
             </label>
             <select
@@ -252,7 +250,7 @@ export default function AdminActivityLogPage() {
               onChange={(e) =>
                 setActionFilter(e.target.value as AdminActivityAction | "all")
               }
-              className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm min-w-[200px]"
+              className="rounded-lg border border-line bg-raised px-3 py-2 text-sm min-w-[200px]"
             >
               {ACTION_FILTER_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -264,7 +262,7 @@ export default function AdminActivityLogPage() {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">
+            <label className="block text-xs font-medium text-fg-subtle mb-1">
               {t("filters.targetType")}
             </label>
             <select
@@ -274,7 +272,7 @@ export default function AdminActivityLogPage() {
                   e.target.value as AdminActivityTargetType | "all",
                 )
               }
-              className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm min-w-[160px]"
+              className="rounded-lg border border-line bg-raised px-3 py-2 text-sm min-w-[160px]"
             >
               <option value="all">{t("filters.allTargets")}</option>
               <option value="admin">{t("targetTypes.admin")}</option>

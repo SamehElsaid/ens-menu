@@ -127,7 +127,9 @@ export default function ReviewCategoryBlock({
 
   const uploadImageFile = async (file: File) => {
     if (
-      !IMAGE_VALID_TYPES.includes(file.type as (typeof IMAGE_VALID_TYPES)[number])
+      !IMAGE_VALID_TYPES.includes(
+        file.type as (typeof IMAGE_VALID_TYPES)[number],
+      )
     ) {
       toast.error(t("invalidFileType"));
       return;
@@ -205,9 +207,7 @@ export default function ReviewCategoryBlock({
               type="button"
               disabled={isImageBusy}
               onClick={() => setPexelsModalOpen(true)}
-              aria-label={
-                displayImageUrl ? t("replaceImage") : t("addImage")
-              }
+              aria-label={displayImageUrl ? t("replaceImage") : t("addImage")}
               className={cn(
                 "relative flex size-[4.5rem] shrink-0 flex-col items-center justify-center overflow-hidden rounded-xl",
                 "transition-colors duration-150 disabled:pointer-events-none disabled:opacity-80",
@@ -329,7 +329,10 @@ export default function ReviewCategoryBlock({
         {!collapsed && (
           <div>
             {category.items.map((item) => (
-              <div key={item.id} className="border-b border-line last:border-b-0">
+              <div
+                key={item.id}
+                className="border-b border-line last:border-b-0"
+              >
                 <ReviewItemRow
                   item={item}
                   currency={currency}

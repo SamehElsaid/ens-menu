@@ -11,20 +11,20 @@ const PAGE_SIZE = 12;
 function StaffCardSkeleton() {
   return (
     <div
-      className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800/80"
+      className="overflow-hidden rounded-lg border border-line bg-white"
       aria-hidden
     >
       <div className="dashboard-mobile-shimmer h-28 bg-primary/5 dark:bg-primary/10" />
       <div className="space-y-3 px-4 pb-4 -mt-2">
-        <div className="rounded-xl border border-slate-100 p-3 dark:border-slate-700">
-          <div className="dashboard-mobile-shimmer mx-auto h-6 w-2/3 rounded-md bg-slate-100 dark:bg-slate-700/60" />
-          <div className="dashboard-mobile-shimmer mt-2.5 h-9 w-full rounded-lg bg-slate-100 dark:bg-slate-700/60" />
+        <div className="rounded-lg border border-line p-3 dark:border-line">
+          <div className="dashboard-mobile-shimmer mx-auto h-6 w-2/3 rounded-md bg-surface-3" />
+          <div className="dashboard-mobile-shimmer mt-2.5 h-9 w-full rounded-lg bg-surface-3" />
         </div>
-        <div className="flex gap-2 border-t border-slate-100 pt-3 dark:border-slate-700">
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-xl bg-slate-100 dark:bg-slate-700/60" />
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-xl bg-slate-100 dark:bg-slate-700/60" />
+        <div className="flex gap-2 border-t border-line pt-3 dark:border-line">
+          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-3" />
+          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-3" />
         </div>
-        <div className="dashboard-mobile-shimmer h-10 w-full rounded-xl bg-slate-100 dark:bg-slate-700/60" />
+        <div className="dashboard-mobile-shimmer h-10 w-full rounded-lg bg-surface-3" />
       </div>
     </div>
   );

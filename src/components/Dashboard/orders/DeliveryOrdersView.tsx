@@ -50,7 +50,7 @@ export default function DeliveryOrdersView() {
 
       <header
         id="onboarding-delivery-orders-header"
-        className="relative overflow-hidden rounded-2xl border border-emerald-200/60 bg-linear-to-br from-emerald-50 via-teal-50/80 to-white p-6 shadow-sm dark:border-emerald-500/20 dark:from-emerald-950/50 dark:via-teal-950/30 dark:to-slate-900 md:p-8"
+        className="relative overflow-hidden rounded-lg border border-emerald-200/60 bg-linear-to-br from-emerald-50 via-teal-50/80 to-white p-6 shadow-sm dark:border-emerald-500/20 dark:from-emerald-950/50 dark:via-teal-950/30 dark:to-slate-900 md:p-8"
       >
         <div
           className="pointer-events-none absolute -end-16 -top-16 h-48 w-48 rounded-full bg-linear-to-br from-emerald-400/20 to-teal-400/10 blur-2xl dark:from-emerald-500/15 dark:to-teal-500/10"
@@ -58,16 +58,16 @@ export default function DeliveryOrdersView() {
         />
         <div className="relative flex flex-wrap items-start justify-between gap-4">
           <div className="flex gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/25">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/25">
               <MdOutlineDeliveryDining className="text-2xl" aria-hidden />
             </div>
             <div>
               <PageTitleWithHelp>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white md:text-3xl">
+                <h1 className="text-2xl font-bold tracking-tight text-fg md:text-3xl">
                   {t("title")}
                 </h1>
               </PageTitleWithHelp>
-              <p className="mt-1 max-w-xl text-sm text-slate-600 dark:text-slate-300">
+              <p className="mt-1 max-w-xl text-sm text-fg-muted">
                 {t("subtitle")}
               </p>
             </div>
@@ -93,7 +93,7 @@ export default function DeliveryOrdersView() {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder={t("searchPlaceholder")}
-            className={`w-full rounded-xl border border-emerald-200/90 bg-white/90 py-3 text-sm text-slate-900 shadow-inner shadow-emerald-500/5 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/35 dark:border-emerald-500/30 dark:bg-slate-800/90 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-emerald-400 dark:focus:ring-emerald-400/25 ${isRTL ? "pe-11 ps-4" : "ps-11 pe-4"}`}
+            className={`w-full rounded-lg border border-emerald-200/90 bg-white/90 py-3 text-sm text-fg shadow-inner shadow-emerald-500/5 placeholder:text-fg-subtle focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/35 dark:border-emerald-500/30   dark:placeholder:text-slate-500 dark:focus:border-emerald-400 dark:focus:ring-emerald-400/25 ${isRTL ? "pe-11 ps-4" : "ps-11 pe-4"}`}
             autoComplete="off"
           />
         </div>

@@ -48,9 +48,9 @@ export default function AdCard({
 
   return (
     <article
-      className={`group flex h-full flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-xl dark:bg-slate-800/95 dark:shadow-slate-950/20 ${
+      className={`group flex h-full flex-col overflow-hidden rounded-lg border bg-white shadow-sm transition-all duration-300 hover:shadow-xl  dark:shadow-slate-950/20 ${
         isActive
-          ? "border-slate-200/90 hover:border-primary/25 dark:border-slate-700/80 dark:hover:border-primary/40"
+          ? "border-line/90 hover:border-primary/25 dark:border-line/80 dark:hover:border-primary/40"
           : "border-amber-200/80 bg-slate-50/40 dark:border-amber-900/40 dark:bg-amber-950/10"
       }`}
     >
@@ -68,7 +68,7 @@ export default function AdCard({
             />
           </div>
         ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-2 text-slate-400 dark:text-slate-500">
+          <div className="flex h-full flex-col items-center justify-center gap-2 text-fg-subtle">
             <IoImageOutline className="text-4xl opacity-60" aria-hidden />
             <span className="text-xs font-medium">{t("columns.image")}</span>
           </div>
@@ -88,7 +88,7 @@ export default function AdCard({
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div className="min-w-0 space-y-1">
           <h3
-            className="truncate text-lg font-bold text-slate-900 dark:text-slate-50"
+            className="truncate text-lg font-bold text-fg"
             dir={isRTL ? "rtl" : "ltr"}
             title={title}
           >
@@ -96,7 +96,7 @@ export default function AdCard({
           </h3>
           {contentPreview && contentPreview !== "—" && (
             <p
-              className="line-clamp-2 text-sm text-slate-500 dark:text-slate-400"
+              className="line-clamp-2 text-sm text-fg-muted"
               dir={isRTL ? "rtl" : "ltr"}
             >
               {contentPreview}
@@ -120,24 +120,24 @@ export default function AdCard({
         </div>
 
         <div className="grid grid-cols-3 gap-1.5">
-          <div className="rounded-xl border border-sky-200/70 bg-sky-50/80 px-2 py-2 text-center dark:border-sky-800/40 dark:bg-sky-950/25">
-            <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
+          <div className="rounded-lg border border-sky-200/70 bg-sky-50/80 px-2 py-2 text-center dark:border-sky-800/40 dark:bg-sky-950/25">
+            <p className="text-[10px] font-medium text-fg-muted">
               {t("columns.impressions")}
             </p>
-            <p className="text-sm font-bold tabular-nums text-slate-900 dark:text-slate-100">
+            <p className="text-sm font-bold tabular-nums text-fg">
               {metrics.impressionCount.toLocaleString()}
             </p>
           </div>
-          <div className="rounded-xl border border-amber-200/70 bg-amber-50/80 px-2 py-2 text-center dark:border-amber-800/40 dark:bg-amber-950/25">
-            <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
+          <div className="rounded-lg border border-amber-200/70 bg-amber-50/80 px-2 py-2 text-center dark:border-amber-800/40 dark:bg-amber-950/25">
+            <p className="text-[10px] font-medium text-fg-muted">
               {t("columns.clicks")}
             </p>
-            <p className="text-sm font-bold tabular-nums text-slate-900 dark:text-slate-100">
+            <p className="text-sm font-bold tabular-nums text-fg">
               {metrics.clickCount.toLocaleString()}
             </p>
           </div>
-          <div className="rounded-xl border border-emerald-200/70 bg-emerald-50/80 px-2 py-2 text-center dark:border-emerald-800/40 dark:bg-emerald-950/25">
-            <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
+          <div className="rounded-lg border border-emerald-200/70 bg-emerald-50/80 px-2 py-2 text-center dark:border-emerald-800/40 dark:bg-emerald-950/25">
+            <p className="text-[10px] font-medium text-fg-muted">
               {t("columns.ctr")}
             </p>
             <p className="text-sm font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
@@ -146,14 +146,14 @@ export default function AdCard({
           </div>
         </div>
 
-        <div className="mt-auto flex flex-col gap-2 border-t border-slate-100 pt-3 dark:border-slate-700/80">
+        <div className="mt-auto flex flex-col gap-2 border-t border-line pt-3 dark:border-line/80">
           {onToggleActive && (
             <button
               type="button"
               onClick={() => onToggleActive(ad)}
               disabled={isToggling}
               title={isActive ? t("pause") : t("activate")}
-              className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 ${
+              className={`inline-flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 ${
                 isActive
                   ? "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:border-amber-800/50 dark:bg-amber-950/30 dark:text-amber-200"
                   : "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 dark:border-emerald-800/50 dark:bg-emerald-950/30 dark:text-emerald-200"
@@ -174,7 +174,7 @@ export default function AdCard({
               type="button"
               onClick={() => onEdit(ad)}
               title={t("edit")}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-700 transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary active:scale-[0.98] dark:border-slate-600 dark:bg-slate-700/50 dark:text-slate-200 dark:hover:border-primary/40 dark:hover:bg-primary/10 dark:hover:text-primary"
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-line bg-slate-50 px-3 py-2.5 text-sm font-medium text-fg-muted transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary active:scale-[0.98] dark:hover:border-primary/40 dark:hover:bg-primary/10 dark:hover:text-primary"
             >
               <IoCreateOutline className="text-base" aria-hidden />
               {t("edit")}
@@ -183,7 +183,7 @@ export default function AdCard({
               type="button"
               onClick={() => onDelete(ad)}
               title={t("delete")}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-red-200/80 bg-red-50 px-3 py-2.5 text-sm font-medium text-red-600 transition-all hover:border-red-300 hover:bg-red-100 active:scale-[0.98] dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300 dark:hover:border-red-800 dark:hover:bg-red-950/50"
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-red-200/80 bg-red-50 px-3 py-2.5 text-sm font-medium text-red-600 transition-all hover:border-red-300 hover:bg-red-100 active:scale-[0.98] dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300 dark:hover:border-red-800 dark:hover:bg-red-950/50"
             >
               <IoTrashOutline className="text-base" aria-hidden />
               {t("delete")}

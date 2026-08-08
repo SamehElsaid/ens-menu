@@ -1,4 +1,7 @@
-import { formatMockPrice } from "@/components/HomePage/formatMockPrice";
+/** Locale-aware price for the demo menu — amount first in Arabic (85 ج.م). */
+function formatMockPrice(amount: number, isRtl: boolean): string {
+  return isRtl ? `${amount} ج.م` : `${amount} EGP`;
+}
 
 /** Canonical demo menu products — one image per product across all homepage demos. */
 export const MOCK_DEMO_PRODUCT_IDS = [

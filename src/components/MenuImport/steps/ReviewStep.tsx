@@ -52,9 +52,7 @@ function StatPill({
       <Badge
         tone={tone}
         size="md"
-        icon={
-          tone === "warning" ? <IoWarningOutline aria-hidden /> : undefined
-        }
+        icon={tone === "warning" ? <IoWarningOutline aria-hidden /> : undefined}
       >
         {children}
       </Badge>
@@ -417,9 +415,7 @@ export default function ReviewStep({
             onRemoveVariant={(itemId, variantId) =>
               onRemoveVariant(category.id, itemId, variantId)
             }
-            onItemImage={(itemId, url) =>
-              onItemImage(category.id, itemId, url)
-            }
+            onItemImage={(itemId, url) => onItemImage(category.id, itemId, url)}
             onResolveDuplicate={(itemId, resolution, variantId) =>
               onResolveDuplicate(category.id, itemId, resolution, variantId)
             }

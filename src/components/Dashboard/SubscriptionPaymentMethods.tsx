@@ -39,7 +39,7 @@ export default function SubscriptionPaymentMethods({
 
   return (
     <section
-      className={`rounded-2xl border border-slate-200/90 bg-white/90 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/70 ${compact ? "p-4 sm:p-5" : "p-5 sm:rounded-3xl sm:p-7"} ${className}`}
+      className={`rounded-lg border border-line/90 bg-white/90 shadow-sm dark:border-line/70  ${compact ? "p-4 sm:p-5" : "p-5 sm:rounded-lg sm:p-7"} ${className}`}
       aria-labelledby="subscription-payment-heading"
     >
       <div className="flex flex-col items-center gap-4 text-center sm:gap-5">
@@ -50,13 +50,13 @@ export default function SubscriptionPaymentMethods({
           />
           <h2
             id="subscription-payment-heading"
-            className={`font-bold text-slate-900 dark:text-white ${compact ? "text-sm sm:text-base" : "text-base sm:text-lg"}`}
+            className={`font-bold text-fg ${compact ? "text-sm sm:text-base" : "text-base sm:text-lg"}`}
           >
             {t("paymentMethodsTitle")}
           </h2>
         </div>
         {!compact && (
-          <p className="max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+          <p className="max-w-2xl text-sm leading-relaxed text-fg-muted">
             {t("paymentMethodsDescription")}
           </p>
         )}
@@ -65,7 +65,7 @@ export default function SubscriptionPaymentMethods({
             const label = t(`paymentMethod.${logo.id}`);
             return (
               <li key={logo.id}>
-                <div className="flex h-14 min-w-28 items-center justify-center rounded-xl border border-slate-200/90 bg-white px-4 py-2 shadow-sm dark:border-slate-700/80 dark:bg-slate-800/80 sm:h-16 sm:min-w-32 sm:px-5">
+                <div className="flex h-14 min-w-28 items-center justify-center rounded-lg border border-line/90 bg-white px-4 py-2 shadow-sm dark:border-line/80 sm:h-16 sm:min-w-32 sm:px-5">
                   {logo.isSvg ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -88,7 +88,7 @@ export default function SubscriptionPaymentMethods({
             );
           })}
         </ul>
-        <p className="text-xs text-slate-500 dark:text-slate-500">
+        <p className="text-xs text-fg-subtle">
           {t("paymentMethodsSecureNote")}
         </p>
       </div>

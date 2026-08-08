@@ -38,7 +38,10 @@ export function Badge({
       )}
     >
       {dot ? (
-        <span className={cn("size-1.5 shrink-0 rounded-full", t.dot)} aria-hidden />
+        <span
+          className={cn("size-1.5 shrink-0 rounded-full", t.dot)}
+          aria-hidden
+        />
       ) : null}
       {icon ? (
         <span className="shrink-0" aria-hidden>

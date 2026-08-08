@@ -155,7 +155,7 @@ export default function AdminUserMenusSection({
         <div
           className={`mb-6 flex flex-wrap items-center justify-between gap-3 ${isRTL ? "flex-row-reverse" : ""}`}
         >
-          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+          <h2 className="text-xl font-bold text-fg">
             {t("lists.title")} ({menus.length})
           </h2>
           {menus.length > 0 ? (
@@ -186,15 +186,12 @@ export default function AdminUserMenusSection({
         {menus.length > 0 ? (
           <div className="space-y-4">
             {menus.map((menu) => (
-              <div
-                key={menu.id}
-                className="p-4 border border-slate-200 dark:border-slate-700 rounded-lg"
-              >
+              <div key={menu.id} className="p-4 border border-line rounded-lg">
                 <div
                   className={`flex items-start justify-between mb-3 ${isRTL ? "flex-row-reverse" : ""}`}
                 >
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                    <h3 className="text-lg font-semibold text-fg mb-2">
                       {isRTL
                         ? menu.nameAr || menu.name
                         : menu.nameEn || menu.name}
@@ -203,7 +200,7 @@ export default function AdminUserMenusSection({
                       className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold mb-3 ${
                         menu.isActive
                           ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                          : "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400"
+                          : "bg-gray-100 text-gray-800  dark:text-fg-subtle"
                       }`}
                     >
                       {menu.isActive
@@ -211,7 +208,7 @@ export default function AdminUserMenusSection({
                         : t("status.suspended")}
                     </span>
                     <div
-                      className={`flex flex-wrap gap-4 text-sm text-slate-600 dark:text-slate-400 ${isRTL ? "flex-row-reverse" : ""}`}
+                      className={`flex flex-wrap gap-4 text-sm text-fg-muted ${isRTL ? "flex-row-reverse" : ""}`}
                     >
                       <span>
                         {t("lists.link")}: {menu.slug}
@@ -256,9 +253,7 @@ export default function AdminUserMenusSection({
           </div>
         ) : (
           <div className="text-center py-8">
-            <p className="text-slate-500 dark:text-slate-400">
-              {t("lists.noMenus")}
-            </p>
+            <p className="text-fg-muted">{t("lists.noMenus")}</p>
           </div>
         )}
       </CardDashBoard>

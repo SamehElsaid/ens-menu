@@ -123,8 +123,7 @@ export default function ProPlanPriceSelector({
                 compact ? "text-[10px] sm:text-xs" : "text-sm"
               }`}
             >
-              {formatEgpPrice(voucherOriginalPrice!)}{" "}
-              {tLanding("currencyEgp")}
+              {formatEgpPrice(voucherOriginalPrice!)} {tLanding("currencyEgp")}
               {billingChoice === "monthly"
                 ? tLanding("perMonth")
                 : tLanding("perYear")}
@@ -132,9 +131,7 @@ export default function ProPlanPriceSelector({
           </div>
         ) : (
           <>
-            <span className={priceClass}>
-              {formatEgpPrice(baseDisplay)}
-            </span>
+            <span className={priceClass}>{formatEgpPrice(baseDisplay)}</span>
             <span
               className={`text-slate-500 dark:text-slate-400 ms-1 ${
                 compact ? "text-[10px] sm:text-xs" : "text-sm"

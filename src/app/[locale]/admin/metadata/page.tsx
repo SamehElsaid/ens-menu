@@ -18,7 +18,12 @@ import {
   Modal,
   PageHeader,
 } from "@/components/ui";
-import { axiosGet, axiosPost, axiosPatch, axiosDelete } from "@/shared/axiosCall";
+import {
+  axiosGet,
+  axiosPost,
+  axiosPatch,
+  axiosDelete,
+} from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 
 interface PageMetadata {
@@ -61,7 +66,6 @@ const EMPTY_FORM: MetaForm = {
   keywordsEn: "",
 };
 
-
 export default function AdminMetadataPage() {
   const locale = useLocale();
   const t = useTranslations("adminMetadata");
@@ -92,7 +96,10 @@ export default function AdminMetadataPage() {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axiosGet<PageMetadata[] | MetaDataResponse>("/metaData", locale);
+      const res = await axiosGet<PageMetadata[] | MetaDataResponse>(
+        "/metaData",
+        locale,
+      );
       if (res.status) {
         let items: PageMetadata[] = [];
         if (Array.isArray(res.data)) {
@@ -129,7 +136,10 @@ export default function AdminMetadataPage() {
     try {
       const item = metaList.find((m) => m.id === id);
       if (!item) return;
-      const res = await axiosDelete<{ message?: string }>(`/metaData/${item.pageName}`, locale);
+      const res = await axiosDelete<{ message?: string }>(
+        `/metaData/${item.pageName}`,
+        locale,
+      );
       if (res.status) {
         toast.success(t("deleteSuccess"));
         fetchAll();
@@ -158,7 +168,12 @@ export default function AdminMetadataPage() {
   };
 
   const closeGenModal = () => {
-    setGenModal({ open: false, pageType: "blog", articleTitle: "", articleContent: "" });
+    setGenModal({
+      open: false,
+      pageType: "blog",
+      articleTitle: "",
+      articleContent: "",
+    });
   };
 
   const setField = (key: keyof MetaForm, value: string) => {
@@ -179,8 +194,16 @@ export default function AdminMetadataPage() {
       const pageName = form.pageName.trim().toLowerCase();
       const payload = { ...form, pageName };
       const res = isEdit
-        ? await axiosPatch<MetaForm, { message?: string }>(`/metaData/${pageName}`, locale, payload)
-        : await axiosPost<MetaForm, { message?: string }>("/metaData", locale, payload);
+        ? await axiosPatch<MetaForm, { message?: string }>(
+            `/metaData/${pageName}`,
+            locale,
+            payload,
+          )
+        : await axiosPost<MetaForm, { message?: string }>(
+            "/metaData",
+            locale,
+            payload,
+          );
 
       if (res.status) {
         toast.success(isEdit ? t("updateSuccess") : t("createSuccess"));
@@ -204,7 +227,11 @@ export default function AdminMetadataPage() {
 
     const resolvedPageName =
       modal.form.pageName.trim() ||
-      genModal.articleTitle.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+      genModal.articleTitle
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9-]/g, "");
 
     setGenerating(true);
     try {
@@ -260,12 +287,12 @@ export default function AdminMetadataPage() {
   };
 
   const inputClass =
-    "w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/40 transition-colors";
+    "w-full px-4 py-2.5 border border-line rounded-lg bg-raised text-fg focus:outline-none focus:ring-2 focus:ring-primary/40 transition-colors";
   const textareaClass =
-    "w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/40 transition-colors resize-none";
-  const labelClass = "block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1";
+    "w-full px-4 py-2.5 border border-line rounded-lg bg-raised text-fg focus:outline-none focus:ring-2 focus:ring-primary/40 transition-colors resize-none";
+  const labelClass = "block text-sm font-medium text-fg-muted mb-1";
   const langBadge = (lang: string) => (
-    <span className="ms-2 px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+    <span className="ms-2 px-1.5 py-0.5 rounded bg-surface-3 text-[10px] font-bold text-fg-muted uppercase tracking-wider">
       {lang}
     </span>
   );
@@ -307,84 +334,108 @@ export default function AdminMetadataPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-700">
-                  <th className={`py-3 px-4 font-semibold text-slate-600 dark:text-slate-400 ${isRTL ? "text-right" : "text-left"}`}>
+                <tr className="border-b border-line">
+                  <th
+                    className={`py-3 px-4 font-semibold text-fg-muted ${isRTL ? "text-right" : "text-left"}`}
+                  >
                     {t("columns.pageName")}
                   </th>
-                  <th className={`py-3 px-4 font-semibold text-slate-600 dark:text-slate-400 ${isRTL ? "text-right" : "text-left"} hidden md:table-cell`}>
+                  <th
+                    className={`py-3 px-4 font-semibold text-fg-muted ${isRTL ? "text-right" : "text-left"} hidden md:table-cell`}
+                  >
                     {t("columns.titleAr")}
                   </th>
-                  <th className={`py-3 px-4 font-semibold text-slate-600 dark:text-slate-400 ${isRTL ? "text-right" : "text-left"} hidden md:table-cell`}>
+                  <th
+                    className={`py-3 px-4 font-semibold text-fg-muted ${isRTL ? "text-right" : "text-left"} hidden md:table-cell`}
+                  >
                     {t("columns.titleEn")}
                   </th>
-                  <th className="py-3 px-4 font-semibold text-slate-600 dark:text-slate-400 text-center">
+                  <th className="py-3 px-4 font-semibold text-fg-muted text-center">
                     {t("columns.actions")}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {metaList.map((item) => (
-                    <tr
-                      key={item.pageName}
-                      className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                  <tr
+                    key={item.pageName}
+                    className="border-b border-line hover:bg-surface-2 transition-colors"
+                  >
+                    <td
+                      className={`py-3 px-4 font-mono text-sm font-medium text-fg ${isRTL ? "text-right" : "text-left"}`}
                     >
-                      <td className={`py-3 px-4 font-mono text-sm font-medium text-slate-800 dark:text-slate-200 ${isRTL ? "text-right" : "text-left"}`}>
-                        {item.pageName}
-                      </td>
-                      <td className={`py-3 px-4 text-slate-600 dark:text-slate-400 hidden md:table-cell max-w-[200px] truncate ${isRTL ? "text-right" : "text-left"}`}>
-                        {item.titleAr || <span className="text-slate-300 dark:text-slate-600">—</span>}
-                      </td>
-                      <td className={`py-3 px-4 text-slate-600 dark:text-slate-400 hidden md:table-cell max-w-[200px] truncate ${isRTL ? "text-right" : "text-left"}`}>
-                        {item.titleEn || <span className="text-slate-300 dark:text-slate-600">—</span>}
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className={`flex items-center gap-2 ${isRTL ? "justify-start flex-row-reverse" : "justify-end"}`}>
-                          <Button
-                            variant="subtle"
-                            size="sm"
-                            startIcon={<IoCreateOutline />}
-                            onClick={() => openEdit(item)}
-                          >
-                            {t("edit")}
-                          </Button>
-                          {confirmDeleteId === item.id ? (
-                            <div className="inline-flex items-center gap-1.5">
-                              <span className="text-xs font-medium text-danger">{t("confirmDelete")}</span>
-                              <Button
-                                variant="danger"
-                                size="sm"
-                                iconOnly
-                                aria-label={t("delete")}
-                                onClick={() => handleDelete(item.id)}
-                                loading={deletingId === item.id}
-                              >
-                                <FaCheck className="text-xs" />
-                              </Button>
-                              <Button
-                                variant="secondary"
-                                size="sm"
-                                iconOnly
-                                aria-label={t("modal.cancel")}
-                                onClick={() => setConfirmDeleteId(null)}
-                              >
-                                <FaTimes className="text-xs" />
-                              </Button>
-                            </div>
-                          ) : (
+                      {item.pageName}
+                    </td>
+                    <td
+                      className={`py-3 px-4 text-fg-muted hidden md:table-cell max-w-[200px] truncate ${isRTL ? "text-right" : "text-left"}`}
+                    >
+                      {item.titleAr || (
+                        <span className="text-slate-300 dark:text-fg-muted">
+                          —
+                        </span>
+                      )}
+                    </td>
+                    <td
+                      className={`py-3 px-4 text-fg-muted hidden md:table-cell max-w-[200px] truncate ${isRTL ? "text-right" : "text-left"}`}
+                    >
+                      {item.titleEn || (
+                        <span className="text-slate-300 dark:text-fg-muted">
+                          —
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4">
+                      <div
+                        className={`flex items-center gap-2 ${isRTL ? "justify-start flex-row-reverse" : "justify-end"}`}
+                      >
+                        <Button
+                          variant="subtle"
+                          size="sm"
+                          startIcon={<IoCreateOutline />}
+                          onClick={() => openEdit(item)}
+                        >
+                          {t("edit")}
+                        </Button>
+                        {confirmDeleteId === item.id ? (
+                          <div className="inline-flex items-center gap-1.5">
+                            <span className="text-xs font-medium text-danger">
+                              {t("confirmDelete")}
+                            </span>
                             <Button
-                              variant="dangerGhost"
+                              variant="danger"
                               size="sm"
-                              startIcon={<IoTrashOutline />}
+                              iconOnly
+                              aria-label={t("delete")}
                               onClick={() => handleDelete(item.id)}
                               loading={deletingId === item.id}
                             >
-                              {t("delete")}
+                              <FaCheck className="text-xs" />
                             </Button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              iconOnly
+                              aria-label={t("modal.cancel")}
+                              onClick={() => setConfirmDeleteId(null)}
+                            >
+                              <FaTimes className="text-xs" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button
+                            variant="dangerGhost"
+                            size="sm"
+                            startIcon={<IoTrashOutline />}
+                            onClick={() => handleDelete(item.id)}
+                            loading={deletingId === item.id}
+                          >
+                            {t("delete")}
+                          </Button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -467,55 +518,62 @@ export default function AdminMetadataPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label className={labelClass}>{t("modal.description")} {langBadge("AR")}</label>
-                  <textarea
-                    value={modal.form.descriptionAr}
-                    onChange={(e) => setField("descriptionAr", e.target.value)}
-                    rows={3}
-                    className={textareaClass}
-                    dir="rtl"
-                    placeholder="الوصف بالعربية..."
-                  />
-                </div>
-                <div>
-                  <label className={labelClass}>{t("modal.description")} {langBadge("EN")}</label>
-                  <textarea
-                    value={modal.form.descriptionEn}
-                    onChange={(e) => setField("descriptionEn", e.target.value)}
-                    rows={3}
-                    className={textareaClass}
-                    dir="ltr"
-                    placeholder="Description in English..."
-                  />
-                </div>
-              </div>
+            <div>
+              <label className={labelClass}>
+                {t("modal.description")} {langBadge("AR")}
+              </label>
+              <textarea
+                value={modal.form.descriptionAr}
+                onChange={(e) => setField("descriptionAr", e.target.value)}
+                rows={3}
+                className={textareaClass}
+                dir="rtl"
+                placeholder="الوصف بالعربية..."
+              />
+            </div>
+            <div>
+              <label className={labelClass}>
+                {t("modal.description")} {langBadge("EN")}
+              </label>
+              <textarea
+                value={modal.form.descriptionEn}
+                onChange={(e) => setField("descriptionEn", e.target.value)}
+                rows={3}
+                className={textareaClass}
+                dir="ltr"
+                placeholder="Description in English..."
+              />
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label className={labelClass}>{t("modal.keywords")} {langBadge("AR")}</label>
-                  <textarea
-                    value={modal.form.keywordsAr}
-                    onChange={(e) => setField("keywordsAr", e.target.value)}
-                    rows={2}
-                    className={textareaClass}
-                    dir="rtl"
-                    placeholder="كلمة1، كلمة2..."
-                  />
-                </div>
-                <div>
-                  <label className={labelClass}>{t("modal.keywords")} {langBadge("EN")}</label>
-                  <textarea
-                    value={modal.form.keywordsEn}
-                    onChange={(e) => setField("keywordsEn", e.target.value)}
-                    rows={2}
-                    className={textareaClass}
-                    dir="ltr"
-                    placeholder="keyword1, keyword2..."
-                  />
-                </div>
-              </div>
-
+            <div>
+              <label className={labelClass}>
+                {t("modal.keywords")} {langBadge("AR")}
+              </label>
+              <textarea
+                value={modal.form.keywordsAr}
+                onChange={(e) => setField("keywordsAr", e.target.value)}
+                rows={2}
+                className={textareaClass}
+                dir="rtl"
+                placeholder="كلمة1، كلمة2..."
+              />
+            </div>
+            <div>
+              <label className={labelClass}>
+                {t("modal.keywords")} {langBadge("EN")}
+              </label>
+              <textarea
+                value={modal.form.keywordsEn}
+                onChange={(e) => setField("keywordsEn", e.target.value)}
+                rows={2}
+                className={textareaClass}
+                dir="ltr"
+                placeholder="keyword1, keyword2..."
+              />
+            </div>
+          </div>
         </div>
       </Modal>
 
@@ -529,7 +587,11 @@ export default function AdminMetadataPage() {
         dismissible={!generating}
         footer={
           <>
-            <Button variant="secondary" onClick={closeGenModal} disabled={generating}>
+            <Button
+              variant="secondary"
+              onClick={closeGenModal}
+              disabled={generating}
+            >
               {t("modal.cancel")}
             </Button>
             <Button
@@ -563,7 +625,10 @@ export default function AdminMetadataPage() {
               type="text"
               value={genModal.articleTitle}
               onChange={(e) =>
-                setGenModal((prev) => ({ ...prev, articleTitle: e.target.value }))
+                setGenModal((prev) => ({
+                  ...prev,
+                  articleTitle: e.target.value,
+                }))
               }
               placeholder={t("generate.articleTitlePlaceholder")}
               className={inputClass}
@@ -575,7 +640,10 @@ export default function AdminMetadataPage() {
             <textarea
               value={genModal.articleContent}
               onChange={(e) =>
-                setGenModal((prev) => ({ ...prev, articleContent: e.target.value }))
+                setGenModal((prev) => ({
+                  ...prev,
+                  articleContent: e.target.value,
+                }))
               }
               rows={6}
               placeholder={t("generate.articleContentPlaceholder")}

@@ -48,7 +48,7 @@ export function NotificationPermissionCard() {
     <div
       role="alert"
       className={[
-        "relative overflow-hidden rounded-2xl border p-4 shadow-md transition-all sm:p-5",
+        "relative overflow-hidden rounded-lg border p-4 shadow-md transition-all sm:p-5",
         isDenied
           ? "border-red-200/70 bg-linear-to-br from-red-50 via-rose-50/50 to-white dark:border-red-500/20 dark:from-red-950/40 dark:via-rose-950/20 dark:to-slate-900"
           : "border-violet-200/70 bg-linear-to-br from-violet-50 via-fuchsia-50/50 to-white dark:border-violet-500/20 dark:from-violet-950/40 dark:via-fuchsia-950/20 dark:to-slate-900",
@@ -78,7 +78,7 @@ export function NotificationPermissionCard() {
         {/* icon */}
         <div
           className={[
-            "relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg",
+            "relative flex h-12 w-12 shrink-0 items-center justify-center rounded-lg text-white shadow-lg",
             isDenied
               ? "bg-linear-to-br from-red-500 to-rose-600 shadow-red-500/30"
               : "bg-linear-to-br from-violet-600 to-fuchsia-600 shadow-violet-500/30",
@@ -100,7 +100,7 @@ export function NotificationPermissionCard() {
           {!isDenied && !justGranted && (
             <span
               aria-hidden
-              className="absolute inset-0 rounded-2xl animate-ping bg-violet-500/30"
+              className="absolute inset-0 rounded-lg animate-ping bg-violet-500/30"
               style={{ animationDuration: "2s" }}
             />
           )}
@@ -119,7 +119,7 @@ export function NotificationPermissionCard() {
             {isDenied ? t("deniedTitle") : t("title")}
           </p>
 
-          <p className="mt-1 max-w-sm text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+          <p className="mt-1 max-w-sm text-xs leading-relaxed text-fg-muted">
             {isDenied ? t("deniedDescription") : t("description")}
           </p>
 
@@ -130,7 +130,7 @@ export function NotificationPermissionCard() {
               onClick={handleAllow}
               disabled={loading || justGranted}
               className={[
-                "inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-md transition-all active:scale-95 disabled:opacity-60",
+                "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-md transition-all active:scale-95 disabled:opacity-60",
                 justGranted
                   ? "bg-emerald-500 shadow-emerald-500/30"
                   : isDenied
@@ -145,7 +145,11 @@ export function NotificationPermissionCard() {
               ) : (
                 <IoNotificationsOutline className="text-sm" aria-hidden />
               )}
-              {justGranted ? t("allowBtn") : isDenied ? t("tryAgain") : t("allowBtn")}
+              {justGranted
+                ? t("allowBtn")
+                : isDenied
+                  ? t("tryAgain")
+                  : t("allowBtn")}
             </button>
 
             {/* secondary — open browser site settings */}
@@ -154,7 +158,7 @@ export function NotificationPermissionCard() {
                 href={getBrowserSettingsUrl()}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-red-200/80 bg-white px-4 py-2 text-xs font-medium text-red-700 shadow-sm transition-all hover:bg-red-50 dark:border-red-700/50 dark:bg-slate-800 dark:text-red-300 dark:hover:bg-red-950/40"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-red-200/80 bg-white px-4 py-2 text-xs font-medium text-red-700 shadow-sm transition-all hover:bg-red-50 dark:border-red-700/50 dark:text-red-300 dark:hover:bg-red-950/40"
               >
                 <IoSettingsOutline className="text-sm" aria-hidden />
                 {t("openSettings")}
@@ -169,7 +173,7 @@ export function NotificationPermissionCard() {
           type="button"
           onClick={() => setDismissed(true)}
           aria-label={t("dismiss")}
-          className="shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700/60 dark:hover:text-slate-200"
+          className="shrink-0 rounded-lg p-1.5 text-fg-subtle transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700/60 dark:hover:text-slate-200"
         >
           <IoClose className="text-base" aria-hidden />
         </button>

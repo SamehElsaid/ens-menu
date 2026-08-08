@@ -25,7 +25,7 @@ interface RecentActivityListProps {
 
 function ActivityRowSkeleton() {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl bg-surface-2 p-3">
+    <div className="flex items-center justify-between gap-4 rounded-lg bg-surface-2 p-3">
       <div className="flex flex-1 items-center gap-3">
         <Skeleton className="size-8 shrink-0 rounded-lg" />
         <div className="min-w-0 flex-1 space-y-2">
@@ -80,14 +80,16 @@ export default function RecentActivityList({
         return (
           <li
             key={entry.id}
-            className="flex items-center justify-between gap-4 rounded-xl border border-transparent bg-surface-2/80 p-3 transition-colors duration-150 hover:border-line hover:bg-surface-2"
+            className="flex items-center justify-between gap-4 rounded-lg border border-transparent bg-surface-2/80 p-3 transition-colors duration-150 hover:border-line hover:bg-surface-2"
           >
             <div className="flex min-w-0 flex-1 items-start gap-3 text-start">
               <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-surface text-brand shadow-xs ring-1 ring-line">
                 <Icon className="text-base" aria-hidden />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-fg">{title}</p>
+                <p className="truncate text-sm font-semibold text-fg">
+                  {title}
+                </p>
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-fg-muted">
                   <Badge tone="neutral" size="sm">
                     {t(`activityCategories.${category}` as never)}

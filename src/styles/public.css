@@ -1,0 +1,543 @@
+/**
+ * ENSMENU public site — token layer.
+ *
+ * Everything here is scoped to `.public-world`, which is applied by the public
+ * shells only (`(main)/layout.tsx`, `not-found`, `unauthorized`, `payment`).
+ * The dashboard and admin never carry the class, so nothing in this file can
+ * reach them. That separation is deliberate: the product is a compact 13px
+ * working tool, and the marketing site is a generous surface read once by a
+ * stranger. They share the name, the logo and the brand hue. Nothing else.
+ *
+ * Do not move these values into `:root` — that is the product's token layer.
+ *
+ * Tokens and element defaults live in `@layer base`. Unlayered CSS beats every
+ * Tailwind utility regardless of specificity, so a `.public-world h2` rule
+ * outside a layer would silently defeat `text-white` on a dark band. Inside
+ * `base`, utilities win.
+ */
+
+@layer base {
+  .public-world {
+    /* --- Ground. Warm-neutral rather than pure grey, so food photography and
+           the amber accent sit on it without going cold. --- */
+    --s-bg: #ffffff;
+    --s-bg-tint: #f7f6fb;
+    --s-bg-warm: #fbf9f6;
+    --s-bg-ink: #100f1c;
+    --s-bg-ink-2: #1a1830;
+
+    /* --- Ink --- */
+    --s-ink: #12111c;
+    --s-body: #4a4858;
+    --s-muted: #78758a;
+    --s-line: #e7e5ef;
+    --s-line-strong: #d6d3e3;
+
+    /* --- Brand. Same indigo the product uses, so one company reads across the
+           site and the dashboard, but spent at marketing intensity. --- */
+    --s-brand: #5a4ce0;
+    --s-brand-hover: #4a3cc4;
+    --s-brand-deep: #3d33a0;
+    --s-brand-bright: #7c6cf5;
+    --s-brand-tint: #efedfe;
+    --s-brand-line: #d5d0fb;
+
+    /* --- Hospitality accent. The one warm note; used for highlights, ratings
+           and food-adjacent moments, never for primary actions. --- */
+    --s-warm: #e08a2b;
+    --s-warm-bright: #f2a53d;
+    --s-warm-tint: #fdf3e5;
+
+    /* --- On dark bands --- */
+    --s-on-ink: #ffffff;
+    --s-on-ink-body: rgb(255 255 255 / 0.68);
+    --s-on-ink-muted: rgb(255 255 255 / 0.5);
+    --s-on-ink-line: rgb(255 255 255 / 0.12);
+    --s-on-ink-raise: rgb(255 255 255 / 0.05);
+
+    /* --- Status, marketing-weight --- */
+    --s-positive: #12886a;
+    --s-positive-tint: #e6f5f0;
+    --s-critical: #cf3b3b;
+    --s-critical-tint: #fdeded;
+
+    /* --- Fluid type. Marketing scale: the display size is the page's single
+           loudest element and everything else steps down from it. --- */
+    --s-display: clamp(2.5rem, 1.6rem + 3.4vw, 4rem);
+    --s-h1: clamp(2rem, 1.4rem + 2.6vw, 3.25rem);
+    --s-h2: clamp(1.75rem, 1.35rem + 1.7vw, 2.5rem);
+    --s-h3: clamp(1.25rem, 1.12rem + 0.55vw, 1.5rem);
+    --s-h4: 1.125rem;
+    --s-lead: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
+    --s-body-size: 1.0625rem;
+    --s-small: 0.9375rem;
+    --s-tiny: 0.8125rem;
+
+    /* --- Geometry. Softer than the product's 8px cards; a marketing surface
+           can afford the roundness. --- */
+    --s-r-sm: 0.5rem;
+    --s-r-control: 0.625rem;
+    --s-r-card: 1rem;
+    --s-r-lg: 1.25rem;
+    --s-r-xl: 1.75rem;
+
+    /* --- Elevation. Layered and low-opacity, Stripe-style: a shadow reads as
+           light falling on a surface, never as a grey halo. --- */
+    --s-shadow-sm:
+      0 1px 2px rgb(18 17 28 / 0.04), 0 1px 3px rgb(18 17 28 / 0.06);
+    --s-shadow:
+      0 2px 4px rgb(18 17 28 / 0.03), 0 6px 16px -4px rgb(18 17 28 / 0.08);
+    --s-shadow-lg:
+      0 4px 8px rgb(18 17 28 / 0.04), 0 18px 40px -12px rgb(18 17 28 / 0.14);
+    --s-shadow-brand: 0 8px 28px -8px rgb(90 76 224 / 0.45);
+
+    /* --- Rhythm --- */
+    --s-section-y: clamp(4rem, 2.8rem + 5vw, 7rem);
+    --s-section-y-lg: clamp(5rem, 3.2rem + 7vw, 9rem);
+    --s-gutter: clamp(1.25rem, 4vw, 2rem);
+    --s-max: 1200px;
+    --s-max-prose: 42rem;
+
+    --s-header-h: 4.5rem;
+
+    color-scheme: light;
+    background-color: var(--s-bg);
+    color: var(--s-body);
+    font-size: var(--s-body-size);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .dark .public-world {
+    --s-bg: #0b0a12;
+    --s-bg-tint: #121020;
+    --s-bg-warm: #12101c;
+    --s-bg-ink: #08070f;
+    --s-bg-ink-2: #14121f;
+
+    --s-ink: #f6f5fb;
+    --s-body: #b3afc6;
+    --s-muted: #85819a;
+    --s-line: #241f3a;
+    --s-line-strong: #322c4d;
+
+    --s-brand: #8577f7;
+    --s-brand-hover: #9a8dff;
+    --s-brand-deep: #6c5eee;
+    --s-brand-bright: #a396ff;
+    --s-brand-tint: #1b1733;
+    --s-brand-line: #302a55;
+
+    --s-warm: #f2a53d;
+    --s-warm-bright: #ffbc5c;
+    --s-warm-tint: #2a1f10;
+
+    --s-positive: #3fc79c;
+    --s-positive-tint: #10261f;
+    --s-critical: #f07070;
+    --s-critical-tint: #2a1414;
+
+    --s-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+    --s-shadow: 0 2px 4px rgb(0 0 0 / 0.3), 0 8px 20px -6px rgb(0 0 0 / 0.5);
+    --s-shadow-lg:
+      0 4px 10px rgb(0 0 0 / 0.35), 0 24px 50px -14px rgb(0 0 0 / 0.7);
+    --s-shadow-brand: 0 8px 30px -8px rgb(108 94 238 / 0.55);
+
+    color-scheme: dark;
+  }
+
+  /**
+   * A patch of the interface that stays light whatever the site theme is.
+   *
+   * The phone mock shows a guest's screen, and a guest's screen is white. If
+   * it followed the visitor's dark preference the mock would stop depicting
+   * the product and start depicting the website, and — worse — pale ink would
+   * land on the white shell. Re-declaring the tokens keeps every utility
+   * inside it honest without any `dark:` overrides at the call site.
+   */
+  .dark .public-world .s-daylight {
+    --s-bg: #ffffff;
+    --s-bg-tint: #f7f6fb;
+    --s-bg-warm: #fbf9f6;
+    --s-bg-ink: #100f1c;
+
+    --s-ink: #12111c;
+    --s-body: #4a4858;
+    --s-muted: #78758a;
+    --s-line: #e7e5ef;
+    --s-line-strong: #d6d3e3;
+
+    --s-brand: #5a4ce0;
+    --s-brand-hover: #4a3cc4;
+    --s-brand-deep: #3d33a0;
+    --s-brand-tint: #efedfe;
+    --s-brand-line: #d5d0fb;
+
+    --s-warm: #e08a2b;
+    --s-warm-tint: #fdf3e5;
+
+    --s-positive: #1f9d76;
+    --s-positive-tint: #e6f7f1;
+
+    --s-shadow-sm: 0 1px 2px rgb(18 17 28 / 0.05);
+
+    color-scheme: light;
+  }
+
+  /* --- Base typography inside the public world --- */
+
+  .public-world :where(h1, h2, h3, h4, h5, h6) {
+    font-family: var(--font-site-display);
+    color: var(--s-ink);
+    font-weight: 700;
+    letter-spacing: -0.022em;
+    text-wrap: balance;
+  }
+
+  /* Arabic does not take negative tracking the way Latin does; the letterforms
+     join, so tightening them damages the join rather than the colour. */
+  .public-world:dir(rtl) :where(h1, h2, h3, h4, h5, h6) {
+    letter-spacing: 0;
+  }
+
+  .public-world :where(p) {
+    text-wrap: pretty;
+  }
+
+  .public-world ::selection {
+    background: var(--s-brand);
+    color: #fff;
+  }
+
+  /* Dark bands opt in by class, and everything inside them inherits light ink
+     so no child has to remember to override it. */
+  .public-world .s-on-ink,
+  .public-world .s-on-ink :where(h1, h2, h3, h4, h5, h6) {
+    color: var(--s-on-ink);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Scroll-driven reveal.
+
+   Native scroll timelines: no JavaScript, no layout thrash, and the animation
+   is entirely off the main thread. Content is fully visible when the feature
+   or motion preference is absent, so this can only ever add.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .public-world .s-reveal {
+      animation: s-reveal-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 22%;
+    }
+
+    .public-world .s-reveal-soft {
+      animation: s-reveal-soft linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 26%;
+    }
+  }
+}
+
+/**
+ * Arabic headings need air.
+ *
+ * The display line-heights are set for Latin caps; Arabic hangs marks well
+ * above the baseline and tails well below it, so at 1.08 the second line of a
+ * hero lands on the first. Deliberately unlayered: Tailwind's size utilities
+ * live in the `utilities` layer and would win from anywhere inside `base`,
+ * whatever the specificity.
+ */
+.public-world:dir(rtl) :is(h1, h2, h3, h4, h5, h6) {
+  line-height: 1.35;
+}
+
+@keyframes s-reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes s-reveal-soft {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Staggered children: each step delays the range start a little further. */
+.public-world .s-stagger > *:nth-child(2) {
+  animation-range: entry 4% cover 26%;
+}
+.public-world .s-stagger > *:nth-child(3) {
+  animation-range: entry 8% cover 30%;
+}
+.public-world .s-stagger > *:nth-child(4) {
+  animation-range: entry 12% cover 34%;
+}
+.public-world .s-stagger > *:nth-child(5) {
+  animation-range: entry 16% cover 38%;
+}
+.public-world .s-stagger > *:nth-child(6) {
+  animation-range: entry 20% cover 42%;
+}
+
+/* --------------------------------------------------------------------------
+   Materials
+   -------------------------------------------------------------------------- */
+
+/** Soft brand aurora behind a hero. One per page, never more. */
+.s-aurora {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.s-aurora::before,
+.s-aurora::after {
+  content: "";
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: 0.55;
+}
+
+.s-aurora::before {
+  inset-inline-start: -10%;
+  top: -30%;
+  width: 46rem;
+  height: 46rem;
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--s-brand) 38%, transparent),
+    transparent 68%
+  );
+}
+
+.s-aurora::after {
+  inset-inline-end: -14%;
+  top: -12%;
+  width: 34rem;
+  height: 34rem;
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--s-warm) 30%, transparent),
+    transparent 68%
+  );
+}
+
+.dark .s-aurora::before,
+.dark .s-aurora::after {
+  opacity: 0.35;
+}
+
+/** Hairline grid, used behind dark bands to give them depth without noise. */
+.s-grid-lines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--s-on-ink-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--s-on-ink-line) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(
+    ellipse 80% 60% at 50% 0%,
+    #000 20%,
+    transparent 75%
+  );
+}
+
+/** Edge fade for horizontally scrolling strips (logo rows, mobile cards). */
+.s-edge-fade {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 4rem,
+    #000 calc(100% - 4rem),
+    transparent
+  );
+}
+
+/** Marquee used by the trusted-by strip. Pauses on hover and on reduced motion. */
+@keyframes s-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.s-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: s-marquee 42s linear infinite;
+}
+
+.public-world:dir(rtl) .s-marquee-track {
+  animation-direction: reverse;
+}
+
+.s-marquee:hover .s-marquee-track,
+.s-marquee:focus-within .s-marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .s-marquee-track {
+    animation: none;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Native disclosure animation for the FAQ accordion.
+   Progressive: where `::details-content` and interpolate-size are supported it
+   eases open, and everywhere else it simply snaps. No JS either way.
+   -------------------------------------------------------------------------- */
+
+@supports (interpolate-size: allow-keywords) {
+  .public-world {
+    interpolate-size: allow-keywords;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports selector(details::details-content) {
+    .s-accordion::details-content {
+      block-size: 0;
+      overflow: clip;
+      opacity: 0;
+      transition:
+        block-size 260ms cubic-bezier(0.2, 0, 0, 1),
+        opacity 200ms ease,
+        content-visibility 260ms allow-discrete;
+    }
+
+    .s-accordion[open]::details-content {
+      block-size: auto;
+      opacity: 1;
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   CMS article body.
+
+   Knowledge-base articles arrive as arbitrary HTML from the editor, so they
+   cannot carry utility classes. These rules give that HTML the public site's
+   reading typography. Scoped to `.public-world` and to the article wrapper, so
+   the same editor output inside admin's preview is untouched.
+   -------------------------------------------------------------------------- */
+
+.public-world .kb-article :where(h1, h2) {
+  font-size: var(--s-h3);
+  margin-block: 2.25rem 0.75rem;
+}
+
+.public-world .kb-article :where(h3, h4, h5, h6) {
+  font-size: var(--s-h4);
+  margin-block: 1.75rem 0.5rem;
+}
+
+.public-world .kb-article :where(p) {
+  margin-block-end: 1.25rem;
+  line-height: 1.75;
+}
+
+.public-world .kb-article :where(ul, ol) {
+  margin-block-end: 1.25rem;
+  padding-inline-start: 1.5rem;
+}
+
+.public-world .kb-article :where(ul) {
+  list-style: disc;
+}
+
+.public-world .kb-article :where(ol) {
+  list-style: decimal;
+}
+
+.public-world .kb-article :where(li) {
+  margin-block-end: 0.5rem;
+}
+
+.public-world .kb-article :where(li)::marker {
+  color: var(--s-brand);
+}
+
+.public-world .kb-article :where(a) {
+  color: var(--s-brand);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.public-world .kb-article :where(strong, b) {
+  color: var(--s-ink);
+  font-weight: 600;
+}
+
+.public-world .kb-article :where(blockquote) {
+  margin-block-end: 1.25rem;
+  padding-inline-start: 1.25rem;
+  border-inline-start: 3px solid var(--s-brand-line);
+  color: var(--s-muted);
+}
+
+.public-world .kb-article :where(img) {
+  border-radius: var(--s-r-card);
+}
+
+.public-world .kb-article :where(code) {
+  border-radius: var(--s-r-sm);
+  background: var(--s-bg-tint);
+  padding: 0.1em 0.4em;
+  font-size: 0.9em;
+}
+
+/** The product's base layer paints a focus ring in the app's accent. Inside the
+    public world it should be the public accent, and on dark bands it has to be
+    light or it disappears. Unlayered, so it wins over the `@layer base` rule
+    without an `!important`. */
+.public-world
+  :where(
+    a,
+    button,
+    input,
+    select,
+    textarea,
+    summary,
+    [tabindex]
+  ):focus-visible {
+  outline: 2px solid var(--s-brand);
+  outline-offset: 2px;
+}
+
+.public-world
+  :where(.s-on-ink)
+  :where(
+    a,
+    button,
+    input,
+    select,
+    textarea,
+    summary,
+    [tabindex]
+  ):focus-visible {
+  outline-color: #fff;
+}

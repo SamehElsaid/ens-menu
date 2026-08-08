@@ -40,8 +40,7 @@ export default function MenuAnalyticsPage() {
       enabled: Boolean(menuSlugOrId),
     });
 
-  const displayTotalViews =
-    analytics?.summary.totalViews ?? menu?.views ?? 0;
+  const displayTotalViews = analytics?.summary.totalViews ?? menu?.views ?? 0;
 
   const activeItemsRate = useMemo(() => {
     if (!menu || (menu.itemsCount ?? 0) <= 0) return 0;
@@ -54,7 +53,7 @@ export default function MenuAnalyticsPage() {
         <div>
           <LinkTo
             href={`/dashboard/${menuSlugOrId}`}
-            className="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-primary mb-3 transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm text-fg-muted hover:text-primary mb-3 transition-colors"
           >
             <IoArrowBack
               className={`text-base ${locale === "ar" ? "rotate-180" : ""}`}
@@ -62,11 +61,11 @@ export default function MenuAnalyticsPage() {
             {t("backToOverview")}
           </LinkTo>
           <PageTitleWithHelp>
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100">
+            <h1 className="text-2xl md:text-3xl font-bold text-fg">
               {t("title")}
             </h1>
           </PageTitleWithHelp>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+          <p className="text-fg-muted text-sm mt-1">
             {isFreePlan ? t("freeSubtitle") : t("subtitle")}
           </p>
         </div>

@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -6,13 +6,15 @@ import { Button } from "@/components/ui";
 import type SunEditorCore from "suneditor/src/lib/core";
 import SunEditor from "suneditor-react";
 
-
 interface ShowEditorProps {
   initialTemplateName: string;
   showMore?: boolean;
 }
 
-const ShowEditor = ({ initialTemplateName, showMore = false }: ShowEditorProps) => {
+const ShowEditor = ({
+  initialTemplateName,
+  showMore = false,
+}: ShowEditorProps) => {
   const [showMoreState, setShowMoreState] = useState(false);
   const divRef = useRef<HTMLDivElement>(null);
   const editorInstance = useRef<SunEditorCore | null>(null);
@@ -41,7 +43,9 @@ const ShowEditor = ({ initialTemplateName, showMore = false }: ShowEditorProps) 
         disableToolbar
         hideToolbar
         onLoad={() => {
-          const editor = document.querySelector<HTMLElement>(".sun-editor-editable");
+          const editor = document.querySelector<HTMLElement>(
+            ".sun-editor-editable",
+          );
           if (editor) {
             editor.setAttribute("contenteditable", "false");
             editor.style.pointerEvents = "auto";

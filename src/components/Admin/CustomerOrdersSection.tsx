@@ -46,7 +46,10 @@ function orderStatusTone(status: string): StatusTone {
   }
 }
 
-export default function CustomerOrdersSection({ userId, onSelectOrder }: Props) {
+export default function CustomerOrdersSection({
+  userId,
+  onSelectOrder,
+}: Props) {
   const locale = useLocale();
   const t = useTranslations("adminUsers.userDetails.customerSections.orders");
   const [data, setData] = useState<UserOrdersResponse | null>(null);

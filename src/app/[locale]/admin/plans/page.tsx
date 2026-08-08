@@ -332,8 +332,7 @@ export default function PlansPage() {
     [t, openEdit],
   );
 
-  const editingPro =
-    editModal.plan != null && isProPlanName(String(form.name));
+  const editingPro = editModal.plan != null && isProPlanName(String(form.name));
 
   return (
     <div className="space-y-6">
@@ -379,10 +378,7 @@ export default function PlansPage() {
                 t={t}
               />
               <div className="flex justify-end">
-                <Button
-                  onClick={handleSaveCustom}
-                  loading={customSaving}
-                >
+                <Button onClick={handleSaveCustom} loading={customSaving}>
                   {t("customDisplay.save")}
                 </Button>
               </div>
@@ -420,185 +416,177 @@ export default function PlansPage() {
             <input
               type="text"
               value={String(form.name)}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, name: e.target.value }))
-              }
-              className="w-full rounded-xl border border-line-strong bg-surface px-4 py-2.5 text-fg"
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              className="w-full rounded-lg border border-line-strong bg-surface px-4 py-2.5 text-fg"
               dir={locale === "ar" ? "rtl" : "ltr"}
             />
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                    {t("editModal.priceMonthly")}
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    step={0.01}
-                    value={Number(form.priceMonthly)}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        priceMonthly: e.target.value
-                          ? Number(e.target.value)
-                          : 0,
-                      }))
-                    }
-                    className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                    {t("editModal.priceYearly")}
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    step={0.01}
-                    value={Number(form.priceYearly)}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        priceYearly: e.target.value
-                          ? Number(e.target.value)
-                          : 0,
-                      }))
-                    }
-                    className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
-                  />
-                </div>
-              </div>
-
-              {editingPro && (
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                    {t("editModal.extraMenuPrice")}
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    step={0.01}
-                    value={Number(form.extraMenuPrice)}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        extraMenuPrice: e.target.value
-                          ? Number(e.target.value)
-                          : 0,
-                      }))
-                    }
-                    className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
-                  />
-                  <p className="text-xs text-slate-500 mt-1">
-                    {t("editModal.extraMenuPriceHint")}
-                  </p>
-                </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  {t("editModal.maxMenus")}
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  value={Number(form.maxMenus)}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      maxMenus: e.target.value ? Number(e.target.value) : 0,
-                    }))
-                  }
-                  className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  {t("editModal.maxProducts")}
-                </label>
-                <input
-                  type="number"
-                  min={-1}
-                  value={Number(form.maxProducts)}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      maxProducts: e.target.value ? Number(e.target.value) : 0,
-                    }))
-                  }
-                  className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
-                />
-                <p className="text-xs text-slate-500 mt-1">
-                  {t("editModal.maxProductsHint")}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="hasAds"
-                  checked={Boolean(form.hasAds)}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, hasAds: e.target.checked }))
-                  }
-                  className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
-                />
-                <label
-                  htmlFor="hasAds"
-                  className="text-sm font-medium text-slate-700 dark:text-slate-300"
-                >
-                  {t("editModal.hasAds")}
-                </label>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="isActive"
-                  checked={Boolean(form.isActive)}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, isActive: e.target.checked }))
-                  }
-                  className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
-                />
-                <label
-                  htmlFor="isActive"
-                  className="text-sm font-medium text-slate-700 dark:text-slate-300"
-                >
-                  {t("editModal.isActive")}
-                </label>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="allowFullDesignControl"
-                  checked={Boolean(form.allowFullDesignControl)}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      allowFullDesignControl: e.target.checked,
-                    }))
-                  }
-                  className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
-                />
-                <label
-                  htmlFor="allowFullDesignControl"
-                  className="text-sm font-medium text-slate-700 dark:text-slate-300"
-                >
-                  {t("editModal.allowFullDesignControl")}
-                </label>
-              </div>
-
-              <PlanCapabilitiesFields
-                idPrefix="plan"
-                value={caps}
-                onChange={setCaps}
-                t={t}
+            <div>
+              <label className="block text-sm font-medium text-fg-muted mb-1">
+                {t("editModal.priceMonthly")}
+              </label>
+              <input
+                type="number"
+                min={0}
+                step={0.01}
+                value={Number(form.priceMonthly)}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    priceMonthly: e.target.value ? Number(e.target.value) : 0,
+                  }))
+                }
+                className="w-full px-4 py-2.5 border border-line rounded-lg bg-raised text-fg"
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-fg-muted mb-1">
+                {t("editModal.priceYearly")}
+              </label>
+              <input
+                type="number"
+                min={0}
+                step={0.01}
+                value={Number(form.priceYearly)}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    priceYearly: e.target.value ? Number(e.target.value) : 0,
+                  }))
+                }
+                className="w-full px-4 py-2.5 border border-line rounded-lg bg-raised text-fg"
+              />
+            </div>
+          </div>
+
+          {editingPro && (
+            <div>
+              <label className="block text-sm font-medium text-fg-muted mb-1">
+                {t("editModal.extraMenuPrice")}
+              </label>
+              <input
+                type="number"
+                min={0}
+                step={0.01}
+                value={Number(form.extraMenuPrice)}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    extraMenuPrice: e.target.value ? Number(e.target.value) : 0,
+                  }))
+                }
+                className="w-full px-4 py-2.5 border border-line rounded-lg bg-raised text-fg"
+              />
+              <p className="text-xs text-fg-subtle mt-1">
+                {t("editModal.extraMenuPriceHint")}
+              </p>
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-medium text-fg-muted mb-1">
+              {t("editModal.maxMenus")}
+            </label>
+            <input
+              type="number"
+              min={0}
+              value={Number(form.maxMenus)}
+              onChange={(e) =>
+                setForm((f) => ({
+                  ...f,
+                  maxMenus: e.target.value ? Number(e.target.value) : 0,
+                }))
+              }
+              className="w-full px-4 py-2.5 border border-line rounded-lg bg-raised text-fg"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-fg-muted mb-1">
+              {t("editModal.maxProducts")}
+            </label>
+            <input
+              type="number"
+              min={-1}
+              value={Number(form.maxProducts)}
+              onChange={(e) =>
+                setForm((f) => ({
+                  ...f,
+                  maxProducts: e.target.value ? Number(e.target.value) : 0,
+                }))
+              }
+              className="w-full px-4 py-2.5 border border-line rounded-lg bg-raised text-fg"
+            />
+            <p className="text-xs text-fg-subtle mt-1">
+              {t("editModal.maxProductsHint")}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="hasAds"
+              checked={Boolean(form.hasAds)}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, hasAds: e.target.checked }))
+              }
+              className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
+            />
+            <label
+              htmlFor="hasAds"
+              className="text-sm font-medium text-fg-muted"
+            >
+              {t("editModal.hasAds")}
+            </label>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="isActive"
+              checked={Boolean(form.isActive)}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, isActive: e.target.checked }))
+              }
+              className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
+            />
+            <label
+              htmlFor="isActive"
+              className="text-sm font-medium text-fg-muted"
+            >
+              {t("editModal.isActive")}
+            </label>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="allowFullDesignControl"
+              checked={Boolean(form.allowFullDesignControl)}
+              onChange={(e) =>
+                setForm((f) => ({
+                  ...f,
+                  allowFullDesignControl: e.target.checked,
+                }))
+              }
+              className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
+            />
+            <label
+              htmlFor="allowFullDesignControl"
+              className="text-sm font-medium text-fg-muted"
+            >
+              {t("editModal.allowFullDesignControl")}
+            </label>
+          </div>
+
+          <PlanCapabilitiesFields
+            idPrefix="plan"
+            value={caps}
+            onChange={setCaps}
+            t={t}
+          />
         </div>
       </Modal>
     </div>

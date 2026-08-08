@@ -5,7 +5,10 @@ type Props = { children: ReactNode; params: Promise<{ locale: string }> };
 
 export async function generateMetadata({ params }: Props) {
   const { locale } = await params;
-  return getDashboardPageMetadata(locale, { namespace: "Dashboard", key: "history" });
+  return getDashboardPageMetadata(locale, {
+    namespace: "Dashboard",
+    key: "history",
+  });
 }
 
 export default function Layout({ children }: Props) {

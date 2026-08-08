@@ -80,9 +80,7 @@ export default function PlanCapabilitiesFields({
               onChange={(e) =>
                 onChange({
                   ...value,
-                  maxAdsPerMenu: e.target.value
-                    ? Number(e.target.value)
-                    : 0,
+                  maxAdsPerMenu: e.target.value ? Number(e.target.value) : 0,
                 })
               }
             />

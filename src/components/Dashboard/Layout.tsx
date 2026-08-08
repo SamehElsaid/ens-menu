@@ -48,10 +48,7 @@ export default function Layout({
       ) : null}
 
       <div
-        className={cn(
-          "flex min-h-dvh flex-col",
-          showSidebar && SIDEBAR_INSET,
-        )}
+        className={cn("flex min-h-dvh flex-col", showSidebar && SIDEBAR_INSET)}
       >
         <DashboardHeader
           setIsMenuOpen={setIsMenuOpen}

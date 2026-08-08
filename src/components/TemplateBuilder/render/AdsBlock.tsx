@@ -82,7 +82,9 @@ export function AdsBlock({
   if (children) {
     return (
       <aside style={{ width: "100%", ...style }}>
-        <div style={{ borderRadius: radius, overflow: "hidden" }}>{children}</div>
+        <div style={{ borderRadius: radius, overflow: "hidden" }}>
+          {children}
+        </div>
       </aside>
     );
   }
@@ -99,12 +101,15 @@ export function AdsBlock({
                 insetInline: 0,
                 bottom: 0,
                 padding: "14px 16px",
-                backgroundImage: "linear-gradient(transparent, rgba(0,0,0,.78))",
+                backgroundImage:
+                  "linear-gradient(transparent, rgba(0,0,0,.78))",
                 color: "#fff",
               }}
             >
               <div style={{ fontWeight: 800, fontSize: 18 }}>{title}</div>
-              <div style={{ fontSize: 12, opacity: 0.9, marginTop: 2 }}>{subtitle}</div>
+              <div style={{ fontSize: 12, opacity: 0.9, marginTop: 2 }}>
+                {subtitle}
+              </div>
             </div>
           </Frame>
         );
@@ -126,8 +131,14 @@ export function AdsBlock({
               }}
             >
               <div>
-                <div style={{ fontWeight: 900, fontSize: 28, letterSpacing: 1 }}>{title}</div>
-                <div style={{ fontSize: 13, marginTop: 6, opacity: 0.95 }}>{subtitle}</div>
+                <div
+                  style={{ fontWeight: 900, fontSize: 28, letterSpacing: 1 }}
+                >
+                  {title}
+                </div>
+                <div style={{ fontSize: 13, marginTop: 6, opacity: 0.95 }}>
+                  {subtitle}
+                </div>
               </div>
             </div>
           </Frame>
@@ -162,7 +173,11 @@ export function AdsBlock({
                 }}
               />
               <div>
-                <div style={{ fontWeight: 800, fontSize: 16, color: "#1f2937" }}>{title}</div>
+                <div
+                  style={{ fontWeight: 800, fontSize: 16, color: "#1f2937" }}
+                >
+                  {title}
+                </div>
                 <div
                   style={{
                     fontSize: 7,
@@ -219,11 +234,29 @@ export function AdsBlock({
                 padding: "18px 20px",
               }}
             >
-              <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", opacity: 0.8 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  letterSpacing: 3,
+                  textTransform: "uppercase",
+                  opacity: 0.8,
+                }}
+              >
                 Featured
               </div>
-              <div style={{ fontWeight: 900, fontSize: 36, lineHeight: 1, marginTop: 4 }}>{title}</div>
-              <div style={{ fontSize: 13, marginTop: 6, opacity: 0.9 }}>{subtitle}</div>
+              <div
+                style={{
+                  fontWeight: 900,
+                  fontSize: 36,
+                  lineHeight: 1,
+                  marginTop: 4,
+                }}
+              >
+                {title}
+              </div>
+              <div style={{ fontSize: 13, marginTop: 6, opacity: 0.9 }}>
+                {subtitle}
+              </div>
             </div>
           </Frame>
         );
@@ -231,7 +264,14 @@ export function AdsBlock({
       case "splitPanel":
         return (
           <Frame radius={radius}>
-            <div style={{ display: "grid", gridTemplateColumns: "58% 42%", height: "100%", minHeight: 100 }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "58% 42%",
+                height: "100%",
+                minHeight: 100,
+              }}
+            >
               <div style={{ position: "relative" }}>
                 <BgImage src={image} />
               </div>
@@ -246,7 +286,14 @@ export function AdsBlock({
                 }}
               >
                 <div style={{ fontWeight: 800, fontSize: 20 }}>{title}</div>
-                <div style={{ fontSize: 11, marginTop: 6, opacity: 0.92, lineHeight: 1.35 }}>
+                <div
+                  style={{
+                    fontSize: 11,
+                    marginTop: 6,
+                    opacity: 0.92,
+                    lineHeight: 1.35,
+                  }}
+                >
                   {subtitle}
                 </div>
               </div>
@@ -296,7 +343,9 @@ export function AdsBlock({
               }}
             >
               <div style={{ fontWeight: 800, fontSize: 16 }}>{title}</div>
-              <div style={{ fontSize: 11, marginTop: 4, opacity: 0.85 }}>{subtitle}</div>
+              <div style={{ fontSize: 11, marginTop: 4, opacity: 0.85 }}>
+                {subtitle}
+              </div>
             </div>
           </Frame>
         );
@@ -342,7 +391,9 @@ export function AdsBlock({
                 textAlign: "start",
               }}
             >
-              <div style={{ fontWeight: 900, fontSize: 28, lineHeight: 1 }}>{title}</div>
+              <div style={{ fontWeight: 900, fontSize: 28, lineHeight: 1 }}>
+                {title}
+              </div>
               <div
                 style={{
                   marginTop: 6,
@@ -375,7 +426,9 @@ export function AdsBlock({
               }}
             >
               <div style={{ fontWeight: 800, fontSize: 20 }}>{title}</div>
-              <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>{subtitle}</div>
+              <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>
+                {subtitle}
+              </div>
             </div>
           </Frame>
         );

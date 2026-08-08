@@ -143,7 +143,7 @@ export default function SubscriptionVoucherSection({
       id="subscription-voucher-section"
       className={
         embedded
-          ? "rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 dark:border-slate-700/80 dark:bg-slate-950/50"
+          ? "rounded-lg border border-line/80 bg-slate-50/80 p-4 dark:border-line/80 dark:bg-slate-950/50"
           : "rounded-[28px] border border-primary/20 bg-gradient-to-br from-primary/[0.04] via-white to-violet-50/50 p-5 shadow-sm dark:border-primary/25 dark:from-primary/10 dark:via-slate-900 dark:to-slate-950 md:p-6"
       }
     >
@@ -155,34 +155,32 @@ export default function SubscriptionVoucherSection({
             className={`${embedded ? "mb-1" : "mb-2"} flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
           >
             {!embedded && (
-              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary">
                 <IoTicketOutline className="text-xl" />
               </span>
             )}
             <h2
               className={
                 embedded
-                  ? "text-sm font-semibold text-slate-800 dark:text-slate-100"
-                  : "text-lg font-bold text-slate-900 dark:text-slate-100"
+                  ? "text-sm font-semibold text-fg"
+                  : "text-lg font-bold text-fg"
               }
             >
               {t("voucherSectionTitle")}
             </h2>
           </div>
           {!embedded && (
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              {sectionDescription}
-            </p>
+            <p className="text-sm text-fg-muted">{sectionDescription}</p>
           )}
         </div>
 
         {showBillingChoice && onBillingChange && (
           <div className={`shrink-0 ${isRTL ? "text-right" : "text-left"}`}>
-            <p className="mb-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+            <p className="mb-1.5 text-xs font-medium text-fg-muted">
               {t("voucherBillingForDiscount")}
             </p>
             <div
-              className={`inline-flex rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-900 ${isRTL ? "flex-row-reverse" : ""}`}
+              className={`inline-flex rounded-lg border border-line bg-white p-1   ${isRTL ? "flex-row-reverse" : ""}`}
               role="group"
               aria-label={t("selectBillingCycle")}
             >
@@ -195,7 +193,7 @@ export default function SubscriptionVoucherSection({
                   className={`rounded-lg px-3 py-2 text-xs font-semibold transition-colors sm:px-4 sm:text-sm ${
                     billingCycle === cycle
                       ? "bg-brand text-on-brand shadow-sm"
-                      : "text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
+                      : "text-fg-muted hover:bg-slate-50  dark:hover:bg-slate-800"
                   }`}
                 >
                   {cycle === "monthly"
@@ -211,7 +209,7 @@ export default function SubscriptionVoucherSection({
       {appliedCode && validation ? (
         <div className="space-y-3">
           <div
-            className={`flex items-start justify-between gap-3 rounded-2xl border border-primary/20 bg-white p-4 dark:border-primary/30 dark:bg-slate-900/90 ${isRTL ? "flex-row-reverse" : ""}`}
+            className={`flex items-start justify-between gap-3 rounded-lg border border-primary/20 bg-white p-4 dark:border-primary/30  ${isRTL ? "flex-row-reverse" : ""}`}
           >
             <div
               className={`flex-1 space-y-2 ${isRTL ? "text-right" : "text-left"}`}
@@ -244,7 +242,7 @@ export default function SubscriptionVoucherSection({
               {isDiscount &&
               validation.discountAmount != null &&
               validation.discountedPrice != null ? (
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <p className="text-sm text-fg-muted">
                   {t("voucherAppliedDiscount", {
                     amount: validation.discountAmount,
                     price: validation.discountedPrice,
@@ -252,14 +250,14 @@ export default function SubscriptionVoucherSection({
                   })}
                 </p>
               ) : isDuration ? (
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <p className="text-sm text-fg-muted">
                   {t("voucherAppliedDuration", {
                     value: formatDurationValue(validation, locale),
                   })}
                 </p>
               ) : null}
               {isDiscount && canUpgradeToPro && (
-                <p className="text-xs text-slate-500 dark:text-slate-500">
+                <p className="text-xs text-fg-subtle">
                   {t("voucherDiscountPayHint")}
                 </p>
               )}
@@ -268,7 +266,7 @@ export default function SubscriptionVoucherSection({
               type="button"
               onClick={handleClear}
               disabled={disabled || redeemLoading}
-              className="rounded-xl p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="rounded-lg p-2 text-fg-subtle transition-colors hover:bg-surface-2"
               aria-label={t("voucherClear")}
             >
               <IoCloseOutline className="text-xl" />
@@ -280,7 +278,7 @@ export default function SubscriptionVoucherSection({
               type="button"
               onClick={() => void onRedeemDuration()}
               disabled={disabled || redeemLoading}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-sm font-semibold text-white shadow-md shadow-primary/20 hover:bg-primary/90 disabled:opacity-60"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3.5 text-sm font-semibold text-white shadow-md shadow-primary/20 hover:bg-primary/90 disabled:opacity-60"
             >
               <IoTimeOutline className="h-5 w-5" />
               {redeemLoading
@@ -301,13 +299,13 @@ export default function SubscriptionVoucherSection({
             }}
             placeholder={t("voucherCodePlaceholder")}
             disabled={disabled || checking}
-            className={`flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm uppercase tracking-wide dark:border-slate-700 dark:bg-slate-900 ${isRTL ? "text-right" : "text-left"}`}
+            className={`flex-1 rounded-lg border border-line bg-white px-4 py-3 text-sm uppercase tracking-wide   ${isRTL ? "text-right" : "text-left"}`}
           />
           <button
             type="button"
             onClick={() => void handleApply()}
             disabled={disabled || checking || !codeInput.trim()}
-            className="rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 disabled:opacity-60 sm:min-w-[7rem]"
+            className="rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 disabled:opacity-60 sm:min-w-[7rem]"
           >
             {checking ? t("voucherApplying") : t("voucherApply")}
           </button>

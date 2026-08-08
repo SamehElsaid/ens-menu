@@ -20,14 +20,22 @@ import {
   IoCloseOutline,
 } from "react-icons/io5";
 import { cn } from "@/lib/cn";
-import { Alert, Badge, Button, Input, Spinner, Textarea, focusRing } from "@/components/ui";
+import {
+  Alert,
+  Badge,
+  Button,
+  Input,
+  Spinner,
+  Textarea,
+  focusRing,
+} from "@/components/ui";
 
 function getVariantLabelAr(variant: ImportVariant): string {
-  return variant.labelAr ?? (variant.labelEn ? "" : variant.label ?? "");
+  return variant.labelAr ?? (variant.labelEn ? "" : (variant.label ?? ""));
 }
 
 function getVariantLabelEn(variant: ImportVariant): string {
-  return variant.labelEn ?? (variant.labelAr ? "" : variant.label ?? "");
+  return variant.labelEn ?? (variant.labelAr ? "" : (variant.label ?? ""));
 }
 
 function syncVariantLabel(
@@ -118,7 +126,11 @@ export default function ReviewItemRow({
       item.flags.includes("needs_review"));
 
   const uploadImageFile = async (file: File) => {
-    if (!IMAGE_VALID_TYPES.includes(file.type as (typeof IMAGE_VALID_TYPES)[number])) {
+    if (
+      !IMAGE_VALID_TYPES.includes(
+        file.type as (typeof IMAGE_VALID_TYPES)[number],
+      )
+    ) {
       toast.error(t("invalidFileType"));
       return;
     }

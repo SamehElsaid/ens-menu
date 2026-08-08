@@ -17,7 +17,8 @@ import { Button, Field, Input, Modal, focusRing } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
 const TABLE_NUMBER_MAX = 50;
-const TABLE_NUMBER_PATTERN = /^[a-zA-Z0-9\u0600-\u06FF][a-zA-Z0-9\u0600-\u06FF\s\-_]*$/;
+const TABLE_NUMBER_PATTERN =
+  /^[a-zA-Z0-9\u0600-\u06FF][a-zA-Z0-9\u0600-\u06FF\s\-_]*$/;
 const TABLE_FORM_ID = "add-table-form";
 
 function sanitizeTableNumberInput(raw: string): string {
@@ -105,7 +106,9 @@ export default function AddTableModal({
           onClose();
           onRefresh?.();
         } else {
-          toast.error(getApiErrorMessage(result.data, locale) ?? t("editError"));
+          toast.error(
+            getApiErrorMessage(result.data, locale) ?? t("editError"),
+          );
         }
       } else {
         const result = await axiosPost<
@@ -117,7 +120,9 @@ export default function AddTableModal({
           onClose();
           onRefresh?.();
         } else {
-          toast.error(getApiErrorMessage(result.data, locale) ?? t("createError"));
+          toast.error(
+            getApiErrorMessage(result.data, locale) ?? t("createError"),
+          );
         }
       }
     } catch {
@@ -200,7 +205,10 @@ export default function AddTableModal({
 
         <div className="flex flex-col gap-3">
           <p className="flex items-center gap-2 text-[13px] font-semibold text-fg">
-            <IoEllipseSharp className="size-3 shrink-0 text-fg-subtle" aria-hidden />
+            <IoEllipseSharp
+              className="size-3 shrink-0 text-fg-subtle"
+              aria-hidden
+            />
             {t("status")}
           </p>
           <Controller

@@ -1,9 +1,7 @@
 "use client";
 
 import { Controller, Resolver, useForm } from "react-hook-form";
-import { Field, Input } from "@/components/ui";
-import { FaEnvelope } from "react-icons/fa";
-import { TbLockPassword } from "react-icons/tb";
+import { FiMail } from "react-icons/fi";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLocale, useTranslations } from "next-intl";
 import { loginSchema, LoginSchema } from "@/schemas/loginSchema";
@@ -23,9 +21,14 @@ import { syncFcmToken } from "@/shared/syncFcmToken";
 import CustomRecaptcha, {
   type RecaptchaGateHandle,
 } from "./Auth/CustomRecaptcha";
-import { Button } from "@/components/ui/Button";
-import { Checkbox } from "@/components/ui/Checkbox";
-import { Alert } from "@/components/ui/Alert";
+import {
+  Alert,
+  Checkbox,
+  Field,
+  Input,
+  PasswordInput,
+} from "@/components/site/Form";
+import { SiteButton } from "@/components/site/Button";
 
 const REMEMBER_EMAIL_KEY = "ensmenu_remember_email";
 
@@ -181,13 +184,10 @@ export default function LoginForm() {
     if (!email) return;
 
     setResendingVerification(true);
-    const response = await axiosPost<{ email: string; locale: string }, unknown>(
-      "/auth/resend-verification",
-      locale,
-      { email, locale },
-      false,
-      true,
-    );
+    const response = await axiosPost<
+      { email: string; locale: string },
+      unknown
+    >("/auth/resend-verification", locale, { email, locale }, false, true);
     setResendingVerification(false);
 
     if (response.status) {
@@ -196,71 +196,97 @@ export default function LoginForm() {
     }
 
     const payload = response.data as { error?: string; message?: string };
-    setApiError(payload?.error || payload?.message || t("auth.verifyEmailFailed"));
+    setApiError(
+      payload?.error || payload?.message || t("auth.verifyEmailFailed"),
+    );
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="login-form">
-      <div className="login-form__fields space-y-3">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate>
+      {apiError ? (
+        <Alert className="mb-5">
+          <p>{apiError}</p>
+          {emailVerificationRequired ? (
+            <button
+              type="button"
+              onClick={handleResendVerification}
+              disabled={resendingVerification}
+              className="mt-1.5 font-semibold underline underline-offset-4 disabled:opacity-60"
+            >
+              {resendingVerification
+                ? t("auth.recaptchaVerifying")
+                : t("auth.resendVerification")}
+            </button>
+          ) : null}
+        </Alert>
+      ) : null}
+
+      <div className="space-y-4">
         <Controller
           control={control}
           name="email"
           render={({ field: { value, onChange } }) => (
-            <Field label={messages.email} error={errors.email?.message}>
+            <Field
+              label={messages.email}
+              error={errors.email?.message}
+              htmlFor="login-email"
+            >
               <Input
+                id="login-email"
                 type="email"
-                inputSize="md"
-                startIcon={<FaEnvelope size={14} />}
-                placeholder={messages.email}
+                inputMode="email"
+                startIcon={<FiMail className="size-4" />}
                 autoComplete="email"
+                invalid={Boolean(errors.email)}
                 value={value}
                 onChange={(e) => {
                   setApiError(null);
                   onChange(e);
                 }}
-                className="login-field-input"
               />
             </Field>
           )}
         />
 
-        <div className="login-form__password-group space-y-1.5">
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { value, onChange } }) => (
-              <Field label={messages.password} error={errors.password?.message}>
-                <Input
-                  type="password"
-                  inputSize="md"
-                  startIcon={<TbLockPassword size={15} />}
-                  placeholder={messages.password}
-                  autoComplete="current-password"
-                  value={value}
-                  onChange={(e) => {
-                    setApiError(null);
-                    onChange(e);
-                  }}
-                  className="login-field-input"
-                />
-              </Field>
-            )}
-          />
-          <LinkTo
-            href="/auth/reset-password"
-            className="login-forgot-link inline-block rounded-sm pt-0.5 text-start text-[12px] font-medium text-brand transition-colors hover:text-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-          >
-            {t("auth.forgotPassword")}
-          </LinkTo>
-        </div>
+        <Controller
+          control={control}
+          name="password"
+          render={({ field: { value, onChange } }) => (
+            <Field
+              label={messages.password}
+              error={errors.password?.message}
+              htmlFor="login-password"
+            >
+              <PasswordInput
+                id="login-password"
+                autoComplete="current-password"
+                invalid={Boolean(errors.password)}
+                showLabel={t("auth.showPassword")}
+                hideLabel={t("auth.hidePassword")}
+                value={value}
+                onChange={(e) => {
+                  setApiError(null);
+                  onChange(e);
+                }}
+              />
+            </Field>
+          )}
+        />
       </div>
 
-      <Checkbox
-        className="mt-3"
-        checked={rememberMe}
-        onChange={(e) => setRememberMe(e.target.checked)}
-        label={t("auth.rememberMe")}
-      />
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <Checkbox
+          checked={rememberMe}
+          onChange={(e) => setRememberMe(e.target.checked)}
+          label={t("auth.rememberMe")}
+        />
+        <LinkTo
+          href="/auth/reset-password"
+          className="text-site-sm font-medium text-site-brand underline underline-offset-4 hover:text-site-brand-hover"
+        >
+          {t("auth.forgotPassword")}
+        </LinkTo>
+      </div>
 
       {/* Silent captcha — modal only on submit */}
       <CustomRecaptcha
@@ -270,49 +296,11 @@ export default function LoginForm() {
         onVerifiedChange={setRecaptchaVerified}
       />
 
-      {apiError && (
-        <Alert tone="danger" className="mt-3">
-          <span>{apiError}</span>
-          {emailVerificationRequired && (
-            <button
-              type="button"
-              onClick={handleResendVerification}
-              disabled={resendingVerification}
-              className="mt-1.5 block rounded-sm text-start text-[12px] font-semibold underline underline-offset-2 disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-            >
-              {resendingVerification
-                ? t("auth.recaptchaVerifying")
-                : t("auth.resendVerification")}
-            </button>
-          )}
-        </Alert>
-      )}
-
-      <Button
-        type="submit"
-        loading={loading}
-        fullWidth
-        size="lg"
-        className="mt-4"
-      >
+      <SiteButton type="submit" loading={loading} block size="lg" className="mt-6">
         {messages.login}
-      </Button>
+      </SiteButton>
 
-      <AuthSocialButtons
-        dividerLabel="auth.orLoginWith"
-        redirectParam={redirectParam}
-        className="mt-4 sm:mt-5"
-      />
-
-      <p className="mt-3 text-center text-[13px] text-fg-muted sm:mt-4">
-        <LinkTo
-          href="/auth/register"
-          className="rounded-sm font-medium transition-colors hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-        >
-          {t("auth.dontHaveAccount")}{" "}
-          <span className="font-semibold text-brand">{t("auth.register")}</span>
-        </LinkTo>
-      </p>
+      <AuthSocialButtons dividerLabel="auth.orLoginWith" redirectParam={redirectParam} className="mt-6" />
     </form>
   );
 }

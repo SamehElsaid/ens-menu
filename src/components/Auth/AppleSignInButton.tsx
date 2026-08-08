@@ -13,6 +13,7 @@ import { pushSignUpEvent } from "@/shared/gtmEvents";
 import { encryptData } from "@/shared/encryption";
 import { LoginResponse } from "@/types/LoginResponse";
 import { resolvePostLoginPath } from "@/lib/authRedirect";
+import { SiteButton } from "@/components/site/Button";
 
 const appleClientId = process.env.NEXT_PUBLIC_APPLE_CLIENT_ID?.trim() || "";
 const appleRedirectUriEnv =
@@ -26,12 +27,9 @@ type AppleAuthRequest = {
 };
 
 type AppleSignInButtonProps = {
-  dividerLabel?: string;
   ariaLabel?: string;
   className?: string;
   redirectParam?: string | null;
-  variant?: "icon" | "full";
-  showDivider?: boolean;
 };
 
 let appleScriptPromise: Promise<void> | null = null;
@@ -75,12 +73,9 @@ function loadAppleSdk(): Promise<void> {
 }
 
 export default function AppleSignInButton({
-  dividerLabel,
   ariaLabel,
-  className = "",
+  className,
   redirectParam = null,
-  variant = "full",
-  showDivider = true,
 }: AppleSignInButtonProps) {
   const t = useTranslations("");
   const dispatch = useAppDispatch();
@@ -167,10 +162,7 @@ export default function AppleSignInButton({
       await completeLogin({
         identityToken,
         email: result.user?.email || undefined,
-        name:
-          firstName || lastName
-            ? { firstName, lastName }
-            : undefined,
+        name: firstName || lastName ? { firstName, lastName } : undefined,
         locale,
       });
     } catch (err: unknown) {
@@ -180,9 +172,7 @@ export default function AppleSignInButton({
         return;
       }
       toast.error(
-        anyErr?.message ||
-          anyErr?.error ||
-          t("auth.loginWithAppleFailed"),
+        anyErr?.message || anyErr?.error || t("auth.loginWithAppleFailed"),
       );
     } finally {
       setLoading(false);
@@ -194,55 +184,18 @@ export default function AppleSignInButton({
   }
 
   return (
-    <div className={className}>
-      {showDivider && dividerLabel && (
-        <div className="auth-social-divider auth-social-divider--subtle mb-3.5 flex w-full items-center gap-2.5">
-          <span
-            aria-hidden
-            className="h-px flex-1 bg-slate-200/70 dark:bg-slate-700/60"
-          />
-          <span className="shrink-0 text-[10px] font-normal text-slate-400/90 dark:text-slate-500/90">
-            {t(dividerLabel)}
-          </span>
-          <span
-            aria-hidden
-            className="h-px flex-1 bg-slate-200/70 dark:bg-slate-700/60"
-          />
-        </div>
-      )}
-
-      {variant === "full" ? (
-        <button
-          type="button"
-          onClick={handleAppleClick}
-          disabled={loading}
-          className="login-apple-btn flex w-full items-center justify-center gap-2 rounded-xl border border-slate-900 bg-slate-950 px-4 py-2.5 text-[13px] font-medium text-white transition-all duration-200 hover:bg-black disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-100 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
-          aria-label={ariaLabel || t("auth.loginWithApple")}
-        >
-          {loading ? (
-            <span className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent dark:border-slate-900 dark:border-t-transparent" />
-          ) : (
-            <FaApple className="size-4" aria-hidden />
-          )}
-          <span>{t("auth.continueWithApple")}</span>
-        </button>
-      ) : (
-        <div className="flex justify-center">
-          <button
-            type="button"
-            onClick={handleAppleClick}
-            disabled={loading}
-            className="flex h-[3.25rem] w-[3.25rem] items-center justify-center rounded-full border border-slate-900 bg-slate-950 text-xl text-white shadow-sm transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-100 dark:bg-white dark:text-slate-900"
-            aria-label={ariaLabel || t("auth.loginWithApple")}
-          >
-            {loading ? (
-              <span className="size-5 animate-spin rounded-full border-2 border-white border-t-transparent dark:border-slate-900 dark:border-t-transparent" />
-            ) : (
-              <FaApple />
-            )}
-          </button>
-        </div>
-      )}
-    </div>
+    <SiteButton
+      type="button"
+      variant="secondary"
+      size="lg"
+      block
+      onClick={handleAppleClick}
+      loading={loading}
+      className={className}
+      aria-label={ariaLabel || t("auth.loginWithApple")}
+    >
+      {loading ? null : <FaApple className="size-4" aria-hidden />}
+      <span>{t("auth.continueWithApple")}</span>
+    </SiteButton>
   );
 }

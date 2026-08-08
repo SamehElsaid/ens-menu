@@ -368,7 +368,9 @@ export default function ChatWidget() {
                 )}
               >
                 <FaWhatsapp
-                  className={isAuthPage ? "text-2xl sm:text-[1.75rem]" : "text-[1.75rem]"}
+                  className={
+                    isAuthPage ? "text-2xl sm:text-[1.75rem]" : "text-[1.75rem]"
+                  }
                   aria-hidden
                 />
               </a>

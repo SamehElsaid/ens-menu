@@ -49,11 +49,10 @@ export default function AddMenuToGroupModal({
     if (!canSubmit) return;
     setIsSaving(true);
     try {
-      const res = await axiosPost<{ menuId: number }, { group?: { id: number } }>(
-        `/menu-groups/${selectedGroupId}/menus`,
-        locale,
-        { menuId: menu.id },
-      );
+      const res = await axiosPost<
+        { menuId: number },
+        { group?: { id: number } }
+      >(`/menu-groups/${selectedGroupId}/menus`, locale, { menuId: menu.id });
 
       if (res.status) {
         toast.success(t("success"));
@@ -122,10 +121,7 @@ export function ManageMenuGroupModal({
   const t = useTranslations("Menus.manageGroupModal");
   const locale = useLocale();
 
-  const addableMenus = useMemo(
-    () => menusAvailableToJoinGroup(menus),
-    [menus],
-  );
+  const addableMenus = useMemo(() => menusAvailableToJoinGroup(menus), [menus]);
 
   const [selectedIds, setSelectedIds] = useState<number[]>(() => [
     ...group.menuIds,
@@ -151,7 +147,8 @@ export function ManageMenuGroupModal({
     selectedIds.some((id) => !group.menuIds.includes(id));
 
   const willDissolveGroup = selectedIds.length < 2;
-  const canSubmit = !isSaving && hasChanges && (selectedIds.length >= 2 || willDissolveGroup);
+  const canSubmit =
+    !isSaving && hasChanges && (selectedIds.length >= 2 || willDissolveGroup);
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
@@ -204,7 +201,9 @@ export function ManageMenuGroupModal({
             selected={selectedIds.includes(menuItem.id)}
             onToggle={() => toggleMenu(menuItem.id)}
             badge={
-              group.menuIds.includes(menuItem.id) ? t("inGroupBadge") : undefined
+              group.menuIds.includes(menuItem.id)
+                ? t("inGroupBadge")
+                : undefined
             }
           />
         ))}

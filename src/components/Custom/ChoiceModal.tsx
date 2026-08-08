@@ -32,22 +32,24 @@ const createChoiceSchema = (t: ReturnType<typeof useTranslations<"">>) =>
     nameAr: yup
       .string()
       .required(
-        t("personal.choiceNameArRequired") || "Choice name in Arabic is required"
+        t("personal.choiceNameArRequired") ||
+          "Choice name in Arabic is required",
       )
       .min(
         2,
         t("personal.choiceNameArMinLength") ||
-          "Choice name in Arabic must be at least 2 characters"
+          "Choice name in Arabic must be at least 2 characters",
       ),
     nameEn: yup
       .string()
       .required(
-        t("personal.choiceNameEnRequired") || "Choice name in English is required"
+        t("personal.choiceNameEnRequired") ||
+          "Choice name in English is required",
       )
       .min(
         2,
         t("personal.choiceNameEnMinLength") ||
-          "Choice name in English must be at least 2 characters"
+          "Choice name in English must be at least 2 characters",
       ),
   });
 
@@ -70,7 +72,7 @@ export default function ChoiceModal({
       nameEn: "",
     },
     resolver: yupResolver(
-      createChoiceSchema(t)
+      createChoiceSchema(t),
     ) as unknown as Resolver<ChoiceFormData>,
     mode: "onChange",
   });

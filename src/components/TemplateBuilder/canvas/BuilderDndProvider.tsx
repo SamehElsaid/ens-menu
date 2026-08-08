@@ -14,7 +14,11 @@ import { useState } from "react";
 import { useBuilderStore } from "../store/useBuilderStore";
 import { getComponentDef } from "@/lib/template-builder/library/registry";
 
-export function BuilderDndProvider({ children }: { children: React.ReactNode }) {
+export function BuilderDndProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const document = useBuilderStore((s) => s.document);
   const addNode = useBuilderStore((s) => s.addNode);
   const reorderInParent = useBuilderStore((s) => s.reorderInParent);

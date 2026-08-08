@@ -68,7 +68,9 @@ export default function AdminPage() {
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<AdminStatsResponse["stats"] | null>(null);
-  const [charts, setCharts] = useState<AdminStatsResponse["charts"] | null>(null);
+  const [charts, setCharts] = useState<AdminStatsResponse["charts"] | null>(
+    null,
+  );
   const [adminsCount, setAdminsCount] = useState(0);
   const [analytics, setAnalytics] = useState<AdminAnalyticsResponse | null>(
     null,
@@ -235,7 +237,8 @@ export default function AdminPage() {
     return pathname === href || pathname.startsWith(href + "/");
   };
 
-  const activeTabId = navigationTabs.find((tab) => isActiveTab(tab.href))?.id ?? "";
+  const activeTabId =
+    navigationTabs.find((tab) => isActiveTab(tab.href))?.id ?? "";
 
   const formatValue = (value: number | string, type?: string) => {
     if (typeof value === "string") return value;
@@ -285,10 +288,9 @@ export default function AdminPage() {
       ].filter((card) => canSee(card.permission))
     : [];
 
-  const revenuePoints =
-    analytics?.revenueOverTime?.length
-      ? analytics.revenueOverTime
-      : charts?.revenueGrowth ?? [];
+  const revenuePoints = analytics?.revenueOverTime?.length
+    ? analytics.revenueOverTime
+    : (charts?.revenueGrowth ?? []);
 
   return (
     <div className="space-y-5 py-5" dir={textDir}>
@@ -430,7 +432,11 @@ export default function AdminPage() {
                 </h3>
                 <StatGrid columns={3}>
                   {charts.plansDistribution.map((plan, index) => (
-                    <StatCard key={index} label={plan.name} value={plan.count} />
+                    <StatCard
+                      key={index}
+                      label={plan.name}
+                      value={plan.count}
+                    />
                   ))}
                 </StatGrid>
               </div>

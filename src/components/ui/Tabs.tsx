@@ -42,7 +42,11 @@ export function Tabs({
         className,
       )}
     >
-      <div role="tablist" aria-label={label} className="flex w-max min-w-full gap-1">
+      <div
+        role="tablist"
+        aria-label={label}
+        className="flex w-max min-w-full gap-1"
+      >
         {items.map((item) => {
           const active = item.id === activeId;
           const content = (

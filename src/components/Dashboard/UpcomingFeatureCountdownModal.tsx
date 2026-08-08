@@ -29,15 +29,9 @@ type UpcomingFeatureCountdownModalProps = {
   onClose: () => void;
 };
 
-function CountdownUnit({
-  label,
-  value,
-}: {
-  label: string;
-  value: number;
-}) {
+function CountdownUnit({ label, value }: { label: string; value: number }) {
   return (
-    <div className="flex min-w-[4.5rem] flex-1 flex-col items-center rounded-xl bg-surface-2 px-3 py-3">
+    <div className="flex min-w-[4.5rem] flex-1 flex-col items-center rounded-lg bg-surface-2 px-3 py-3">
       <span className="text-2xl font-semibold tabular-nums text-fg">
         {String(value).padStart(2, "0")}
       </span>
