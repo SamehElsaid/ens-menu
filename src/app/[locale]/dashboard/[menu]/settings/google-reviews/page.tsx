@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { FiExternalLink, FiSave } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
-import CustomBtn from "@/components/Custom/CustomBtn";
 import CustomInput from "@/components/Custom/CustomInput";
+import { Button } from "@/components/ui";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { axiosPatch } from "@/shared/axiosCall";
 import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
@@ -421,16 +421,15 @@ export default function GoogleReviewsSettingsPage() {
         </section>
 
         <div className="flex justify-end">
-          <CustomBtn
+          <Button
             type="button"
             onClick={() => void handleSave()}
             disabled={saving}
             loading={saving}
-            className="w-auto! inline-flex items-center gap-2"
+            startIcon={<FiSave className="text-lg" />}
           >
-            <FiSave className="text-lg" />
             {t("buttons.save")}
-          </CustomBtn>
+          </Button>
         </div>
       </div>
     </div>
