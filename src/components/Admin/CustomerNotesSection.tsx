@@ -6,7 +6,14 @@ import { FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { axiosDelete, axiosGet, axiosPost } from "@/shared/axiosCall";
 import { formatAdminDate } from "@/lib/fetchAdminAnalytics";
-import CardDashBoard from "@/components/Card/CardDashBoard";
+import {
+  Button,
+  Card,
+  EmptyState,
+  Input,
+  LoadingBlock,
+  SectionHeader,
+} from "@/components/ui";
 import type { UserInternalNote } from "@/types/AdminCustomer";
 
 interface Props {
@@ -16,6 +23,7 @@ interface Props {
 export default function CustomerNotesSection({ userId }: Props) {
   const locale = useLocale();
   const t = useTranslations("adminUsers.userDetails.customerSections.notes");
+  const tCommon = useTranslations("common");
   const [notes, setNotes] = useState<UserInternalNote[]>([]);
   const [loading, setLoading] = useState(true);
   const [noteText, setNoteText] = useState("");
@@ -75,56 +83,59 @@ export default function CustomerNotesSection({ userId }: Props) {
   };
 
   return (
-    <CardDashBoard>
-      <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-        {t("title")}
-      </h2>
-      <p className="text-sm text-slate-500 mb-4">{t("hint")}</p>
-      <form onSubmit={handleAdd} className="flex gap-2 mb-6">
-        <input
+    <Card padded="lg">
+      <SectionHeader
+        title={t("title")}
+        description={t("hint")}
+        className="mb-4"
+      />
+
+      <form onSubmit={handleAdd} className="mb-6 flex items-start gap-2">
+        <Input
           value={noteText}
           onChange={(e) => setNoteText(e.target.value)}
           placeholder={t("placeholder")}
-          className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+          aria-label={t("title")}
         />
-        <button
+        <Button
           type="submit"
-          disabled={submitting || !noteText.trim()}
-          className="px-4 py-2.5 rounded-xl bg-primary text-white font-semibold disabled:opacity-50"
+          variant="primary"
+          loading={submitting}
+          disabled={!noteText.trim()}
         >
           {t("add")}
-        </button>
+        </Button>
       </form>
+
       {loading ? (
-        <p className="text-slate-500">{t("loading")}</p>
+        <LoadingBlock label={t("loading")} />
       ) : notes.length === 0 ? (
-        <p className="text-slate-500">{t("empty")}</p>
+        <EmptyState title={t("empty")} size="sm" />
       ) : (
-        <div className="space-y-3">
+        <ul className="flex flex-col gap-3">
           {notes.map((note) => (
-            <div
-              key={note.id}
-              className="rounded-xl border border-slate-200 dark:border-slate-700 p-4"
-            >
-              <div className="flex justify-between gap-3 items-start">
-                <div>
-                  <p className="text-slate-800 dark:text-slate-200">{note.note}</p>
-                  <p className="text-xs text-slate-500 mt-2">
+            <Card as="li" key={note.id} padded="md">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-fg">{note.note}</p>
+                  <p className="mt-2 text-xs text-fg-muted">
                     {note.adminName} · {formatAdminDate(note.createdAt, locale)}
                   </p>
                 </div>
-                <button
-                  type="button"
+                <Button
+                  variant="dangerGhost"
+                  size="sm"
+                  iconOnly
+                  aria-label={tCommon("delete")}
                   onClick={() => handleDelete(note.id)}
-                  className="p-2 rounded-lg text-red-600 hover:bg-red-50"
                 >
                   <FaTrash />
-                </button>
+                </Button>
               </div>
-            </div>
+            </Card>
           ))}
-        </div>
+        </ul>
       )}
-    </CardDashBoard>
+    </Card>
   );
 }

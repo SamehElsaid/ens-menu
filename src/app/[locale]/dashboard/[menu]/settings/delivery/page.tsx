@@ -19,8 +19,14 @@ import {
 } from "react-icons/io5";
 import { FaWhatsapp, FaCrown } from "react-icons/fa";
 import { axiosGet, axiosPost, axiosPatch, axiosDelete } from "@/shared/axiosCall";
-import CustomBtn from "@/components/Custom/CustomBtn";
 import CustomInput from "@/components/Custom/CustomInput";
+import {
+  Button,
+  Field,
+  Input,
+  Spinner,
+  Switch,
+} from "@/components/ui";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import DeleteEntityConfirmModal from "@/components/Dashboard/DeleteEntityConfirmModal";
 import BranchLocationPicker, {
@@ -575,29 +581,13 @@ export default function DeliverySettingsPage() {
             </div>
 
             {/* Toggle switch */}
-            <button
-              type="button"
-              role="switch"
-              aria-checked={settings.deliveryOn}
-              onClick={() =>
-                setSettings((s) => ({ ...s, deliveryOn: !s.deliveryOn }))
+            <Switch
+              checked={settings.deliveryOn}
+              onChange={(e) =>
+                setSettings((s) => ({ ...s, deliveryOn: e.target.checked }))
               }
-              className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2 ${
-                settings.deliveryOn
-                  ? "bg-primary"
-                  : "bg-slate-200 dark:bg-slate-600"
-              }`}
-            >
-              <span
-                className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${
-                  settings.deliveryOn
-                    ? isRTL
-                      ? "-translate-x-5"
-                      : "translate-x-5"
-                    : "translate-x-0"
-                }`}
-              />
-            </button>
+              aria-label={t("deliveryStatus.title")}
+            />
           </div>
 
           <div className="mt-3">
@@ -905,14 +895,15 @@ export default function DeliverySettingsPage() {
                 </div>
               </div>
               {!showForm && (
-                <button
+                <Button
                   type="button"
+                  size="sm"
+                  startIcon={<IoAddOutline className="text-base" />}
+                  className="shrink-0"
                   onClick={handleAddGov}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-primary text-white px-4 py-2 text-sm font-medium hover:bg-primary/90 transition-colors shrink-0"
                 >
-                  <IoAddOutline className="text-base" />
                   {t("governorates.addBtn")}
-                </button>
+                </Button>
               )}
             </div>
 
@@ -990,91 +981,99 @@ export default function DeliverySettingsPage() {
 
                 <div className="grid sm:grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                      {t("governorates.nameAr")} <span className="text-red-500">*</span>
-                    </label>
-                    <CustomInput
-                      type="text"
-                      value={govForm.nameAr}
-                      onChange={(e) =>
-                        setGovForm((f) => ({
-                          ...f,
-                          nameAr: (
-                            e as React.ChangeEvent<HTMLInputElement>
-                          ).target.value,
-                        }))
+                    <Field
+                      label={t("governorates.nameAr")}
+                      required
+                      error={
+                        govFormTouched && !govForm.nameAr.trim()
+                          ? isRTL
+                            ? "مطلوب"
+                            : "Required"
+                          : undefined
                       }
-                      placeholder={t("governorates.nameArPlaceholder")}
-                      error={govFormTouched && !govForm.nameAr.trim() ? (isRTL ? "مطلوب" : "Required") : undefined}
-                    />
+                    >
+                      <Input
+                        type="text"
+                        value={govForm.nameAr}
+                        onChange={(e) =>
+                          setGovForm((f) => ({
+                            ...f,
+                            nameAr: e.target.value,
+                          }))
+                        }
+                        placeholder={t("governorates.nameArPlaceholder")}
+                      />
+                    </Field>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                      {t("governorates.nameEn")} <span className="text-red-500">*</span>
-                    </label>
-                    <CustomInput
-                      type="text"
-                      value={govForm.nameEn}
-                      onChange={(e) =>
-                        setGovForm((f) => ({
-                          ...f,
-                          nameEn: (
-                            e as React.ChangeEvent<HTMLInputElement>
-                          ).target.value,
-                        }))
+                    <Field
+                      label={t("governorates.nameEn")}
+                      required
+                      error={
+                        govFormTouched && !govForm.nameEn.trim()
+                          ? isRTL
+                            ? "مطلوب"
+                            : "Required"
+                          : undefined
                       }
-                      placeholder={t("governorates.nameEnPlaceholder")}
-                      error={govFormTouched && !govForm.nameEn.trim() ? (isRTL ? "مطلوب" : "Required") : undefined}
-                    />
+                    >
+                      <Input
+                        type="text"
+                        value={govForm.nameEn}
+                        onChange={(e) =>
+                          setGovForm((f) => ({
+                            ...f,
+                            nameEn: e.target.value,
+                          }))
+                        }
+                        placeholder={t("governorates.nameEnPlaceholder")}
+                      />
+                    </Field>
                   </div>
                   {/* lat & lan: hidden visually, tracked in state and sent to API */}
                   <input type="hidden" value={govForm.lat} readOnly />
                   <input type="hidden" value={govForm.lan} readOnly />
                   <div className="space-y-1.5 sm:col-span-2">
-                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                      {t("governorates.price")}{" "}
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <CustomInput
-                      type="number"
-                      value={govForm.price}
-                      onChange={(e) =>
-                        setGovForm((f) => ({
-                          ...f,
-                          price: (
-                            e as React.ChangeEvent<HTMLInputElement>
-                          ).target.value,
-                        }))
-                      }
-                      placeholder={t("governorates.pricePlaceholder")}
+                    <Field
+                      label={t("governorates.price")}
+                      required
                       error={
-                        govFormTouched && (!govForm.price || parseFloat(govForm.price) <= 0)
-                          ? (isRTL ? "أدخل سعر أكبر من صفر" : "Enter a price greater than 0")
+                        govFormTouched &&
+                        (!govForm.price || parseFloat(govForm.price) <= 0)
+                          ? isRTL
+                            ? "أدخل سعر أكبر من صفر"
+                            : "Enter a price greater than 0"
                           : undefined
                       }
-                    />
+                    >
+                      <Input
+                        type="number"
+                        value={govForm.price}
+                        onChange={(e) =>
+                          setGovForm((f) => ({
+                            ...f,
+                            price: e.target.value,
+                          }))
+                        }
+                        placeholder={t("governorates.pricePlaceholder")}
+                      />
+                    </Field>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-end gap-3 pt-1">
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                  >
+                  <Button type="button" variant="secondary" onClick={resetForm}>
                     {t("governorates.cancel")}
-                  </button>
-                  <CustomBtn
+                  </Button>
+                  <Button
                     onClick={handleSaveGov}
                     loading={isSavingGov}
                     disabled={isSavingGov || (govFormTouched && !isGovFormValid)}
                     className="w-auto! min-w-[130px]"
+                    startIcon={<IoSaveOutline className="text-base" />}
                   >
-                    <span className="flex items-center gap-2">
-                      <IoSaveOutline className="text-base" />
-                      {t("governorates.saveGov")}
-                    </span>
-                  </CustomBtn>
+                    {t("governorates.saveGov")}
+                  </Button>
                 </div>
               </div>
             )}
@@ -1082,7 +1081,7 @@ export default function DeliverySettingsPage() {
             {/* ── Governorates list ── */}
             {isLoadingGovs ? (
               <div className="flex items-center justify-center py-10">
-                <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                <Spinner size="lg" />
               </div>
             ) : governorates.length === 0 && !showForm ? (
               <div className="flex flex-col items-center justify-center py-10 gap-2 text-slate-400 dark:text-slate-500">
@@ -1167,7 +1166,7 @@ export default function DeliverySettingsPage() {
 
             {isLoadingBranch ? (
               <div className="flex items-center justify-center py-10">
-                <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                <Spinner size="lg" />
               </div>
             ) : (
               <div className="space-y-4">
@@ -1192,54 +1191,45 @@ export default function DeliverySettingsPage() {
                 )}
 
                 <div className="grid sm:grid-cols-3 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                      {t("branches.basePrice")} <span className="text-red-500">*</span>
-                    </label>
-                    <CustomInput
+                  <Field label={t("branches.basePrice")} required>
+                    <Input
                       type="number"
                       value={branchForm.deliveryBasePrice}
                       onChange={(e) =>
                         setBranchForm((f) => ({
                           ...f,
-                          deliveryBasePrice: (e as React.ChangeEvent<HTMLInputElement>).target.value,
+                          deliveryBasePrice: e.target.value,
                         }))
                       }
                       placeholder={t("branches.basePricePlaceholder")}
                     />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                      {t("branches.pricePerKm")} <span className="text-red-500">*</span>
-                    </label>
-                    <CustomInput
+                  </Field>
+                  <Field label={t("branches.pricePerKm")} required>
+                    <Input
                       type="number"
                       value={branchForm.deliveryPricePerKm}
                       onChange={(e) =>
                         setBranchForm((f) => ({
                           ...f,
-                          deliveryPricePerKm: (e as React.ChangeEvent<HTMLInputElement>).target.value,
+                          deliveryPricePerKm: e.target.value,
                         }))
                       }
                       placeholder={t("branches.pricePerKmPlaceholder")}
                     />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                      {t("branches.maxRadius")} <span className="text-red-500">*</span>
-                    </label>
-                    <CustomInput
+                  </Field>
+                  <Field label={t("branches.maxRadius")} required>
+                    <Input
                       type="number"
                       value={branchForm.maxDeliveryRadiusKm}
                       onChange={(e) =>
                         setBranchForm((f) => ({
                           ...f,
-                          maxDeliveryRadiusKm: (e as React.ChangeEvent<HTMLInputElement>).target.value,
+                          maxDeliveryRadiusKm: e.target.value,
                         }))
                       }
                       placeholder={t("branches.maxRadiusPlaceholder")}
                     />
-                  </div>
+                  </Field>
                 </div>
               </div>
             )}
@@ -1249,17 +1239,16 @@ export default function DeliverySettingsPage() {
 
         {/* ── Save settings footer ── */}
         <div className="flex flex-wrap justify-end gap-3 pt-2 pb-6">
-          <CustomBtn
+          <Button
             onClick={handleSaveSettings}
             loading={isSavingSettings}
             disabled={isSaveDisabled}
+            size="lg"
             className="w-auto! min-w-[160px]"
+            startIcon={<FiSave className="text-base" />}
           >
-            <span className="flex items-center justify-center gap-2">
-              <FiSave className="text-base" />
-              {t("buttons.save")}
-            </span>
-          </CustomBtn>
+            {t("buttons.save")}
+          </Button>
         </div>
       </div>
 

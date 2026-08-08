@@ -9,7 +9,15 @@ import {
   axiosPost,
 } from "@/shared/axiosCall";
 import { formatAdminDate } from "@/lib/fetchAdminAnalytics";
-import CardDashBoard from "@/components/Card/CardDashBoard";
+import {
+  Button,
+  Card,
+  CardHeader,
+  EmptyState,
+  Input,
+  LoadingBlock,
+  SectionHeader,
+} from "@/components/ui";
 import type { UserVouchersResponse } from "@/types/AdminCustomer";
 
 interface Props {
@@ -89,43 +97,45 @@ export default function CustomerVouchersSection({ userId }: Props) {
   };
 
   return (
-    <CardDashBoard>
-      <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">
-        {t("title")}
-      </h2>
-      <form onSubmit={handleAssign} className="flex gap-2 mb-6">
-        <input
+    <Card padded="lg">
+      <SectionHeader title={t("title")} className="mb-4" />
+
+      <form onSubmit={handleAssign} className="mb-6 flex items-start gap-2">
+        <Input
           value={code}
           onChange={(e) => setCode(e.target.value)}
           placeholder={t("assignPlaceholder")}
-          className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 uppercase"
+          aria-label={t("assignPlaceholder")}
+          className="uppercase"
           dir="ltr"
         />
-        <button
+        <Button
           type="submit"
-          disabled={assigning || !code.trim()}
-          className="px-4 py-2.5 rounded-xl bg-primary text-white font-semibold disabled:opacity-50"
+          variant="primary"
+          loading={assigning}
+          disabled={!code.trim()}
         >
           {t("assign")}
-        </button>
+        </Button>
       </form>
+
       {loading ? (
-        <p className="text-slate-500">{t("loading")}</p>
+        <LoadingBlock label={t("loading")} />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
-            <h3 className="font-semibold mb-2">{t("used")}</h3>
+            <CardHeader title={t("used")} className="mb-2" />
             {data?.redemptions.length === 0 ? (
-              <p className="text-sm text-slate-500">{t("emptyUsed")}</p>
+              <EmptyState title={t("emptyUsed")} size="sm" />
             ) : (
-              <ul className="space-y-2 text-sm">
+              <ul className="text-sm">
                 {data?.redemptions.map((r) => (
                   <li
                     key={r.id}
-                    className="flex justify-between items-center py-2 border-b border-slate-100"
+                    className="flex items-center justify-between gap-3 border-b border-line py-2 last:border-b-0"
                   >
-                    <span className="font-mono">{r.code}</span>
-                    <span className="text-slate-500">
+                    <span className="font-mono text-fg">{r.code}</span>
+                    <span className="text-fg-muted">
                       {formatAdminDate(r.redeemedAt, locale)}
                     </span>
                   </li>
@@ -133,42 +143,43 @@ export default function CustomerVouchersSection({ userId }: Props) {
               </ul>
             )}
           </div>
+
           <div>
-            <h3 className="font-semibold mb-2">{t("blocked")}</h3>
+            <CardHeader title={t("blocked")} className="mb-2" />
             {data?.blocked.length === 0 ? (
-              <p className="text-sm text-slate-500">{t("emptyBlocked")}</p>
+              <EmptyState title={t("emptyBlocked")} size="sm" />
             ) : (
-              <ul className="space-y-2 text-sm">
+              <ul className="text-sm">
                 {data?.blocked.map((b) => (
                   <li
                     key={b.id}
-                    className="flex justify-between items-center py-2 border-b border-slate-100"
+                    className="flex items-center justify-between gap-3 border-b border-line py-2 last:border-b-0"
                   >
-                    <span className="font-mono">{b.code}</span>
-                    <button
-                      type="button"
+                    <span className="font-mono text-fg">{b.code}</span>
+                    <Button
+                      variant="link"
+                      size="sm"
                       onClick={() => handleUnblock(b.voucherId)}
-                      className="text-xs text-primary font-semibold"
                     >
                       {t("unblock")}
-                    </button>
+                    </Button>
                   </li>
                 ))}
               </ul>
             )}
             {data?.redemptions.length ? (
               <div className="mt-4">
-                <p className="text-xs text-slate-500 mb-2">{t("blockHint")}</p>
+                <p className="mb-2 text-xs text-fg-muted">{t("blockHint")}</p>
                 <div className="flex flex-wrap gap-2">
                   {data.redemptions.map((r) => (
-                    <button
+                    <Button
                       key={`block-${r.voucherId}`}
-                      type="button"
+                      variant="dangerGhost"
+                      size="xs"
                       onClick={() => handleBlock(r.voucherId)}
-                      className="text-xs px-2 py-1 rounded-lg bg-red-50 text-red-700"
                     >
                       {t("block")} {r.code}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -176,6 +187,6 @@ export default function CustomerVouchersSection({ userId }: Props) {
           </div>
         </div>
       )}
-    </CardDashBoard>
+    </Card>
   );
 }

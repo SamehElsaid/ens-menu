@@ -10,13 +10,27 @@ import {
   axiosPatch,
   axiosPost,
 } from "@/shared/axiosCall";
-import CardDashBoard from "@/components/Card/CardDashBoard";
-import ConfirmationModal from "@/components/Custom/ConfirmationModal";
+import { FiAlertTriangle } from "react-icons/fi";
+import {
+  Badge,
+  Button,
+  Card,
+  Checkbox,
+  ConfirmDialog,
+  EmptyState,
+  Field,
+  Input,
+  LoadingBlock,
+  Modal,
+  SectionHeader,
+} from "@/components/ui";
 import type { UserAddress } from "@/types/AdminCustomer";
 
 interface Props {
   userId: number;
 }
+
+const FORM_ID = "customer-address-form";
 
 const emptyForm = {
   label: "",
@@ -31,6 +45,7 @@ const emptyForm = {
 export default function CustomerAddressesSection({ userId }: Props) {
   const locale = useLocale();
   const t = useTranslations("adminUsers.userDetails.customerSections.addresses");
+  const tCommon = useTranslations("common");
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
@@ -135,43 +150,50 @@ export default function CustomerAddressesSection({ userId }: Props) {
   };
 
   return (
-    <CardDashBoard>
-      <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-          {t("title")}
-        </h2>
-        <button
-          type="button"
-          onClick={openCreate}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold"
-        >
-          <FaPlus /> {t("add")}
-        </button>
-      </div>
+    <Card padded="lg">
+      <SectionHeader
+        title={t("title")}
+        className="mb-4"
+        actions={
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={openCreate}
+            startIcon={<FaPlus />}
+          >
+            {t("add")}
+          </Button>
+        }
+      />
+
       {loading ? (
-        <p className="text-slate-500">{t("loading")}</p>
+        <LoadingBlock label={t("loading")} />
       ) : addresses.length === 0 ? (
-        <p className="text-slate-500">{t("empty")}</p>
+        <EmptyState title={t("empty")} size="sm" />
       ) : (
-        <div className="space-y-3">
+        <ul className="flex flex-col gap-3">
           {addresses.map((addr) => (
-            <div
+            <Card
+              as="li"
               key={addr.id}
-              className="rounded-xl border border-slate-200 dark:border-slate-700 p-4 flex flex-wrap justify-between gap-3"
+              padded="md"
+              className="flex flex-wrap justify-between gap-3"
             >
-              <div>
-                <div className="flex items-center gap-2 mb-1">
+              <div className="min-w-0">
+                <div className="mb-1 flex items-center gap-2">
                   {addr.isDefault && (
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600">
-                      <FaStar /> {t("default")}
-                    </span>
+                    <Badge tone="warning" icon={<FaStar />}>
+                      {t("default")}
+                    </Badge>
                   )}
                   {addr.label && (
-                    <span className="text-sm font-semibold">{addr.label}</span>
+                    <span className="text-sm font-semibold text-fg">
+                      {addr.label}
+                    </span>
                   )}
                 </div>
-                <p className="text-slate-700 dark:text-slate-300">{addr.addressLine}</p>
-                <p className="text-sm text-slate-500">
+                <p className="text-fg">{addr.addressLine}</p>
+                <p className="text-sm text-fg-muted">
                   {[addr.city, addr.governorate, addr.country]
                     .filter(Boolean)
                     .join(" · ")}
@@ -179,108 +201,124 @@ export default function CustomerAddressesSection({ userId }: Props) {
               </div>
               <div className="flex items-center gap-2">
                 {!addr.isDefault && (
-                  <button
-                    type="button"
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    iconOnly
+                    aria-label={t("setDefault")}
                     onClick={() => setDefault(addr)}
-                    className="p-2 rounded-lg bg-amber-100 text-amber-700"
-                    title={t("setDefault")}
                   >
                     <FaStar />
-                  </button>
+                  </Button>
                 )}
-                <button
-                  type="button"
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  iconOnly
+                  aria-label={t("edit")}
                   onClick={() => openEdit(addr)}
-                  className="p-2 rounded-lg bg-blue-100 text-blue-700"
                 >
                   <FaEdit />
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
+                  variant="dangerGhost"
+                  size="sm"
+                  iconOnly
+                  aria-label={tCommon("delete")}
                   onClick={() => setDeleteId(addr.id)}
-                  className="p-2 rounded-lg bg-red-100 text-red-700"
                 >
                   <FaTrash />
-                </button>
+                </Button>
               </div>
-            </div>
+            </Card>
           ))}
-        </div>
+        </ul>
       )}
 
-      {formOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <form
-            onSubmit={handleSubmit}
-            className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-md w-full p-6 space-y-3"
-          >
-            <h3 className="text-lg font-bold">{editingId ? t("edit") : t("add")}</h3>
-            <input
-              placeholder={t("label")}
+      <Modal
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        title={editingId ? t("edit") : t("add")}
+        size="sm"
+        dismissible={!submitting}
+        closeLabel={tCommon("close")}
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              onClick={() => setFormOpen(false)}
+              disabled={submitting}
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              type="submit"
+              form={FORM_ID}
+              variant="primary"
+              loading={submitting}
+            >
+              {t("save")}
+            </Button>
+          </>
+        }
+      >
+        <form
+          id={FORM_ID}
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-4"
+        >
+          <Field label={t("label")}>
+            <Input
               value={form.label}
-              onChange={(e) => setForm((f) => ({ ...f, label: e.target.value }))}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+              onChange={(e) =>
+                setForm((f) => ({ ...f, label: e.target.value }))
+              }
             />
-            <input
+          </Field>
+          <Field label={t("addressLine")} required>
+            <Input
               required
-              placeholder={t("addressLine")}
               value={form.addressLine}
               onChange={(e) =>
                 setForm((f) => ({ ...f, addressLine: e.target.value }))
               }
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
             />
-            <input
-              placeholder={t("city")}
+          </Field>
+          <Field label={t("city")}>
+            <Input
               value={form.city}
               onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
             />
-            <input
-              placeholder={t("governorate")}
+          </Field>
+          <Field label={t("governorate")}>
+            <Input
               value={form.governorate}
               onChange={(e) =>
                 setForm((f) => ({ ...f, governorate: e.target.value }))
               }
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
             />
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={form.isDefault}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, isDefault: e.target.checked }))
-                }
-              />
-              {t("setDefault")}
-            </label>
-            <div className="flex gap-2 pt-2">
-              <button
-                type="submit"
-                disabled={submitting}
-                className="flex-1 py-2 rounded-xl bg-primary text-white font-semibold disabled:opacity-50"
-              >
-                {t("save")}
-              </button>
-              <button
-                type="button"
-                onClick={() => setFormOpen(false)}
-                className="flex-1 py-2 rounded-xl border border-slate-200"
-              >
-                {t("cancel")}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+          </Field>
+          <Checkbox
+            label={t("setDefault")}
+            checked={form.isDefault}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, isDefault: e.target.checked }))
+            }
+          />
+        </form>
+      </Modal>
 
-      <ConfirmationModal
-        isOpen={deleteId !== null}
+      <ConfirmDialog
+        open={deleteId !== null}
         onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
         title={t("deleteConfirmTitle")}
-        message={t("deleteConfirmMessage")}
+        description={t("deleteConfirmMessage")}
+        confirmLabel={tCommon("delete")}
+        cancelLabel={t("cancel")}
+        tone="danger"
+        icon={<FiAlertTriangle />}
       />
-    </CardDashBoard>
+    </Card>
   );
 }

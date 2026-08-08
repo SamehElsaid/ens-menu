@@ -20,6 +20,7 @@ import {
 import { formatImageSizeLog } from "@/lib/menuImport/formatImageSize";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { useCompleteAiImportOnboarding } from "@/hooks/useCompleteAiImportOnboarding";
+import { Button, Card, PageHeader } from "@/components/ui";
 
 export default function MenuImportWizard() {
   const t = useTranslations("MenuImport");
@@ -106,28 +107,22 @@ export default function MenuImportWizard() {
 
   return (
     <div className="mobile-stack pb-8 sm:pb-10 animate-fadeIn">
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div>
-          <button
-            type="button"
-            onClick={() => void leaveOnboarding()}
-            className="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-primary mb-3 transition-colors"
-          >
-            <IoArrowBackOutline className="text-lg" />
-            {t("backToOverview")}
-          </button>
-          <PageTitleWithHelp>
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100">
-              {t("pageTitle")}
-            </h1>
-          </PageTitleWithHelp>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-            {t("pageSubtitle")}
-          </p>
-        </div>
+      <div className="flex flex-col gap-3">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => void leaveOnboarding()}
+          startIcon={<IoArrowBackOutline className="text-lg rtl:rotate-180" />}
+          className="self-start"
+        >
+          {t("backToOverview")}
+        </Button>
+        <PageTitleWithHelp>
+          <PageHeader title={t("pageTitle")} description={t("pageSubtitle")} />
+        </PageTitleWithHelp>
       </div>
 
-      <div className="mobile-card shadow-sm dark:bg-slate-800">
+      <Card>
         <ImportStepper currentStep={state.step} />
 
         <div className="mt-6 sm:mt-8">
@@ -193,8 +188,7 @@ export default function MenuImportWizard() {
             />
           )}
         </div>
-      </div>
-
+      </Card>
     </div>
   );
 }

@@ -1,3 +1,6 @@
+import { Card } from "@/components/ui";
+import { cn } from "@/lib/cn";
+
 interface CardDashBoardProps {
   className?: string;
   children: React.ReactNode;
@@ -6,28 +9,27 @@ interface CardDashBoardProps {
   borderColor?: string;
 }
 
-function CardDashBoard({ 
-  className = "", 
-  children, 
+/**
+ * Legacy dashboard panel kept for the pages that already use it.
+ * New surfaces should import `Card` from `@/components/ui` directly.
+ */
+function CardDashBoard({
+  className = "",
+  children,
   hover = false,
   border = true,
-  borderColor = "border-slate-200 dark:border-slate-800"
+  borderColor,
 }: CardDashBoardProps) {
   return (
-    <div 
-      className={`
-        bg-white dark:bg-slate-900 
-        rounded-2xl 
-        ${border ? `border ${borderColor}` : ''}
-        shadow-sm 
-        p-6
-        ${hover ? 'transition-all duration-200 hover:shadow-md hover:-translate-y-0.5' : ''}
-        ${className}
-      `}
+    <Card
+      variant={border ? "flat" : "raised"}
+      padded="lg"
+      interactive={hover}
+      className={cn(borderColor, className)}
     >
       {children}
-    </div>
-  )
+    </Card>
+  );
 }
 
-export default CardDashBoard
+export default CardDashBoard;

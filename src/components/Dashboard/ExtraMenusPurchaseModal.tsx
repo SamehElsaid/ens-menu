@@ -16,7 +16,9 @@ import {
   shouldShowExtraMenuShortPeriodWarning,
 } from "@/lib/subscriptionMenus";
 import type { Subscription } from "@/types/Subscription";
-import { IoCloseOutline, IoWarningOutline } from "react-icons/io5";
+import { IoWarningOutline } from "react-icons/io5";
+import { FiMinus, FiPlus } from "react-icons/fi";
+import { Alert, Button, Field, Input, Modal } from "@/components/ui";
 
 type AuthUser = {
   name?: string;
@@ -36,6 +38,7 @@ export default function ExtraMenusPurchaseModal({
   onClose,
 }: ExtraMenusPurchaseModalProps) {
   const t = useTranslations("Menus");
+  const tStepper = useTranslations("personalProfile");
   const locale = useLocale();
   const authData = useAppSelector((state) => state.auth.data) as {
     user?: AuthUser;
@@ -115,75 +118,70 @@ export default function ExtraMenusPurchaseModal({
   }, [profile, quantity, locale, t]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-900">
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute end-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800"
-        >
-          <IoCloseOutline className="text-xl text-gray-400" />
-        </button>
-
-        <div className="flex flex-col gap-4 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-900/30">
-            <IoWarningOutline className="text-3xl text-amber-500 dark:text-amber-400" />
-          </div>
-
-          <div>
-            <h3 className="mb-2 text-xl font-bold text-slate-800 dark:text-slate-100">
-              {t("limitReached")}
-            </h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              {t("extraMenusDescription", {
-                current: String(currentCount),
-                max: String(baseMax + extraMenus),
-                monthly: String(monthlyPrice),
-                unitPrice: String(pricePerMenu),
-              })}
-            </p>
-          </div>
-
-          {showShortPeriodWarning && (
-            <div
-              role="alert"
-              className="flex gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-start dark:border-amber-700 dark:bg-amber-950/40"
-            >
-              <IoWarningOutline className="mt-0.5 shrink-0 text-xl text-amber-600 dark:text-amber-400" />
-              <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
-                {t("extraMenusShortPeriodWarning", {
-                  days: String(daysRemaining),
-                  price: String(monthlyPrice),
-                })}
-              </p>
-            </div>
-          )}
-
-          <div className="rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:bg-slate-800/50 dark:text-slate-300">
-            {t("extraMenusMonthlyBreakdown", {
-              monthly: String(monthlyPrice),
-              unit: String(pricePerMenu),
+    <Modal
+      open
+      onClose={onClose}
+      size="sm"
+      title={t("limitReached")}
+      description={t("extraMenusDescription", {
+        current: String(currentCount),
+        max: String(baseMax + extraMenus),
+        monthly: String(monthlyPrice),
+        unitPrice: String(pricePerMenu),
+      })}
+      icon={<IoWarningOutline className="size-5" />}
+      iconTone="warning"
+      dismissible={!loading}
+      closeLabel={t("close")}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose} disabled={loading}>
+            {t("cancel")}
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => void handlePay()}
+            loading={loading}
+          >
+            {loading ? t("extraMenusPaying") : t("extraMenusPayNow")}
+          </Button>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        {showShortPeriodWarning && (
+          <Alert tone="warning">
+            {t("extraMenusShortPeriodWarning", {
+              days: String(daysRemaining),
+              price: String(monthlyPrice),
             })}
-          </div>
+          </Alert>
+        )}
 
-          <div className="rounded-xl bg-slate-50 p-4 text-start dark:bg-slate-800/50">
-            <label
-              htmlFor="extra-menus-qty"
-              className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
-            >
-              {t("extraMenusQuantityLabel")}
-            </label>
+        <p className="rounded-xl bg-surface-2 px-4 py-3 text-sm text-fg-muted">
+          {t("extraMenusMonthlyBreakdown", {
+            monthly: String(monthlyPrice),
+            unit: String(pricePerMenu),
+          })}
+        </p>
+
+        <div className="rounded-xl bg-surface-2 p-4">
+          <Field
+            label={t("extraMenusQuantityLabel")}
+            hint={t("extraMenusRenewalNote")}
+            htmlFor="extra-menus-qty"
+          >
             <div className="flex items-center gap-3">
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                iconOnly
+                aria-label={tStepper("renewExtraMenusDecrease")}
                 disabled={quantity <= 1 || loading}
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-lg font-bold disabled:opacity-40 dark:border-slate-600"
               >
-                −
-              </button>
-              <input
-                id="extra-menus-qty"
+                <FiMinus className="size-4" />
+              </Button>
+              <Input
                 type="number"
                 min={1}
                 max={50}
@@ -194,51 +192,31 @@ export default function ExtraMenusPurchaseModal({
                     setQuantity(v);
                   }
                 }}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-center text-lg font-semibold dark:border-slate-600 dark:bg-slate-900"
+                className="text-center font-semibold tabular-nums"
+                data-autofocus
               />
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                iconOnly
+                aria-label={tStepper("renewExtraMenusIncrease")}
                 disabled={quantity >= 50 || loading}
                 onClick={() => setQuantity((q) => Math.min(50, q + 1))}
-                className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-lg font-bold disabled:opacity-40 dark:border-slate-600"
               >
-                +
-              </button>
+                <FiPlus className="size-4" />
+              </Button>
             </div>
-            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-              {t("extraMenusRenewalNote")}
-            </p>
-          </div>
+          </Field>
+        </div>
 
-          <div className="flex items-center justify-between rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
-            <span className="text-sm text-slate-600 dark:text-slate-300">
-              {t("extraMenusTotal")}
-            </span>
-            <span className="text-lg font-bold text-primary">
-              {total} {t("extraMenusCurrency")}
-            </span>
-          </div>
-
-          <div className="mt-1 flex gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={loading}
-              className="flex-1 rounded-xl border-2 border-slate-200 px-4 py-2.5 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300"
-            >
-              {t("cancel")}
-            </button>
-            <button
-              type="button"
-              onClick={() => void handlePay()}
-              disabled={loading}
-              className="flex-1 rounded-xl bg-linear-to-r from-primary to-primary/80 px-4 py-2.5 font-semibold text-white shadow-lg hover:opacity-90 disabled:opacity-50"
-            >
-              {loading ? t("extraMenusPaying") : t("extraMenusPayNow")}
-            </button>
-          </div>
+        <div className="flex items-center justify-between rounded-xl border border-brand-line bg-brand-soft px-4 py-3">
+          <span className="text-sm text-brand-soft-fg">
+            {t("extraMenusTotal")}
+          </span>
+          <span className="text-base font-semibold tabular-nums text-brand-soft-fg">
+            {total} {t("extraMenusCurrency")}
+          </span>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

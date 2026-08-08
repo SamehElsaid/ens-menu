@@ -18,6 +18,7 @@ import ProPlanPriceSelector, {
 } from "@/components/Pricing/ProPlanPriceSelector";
 import { formatEgpPrice } from "@/lib/subscriptionPayment";
 import type { Plan } from "@/types/Plan";
+import { Alert, Badge, Button, Skeleton, SkeletonRegion } from "@/components/ui";
 
 type SubscriptionPlanCardProps = {
   plan: Plan;
@@ -76,12 +77,12 @@ function PlanFeatureList({
       {features.map((f, i) => (
         <li
           key={`${f}-${i}`}
-          className={`flex gap-2.5 text-sm text-slate-600 dark:text-slate-300 leading-snug ${
+          className={`flex gap-2.5 text-sm text-fg-muted leading-snug ${
             isRTL ? "flex-row-reverse text-right" : ""
           }`}
         >
-          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 dark:bg-emerald-500/20">
-            <HiCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-success-soft">
+            <HiCheck className="h-3.5 w-3.5 text-success-fg" />
           </span>
           <span>{f}</span>
         </li>
@@ -110,22 +111,23 @@ function CollapsiblePlanFeatureList({
     <div className="flex-1 min-h-0">
       <PlanFeatureList features={visibleFeatures} isRTL={isRTL} />
       {hasMore && (
-        <button
+        <Button
           type="button"
+          variant="secondary"
+          fullWidth
           onClick={() => setExpanded((prev) => !prev)}
-          className={`mt-4 flex w-full min-h-[40px] items-center justify-center gap-2 rounded-xl border border-slate-200/90 bg-slate-50/90 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200 dark:hover:bg-slate-800 ${
-            isRTL ? "flex-row-reverse" : ""
-          }`}
+          className={isRTL ? "flex-row-reverse" : ""}
+          endIcon={
+            <HiChevronDown
+              className={`h-4 w-4 transition-transform duration-300 ${
+                expanded ? "rotate-180" : ""
+              }`}
+            />
+          }
           aria-expanded={expanded}
         >
           {expanded ? t("mobileShowLess") : t("mobileShowMore")}
-          <HiChevronDown
-            className={`h-4 w-4 transition-transform duration-300 ${
-              expanded ? "rotate-180" : ""
-            }`}
-            aria-hidden
-          />
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -185,18 +187,18 @@ export default function SubscriptionPlanCard({
   return (
     <article
       className={[
-        "group relative flex h-full flex-col rounded-[28px] p-6 md:p-7 transition-all duration-300",
+        "group relative flex h-full flex-col rounded-2xl p-6 md:p-7 transition-all duration-300",
         isProPlan && !isCurrentPlan
-          ? "border-2 border-primary/50 dark:border-primary/60 bg-gradient-to-b from-primary/[0.06] to-white dark:from-primary/10 dark:to-slate-900 shadow-xl shadow-primary/10 md:-translate-y-1 md:scale-[1.02] z-[1]"
+          ? "border-2 border-brand-line bg-surface shadow-md z-[1]"
           : isCurrentPlan
-            ? "border-2 border-primary bg-gradient-to-br from-primary/8 via-white to-white dark:from-primary/15 dark:via-slate-900 dark:to-slate-900 shadow-lg shadow-primary/15 ring-1 ring-primary/20"
-            : "border border-slate-200/90 dark:border-slate-700/90 bg-white dark:bg-slate-900/80 shadow-md shadow-slate-200/40 dark:shadow-none hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-lg",
+            ? "border-2 border-brand bg-surface shadow-md ring-1 ring-brand-line"
+            : "border border-line bg-surface shadow-sm hover:border-line-strong hover:shadow-md",
         className,
       ].join(" ")}
     >
       {isMostPopular && !isCurrentPlan && (
         <div className="absolute -top-3 inset-x-0 flex justify-center pointer-events-none">
-          <span className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-1 text-xs font-bold text-white shadow-md shadow-primary/30">
+          <span className="inline-flex items-center gap-1 rounded-full bg-brand px-4 py-1 text-xs font-bold text-on-brand shadow-sm">
             <HiOutlineSparkles className="h-3.5 w-3.5" />
             {mostPopularLabel}
           </span>
@@ -205,12 +207,11 @@ export default function SubscriptionPlanCard({
 
       {isCurrentPlan && (
         <div
-          className={`absolute top-4 ${isRTL ? "left-4" : "right-4"} pointer-events-none`}
+          className={`absolute top-4 ${isRTL ? "start-4" : "end-4"} pointer-events-none`}
         >
-          <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 dark:bg-primary/25 px-2.5 py-1 text-[11px] font-semibold text-primary dark:text-primary-foreground">
-            <HiOutlineTag className="h-3.5 w-3.5" />
+          <Badge tone="brand" icon={<HiOutlineTag className="h-3.5 w-3.5" />}>
             {currentPlanLabel}
-          </span>
+          </Badge>
         </div>
       )}
 
@@ -220,10 +221,10 @@ export default function SubscriptionPlanCard({
         <div
           className={`mb-3 flex h-11 w-11 items-center justify-center rounded-2xl ${
             isProPlan
-              ? "bg-primary/15 text-primary"
+              ? "bg-brand-soft text-brand-soft-fg"
               : isFreePlan
-                ? "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-                : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                ? "bg-surface-2 text-fg-muted"
+                : "bg-success-soft text-success-fg"
           } ${isRTL ? "ms-auto" : ""}`}
         >
           {isProPlan ? (
@@ -234,11 +235,11 @@ export default function SubscriptionPlanCard({
             <span className="text-lg font-black">★</span>
           )}
         </div>
-        <h3 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+        <h3 className="text-xl font-bold tracking-tight text-fg">
           {planDisplayName}
         </h3>
         {plan.description ? (
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 line-clamp-2">
+          <p className="mt-1 text-sm text-fg-muted line-clamp-2">
             {plan.description}
           </p>
         ) : null}
@@ -246,7 +247,7 @@ export default function SubscriptionPlanCard({
 
       <div className={`mb-5 ${isRTL ? "text-right" : "text-left"}`}>
         {isFreePlan && plan.priceMonthly === 0 ? (
-          <span className="text-4xl font-black text-slate-900 dark:text-white">
+          <span className="text-4xl font-black text-fg">
             {freePriceLabel}
           </span>
         ) : showProBilling && isProPlan ? (
@@ -265,13 +266,13 @@ export default function SubscriptionPlanCard({
         ) : isProPlan ? (
           <div className="space-y-1">
             {resolvedActiveBilling === "monthly" && plan.priceMonthly > 0 ? (
-              <p className="text-2xl font-black text-slate-900 dark:text-white tabular-nums">
+              <p className="text-2xl font-black text-fg tabular-nums">
                 {monthlyPriceFormatted(
                   formatEgpPrice(plan.firstMonthlyPrice ?? plan.priceMonthly),
                 )}
               </p>
             ) : plan.priceYearly > 0 ? (
-              <p className="text-2xl font-black text-slate-900 dark:text-white tabular-nums">
+              <p className="text-2xl font-black text-fg tabular-nums">
                 {yearlyPriceFormatted(
                   formatEgpPrice(plan.firstYearlyPrice ?? plan.priceYearly),
                 )}
@@ -279,62 +280,72 @@ export default function SubscriptionPlanCard({
             ) : null}
           </div>
         ) : (
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-fg-muted">
             {contactForDetailsLabel}
           </p>
         )}
       </div>
 
-      <div className="mb-5 h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-700 to-transparent" />
+      <div className="mb-5 h-px bg-line" />
 
       <CollapsiblePlanFeatureList features={features} isRTL={isRTL} />
 
       <div className="mt-6 flex flex-col gap-2 pt-2">
         {isCurrentPlan && !canRenew && (
-          <span className="inline-flex items-center justify-center gap-2 rounded-2xl border border-primary/25 bg-primary/5 px-4 py-3 text-sm font-semibold text-primary dark:text-primary-foreground">
+          <span className="inline-flex items-center justify-center gap-2 rounded-xl border border-brand-line bg-brand-soft px-4 py-3 text-sm font-semibold text-brand-soft-fg">
             <HiCheck className="h-4 w-4" />
             {currentPlanLabel}
           </span>
         )}
         {canRenew && onRenew && (
-          <button
+          <Button
             type="button"
+            fullWidth
             onClick={onRenew}
             disabled={proPayLoading || renewLoading}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-sm font-semibold text-white shadow-md shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+            loading={proPayLoading || renewLoading}
+            startIcon={
+              !proPayLoading && !renewLoading ? (
+                <HiOutlineRefresh className="h-4 w-4 shrink-0" />
+              ) : undefined
+            }
           >
-            <HiOutlineRefresh className={`h-4 w-4 shrink-0 ${renewLoading || proPayLoading ? "animate-spin" : ""}`} />
             {proPayLoading || renewLoading ? payingLabel : renewLabel ?? currentPlanLabel}
-          </button>
+          </Button>
         )}
         {canUpgrade && (
           <>
             {voucherDurationHint && (
-              <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-center text-xs text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+              <Alert tone="warning" className="text-center text-xs">
                 {voucherDurationHint}
-              </p>
+              </Alert>
             )}
-            <button
+            <Button
               type="button"
+              fullWidth
               onClick={onUpgrade}
               disabled={proPayLoading || Boolean(voucherDurationHint)}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-sm font-semibold text-white shadow-md shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+              loading={proPayLoading}
+              startIcon={!proPayLoading ? <HiArrowUp className="h-4 w-4 shrink-0" /> : undefined}
             >
-              <HiArrowUp className="h-4 w-4 shrink-0" />
               {proPayLoading ? payingLabel : upgradeLabel}
-            </button>
+            </Button>
           </>
         )}
         {canDowngrade && (
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            fullWidth
             onClick={onDowngrade}
             disabled={downgradeLoading}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-4 py-3.5 text-sm font-semibold text-slate-700 dark:text-slate-200 transition-all hover:border-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+            loading={downgradeLoading}
+            startIcon={
+              !downgradeLoading ? <HiArrowDown className="h-4 w-4 shrink-0" /> : undefined
+            }
           >
-            <HiArrowDown className="h-4 w-4 shrink-0" />
             {downgradeLoading ? downgradingLabel : downgradeLabel}
-          </button>
+          </Button>
         )}
         {children}
       </div>
@@ -344,22 +355,22 @@ export default function SubscriptionPlanCard({
 
 export function SubscriptionPlanCardSkeleton() {
   return (
-    <div
-      className="flex h-full min-h-[420px] flex-col rounded-[28px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 md:p-7 animate-pulse"
-      aria-hidden
+    <SkeletonRegion
+      label="Loading plan"
+      className="flex h-full min-h-[420px] flex-col rounded-2xl border border-line bg-surface p-6 md:p-7"
     >
-      <div className="mb-5 h-11 w-11 rounded-2xl bg-slate-200 dark:bg-slate-700" />
-      <div className="mb-2 h-6 w-2/5 rounded-lg bg-slate-200 dark:bg-slate-700" />
-      <div className="mb-6 h-4 w-3/5 rounded bg-slate-100 dark:bg-slate-800" />
-      <div className="mb-6 h-10 w-full rounded-xl bg-slate-100 dark:bg-slate-800" />
-      <div className="mb-5 h-px bg-slate-100 dark:bg-slate-800" />
+      <Skeleton className="mb-5 h-11 w-11" rounded="lg" />
+      <Skeleton className="mb-2 h-6 w-2/5" rounded="md" />
+      <Skeleton className="mb-6 h-4 w-3/5" />
+      <Skeleton className="mb-6 h-10 w-full" rounded="lg" />
+      <div className="mb-5 h-px bg-line" />
       <div className="flex-1 space-y-3">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="h-4 rounded bg-slate-100 dark:bg-slate-800" />
+          <Skeleton key={i} className="h-4" />
         ))}
       </div>
-      <div className="mt-6 h-12 rounded-2xl bg-slate-200 dark:bg-slate-700" />
-    </div>
+      <Skeleton className="mt-6 h-12 w-full" rounded="lg" />
+    </SkeletonRegion>
   );
 }
 
@@ -391,9 +402,9 @@ export function CustomSubscriptionPlanCard({
   return (
     <article
       className={[
-        "relative flex h-full flex-col rounded-[28px] border border-slate-200/90 dark:border-slate-700/90 bg-white dark:bg-slate-900/80 p-6 md:p-7 shadow-md transition-all duration-300 hover:border-emerald-300/60 hover:shadow-lg dark:hover:border-emerald-700/50",
+        "relative flex h-full flex-col rounded-2xl border border-line bg-surface p-6 md:p-7 shadow-sm transition-all duration-300 hover:border-line-strong hover:shadow-md",
         isCurrentCustomPlan &&
-          "border-2 border-primary ring-1 ring-primary/20 shadow-lg shadow-primary/10",
+          "border-2 border-brand ring-1 ring-brand-line shadow-md",
         className,
       ]
         .filter(Boolean)
@@ -401,56 +412,54 @@ export function CustomSubscriptionPlanCard({
     >
       {isCurrentCustomPlan && (
         <div
-          className={`absolute top-4 ${isRTL ? "left-4" : "right-4"}`}
+          className={`absolute top-4 ${isRTL ? "start-4" : "end-4"}`}
         >
-          <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2.5 py-1 text-[11px] font-semibold text-primary">
-            {currentPlanLabel}
-          </span>
+          <Badge tone="brand">{currentPlanLabel}</Badge>
         </div>
       )}
 
       <header className={`mb-5 ${isRTL ? "text-right" : "text-left"}`}>
         <div
-          className={`mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 ${
+          className={`mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-success-soft text-success-fg ${
             isRTL ? "ms-auto" : ""
           }`}
         >
           <HiOutlineChat className="h-6 w-6" />
         </div>
-        <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50">
+        <h3 className="text-xl font-bold text-fg">
           {planCustomLabel}
         </h3>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+        <p className="mt-1 text-sm text-fg-muted">
           {planDescription ?? contactForDetailsLabel}
         </p>
       </header>
 
       <div className={`mb-5 ${isRTL ? "text-right" : "text-left"}`}>
-        <span className="text-2xl font-black text-slate-900 dark:text-white">
+        <span className="text-2xl font-black text-fg">
           {customPriceLabel}
         </span>
       </div>
 
-      <div className="mb-5 h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-700 to-transparent" />
+      <div className="mb-5 h-px bg-line" />
 
       <CollapsiblePlanFeatureList features={customPlanFeatures} isRTL={isRTL} />
 
       <div className="mt-6 pt-2">
         {isCurrentCustomPlan ? (
-          <span className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-primary/25 bg-primary/5 px-4 py-3 text-sm font-semibold text-primary">
+          <span className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-brand-line bg-brand-soft px-4 py-3 text-sm font-semibold text-brand-soft-fg">
             <HiCheck className="h-4 w-4" />
             {currentPlanLabel}
           </span>
         ) : (
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3.5 text-sm font-semibold text-white shadow-md shadow-emerald-500/25 transition-all hover:bg-emerald-600 hover:shadow-lg active:scale-[0.98]"
+          <Button
+            variant="primary"
+            fullWidth
+            className="bg-success text-white hover:bg-success-hover"
+            startIcon={<HiOutlineChat className="h-5 w-5" />}
+            onClick={() => window.open(whatsappUrl, "_blank", "noopener,noreferrer")}
           >
-            <HiOutlineChat className="h-5 w-5" />
             {contactWhatsAppLabel}
-          </a>
+          </Button>
         )}
       </div>
     </article>

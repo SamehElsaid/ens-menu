@@ -11,12 +11,19 @@ import {
   IoSearchOutline,
 } from "react-icons/io5";
 import CardDashBoard from "@/components/Card/CardDashBoard";
-import ConfirmationModal from "@/components/Custom/ConfirmationModal";
-import CustomBtn from "@/components/Custom/CustomBtn";
+import { FiAlertTriangle } from "react-icons/fi";
+import {
+  Button,
+  ConfirmDialog,
+  Field,
+  Input,
+  PageHeader,
+  SegmentedControl,
+  Textarea,
+} from "@/components/ui";
 import CustomInput from "@/components/Custom/CustomInput";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
-import { cn } from "@/lib/cn";
 import {
   getBroadcastTemplate,
   hasBroadcastTemplate,
@@ -84,6 +91,7 @@ function parseTestEmails(value: string): string[] {
 export default function AdminBroadcastPage() {
   const locale = useLocale();
   const t = useTranslations("adminBroadcast");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const textDir = locale === "ar" ? "rtl" : "ltr";
   const defaultEmailLocale = locale === "ar" ? "ar" : "en";
@@ -298,56 +306,45 @@ export default function AdminBroadcastPage() {
 
   return (
     <div dir={textDir} className="admin-broadcast-page space-y-6 p-4 md:p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <button
-            type="button"
-            onClick={() => router.push("/admin")}
-            className="mb-2 inline-flex items-center gap-2 text-sm text-slate-500 hover:text-primary dark:text-slate-400"
-          >
-            <IoArrowBack className={cn(locale === "ar" && "rotate-180")} />
-            {t("backToAdmin")}
-          </button>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            {t("title")}
-          </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {t("subtitle")}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => void loadPreview()}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
-        >
-          <IoRefreshOutline />
-          {t("refresh")}
-        </button>
-      </div>
+      <PageHeader
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          <>
+            <Button
+              variant="ghost"
+              size="sm"
+              startIcon={<IoArrowBack className="rtl:rotate-180" />}
+              onClick={() => router.push("/admin")}
+            >
+              {t("backToAdmin")}
+            </Button>
+            <Button
+              variant="secondary"
+              startIcon={<IoRefreshOutline />}
+              onClick={() => void loadPreview()}
+            >
+              {t("refresh")}
+            </Button>
+          </>
+        }
+      />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <CardDashBoard className="space-y-5 p-5">
           <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">
+            <label className="mb-2 block text-sm font-semibold text-fg">
               {t("audienceLabel")}
             </label>
-            <div className="flex flex-wrap gap-2">
-              {AUDIENCES.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => handleAudienceChange(item)}
-                  className={cn(
-                    "rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
-                    audience === item
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-slate-200 text-slate-600 hover:border-primary/40 dark:border-slate-600 dark:text-slate-300",
-                  )}
-                >
-                  {t(`audience.${item}`)}
-                </button>
-              ))}
-            </div>
+            <SegmentedControl
+              label={t("audienceLabel")}
+              value={audience}
+              onChange={handleAudienceChange}
+              options={AUDIENCES.map((item) => ({
+                value: item,
+                label: t(`audience.${item}`),
+              }))}
+            />
           </div>
 
           {audience === "selected" && (
@@ -446,26 +443,21 @@ export default function AdminBroadcastPage() {
             </div>
           )}
 
-          <CustomInput
-            type="text"
-            id="broadcast-subject"
-            label={t("subject")}
-            placeholder={t("subjectPlaceholder")}
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-          />
+          <Field label={t("subject")} htmlFor="broadcast-subject">
+            <Input
+              id="broadcast-subject"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              placeholder={t("subjectPlaceholder")}
+            />
+          </Field>
 
-          <div>
-            <label
-              htmlFor="broadcast-message"
-              className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200"
-            >
-              {t("message")}
-            </label>
-            <p className="mb-2 text-xs text-slate-500 dark:text-slate-400">
-              {t("messageHint")}
-            </p>
-            <textarea
+          <Field
+            label={t("message")}
+            htmlFor="broadcast-message"
+            hint={t("messageHint")}
+          >
+            <Textarea
               id="broadcast-message"
               rows={18}
               dir="ltr"
@@ -473,11 +465,12 @@ export default function AdminBroadcastPage() {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder={t("messagePlaceholder")}
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 font-mono text-sm leading-relaxed text-slate-800 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+              className="font-mono text-sm leading-relaxed"
             />
-            {message.trim() && (
-              <div className="mt-3 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-600">
-                <p className="border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-600 dark:bg-slate-800/60">
+          </Field>
+          {message.trim() ? (
+              <div className="mt-3 overflow-hidden rounded-xl border border-line">
+                <p className="border-b border-line bg-surface-2 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-fg-muted">
                   {t("htmlPreview")}
                 </p>
                 <iframe
@@ -490,39 +483,31 @@ export default function AdminBroadcastPage() {
                   sandbox=""
                 />
               </div>
-            )}
-          </div>
+            ) : null}
 
           <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">
+            <label className="mb-2 block text-sm font-semibold text-fg">
               {t("emailLocale")}
             </label>
-            <div className="flex gap-2">
-              {(["ar", "en"] as const).map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => handleEmailLocaleChange(item)}
-                  className={cn(
-                    "rounded-lg border px-4 py-2 text-sm font-medium",
-                    emailLocale === item
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-slate-200 text-slate-600 dark:border-slate-600 dark:text-slate-300",
-                  )}
-                >
-                  {item === "ar" ? t("localeAr") : t("localeEn")}
-                </button>
-              ))}
-            </div>
+            <SegmentedControl
+              label={t("emailLocale")}
+              value={emailLocale}
+              onChange={handleEmailLocaleChange}
+              options={[
+                { value: "ar" as const, label: t("localeAr") },
+                { value: "en" as const, label: t("localeEn") },
+              ]}
+            />
           </div>
 
-          <CustomBtn
-            text={t("send")}
-            loading={sending}
+          <Button
             disabled={!canSend || sending}
+            loading={sending}
             onClick={() => setConfirmOpen(true)}
             className="w-full sm:w-auto"
-          />
+          >
+            {t("send")}
+          </Button>
         </CardDashBoard>
 
         <CardDashBoard className="h-fit space-y-4 p-5">
@@ -571,14 +556,17 @@ export default function AdminBroadcastPage() {
         </CardDashBoard>
       </div>
 
-      <ConfirmationModal
-        isOpen={confirmOpen}
+      <ConfirmDialog
+        open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         onConfirm={() => void handleSend()}
         title={t("confirmTitle")}
-        message={t("confirmMessage", { count: preview?.count ?? 0 })}
-        confirmText={t("confirmSend")}
-        isLoading={sending}
+        description={t("confirmMessage", { count: preview?.count ?? 0 })}
+        confirmLabel={t("confirmSend")}
+        cancelLabel={tCommon("cancel")}
+        loading={sending}
+        tone="brand"
+        icon={<FiAlertTriangle />}
       />
     </div>
   );

@@ -9,7 +9,6 @@ import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import { _resizeImage } from "@/shared/_shared";
 import { pushMenuCreatedEvent } from "@/shared/gtmEvents";
 import CurrencySelector from "@/components/Global/CurrencySelector";
-import CustomInput from "@/components/Custom/CustomInput";
 import { createMenuSchema, CreateMenuSchema } from "@/schemas/createMenuSchema";
 import { toast } from "react-toastify";
 import { Menu, SlugCheckResponse, UploadResponse } from "@/types/Menu";
@@ -26,10 +25,17 @@ import {
   IoInformationCircleOutline,
   IoAddCircleOutline,
   IoCloudUploadOutline,
-  IoArrowBackOutline,
-  IoGitNetworkOutline,
 } from "react-icons/io5";
-import CustomBtn from "../Custom/CustomBtn";
+import {
+  Button,
+  Field,
+  Input,
+  Modal,
+  Spinner,
+  Textarea,
+  focusRing,
+} from "@/components/ui";
+import { cn } from "@/lib/cn";
 import { normalizeMenuFromApi } from "@/lib/normalizeMenuFromApi";
 import {
   publicMenuHostDisplay,
@@ -41,6 +47,8 @@ interface CreateMenuModalProps {
   onMenuCreated?: (newMenu?: Menu) => void;
   onRefresh?: () => void;
 }
+
+const CREATE_MENU_FORM_ID = "onboarding-create-menu-form";
 
 const LOGO_ACCEPT =
   ".png,.ico,.jpg,.jpeg,.webp,image/png,image/x-icon,image/vnd.microsoft.icon,image/jpeg,image/webp";
@@ -77,8 +85,8 @@ export default function CreateMenuModal({
   onMenuCreated,
 }: CreateMenuModalProps) {
   const t = useTranslations("Menus.createModal");
+  const tCommon = useTranslations("common");
   const locale = useLocale();
-  const isRTL = locale === "ar";
 
   const {
     control,
@@ -271,387 +279,297 @@ export default function CreateMenuModal({
   };
 
   return (
-    <div
-      id="onboarding-create-menu-modal-root"
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
-    >
-      <div
-        id="onboarding-create-menu-modal"
-        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-3xl w-full p-8 max-h-[90vh] overflow-y-auto overscroll-contain"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-linear-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg">
-              <IoRestaurant className="text-white text-2xl" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {t("title")}
-            </h2>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+    <Modal
+      open
+      onClose={onClose}
+      title={t("title")}
+      icon={<IoRestaurant className="size-5" />}
+      size="xl"
+      dismissible={!isCreating}
+      closeLabel={tCommon("close")}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose} disabled={isCreating}>
+            {t("cancel")}
+          </Button>
+          <Button
+            id="onboarding-create-submit"
+            variant="primary"
+            type="submit"
+            form={CREATE_MENU_FORM_ID}
+            loading={isCreating}
+            disabled={
+              isCreating ||
+              !logo ||
+              !isValid ||
+              slugStatus.checking ||
+              slugStatus.available === false
+            }
+            startIcon={<IoAddCircleOutline className="size-4.5" />}
           >
-            <IoCloseOutline className="text-gray-500 dark:text-gray-400 text-xl" />
-          </button>
-        </div>
-
-        <form
-          id="onboarding-create-menu-form"
-          onSubmit={handleSubmit(onSubmit)}
-          className="space-y-6"
-        >
-          {/* Names Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-3">
-              <IoPricetagOutline className="text-primary text-xl" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {t("menuNames")}
-              </h3>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t("nameEn")} *
-                </label>
-                <Controller
-                  name="name"
-                  control={control}
-                  render={({ field }) => (
-                    <CustomInput
-                      type="text"
-                      value={field.value}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                      placeholder={t("nameEnPlaceholder")}
-                      error={errors.name?.message}
-                    />
-                  )}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t("nameAr")} *
-                </label>
-                <Controller
-                  name="nameAr"
-                  control={control}
-                  render={({ field }) => (
-                    <CustomInput
-                      type="text"
-                      value={field.value}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                      placeholder="مثال: قائمة مطعمي"
-                      dir="rtl"
-                      error={errors.nameAr?.message}
-                    />
-                  )}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Descriptions Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-3">
-              <IoDocumentTextOutline className="text-primary text-xl" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {t("descriptions")}
-              </h3>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t("descriptionEn")}
-                </label>
-                <Controller
-                  name="description"
-                  control={control}
-                  render={({ field }) => (
-                    <CustomInput
-                      type="textarea"
-                      value={field.value}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      rows={3}
-                      className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary resize-none"
-                      placeholder={t("descriptionEnPlaceholder")}
-                    />
-                  )}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t("descriptionAr")}
-                </label>
-                <Controller
-                  name="descriptionAr"
-                  control={control}
-                  render={({ field }) => (
-                    <CustomInput
-                      type="textarea"
-                      value={field.value}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      rows={3}
-                      className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary resize-none"
-                      placeholder="اكتب وصف القائمة بالعربية..."
-                      dir="rtl"
-                    />
-                  )}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Logo Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-3">
-              <IoImageOutline className="text-primary text-xl" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {t("logo")} *
-              </h3>
-            </div>
-
-            <div className="flex flex-col items-center gap-4">
-              <div className="relative">
-                <div className="w-32 h-32 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center bg-gray-50 dark:bg-gray-700/30 overflow-hidden">
-                  {logoPreview ? (
-                    <img
-                      src={logoPreview}
-                      alt="Logo preview"
-                      className="w-full h-full object-contain"
-                    />
-                  ) : (
-                    <IoRestaurant className="text-gray-400 text-5xl" />
-                  )}
-                </div>
-                {logoPreview && (
-                  <button
-                    type="button"
-                    onClick={handleRemoveLogo}
-                    className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-colors"
-                  >
-                    <IoCloseOutline className="text-lg" />
-                  </button>
-                )}
-              </div>
-
-              <div className="flex flex-col items-center gap-2 w-full">
-                <label className="cursor-pointer">
-                  <input
-                    type="file"
-                    accept={LOGO_ACCEPT}
-                    onChange={handleLogoChange}
-                    className="hidden"
-                  />
-                  <div className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors flex items-center gap-2">
-                    <IoCloudUploadOutline className="text-xl" />
-                    <span className="text-sm font-medium">
-                      {t("logoUpload")}
-                    </span>
-                  </div>
-                </label>
-                <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                  {t("logoHint")}
-                </p>
-                <p className="text-xs text-gray-400 dark:text-gray-500">
-                  {t("supportedFormats")}
-                </p>
-                {logoError && (
-                  <p className="text-xs text-red-600 dark:text-red-400">
-                    {logoError}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Currency Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-3">
-              <IoCashOutline className="text-primary text-xl" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {t("currency")}
-              </h3>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t("currencyLabel")} *
-              </label>
+            {t("create")}
+          </Button>
+        </>
+      }
+    >
+      <form
+        id={CREATE_MENU_FORM_ID}
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-col gap-6"
+      >
+        <section className="flex flex-col gap-3">
+          <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
+            <IoPricetagOutline className="size-4 shrink-0 text-fg-muted" aria-hidden />
+            {t("menuNames")}
+          </h3>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <Field label={t("nameEn")} required error={errors.name?.message}>
               <Controller
-                name="currency"
+                name="name"
                 control={control}
                 render={({ field }) => (
-                  <CurrencySelector
+                  <Input
+                    type="text"
                     value={field.value}
                     onChange={field.onChange}
-                    showArabOnly={locale === "ar"}
+                    onBlur={field.onBlur}
+                    placeholder={t("nameEnPlaceholder")}
+                    data-autofocus
                   />
                 )}
               />
-            </div>
-          </div>
-
-          {/* Slug Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-3">
-              <IoLinkOutline className="text-primary text-xl" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {t("urlSettings")}
-              </h3>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t("slug")} *
-              </label>
-              <div className="relative">
-                <Controller
-                  name="slug"
-                  control={control}
-                  render={({ field }) => (
-                    <CustomInput
-                      type="text"
-                      value={field.value}
-                      onChange={(e) =>
-                        field.onChange(sanitizeMenuSlugInput(e.target.value))
-                      }
-                      onBlur={field.onBlur}
-                      className={`px-4 py-3 font-mono dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:border-transparent ${
-                        slugStatus.available === false
-                          ? "border-red-300 dark:border-red-600 focus:ring-red-500"
-                          : slugStatus.available === true
-                            ? "border-green-300 dark:border-green-600 focus:ring-green-500"
-                            : "border-gray-300 dark:border-gray-600 focus:ring-primary"
-                      }`}
-                      placeholder={t("slugPlaceholder")}
-                      error={errors.slug?.message}
-                      icon={
-                        slugStatus.checking ? (
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
-                        ) : slugStatus.available === true ? (
-                          <IoCheckmarkCircle className="text-green-500 text-xl" />
-                        ) : slugStatus.available === false ? (
-                          <IoCloseCircle className="text-red-500 text-xl" />
-                        ) : undefined
-                      }
-                    />
-                  )}
-                />
-              </div>
-
-              {/* Status Message */}
-              {slugStatus.checking && (
-                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                  {t("slugChecking")}
-                </p>
-              )}
-              {!slugStatus.checking && slugStatus.available === true && (
-                <p className="mt-2 text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
-                  <IoCheckmarkCircle className="text-base" />
-                  {t("slugAvailable")}
-                </p>
-              )}
-              {!slugStatus.checking && slugStatus.available === false && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center gap-2">
-                  <IoCloseCircle className="text-base" />
-                  {t("slugTaken")}
-                </p>
-              )}
-
-              {/* Suggestions */}
-              {!slugStatus.checking &&
-                slugStatus.available === false &&
-                slugStatus.suggestions.length > 0 && (
-                  <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {t("slugSuggestions")}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {slugStatus.suggestions.map(
-                        (suggestion: string, index: number) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => handleSuggestionClick(suggestion)}
-                            className="px-3 py-1.5 text-xs font-mono bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-primary/5 dark:hover:bg-primary/10 hover:border-primary/30 text-gray-700 dark:text-gray-300 transition-all"
-                          >
-                            {suggestion}
-                          </button>
-                        ),
-                      )}
-                    </div>
-                  </div>
+            </Field>
+            <Field label={t("nameAr")} required error={errors.nameAr?.message}>
+              <Controller
+                name="nameAr"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type="text"
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    placeholder="مثال: قائمة مطعمي"
+                    dir="rtl"
+                  />
                 )}
+              />
+            </Field>
+          </div>
+        </section>
 
-              <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg select-none">
-                <div className="flex items-start gap-2">
-                  <IoInformationCircleOutline className="text-blue-500 text-lg mt-0.5 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">
-                      {t("slugHint")}
-                    </p>
-                    <p
-                      className="text-xs text-blue-600 dark:text-blue-400 font-mono select-none"
-                      dir="ltr"
-                      onCopy={(e) => e.preventDefault()}
-                      onCut={(e) => e.preventDefault()}
-                      onContextMenu={(e) => e.preventDefault()}
+        <section className="flex flex-col gap-3">
+          <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
+            <IoDocumentTextOutline className="size-4 shrink-0 text-fg-muted" aria-hidden />
+            {t("descriptions")}
+          </h3>
+          <Field label={t("descriptionEn")}>
+            <Controller
+              name="description"
+              control={control}
+              render={({ field }) => (
+                <Textarea
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  rows={3}
+                  className="resize-none"
+                  placeholder={t("descriptionEnPlaceholder")}
+                />
+              )}
+            />
+          </Field>
+          <Field label={t("descriptionAr")}>
+            <Controller
+              name="descriptionAr"
+              control={control}
+              render={({ field }) => (
+                <Textarea
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  rows={3}
+                  className="resize-none"
+                  placeholder="اكتب وصف القائمة بالعربية..."
+                  dir="rtl"
+                />
+              )}
+            />
+          </Field>
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
+            <IoImageOutline className="size-4 shrink-0 text-fg-muted" aria-hidden />
+            {t("logo")} *
+          </h3>
+          <div className="flex flex-col items-center gap-4">
+            <div className="relative">
+              <div className="flex size-32 items-center justify-center overflow-hidden rounded-xl border border-dashed border-line-strong bg-surface-2">
+                {logoPreview ? (
+                  <img
+                    src={logoPreview}
+                    alt="Logo preview"
+                    className="size-full object-contain"
+                  />
+                ) : (
+                  <IoRestaurant className="size-12 text-fg-subtle" />
+                )}
+              </div>
+              {logoPreview && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  iconOnly
+                  onClick={handleRemoveLogo}
+                  aria-label={t("cancel")}
+                  className="absolute -end-2 -top-2"
+                >
+                  <IoCloseOutline className="size-4" />
+                </Button>
+              )}
+            </div>
+            <div className="flex w-full flex-col items-center gap-2">
+              <label className="cursor-pointer">
+                <input
+                  type="file"
+                  accept={LOGO_ACCEPT}
+                  onChange={handleLogoChange}
+                  className="hidden"
+                />
+                <span
+                  className={cn(
+                    "inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-on-brand transition-colors hover:bg-brand/90",
+                    focusRing,
+                  )}
+                >
+                  <IoCloudUploadOutline className="size-5" />
+                  {t("logoUpload")}
+                </span>
+              </label>
+              <p className="text-center text-xs text-fg-muted">{t("logoHint")}</p>
+              <p className="text-center text-xs text-fg-subtle">{t("supportedFormats")}</p>
+              {logoError && (
+                <p className="text-xs text-danger">{logoError}</p>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
+            <IoCashOutline className="size-4 shrink-0 text-fg-muted" aria-hidden />
+            {t("currency")}
+          </h3>
+          <Field label={t("currencyLabel")} required>
+            <Controller
+              name="currency"
+              control={control}
+              render={({ field }) => (
+                <CurrencySelector
+                  value={field.value}
+                  onChange={field.onChange}
+                  showArabOnly={locale === "ar"}
+                />
+              )}
+            />
+          </Field>
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
+            <IoLinkOutline className="size-4 shrink-0 text-fg-muted" aria-hidden />
+            {t("urlSettings")}
+          </h3>
+          <Field label={t("slug")} required error={errors.slug?.message}>
+            <Controller
+              name="slug"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="text"
+                  value={field.value}
+                  onChange={(e) =>
+                    field.onChange(sanitizeMenuSlugInput(e.target.value))
+                  }
+                  onBlur={field.onBlur}
+                  className="font-mono"
+                  placeholder={t("slugPlaceholder")}
+                  aria-invalid={
+                    slugStatus.available === false ? true : undefined
+                  }
+                  endIcon={
+                    slugStatus.checking ? (
+                      <Spinner size="sm" />
+                    ) : slugStatus.available === true ? (
+                      <IoCheckmarkCircle className="size-5 text-success" />
+                    ) : slugStatus.available === false ? (
+                      <IoCloseCircle className="size-5 text-danger" />
+                    ) : undefined
+                  }
+                />
+              )}
+            />
+          </Field>
+
+          {slugStatus.checking && (
+            <p className="text-sm text-fg-muted">{t("slugChecking")}</p>
+          )}
+          {!slugStatus.checking && slugStatus.available === true && (
+            <p className="flex items-center gap-2 text-sm text-success">
+              <IoCheckmarkCircle className="size-4" />
+              {t("slugAvailable")}
+            </p>
+          )}
+          {!slugStatus.checking && slugStatus.available === false && (
+            <p className="flex items-center gap-2 text-sm text-danger">
+              <IoCloseCircle className="size-4" />
+              {t("slugTaken")}
+            </p>
+          )}
+
+          {!slugStatus.checking &&
+            slugStatus.available === false &&
+            slugStatus.suggestions.length > 0 && (
+              <div className="rounded-lg border border-line bg-surface-2 p-3">
+                <p className="mb-2 text-xs font-medium text-fg">{t("slugSuggestions")}</p>
+                <div className="flex flex-wrap gap-2">
+                  {slugStatus.suggestions.map((suggestion: string, index: number) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      className={cn(
+                        "rounded-lg border border-line bg-surface px-3 py-1.5 font-mono text-xs text-fg transition-colors hover:border-brand/30 hover:bg-brand-soft",
+                        focusRing,
+                      )}
                     >
-                      {publicMenuHostDisplay(slugValue)}
-                    </p>
-                  </div>
+                      {suggestion}
+                    </button>
+                  ))}
                 </div>
+              </div>
+            )}
+
+          <div className="rounded-lg bg-brand-soft/50 p-3 select-none">
+            <div className="flex items-start gap-2">
+              <IoInformationCircleOutline className="mt-0.5 size-4 shrink-0 text-brand" />
+              <div className="min-w-0 flex-1">
+                <p className="mb-1 text-xs font-medium text-fg">{t("slugHint")}</p>
+                <p
+                  className="font-mono text-xs text-fg-muted select-none"
+                  dir="ltr"
+                  onCopy={(e) => e.preventDefault()}
+                  onCut={(e) => e.preventDefault()}
+                  onContextMenu={(e) => e.preventDefault()}
+                >
+                  {publicMenuHostDisplay(slugValue)}
+                </p>
               </div>
             </div>
           </div>
-
-          {/* Buttons */}
-          <div
-            id="onboarding-create-actions"
-            className="flex gap-3 pt-6 border-t border-gray-200 dark:border-gray-700 justify-end"
-          >
-            <div className="w-fit! ms-auto flex gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isCreating}
-              >
-                {t("cancel")}
-              </button>
-            </div>
-            <div className="w-fit!">
-              <CustomBtn
-                id="onboarding-create-submit"
-                type="submit"
-                loading={isCreating}
-                disabled={
-                  isCreating ||
-                  !logo ||
-                  !isValid ||
-                  slugStatus.checking ||
-                  slugStatus.available === false
-                }
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <IoAddCircleOutline className="text-xl" /> {t("create")}
-                </div>
-              </CustomBtn>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
+        </section>
+      </form>
+    </Modal>
   );
 }

@@ -11,7 +11,14 @@ import type {
   FollowUpPurpose,
   UpdateFollowUpCallPayload,
 } from "@/types/AdminFollowUp";
-import { IoCloseOutline } from "react-icons/io5";
+import {
+  Button,
+  Field,
+  Input,
+  Modal,
+  Select,
+  Textarea,
+} from "@/components/ui";
 import PhoneDisplay from "@/components/Global/PhoneDisplay";
 
 type LogFollowUpCallModalProps = {
@@ -28,6 +35,8 @@ type LogFollowUpCallModalProps = {
   editingCall?: FollowUpCall | null;
   submitting?: boolean;
 };
+
+const FORM_ID = "log-follow-up-call-form";
 
 const OUTCOMES: FollowUpOutcome[] = [
   "answered",
@@ -101,11 +110,6 @@ export default function LogFollowUpCallModal({
     setOtherContactNumbers("");
   }, [open, editingCall, authData?.name]);
 
-  if (!open) return null;
-
-  const fieldClass =
-    "w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/40";
-
   const resetForm = () => {
     setNotes("");
     setNextFollowUpAt("");
@@ -147,208 +151,144 @@ export default function LogFollowUpCallModal({
   const modalTitle = isEditing ? t("editCallTitle") : t("logCallTitle");
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
-      <div
-        className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white text-slate-800 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 max-h-[90vh] overflow-y-auto"
-        role="dialog"
-        aria-modal
-        aria-labelledby="log-call-title"
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={modalTitle}
+      size="md"
+      dismissible={!submitting}
+      closeLabel={t("close")}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose} disabled={submitting}>
+            {t("cancel")}
+          </Button>
+          <Button
+            type="submit"
+            form={FORM_ID}
+            variant="primary"
+            loading={submitting}
+            disabled={!agentName.trim()}
+          >
+            {submitting
+              ? t("saving")
+              : isEditing
+                ? t("saveChanges")
+                : t("saveCall")}
+          </Button>
+        </>
+      }
+    >
+      <form
+        id={FORM_ID}
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-4"
       >
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
-          <h2
-            id="log-call-title"
-            className="text-lg font-semibold text-slate-900 dark:text-slate-100"
-          >
-            {modalTitle}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
-            aria-label={t("close")}
-          >
-            <IoCloseOutline className="text-xl" />
-          </button>
+        <div>
+          <p className="text-sm font-medium text-fg">{userName}</p>
+          {phoneNumber ? (
+            <PhoneDisplay value={phoneNumber} className="text-sm text-fg-muted" />
+          ) : (
+            <p className="text-sm text-fg-subtle">{t("noPhone")}</p>
+          )}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 p-6">
-          <div>
-            <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-              {userName}
-            </p>
-            {phoneNumber ? (
-              <PhoneDisplay
-                value={phoneNumber}
-                className="text-sm text-slate-500 dark:text-slate-400"
-              />
-            ) : (
-              <p className="text-sm text-slate-400 dark:text-slate-500">
-                {t("noPhone")}
-              </p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                {t("customerName")}{" "}
-                <span className="font-normal text-slate-400 dark:text-slate-500">
-                  ({t("optional")})
-                </span>
-              </label>
-              <input
-                type="text"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                className={fieldClass}
-                placeholder={t("customerNamePlaceholder")}
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                {t("governorate")}{" "}
-                <span className="font-normal text-slate-400 dark:text-slate-500">
-                  ({t("optional")})
-                </span>
-              </label>
-              <input
-                type="text"
-                value={governorate}
-                onChange={(e) => setGovernorate(e.target.value)}
-                className={fieldClass}
-                placeholder={t("governoratePlaceholder")}
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                {t("cafeName")}{" "}
-                <span className="font-normal text-slate-400 dark:text-slate-500">
-                  ({t("optional")})
-                </span>
-              </label>
-              <input
-                type="text"
-                value={cafeName}
-                onChange={(e) => setCafeName(e.target.value)}
-                className={fieldClass}
-                placeholder={t("cafeNamePlaceholder")}
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                {t("otherContactNumbers")}{" "}
-                <span className="font-normal text-slate-400 dark:text-slate-500">
-                  ({t("optional")})
-                </span>
-              </label>
-              <input
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
-                dir="ltr"
-                value={otherContactNumbers}
-                onChange={(e) => setOtherContactNumbers(e.target.value)}
-                className={`${fieldClass} tabular-nums`}
-                placeholder={t("otherContactNumbersPlaceholder")}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
-              {t("agentName")} *
-            </label>
-            <input
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label={t("customerName")} optionalLabel={t("optional")}>
+            <Input
               type="text"
-              value={agentName}
-              onChange={(e) => setAgentName(e.target.value)}
-              required
-              className={fieldClass}
-              placeholder={t("agentNamePlaceholder")}
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              placeholder={t("customerNamePlaceholder")}
             />
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
-              {t("outcome")}
-            </label>
-            <select
-              value={outcome}
-              onChange={(e) => setOutcome(e.target.value as FollowUpOutcome)}
-              className={fieldClass}
-            >
-              {OUTCOMES.map((o) => (
-                <option key={o} value={o}>
-                  {t(`outcomes.${o}`)}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
-              {t("purpose")}
-            </label>
-            <select
-              value={purpose}
-              onChange={(e) => setPurpose(e.target.value as FollowUpPurpose)}
-              className={fieldClass}
-            >
-              {PURPOSES.map((p) => (
-                <option key={p} value={p}>
-                  {t(`purposes.${p}`)}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
-              {t("notes")}
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-              className={`${fieldClass} resize-none`}
-              placeholder={t("notesPlaceholder")}
+          </Field>
+          <Field label={t("governorate")} optionalLabel={t("optional")}>
+            <Input
+              type="text"
+              value={governorate}
+              onChange={(e) => setGovernorate(e.target.value)}
+              placeholder={t("governoratePlaceholder")}
             />
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
-              {t("nextFollowUp")}
-            </label>
-            <input
-              type="date"
-              value={nextFollowUpAt}
-              onChange={(e) => setNextFollowUpAt(e.target.value)}
-              className={fieldClass}
+          </Field>
+          <Field label={t("cafeName")} optionalLabel={t("optional")}>
+            <Input
+              type="text"
+              value={cafeName}
+              onChange={(e) => setCafeName(e.target.value)}
+              placeholder={t("cafeNamePlaceholder")}
             />
-          </div>
+          </Field>
+          <Field
+            label={t("otherContactNumbers")}
+            optionalLabel={t("optional")}
+          >
+            <Input
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              dir="ltr"
+              className="tabular-nums"
+              value={otherContactNumbers}
+              onChange={(e) => setOtherContactNumbers(e.target.value)}
+              placeholder={t("otherContactNumbersPlaceholder")}
+            />
+          </Field>
+        </div>
 
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 dark:border-slate-700 dark:text-slate-300"
-            >
-              {t("cancel")}
-            </button>
-            <button
-              type="submit"
-              disabled={submitting || !agentName.trim()}
-              className="flex-1 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-60"
-            >
-              {submitting
-                ? t("saving")
-                : isEditing
-                  ? t("saveChanges")
-                  : t("saveCall")}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <Field label={t("agentName")} required>
+          <Input
+            type="text"
+            value={agentName}
+            onChange={(e) => setAgentName(e.target.value)}
+            required
+            placeholder={t("agentNamePlaceholder")}
+          />
+        </Field>
+
+        <Field label={t("outcome")}>
+          <Select
+            value={outcome}
+            onChange={(e) => setOutcome(e.target.value as FollowUpOutcome)}
+          >
+            {OUTCOMES.map((o) => (
+              <option key={o} value={o}>
+                {t(`outcomes.${o}`)}
+              </option>
+            ))}
+          </Select>
+        </Field>
+
+        <Field label={t("purpose")}>
+          <Select
+            value={purpose}
+            onChange={(e) => setPurpose(e.target.value as FollowUpPurpose)}
+          >
+            {PURPOSES.map((p) => (
+              <option key={p} value={p}>
+                {t(`purposes.${p}`)}
+              </option>
+            ))}
+          </Select>
+        </Field>
+
+        <Field label={t("notes")}>
+          <Textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={3}
+            className="resize-none"
+            placeholder={t("notesPlaceholder")}
+          />
+        </Field>
+
+        <Field label={t("nextFollowUp")}>
+          <Input
+            type="date"
+            value={nextFollowUpAt}
+            onChange={(e) => setNextFollowUpAt(e.target.value)}
+          />
+        </Field>
+      </form>
+    </Modal>
   );
 }

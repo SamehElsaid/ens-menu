@@ -6,9 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import LinkTo from "../Global/LinkTo";
 import { accountNavSections, adminNavSections, navSections } from "./data";
 import { useAuthorization } from "@/hooks/useAuthorization";
-import Drawer from "../Global/Drawer";
-import { useLocale, useTranslations } from "next-intl";
-import LoadImage from "../ImageLoad";
+import { useTranslations } from "next-intl";
 import { useAppSelector } from "@/store/hooks";
 import Logo from "../Global/Logo";
 import { useAdminPermissions } from "@/hooks/useAdminPermissions";
@@ -16,49 +14,74 @@ import { usePendingOrders } from "@/components/Dashboard/PendingOrdersProvider";
 import type { AdminPermissionKey } from "@/types/AdminPermission";
 import type { NavItem, NavSection } from "./data";
 import ProUpgradeModal from "./ProUpgradeModal";
-import { FaCrown } from "react-icons/fa";
+import MenuSwitcher from "./MenuSwitcher";
+import { FiLock } from "react-icons/fi";
 import { IoOpenOutline } from "react-icons/io5";
+import { cn } from "@/lib/cn";
+import { Sheet, focusRing } from "@/components/ui";
 import {
   publicMenuLinkUrl,
   resolvePublicMenuSlug,
 } from "@/lib/publicMenuUrl";
 
-const ITEM =
-  "flex w-full min-h-10 items-center gap-3 overflow-visible rounded-md px-3 py-1.5 text-[13px] font-normal leading-[1.45] transition-colors duration-150";
+/** Sidebar rail width. `Layout` offsets the main column by the same value. */
+export const SIDEBAR_WIDTH = 240;
+
+/**
+ * Nav rows are 28px on the rail and 36px in the mobile sheet, where they are
+ * touched rather than pointed at.
+ */
+const ITEM = cn(
+  "group/nav relative flex w-full items-center gap-2 rounded-md ps-2 pe-1.5",
+  "min-h-9 sm:min-h-7",
+  "text-[13px] font-medium leading-tight row-settle",
+  focusRing,
+);
 
 function itemClass(
   active: boolean,
   opts: { comingSoon?: boolean; locked?: boolean } = {},
 ) {
   if (opts.comingSoon) {
-    return `${ITEM} cursor-default text-slate-400 dark:text-slate-500`;
+    return cn(ITEM, "cursor-default text-fg-subtle");
   }
   if (opts.locked) {
-    return `${ITEM} cursor-pointer text-slate-500 hover:bg-slate-50/80 dark:text-slate-500 dark:hover:bg-white/[0.03]`;
+    return cn(ITEM, "text-fg-subtle hover:bg-surface-2 hover:text-fg-muted");
   }
   if (active) {
-    return `${ITEM} bg-slate-100/90 text-slate-900 dark:bg-white/[0.06] dark:text-slate-100`;
+    // Fill, weight, icon tint and `aria-current` all carry the state, so it
+    // survives both a monochrome screen and a screen reader.
+    return cn(ITEM, "bg-surface-3 font-semibold text-fg");
   }
-  return `${ITEM} text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-white/[0.04]`;
+  return cn(ITEM, "text-fg-muted hover:bg-surface-2 hover:text-fg");
 }
 
 const INLINE_BADGE =
-  "inline-flex shrink-0 items-center rounded px-1.5 py-0.5 text-[9px] font-semibold leading-tight";
+  "inline-flex shrink-0 items-center rounded px-1 py-px text-[9px] font-semibold leading-[1.4] uppercase tracking-[0.04em]";
 
-function inlineBadgeClass(
-  variant: "new" | "beta" | "soon" | "pro",
-): string {
+function inlineBadgeClass(variant: "new" | "beta" | "soon"): string {
   if (variant === "new") {
-    return `${INLINE_BADGE} bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/50 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-emerald-800/30`;
+    return cn(INLINE_BADGE, "bg-success-soft text-success-fg");
   }
   if (variant === "beta") {
-    return `${INLINE_BADGE} bg-amber-50 text-amber-700 ring-1 ring-amber-200/50 dark:bg-amber-950/40 dark:text-amber-300 dark:ring-amber-800/30`;
+    return cn(INLINE_BADGE, "bg-info-soft text-info-fg");
   }
-  if (variant === "pro") {
-    return `${INLINE_BADGE} uppercase tracking-wide bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 ring-1 ring-amber-200/55 dark:from-amber-950/50 dark:to-orange-950/30 dark:text-amber-300 dark:ring-amber-800/35`;
-  }
-  return `${INLINE_BADGE} bg-slate-100 text-slate-500 ring-1 ring-slate-200/60 dark:bg-slate-800/60 dark:text-slate-400 dark:ring-slate-700/50`;
+  return cn(INLINE_BADGE, "bg-surface-3 text-fg-subtle");
 }
+
+/** Section id → label key. A rail of eighteen rows needs headings to be scanned. */
+const SECTION_LABEL: Record<string, string> = {
+  overview: "navSectionOverview",
+  account: "navSectionAccount",
+  import: "navSectionImport",
+  menu: "navSectionMenu",
+  settings: "navSectionSettings",
+  activity: "navSectionActivity",
+  accountOverview: "navSectionOverview",
+  accountOperations: "navSectionOperations",
+  accountSettings: "navSectionAccount",
+  admin: "navSectionAdmin",
+};
 
 type SidebarNavItemProps = {
   item: NavItem;
@@ -82,61 +105,46 @@ function SidebarNavItem({
   onLockedClick,
 }: SidebarNavItemProps) {
   const itemKey = item.key ?? item.label;
-  const iconTone = item.comingSoon
-    ? "text-slate-400 dark:text-slate-500"
-    : locked
-      ? "text-slate-400 dark:text-slate-500"
-      : active
-        ? "text-slate-700 dark:text-slate-200"
-        : "text-slate-500 dark:text-slate-500";
-
   const countBadge = !locked ? resolveItemBadge(item) : undefined;
-  const trailingBadges =
-    item.badges?.length || locked || countBadge ? (
-      <span className="flex shrink-0 items-center gap-1.5">
-        {item.badges?.map((badge) => (
-          <span
-            key={badge.label}
-            className={inlineBadgeClass(badge.variant)}
-          >
-            {t(badge.label)}
-          </span>
-        ))}
-        {locked && (
-          <>
-            <span className={inlineBadgeClass("pro")}>{t("badgePro")}</span>
-            <FaCrown
-              className="size-3 shrink-0 text-amber-500/80 dark:text-amber-400/70"
-              aria-hidden
-            />
-          </>
-        )}
-        {countBadge && (
-          <span className="inline-flex shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold leading-tight tabular-nums bg-amber-50 text-amber-800 ring-1 ring-amber-200/50 dark:bg-amber-950/40 dark:text-amber-200 dark:ring-amber-800/35">
-            {countBadge}
-          </span>
-        )}
-      </span>
-    ) : null;
 
   const labelContent = (
     <>
       <item.icon
-        className={`size-[18px] shrink-0 ${iconTone}`}
+        className={cn(
+          "size-4 shrink-0",
+          active ? "text-brand" : "text-fg-subtle",
+        )}
         aria-hidden
       />
-      <span
-        className={`flex-1 text-start whitespace-normal wrap-break-word ${locked ? "text-slate-500" : ""}`}
-      >
+      <span className="min-w-0 flex-1 truncate text-start">
         {t(item.label)}
       </span>
-      {trailingBadges}
+      {item.badges?.map((badge) => (
+        <span key={badge.label} className={inlineBadgeClass(badge.variant)}>
+          {t(badge.label)}
+        </span>
+      ))}
+      {locked ? (
+        <FiLock
+          className="size-3 shrink-0 text-fg-subtle"
+          aria-label={t("badgePro")}
+        />
+      ) : null}
+      {countBadge ? (
+        <span className="inline-flex min-w-4 shrink-0 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold leading-4 tabular-nums text-on-brand">
+          {countBadge}
+        </span>
+      ) : null}
     </>
   );
 
   if (item.comingSoon) {
     return (
-      <div key={itemKey} aria-disabled className={itemClass(false, { comingSoon: true })}>
+      <div
+        key={itemKey}
+        aria-disabled
+        className={itemClass(false, { comingSoon: true })}
+      >
         {labelContent}
       </div>
     );
@@ -167,6 +175,7 @@ function SidebarNavItem({
             : item.navId
       }
       onClick={onNavigate}
+      aria-current={active ? "page" : undefined}
       className={itemClass(active)}
     >
       {labelContent}
@@ -174,22 +183,8 @@ function SidebarNavItem({
   );
 }
 
-function clusterItems(items: NavItem[]): { subgroup?: string; items: NavItem[] }[] {
-  const clusters: { subgroup?: string; items: NavItem[] }[] = [];
-  for (const item of items) {
-    const last = clusters[clusters.length - 1];
-    if (last && last.subgroup === item.subgroup) {
-      last.items.push(item);
-    } else {
-      clusters.push({ subgroup: item.subgroup, items: [item] });
-    }
-  }
-  return clusters;
-}
-
 function NavGroup({
   section,
-  showDivider,
   isItemActive,
   itemHref,
   isItemLocked,
@@ -199,7 +194,6 @@ function NavGroup({
   onLockedClick,
 }: {
   section: NavSection;
-  showDivider: boolean;
   isItemActive: (item: NavItem) => boolean;
   itemHref: (link: string) => string;
   isItemLocked: (item: NavItem) => boolean;
@@ -208,50 +202,29 @@ function NavGroup({
   onNavigate: () => void;
   onLockedClick: (featureKey: string) => void;
 }) {
-  const clusters = clusterItems(section.items);
+  const labelKey = SECTION_LABEL[section.id];
 
   return (
-    <div
-      className={
-        showDivider
-          ? "border-t border-slate-100/90 pt-2 dark:border-slate-800/70"
-          : ""
-      }
-    >
-      <div className="flex flex-col gap-1">
-        {clusters.map((cluster, ci) => {
-          const isCluster = Boolean(cluster.subgroup);
-          const inner = (
-            <div className={`flex flex-col ${isCluster ? "gap-px" : "gap-0.5"}`}>
-              {cluster.items.map((item) => (
-                <SidebarNavItem
-                  key={item.key ?? item.label}
-                  item={item}
-                  active={!item.comingSoon && isItemActive(item)}
-                  locked={isItemLocked(item)}
-                  href={itemHref(item.link ?? "")}
-                  t={t}
-                  resolveItemBadge={resolveItemBadge}
-                  onNavigate={onNavigate}
-                  onLockedClick={onLockedClick}
-                />
-              ))}
-            </div>
-          );
-
-          if (!isCluster) {
-            return <div key={`c-${ci}`}>{inner}</div>;
-          }
-
-          return (
-            <div
-              key={`c-${cluster.subgroup}`}
-              className="rounded-lg bg-slate-50/70 p-0.5 ring-1 ring-inset ring-slate-100 dark:bg-white/2 dark:ring-slate-800/80"
-            >
-              {inner}
-            </div>
-          );
-        })}
+    <div className="mb-3 last:mb-0">
+      {labelKey ? (
+        <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-[0.07em] text-fg-subtle">
+          {t(labelKey)}
+        </p>
+      ) : null}
+      <div className="flex flex-col gap-px">
+        {section.items.map((item) => (
+          <SidebarNavItem
+            key={item.key ?? item.label}
+            item={item}
+            active={!item.comingSoon && isItemActive(item)}
+            locked={isItemLocked(item)}
+            href={itemHref(item.link ?? "")}
+            t={t}
+            resolveItemBadge={resolveItemBadge}
+            onNavigate={onNavigate}
+            onLockedClick={onLockedClick}
+          />
+        ))}
       </div>
     </div>
   );
@@ -275,14 +248,12 @@ export function DashboardSidebar({
 }) {
   const isAccountVariant = variant === "account" && !isAdmin;
   const pathname = usePathname();
-  const locale = useLocale();
   const t = useTranslations("Dashboard");
+  const tCommon = useTranslations("common");
   const { isStaff, can } = useAuthorization();
   const { has: hasAdminPermission } = useAdminPermissions();
   const userData = useAppSelector((s) => s.auth.data);
-  const isFreePlan =
-    !isAdmin && (!userData || isFreePlanUser(userData));
-  const canFetchProData = Boolean(userData) && !isFreePlan && !isAdmin;
+  const isFreePlan = !isAdmin && (!userData || isFreePlanUser(userData));
 
   const [upgradeModal, setUpgradeModal] = useState<{
     open: boolean;
@@ -318,7 +289,7 @@ export function DashboardSidebar({
         }))
         .filter((section) => section.items.length > 0);
 
-  const { menu, loading } = useAppSelector((state) => state.menuData);
+  const { menu } = useAppSelector((state) => state.menuData);
   const {
     unseenTableCount: pendingOrdersCount,
     unseenDeliveryCount: pendingDeliveryOrdersCount,
@@ -345,10 +316,13 @@ export function DashboardSidebar({
     [isFreePlan],
   );
 
-  const handleLockedClick = useCallback((featureKey: string) => {
-    setUpgradeModal({ open: true, featureKey });
-    setIsMenuOpen(false);
-  }, [setIsMenuOpen]);
+  const handleLockedClick = useCallback(
+    (featureKey: string) => {
+      setUpgradeModal({ open: true, featureKey });
+      setIsMenuOpen(false);
+    },
+    [setIsMenuOpen],
+  );
 
   useEffect(() => {
     const closeDrawer = () => setIsMenuOpen(false);
@@ -385,74 +359,27 @@ export function DashboardSidebar({
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
-  const sidebarSections = (hidden = false) => (
-    <aside
-      className={`${
-        hidden ? "hidden w-[288px]" : "w-full"
-      } flex h-dvh flex-col overflow-x-visible border-e border-slate-100 bg-white fixed top-0 start-0 dark:border-slate-800/80 dark:bg-[#0d1117]/95 lg:flex`}
-      dir={locale === "ar" ? "rtl" : "ltr"}
-    >
+  /** Position-free so it can be dropped into the fixed rail or the mobile sheet. */
+  const sidebarContent = (
+    <div className="flex h-full min-h-0 flex-col bg-surface">
       {isAdmin || isAccountVariant ? (
-        <div className="flex h-[64px] shrink-0 items-center justify-center border-b border-slate-100 dark:border-slate-800/80">
-          <Logo size="small" />
+        <div className="flex h-12 shrink-0 items-center border-b border-line px-3">
+          <Logo size="header" />
         </div>
       ) : (
-        <LinkTo
-          href="/"
-          className="flex shrink-0 items-center gap-3 border-b border-slate-100 px-4 py-3.5 dark:border-slate-800/80"
-        >
-          {loading || !menu ? (
-            <div className="flex w-full items-center gap-3">
-              <div className="size-10 animate-pulse rounded-xl bg-slate-200 dark:bg-slate-800" />
-              <div className="h-3 flex-1 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
-            </div>
-          ) : (
-            <>
-              {menu.logo ? (
-                <LoadImage
-                  src={menu.logo}
-                  alt={
-                    locale === "ar" ? (menu.nameAr ?? "") : (menu.nameEn ?? "")
-                  }
-                  className="size-10 rounded-xl"
-                  width={40}
-                  height={40}
-                />
-              ) : (
-                <span className="flex size-10 items-center justify-center rounded-xl bg-violet-500/10 text-base font-semibold text-violet-600 dark:text-violet-400">
-                  {locale === "ar"
-                    ? (menu.nameAr?.charAt(0) ?? "")
-                    : (menu.nameEn?.charAt(0) ?? "")}
-                </span>
-              )}
-              <p className="flex-1 text-sm font-medium leading-snug text-slate-800 dark:text-slate-100">
-                {locale === "ar" ? menu.nameAr : menu.nameEn}
-              </p>
-            </>
-          )}
-        </LinkTo>
-      )}
-
-      {!isAdmin && !isAccountVariant && publicMenuUrl && (
-        <div className="shrink-0 border-b border-slate-100 px-4 py-3 dark:border-slate-800/80">
-          <a
-            href={publicMenuUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-emerald-500 px-4 py-2.5 text-[13px] font-medium text-white shadow-md shadow-emerald-500/25 transition-colors hover:bg-emerald-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/50 focus-visible:ring-offset-2 active:scale-[0.98] dark:shadow-emerald-900/30"
-          >
-            <IoOpenOutline className="size-[18px] shrink-0" aria-hidden />
-            {t("viewMenu")}
-          </a>
+        <div className="shrink-0 border-b border-line">
+          <MenuSwitcher onNavigate={() => setIsMenuOpen(false)} />
         </div>
       )}
 
-      <nav className="flex-1 space-y-2 overflow-x-visible overflow-y-auto px-3 py-2.5 pb-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        {navSectionsData.map((section, index) => (
+      <nav
+        aria-label={t("drawerMenuTitle")}
+        className="min-h-0 flex-1 overflow-y-auto px-2 py-3 [scrollbar-width:thin]"
+      >
+        {navSectionsData.map((section) => (
           <NavGroup
             key={section.id}
             section={section}
-            showDivider={index > 0}
             isItemActive={isItemActive}
             isItemLocked={isItemLocked}
             itemHref={itemHref}
@@ -463,20 +390,48 @@ export function DashboardSidebar({
           />
         ))}
       </nav>
-    </aside>
+
+      {!isAdmin && !isAccountVariant && publicMenuUrl ? (
+        <div className="shrink-0 border-t border-line p-2">
+          <a
+            href={publicMenuUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              "flex min-h-9 w-full items-center gap-2 rounded-md px-2 sm:min-h-7",
+              "text-[13px] font-medium text-fg-muted row-settle hover:bg-surface-2 hover:text-fg",
+              focusRing,
+            )}
+          >
+            <IoOpenOutline className="size-4 shrink-0 text-fg-subtle" aria-hidden />
+            <span className="flex-1 text-start">{t("viewMenu")}</span>
+          </a>
+        </div>
+      ) : null}
+    </div>
   );
 
   return (
     <>
-      {sidebarSections(true)}
-      <Drawer
+      <aside
+        className="fixed inset-y-0 start-0 z-30 hidden border-e border-line bg-surface lg:block"
+        style={{ width: SIDEBAR_WIDTH }}
+      >
+        {sidebarContent}
+      </aside>
+
+      <Sheet
         open={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
-        title={t("drawerMenuTitle")}
-        right={locale === "ar"}
+        side="start"
+        size="sm"
+        bare
+        closeLabel={tCommon("close")}
+        className="lg:hidden"
       >
-        {sidebarSections()}
-      </Drawer>
+        {sidebarContent}
+      </Sheet>
+
       <ProUpgradeModal
         open={upgradeModal.open}
         featureKey={upgradeModal.featureKey}

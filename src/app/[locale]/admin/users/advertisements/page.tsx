@@ -8,7 +8,8 @@ import { FaSpinner, FaEye, FaTrash, FaEdit, FaBan } from "react-icons/fa";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import { axiosGet, axiosDelete, axiosPatch } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
-import ConfirmationModal from "@/components/Custom/ConfirmationModal";
+import { FiAlertTriangle } from "react-icons/fi";
+import { ConfirmDialog, Button, PageHeader } from "@/components/ui";
 import LoadImage from "@/components/ImageLoad";
 
 interface Advertisement {
@@ -177,26 +178,19 @@ export default function AdminAdvertisementsPage() {
 
     return (
         <div className="space-y-6">
-            {/* Header Section */}
-            <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                    <div className={`flex items-center gap-4 mb-4 ${isRTL ? "flex-row-reverse" : ""}`}>
-                        <button
-                            onClick={() => router.back()}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${isRTL ? "flex-row-reverse" : ""}`}
-                        >
-                            <IoArrowBack className="text-lg" />
-                            <span className="font-medium">{t("back")}</span>
-                        </button>
-                    </div>
-                    <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-                        {t("title")}
-                    </h1>
-                    <p className="text-slate-500 dark:text-slate-400">
-                        {t("subtitle")}
-                    </p>
-                </div>
-            </div>
+            <PageHeader
+                title={t("title")}
+                description={t("subtitle")}
+                actions={
+                    <Button
+                        variant="secondary"
+                        startIcon={<IoArrowBack className="rtl:rotate-180" />}
+                        onClick={() => router.back()}
+                    >
+                        {t("back")}
+                    </Button>
+                }
+            />
 
             {/* Statistics Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -407,29 +401,31 @@ export default function AdminAdvertisementsPage() {
             )}
 
             {/* Delete Confirmation Modal */}
-            <ConfirmationModal
-                isOpen={deleteModal.isOpen}
+            <ConfirmDialog
+                open={deleteModal.isOpen}
                 onClose={() => setDeleteModal({ isOpen: false, ad: null })}
                 onConfirm={handleDelete}
                 title={t("deleteConfirmTitle")}
-                message={t("deleteConfirm", { title: deleteModal.ad ? getTitle(deleteModal.ad) : "" })}
-                confirmText={t("actions.delete")}
-                cancelText={t("actions.cancel")}
-                isLoading={loadingAdId === deleteModal.ad?.id}
-                loadingText={t("deleting")}
+                description={t("deleteConfirm", { title: deleteModal.ad ? getTitle(deleteModal.ad) : "" })}
+                confirmLabel={t("actions.delete")}
+                cancelLabel={t("actions.cancel")}
+                loading={loadingAdId === deleteModal.ad?.id}
+                tone="brand"
+                icon={<FiAlertTriangle />}
             />
 
             {/* Deactivate Confirmation Modal */}
-            <ConfirmationModal
-                isOpen={deactivateModal.isOpen}
+            <ConfirmDialog
+                open={deactivateModal.isOpen}
                 onClose={() => setDeactivateModal({ isOpen: false, ad: null })}
                 onConfirm={handleDeactivate}
                 title={t("deactivateConfirmTitle")}
-                message={t("deactivateConfirm", { title: deactivateModal.ad ? getTitle(deactivateModal.ad) : "" })}
-                confirmText={t("actions.deactivate")}
-                cancelText={t("actions.cancel")}
-                isLoading={loadingAdId === deactivateModal.ad?.id}
-                loadingText={t("deactivating")}
+                description={t("deactivateConfirm", { title: deactivateModal.ad ? getTitle(deactivateModal.ad) : "" })}
+                confirmLabel={t("actions.deactivate")}
+                cancelLabel={t("actions.cancel")}
+                loading={loadingAdId === deactivateModal.ad?.id}
+                tone="brand"
+                icon={<FiAlertTriangle />}
             />
         </div>
     );

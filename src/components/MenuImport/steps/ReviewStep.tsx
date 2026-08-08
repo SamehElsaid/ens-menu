@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { ImportDraft, ImportError } from "@/types/menuImport";
 import type { SaveBlockingError } from "@/types/menuImport";
@@ -15,14 +15,52 @@ import {
 } from "@/lib/menuImport/duplicateMatch";
 import { expandItemForSave } from "@/lib/menuImport/draftSaveUtils";
 import { scrollToImportRef } from "@/lib/menuImport/importRefDomId";
-import { IoAddCircleOutline } from "react-icons/io5";
+import { IoAddCircleOutline, IoWarningOutline } from "react-icons/io5";
+import { cn } from "@/lib/cn";
+import {
+  Alert,
+  Badge,
+  Button,
+  SectionHeader,
+  Spinner,
+  focusRing,
+  type StatusTone,
+} from "@/components/ui";
 
-const STAT_BADGE_NEUTRAL =
-  "px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors cursor-pointer";
-const STAT_BADGE_WARNING =
-  "px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 font-medium hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors cursor-pointer";
-const WARNING_BLOCK =
-  "w-full text-start p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-sm text-amber-800 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors cursor-pointer";
+/** Clickable summary pill that jumps to the next entry in a problem group. */
+function StatPill({
+  tone = "neutral",
+  title,
+  onClick,
+  children,
+}: {
+  tone?: StatusTone;
+  title: string;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      className={cn(
+        "rounded-full transition-opacity hover:opacity-80",
+        focusRing,
+      )}
+    >
+      <Badge
+        tone={tone}
+        size="md"
+        icon={
+          tone === "warning" ? <IoWarningOutline aria-hidden /> : undefined
+        }
+      >
+        {children}
+      </Badge>
+    </button>
+  );
+}
 
 interface ReviewStepProps {
   draft: ImportDraft;
@@ -193,179 +231,171 @@ export default function ReviewStep({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-            {t("reviewTitle")}
-          </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            {t("reviewDescription")}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2 text-sm">
-          <button
-            type="button"
-            onClick={() => scrollToRefGroup(categoryRefIds, "categories")}
-            title={t("statClickHint")}
-            className={STAT_BADGE_NEUTRAL}
-          >
-            {t("statCategories", { count: draft.stats.categoryCount })}
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollToRefGroup(itemRefIds, "items")}
-            title={t("statClickHint")}
-            className={STAT_BADGE_NEUTRAL}
-          >
-            {t("statItems", { count: draft.stats.itemCount })}
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollToRefGroup(expandedItemRefIds, "expandedItems")}
-            title={t("statClickHint")}
-            className={STAT_BADGE_NEUTRAL}
-          >
-            {t("statExpandedItems", {
-              count: draft.stats.expandedItemCount,
-            })}
-          </button>
-          {dupStats.exactDuplicates > 0 && (
-            <button
-              type="button"
-              onClick={() =>
-                scrollToRefGroup(exactDuplicateRefIds, "exactDuplicates")
-              }
+    <div className="flex flex-col gap-6">
+      <SectionHeader
+        title={t("reviewTitle")}
+        description={t("reviewDescription")}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <StatPill
               title={t("statClickHint")}
-              className={STAT_BADGE_NEUTRAL}
+              onClick={() => scrollToRefGroup(categoryRefIds, "categories")}
             >
-              {t("statDuplicates", { count: dupStats.exactDuplicates })}
-            </button>
-          )}
-          {dupStats.priceConflicts > 0 && (
-            <button
-              type="button"
-              onClick={() =>
-                scrollToRefGroup(priceConflictRefIds, "priceConflicts")
-              }
+              {t("statCategories", { count: draft.stats.categoryCount })}
+            </StatPill>
+            <StatPill
               title={t("statClickHint")}
-              className={STAT_BADGE_WARNING}
+              onClick={() => scrollToRefGroup(itemRefIds, "items")}
             >
-              {t("statPriceConflicts", { count: dupStats.priceConflicts })}
-            </button>
-          )}
-          {blockingPriceErrors.length > 0 && (
-            <button
-              type="button"
+              {t("statItems", { count: draft.stats.itemCount })}
+            </StatPill>
+            <StatPill
+              title={t("statClickHint")}
               onClick={() =>
-                scrollToRefGroup(missingPriceRefIds, "missingPrices", {
-                  focusMissing: true,
-                })
+                scrollToRefGroup(expandedItemRefIds, "expandedItems")
               }
-              title={t("missingPriceBlockHint")}
-              className={STAT_BADGE_WARNING}
             >
-              {t("statMissingPrices", {
-                count: blockingPriceErrors.length,
+              {t("statExpandedItems", {
+                count: draft.stats.expandedItemCount,
               })}
-            </button>
-          )}
-          {blockingNameErrors.length > 0 && (
-            <button
-              type="button"
-              onClick={() =>
-                scrollToRefGroup(missingNameRefIds, "missingNames", {
-                  focusMissing: true,
-                })
-              }
-              title={t("missingNameBlockHint")}
-              className={STAT_BADGE_WARNING}
-            >
-              {t("statMissingNames", {
-                count: blockingNameErrors.length,
-              })}
-            </button>
-          )}
-        </div>
-      </div>
+            </StatPill>
+            {dupStats.exactDuplicates > 0 && (
+              <StatPill
+                title={t("statClickHint")}
+                onClick={() =>
+                  scrollToRefGroup(exactDuplicateRefIds, "exactDuplicates")
+                }
+              >
+                {t("statDuplicates", { count: dupStats.exactDuplicates })}
+              </StatPill>
+            )}
+            {dupStats.priceConflicts > 0 && (
+              <StatPill
+                tone="warning"
+                title={t("statClickHint")}
+                onClick={() =>
+                  scrollToRefGroup(priceConflictRefIds, "priceConflicts")
+                }
+              >
+                {t("statPriceConflicts", { count: dupStats.priceConflicts })}
+              </StatPill>
+            )}
+            {blockingPriceErrors.length > 0 && (
+              <StatPill
+                tone="warning"
+                title={t("missingPriceBlockHint")}
+                onClick={() =>
+                  scrollToRefGroup(missingPriceRefIds, "missingPrices", {
+                    focusMissing: true,
+                  })
+                }
+              >
+                {t("statMissingPrices", { count: blockingPriceErrors.length })}
+              </StatPill>
+            )}
+            {blockingNameErrors.length > 0 && (
+              <StatPill
+                tone="warning"
+                title={t("missingNameBlockHint")}
+                onClick={() =>
+                  scrollToRefGroup(missingNameRefIds, "missingNames", {
+                    focusMissing: true,
+                  })
+                }
+              >
+                {t("statMissingNames", { count: blockingNameErrors.length })}
+              </StatPill>
+            )}
+          </div>
+        }
+      />
 
       {duplicatesLoading && (
-        <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-400 flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0" />
+        <Alert tone="neutral" icon={<Spinner size="sm" />}>
           {t("checkingDuplicates")}
-        </div>
+        </Alert>
       )}
 
       {saveError?.message === "save_timeout_long" && (
-        <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-sm text-amber-900 dark:text-amber-200">
-          {t("saveTimeoutLong")}
-        </div>
+        <Alert tone="warning">{t("saveTimeoutLong")}</Alert>
       )}
 
       {!canProceedToConfirm && !duplicatesLoading && (
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           {blockingPriceErrors.length > 0 && (
-            <button
-              type="button"
-              onClick={() =>
-                scrollToRefGroup(missingPriceRefIds, "missingPricesBlock", {
-                  focusMissing: true,
-                })
+            <Alert
+              tone="warning"
+              title={t("missingPriceBlock", {
+                count: blockingPriceErrors.length,
+              })}
+              action={
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() =>
+                    scrollToRefGroup(missingPriceRefIds, "missingPricesBlock", {
+                      focusMissing: true,
+                    })
+                  }
+                >
+                  {t("missingPriceBlockHint")}
+                </Button>
               }
-              className={WARNING_BLOCK}
-            >
-              <span className="block">
-                {t("missingPriceBlock", { count: blockingPriceErrors.length })}
-              </span>
-              <span className="mt-1 block text-xs font-medium text-amber-700/90 dark:text-amber-300/90">
-                {t("missingPriceBlockHint")}
-              </span>
-            </button>
+            />
           )}
           {blockingNameErrors.length > 0 && (
-            <button
-              type="button"
-              onClick={() =>
-                scrollToRefGroup(missingNameRefIds, "missingNamesBlock", {
-                  focusMissing: true,
-                })
+            <Alert
+              tone="warning"
+              title={t("missingNameBlock", {
+                count: blockingNameErrors.length,
+              })}
+              action={
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() =>
+                    scrollToRefGroup(missingNameRefIds, "missingNamesBlock", {
+                      focusMissing: true,
+                    })
+                  }
+                >
+                  {t("missingNameBlockHint")}
+                </Button>
               }
-              className={WARNING_BLOCK}
-            >
-              <span className="block">
-                {t("missingNameBlock", { count: blockingNameErrors.length })}
-              </span>
-              <span className="mt-1 block text-xs font-medium text-amber-700/90 dark:text-amber-300/90">
-                {t("missingNameBlockHint")}
-              </span>
-            </button>
+            />
           )}
           {unresolvedPriceConflicts.length > 0 && (
-            <button
-              type="button"
-              onClick={() =>
-                scrollToRefGroup(
-                  unresolvedConflictRefIds,
-                  "unresolvedConflictsBlock",
-                )
-              }
-              className={WARNING_BLOCK}
-            >
-              {t("unresolvedPriceConflicts", {
+            <Alert
+              tone="warning"
+              title={t("unresolvedPriceConflicts", {
                 count: unresolvedPriceConflicts.length,
               })}
-            </button>
+              action={
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() =>
+                    scrollToRefGroup(
+                      unresolvedConflictRefIds,
+                      "unresolvedConflictsBlock",
+                    )
+                  }
+                >
+                  {t("statClickHint")}
+                </Button>
+              }
+            />
           )}
         </div>
       )}
 
       {parseErrors.length > 0 && (
-        <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-400">
+        <Alert tone="neutral">
           {t("parseErrorsNotice", { count: parseErrors.length })}
-        </div>
+        </Alert>
       )}
 
-      <div className="space-y-3">
+      <div className="flex flex-col gap-3">
         {draft.categories.map((category) => (
           <ReviewCategoryBlock
             key={category.id}
@@ -397,39 +427,40 @@ export default function ReviewStep({
         ))}
       </div>
 
-      <button
-        type="button"
-        onClick={onAddCategory}
-        disabled={isSaving}
-        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-primary hover:text-primary transition-colors text-sm font-medium disabled:opacity-50"
-      >
-        <IoAddCircleOutline className="text-lg" />
-        {t("addCategory")}
-      </button>
+      <div>
+        <Button
+          variant="secondary"
+          onClick={onAddCategory}
+          disabled={isSaving}
+          startIcon={<IoAddCircleOutline className="text-lg" />}
+          className="border-dashed"
+        >
+          {t("addCategory")}
+        </Button>
+      </div>
 
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-        <div className="flex flex-col items-stretch gap-2 max-w-md">
-          <button
-            type="button"
+      <div className="flex flex-col items-stretch justify-between gap-4 border-t border-line pt-4 sm:flex-row sm:items-end">
+        <div className="flex max-w-md flex-col items-stretch gap-2">
+          <Button
+            variant="secondary"
             onClick={onNewUpload}
             disabled={isSaving}
-            className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 w-full sm:w-auto"
+            className="w-full sm:w-auto"
           >
             {t("newUpload")}
-          </button>
-          <p className="text-xs sm:text-[13px] leading-relaxed text-slate-500 dark:text-slate-400 text-purple-950/50 dark:text-purple-200/45 px-0.5">
+          </Button>
+          <p className="px-0.5 text-xs leading-relaxed text-fg-muted sm:text-[13px]">
             {t("reuploadHint")}
           </p>
         </div>
-        <button
-          type="button"
+        <Button
+          size="lg"
           disabled={!canProceedToConfirm || isSaving}
           onClick={onOpenConfirm}
           title={!canProceedToConfirm ? t("blockingHint") : undefined}
-          className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-semibold shadow-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           {t("proceedToConfirm")}
-        </button>
+        </Button>
       </div>
 
       {confirmOpen && (
@@ -445,4 +476,3 @@ export default function ReviewStep({
     </div>
   );
 }
-

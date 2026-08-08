@@ -11,6 +11,7 @@ import RoleCardGrid from "@/components/Dashboard/staff/RoleCardGrid";
 import AddRoleModal from "@/components/Dashboard/staff/AddRoleModal";
 import DeleteRoleConfirm from "@/components/Dashboard/staff/DeleteRoleConfirm";
 import LinkTo from "@/components/Global/LinkTo";
+import { Button, buttonClasses } from "@/components/ui";
 import { MenuStaff, MenuStaffRole } from "@/types/Menu";
 import { useAccountStaffRoles } from "@/hooks/useAccountStaffRoles";
 import { useDashboardMenus, localizedMenuName } from "@/hooks/useDashboardMenus";
@@ -170,17 +171,14 @@ export default function AccountStaffPage() {
   if (isFreePlan) {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4 text-center md:min-h-[60vh] md:gap-4">
-        <PageTitleWithHelp className="justify-center">
-          <h1 className="text-xl font-bold text-slate-800 sm:text-2xl md:text-3xl dark:text-slate-100">
-            {t("proOnlyTitle")}
-          </h1>
-        </PageTitleWithHelp>
-        <p className="max-w-md text-sm text-slate-500 md:text-base dark:text-slate-400">
-          {t("proOnlyDescription")}
-        </p>
+        <PageTitleWithHelp
+          className="justify-center"
+          title={t("proOnlyTitle")}
+          description={t("proOnlyDescription")}
+        />
         <LinkTo
           href="/dashboard/subscription"
-          className="mt-2 inline-flex items-center justify-center gap-2 rounded-2xl bg-linear-to-r from-primary to-primary/80 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] md:mt-4 md:px-8"
+          className={buttonClasses({ variant: "primary", className: "mt-2 md:mt-4" })}
         >
           {t("upgradeShort")}
         </LinkTo>
@@ -191,54 +189,46 @@ export default function AccountStaffPage() {
   return (
     <>
       <div className="dashboard-staff-header mb-5 min-w-0 md:mb-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-          <div className="min-w-0 flex-1">
-            <PageTitleWithHelp>
-              <h1 className="text-xl font-bold text-slate-800 sm:text-2xl md:text-3xl dark:text-slate-100">
-                {t("title")}
-              </h1>
-            </PageTitleWithHelp>
-            <p className="mt-0.5 text-sm text-slate-500 md:mt-1 dark:text-slate-400">
-              {activeTab === "staff" ? t("subtitle") : tRoles("subtitle")}
-            </p>
-            {activeTab === "staff" && !loading && staffList.length > 0 && (
-              <p className="mt-2 text-xs font-medium text-slate-400 dark:text-slate-500">
+        <PageTitleWithHelp
+          title={t("title")}
+          description={activeTab === "staff" ? t("subtitle") : tRoles("subtitle")}
+          meta={
+            activeTab === "staff" && !loading && staffList.length > 0 ? (
+              <span className="text-xs font-medium text-fg-subtle">
                 {t("totalStaffLabel")}:{" "}
-                <span className="font-bold tabular-nums text-slate-700 dark:text-slate-300">
+                <span className="font-bold tabular-nums text-fg-muted">
                   {staffList.length}
                 </span>
-              </p>
-            )}
-            {activeTab === "roles" && !rolesLoading && roles.length > 0 && (
-              <p className="mt-2 text-xs font-medium text-slate-400 dark:text-slate-500">
+              </span>
+            ) : activeTab === "roles" && !rolesLoading && roles.length > 0 ? (
+              <span className="text-xs font-medium text-fg-subtle">
                 {tRoles("totalRolesLabel")}:{" "}
-                <span className="font-bold tabular-nums text-slate-700 dark:text-slate-300">
+                <span className="font-bold tabular-nums text-fg-muted">
                   {roles.length}
                 </span>
-              </p>
-            )}
-          </div>
-
-          {activeTab === "staff" ? (
-            <button
-              type="button"
-              onClick={openAddModal}
-              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 self-start rounded-xl bg-primary px-4 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] sm:h-11 sm:px-5"
-            >
-              <IoAddCircleOutline className="text-lg" aria-hidden />
-              {t("addStaff")}
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={openAddRoleModal}
-              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 self-start rounded-xl bg-primary px-4 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] sm:h-11 sm:px-5"
-            >
-              <IoAddCircleOutline className="text-lg" aria-hidden />
-              {tRoles("addRole")}
-            </button>
-          )}
-        </div>
+              </span>
+            ) : undefined
+          }
+          actions={
+            activeTab === "staff" ? (
+              <Button
+                type="button"
+                onClick={openAddModal}
+                startIcon={<IoAddCircleOutline className="size-4.5" />}
+              >
+                {t("addStaff")}
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                onClick={openAddRoleModal}
+                startIcon={<IoAddCircleOutline className="size-4.5" />}
+              >
+                {tRoles("addRole")}
+              </Button>
+            )
+          }
+        />
 
         <div
           className="mt-5 flex gap-1 border-b border-slate-200 dark:border-slate-700/80"

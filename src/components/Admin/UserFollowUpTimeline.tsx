@@ -9,10 +9,11 @@ import {
   updateFollowUpCall,
 } from "@/lib/fetchAdminFollowUp";
 import type { FollowUpCall } from "@/types/AdminFollowUp";
+import { FiAlertTriangle } from "react-icons/fi";
+import { Button, ConfirmDialog, SectionHeader, Skeleton } from "@/components/ui";
 import CallNowPhoneModal from "@/components/Admin/CallNowPhoneModal";
 import FollowUpCallsList from "@/components/Admin/FollowUpCallsList";
 import LogFollowUpCallModal from "@/components/Admin/LogFollowUpCallModal";
-import ConfirmationModal from "@/components/Custom/ConfirmationModal";
 import { toast } from "react-toastify";
 import { IoCallOutline } from "react-icons/io5";
 
@@ -114,38 +115,35 @@ export default function UserFollowUpTimeline({
 
   return (
     <div dir={textDir}>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-          {t("timelineTitle")}
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          {phoneNumber && (
-            <button
+      <SectionHeader
+        className="mb-4"
+        title={t("timelineTitle")}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            {phoneNumber ? (
+              <Button
+                type="button"
+                variant="secondary"
+                startIcon={<IoCallOutline />}
+                onClick={() => setCallNowOpen(true)}
+              >
+                {t("callNow")}
+              </Button>
+            ) : null}
+            <Button
               type="button"
-              onClick={() => setCallNowOpen(true)}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+              onClick={() => setActiveLogModal({ kind: "create" })}
             >
-              <IoCallOutline />
-              {t("callNow")}
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => setActiveLogModal({ kind: "create" })}
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
-          >
-            {t("logCall")}
-          </button>
-        </div>
-      </div>
+              {t("logCall")}
+            </Button>
+          </div>
+        }
+      />
 
       {loading ? (
-        <div className="animate-pulse space-y-3">
+        <div className="space-y-3" aria-busy="true">
           {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-16 rounded-xl bg-slate-100 dark:bg-slate-800"
-            />
+            <Skeleton key={i} className="h-16 w-full rounded-xl" />
           ))}
         </div>
       ) : (
@@ -179,16 +177,17 @@ export default function UserFollowUpTimeline({
         />
       )}
 
-      <ConfirmationModal
-        isOpen={Boolean(deleteTarget)}
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
         onClose={() => !deleting && setDeleteTarget(null)}
         onConfirm={() => void handleDelete()}
         title={t("deleteCallTitle")}
-        message={t("deleteCallMessage")}
-        confirmText={t("deleteCall")}
-        cancelText={t("cancel")}
-        isLoading={deleting}
-        loadingText={t("deletingCall")}
+        description={t("deleteCallMessage")}
+        confirmLabel={t("deleteCall")}
+        cancelLabel={t("cancel")}
+        loading={deleting}
+        tone="brand"
+        icon={<FiAlertTriangle />}
       />
     </div>
   );

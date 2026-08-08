@@ -15,8 +15,14 @@ import {
   FaTwitter,
   FaWhatsapp,
 } from "react-icons/fa";
-import CustomBtn from "@/components/Custom/CustomBtn";
 import CustomInput from "@/components/Custom/CustomInput";
+import {
+  Button,
+  Checkbox,
+  Field,
+  Input,
+  Switch,
+} from "@/components/ui";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { axiosPatch } from "@/shared/axiosCall";
 import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
@@ -276,40 +282,36 @@ export default function MediaPage() {
                   >
                     <Icon className="text-lg" />
                   </div>
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300 w-24 shrink-0">
-                    {t(labelKey)}
-                  </span>
                   <div className="flex-1 min-w-[180px]">
-                    <CustomInput
-                      type={row.id === "whatsapp" ? "tel" : "text"}
-                      value={row.value}
-                      onChange={(e) =>
-                        updateSocial(
-                          row.id,
-                          row.id === "whatsapp"
-                            ? ((e as unknown as string | undefined) ?? "")
-                            : (e as React.ChangeEvent<HTMLInputElement>)
-                                .target.value,
-                        )
-                      }
-                      onBlur={
-                        row.id === "whatsapp"
-                          ? undefined
-                          : () => {
-                              const trimmed = row.value.trim();
-                              if (!trimmed) return;
-                              updateSocial(
-                                row.id,
-                                normalizeExternalUrl(trimmed),
-                              );
-                            }
-                      }
-                      placeholder={
-                        row.id === "whatsapp"
-                          ? "123-456-7890"
-                          : SOCIAL_URL_PLACEHOLDERS[row.id]
-                      }
-                    />
+                    <Field label={t(labelKey)}>
+                      {row.id === "whatsapp" ? (
+                        <CustomInput
+                          type="tel"
+                          value={row.value}
+                          onChange={(val) =>
+                            updateSocial(
+                              row.id,
+                              (val as unknown as string | undefined) ?? "",
+                            )
+                          }
+                          placeholder="123-456-7890"
+                        />
+                      ) : (
+                        <Input
+                          type="text"
+                          value={row.value}
+                          onChange={(e) =>
+                            updateSocial(row.id, e.target.value)
+                          }
+                          onBlur={() => {
+                            const trimmed = row.value.trim();
+                            if (!trimmed) return;
+                            updateSocial(row.id, normalizeExternalUrl(trimmed));
+                          }}
+                          placeholder={SOCIAL_URL_PLACEHOLDERS[row.id]}
+                        />
+                      )}
+                    </Field>
                   </div>
                 </div>
               );
@@ -343,11 +345,8 @@ export default function MediaPage() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-1">
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                {t("contact.addressAr")}
-              </label>
-              <CustomInput
+            <Field label={t("contact.addressAr")}>
+              <Input
                 type="text"
                 value={contact.addressAr}
                 onChange={(e) =>
@@ -355,12 +354,9 @@ export default function MediaPage() {
                 }
                 placeholder={t("addressArPlaceholder")}
               />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                {t("contact.addressEn")}
-              </label>
-              <CustomInput
+            </Field>
+            <Field label={t("contact.addressEn")}>
+              <Input
                 type="text"
                 value={contact.addressEn}
                 onChange={(e) =>
@@ -368,11 +364,8 @@ export default function MediaPage() {
                 }
                 placeholder={t("addressEnPlaceholder")}
               />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                {t("contact.phone")}
-              </label>
+            </Field>
+            <Field label={t("contact.phone")}>
               <CustomInput
                 type="tel"
                 value={contact.phone}
@@ -384,7 +377,7 @@ export default function MediaPage() {
                 }
                 placeholder={t("contact.phonePlaceholder")}
               />
-            </div>
+            </Field>
           </div>
         </section>
 
@@ -411,43 +404,23 @@ export default function MediaPage() {
               <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                 {wifi.wifiEnabled ? t("wifi.enabledOn") : t("wifi.enabledOff")}
               </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={wifi.wifiEnabled}
-                aria-label={t("wifi.enabled")}
-                onClick={() =>
-                  setWifi((prev) => ({
-                    ...prev,
-                    wifiEnabled: !prev.wifiEnabled,
-                  }))
-                }
-                className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2 ${
-                  wifi.wifiEnabled
-                    ? "bg-primary"
-                    : "bg-slate-200 dark:bg-slate-600"
-                }`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${
-                    wifi.wifiEnabled
-                      ? isRTL
-                        ? "-translate-x-5"
-                        : "translate-x-5"
-                      : "translate-x-0"
-                  }`}
-                />
-              </button>
+            <Switch
+              checked={wifi.wifiEnabled}
+              onChange={(e) =>
+                setWifi((prev) => ({
+                  ...prev,
+                  wifiEnabled: e.target.checked,
+                }))
+              }
+              aria-label={t("wifi.enabled")}
+            />
             </div>
           </div>
 
           {wifi.wifiEnabled && (
             <div className="grid gap-4 sm:grid-cols-1">
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  {t("wifi.name")}
-                </label>
-                <CustomInput
+              <Field label={t("wifi.name")}>
+                <Input
                   type="text"
                   value={wifi.wifiName}
                   onChange={(e) =>
@@ -458,12 +431,9 @@ export default function MediaPage() {
                   }
                   placeholder={t("wifi.namePlaceholder")}
                 />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  {t("wifi.password")}
-                </label>
-                <CustomInput
+              </Field>
+              <Field label={t("wifi.password")}>
+                <Input
                   type="text"
                   value={wifi.wifiPassword}
                   onChange={(e) =>
@@ -474,7 +444,7 @@ export default function MediaPage() {
                   }
                   placeholder={t("wifi.passwordPlaceholder")}
                 />
-              </div>
+              </Field>
             </div>
           )}
         </section>
@@ -523,7 +493,7 @@ export default function MediaPage() {
                         disabled={isClosed}
                       />
                     </div>
-                    <span className="text-slate-500 dark:text-slate-400 text-sm shrink-0">
+                    <span className="text-fg-muted text-sm shrink-0">
                       {t("businessHours.to")}
                     </span>
                     <div className="flex-1 min-w-0">
@@ -542,17 +512,11 @@ export default function MediaPage() {
                       />
                     </div>
                   </div>
-                  <label className="flex items-center gap-2 shrink-0 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={isClosed}
-                      onChange={(e) => setDayClosed(day, e.target.checked)}
-                      className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-700 text-primary focus:ring-primary/20"
-                    />
-                    <span className="text-sm text-slate-600 dark:text-slate-400">
-                      {t("businessHours.closed")}
-                    </span>
-                  </label>
+                  <Checkbox
+                    checked={isClosed}
+                    onChange={(e) => setDayClosed(day, e.target.checked)}
+                    label={t("businessHours.closed")}
+                  />
                 </div>
               );
             })}
@@ -570,17 +534,16 @@ export default function MediaPage() {
 
         {/* Footer actions */}
         <div className="flex flex-wrap justify-end gap-3 pt-2 pb-6">
-          <CustomBtn
+          <Button
             onClick={handleSave}
             loading={isSaving}
             disabled={isSaving}
+            size="lg"
             className="w-auto! min-w-[160px]"
+            startIcon={<FiSave className="text-base" />}
           >
-            <span className="flex items-center justify-center gap-2">
-              <FiSave className="text-base" />
-              {t("buttons.save")}
-            </span>
-          </CustomBtn>
+            {t("buttons.save")}
+          </Button>
         </div>
       </div>
     </div>

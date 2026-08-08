@@ -5,10 +5,17 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { ColDef } from "ag-grid-community";
 import { IoArrowBack, IoCreateOutline } from "react-icons/io5";
-import { FaSpinner } from "react-icons/fa";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import DataTable from "@/components/Custom/DataTable";
 import PlanCapabilitiesFields from "@/components/Admin/PlanCapabilitiesFields";
+import {
+  Button,
+  LoadingBlock,
+  Modal,
+  PageHeader,
+  SectionHeader,
+  buttonClasses,
+} from "@/components/ui";
 import { axiosGet, axiosPatch } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import {
@@ -310,7 +317,11 @@ export default function PlansPage() {
                 e.stopPropagation();
                 openEdit(params.data);
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 font-medium text-sm"
+              className={buttonClasses({
+                variant: "subtle",
+                size: "sm",
+                className: "gap-1.5",
+              })}
             >
               <IoCreateOutline className="text-base" />
               {t("edit")}
@@ -326,24 +337,19 @@ export default function PlansPage() {
 
   return (
     <div className="space-y-6">
-      <div
-        className={`flex flex-col gap-4 ${isRTL ? "text-right" : "text-left"}`}
-      >
-        <div className="flex items-center gap-4">
-          <button
-            type="button"
+      <PageHeader
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          <Button
+            variant="secondary"
+            startIcon={<IoArrowBack className="rtl:rotate-180" />}
             onClick={() => router.back()}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${isRTL ? "flex-row-reverse" : ""}`}
           >
-            <IoArrowBack className="text-lg" />
-            <span className="font-medium">{t("back")}</span>
-          </button>
-        </div>
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-          {t("title")}
-        </h1>
-        <p className="text-slate-500 dark:text-slate-400">{t("subtitle")}</p>
-      </div>
+            {t("back")}
+          </Button>
+        }
+      />
 
       <CardDashBoard>
         <DataTable<Plan>
@@ -358,19 +364,12 @@ export default function PlansPage() {
 
       <CardDashBoard>
         <div className={`space-y-4 ${isRTL ? "text-right" : "text-left"}`}>
-          <div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-              {t("customDisplay.title")}
-            </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              {t("customDisplay.subtitle")}
-            </p>
-          </div>
+          <SectionHeader
+            title={t("customDisplay.title")}
+            description={t("customDisplay.subtitle")}
+          />
           {customLoading ? (
-            <div className="flex items-center gap-2 text-slate-500">
-              <FaSpinner className="animate-spin" />
-              {t("customDisplay.loading")}
-            </div>
+            <LoadingBlock label={t("customDisplay.loading")} />
           ) : (
             <>
               <PlanCapabilitiesFields
@@ -380,51 +379,56 @@ export default function PlansPage() {
                 t={t}
               />
               <div className="flex justify-end">
-                <button
-                  type="button"
+                <Button
                   onClick={handleSaveCustom}
-                  disabled={customSaving}
-                  className="px-5 py-2.5 bg-primary text-white rounded-xl font-semibold hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2"
+                  loading={customSaving}
                 >
-                  {customSaving ? (
-                    <>
-                      <FaSpinner className="animate-spin" />
-                      {t("editModal.saving")}
-                    </>
-                  ) : (
-                    t("customDisplay.save")
-                  )}
-                </button>
+                  {t("customDisplay.save")}
+                </Button>
               </div>
             </>
           )}
         </div>
       </CardDashBoard>
 
-      {editModal.isOpen && editModal.plan && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 space-y-4">
-              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
-                {t("editModal.title")} — {editModal.plan.name}
-              </h2>
+      <Modal
+        open={editModal.isOpen && editModal.plan != null}
+        onClose={closeEdit}
+        title={
+          editModal.plan
+            ? `${t("editModal.title")} — ${editModal.plan.name}`
+            : t("editModal.title")
+        }
+        size="lg"
+        dismissible={!saving}
+        footer={
+          <>
+            <Button variant="secondary" onClick={closeEdit} disabled={saving}>
+              {t("editModal.cancel")}
+            </Button>
+            <Button onClick={handleSave} loading={saving}>
+              {t("editModal.save")}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="mb-1 block text-sm font-medium text-fg-muted">
+              {t("editModal.name")}
+            </label>
+            <input
+              type="text"
+              value={String(form.name)}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, name: e.target.value }))
+              }
+              className="w-full rounded-xl border border-line-strong bg-surface px-4 py-2.5 text-fg"
+              dir={locale === "ar" ? "rtl" : "ltr"}
+            />
+          </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  {t("editModal.name")}
-                </label>
-                <input
-                  type="text"
-                  value={String(form.name)}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, name: e.target.value }))
-                  }
-                  className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
-                  dir={locale === "ar" ? "rtl" : "ltr"}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                     {t("editModal.priceMonthly")}
@@ -595,36 +599,8 @@ export default function PlansPage() {
                 onChange={setCaps}
                 t={t}
               />
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={closeEdit}
-                  disabled={saving}
-                  className="flex-1 px-4 py-2.5 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 rounded-xl font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50"
-                >
-                  {t("editModal.cancel")}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="flex-1 px-4 py-2.5 bg-primary text-white rounded-xl font-semibold hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {saving ? (
-                    <>
-                      <FaSpinner className="animate-spin text-lg" />
-                      {t("editModal.saving")}
-                    </>
-                  ) : (
-                    t("editModal.save")
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

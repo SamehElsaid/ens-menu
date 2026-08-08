@@ -17,6 +17,7 @@ import {
   type DisplayOrderRow,
 } from "@/components/Dashboard/DisplayOrderList";
 import LinkTo from "@/components/Global/LinkTo";
+import { Button, buttonClasses } from "@/components/ui";
 import type { Category, Item } from "@/types/Menu";
 
 function bySortOrderThenId<T extends { id: number; sortOrder?: number }>(
@@ -246,34 +247,29 @@ export default function DisplayOrderPage() {
 
   return (
     <>
-      <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <PageTitleWithHelp>
-            <h1 className="text-2xl font-bold text-slate-800 md:text-3xl dark:text-slate-100">
-              {t("title")}
-            </h1>
-          </PageTitleWithHelp>
-          <p className="mt-1 text-slate-500 dark:text-slate-400">
-            {t("subtitle")}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <LinkTo
-            href={`/dashboard/${menuId}`}
-            className="inline-flex items-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-all hover:border-primary/30 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-primary/50 dark:hover:bg-slate-700"
-          >
-            {tStaff("backToOverview")}
-          </LinkTo>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={!isDirty || saving || loading}
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-white shadow-lg transition-all hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
-          >
-            {saving ? t("saving") : t("save")}
-          </button>
-        </div>
-      </div>
+      <PageTitleWithHelp
+        className="mb-8"
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          <>
+            <LinkTo
+              href={`/dashboard/${menuId}`}
+              className={buttonClasses({ variant: "secondary" })}
+            >
+              {tStaff("backToOverview")}
+            </LinkTo>
+            <Button
+              type="button"
+              onClick={handleSave}
+              disabled={!isDirty || saving || loading}
+              loading={saving}
+            >
+              {saving ? t("saving") : t("save")}
+            </Button>
+          </>
+        }
+      />
 
       {isDirty ? (
         <p className="mb-4 text-sm font-medium text-amber-600 dark:text-amber-400">

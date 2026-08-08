@@ -29,10 +29,10 @@ interface OrdersCardGridProps {
 function OrderCardSkeleton() {
   return (
     <div
-      className="overflow-hidden rounded-2xl border border-violet-200/70 bg-white dark:border-violet-800/40 dark:bg-slate-800/80"
+      className="overflow-hidden rounded-2xl border border-line bg-surface"
       aria-hidden
     >
-      <div className="dashboard-mobile-shimmer h-16 bg-violet-50 dark:bg-violet-950/30" />
+      <div className="dashboard-mobile-shimmer h-16 bg-surface-2" />
       <div className="space-y-3 p-4">
         <div className="dashboard-mobile-shimmer h-4 w-2/3 rounded-md bg-slate-100 dark:bg-slate-700/60" />
         <div className="dashboard-mobile-shimmer h-4 w-1/2 rounded-md bg-slate-100 dark:bg-slate-700/60" />
@@ -81,10 +81,10 @@ export default function OrdersCardGrid({
     return (
       <div
         id="onboarding-orders-table"
-        className="rounded-2xl border border-dashed border-violet-200 bg-white px-6 py-14 text-center dark:border-violet-800/40 dark:bg-slate-800/50"
+        className="rounded-2xl border border-dashed border-line bg-surface px-6 py-14 text-center"
       >
-        <IoReceiptOutline className="mx-auto mb-3 text-4xl text-violet-400" />
-        <p className="text-sm text-slate-600 dark:text-slate-300">
+        <IoReceiptOutline className="mx-auto mb-3 text-4xl text-brand" />
+        <p className="text-sm text-fg-muted">
           {isFiltered ? t("noSearchResults") : t("empty")}
         </p>
       </div>

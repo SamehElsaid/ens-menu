@@ -1,10 +1,9 @@
 "use client";
 
 import { Controller, Resolver, useForm } from "react-hook-form";
-import CustomInput from "@/components/Custom/CustomInput";
+import { Field, Input } from "@/components/ui";
 import { FaEnvelope } from "react-icons/fa";
 import { TbLockPassword } from "react-icons/tb";
-import { FiCheck, FiLoader } from "react-icons/fi";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLocale, useTranslations } from "next-intl";
 import { loginSchema, LoginSchema } from "@/schemas/loginSchema";
@@ -24,7 +23,9 @@ import { syncFcmToken } from "@/shared/syncFcmToken";
 import CustomRecaptcha, {
   type RecaptchaGateHandle,
 } from "./Auth/CustomRecaptcha";
-import { cn } from "@/lib/cn";
+import { Button } from "@/components/ui/Button";
+import { Checkbox } from "@/components/ui/Checkbox";
+import { Alert } from "@/components/ui/Alert";
 
 const REMEMBER_EMAIL_KEY = "ensmenu_remember_email";
 
@@ -205,87 +206,61 @@ export default function LoginForm() {
           control={control}
           name="email"
           render={({ field: { value, onChange } }) => (
-            <CustomInput
-              type="email"
-              placeholder={messages.email}
-              id="login-email"
-              icon={<FaEnvelope size={14} />}
-              label={messages.email}
-              error={errors.email?.message}
-              value={value}
-              onChange={(e) => {
-                setApiError(null);
-                onChange(e);
-              }}
-              size="small"
-              className="login-field-input"
-            />
-          )}
-        />
-
-        <div className="login-form__password-group space-y-1.5">
-          <label
-            htmlFor="login-password"
-            className="block text-[12px] font-medium text-slate-600 dark:text-slate-400"
-          >
-            {messages.password}
-          </label>
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { value, onChange } }) => (
-              <CustomInput
-                type="password"
-                placeholder={messages.password}
-                id="login-password"
-                icon={<TbLockPassword size={15} />}
-                error={errors.password?.message}
+            <Field label={messages.email} error={errors.email?.message}>
+              <Input
+                type="email"
+                inputSize="md"
+                startIcon={<FaEnvelope size={14} />}
+                placeholder={messages.email}
+                autoComplete="email"
                 value={value}
                 onChange={(e) => {
                   setApiError(null);
                   onChange(e);
                 }}
-                size="small"
                 className="login-field-input"
               />
+            </Field>
+          )}
+        />
+
+        <div className="login-form__password-group space-y-1.5">
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { value, onChange } }) => (
+              <Field label={messages.password} error={errors.password?.message}>
+                <Input
+                  type="password"
+                  inputSize="md"
+                  startIcon={<TbLockPassword size={15} />}
+                  placeholder={messages.password}
+                  autoComplete="current-password"
+                  value={value}
+                  onChange={(e) => {
+                    setApiError(null);
+                    onChange(e);
+                  }}
+                  className="login-field-input"
+                />
+              </Field>
             )}
           />
           <LinkTo
             href="/auth/reset-password"
-            className="login-forgot-link inline-block pt-0.5 text-start text-[12px] font-medium text-purple-600 transition-colors hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300"
+            className="login-forgot-link inline-block rounded-sm pt-0.5 text-start text-[12px] font-medium text-brand transition-colors hover:text-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
             {t("auth.forgotPassword")}
           </LinkTo>
         </div>
       </div>
 
-      <label className="login-remember-me mt-3 flex cursor-pointer items-center gap-2.5 text-start">
-        <input
-          type="checkbox"
-          checked={rememberMe}
-          onChange={(e) => setRememberMe(e.target.checked)}
-          className="login-remember-me__input sr-only"
-        />
-        <span
-          aria-hidden
-          className={cn(
-            "login-remember-me__box flex size-[18px] shrink-0 items-center justify-center rounded-[6px] border-2 transition-all duration-200",
-            rememberMe
-              ? "border-purple-600 bg-purple-600 shadow-[0_0_0_3px_rgba(124,58,237,0.2)] dark:border-purple-500 dark:bg-purple-500"
-              : "border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-900",
-          )}
-        >
-          <FiCheck
-            className={cn(
-              "size-3 text-white transition-all duration-200",
-              rememberMe ? "scale-100 opacity-100" : "scale-75 opacity-0",
-            )}
-          />
-        </span>
-        <span className="text-[13px] font-medium text-slate-600 dark:text-slate-400">
-          {t("auth.rememberMe")}
-        </span>
-      </label>
+      <Checkbox
+        className="mt-3"
+        checked={rememberMe}
+        onChange={(e) => setRememberMe(e.target.checked)}
+        label={t("auth.rememberMe")}
+      />
 
       {/* Silent captcha — modal only on submit */}
       <CustomRecaptcha
@@ -296,38 +271,32 @@ export default function LoginForm() {
       />
 
       {apiError && (
-        <div
-          role="alert"
-          className="login-form__error mt-3 flex flex-col gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-[13px] font-medium text-red-800 dark:border-red-500/35 dark:bg-red-950/40 dark:text-red-300"
-        >
+        <Alert tone="danger" className="mt-3">
           <span>{apiError}</span>
           {emailVerificationRequired && (
             <button
               type="button"
               onClick={handleResendVerification}
               disabled={resendingVerification}
-              className="text-start text-[12px] font-semibold text-purple-700 underline underline-offset-2 disabled:opacity-60 dark:text-purple-300"
+              className="mt-1.5 block rounded-sm text-start text-[12px] font-semibold underline underline-offset-2 disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
               {resendingVerification
                 ? t("auth.recaptchaVerifying")
                 : t("auth.resendVerification")}
             </button>
           )}
-        </div>
+        </Alert>
       )}
 
-      <button
+      <Button
         type="submit"
-        disabled={loading}
-        className="login-submit-btn mt-4 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-[14px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+        loading={loading}
+        fullWidth
+        size="lg"
+        className="mt-4"
       >
-        <span className={cn("relative z-1", loading && "opacity-0")}>
-          {messages.login}
-        </span>
-        {loading && (
-          <FiLoader className="absolute size-5 animate-spin" aria-hidden />
-        )}
-      </button>
+        {messages.login}
+      </Button>
 
       <AuthSocialButtons
         dividerLabel="auth.orLoginWith"
@@ -335,15 +304,13 @@ export default function LoginForm() {
         className="mt-4 sm:mt-5"
       />
 
-      <p className="mt-3 text-center text-[13px] text-slate-500 sm:mt-4 dark:text-slate-400">
+      <p className="mt-3 text-center text-[13px] text-fg-muted sm:mt-4">
         <LinkTo
           href="/auth/register"
-          className="font-medium text-slate-600 transition-colors hover:text-purple-600 dark:text-slate-300 dark:hover:text-purple-400"
+          className="rounded-sm font-medium transition-colors hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
           {t("auth.dontHaveAccount")}{" "}
-          <span className="font-semibold text-purple-600 dark:text-purple-400">
-            {t("auth.register")}
-          </span>
+          <span className="font-semibold text-brand">{t("auth.register")}</span>
         </LinkTo>
       </p>
     </form>

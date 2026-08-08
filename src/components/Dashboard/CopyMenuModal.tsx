@@ -3,15 +3,13 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
-import CustomInput from "@/components/Custom/CustomInput";
+import { Button, Checkbox, Field, Input, Modal } from "@/components/ui";
 import { normalizeMenuFromApi } from "@/lib/normalizeMenuFromApi";
 import { sanitizeMenuSlugInput } from "@/lib/publicMenuUrl";
 import type { Menu, SlugCheckResponse } from "@/types/Menu";
 import { toast } from "react-toastify";
 import {
-  IoCloseOutline,
   IoCopyOutline,
-  IoLinkOutline,
   IoPricetagOutline,
   IoCheckmarkCircle,
   IoCloseCircle,
@@ -40,6 +38,8 @@ type CopyMenuPayload = {
 } & CopyOptions;
 
 type CopyOptionKey = keyof CopyOptions;
+
+const COPY_FORM_ID = "copy-menu-form";
 
 const COPY_OPTION_KEYS: CopyOptionKey[] = [
   "copyProducts",
@@ -225,211 +225,158 @@ export default function CopyMenuModal({
     slugStatus.available !== false;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-900">
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 pb-4 pt-6 dark:border-slate-800">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <IoCopyOutline className="text-xl" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                {t("title")}
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {t("subtitle", { name: menuName })}
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isCopying}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
-            aria-label={t("cancel")}
+    <Modal
+      open
+      onClose={onClose}
+      title={t("title")}
+      description={t("subtitle", { name: menuName })}
+      icon={<IoCopyOutline className="size-5" />}
+      dismissible={!isCopying}
+      closeLabel={t("cancel")}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose} disabled={isCopying}>
+            {t("cancel")}
+          </Button>
+          <Button
+            variant="primary"
+            type="submit"
+            form={COPY_FORM_ID}
+            loading={isCopying}
+            disabled={!canSubmit}
+            startIcon={<IoCopyOutline className="size-4" />}
           >
-            <IoCloseOutline className="text-xl" />
-          </button>
+            {isCopying ? t("copying") : t("copy")}
+          </Button>
+        </>
+      }
+    >
+      <form
+        id={COPY_FORM_ID}
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-5"
+      >
+        <p className="text-sm leading-relaxed text-fg-muted">
+          {t("description")}
+        </p>
+
+        <div className="flex flex-col gap-3">
+          <p className="flex items-center gap-2 text-[13px] font-semibold text-fg">
+            <IoPricetagOutline className="text-fg-muted" aria-hidden />
+            {t("menuNames")}
+          </p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Field
+              label={t("nameAr")}
+              required
+              error={nameArError ?? undefined}
+            >
+              <Input
+                value={nameAr}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  setNameAr(next);
+                  setNameArError(
+                    next.trim() ? null : t("validation.nameArRequired"),
+                  );
+                }}
+                placeholder={t("nameArPlaceholder")}
+                data-autofocus
+              />
+            </Field>
+            <Field
+              label={t("nameEn")}
+              required
+              error={nameEnError ?? undefined}
+            >
+              <Input
+                value={nameEn}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  setNameEn(next);
+                  setNameEnError(
+                    next.trim() ? null : t("validation.nameEnRequired"),
+                  );
+                }}
+                placeholder={t("nameEnPlaceholder")}
+                dir="ltr"
+              />
+            </Field>
+          </div>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex min-h-0 flex-1 flex-col"
-        >
-          <div className="space-y-4 overflow-y-auto px-6 py-4">
-            <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-              {t("description")}
-            </p>
+        <div>
+          <Field label={t("slug")} required error={slugError ?? undefined}>
+            <Input
+              value={slug}
+              onChange={(e) => {
+                const next = sanitizeMenuSlugInput(e.target.value);
+                setSlug(next);
+                setSlugError(validateSlug(next));
+              }}
+              placeholder={t("slugPlaceholder")}
+              dir="ltr"
+              className="font-mono"
+            />
+          </Field>
 
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                <IoPricetagOutline className="text-primary" />
-                {t("menuNames")}
-              </div>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div>
-                  <label className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-slate-400">
-                    {t("nameAr")} *
-                  </label>
-                  <CustomInput
-                    type="text"
-                    value={nameAr}
-                    onChange={(e) => {
-                      const next = e.target.value;
-                      setNameAr(next);
-                      setNameArError(
-                        next.trim() ? null : t("validation.nameArRequired"),
-                      );
-                    }}
-                    className="px-4 py-3 border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
-                    placeholder={t("nameArPlaceholder")}
-                    error={nameArError ?? undefined}
-                  />
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-slate-400">
-                    {t("nameEn")} *
-                  </label>
-                  <CustomInput
-                    type="text"
-                    value={nameEn}
-                    onChange={(e) => {
-                      const next = e.target.value;
-                      setNameEn(next);
-                      setNameEnError(
-                        next.trim() ? null : t("validation.nameEnRequired"),
-                      );
-                    }}
-                    dir="ltr"
-                    className="px-4 py-3 border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
-                    placeholder={t("nameEnPlaceholder")}
-                    error={nameEnError ?? undefined}
-                  />
-                </div>
-              </div>
+          <div className="mt-2 min-h-5 text-xs" aria-live="polite">
+            {slugStatus.checking && (
+              <span className="text-fg-muted">{t("slugChecking")}</span>
+            )}
+            {!slugStatus.checking && slugStatus.available === true && (
+              <span className="inline-flex items-center gap-1 text-success">
+                <IoCheckmarkCircle aria-hidden />
+                {t("slugAvailable")}
+              </span>
+            )}
+            {!slugStatus.checking && slugStatus.available === false && (
+              <span className="inline-flex items-center gap-1 text-danger">
+                <IoCloseCircle aria-hidden />
+                {t("slugTaken")}
+              </span>
+            )}
+          </div>
+
+          {slugStatus.suggestions.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {slugStatus.suggestions.map((suggestion) => (
+                <Button
+                  key={suggestion}
+                  variant="secondary"
+                  size="xs"
+                  onClick={() => {
+                    setSlug(suggestion);
+                    setSlugError(null);
+                  }}
+                  className="font-mono"
+                  dir="ltr"
+                >
+                  {suggestion}
+                </Button>
+              ))}
             </div>
+          )}
+        </div>
 
-            <div>
-              <label className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                <IoLinkOutline className="text-primary" />
-                {t("slug")} *
-              </label>
-              <CustomInput
-                type="text"
-                value={slug}
-                onChange={(e) => {
-                  const next = sanitizeMenuSlugInput(e.target.value);
-                  setSlug(next);
-                  setSlugError(validateSlug(next));
-                }}
-                dir="ltr"
-                className="px-4 py-3 border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
-                placeholder={t("slugPlaceholder")}
-                error={slugError ?? undefined}
+        <div className="flex flex-col gap-3">
+          <p className="flex items-center gap-2 text-[13px] font-semibold text-fg">
+            <IoOptionsOutline className="text-fg-muted" aria-hidden />
+            {t("whatToCopy")}
+          </p>
+          <div className="flex flex-col gap-3 rounded-xl bg-surface-2 p-4">
+            {COPY_OPTION_KEYS.map((key) => (
+              <Checkbox
+                key={key}
+                checked={options[key]}
+                onChange={() => toggleOption(key)}
+                disabled={isCopying}
+                label={t(`options.${OPTION_LABEL_KEYS[key]}`)}
               />
-              <div className="mt-2 min-h-5 text-xs">
-                {slugStatus.checking && (
-                  <span className="text-slate-500">{t("slugChecking")}</span>
-                )}
-                {!slugStatus.checking && slugStatus.available === true && (
-                  <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                    <IoCheckmarkCircle />
-                    {t("slugAvailable")}
-                  </span>
-                )}
-                {!slugStatus.checking && slugStatus.available === false && (
-                  <span className="inline-flex items-center gap-1 text-red-600 dark:text-red-400">
-                    <IoCloseCircle />
-                    {t("slugTaken")}
-                  </span>
-                )}
-              </div>
-              {slugStatus.suggestions.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {slugStatus.suggestions.map((suggestion) => (
-                    <button
-                      key={suggestion}
-                      type="button"
-                      onClick={() => {
-                        setSlug(suggestion);
-                        setSlugError(null);
-                      }}
-                      className="rounded-lg border border-slate-200 px-2.5 py-1 font-mono text-xs text-slate-600 transition hover:border-primary/40 hover:bg-primary/5 hover:text-primary dark:border-slate-700 dark:text-slate-300"
-                      dir="ltr"
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                <IoOptionsOutline className="text-primary" />
-                {t("whatToCopy")}
-              </div>
-              <div className="space-y-2 rounded-xl border border-slate-200 p-3 dark:border-slate-700">
-                {COPY_OPTION_KEYS.map((key) => {
-                  const checked = options[key];
-                  const inputId = `copy-option-${key}`;
-                  return (
-                    <label
-                      key={key}
-                      htmlFor={inputId}
-                      className={`flex cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2.5 transition ${
-                        checked
-                          ? "bg-primary/5 text-slate-900 dark:bg-primary/10 dark:text-slate-100"
-                          : "text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800/60"
-                      }`}
-                    >
-                      <input
-                        id={inputId}
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => toggleOption(key)}
-                        disabled={isCopying}
-                        className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
-                      />
-                      <span className="text-sm font-medium">
-                        {t(`options.${OPTION_LABEL_KEYS[key]}`)}
-                      </span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
+            ))}
           </div>
-
-          <div className="flex flex-col-reverse gap-2 border-t border-slate-100 px-6 py-4 sm:flex-row sm:justify-end dark:border-slate-800">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isCopying}
-              className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-            >
-              {t("cancel")}
-            </button>
-            <button
-              type="submit"
-              disabled={!canSubmit}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary/90 disabled:opacity-60"
-            >
-              {isCopying ? (
-                <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  {t("copying")}
-                </>
-              ) : (
-                <>
-                  <IoCopyOutline className="text-base" />
-                  {t("copy")}
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        </div>
+      </form>
+    </Modal>
   );
 }

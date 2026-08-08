@@ -7,7 +7,6 @@ import type { ColDef, ICellRendererParams } from "ag-grid-community";
 import {
   IoArrowBack,
   IoRefreshOutline,
-  IoSearchOutline,
 } from "react-icons/io5";
 import {
   FaCheckCircle,
@@ -21,6 +20,14 @@ import {
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import DataTable from "@/components/Custom/DataTable";
 import { DemoDataBanner } from "@/components/Admin/AdminAnalyticsWidgets";
+import {
+  Button,
+  PageHeader,
+  SearchInput,
+  SectionHeader,
+  SegmentedControl,
+  Toolbar,
+} from "@/components/ui";
 import {
   fetchAdminPayments,
   formatPaymentAmount,
@@ -401,22 +408,19 @@ export default function AdminPaymentsPage() {
 
   return (
     <div className="space-y-6 py-5 animate-fadeIn" dir={textDir}>
-      <div>
-        <button
-          type="button"
-          onClick={() => router.push("/admin")}
-          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-primary mb-2"
-        >
-          <IoArrowBack
-            className={`text-base ${locale === "ar" ? "rotate-180" : ""}`}
-          />
-          {t("backToAdmin")}
-        </button>
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-          {t("title")}
-        </h1>
-        <p className="text-slate-500 dark:text-slate-400">{t("subtitle")}</p>
-      </div>
+      <PageHeader
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          <Button
+            variant="secondary"
+            startIcon={<IoArrowBack className="rtl:rotate-180" />}
+            onClick={() => router.push("/admin")}
+          >
+            {t("backToAdmin")}
+          </Button>
+        }
+      />
 
       {isDemo && <DemoDataBanner message={t("demoDataBanner")} dir={textDir} />}
 
@@ -453,139 +457,98 @@ export default function AdminPaymentsPage() {
       )}
 
       <CardDashBoard className="p-4">
-        <div
-          className={`flex flex-wrap items-center gap-3 ${textDir === "rtl" ? "flex-row-reverse" : ""}`}
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            handleSearch();
+          }}
         >
-          <div className="flex-1 min-w-[200px] relative">
-            <IoSearchOutline
-              className={`absolute top-1/2 -translate-y-1/2 text-slate-400 text-lg ${textDir === "rtl" ? "right-3" : "left-3"}`}
-            />
-            <input
-              type="text"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              placeholder={t("searchPlaceholder")}
-              className={`w-full h-11 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm ${textDir === "rtl" ? "pr-10 pl-3 text-right" : "pl-10 pr-3"}`}
-            />
-          </div>
-          <button
-            type="button"
-            onClick={handleSearch}
-            className="h-11 px-5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90"
-          >
-            {t("search")}
-          </button>
-          {(searchQuery || searchInput) && (
-            <button
-              type="button"
-              onClick={handleReset}
-              className="h-11 inline-flex items-center gap-2 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-medium"
-            >
-              <IoRefreshOutline />
-              {t("reset")}
-            </button>
-          )}
-        </div>
+          <Toolbar
+            search={
+              <SearchInput
+                value={searchInput}
+                onChange={setSearchInput}
+                placeholder={t("searchPlaceholder")}
+                label={t("search")}
+                debounceMs={0}
+              />
+            }
+            actions={
+              <>
+                <Button type="submit">{t("search")}</Button>
+                {(searchQuery || searchInput) && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    startIcon={<IoRefreshOutline />}
+                    onClick={handleReset}
+                  >
+                    {t("reset")}
+                  </Button>
+                )}
+              </>
+            }
+          />
+        </form>
       </CardDashBoard>
 
-      <CardDashBoard className="p-4 space-y-4">
-        <div>
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            {t("filters.source")}
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {SOURCE_FILTERS.map((source) => (
-              <button
-                key={source}
-                type="button"
-                onClick={() => {
-                  setSourceFilter(source);
-                  setPage(1);
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                  sourceFilter === source
-                    ? "bg-primary text-white"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
-                }`}
-              >
-                {t(`source.${source}`)}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            {t("filters.subscriptionStatus")}
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {SUBSCRIPTION_STATUS_FILTERS.map((subStatus) => (
-              <button
-                key={subStatus}
-                type="button"
-                onClick={() => {
-                  setSubscriptionStatusFilter(subStatus);
-                  setPage(1);
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                  subscriptionStatusFilter === subStatus
-                    ? "bg-primary text-white"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
-                }`}
-              >
-                {t(`subscriptionStatus.${subStatus}`)}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            {t("filters.status")}
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {STATUS_FILTERS.map((status) => (
-              <button
-                key={status}
-                type="button"
-                onClick={() => {
-                  setStatusFilter(status);
-                  setPage(1);
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                  statusFilter === status
-                    ? "bg-primary text-white"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
-                }`}
-              >
-                {t(`filters.${status}`)}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            {t("filters.period")}
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {PERIODS.map((p) => (
-              <button
-                key={p}
-                type="button"
-                onClick={() => {
-                  setPeriod(p);
-                  setPage(1);
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                  period === p
-                    ? "bg-primary text-white"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
-                }`}
-              >
-                {t(`period.${p}`)}
-              </button>
-            ))}
-          </div>
-        </div>
+      <CardDashBoard className="space-y-4 p-4">
+        <SectionHeader title={t("filters.source")} />
+        <SegmentedControl
+          label={t("filters.source")}
+          value={sourceFilter}
+          onChange={(source) => {
+            setSourceFilter(source);
+            setPage(1);
+          }}
+          size="sm"
+          options={SOURCE_FILTERS.map((source) => ({
+            value: source,
+            label: t(`source.${source}`),
+          }))}
+        />
+        <SectionHeader title={t("filters.subscriptionStatus")} />
+        <SegmentedControl
+          label={t("filters.subscriptionStatus")}
+          value={subscriptionStatusFilter}
+          onChange={(subStatus) => {
+            setSubscriptionStatusFilter(subStatus);
+            setPage(1);
+          }}
+          size="sm"
+          options={SUBSCRIPTION_STATUS_FILTERS.map((subStatus) => ({
+            value: subStatus,
+            label: t(`subscriptionStatus.${subStatus}`),
+          }))}
+        />
+        <SectionHeader title={t("filters.status")} />
+        <SegmentedControl
+          label={t("filters.status")}
+          value={statusFilter}
+          onChange={(status) => {
+            setStatusFilter(status);
+            setPage(1);
+          }}
+          size="sm"
+          options={STATUS_FILTERS.map((status) => ({
+            value: status,
+            label: t(`filters.${status}`),
+          }))}
+        />
+        <SectionHeader title={t("filters.period")} />
+        <SegmentedControl
+          label={t("filters.period")}
+          value={period}
+          onChange={(p) => {
+            setPeriod(p);
+            setPage(1);
+          }}
+          size="sm"
+          options={PERIODS.map((p) => ({
+            value: p,
+            label: t(`period.${p}`),
+          }))}
+        />
       </CardDashBoard>
 
       <CardDashBoard className="p-4">

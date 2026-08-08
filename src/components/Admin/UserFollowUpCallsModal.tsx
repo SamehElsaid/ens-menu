@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { IoArrowBack, IoCloseOutline } from "react-icons/io5";
-import { FaSpinner } from "react-icons/fa";
+import { IoArrowBack } from "react-icons/io5";
+import { FiAlertTriangle } from "react-icons/fi";
+import { Button, ConfirmDialog, LoadingBlock, Modal } from "@/components/ui";
 import FollowUpAgentCallsSummaryList from "@/components/Admin/FollowUpAgentCallsSummaryList";
 import FollowUpCallsList from "@/components/Admin/FollowUpCallsList";
 import LogFollowUpCallModal from "@/components/Admin/LogFollowUpCallModal";
-import ConfirmationModal from "@/components/Custom/ConfirmationModal";
 import CallNowPhoneModal from "@/components/Admin/CallNowPhoneModal";
 import PhoneDisplay from "@/components/Global/PhoneDisplay";
 import {
@@ -160,132 +160,98 @@ export default function UserFollowUpCallsModal({
 
   return (
     <>
-      <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-        onClick={onClose}
-        role="presentation"
+      <Modal
+        open={open}
+        onClose={onClose}
+        title={modalTitle}
+        size="lg"
+        closeLabel={t("close")}
+        footer={
+          <Button variant="secondary" fullWidth onClick={onClose}>
+            {t("close")}
+          </Button>
+        }
       >
-        <div
-          role="dialog"
-          aria-modal
-          aria-labelledby="follow-up-calls-title"
-          dir={textDir}
-          className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-800 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-6 py-4 dark:border-slate-800">
-            <div className="min-w-0">
-              {showingAgentDetail && (
-                <button
-                  type="button"
-                  onClick={() => setSelectedCall(null)}
-                  className="mb-2 inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-primary dark:text-slate-400"
-                >
-                  <IoArrowBack
-                    className={locale === "ar" ? "rotate-180" : undefined}
-                  />
-                  {t("backToCallsList")}
-                </button>
-              )}
-              <h2
-                id="follow-up-calls-title"
-                className="text-lg font-semibold text-slate-900 dark:text-slate-100"
+        <div dir={textDir} className="flex flex-col gap-4">
+          <div className="flex flex-col items-start gap-1">
+            {showingAgentDetail && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedCall(null)}
+                startIcon={<IoArrowBack className="rtl:rotate-180" />}
+                className="-ms-3 mb-1"
               >
-                {modalTitle}
-              </h2>
-              {subtitle && (
-                <p className="mt-1 text-sm font-medium text-slate-800 dark:text-slate-200">
-                  {subtitle}
-                </p>
-              )}
-              {showingAgentDetail && selectedCallPhone ? (
-                <div className="mt-1 flex flex-wrap items-center gap-2">
-                  <PhoneDisplay
-                    value={selectedCallPhone}
-                    copyOnClick
-                    className="text-sm text-primary hover:underline"
-                    title={t("copyPhone")}
-                    onCopied={() => toast.success(t("phoneCopied"))}
-                    onCopyFailed={() => toast.error(t("copyFailed"))}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setCallNowOpen(true)}
-                    className="text-xs font-medium text-slate-600 underline hover:text-primary dark:text-slate-300"
-                  >
-                    {t("callNow")}
-                  </button>
-                </div>
-              ) : showingAgentDetail ? (
-                <p className="mt-0.5 text-sm text-slate-400 dark:text-slate-500">
-                  {t("noPhone")}
-                </p>
-              ) : !isAgentView && phoneNumber ? (
-                <PhoneDisplay
-                  value={phoneNumber}
-                  className="mt-0.5 text-sm text-slate-500 dark:text-slate-400"
-                />
-              ) : !isAgentView ? (
-                <p className="mt-0.5 text-sm text-slate-400 dark:text-slate-500">
-                  {t("noPhone")}
-                </p>
-              ) : null}
-              {!loading && !showingAgentDetail && (
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  {t("callsCount", { count: calls.length })}
-                </p>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="shrink-0 rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
-              aria-label={t("close")}
-            >
-              <IoCloseOutline className="text-xl" />
-            </button>
-          </div>
+                {t("backToCallsList")}
+              </Button>
+            )}
 
-          <div className="flex-1 overflow-y-auto px-6 py-4">
-            {loading ? (
-              <div className="flex justify-center py-12">
-                <FaSpinner className="animate-spin text-2xl text-primary" />
+            {subtitle && (
+              <p className="text-sm font-medium text-fg">{subtitle}</p>
+            )}
+
+            {showingAgentDetail && selectedCallPhone ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <PhoneDisplay
+                  value={selectedCallPhone}
+                  copyOnClick
+                  className="text-sm text-brand hover:underline"
+                  title={t("copyPhone")}
+                  onCopied={() => toast.success(t("phoneCopied"))}
+                  onCopyFailed={() => toast.error(t("copyFailed"))}
+                />
+                <Button
+                  variant="link"
+                  size="sm"
+                  onClick={() => setCallNowOpen(true)}
+                >
+                  {t("callNow")}
+                </Button>
               </div>
-            ) : isAgentView && !selectedCall ? (
-              <FollowUpAgentCallsSummaryList
-                calls={calls}
-                onSelect={setSelectedCall}
+            ) : showingAgentDetail ? (
+              <p className="text-sm text-fg-subtle">{t("noPhone")}</p>
+            ) : !isAgentView && phoneNumber ? (
+              <PhoneDisplay
+                value={phoneNumber}
+                className="text-sm text-fg-muted"
               />
-            ) : isAgentView && selectedCall ? (
-              <FollowUpCallsList
-                calls={[selectedCall]}
-                detailed
-                showCustomer
-                onDelete={(call) => setDeleteTarget(call)}
-                onEdit={(call) => setActiveLogModal({ kind: "edit", call })}
-              />
-            ) : (
-              <FollowUpCallsList
-                calls={calls}
-                detailed
-                showCustomer={showCustomer}
-                onDelete={(call) => setDeleteTarget(call)}
-                onEdit={(call) => setActiveLogModal({ kind: "edit", call })}
-              />
+            ) : !isAgentView ? (
+              <p className="text-sm text-fg-subtle">{t("noPhone")}</p>
+            ) : null}
+
+            {!loading && !showingAgentDetail && (
+              <p className="text-xs text-fg-muted">
+                {t("callsCount", { count: calls.length })}
+              </p>
             )}
           </div>
 
-          <div className="border-t border-slate-100 px-6 py-4 dark:border-slate-800">
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 dark:border-slate-700 dark:text-slate-300"
-            >
-              {t("close")}
-            </button>
-          </div>
+          {loading ? (
+            <LoadingBlock />
+          ) : isAgentView && !selectedCall ? (
+            <FollowUpAgentCallsSummaryList
+              calls={calls}
+              onSelect={setSelectedCall}
+            />
+          ) : isAgentView && selectedCall ? (
+            <FollowUpCallsList
+              calls={[selectedCall]}
+              detailed
+              showCustomer
+              onDelete={(call) => setDeleteTarget(call)}
+              onEdit={(call) => setActiveLogModal({ kind: "edit", call })}
+            />
+          ) : (
+            <FollowUpCallsList
+              calls={calls}
+              detailed
+              showCustomer={showCustomer}
+              onDelete={(call) => setDeleteTarget(call)}
+              onEdit={(call) => setActiveLogModal({ kind: "edit", call })}
+            />
+          )}
         </div>
-      </div>
+      </Modal>
 
       {logModalContext && activeLogModal && (
         <LogFollowUpCallModal
@@ -301,16 +267,17 @@ export default function UserFollowUpCallsModal({
         />
       )}
 
-      <ConfirmationModal
-        isOpen={Boolean(deleteTarget)}
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
         onClose={() => !deleting && setDeleteTarget(null)}
         onConfirm={() => void handleDelete()}
         title={t("deleteCallTitle")}
-        message={t("deleteCallMessage")}
-        confirmText={t("deleteCall")}
-        cancelText={t("cancel")}
-        isLoading={deleting}
-        loadingText={t("deletingCall")}
+        description={t("deleteCallMessage")}
+        confirmLabel={t("deleteCall")}
+        cancelLabel={t("cancel")}
+        loading={deleting}
+        tone="danger"
+        icon={<FiAlertTriangle />}
       />
 
       {selectedCallPhone && (

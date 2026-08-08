@@ -1,7 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { IoChevronBack, IoChevronForward } from "react-icons/io5";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { Button } from "@/components/ui";
+import { cn } from "@/lib/cn";
 
 interface MobileListPaginationProps {
   page: number;
@@ -22,36 +24,41 @@ export default function MobileListPagination({
   if (totalPages <= 1) return null;
 
   return (
-    <div
-      className="dashboard-mobile-pagination mt-4 flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-800/80"
+    <nav
+      aria-label={t("pagination")}
+      className={cn(
+        "dashboard-mobile-pagination mt-4 flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-3 py-3",
+      )}
       dir={isRTL ? "rtl" : "ltr"}
     >
-      <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+      <span className="text-sm font-medium text-fg-muted">
         {t("page")} {page} {t("pageOf")} {totalPages}
       </span>
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => onPageChange(page - 1)}
-          disabled={page <= 1}
+        <Button
+          variant="secondary"
+          size="sm"
+          iconOnly
           aria-label={t("prev")}
-          className="inline-flex size-11 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition-colors active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
+          disabled={page <= 1}
+          onClick={() => onPageChange(page - 1)}
         >
-          <IoChevronBack className="text-xl rtl:rotate-180" />
-        </button>
-        <span className="inline-flex min-w-10 items-center justify-center rounded-xl bg-primary/10 px-3 py-2 text-sm font-bold text-primary dark:bg-primary/20">
+          <FiChevronLeft className="size-4 rtl:rotate-180" />
+        </Button>
+        <span className="inline-flex min-w-10 items-center justify-center rounded-lg bg-brand-soft px-3 py-1.5 text-sm font-semibold text-brand-soft-fg">
           {page}
         </span>
-        <button
-          type="button"
-          onClick={() => onPageChange(page + 1)}
-          disabled={page >= totalPages}
+        <Button
+          variant="secondary"
+          size="sm"
+          iconOnly
           aria-label={t("next")}
-          className="inline-flex size-11 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition-colors active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
+          disabled={page >= totalPages}
+          onClick={() => onPageChange(page + 1)}
         >
-          <IoChevronForward className="text-xl rtl:rotate-180" />
-        </button>
+          <FiChevronRight className="size-4 rtl:rotate-180" />
+        </Button>
       </div>
-    </div>
+    </nav>
   );
 }

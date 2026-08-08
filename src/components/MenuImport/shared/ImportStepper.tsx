@@ -2,7 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import type { ImportStep } from "@/types/menuImport";
-import { IoCheckmarkCircle, IoEllipseOutline } from "react-icons/io5";
+import { IoCheckmarkCircle, IoEllipseOutline, IoRadioButtonOn } from "react-icons/io5";
+import { cn } from "@/lib/cn";
 
 const STEPS: ImportStep[] = ["upload", "processing", "review"];
 
@@ -20,40 +21,55 @@ export default function ImportStepper({ currentStep }: ImportStepperProps) {
   const labels = [t("stepUpload"), t("stepProcessing"), t("stepReview")];
 
   return (
-    <ol className="flex items-center justify-center gap-2 sm:gap-4 w-full max-w-xl mx-auto">
+    <ol className="mx-auto flex w-full max-w-xl items-center justify-center gap-2 sm:gap-4">
       {STEPS.map((step, index) => {
         const isComplete = index < stepIndex;
         const isCurrent = index === stepIndex;
 
         return (
-          <li key={step} className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-            <div className="flex items-center gap-2 min-w-0">
+          <li
+            key={step}
+            aria-current={isCurrent ? "step" : undefined}
+            className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3"
+          >
+            <div className="flex min-w-0 items-center gap-2">
+              {/* Completed steps carry a checkmark, so state is never colour alone. */}
               {isComplete ? (
-                <IoCheckmarkCircle className="text-emerald-500 text-xl shrink-0" />
+                <IoCheckmarkCircle
+                  className="shrink-0 text-xl text-success"
+                  aria-hidden
+                />
+              ) : isCurrent ? (
+                <IoRadioButtonOn
+                  className="shrink-0 text-xl text-brand"
+                  aria-hidden
+                />
               ) : (
                 <IoEllipseOutline
-                  className={`text-xl shrink-0 ${
-                    isCurrent ? "text-primary" : "text-slate-300 dark:text-slate-600"
-                  }`}
+                  className="shrink-0 text-xl text-fg-subtle"
+                  aria-hidden
                 />
               )}
               <span
-                className={`text-xs sm:text-sm font-medium truncate ${
+                className={cn(
+                  "truncate text-xs font-medium sm:text-sm",
                   isCurrent
-                    ? "text-primary"
+                    ? "text-brand"
                     : isComplete
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : "text-slate-400 dark:text-slate-500"
-                }`}
+                      ? "text-success"
+                      : "text-fg-subtle",
+                )}
               >
                 {labels[index]}
               </span>
             </div>
             {index < STEPS.length - 1 && (
               <div
-                className={`hidden sm:block h-0.5 flex-1 rounded-full ${
-                  index < stepIndex ? "bg-emerald-400" : "bg-slate-200 dark:bg-slate-700"
-                }`}
+                className={cn(
+                  "hidden h-0.5 flex-1 rounded-full sm:block",
+                  index < stepIndex ? "bg-success" : "bg-line-strong",
+                )}
+                aria-hidden
               />
             )}
           </li>

@@ -8,7 +8,6 @@ import { useAppSelector } from "@/store/hooks";
 import {
   HiOutlineCloudUpload,
   HiOutlineUser,
-  HiOutlineMail,
   HiOutlinePhone,
   HiOutlineGlobeAlt,
   HiOutlineLocationMarker,
@@ -23,6 +22,7 @@ import {
   menuDashboardPath,
 } from "@/lib/menuDashboardPath";
 import CustomInput from "@/components/Custom/CustomInput";
+import { Button, ButtonLink, Field, Input, ReadonlyValue } from "@/components/ui";
 import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
 import { _resizeImage } from "@/shared/_shared";
 import { useAppDispatch } from "@/store/hooks";
@@ -395,21 +395,12 @@ export default function PersonalProfile({
         </div>
       )}
 
-      <header
+      <PageTitleWithHelp
         id="onboarding-personal-header"
-        className={
-          isRTL ? "text-right space-y-1 mb-8" : "text-left space-y-1 mb-8"
-        }
-      >
-        <PageTitleWithHelp>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100">
-            {t("editPageTitle")}
-          </h1>
-        </PageTitleWithHelp>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          {t("editSubtitle")}
-        </p>
-      </header>
+        className={isRTL ? "text-right mb-8" : "text-left mb-8"}
+        title={t("editPageTitle")}
+        description={t("editSubtitle")}
+      />
 
       <div className="space-y-8">
         <section
@@ -526,43 +517,22 @@ export default function PersonalProfile({
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
-                {t("fullName")} *
-              </label>
-              <CustomInput
+            <Field label={t("fullName")} required className="sm:col-span-2">
+              <Input
                 type="text"
                 id="fullName"
                 value={name}
-                onChange={(e) =>
-                  setName(
-                    (e as React.ChangeEvent<HTMLInputElement>).target.value,
-                  )
-                }
+                onChange={(e) => setName(e.target.value)}
                 placeholder={t("fullName")}
-                icon={<HiOutlineUser className="text-lg" />}
+                startIcon={<HiOutlineUser className="size-4.5" />}
               />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
-                {t("email")}
-              </label>
-              <CustomInput
-                type="email"
-                id="email"
-                value={profile?.email ?? ""}
-                disabled
-                placeholder={t("email")}
-                icon={<HiOutlineMail className="text-lg" />}
-              />
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {t("emailCannotChange")}
-              </p>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
-                {t("phone")}
-              </label>
+            </Field>
+            <Field label={t("email")} hint={t("emailCannotChange")}>
+              <ReadonlyValue>
+                {profile?.email ?? ""}
+              </ReadonlyValue>
+            </Field>
+            <Field label={t("phone")}>
               <CustomInput
                 type="tel"
                 id="phone"
@@ -572,11 +542,8 @@ export default function PersonalProfile({
                 placeholder={t("phone")}
                 icon={<HiOutlinePhone className="text-lg" />}
               />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
-                {t("dateOfBirth")}
-              </label>
+            </Field>
+            <Field label={t("dateOfBirth")}>
               <CustomInput
                 type="date"
                 id="dateOfBirth"
@@ -585,45 +552,28 @@ export default function PersonalProfile({
                 onChange={(e) => setDateOfBirth((e as unknown as Date) ?? null)}
                 icon={<HiOutlineCalendar className="text-lg" />}
               />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
-                {t("country")}
-              </label>
-              <CustomInput
+            </Field>
+            <Field label={t("country")}>
+              <Input
                 type="text"
                 id="country"
                 value={country}
-                onChange={(e) =>
-                  setCountry(
-                    (e as React.ChangeEvent<HTMLInputElement>).target.value,
-                  )
-                }
+                onChange={(e) => setCountry(e.target.value)}
                 placeholder={t("countryPlaceholder")}
-                icon={<HiOutlineGlobeAlt className="text-lg" />}
+                startIcon={<HiOutlineGlobeAlt className="size-4.5" />}
               />
-            </div>
-            <div className="sm:col-span-2">
-              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
-                {t("address")}
-              </label>
-              <CustomInput
+            </Field>
+            <Field label={t("address")} className="sm:col-span-2">
+              <Input
                 type="text"
                 id="address"
                 value={address}
-                onChange={(e) =>
-                  setAddress(
-                    (e as React.ChangeEvent<HTMLInputElement>).target.value,
-                  )
-                }
+                onChange={(e) => setAddress(e.target.value)}
                 placeholder={t("addressPlaceholder")}
-                icon={<HiOutlineLocationMarker className="text-lg" />}
+                startIcon={<HiOutlineLocationMarker className="size-4.5" />}
               />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
-                {t("gender")}
-              </label>
+            </Field>
+            <Field label={t("gender")}>
               <CustomInput
                 type="select"
                 id="gender"
@@ -635,16 +585,18 @@ export default function PersonalProfile({
                 options={genderOptions}
                 icon={<HiOutlineUser className="text-lg" />}
               />
-            </div>
+            </Field>
           </div>
-          <button
+          <Button
             type="button"
+            variant="primary"
             onClick={handleSaveChanges}
             disabled={saveLoading}
-            className="mt-5 px-5 py-2.5 rounded-xl bg-primary text-white font-medium text-sm hover:bg-primary/90 dark:hover:bg-primary/80 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+            loading={saveLoading}
+            className="mt-5"
           >
             {saveLoading ? t("saving") : t("saveChanges")}
-          </button>
+          </Button>
         </section>
 
         <section
@@ -659,91 +611,80 @@ export default function PersonalProfile({
             className="max-w-2xl"
           >
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
-                  {t("currentPassword")} *
-                </label>
+              <Field
+                label={t("currentPassword")}
+                required
+                className="sm:col-span-2"
+                error={passwordErrors.currentPassword?.message}
+              >
                 <Controller
                   control={controlPassword}
                   name="currentPassword"
                   render={({ field: { value, onChange } }) => (
-                    <CustomInput
+                    <Input
                       type="password"
                       id="currentPassword"
                       value={value}
-                      onChange={(e) =>
-                        onChange(
-                          (e as React.ChangeEvent<HTMLInputElement>).target
-                            .value,
-                        )
-                      }
+                      onChange={(e) => onChange(e.target.value)}
                       placeholder={t("currentPassword")}
-                      error={passwordErrors.currentPassword?.message}
+                      autoComplete="current-password"
                     />
                   )}
                 />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
-                  {t("newPassword")} *
-                </label>
+              </Field>
+              <Field
+                label={t("newPassword")}
+                required
+                hint={t("atLeast8Chars")}
+                error={passwordErrors.newPassword?.message}
+              >
                 <Controller
                   control={controlPassword}
                   name="newPassword"
                   render={({ field: { value, onChange } }) => (
-                    <CustomInput
+                    <Input
                       type="password"
                       id="newPassword"
                       value={value}
-                      onChange={(e) =>
-                        onChange(
-                          (e as React.ChangeEvent<HTMLInputElement>).target
-                            .value,
-                        )
-                      }
+                      onChange={(e) => onChange(e.target.value)}
                       placeholder={t("newPassword")}
-                      error={passwordErrors.newPassword?.message}
+                      autoComplete="new-password"
                     />
                   )}
                 />
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  {t("atLeast8Chars")}
-                </p>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
-                  {t("confirmNewPassword")} *
-                </label>
+              </Field>
+              <Field
+                label={t("confirmNewPassword")}
+                required
+                error={passwordErrors.confirmNewPassword?.message}
+              >
                 <Controller
                   control={controlPassword}
                   name="confirmNewPassword"
                   render={({ field: { value, onChange } }) => (
-                    <CustomInput
+                    <Input
                       type="password"
                       id="confirmNewPassword"
                       value={value}
-                      onChange={(e) =>
-                        onChange(
-                          (e as React.ChangeEvent<HTMLInputElement>).target
-                            .value,
-                        )
-                      }
+                      onChange={(e) => onChange(e.target.value)}
                       placeholder={t("confirmNewPassword")}
-                      error={passwordErrors.confirmNewPassword?.message}
+                      autoComplete="new-password"
                     />
                   )}
                 />
-              </div>
+              </Field>
             </div>
-            <button
+            <Button
               type="submit"
+              variant="primary"
               disabled={changePasswordLoading}
-              className="mt-5 px-5 py-2.5 rounded-xl bg-amber-500 dark:bg-amber-600 text-white font-medium text-sm hover:bg-amber-600 dark:hover:bg-amber-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+              loading={changePasswordLoading}
+              className="mt-5 bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700"
             >
               {changePasswordLoading
                 ? t("changingPassword")
                 : t("changePasswordButton")}
-            </button>
+            </Button>
           </form>
         </section>
 
@@ -762,16 +703,18 @@ export default function PersonalProfile({
               className="mb-5"
             />
             {menuRef && (
-              <LinkTo
+              <ButtonLink
                 id="onboarding-personal-subscription-link"
                 href={menuDashboardPath(menu, "subscription")}
-                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary/90 dark:hover:bg-primary/80 transition-colors shadow-sm"
+                className="w-full sm:w-auto"
+                endIcon={
+                  <HiOutlineArrowRight
+                    className={`text-lg ${isRTL ? "rotate-180" : ""}`}
+                  />
+                }
               >
                 {t("manageSubscriptionAndPricing")}
-                <HiOutlineArrowRight
-                  className={`text-lg ${isRTL ? "rotate-180" : ""}`}
-                />
-              </LinkTo>
+              </ButtonLink>
             )}
           </section>
         )}

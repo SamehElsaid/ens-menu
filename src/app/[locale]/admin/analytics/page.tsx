@@ -15,6 +15,13 @@ import {
 import { FaChartLine, FaCreditCard } from "react-icons/fa";
 import LinkTo from "@/components/Global/LinkTo";
 import {
+  Button,
+  PageHeader,
+  SegmentedControl,
+  Skeleton,
+  SkeletonRegion,
+} from "@/components/ui";
+import {
   AdminBarChart,
   AdminMetricsGrid,
   AdminMonthGrid,
@@ -44,6 +51,7 @@ const PERIODS: AdminAnalyticsPeriod[] = ["7d", "30d", "90d"];
 export default function AdminAnalyticsPage() {
   const locale = useLocale();
   const t = useTranslations("adminAnalytics");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const textDir = locale === "ar" ? "rtl" : "ltr";
 
@@ -254,49 +262,38 @@ export default function AdminAnalyticsPage() {
 
   return (
     <div className="space-y-6 pb-8" dir={textDir}>
-      <div>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className={`flex items-center gap-2 px-4 py-2 mb-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${textDir === "rtl" ? "flex-row-reverse" : ""}`}
-        >
-          <IoArrowBack className="text-lg" />
-          <span className="font-medium">{t("back")}</span>
-        </button>
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-          {t("title")}
-        </h1>
-        <p className="text-slate-500 dark:text-slate-400">{t("subtitle")}</p>
-      </div>
-
-      <div
-        className={`flex flex-wrap gap-2 ${textDir === "rtl" ? "flex-row-reverse" : ""}`}
-      >
-        {PERIODS.map((p) => (
-          <button
-            key={p}
-            type="button"
-            onClick={() => setPeriod(p)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-              period === p
-                ? "bg-primary text-white"
-                : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-            }`}
+      <PageHeader
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          <Button
+            variant="secondary"
+            startIcon={<IoArrowBack className="rtl:rotate-180" />}
+            onClick={() => router.back()}
           >
-            {t(`period.${p}`)}
-          </button>
-        ))}
-      </div>
+            {t("back")}
+          </Button>
+        }
+      />
+
+      <SegmentedControl
+        label={t("title")}
+        value={period}
+        onChange={setPeriod}
+        options={PERIODS.map((p) => ({
+          value: p,
+          label: t(`period.${p}`),
+        }))}
+      />
 
       {loading ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-pulse">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="h-64 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
-            />
-          ))}
-        </div>
+        <SkeletonRegion label={tCommon("loading")}>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-64 w-full rounded-xl" />
+            ))}
+          </div>
+        </SkeletonRegion>
       ) : !analytics ? null : (
         <>
           {analytics._isDemoData && (

@@ -7,6 +7,7 @@ import { ColDef } from "ag-grid-community";
 import { IoArrowBack } from "react-icons/io5";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import DataTable from "@/components/Custom/DataTable";
+import { Button, PageHeader } from "@/components/ui";
 import { axiosGet } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import { formatAdminDate } from "@/lib/fetchAdminAnalytics";
@@ -224,26 +225,19 @@ export default function AdminActivityLogPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1">
-          <div
-            className={`flex items-center gap-4 mb-4 ${isRTL ? "flex-row-reverse" : ""}`}
+      <PageHeader
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          <Button
+            variant="secondary"
+            startIcon={<IoArrowBack className="rtl:rotate-180" />}
+            onClick={() => router.push("/admin/administrators")}
           >
-            <button
-              type="button"
-              onClick={() => router.push("/admin/administrators")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${isRTL ? "flex-row-reverse" : ""}`}
-            >
-              <IoArrowBack className="text-lg" />
-              <span className="font-medium">{t("back")}</span>
-            </button>
-          </div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-            {t("title")}
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400">{t("subtitle")}</p>
-        </div>
-      </div>
+            {t("back")}
+          </Button>
+        }
+      />
 
       <CardDashBoard>
         <div

@@ -22,24 +22,24 @@ import { shouldShowAiImportOnboarding } from "@/lib/aiImportOnboarding";
 import { normalizeMenuFromApi } from "@/lib/normalizeMenuFromApi";
 import { Subscription, SubscriptionResponse } from "@/types/Subscription";
 import {
-  IoRestaurant,
   IoAddCircleOutline,
-  IoGlobeOutline,
-  IoEllipseSharp,
   IoStorefrontOutline,
-  IoSettingsOutline,
-  IoEyeOutline,
-  IoOpenOutline,
   IoTrashOutline,
   IoWarningOutline,
-  IoCloseOutline,
   IoRocketOutline,
-  IoPauseOutline,
-  IoPlayOutline,
-  IoCalendarOutline,
   IoGitNetworkOutline,
 } from "react-icons/io5";
-import LoadImage from "@/components/ImageLoad";
+import {
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  Field,
+  Input,
+  LoadingBlock,
+  Modal,
+  PageHeader,
+  buttonClasses,
+} from "@/components/ui";
 import MenusMobileList from "@/components/Dashboard/mobile/MenusMobileList";
 import MenuDashboardCard from "@/components/Dashboard/MenuDashboardCard";
 import MenuDeliveryGroupPanel from "@/components/Dashboard/MenuDeliveryGroupPanel";
@@ -74,11 +74,7 @@ export default function DashboardPage() {
 }
 
 function DashboardRootLoader() {
-  return (
-    <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4 sm:min-h-[60vh]">
-      <div className="h-16 w-16 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
-    </div>
-  );
+  return <LoadingBlock size="xl" className="min-h-[40vh] sm:min-h-[60vh]" />;
 }
 
 function OwnerMenusPage() {
@@ -455,10 +451,11 @@ function OwnerMenusPage() {
   // Loading State
   if (loading) {
     return (
-      <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4 sm:min-h-[60vh]">
-        <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-        <p className="text-slate-500 font-medium">{t("loading")}</p>
-      </div>
+      <LoadingBlock
+        size="xl"
+        label={t("loading")}
+        className="min-h-[40vh] sm:min-h-[60vh]"
+      />
     );
   }
 
@@ -466,27 +463,26 @@ function OwnerMenusPage() {
   if (menus.length === 0) {
     return (
       <>
-        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 ">
-          <div className="w-32 h-32 bg-primary/5 rounded-full flex items-center justify-center">
-            <IoStorefrontOutline className="text-primary text-6xl" />
-          </div>
-          <div className="text-center max-w-md">
-            <PageTitleWithHelp className="justify-center mb-2">
-              <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
-                {t("noMenus")}
-              </h2>
+        <EmptyState
+          icon={<IoStorefrontOutline />}
+          title={
+            <PageTitleWithHelp className="flex justify-center">
+              {t("noMenus")}
             </PageTitleWithHelp>
-            <p className="text-slate-500 mb-8">{t("noMenusDescription")}</p>
-            <button
+          }
+          description={t("noMenusDescription")}
+          className="min-h-[60vh]"
+          action={
+            <Button
               id="onboarding-create-menu"
+              size="lg"
               onClick={handleCreateClick}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-linear-to-r from-primary to-primary/80 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+              startIcon={<IoAddCircleOutline className="size-5" />}
             >
-              <IoAddCircleOutline className="text-2xl" />
               {t("createFirstMenu")}
-            </button>
-          </div>
-        </div>
+            </Button>
+          }
+        />
 
         {showCreateModal && (
           <CreateMenuModal
@@ -522,39 +518,32 @@ function OwnerMenusPage() {
   // Menus List
   return (
     <>
-      {/* Page Header */}
-      <div className="menus-page-header mb-5 flex flex-col gap-3 text-start sm:mb-8 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <div className="min-w-0">
-          <PageTitleWithHelp>
-            <h1 className="text-xl font-bold text-slate-800 sm:text-3xl dark:text-slate-100">
-              {t("title")}
-            </h1>
-          </PageTitleWithHelp>
-          <p className="mt-0.5 text-sm text-slate-500 sm:mt-1 dark:text-slate-400">
-            {t("subtitle")}
-          </p>
-        </div>
-        <div className="flex w-full max-w-[320px] flex-col gap-2 sm:w-auto sm:flex-row sm:max-w-none">
-          {showCreateGroupButton && (
-            <button
-              type="button"
-              onClick={handleCreateGroupClick}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-teal-600/70 bg-linear-to-r from-teal-50 to-emerald-50 px-4 py-2.5 text-sm font-bold text-teal-900 shadow-sm transition hover:border-teal-600 hover:from-teal-100 hover:to-emerald-100 active:scale-[0.98] sm:w-auto sm:px-5 sm:py-3 sm:text-base dark:border-teal-500/50 dark:from-teal-950/50 dark:to-emerald-950/30 dark:text-teal-100 dark:hover:from-teal-900/50"
-            >
-              <IoGitNetworkOutline className="text-lg sm:text-xl" />
-              {t("createGroup")}
-            </button>
-          )}
-          <button
-            id="onboarding-create-menu"
-            onClick={handleCreateClick}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-primary to-primary/80 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg active:scale-[0.98] sm:w-auto sm:px-6 sm:py-3 sm:text-base"
-          >
-            <IoAddCircleOutline className="text-lg sm:text-xl" />
-            {t("createMenu")}
-          </button>
-        </div>
-      </div>
+      <PageTitleWithHelp className="menus-page-header mb-5 sm:mb-8">
+        <PageHeader
+          title={t("title")}
+          description={t("subtitle")}
+          actions={
+            <>
+              {showCreateGroupButton && (
+                <Button
+                  variant="secondary"
+                  onClick={handleCreateGroupClick}
+                  startIcon={<IoGitNetworkOutline className="size-4.5" />}
+                >
+                  {t("createGroup")}
+                </Button>
+              )}
+              <Button
+                id="onboarding-create-menu"
+                onClick={handleCreateClick}
+                startIcon={<IoAddCircleOutline className="size-4.5" />}
+              >
+                {t("createMenu")}
+              </Button>
+            </>
+          }
+        />
+      </PageTitleWithHelp>
 
       <MenusMobileList
         menus={menus}
@@ -729,148 +718,91 @@ function OwnerMenusPage() {
 
       {/* Switch Menu (Free limit) Modal */}
       {switchMenuTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-slate-200/80 dark:bg-slate-900 dark:ring-slate-700/50">
-            {/* Header with close */}
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/40">
-                  <IoWarningOutline className="text-amber-600 dark:text-amber-400 text-xl" />
-                </div>
-                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
-                  {t("switchMenuLimitTitle")}
-                </h3>
-              </div>
-              <button
-                onClick={() => !isSwitchingMenu && setSwitchMenuTarget(null)}
-                disabled={isSwitchingMenu}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300 disabled:opacity-50"
-                aria-label={t("close")}
-              >
-                <IoCloseOutline className="text-xl" />
-              </button>
-            </div>
-
-            {/* Body */}
-            <div className="px-6 py-5">
-              <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                {t("switchMenuLimitMessage")}
-              </p>
-              {switchMenuTarget && (
-                <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 dark:border-slate-700 dark:bg-slate-800/50">
-                  <p className="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                    {t("selectedMenu")}
-                  </p>
-                  <p className="mt-0.5 font-semibold text-slate-800 dark:text-slate-200">
-                    {getMenuName(switchMenuTarget)}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Actions */}
-            <div className="flex flex-col-reverse gap-3 border-t border-slate-100 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/30 sm:flex-row sm:justify-end">
-              <button
+        <Modal
+          open
+          onClose={() => setSwitchMenuTarget(null)}
+          dismissible={!isSwitchingMenu}
+          closeLabel={t("close")}
+          size="sm"
+          icon={<IoWarningOutline className="size-5" />}
+          iconTone="warning"
+          title={t("switchMenuLimitTitle")}
+          footer={
+            <>
+              <Button
+                variant="secondary"
                 onClick={() => setSwitchMenuTarget(null)}
                 disabled={isSwitchingMenu}
-                className="order-2 sm:order-1 w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 sm:w-auto"
               >
                 {t("cancel")}
-              </button>
+              </Button>
               <LinkTo
                 href={menuDashboardPath(switchMenuTarget, "personal")}
-                className="order-1 flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-amber-500 to-orange-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-amber-600 hover:to-orange-600 hover:shadow-lg sm:order-2 sm:w-auto"
+                className={buttonClasses({ variant: "secondary" })}
               >
-                <IoRocketOutline className="text-lg" />
+                <IoRocketOutline className="size-4.5" aria-hidden />
                 {t("upgradePlan")}
               </LinkTo>
-              <button
+              <Button
                 onClick={handleConfirmSwitchMenu}
-                disabled={isSwitchingMenu}
-                className="order-0 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-primary/90 disabled:opacity-60 sm:order-3 sm:w-auto"
+                loading={isSwitchingMenu}
               >
-                {isSwitchingMenu ? (
-                  <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    <span>{t("switching")}</span>
-                  </>
-                ) : (
-                  t("switchMenuConfirm")
-                )}
-              </button>
-            </div>
+                {isSwitchingMenu ? t("switching") : t("switchMenuConfirm")}
+              </Button>
+            </>
+          }
+        >
+          <p className="text-sm leading-relaxed text-fg-muted">
+            {t("switchMenuLimitMessage")}
+          </p>
+          <div className="mt-4 rounded-xl border border-line bg-surface-2 px-4 py-3">
+            <p className="text-xs font-medium uppercase tracking-wide text-fg-subtle">
+              {t("selectedMenu")}
+            </p>
+            <p className="mt-0.5 font-semibold text-fg">
+              {getMenuName(switchMenuTarget)}
+            </p>
           </div>
-        </div>
+        </Modal>
       )}
 
       {/* Delete Confirmation Modal */}
       {deleteTarget && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex flex-col items-center text-center gap-4">
-              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center">
-                <IoTrashOutline className="text-red-500 text-3xl" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">
-                  {t("deleteConfirmTitle")}
-                </h3>
-                <p className="text-slate-500 text-sm mb-1 dark:text-slate-300">
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">
-                    {getMenuName(deleteTarget)}
-                  </span>
-                </p>
-                <p className="text-slate-500 text-sm dark:text-slate-300">
-                  {t("deleteConfirm")}
-                </p>
-                <p className="text-sm font-medium text-slate-700 mt-3 mb-1 dark:text-slate-300">
-                  {t("typeMenuNameToConfirm")}
-                </p>
-                <input
-                  id="delete-confirm-input"
-                  type="text"
-                  value={deleteConfirmText}
-                  onChange={(e) => setDeleteConfirmText(e.target.value)}
-                  placeholder={getMenuName(deleteTarget)}
-                  className="w-full px-4 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-red-300 focus:ring-2 focus:ring-red-100 focus:outline-none"
-                  dir={locale === "ar" ? "rtl" : "ltr"}
-                />
-              </div>
-              <div className="flex gap-3 w-full mt-2">
-                <button
-                  onClick={() => {
-                    setDeleteTarget(null);
-                    setDeleteConfirmText("");
-                  }}
-                  disabled={isDeleting}
-                  className="flex-1 px-4 py-2.5 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 rounded-xl font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all disabled:opacity-50"
-                >
-                  {t("cancel")}
-                </button>
-                <button
-                  onClick={handleDeleteMenu}
-                  disabled={
-                    isDeleting ||
-                    deleteConfirmText.trim() !== getMenuName(deleteTarget)
-                  }
-                  className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl font-semibold hover:bg-red-600 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {isDeleting ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin dark:border-slate-00"></div>
-                      {t("deleting")}
-                    </>
-                  ) : (
-                    <>
-                      <IoTrashOutline className="text-base dark:text-slate-400" />
-                      {t("confirm")}
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
+        <ConfirmDialog
+          open
+          onClose={() => {
+            setDeleteTarget(null);
+            setDeleteConfirmText("");
+          }}
+          onConfirm={handleDeleteMenu}
+          title={t("deleteConfirmTitle")}
+          description={t("deleteConfirm")}
+          confirmLabel={isDeleting ? t("deleting") : t("confirm")}
+          cancelLabel={t("cancel")}
+          loading={isDeleting}
+          confirmDisabled={
+            deleteConfirmText.trim() !== getMenuName(deleteTarget)
+          }
+          tone="danger"
+          icon={<IoTrashOutline className="size-5" />}
+        >
+          <div className="flex flex-col gap-4">
+            <p className="text-sm font-semibold text-fg">
+              {getMenuName(deleteTarget)}
+            </p>
+            <Field
+              label={t("typeMenuNameToConfirm")}
+              htmlFor="delete-confirm-input"
+            >
+              <Input
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder={getMenuName(deleteTarget)}
+                dir={locale === "ar" ? "rtl" : "ltr"}
+              />
+            </Field>
           </div>
-        </div>
+        </ConfirmDialog>
       )}
     </>
   );
@@ -895,64 +827,44 @@ function LimitReachedModal({
   const planName = subscription?.planName || subscription?.plan || "Free";
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-        <div className="flex flex-col items-center text-center gap-4">
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 end-4 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+    <Modal
+      open
+      onClose={onClose}
+      closeLabel={t("close")}
+      size="sm"
+      icon={<IoWarningOutline className="size-5" />}
+      iconTone="warning"
+      title={t("limitReached")}
+      description={t("limitReachedDescription", {
+        current: String(currentCount),
+        max: String(maxMenus),
+        plan: planName,
+      })}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>
+            {t("close")}
+          </Button>
+          <LinkTo
+            href={
+              upgradeMenuRef
+                ? `/dashboard/${upgradeMenuRef}/subscription`
+                : "/pricing"
+            }
+            className={buttonClasses({ variant: "primary" })}
           >
-            <IoCloseOutline className="text-gray-400 text-xl" />
-          </button>
-
-          <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center">
-            <IoWarningOutline className="text-amber-500 text-3xl" />
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-slate-800 mb-2">
-              {t("limitReached")}
-            </h3>
-            <p className="text-slate-500 text-sm">
-              {t("limitReachedDescription", {
-                current: String(currentCount),
-                max: String(maxMenus),
-                plan: planName,
-              })}
-            </p>
-          </div>
-
-          {/* Plan info badge */}
-          <div className="w-full p-3 bg-slate-50 rounded-xl flex items-center justify-between">
-            <span className="text-sm text-slate-500">
-              {t("currentPlan")}
-            </span>
-            <span className="text-sm font-bold text-slate-800">
-              {planName} ({currentCount}/{maxMenus})
-            </span>
-          </div>
-
-          <div className="flex gap-3 w-full mt-2">
-            <button
-              onClick={onClose}
-              className="flex-1 px-4 py-2.5 border-2 border-slate-200 text-slate-600 rounded-xl font-semibold hover:bg-slate-50 transition-all"
-            >
-              {t("close")}
-            </button>
-            <LinkTo
-              href={
-                upgradeMenuRef
-                  ? `/dashboard/${upgradeMenuRef}/subscription`
-                  : "/pricing"
-              }
-              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-linear-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg"
-            >
-              <IoRocketOutline className="text-base" />
-              {t("upgradePlan")}
-            </LinkTo>
-          </div>
-        </div>
+            <IoRocketOutline className="size-4" aria-hidden />
+            {t("upgradePlan")}
+          </LinkTo>
+        </>
+      }
+    >
+      <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-2 px-4 py-3">
+        <span className="text-[13px] text-fg-muted">{t("currentPlan")}</span>
+        <span className="text-[13px] font-semibold text-fg">
+          {planName} ({currentCount}/{maxMenus})
+        </span>
       </div>
-    </div>
+    </Modal>
   );
 }

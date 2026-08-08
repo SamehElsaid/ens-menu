@@ -2,6 +2,8 @@
 
 import { useSyncExternalStore } from "react";
 import { FiMoon, FiSun } from "react-icons/fi";
+import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui";
 
 function useDarkMode() {
   const subscribe = (callback: () => void) => {
@@ -23,6 +25,7 @@ function useDarkMode() {
 
 const DarkModeToggle: React.FC = () => {
   const isDarkMode = useDarkMode();
+  const t = useTranslations("common");
 
   const toggleDarkMode = () => {
     const newTheme = !isDarkMode;
@@ -31,13 +34,16 @@ const DarkModeToggle: React.FC = () => {
   };
 
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="sm"
+      iconOnly
       onClick={toggleDarkMode}
-      aria-label="Toggle theme"
-      className="w-9 h-9 flex items-center justify-center rounded-full font-bold text-[14px] text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-500/20 transition-all"
+      aria-pressed={isDarkMode}
+      aria-label={isDarkMode ? t("useLightTheme") : t("useDarkTheme")}
     >
-      {isDarkMode ? <FiSun size={20} /> : <FiMoon size={20} />}
-    </button>
+      {isDarkMode ? <FiSun className="size-4" /> : <FiMoon className="size-4" />}
+    </Button>
   );
 };
 

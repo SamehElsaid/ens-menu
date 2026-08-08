@@ -46,9 +46,7 @@ export default function DeleteStaffConfirm({
       typeConfirmLabel={
         <>
           {t("typeToConfirm")}{" "}
-          <span className="font-bold text-gray-900 dark:text-white">
-            «{labelText}»
-          </span>
+          <span className="font-semibold text-fg">«{labelText}»</span>
         </>
       }
       confirmPlaceholder={labelText}

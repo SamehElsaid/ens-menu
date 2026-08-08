@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Button, ChoiceCard, SectionHeader } from "@/components/ui";
 import {
   ADMIN_PERMISSION_KEYS,
   type AdminPermissionKey,
@@ -47,49 +48,43 @@ export default function AdminPermissionsEditor({
   const clearAll = () => onChange([]);
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-          {t("title")}
-        </p>
-        <div className="flex gap-2 text-xs">
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={selectAll}
-            className="text-primary hover:underline disabled:opacity-50"
-          >
-            {t("selectAll")}
-          </button>
-          <span className="text-slate-300">|</span>
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={clearAll}
-            className="text-slate-500 hover:underline disabled:opacity-50"
-          >
-            {t("clearAll")}
-          </button>
-        </div>
-      </div>
-      <p className="text-xs text-slate-500 dark:text-slate-400">{t("hint")}</p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pe-1">
-        {ADMIN_PERMISSION_KEYS.map((key) => (
-          <label
-            key={key}
-            className={`flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 ${
-              disabled ? "opacity-60 cursor-not-allowed" : ""
-            }`}
-          >
-            <input
-              type="checkbox"
-              checked={value.includes(key)}
+    <div className="flex flex-col gap-4">
+      <SectionHeader
+        title={t("title")}
+        description={t("hint")}
+        actions={
+          <>
+            <Button
+              variant="link"
+              size="sm"
               disabled={disabled}
-              onChange={() => toggle(key)}
-              className="rounded border-slate-300 text-primary focus:ring-primary/30"
-            />
-            <span>{tNav(PERMISSION_LABEL_KEYS[key])}</span>
-          </label>
+              onClick={selectAll}
+            >
+              {t("selectAll")}
+            </Button>
+            <Button
+              variant="link"
+              size="sm"
+              disabled={disabled}
+              onClick={clearAll}
+              className="text-fg-muted"
+            >
+              {t("clearAll")}
+            </Button>
+          </>
+        }
+      />
+
+      <div className="grid max-h-48 grid-cols-1 gap-2 overflow-y-auto pe-1 sm:grid-cols-2">
+        {ADMIN_PERMISSION_KEYS.map((key) => (
+          <ChoiceCard
+            key={key}
+            label={tNav(PERMISSION_LABEL_KEYS[key])}
+            checked={value.includes(key)}
+            disabled={disabled}
+            onChange={() => toggle(key)}
+            className="p-2.5"
+          />
         ))}
       </div>
     </div>

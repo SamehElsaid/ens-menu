@@ -12,9 +12,8 @@ import {
   HiOutlineCreditCard,
   HiOutlineChatAlt2,
 } from "react-icons/hi";
-import { IoCloseOutline } from "react-icons/io5";
 import { FaStore, FaWhatsapp } from "react-icons/fa";
-import { ImSpinner8 } from "react-icons/im";
+import { Button, Field, Input, Modal, Spinner } from "@/components/ui";
 import { toast } from "react-toastify";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
@@ -371,9 +370,17 @@ export function RequirePhone({
   if (!authLoaded) {
     if (variant === "modal") {
       return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <ImSpinner8 className="animate-spin text-3xl text-white" />
-        </div>
+        <Modal
+          open
+          onClose={() => {}}
+          dismissible={false}
+          showClose={false}
+          title={t("title")}
+        >
+          <div className="flex justify-center py-12">
+            <Spinner size="md" />
+          </div>
+        </Modal>
       );
     }
     return null;
@@ -533,11 +540,11 @@ export function RequirePhone({
         <div
           className={`rounded-2xl border text-center ${
             isModal
-              ? "border-accent-purple/20 bg-accent-purple/5 px-4 py-5 dark:border-accent-purple/30 dark:bg-accent-purple/10"
-              : "border-violet-100 bg-violet-50/70 p-4 dark:border-violet-900/40 dark:bg-violet-950/20"
+              ? "border-brand-line bg-brand-soft px-4 py-5"
+              : "border-line bg-surface-2 p-4"
           }`}
         >
-          <p className="text-xs font-semibold uppercase tracking-wide text-accent-purple">
+          <p className="text-xs font-semibold uppercase tracking-wide text-brand">
             {t("timerLabel")}
           </p>
           <p className="mt-1 text-3xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
@@ -553,8 +560,8 @@ export function RequirePhone({
         <div
           className={`rounded-2xl border ${
             isModal
-              ? "border-slate-200 bg-slate-50 px-4 py-4 dark:border-slate-700 dark:bg-slate-800/50"
-              : "border-violet-100 bg-violet-50/70 p-4 text-center dark:border-violet-900/40 dark:bg-violet-950/20"
+              ? "border-line bg-surface-2 px-4 py-4"
+              : "border-line bg-surface-2 p-4 text-center"
           }`}
         >
           {isModal ? (
@@ -589,16 +596,16 @@ export function RequirePhone({
         type="button"
         onClick={handleOpenWhatsapp}
         disabled={startingVerification || !canOpenWhatsapp}
-        className={`group relative w-full overflow-hidden rounded-xl py-3.5 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 ${
+        className={`group relative w-full overflow-hidden rounded-xl py-3.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 ${
           isModal
-            ? "bg-[#25D366] shadow-[#25D366]/25 hover:bg-[#20BD5A] hover:shadow-xl hover:shadow-[#25D366]/30"
-            : "bg-linear-to-r from-accent-purple to-violet-500 shadow-violet-300/40 hover:shadow-xl hover:shadow-violet-300/50 dark:shadow-violet-900/30 dark:hover:shadow-violet-900/50"
+            ? "bg-[#25D366] shadow-[#25D366]/25 hover:bg-[#20BD5A] hover:shadow-md hover:shadow-[#25D366]/30"
+            : "bg-brand hover:bg-brand-hover"
         }`}
       >
         <span className="flex items-center justify-center gap-2">
           {startingVerification ? (
             <>
-              <ImSpinner8 className="animate-spin text-base" />
+              <Spinner size="sm" className="text-white" />
               {t("startingVerification")}
             </>
           ) : (
@@ -618,7 +625,7 @@ export function RequirePhone({
         <button
           type="button"
           onClick={handleRestartVerification}
-          className="w-full rounded-xl border border-slate-200 py-3 text-sm font-semibold text-slate-700 transition hover:border-accent-purple hover:text-accent-purple dark:border-slate-700 dark:text-slate-200"
+          className="w-full rounded-xl border border-line py-3 text-sm font-semibold text-fg transition hover:border-brand hover:text-brand"
         >
           {t("restartVerification")}
         </button>
@@ -626,7 +633,7 @@ export function RequirePhone({
 
       {verificationReference && !verificationExpired && (
         <div className="flex items-center justify-center gap-2 text-xs text-slate-400 dark:text-slate-500">
-          <ImSpinner8 className="animate-spin" />
+          <Spinner size="sm" />
           <span>{t("checkingNow")}</span>
         </div>
       )}
@@ -636,35 +643,26 @@ export function RequirePhone({
   const profileFormContent = (
     <form onSubmit={handleSubmit} className="space-y-4">
       {!hasRestaurantName && (
-        <div>
-          <label className="mb-1.5 block text-xs font-semibold text-slate-600 dark:text-slate-400">
-            {t("restaurantNameLabel")}{" "}
-            <span className="text-accent-purple">*</span>
-          </label>
+        <Field label={t("restaurantNameLabel")} required error={errors.restaurantName?.message}>
           <Controller
             control={control}
             name="restaurantName"
             render={({ field: { value, onChange } }) => (
-              <CustomInput
+              <Input
                 type="text"
                 id="restaurant-name-gate"
                 value={value}
                 onChange={onChange}
                 placeholder={t("restaurantNameLabel")}
-                icon={<FaStore className="text-lg" />}
-                error={errors.restaurantName?.message}
+                startIcon={<FaStore className="size-4.5" />}
               />
             )}
           />
-        </div>
+        </Field>
       )}
 
       {!hasPhone && (
-        <div>
-          <label className="mb-1.5 block text-xs font-semibold text-slate-600 dark:text-slate-400">
-            {t("phoneLabel")}{" "}
-            <span className="text-accent-purple">*</span>
-          </label>
+        <Field label={t("phoneLabel")} required error={errors.phone?.message}>
           <Controller
             control={control}
             name="phone"
@@ -676,29 +674,21 @@ export function RequirePhone({
                 onChange={onChange}
                 placeholder={t("phoneLabel")}
                 icon={<HiOutlinePhone className="text-lg" />}
-                error={errors.phone?.message}
               />
             )}
           />
-        </div>
+        </Field>
       )}
 
-      <button
+      <Button
         type="submit"
+        variant="primary"
+        className="w-full"
         disabled={saving || !isValid}
-        className="group relative w-full overflow-hidden rounded-xl bg-linear-to-r from-accent-purple to-violet-500 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-300/40 transition-all duration-200 hover:shadow-xl hover:shadow-violet-300/50 hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 dark:shadow-violet-900/30 dark:hover:shadow-violet-900/50"
+        loading={saving}
       >
-        <span className="flex items-center justify-center gap-2">
-          {saving ? (
-            <>
-              <ImSpinner8 className="animate-spin text-base" />
-              {t("saving")}
-            </>
-          ) : (
-            t("submit")
-          )}
-        </span>
-      </button>
+        {t("submit")}
+      </Button>
 
       <div className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
         <HiOutlineLockClosed className="shrink-0" />
@@ -708,66 +698,29 @@ export function RequirePhone({
   );
 
   const modalPanel = (
-    <div className="relative w-full overflow-hidden rounded-[28px] border border-slate-200/90 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
-      <div className="h-1 w-full bg-linear-to-r from-accent-purple via-violet-400 to-purple-500" />
-
-      <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent-purple/10 dark:bg-accent-purple/20">
-            {requiresVerification ? (
-              <FaWhatsapp className="text-xl text-[#25D366]" />
-            ) : (
-              <HiOutlinePhone className="text-xl text-accent-purple" />
-            )}
-          </div>
-          <div className="min-w-0">
-            {userName && (
-              <p className="truncate text-xs text-slate-400 dark:text-slate-500">
-                {t("welcomeBack")} {userName}
-              </p>
-            )}
-            <h2
-              id="phone-gate-title"
-              className="text-lg font-bold leading-snug text-slate-900 dark:text-slate-100"
-            >
-              {gateTitle}
-            </h2>
-          </div>
-        </div>
-        {onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-            aria-label={t("cancel")}
-          >
-            <IoCloseOutline className="text-xl" />
-          </button>
-        )}
-      </div>
-
-      <div className="px-5 pb-5 pt-4">
-        <p className="mb-4 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-          {gateSubtitle}
+    <>
+      {userName && (
+        <p className="mb-3 truncate text-xs text-fg-muted">
+          {t("welcomeBack")} {userName}
         </p>
-        {requiresVerification ? verificationContent : profileFormContent}
-      </div>
-    </div>
+      )}
+      {requiresVerification ? verificationContent : profileFormContent}
+    </>
   );
 
   const gatePanel = (
     <div className="relative w-full max-w-md">
       <div className="mb-8 flex items-center justify-center gap-2">
         <div
-          className={`h-1.5 rounded-full ${requiresVerification ? "w-10 bg-accent-purple" : "w-6 bg-accent-purple/30"}`}
+          className={`h-1.5 rounded-full ${requiresVerification ? "w-10 bg-brand" : "w-6 bg-brand/30"}`}
         />
         <div
-          className={`h-1.5 rounded-full ${requiresVerification ? "w-6 bg-accent-purple/30" : "w-10 bg-accent-purple"}`}
+          className={`h-1.5 rounded-full ${requiresVerification ? "w-6 bg-brand/30" : "w-10 bg-brand"}`}
         />
       </div>
 
-      <div className="overflow-hidden rounded-3xl border border-white/80 bg-white/80 shadow-2xl shadow-violet-200/40 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-violet-950/20">
-        <div className="h-1 w-full bg-linear-to-r from-accent-purple via-violet-400 to-purple-500" />
+      <div className="overflow-hidden rounded-2xl border border-line bg-surface shadow-lg">
+        <div className="h-1 w-full bg-brand" />
 
         <div className={panelPadding}>
           {userName && (
@@ -778,10 +731,10 @@ export function RequirePhone({
                 <img
                   src={userProfile.profileImage}
                   alt=""
-                  className="h-10 w-10 rounded-full object-cover ring-2 ring-accent-purple/20"
+                  className="h-10 w-10 rounded-full object-cover ring-2 ring-brand/20"
                 />
               ) : (
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-accent-purple to-violet-400 text-sm font-bold text-white ring-4 ring-accent-purple/10">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-bold text-on-brand ring-4 ring-brand/10">
                   {initial}
                 </div>
               )}
@@ -797,11 +750,8 @@ export function RequirePhone({
           )}
 
           <div className="mb-5 flex justify-center">
-            <div className="relative">
-              <div className="absolute inset-0 scale-150 rounded-2xl bg-accent-purple/20 blur-xl" />
-              <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-accent-purple to-violet-500 shadow-lg shadow-violet-300/50 dark:shadow-violet-900/50">
-                <HiOutlinePhone className="text-2xl text-white" />
-              </div>
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand shadow-sm">
+              <HiOutlinePhone className="text-2xl text-on-brand" />
             </div>
           </div>
 
@@ -819,8 +769,8 @@ export function RequirePhone({
               <ul className="mb-7 space-y-2.5">
                 {benefits.map(({ icon: Icon, key }) => (
                   <li key={key} className="flex items-start gap-3">
-                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-accent-purple/10 dark:bg-accent-purple/20">
-                      <Icon className="text-sm text-accent-purple" />
+                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-brand-soft">
+                      <Icon className="text-sm text-brand" />
                     </span>
                     <span className="text-sm text-slate-600 dark:text-slate-300">
                       {t(key)}
@@ -839,32 +789,30 @@ export function RequirePhone({
 
   if (isModal) {
     return (
-      <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-[fadeIn_0.2s_ease-out]"
-        onClick={(e) => {
-          if (e.target === e.currentTarget) {
-            onCancel?.();
-          }
-        }}
+      <Modal
+        open
+        onClose={onCancel ?? (() => {})}
+        title={gateTitle}
+        description={gateSubtitle}
+        icon={
+          requiresVerification ? (
+            <FaWhatsapp className="size-5 text-[#25D366]" />
+          ) : (
+            <HiOutlinePhone className="size-5" />
+          )
+        }
+        size="sm"
+        dismissible={!saving && !startingVerification}
+        showClose={Boolean(onCancel)}
+        closeLabel={t("cancel")}
       >
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="phone-gate-title"
-          className="w-full max-w-[420px] max-h-[90vh] overflow-y-auto animate-[fadeIn_0.25s_ease-out]"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {modalPanel}
-        </div>
-      </div>
+        {modalPanel}
+      </Modal>
     );
   }
 
   return (
-    <div className="relative flex min-h-[calc(100vh-80px)] items-center justify-center overflow-hidden bg-linear-to-br from-violet-50 via-white to-purple-50/60 px-4 py-12 dark:from-slate-950 dark:via-slate-900 dark:to-violet-950/20">
-      <div className="pointer-events-none absolute start-0 top-0 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-300/20 blur-3xl dark:bg-violet-800/10" />
-      <div className="pointer-events-none absolute bottom-0 end-0 h-96 w-96 translate-x-1/3 translate-y-1/3 rounded-full bg-purple-300/15 blur-3xl dark:bg-purple-800/10" />
-      <div className="pointer-events-none absolute start-1/2 top-1/3 h-64 w-64 -translate-x-1/2 rounded-full bg-accent-purple/5 blur-2xl dark:bg-accent-purple/10" />
+    <div className="relative flex min-h-[calc(100vh-80px)] items-center justify-center bg-app px-4 py-12">
       {gatePanel}
     </div>
   );

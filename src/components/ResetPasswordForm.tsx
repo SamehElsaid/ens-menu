@@ -9,8 +9,9 @@ import { useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { useState } from "react";
 
-import CustomInput from "@/components/Custom/CustomInput";
-import CustomBtn from "@/components/Custom/CustomBtn";
+import { Alert } from "@/components/ui/Alert";
+import { Button } from "@/components/ui/Button";
+import { Field, Input } from "@/components/ui";
 import LinkTo from "@/components/Global/LinkTo";
 import { axiosPost } from "@/shared/axiosCall";
 import { useRouter } from "@/i18n/navigation";
@@ -40,6 +41,34 @@ type ApiErrorResponse = {
 function getApiErrorMessage(data: unknown) {
   const payload = data as ApiErrorResponse;
   return payload?.error || payload?.message || null;
+}
+
+/** Both branches of this screen end the same way; only the label differs. */
+function SubmitAndReturn({
+  label,
+  backLabel,
+  loading,
+}: {
+  label: string;
+  backLabel: string;
+  loading: boolean;
+}) {
+  return (
+    <>
+      <Button type="submit" loading={loading} fullWidth size="lg" className="mt-5">
+        {label}
+      </Button>
+
+      <div className="mt-4 flex items-center justify-center">
+        <LinkTo
+          href="/auth/login"
+          className="rounded-sm text-[13px] font-medium text-fg-muted transition-colors hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        >
+          {backLabel}
+        </LinkTo>
+      </div>
+    </>
+  );
 }
 
 export default function ResetPasswordForm() {
@@ -137,16 +166,20 @@ export default function ResetPasswordForm() {
           control={resetForm.control}
           name="newPassword"
           render={({ field: { value, onChange } }) => (
-            <CustomInput
-              type="password"
-              placeholder={t("auth.newPassword")}
-              id="newPassword"
-              icon={<TbLockPassword />}
+            <Field
               label={t("auth.newPassword")}
               error={resetForm.formState.errors.newPassword?.message}
-              value={value}
-              onChange={onChange}
-            />
+            >
+              <Input
+                type="password"
+                inputSize="md"
+                startIcon={<TbLockPassword size={15} />}
+                placeholder={t("auth.newPassword")}
+                autoComplete="new-password"
+                value={value}
+                onChange={onChange}
+              />
+            </Field>
           )}
         />
 
@@ -154,35 +187,28 @@ export default function ResetPasswordForm() {
           control={resetForm.control}
           name="confirmNewPassword"
           render={({ field: { value, onChange } }) => (
-            <CustomInput
-              type="password"
-              placeholder={t("auth.confirmNewPassword")}
-              id="confirmNewPassword"
-              icon={<TbLockPassword />}
+            <Field
               label={t("auth.confirmNewPassword")}
               error={resetForm.formState.errors.confirmNewPassword?.message}
-              value={value}
-              onChange={onChange}
-            />
+            >
+              <Input
+                type="password"
+                inputSize="md"
+                startIcon={<TbLockPassword size={15} />}
+                placeholder={t("auth.confirmNewPassword")}
+                autoComplete="new-password"
+                value={value}
+                onChange={onChange}
+              />
+            </Field>
           )}
         />
 
-        <div className="flex w-full mt-8">
-          <CustomBtn
-            text={t("auth.resetPasswordSubmit")}
-            type="submit"
-            loading={loading}
-          />
-        </div>
-
-        <div className="flex items-center justify-center mt-6">
-          <LinkTo
-            href="/auth/login"
-            className="text-sm font-medium text-center text-slate-700 dark:text-slate-300 hover:text-accent-purple/80 transition-all duration-200"
-          >
-            {t("auth.backToLogin")}
-          </LinkTo>
-        </div>
+        <SubmitAndReturn
+          label={t("auth.resetPasswordSubmit")}
+          backLabel={t("auth.backToLogin")}
+          loading={loading}
+        />
       </form>
     );
   }
@@ -196,41 +222,32 @@ export default function ResetPasswordForm() {
         control={forgotForm.control}
         name="email"
         render={({ field: { value, onChange } }) => (
-          <CustomInput
-            type="email"
-            placeholder={t("auth.email")}
-            id="email"
-            icon={<FaEnvelope />}
+          <Field
             label={t("auth.email")}
             error={forgotForm.formState.errors.email?.message}
-            value={value}
-            onChange={onChange}
-          />
+          >
+            <Input
+              type="email"
+              inputSize="md"
+              startIcon={<FaEnvelope size={14} />}
+              placeholder={t("auth.email")}
+              autoComplete="email"
+              value={value}
+              onChange={onChange}
+            />
+          </Field>
         )}
       />
 
       {linkSent ? (
-        <p className="text-sm text-green-600 dark:text-green-400">
-          {t("auth.resetLinkSent")}
-        </p>
+        <Alert tone="success">{t("auth.resetLinkSent")}</Alert>
       ) : null}
 
-      <div className="flex w-full mt-8">
-        <CustomBtn
-          text={t("auth.sendResetLink")}
-          type="submit"
-          loading={loading}
-        />
-      </div>
-
-      <div className="flex items-center justify-center mt-6">
-        <LinkTo
-          href="/auth/login"
-          className="text-sm font-medium text-center text-slate-700 dark:text-slate-300 hover:text-accent-purple/80 transition-all duration-200"
-        >
-          {t("auth.backToLogin")}
-        </LinkTo>
-      </div>
+      <SubmitAndReturn
+        label={t("auth.sendResetLink")}
+        backLabel={t("auth.backToLogin")}
+        loading={loading}
+      />
     </form>
   );
 }

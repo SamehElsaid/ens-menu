@@ -5,7 +5,19 @@ import { useLocale, useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
 import { formatAdminDate } from "@/lib/fetchAdminAnalytics";
-import CardDashBoard from "@/components/Card/CardDashBoard";
+import {
+  Button,
+  Card,
+  CardHeader,
+  EmptyState,
+  Field,
+  Input,
+  LoadingBlock,
+  Modal,
+  SectionHeader,
+  Select,
+  Textarea,
+} from "@/components/ui";
 import type { SupportCase } from "@/types/AdminCustomer";
 
 interface Props {
@@ -14,9 +26,15 @@ interface Props {
 
 const STATUSES = ["open", "in_progress", "resolved", "closed"] as const;
 
+const FORM_ID = "customer-support-case-form";
+
 export default function CustomerSupportSection({ userId }: Props) {
   const locale = useLocale();
   const t = useTranslations("adminUsers.userDetails.customerSections.support");
+  const tOrders = useTranslations(
+    "adminUsers.userDetails.customerSections.orders",
+  );
+  const tCommon = useTranslations("common");
   const [cases, setCases] = useState<SupportCase[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
@@ -85,48 +103,46 @@ export default function CustomerSupportSection({ userId }: Props) {
   };
 
   return (
-    <CardDashBoard>
-      <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-          {t("title")}
-        </h2>
-        <button
-          type="button"
-          onClick={() => setFormOpen(true)}
-          className="px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold"
-        >
-          {t("add")}
-        </button>
-      </div>
+    <Card padded="lg">
+      <SectionHeader
+        title={t("title")}
+        className="mb-4"
+        actions={
+          <Button variant="primary" size="sm" onClick={() => setFormOpen(true)}>
+            {t("add")}
+          </Button>
+        }
+      />
+
       {loading ? (
-        <p className="text-slate-500">{t("loading")}</p>
+        <LoadingBlock label={t("loading")} />
       ) : cases.length === 0 ? (
-        <p className="text-slate-500">{t("empty")}</p>
+        <EmptyState title={t("empty")} size="sm" />
       ) : (
-        <div className="space-y-4">
+        <ul className="flex flex-col gap-4">
           {cases.map((c) => (
-            <div
-              key={c.id}
-              className="rounded-xl border border-slate-200 dark:border-slate-700 p-4"
-            >
-              <div className="flex flex-wrap justify-between gap-2 mb-2">
-                <h3 className="font-semibold">{c.subject}</h3>
-                <select
-                  value={c.status}
-                  onChange={(e) => updateStatus(c.id, e.target.value)}
-                  className="text-xs px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
-                >
-                  {STATUSES.map((s) => (
-                    <option key={s} value={s}>
-                      {t(`status.${s}`)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
-                {c.message}
-              </p>
-              <div className="text-xs text-slate-500 flex flex-wrap gap-3">
+            <Card as="li" key={c.id} padded="md">
+              <CardHeader
+                title={c.subject}
+                className="mb-2"
+                actions={
+                  <Select
+                    inputSize="sm"
+                    value={c.status}
+                    aria-label={tOrders("status")}
+                    onChange={(e) => updateStatus(c.id, e.target.value)}
+                    wrapperClassName="w-auto"
+                  >
+                    {STATUSES.map((s) => (
+                      <option key={s} value={s}>
+                        {t(`status.${s}`)}
+                      </option>
+                    ))}
+                  </Select>
+                }
+              />
+              <p className="mb-2 text-sm text-fg-muted">{c.message}</p>
+              <div className="flex flex-wrap gap-3 text-xs text-fg-subtle">
                 <span>{formatAdminDate(c.createdAt, locale)}</span>
                 {c.ticketRef && (
                   <span>
@@ -134,58 +150,66 @@ export default function CustomerSupportSection({ userId }: Props) {
                   </span>
                 )}
               </div>
-            </div>
+            </Card>
           ))}
-        </div>
+        </ul>
       )}
 
-      {formOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <form
-            onSubmit={handleCreate}
-            className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-md w-full p-6 space-y-3"
-          >
-            <h3 className="text-lg font-bold">{t("add")}</h3>
-            <input
+      <Modal
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        title={t("add")}
+        size="sm"
+        dismissible={!submitting}
+        closeLabel={tCommon("close")}
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              onClick={() => setFormOpen(false)}
+              disabled={submitting}
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              type="submit"
+              form={FORM_ID}
+              variant="primary"
+              loading={submitting}
+            >
+              {t("save")}
+            </Button>
+          </>
+        }
+      >
+        <form
+          id={FORM_ID}
+          onSubmit={handleCreate}
+          className="flex flex-col gap-4"
+        >
+          <Field label={t("subject")} required>
+            <Input
               required
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              placeholder={t("subject")}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
             />
-            <textarea
+          </Field>
+          <Field label={t("message")} required>
+            <Textarea
               required
               rows={4}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder={t("message")}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
             />
-            <input
+          </Field>
+          <Field label={t("ticketRef")}>
+            <Input
               value={ticketRef}
               onChange={(e) => setTicketRef(e.target.value)}
-              placeholder={t("ticketRef")}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
             />
-            <div className="flex gap-2 pt-2">
-              <button
-                type="submit"
-                disabled={submitting}
-                className="flex-1 py-2 rounded-xl bg-primary text-white font-semibold disabled:opacity-50"
-              >
-                {t("save")}
-              </button>
-              <button
-                type="button"
-                onClick={() => setFormOpen(false)}
-                className="flex-1 py-2 rounded-xl border border-slate-200"
-              >
-                {t("cancel")}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-    </CardDashBoard>
+          </Field>
+        </form>
+      </Modal>
+    </Card>
   );
 }

@@ -17,7 +17,7 @@ import { useAppSelector } from "@/store/hooks";
 import { templatesInfo } from "@/modules/TemplateShow/data";
 import { toast } from "react-toastify";
 import ColorControl from "@/components/Settings/ColorControl";
-import CustomBtn from "@/components/Custom/CustomBtn";
+import { Button } from "@/components/ui";
 import { axiosGet, axiosPatch } from "@/shared/axiosCall";
 import Loader from "@/components/Global/Loader";
 import { useRouter } from "@/i18n/navigation";
@@ -802,27 +802,25 @@ export default function TemplateDesignCustomizePanel({
           {/* Footer actions */}
           <div className=" justify-between gap-3 pt-2 pb-6">
             <div className="flex flex-wrap gap-2 justify-end w-fit ms-auto mb-3">
-              <CustomBtn
+              <Button
                 onClick={handleReset}
                 variant="danger"
+                size="lg"
                 className="w-fit!"
               >
-                <div className="flex items-center justify-center gap-2 ">
-                  {t("buttons.reset", { defaultMessage: "Reset" })}
-                </div>
-              </CustomBtn>
+                {t("buttons.reset", { defaultMessage: "Reset" })}
+              </Button>
 
-              <CustomBtn
+              <Button
                 onClick={handleSave}
                 loading={isSaving}
                 disabled={isSaving}
+                size="lg"
+                startIcon={<FiSave className="text-sm" />}
                 className="w-fit!"
               >
-                <div className="flex items-center justify-center gap-2 ">
-                  <FiSave className="text-sm" />
-                  {t("buttons.save")}
-                </div>
-              </CustomBtn>
+                {t("buttons.save")}
+              </Button>
             </div>
 
             <p className="text-[11px] text-slate-500 dark:text-slate-400 max-w-md">

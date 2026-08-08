@@ -14,12 +14,12 @@ export default function OrderChargesLines({
   charges,
   currency,
   labels,
-  accent = "violet",
+  accent = "brand",
 }: {
   charges: OrderChargesBreakdown;
   currency: string;
   labels: Labels;
-  accent?: "violet" | "emerald";
+  accent?: "brand" | "emerald";
 }) {
   const money = (n: number) => (
     <>
@@ -35,11 +35,11 @@ export default function OrderChargesLines({
   const muted =
     accent === "emerald"
       ? "text-emerald-700/80 dark:text-emerald-300/80"
-      : "text-violet-700/80 dark:text-violet-300/80";
+      : "text-fg-muted";
   const strong =
     accent === "emerald"
       ? "text-emerald-900 dark:text-emerald-100"
-      : "text-violet-900 dark:text-violet-100";
+      : "text-fg";
 
   if (!charges.hasExtraCharges) {
     return (

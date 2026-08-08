@@ -2,7 +2,9 @@
 
 import { Controller, Resolver, useForm } from "react-hook-form";
 import CustomInput from "@/components/Custom/CustomInput";
-import { FiHome, FiMail, FiPhone, FiUser } from "react-icons/fi";
+import { FiCheck, FiHome, FiMail, FiPhone, FiUser } from "react-icons/fi";
+import { Button } from "@/components/ui/Button";
+import { Field, Input, Spinner } from "@/components/ui";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLocale, useTranslations } from "next-intl";
 import { registerSchema, RegisterSchema } from "@/schemas/registerSchema";
@@ -41,32 +43,31 @@ function RegisterStepHeader({
   activeIndex: number;
 }) {
   return (
-    <div className="register-steps mb-5 flex items-center gap-1.5 sm:mb-6">
+    <ol className="register-steps mb-5 flex items-center gap-1.5 sm:mb-6">
       {steps.map((step, index) => {
         const isActive = index === activeIndex;
         const isDone = index < activeIndex;
         return (
-          <div key={step.id} className="flex min-w-0 flex-1 items-center gap-1.5">
+          <li
+            key={step.id}
+            aria-current={isActive ? "step" : undefined}
+            className="flex min-w-0 flex-1 items-center gap-1.5"
+          >
             <span
               className={cn(
-                "register-step-dot flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition-all duration-300",
-                isDone &&
-                  "bg-purple-600 text-white shadow-sm shadow-purple-600/25 dark:bg-purple-500",
-                isActive &&
-                  "bg-purple-100 text-purple-700 ring-2 ring-purple-500/30 dark:bg-purple-500/15 dark:text-purple-300 dark:ring-purple-400/30",
-                !isActive &&
-                  !isDone &&
-                  "bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500",
+                "register-step-dot flex size-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition-colors duration-200",
+                isDone && "bg-brand text-on-brand",
+                isActive && "bg-brand-soft text-brand-soft-fg ring-2 ring-brand-line",
+                !isActive && !isDone && "bg-surface-3 text-fg-subtle",
               )}
             >
-              {index + 1}
+              {/* State is carried by the glyph too, not colour alone. */}
+              {isDone ? <FiCheck className="size-3.5 stroke-3" aria-hidden /> : index + 1}
             </span>
             <span
               className={cn(
                 "hidden truncate text-[11px] font-semibold sm:block",
-                isActive
-                  ? "text-purple-700 dark:text-purple-300"
-                  : "text-slate-400 dark:text-slate-500",
+                isActive ? "text-brand-soft-fg" : "text-fg-subtle",
               )}
             >
               {step.label}
@@ -76,14 +77,14 @@ function RegisterStepHeader({
                 aria-hidden
                 className={cn(
                   "register-step-line mx-0.5 hidden h-px flex-1 sm:block",
-                  isDone ? "bg-purple-400/60" : "bg-slate-200 dark:bg-slate-700",
+                  isDone ? "bg-brand-line" : "bg-line",
                 )}
               />
             )}
-          </div>
+          </li>
         );
       })}
-    </div>
+    </ol>
   );
 }
 
@@ -96,7 +97,7 @@ function RegisterSection({
 }) {
   return (
     <section className="register-form-section space-y-2.5">
-      <h3 className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+      <h3 className="text-[11px] font-semibold uppercase tracking-wide text-fg-subtle">
         {title}
       </h3>
       <div className="space-y-2.5">{children}</div>
@@ -287,7 +288,7 @@ export default function RegisterForm({ steps = [] }: RegisterFormProps) {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="register-form space-y-4 text-slate-800 dark:text-slate-100"
+      className="register-form space-y-4 text-fg"
     >
       {steps.length > 0 && (
         <RegisterStepHeader steps={steps} activeIndex={activeStepIndex} />
@@ -298,40 +299,50 @@ export default function RegisterForm({ steps = [] }: RegisterFormProps) {
           control={control}
           name="fullName"
           render={({ field: { value, onChange } }) => (
-            <CustomInput
-              type="text"
-              placeholder={messages.fullName}
-              id="fullName"
-              icon={<FiUser size={15} />}
-              label={messages.fullName}
-              error={errors.fullName?.message}
-              value={value}
-              onChange={onChange}
-              size="small"
-              className={fieldClass}
-            />
+            <Field label={messages.fullName} error={errors.fullName?.message}>
+              <Input
+                type="text"
+                inputSize="md"
+                startIcon={<FiUser size={15} />}
+                placeholder={messages.fullName}
+                autoComplete="name"
+                value={value}
+                onChange={onChange}
+                className={fieldClass}
+              />
+            </Field>
           )}
         />
 
         <Controller
           control={control}
           name="email"
-          render={({ field: { value, onChange } }) => (
-            <CustomInput
-              type="email"
-              placeholder={messages.email}
-              id="email"
-              icon={<FiMail size={15} />}
-              label={messages.email}
-              error={errors.email?.message}
-              loading={checkingField.email || Boolean(validatingFields.email)}
-              loadingLabel={t("auth.checkingAvailability")}
-              value={value}
-              onChange={onChange}
-              size="small"
-              className={fieldClass}
-            />
-          )}
+          render={({ field: { value, onChange } }) => {
+            const checking =
+              checkingField.email || Boolean(validatingFields.email);
+            return (
+              <Field label={messages.email} error={errors.email?.message}>
+                <Input
+                  type="email"
+                  inputSize="md"
+                  startIcon={<FiMail size={15} />}
+                  endIcon={
+                    checking ? (
+                      <Spinner
+                        size="xs"
+                        label={t("auth.checkingAvailability")}
+                      />
+                    ) : undefined
+                  }
+                  placeholder={messages.email}
+                  autoComplete="email"
+                  value={value}
+                  onChange={onChange}
+                  className={fieldClass}
+                />
+              </Field>
+            );
+          }}
         />
 
         <Controller
@@ -361,18 +372,21 @@ export default function RegisterForm({ steps = [] }: RegisterFormProps) {
           control={control}
           name="resturantName"
           render={({ field: { value, onChange } }) => (
-            <CustomInput
-              type="text"
-              placeholder={messages.resturantName}
-              id="resturantName"
-              icon={<FiHome size={15} />}
+            <Field
               label={messages.resturantName}
               error={errors.resturantName?.message}
-              value={value}
-              onChange={onChange}
-              size="small"
-              className={fieldClass}
-            />
+            >
+              <Input
+                type="text"
+                inputSize="md"
+                startIcon={<FiHome size={15} />}
+                placeholder={messages.resturantName}
+                autoComplete="organization"
+                value={value}
+                onChange={onChange}
+                className={fieldClass}
+              />
+            </Field>
           )}
         />
       </RegisterSection>
@@ -383,18 +397,18 @@ export default function RegisterForm({ steps = [] }: RegisterFormProps) {
             control={control}
             name="password"
             render={({ field: { value, onChange } }) => (
-              <CustomInput
-                type="password"
-                placeholder={messages.password}
-                id="password"
-                icon={<TbLockPassword size={16} />}
-                label={messages.password}
-                error={errors.password?.message}
-                value={value}
-                onChange={onChange}
-                size="small"
-                className={fieldClass}
-              />
+              <Field label={messages.password} error={errors.password?.message}>
+                <Input
+                  type="password"
+                  inputSize="md"
+                  startIcon={<TbLockPassword size={16} />}
+                  placeholder={messages.password}
+                  autoComplete="new-password"
+                  value={value}
+                  onChange={onChange}
+                  className={fieldClass}
+                />
+              </Field>
             )}
           />
 
@@ -402,18 +416,21 @@ export default function RegisterForm({ steps = [] }: RegisterFormProps) {
             control={control}
             name="confirmPassword"
             render={({ field: { value, onChange } }) => (
-              <CustomInput
-                type="password"
-                placeholder={messages.confirmPassword}
-                id="confirmPassword"
-                icon={<TbLockPassword size={16} />}
+              <Field
                 label={messages.confirmPassword}
                 error={errors.confirmPassword?.message}
-                value={value}
-                onChange={onChange}
-                size="small"
-                className={fieldClass}
-              />
+              >
+                <Input
+                  type="password"
+                  inputSize="md"
+                  startIcon={<TbLockPassword size={16} />}
+                  placeholder={messages.confirmPassword}
+                  autoComplete="new-password"
+                  value={value}
+                  onChange={onChange}
+                  className={fieldClass}
+                />
+              </Field>
             )}
           />
         </div>
@@ -425,25 +442,15 @@ export default function RegisterForm({ steps = [] }: RegisterFormProps) {
           onVerifiedChange={setRecaptchaVerified}
         />
 
-        <button
+        <Button
           type="submit"
-          disabled={loading}
-          className={cn(
-            "register-submit-btn relative mt-2 flex w-full items-center justify-center gap-2.5 rounded-xl px-4 py-3 text-[15px] font-semibold text-white transition-all duration-300 enabled:hover:-translate-y-0.5 enabled:hover:shadow-[0_16px_40px_-12px_rgba(124,58,237,0.55)] disabled:cursor-not-allowed",
-            loading
-              ? "register-submit-btn--loading"
-              : "disabled:opacity-55",
-          )}
+          loading={loading}
+          fullWidth
+          size="lg"
+          className="mt-2"
         >
-          {loading ? (
-            <>
-              <span className="register-submit-btn__spinner" aria-hidden />
-              <span>{t("auth.loading")}</span>
-            </>
-          ) : (
-            messages.register
-          )}
-        </button>
+          {loading ? t("auth.loading") : messages.register}
+        </Button>
 
         <AuthSocialButtons
           dividerLabel="auth.orRegisterWith"
@@ -451,15 +458,13 @@ export default function RegisterForm({ steps = [] }: RegisterFormProps) {
         />
       </RegisterSection>
 
-      <p className="pt-1 text-center text-[13px] text-slate-500 dark:text-slate-400">
+      <p className="pt-1 text-center text-[13px] text-fg-muted">
         <LinkTo
           href="/auth/login"
-          className="font-medium text-slate-600 transition-colors hover:text-purple-600 dark:text-slate-300 dark:hover:text-purple-400"
+          className="rounded-sm font-medium transition-colors hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
           {t("auth.haveAccount")}{" "}
-          <span className="font-semibold text-purple-600 dark:text-purple-400">
-            {t("auth.login")}
-          </span>
+          <span className="font-semibold text-brand">{t("auth.login")}</span>
         </LinkTo>
       </p>
     </form>

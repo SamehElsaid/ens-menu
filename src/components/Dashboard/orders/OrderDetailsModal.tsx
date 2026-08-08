@@ -50,6 +50,7 @@ import OrderChargesLines from "./OrderChargesLines";
 import { useAppSelector } from "@/store/hooks";
 import { isFreePlanUser } from "@/lib/subscription";
 import { useAuthorization } from "@/hooks/useAuthorization";
+import { Badge, Button, Modal, Skeleton, SkeletonRegion } from "@/components/ui";
 
 function PrintableReceipt({
   orderId,
@@ -315,19 +316,16 @@ function StatusIcon({ status }: { status: string }) {
 
 function ModalSkeleton() {
   return (
-    <div className="animate-pulse space-y-4 p-6">
-      <div className="h-4 w-1/3 rounded-lg bg-slate-200 dark:bg-slate-700" />
-      <div className="h-4 w-1/2 rounded-lg bg-slate-200 dark:bg-slate-700" />
-      <div className="h-4 w-2/5 rounded-lg bg-slate-200 dark:bg-slate-700" />
+    <SkeletonRegion label="Loading order" className="space-y-4 p-2">
+      <Skeleton className="h-4 w-1/3" rounded="md" />
+      <Skeleton className="h-4 w-1/2" rounded="md" />
+      <Skeleton className="h-4 w-2/5" rounded="md" />
       <div className="mt-6 space-y-3">
         {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="h-10 w-full rounded-lg bg-slate-200 dark:bg-slate-700"
-          />
+          <Skeleton key={i} className="h-10 w-full" rounded="lg" />
         ))}
       </div>
-    </div>
+    </SkeletonRegion>
   );
 }
 
@@ -541,7 +539,7 @@ function OrderCustomerSection({
 
       <div className="grid gap-2.5 sm:grid-cols-2">
         <DetailRow
-          icon={<IoPersonOutline className="text-fuchsia-500" />}
+          icon={<IoPersonOutline className="text-brand" />}
           label={t("detailsCustomer")}
           value={customerDisplay}
           emptyLabel={t("notProvided")}
@@ -564,14 +562,14 @@ function OrderCustomerSection({
           tableNumber &&
           String(tableNumber).trim() !== "" && (
             <DetailRow
-              icon={<IoReceiptOutline className="text-violet-500" />}
+              icon={<IoReceiptOutline className="text-brand" />}
               label={t("detailsTable")}
               value={tableNumber}
             />
           )
         )}
         <DetailRow
-          icon={<IoCalendarOutline className="text-violet-500" />}
+          icon={<IoCalendarOutline className="text-brand" />}
           label={t("detailsWhen")}
           value={when}
         />
@@ -810,40 +808,17 @@ export default function OrderDetailsModal({
     order?.orderNotes?.trim() || entry?.orderNotes?.trim() || null;
   const whenDisplay = <ViewTime data={lastAction?.time ?? actions[0]?.time} />;
 
-  const statusConfig = {
-    confirmed: {
-      pill: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 ring-1 ring-green-300/50",
-      header:
-        "from-green-500/10 to-emerald-500/5 dark:from-green-900/30 dark:to-emerald-900/10",
-      border: "border-green-200/60 dark:border-green-700/40",
-    },
-    prepared: {
-      pill: "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 ring-1 ring-sky-300/50",
-      header:
-        "from-sky-500/10 to-cyan-500/5 dark:from-sky-900/30 dark:to-cyan-900/10",
-      border: "border-sky-200/60 dark:border-sky-700/40",
-    },
-    delivered: {
-      pill: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 ring-1 ring-violet-300/50",
-      header:
-        "from-violet-500/10 to-fuchsia-500/5 dark:from-violet-900/30 dark:to-fuchsia-900/10",
-      border: "border-violet-200/60 dark:border-violet-700/40",
-    },
-    cancelled: {
-      pill: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 ring-1 ring-red-300/50",
-      header:
-        "from-red-500/10 to-rose-500/5 dark:from-red-900/30 dark:to-rose-900/10",
-      border: "border-red-200/60 dark:border-red-700/40",
-    },
-    pending: {
-      pill: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 ring-1 ring-amber-300/50",
-      header:
-        "from-violet-500/10 to-fuchsia-500/5 dark:from-violet-900/30 dark:to-fuchsia-900/10",
-      border: "border-violet-200/60 dark:border-violet-700/40",
-    },
+  const statusToneMap: Record<
+    string,
+    "success" | "info" | "brand" | "danger" | "warning"
+  > = {
+    confirmed: "success",
+    prepared: "info",
+    delivered: "brand",
+    cancelled: "danger",
+    pending: "warning",
   };
-  const cfg =
-    statusConfig[status as keyof typeof statusConfig] ?? statusConfig.pending;
+  const statusTone = statusToneMap[status] ?? "warning";
 
   const printRef = useRef<HTMLDivElement>(null);
   const handlePrint = useReactToPrint({
@@ -853,76 +828,78 @@ export default function OrderDetailsModal({
   });
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-slate-900/10 dark:ring-white/10 flex flex-col max-h-[92dvh] sm:max-h-[85vh] overflow-hidden animate-slideUp"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div
-          className={`relative bg-linear-to-br ${cfg.header} px-5 pt-5 pb-4 border-b ${cfg.border}`}
-        >
-          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600 sm:hidden" />
-
-          <div className="flex items-start justify-between gap-3 mt-3 sm:mt-0">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white dark:bg-slate-800 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700">
-                <IoReceiptOutline className="text-2xl text-violet-600 dark:text-violet-400" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 leading-tight">
-                  {t("detailsTitle")}
-                </h3>
-                {entry && (
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    {t("colOrderId")}&nbsp;
-                    <span className="font-semibold text-slate-700 dark:text-slate-300">
-                      #{entry.orderId}
-                    </span>
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              {entry && (
-                <span
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${cfg.pill}`}
-                >
-                  <StatusIcon status={status} />
-                  {t(`orderStatus.${status}` as never)}
-                </span>
-              )}
-              <button
+    <>
+      <Modal
+        open
+        onClose={onClose}
+        title={t("detailsTitle")}
+        description={
+          entry ? (
+            <span className="flex flex-wrap items-center gap-2">
+              <span>
+                {t("colOrderId")}{" "}
+                <span className="font-semibold text-fg">#{entry.orderId}</span>
+              </span>
+              <Badge tone={statusTone} icon={<StatusIcon status={status} />}>
+                {t(`orderStatus.${status}` as never)}
+              </Badge>
+            </span>
+          ) : undefined
+        }
+        size="md"
+        dismissible={!savingItems}
+        footer={
+          <>
+            {entry && menuId && onActionComplete && !loading && (
+              <OrderActionButtons
+                menuId={menuId}
+                entry={{
+                  ...(entry as CallEntry),
+                  pendingGuestAddition:
+                    entry.pendingGuestAddition === true ||
+                    order?.pendingGuestAddition === true,
+                  pendingBillRequest:
+                    entry.pendingBillRequest === true ||
+                    order?.pendingBillRequest === true,
+                }}
+                status={status}
+                onComplete={onActionComplete}
+                translationNs={
+                  variant === "delivery" ? "deliveryOrders" : "tableOrders"
+                }
+                variant={variant}
+              />
+            )}
+            {isPro && entry && !loading && (
+              <Button
                 type="button"
-                onClick={onClose}
-                className="flex items-center justify-center w-8 h-8 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                variant="secondary"
+                onClick={handlePrint}
+                startIcon={<IoPrintOutline className="text-base" />}
               >
-                <IoCloseOutline className="text-lg" />
-              </button>
-            </div>
-          </div>
+                {t("printOrder")}
+              </Button>
+            )}
+            <Button type="button" variant="secondary" onClick={onClose}>
+              {t("close")}
+            </Button>
+          </>
+        }
+      >
+        {summary && (
+          <p className="mb-3 text-xs leading-relaxed text-fg-muted">{summary}</p>
+        )}
+        {(entry?.pendingBillRequest === true ||
+          order?.pendingBillRequest === true) && (
+          <Badge tone="danger" className="mb-3">
+            {t("billRequestBadge")}
+          </Badge>
+        )}
 
-          {summary && (
-            <p className="mt-3 text-xs text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-200/60 dark:border-slate-700/50 pt-2">
-              {summary}
-            </p>
-          )}
-          {(entry?.pendingBillRequest === true ||
-            order?.pendingBillRequest === true) && (
-            <p className="mt-2 inline-flex rounded-full bg-red-100 px-2.5 py-0.5 text-[11px] font-semibold text-red-700 dark:bg-red-900/40 dark:text-red-200">
-              {t("billRequestBadge")}
-            </p>
-          )}
-        </div>
-
-        <div className="flex-1 overflow-y-auto">
-          {loading ? (
-            <ModalSkeleton />
-          ) : entry ? (
-            <>
+        {loading ? (
+          <ModalSkeleton />
+        ) : entry ? (
+          <>
               <OrderCustomerSection
                 variant={variant}
                 t={t}
@@ -940,7 +917,7 @@ export default function OrderDetailsModal({
               {waiterDisplay && (
                 <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800">
                   <DetailRow
-                    icon={<IoPersonOutline className="text-violet-500" />}
+                    icon={<IoPersonOutline className="text-brand" />}
                     label={t("colWaiter")}
                     value={waiterDisplay}
                   />
@@ -950,14 +927,16 @@ export default function OrderDetailsModal({
               <div className="px-5 py-4">
                 <div className="mb-3 flex items-center justify-between gap-2">
                   <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 text-[10px] font-bold">
+                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-brand-soft text-brand-soft-fg text-[10px] font-bold">
                       {displayItems.length}
                     </span>
                     {t("itemsTitle")}
                   </h4>
                   {canEditItems && menuId && (
-                    <button
+                    <Button
                       type="button"
+                      variant="subtle"
+                      size="sm"
                       onClick={() => {
                         if (editingItems) {
                           setDraftItems(items);
@@ -966,11 +945,10 @@ export default function OrderDetailsModal({
                           setEditingItems(true);
                         }
                       }}
-                      className="inline-flex items-center gap-1 rounded-lg border border-violet-200 px-2.5 py-1 text-xs font-semibold text-violet-700 hover:bg-violet-50 dark:border-violet-700/50 dark:text-violet-300 dark:hover:bg-violet-950/30"
+                      startIcon={<IoCreateOutline className="text-sm" />}
                     >
-                      <IoCreateOutline className="text-sm" />
                       {editingItems ? t("editItemsCancel") : t("editItems")}
-                    </button>
+                    </Button>
                   )}
                 </div>
 
@@ -1020,7 +998,7 @@ export default function OrderDetailsModal({
                               {item.name}
                             </p>
                             {(item.size || item.variant) && (
-                              <p className="text-[11px] text-violet-600 dark:text-violet-400 mt-0.5 truncate">
+                              <p className="text-[11px] text-fg-muted mt-0.5 truncate">
                                 {[
                                   callItemOptionLabel(
                                     item.size,
@@ -1049,23 +1027,29 @@ export default function OrderDetailsModal({
                           </div>
                           {editingItems ? (
                             <div className="flex items-center justify-center gap-1">
-                              <button
+                              <Button
                                 type="button"
+                                variant="secondary"
+                                size="xs"
+                                iconOnly
                                 onClick={() => adjustDraftQty(idx, -1)}
-                                className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300"
+                                aria-label="-"
                               >
                                 <IoRemoveOutline />
-                              </button>
+                              </Button>
                               <span className="min-w-6 text-center text-xs font-semibold">
                                 {item.quantity}
                               </span>
-                              <button
+                              <Button
                                 type="button"
+                                variant="secondary"
+                                size="xs"
+                                iconOnly
                                 onClick={() => adjustDraftQty(idx, 1)}
-                                className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300"
+                                aria-label="+"
                               >
                                 <IoAddOutline />
-                              </button>
+                              </Button>
                             </div>
                           ) : (
                             <span className="text-center min-w-8 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300">
@@ -1081,20 +1065,22 @@ export default function OrderDetailsModal({
                             )}
                           </span>
                           {editingItems && (
-                            <button
+                            <Button
                               type="button"
+                              variant="dangerGhost"
+                              size="sm"
+                              iconOnly
                               onClick={() => removeDraftItem(idx)}
-                              className="flex h-8 w-8 items-center justify-center rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
                               aria-label={t("removeItem")}
                             >
                               <IoTrashOutline />
-                            </button>
+                            </Button>
                           )}
                         </div>
                       ))}
                     </div>
 
-                    <div className="mt-3 px-4 py-3 rounded-xl bg-linear-to-r from-violet-50 to-fuchsia-50/60 dark:from-violet-950/40 dark:to-fuchsia-950/20 border border-violet-200/60 dark:border-violet-700/40">
+                    <div className="mt-3 px-4 py-3 rounded-xl border border-line bg-surface-2">
                       <OrderChargesLines
                         charges={charges}
                         currency={currency}
@@ -1108,19 +1094,21 @@ export default function OrderDetailsModal({
                               : undefined,
                           total: t("detailsTotal"),
                         }}
-                        accent="violet"
+                        accent="brand"
                       />
                     </div>
 
                     {editingItems && (
-                      <button
+                      <Button
                         type="button"
+                        fullWidth
                         disabled={savingItems || draftItems.length === 0}
+                        loading={savingItems}
                         onClick={() => void saveItemEdits()}
-                        className="mt-3 w-full rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-60"
+                        className="mt-3"
                       >
                         {savingItems ? t("itemsSaving") : t("itemsSave")}
-                      </button>
+                      </Button>
                     )}
                   </>
                 )}
@@ -1129,7 +1117,7 @@ export default function OrderDetailsModal({
               {entry.actions && entry.actions.length > 0 && (
                 <div className="px-5 pb-5 border-t border-slate-100 dark:border-slate-800 pt-4">
                   <h4 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                    <IoListOutline className="text-violet-500 text-base" />
+                    <IoListOutline className="text-brand text-base" />
                     {t("actionsTitle")}
                   </h4>
                   <ActionsTimeline
@@ -1141,51 +1129,8 @@ export default function OrderDetailsModal({
                 </div>
               )}
             </>
-          ) : null}
-        </div>
-
-        <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-3 bg-slate-50/80 dark:bg-slate-900/80">
-          {entry && menuId && onActionComplete && !loading && (
-            <OrderActionButtons
-              menuId={menuId}
-              entry={{
-                ...(entry as CallEntry),
-                pendingGuestAddition:
-                  entry.pendingGuestAddition === true ||
-                  order?.pendingGuestAddition === true,
-                pendingBillRequest:
-                  entry.pendingBillRequest === true ||
-                  order?.pendingBillRequest === true,
-              }}
-              status={status}
-              onComplete={onActionComplete}
-              translationNs={
-                variant === "delivery" ? "deliveryOrders" : "tableOrders"
-              }
-              variant={variant}
-            />
-          )}
-          <div className="flex justify-end gap-2">
-            {isPro && entry && !loading && (
-              <button
-                type="button"
-                onClick={handlePrint}
-                className="flex items-center gap-1.5 px-5 py-2 rounded-xl border border-violet-200 dark:border-violet-700 text-sm font-medium text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-900/20 hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-colors"
-              >
-                <IoPrintOutline className="text-base" />
-                {t("printOrder")}
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-            >
-              {t("close")}
-            </button>
-          </div>
-        </div>
-      </div>
+        ) : null}
+      </Modal>
 
       {isPro && entry && (
         <div style={{ overflow: "hidden", height: 0, position: "absolute" }}>
@@ -1222,6 +1167,6 @@ export default function OrderDetailsModal({
           />
         </div>
       )}
-    </div>
+    </>
   );
 }

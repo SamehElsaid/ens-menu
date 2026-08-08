@@ -246,6 +246,8 @@
     "close": "Close",
     "cancel": "Cancel",
     "openMenu": "Open menu",
+    "useDarkTheme": "Switch to dark theme",
+    "useLightTheme": "Switch to light theme",
     "search": "Search...",
     "optional": "Optional",
     "urlPlaceholder": "https://...",
@@ -254,7 +256,21 @@
     "saving": "Saving...",
     "paginationInfo": "Showing {from}–{to} of {total}",
     "showMore": "Show more",
-    "showLess": "Show less"
+    "showLess": "Show less",
+    "clearSearch": "Clear search",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "goToPage": "Go to page {page}",
+    "pagination": "Pagination",
+    "retry": "Try again",
+    "loading": "Loading",
+    "actions": "Actions",
+    "moreActions": "More actions",
+    "clearFilters": "Clear filters",
+    "noResultsTitle": "No matches",
+    "noResultsDescription": "Try a different search term or clear your filters.",
+    "errorTitle": "Something went wrong",
+    "errorDescription": "We couldn't load this. Check your connection and try again."
   },
   "auth": {
     "parentTitle": "Parent Registration",
@@ -437,7 +453,9 @@
     "recaptchaOnSubmit": "Quick security check when you tap Create account",
     "recaptchaModalTitle": "Quick security check",
     "recaptchaModalSubtitle": "One step to protect your account — then we'll finish signup.",
-    "recaptchaModalClose": "Close"
+    "recaptchaModalClose": "Close",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "registerPage": {
     "headline": "Launch your smart venue",
@@ -2898,7 +2916,8 @@
     "next": "Next",
     "pageOf": "of",
     "first": "First",
-    "last": "Last"
+    "last": "Last",
+    "pagination": "Pagination"
   },
   "templateBuilder": {
     "title": "Template Builder",
@@ -3120,6 +3139,19 @@
     "deliveryOrders": "Online orders",
     "myMenus": "My menus",
     "accountWorkspace": "My account",
+    "switchMenu": "Switch menu",
+    "switchMenuHint": "Stays on this page",
+    "searchMenus": "Find a menu",
+    "noMenusFound": "No menu matches that",
+    "currentMenu": "Current menu",
+    "navSectionOverview": "Overview",
+    "navSectionMenu": "Menu",
+    "navSectionOperations": "Operations",
+    "navSectionSettings": "Settings",
+    "navSectionActivity": "Activity",
+    "navSectionAccount": "Account",
+    "navSectionImport": "Import",
+    "navSectionAdmin": "Administration",
     "badgeSoon": "Soon",
     "menuImport": "AI Menu Import",
     "Menu Import": "Menu Import",
@@ -5605,7 +5637,6 @@
     "aiImportAction": "Import from photo",
     "accountSection": "Account alerts",
     "noAccountAlerts": "No new alerts",
-
     "renewNow": "Renew subscription →",
     "dismissAlert": "Dismiss",
     "goToRenewal": "Renew"

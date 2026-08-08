@@ -9,6 +9,12 @@ import { axiosGet, axiosPost, axiosPatch } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import Editor from "@/components/Custom/Editor";
+import {
+  Button,
+  PageHeader,
+  Skeleton,
+  SkeletonRegion,
+} from "@/components/ui";
 
 const defaultForm = {
   titleAr: "",
@@ -33,6 +39,7 @@ interface KnowledgeItemResponse {
 export default function KnowledgeManagementAddPage() {
   const locale = useLocale();
   const t = useTranslations("adminKnowledge");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const searchParams = useSearchParams();
   const isRTL = locale === "ar";
@@ -131,40 +138,39 @@ export default function KnowledgeManagementAddPage() {
   if (fetchingItem) {
     return (
       <div className="space-y-6 pb-10">
-        <div className="h-10 w-48 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
-        <div className="h-8 w-72 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
-        <CardDashBoard>
-          <div className="space-y-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="h-10 bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse" />
-              <div className="h-10 bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse" />
+        <SkeletonRegion label={tCommon("loading")}>
+          <Skeleton className="h-10 w-48 rounded-lg" />
+          <Skeleton className="mt-4 h-8 w-72" />
+          <CardDashBoard>
+            <div className="space-y-5">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Skeleton className="h-10 rounded-xl" />
+                <Skeleton className="h-10 rounded-xl" />
+              </div>
+              <Skeleton className="h-[400px] rounded-xl" />
+              <Skeleton className="h-[400px] rounded-xl" />
             </div>
-            <div className="h-[400px] bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse" />
-            <div className="h-[400px] bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse" />
-          </div>
-        </CardDashBoard>
+          </CardDashBoard>
+        </SkeletonRegion>
       </div>
     );
   }
 
   return (
     <div className="space-y-6 pb-10">
-      {/* Header */}
-      <div>
-        <div className={`flex items-center gap-4 mb-4 ${isRTL ? "flex-row-reverse" : ""}`}>
-          <button
+      <PageHeader
+        title={isEditMode ? t("editTitle") : t("addTitle")}
+        description={t("subtitle")}
+        actions={
+          <Button
+            variant="secondary"
+            startIcon={<IoArrowBack className="rtl:rotate-180" />}
             onClick={() => router.back()}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${isRTL ? "flex-row-reverse" : ""}`}
           >
-            <IoArrowBack className="text-lg" />
-            <span className="font-medium">{t("back")}</span>
-          </button>
-        </div>
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-          {isEditMode ? t("editTitle") : t("addTitle")}
-        </h1>
-        <p className="text-slate-500 dark:text-slate-400">{t("subtitle")}</p>
-      </div>
+            {t("back")}
+          </Button>
+        }
+      />
 
       {/* Form */}
       <CardDashBoard>
@@ -237,27 +243,16 @@ export default function KnowledgeManagementAddPage() {
 
           {/* Actions */}
           <div className={`flex items-center gap-3 pt-2 ${isRTL ? "flex-row-reverse" : "justify-end"}`}>
-            <button
-              onClick={() => router.back()}
-              disabled={saving}
-              className="px-6 py-2.5 rounded-xl font-medium border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <Button variant="secondary" onClick={() => router.back()} disabled={saving}>
               {t("actions.cancel")}
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleSave}
-              disabled={saving || editorLoading}
-              className="px-6 py-2.5 rounded-xl font-semibold bg-violet-600 hover:bg-violet-700 text-white transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 min-w-[110px] justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+              loading={saving}
+              disabled={editorLoading}
             >
-              {saving ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>{t("saving")}</span>
-                </>
-              ) : (
-                <span>{isEditMode ? t("actions.save") : t("actions.create")}</span>
-              )}
-            </button>
+              {isEditMode ? t("actions.save") : t("actions.create")}
+            </Button>
           </div>
         </div>
       </CardDashBoard>

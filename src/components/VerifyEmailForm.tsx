@@ -3,15 +3,9 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import {
-  FiAlertCircle,
-  FiArrowLeft,
-  FiArrowRight,
-  FiCheck,
-  FiMail,
-} from "react-icons/fi";
+import { FiAlertCircle, FiArrowRight, FiCheck, FiMail } from "react-icons/fi";
 import LinkTo from "@/components/Global/LinkTo";
-import CustomBtn from "@/components/Custom/CustomBtn";
+import { Button } from "@/components/ui/Button";
 import { localizeHref } from "@/i18n/routing";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import { cn } from "@/lib/cn";
@@ -31,92 +25,88 @@ function getApiErrorMessage(data: unknown) {
   return payload?.error || payload?.message || null;
 }
 
-function StatusIcon({
-  variant,
-  className,
-}: {
-  variant: StatusVariant;
-  className?: string;
-}) {
+const TONE = {
+  loading: {
+    shell: "bg-brand-soft text-brand ring-brand-line",
+    title: "text-fg",
+  },
+  success: {
+    shell: "bg-success-soft text-success ring-success-line",
+    title: "text-success-fg",
+  },
+  error: {
+    shell: "bg-danger-soft text-danger ring-danger-line",
+    title: "text-danger-fg",
+  },
+} as const;
+
+function StatusIcon({ variant }: { variant: StatusVariant }) {
   const shellClass = cn(
-    "relative flex size-[72px] items-center justify-center rounded-2xl ring-1",
-    variant === "loading" &&
-      "bg-purple-50 text-royal-purple ring-purple-200/80 dark:bg-purple-950/40 dark:text-purple-300 dark:ring-purple-500/25",
-    variant === "success" &&
-      "bg-emerald-50 text-emerald-600 ring-emerald-200/80 dark:bg-emerald-950/35 dark:text-emerald-400 dark:ring-emerald-500/25",
-    variant === "error" &&
-      "bg-red-50 text-red-600 ring-red-200/80 dark:bg-red-950/35 dark:text-red-400 dark:ring-red-500/25",
-    className,
+    "relative flex size-16 items-center justify-center rounded-2xl ring-1",
+    TONE[variant].shell,
   );
 
   if (variant === "loading") {
     return (
       <div className={shellClass} aria-hidden>
-        <FiMail className="size-8" />
-        <span className="absolute -inset-1 rounded-2xl border-2 border-purple-400/30 border-t-purple-600 animate-spin dark:border-purple-500/20 dark:border-t-purple-400" />
-      </div>
-    );
-  }
-
-  if (variant === "success") {
-    return (
-      <div className={shellClass} aria-hidden>
-        <FiCheck className="size-9 stroke-[2.5]" />
+        <FiMail className="size-7" />
+        <span className="absolute -inset-1 animate-spin rounded-2xl border-2 border-brand-line border-t-brand" />
       </div>
     );
   }
 
   return (
     <div className={shellClass} aria-hidden>
-      <FiAlertCircle className="size-8" />
+      {variant === "success" ? (
+        <FiCheck className="size-8 stroke-[2.5]" />
+      ) : (
+        <FiAlertCircle className="size-7" />
+      )}
     </div>
   );
 }
 
+/**
+ * Single panel for all three verification outcomes. The result is announced
+ * politely because it arrives after the page has already settled.
+ */
 function VerifyStatusPanel({
-  isRtl,
   variant,
   title,
   description,
+  detail,
   children,
 }: {
-  isRtl: boolean;
   variant: StatusVariant;
   title: string;
   description: string;
+  detail?: string;
   children?: ReactNode;
 }) {
   return (
     <div
-      dir={isRtl ? "rtl" : "ltr"}
-      className={cn(
-        "verify-email-status w-full rounded-2xl border px-5 py-8 text-center sm:px-6",
-        variant === "loading" &&
-          "border-purple-200/70 bg-linear-to-b from-purple-50/80 to-white dark:border-purple-500/20 dark:from-purple-950/25 dark:to-[#0d1117]",
-        variant === "success" &&
-          "border-emerald-200/70 bg-linear-to-b from-emerald-50/80 to-white dark:border-emerald-500/20 dark:from-emerald-950/20 dark:to-[#0d1117]",
-        variant === "error" &&
-          "border-red-200/70 bg-linear-to-b from-red-50/70 to-white dark:border-red-500/20 dark:from-red-950/20 dark:to-[#0d1117]",
-      )}
+      role="status"
+      aria-live="polite"
+      className="w-full text-center"
     >
       <div className="mx-auto flex max-w-sm flex-col items-center gap-5">
         <StatusIcon variant={variant} />
 
-        <div className="space-y-2">
-          <h3
+        <div className="space-y-1.5">
+          <h2
             className={cn(
-              "text-lg font-bold tracking-tight",
-              variant === "loading" && "text-royal-purple dark:text-purple-300",
-              variant === "success" &&
-                "text-emerald-700 dark:text-emerald-300",
-              variant === "error" && "text-red-700 dark:text-red-300",
+              "text-lg font-semibold tracking-[-0.014em]",
+              TONE[variant].title,
             )}
           >
             {title}
-          </h3>
-          <p className="text-[14px] leading-relaxed text-slate-600 dark:text-slate-400">
-            {description}
-          </p>
+          </h2>
+          <p className="text-sm leading-relaxed text-fg-muted">{description}</p>
+          {detail ? (
+            <p className="text-[13px] leading-relaxed text-fg-subtle">
+              {detail}
+            </p>
+          ) : null}
         </div>
 
         {children ? (
@@ -132,7 +122,6 @@ function VerifyStatusPanel({
 export default function VerifyEmailForm() {
   const t = useTranslations("");
   const locale = useLocale();
-  const isRtl = locale === "ar";
   const searchParams = useSearchParams();
   const token = searchParams.get("token")?.trim() || "";
   const email = searchParams.get("email")?.trim() || "";
@@ -192,67 +181,38 @@ export default function VerifyEmailForm() {
     toast.error(getApiErrorMessage(response.data) || t("auth.verifyEmailFailed"));
   };
 
-  const BackToLoginLink = () => {
-    const Arrow = isRtl ? FiArrowLeft : FiArrowRight;
-
-    return (
-      <LinkTo
-        href="/auth/login"
-        className="inline-flex items-center justify-center gap-2 text-[13px] font-medium text-slate-600 transition-colors hover:text-royal-purple dark:text-slate-400 dark:hover:text-purple-300"
-      >
-        <Arrow className="size-4 shrink-0 rtl:rotate-180" aria-hidden />
-        <span>{t("auth.backToLogin")}</span>
-      </LinkTo>
-    );
-  };
-
   if (state === "loading") {
     return (
-      <div
-        dir={isRtl ? "rtl" : "ltr"}
-        className="verify-email-status w-full rounded-2xl border border-purple-200/70 bg-linear-to-b from-purple-50/80 to-white px-5 py-10 text-center dark:border-purple-500/20 dark:from-purple-950/25 dark:to-[#0d1117] sm:px-6"
-      >
-        <div className="mx-auto flex max-w-sm flex-col items-center gap-4">
-          <StatusIcon variant="loading" />
-          <div className="space-y-2">
-            <h3 className="text-lg font-bold text-royal-purple dark:text-purple-300">
-              {t("auth.verifyEmailTitle")}
-            </h3>
-            <p className="text-[14px] font-medium text-slate-700 dark:text-slate-300">
-              {t("auth.verifyEmailLoading")}
-            </p>
-            <p className="text-[13px] leading-relaxed text-slate-500 dark:text-slate-400">
-              {t("auth.verifyEmailDescription")}
-            </p>
-          </div>
-        </div>
-      </div>
+      <VerifyStatusPanel
+        variant="loading"
+        title={t("auth.verifyEmailTitle")}
+        description={t("auth.verifyEmailLoading")}
+        detail={t("auth.verifyEmailDescription")}
+      />
     );
   }
 
   if (state === "success") {
     return (
       <VerifyStatusPanel
-        isRtl={isRtl}
         variant="success"
         title={t("auth.verifyEmailSuccessTitle")}
         description={t("auth.verifyEmailSuccess")}
       >
-        <CustomBtn
-          type="button"
+        <Button
           onClick={() => {
             window.location.href = localizeHref("/auth/login", locale);
           }}
-          text={t("auth.login")}
-          className="w-full"
-        />
+          fullWidth
+        >
+          {t("auth.login")}
+        </Button>
       </VerifyStatusPanel>
     );
   }
 
   return (
     <VerifyStatusPanel
-      isRtl={isRtl}
       variant="error"
       title={t("auth.verifyEmailErrorTitle")}
       description={
@@ -262,16 +222,17 @@ export default function VerifyEmailForm() {
       }
     >
       {email ? (
-        <CustomBtn
-          type="button"
-          onClick={handleResend}
-          loading={resending}
-          disabled={resending}
-          text={t("auth.resendVerification")}
-          className="w-full"
-        />
+        <Button onClick={handleResend} loading={resending} fullWidth>
+          {t("auth.resendVerification")}
+        </Button>
       ) : null}
-      <BackToLoginLink />
+      <LinkTo
+        href="/auth/login"
+        className="inline-flex items-center justify-center gap-2 rounded-md py-1 text-[13px] font-medium text-fg-muted transition-colors hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      >
+        <FiArrowRight className="size-4 shrink-0 rtl:rotate-180" aria-hidden />
+        <span>{t("auth.backToLogin")}</span>
+      </LinkTo>
     </VerifyStatusPanel>
   );
 }

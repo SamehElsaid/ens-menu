@@ -9,7 +9,6 @@ import {
   IoCallOutline,
   IoListOutline,
   IoRefreshOutline,
-  IoSearchOutline,
 } from "react-icons/io5";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import DataTable from "@/components/Custom/DataTable";
@@ -18,6 +17,15 @@ import UserFollowUpCallsModal from "@/components/Admin/UserFollowUpCallsModal";
 import PhoneDisplay from "@/components/Global/PhoneDisplay";
 import { DemoDataBanner } from "@/components/Admin/AdminAnalyticsWidgets";
 import FollowUpTeamPerformance from "@/components/Admin/FollowUpTeamPerformance";
+import {
+  Button,
+  NoResultsState,
+  PageHeader,
+  SearchInput,
+  SectionHeader,
+  SegmentedControl,
+  buttonClasses,
+} from "@/components/ui";
 import {
   createFollowUpCall,
   fetchFollowUpQueue,
@@ -64,6 +72,7 @@ function matchesQueueSearch(user: FollowUpQueueUser, query: string): boolean {
 export default function AdminFollowUpsPage() {
   const locale = useLocale();
   const t = useTranslations("adminFollowUps");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const textDir = locale === "ar" ? "rtl" : "ltr";
 
@@ -222,7 +231,7 @@ export default function AdminFollowUpsPage() {
               <button
                 type="button"
                 onClick={() => setCallsTarget(row)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                className={buttonClasses({ variant: "secondary", size: "sm" })}
               >
                 <IoListOutline />
                 {t("viewCalls")}
@@ -230,7 +239,7 @@ export default function AdminFollowUpsPage() {
               <button
                 type="button"
                 onClick={() => setLogTarget(row)}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+                className={buttonClasses({ variant: "subtle", size: "sm" })}
               >
                 <IoCallOutline />
                 {t("logCall")}
@@ -248,34 +257,29 @@ export default function AdminFollowUpsPage() {
       className="space-y-6 py-5 animate-fadeIn text-slate-800 dark:text-slate-100"
       dir={textDir}
     >
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <button
-            type="button"
-            onClick={() => router.push("/admin")}
-            className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-primary mb-2"
-          >
-            <IoArrowBack
-              className={locale === "ar" ? "rotate-180" : undefined}
-            />
-            {t("backToAdmin")}
-          </button>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100">
-            {t("title")}
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            {t("subtitle")}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => void load()}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
-        >
-          <IoRefreshOutline />
-          {t("refresh")}
-        </button>
-      </div>
+      <PageHeader
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          <>
+            <Button
+              variant="ghost"
+              size="sm"
+              startIcon={<IoArrowBack className="rtl:rotate-180" />}
+              onClick={() => router.push("/admin")}
+            >
+              {t("backToAdmin")}
+            </Button>
+            <Button
+              variant="secondary"
+              startIcon={<IoRefreshOutline />}
+              onClick={() => void load()}
+            >
+              {t("refresh")}
+            </Button>
+          </>
+        }
+      />
 
       {isDemo && <DemoDataBanner message={t("demoDataBanner")} dir={textDir} />}
 
@@ -316,22 +320,16 @@ export default function AdminFollowUpsPage() {
                 </p>
               </CardDashBoard>
             </div>
-            <div className="flex gap-2 shrink-0">
-              {(["7d", "30d"] as const).map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => setReportPeriod(p)}
-                  className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors ${
-                    reportPeriod === p
-                      ? "bg-primary text-white"
-                      : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
-                  }`}
-                >
-                  {t(`teamReport.period.${p}`)}
-                </button>
-              ))}
-            </div>
+            <SegmentedControl
+              label={t("title")}
+              value={reportPeriod}
+              onChange={setReportPeriod}
+              size="sm"
+              options={(["7d", "30d"] as const).map((p) => ({
+                value: p,
+                label: t(`teamReport.period.${p}`),
+              }))}
+            />
           </div>
 
           <FollowUpTeamPerformance
@@ -342,46 +340,31 @@ export default function AdminFollowUpsPage() {
         </>
       )}
 
-      <div className="flex flex-wrap gap-2">
-        {SEGMENTS.map((s) => (
-          <button
-            key={s}
-            type="button"
-            onClick={() => setSegment(s)}
-            className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors ${
-              segment === s
-                ? "bg-primary text-white"
-                : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
-            }`}
-          >
-            {t(`segments.${s}`)}
-          </button>
-        ))}
-      </div>
+      <SegmentedControl
+        label={t("queueTitle")}
+        value={segment}
+        onChange={setSegment}
+        options={SEGMENTS.map((s) => ({
+          value: s,
+          label: t(`segments.${s}`),
+        }))}
+      />
 
       <CardDashBoard>
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
-          {t("queueTitle")}
-        </h2>
-        <div className="relative mb-4">
-          <IoSearchOutline
-            className={`pointer-events-none absolute top-1/2 -translate-y-1/2 text-lg text-slate-400 ${locale === "ar" ? "right-3" : "left-3"}`}
-          />
-          <input
-            type="search"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t("queueSearchPlaceholder")}
-            dir={textDir}
-            className={`w-full rounded-xl border border-slate-200 bg-white py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 ${
-              locale === "ar" ? "pr-10 pl-4 text-start" : "pl-10 pr-4"
-            }`}
-          />
-        </div>
+        <SectionHeader title={t("queueTitle")} className="mb-4" />
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder={t("queueSearchPlaceholder")}
+          label={t("queueSearchPlaceholder")}
+          className="mb-4"
+        />
         {!loading && searchQuery.trim() && filteredQueue.length === 0 ? (
-          <p className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">
-            {t("queueNoResults")}
-          </p>
+          <NoResultsState
+            title={t("queueNoResults")}
+            onClear={() => setSearchQuery("")}
+            clearLabel={tCommon("clearSearch")}
+          />
         ) : (
           <DataTable<FollowUpQueueUser>
             rowData={filteredQueue}

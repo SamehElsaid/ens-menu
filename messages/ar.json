@@ -246,6 +246,8 @@
     "close": "إغلاق",
     "cancel": "إلغاء",
     "openMenu": "فتح القائمة",
+    "useDarkTheme": "التبديل إلى الوضع الداكن",
+    "useLightTheme": "التبديل إلى الوضع الفاتح",
     "search": "بحث...",
     "optional": "اختياري",
     "urlPlaceholder": "https://...",
@@ -254,7 +256,21 @@
     "saving": "جاري الحفظ...",
     "paginationInfo": "عرض {from}–{to} من {total}",
     "showMore": "عرض المزيد",
-    "showLess": "عرض أقل"
+    "showLess": "عرض أقل",
+    "clearSearch": "مسح البحث",
+    "previousPage": "الصفحة السابقة",
+    "nextPage": "الصفحة التالية",
+    "goToPage": "الانتقال إلى الصفحة {page}",
+    "pagination": "ترقيم الصفحات",
+    "retry": "إعادة المحاولة",
+    "loading": "جاري التحميل",
+    "actions": "إجراءات",
+    "moreActions": "المزيد من الإجراءات",
+    "clearFilters": "مسح عوامل التصفية",
+    "noResultsTitle": "لا توجد نتائج",
+    "noResultsDescription": "جرّب كلمة بحث مختلفة أو امسح عوامل التصفية.",
+    "errorTitle": "حدث خطأ ما",
+    "errorDescription": "تعذّر تحميل البيانات. تحقّق من اتصالك وحاول مرة أخرى."
   },
   "auth": {
     "parentTitle": "تسجيل الوالد",
@@ -437,7 +453,9 @@
     "recaptchaOnSubmit": "تحقق أمني سريع عند الضغط على «إنشاء حساب»",
     "recaptchaModalTitle": "تحقق سريع",
     "recaptchaModalSubtitle": "خطوة واحدة لحماية حسابك — ثم نكمل التسجيل مباشرة.",
-    "recaptchaModalClose": "إغلاق"
+    "recaptchaModalClose": "إغلاق",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور"
   },
   "registerPage": {
     "headline": "ابدأ تشغيل منشأتك",
@@ -2801,7 +2819,8 @@
     "next": "التالي",
     "pageOf": "من",
     "first": "الأولى",
-    "last": "الأخيرة"
+    "last": "الأخيرة",
+    "pagination": "ترقيم الصفحات"
   },
   "templateBuilder": {
     "title": "منشئ القوالب",
@@ -3023,6 +3042,19 @@
     "deliveryOrders": "عرض طلبات الاونلاين",
     "myMenus": "منيوهاتي",
     "accountWorkspace": "حسابي",
+    "switchMenu": "تبديل المنيو",
+    "switchMenuHint": "تبقى في نفس الصفحة",
+    "searchMenus": "ابحث عن منيو",
+    "noMenusFound": "لا يوجد منيو بهذا الاسم",
+    "currentMenu": "المنيو الحالي",
+    "navSectionOverview": "نظرة عامة",
+    "navSectionMenu": "المنيو",
+    "navSectionOperations": "التشغيل",
+    "navSectionSettings": "الإعدادات",
+    "navSectionActivity": "النشاط",
+    "navSectionAccount": "الحساب",
+    "navSectionImport": "الاستيراد",
+    "navSectionAdmin": "الإدارة",
     "badgeSoon": "قريباً",
     "menuImport": "استيراد المنيو",
     "Menu Import": "استيراد المنيو",
@@ -5605,7 +5637,6 @@
     "aiImportAction": "استيراد من صورة",
     "accountSection": "تنبيهات الحساب",
     "noAccountAlerts": "لا توجد تنبيهات جديدة",
-
     "renewNow": "جدّد الاشتراك ←",
     "dismissAlert": "إزالة",
     "goToRenewal": "التجديد"

@@ -1,26 +1,34 @@
 /**
  * ENSmenu public-site design system.
  *
+ * These recipes now compose from the same semantic tokens as the in-product
+ * primitives in `src/components/ui` (`surface`, `fg`, `line`, `brand`, …), so
+ * the marketing site and the app resolve to one palette, one radius scale and
+ * one focus treatment. Dark mode is inherited from the token layer rather than
+ * re-declared per class.
+ *
  * Rules:
  * - Layout: `.container`, compact vertical rhythm, balanced whitespace
  * - Typography: display → section → body → caption hierarchy
- * - Visual: minimal SaaS, soft purple accents, subtle glow only
- * - Components: use `ds.*` tokens or `marketing/*` primitives — do not one-off styles
- * - AI branding: subtle badges/hints, smart-menu focus — not buzzword-heavy
- * - Mobile-first: center on small screens, `flow-*` / `text-start` on large
- * - RTL/LTR: logical properties (`start`/`end`, `text-start`) — never hardcode left/right per locale
+ * - Components: use `ds.*` tokens or `marketing/*` primitives — no one-off styles
+ * - Mobile-first: center on small screens, `text-start` on large
+ * - RTL/LTR: logical properties (`start`/`end`, `text-start`) — never hardcode
+ *   left/right per locale
  * - Sections: one idea per section, avoid card overload
  */
+
+/** Keyboard-only ring, identical to the one the product primitives use. */
+const focus =
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
 
 export const ds = {
   /** Section shells — pick one variant per section */
   section: {
     base: "relative overflow-visible",
-    hero: "hero-section isolate bg-white pt-24 pb-10 sm:pt-28 sm:pb-12 dark:bg-[#0d1117] lg:pt-32 lg:pb-28",
-    default: "bg-white py-8 sm:py-10 dark:bg-[#0d1117] lg:py-16",
-    muted: "bg-slate-50/60 py-8 sm:py-10 dark:bg-slate-900/20 lg:py-16",
-    footer:
-      "site-footer relative border-t border-slate-200/40 bg-slate-50/50 text-slate-500 dark:border-slate-800/50 dark:bg-[#0a0a0c]/90 dark:text-slate-500",
+    hero: "hero-section isolate bg-surface pt-24 pb-10 sm:pt-28 sm:pb-12 lg:pt-32 lg:pb-28",
+    default: "bg-surface py-8 sm:py-10 lg:py-16",
+    muted: "bg-surface-2 py-8 sm:py-10 lg:py-16",
+    footer: "site-footer relative border-t border-line bg-surface-2 text-fg-muted",
   },
 
   /** Two-column section layout (copy + visual) */
@@ -31,62 +39,56 @@ export const ds = {
       "flex w-full shrink-0 items-center justify-center self-center overflow-visible lg:w-auto",
   },
 
-  /** Typography scale */
+  /** Typography scale. Tracking tightens as size grows, the way real type does. */
   type: {
     display:
-      "font-bold leading-[1.12] tracking-tight text-slate-900 text-[2rem] sm:text-[2.5rem] lg:text-[2.75rem] dark:text-white",
+      "text-[2rem] font-bold leading-[1.12] tracking-[-0.024em] text-fg sm:text-[2.5rem] lg:text-[2.75rem]",
     sectionTitle:
-      "font-bold leading-tight tracking-tight text-slate-900 text-2xl sm:text-[1.75rem] lg:text-[2rem] dark:text-white",
-    subtitle:
-      "max-w-lg text-base leading-relaxed text-slate-500 sm:text-lg dark:text-slate-400",
-    body: "text-[13px] leading-relaxed text-slate-500 dark:text-slate-400",
-    caption: "text-xs font-medium text-slate-400 dark:text-slate-500",
-    label:
-      "text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500",
-    accent:
-      "bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent rtl:bg-gradient-to-l dark:from-purple-400 dark:to-indigo-400",
+      "text-2xl font-bold leading-tight tracking-[-0.02em] text-fg sm:text-[1.75rem] lg:text-[2rem]",
+    subtitle: "max-w-lg text-base leading-relaxed text-fg-muted sm:text-lg",
+    body: "text-[13px] leading-relaxed text-fg-muted",
+    caption: "text-xs font-medium text-fg-subtle",
+    label: "text-[11px] font-semibold uppercase tracking-wide text-fg-subtle",
+    /** Headline highlight. Solid brand reads sharper than a gradient and keeps
+     *  contrast predictable in both themes. */
+    accent: "text-brand",
   },
 
   /** Badges & pills */
   badge:
-    "inline-flex items-center gap-2 rounded-full border border-purple-100 bg-purple-50/80 px-3.5 py-1 text-[11px] font-semibold tracking-wide text-purple-700 dark:border-purple-500/20 dark:bg-purple-500/10 dark:text-purple-300",
-  badgeDot: "h-1.5 w-1.5 shrink-0 rounded-full bg-purple-500",
-  pill: "rounded-full border border-slate-200/80 bg-white px-3 py-1 text-[11px] font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-400",
+    "inline-flex items-center gap-2 rounded-full border border-brand-line bg-brand-soft px-3.5 py-1 text-[11px] font-semibold tracking-wide text-brand-soft-fg",
+  badgeDot: "size-1.5 shrink-0 rounded-full bg-brand",
+  pill: "rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-fg-muted",
   pillRow: "flex flex-wrap justify-center gap-2 lg:justify-start",
 
-  /** Buttons */
+  /** Buttons. Same geometry and states as the in-product `Button` primitive so
+   *  the landing CTA and the first in-app action feel like one control. */
   btn: {
-    base: "inline-flex items-center justify-center gap-2 transition-colors",
-    primary:
-      "rounded-full bg-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm shadow-purple-600/15 transition-all hover:bg-purple-700 hover:shadow-md hover:shadow-purple-600/20 dark:bg-purple-500 dark:shadow-purple-500/10 dark:hover:bg-purple-600",
-    secondary:
-      "rounded-full border border-slate-200/90 bg-white/80 px-6 py-2.5 text-sm font-medium text-slate-700 backdrop-blur-sm transition-all hover:border-purple-200/80 hover:bg-purple-50/30 hover:text-purple-700 dark:border-slate-700/80 dark:bg-slate-900/30 dark:text-slate-300 dark:hover:border-purple-500/30 dark:hover:text-purple-300",
-    compact:
-      "rounded-full bg-purple-600 px-4 py-1.5 text-[12px] font-medium text-white hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600",
-    ghost:
-      "rounded-full px-3 py-1.5 text-[12px] font-medium text-slate-600 hover:text-purple-600 dark:text-slate-400 dark:hover:text-purple-300",
+    base: `inline-flex items-center justify-center gap-2 transition-colors ${focus}`,
+    primary: `h-11 rounded-lg bg-brand px-6 text-sm font-semibold text-on-brand shadow-xs transition-colors hover:bg-brand-hover active:bg-brand-active ${focus}`,
+    secondary: `h-11 rounded-lg border border-line bg-surface px-6 text-sm font-medium text-fg transition-colors hover:bg-surface-2 ${focus}`,
+    compact: `h-8 rounded-md bg-brand px-4 text-[12px] font-medium text-on-brand transition-colors hover:bg-brand-hover ${focus}`,
+    ghost: `h-8 rounded-md px-3 text-[12px] font-medium text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg ${focus}`,
     row: "flex flex-wrap items-center justify-center gap-3 lg:justify-start",
   },
 
-  /** Cards & surfaces */
+  /** Cards & surfaces. A card gets a hairline or a shadow — not a heavy pair. */
   card: {
-    base: "rounded-2xl border border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-950",
-    shadow: "shadow-sm shadow-slate-200/40 dark:shadow-black/20",
-    elevated:
-      "shadow-xl shadow-slate-200/50 dark:border-slate-800 dark:shadow-black/30",
+    base: "rounded-2xl border border-line bg-surface",
+    shadow: "shadow-sm",
+    elevated: "shadow-lg",
     padding: "p-5 sm:p-6 lg:p-6",
     paddingMobile: "p-4 sm:p-5 md:p-6",
   },
 
   /** Links */
   link: {
-    footer:
-      "text-[13px] leading-snug text-slate-600 transition-colors hover:text-purple-600 dark:text-slate-400 dark:hover:text-purple-300",
-    nav: "text-[13px] font-medium text-slate-600 transition-colors hover:text-purple-600 dark:text-slate-400 dark:hover:text-purple-300",
+    footer: `rounded-sm text-[13px] leading-snug text-fg-muted transition-colors hover:text-brand ${focus}`,
+    nav: `rounded-sm text-[13px] font-medium text-fg-muted transition-colors hover:text-brand ${focus}`,
   },
 
   /** Subtle decorative glow (use sparingly — one per section max) */
-  glow: "pointer-events-none absolute inset-0 -z-10 scale-110 rounded-[2.5rem] bg-purple-400/10 blur-3xl dark:bg-purple-600/15",
+  glow: "pointer-events-none absolute inset-0 -z-10 scale-110 rounded-[2.5rem] bg-brand-soft blur-3xl",
 
   /** Prose width caps */
   prose: {
@@ -97,10 +99,10 @@ export const ds = {
 
   /** Footer-specific compact spacing */
   footer: {
-    inner: "container py-6 opacity-90 lg:py-7",
+    inner: "container py-6 lg:py-7",
     grid: "grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-[1.4fr_0.55fr_0.7fr] lg:items-start lg:gap-8",
-    desc: "mt-3 max-w-[16rem] text-[13px] leading-relaxed text-slate-500 dark:text-slate-400",
-    bar: "mt-6 flex flex-col gap-2 border-t border-slate-100 pt-5 text-start text-[12px] text-slate-400 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800/80 dark:text-slate-500",
+    desc: "mt-3 max-w-64 text-[13px] leading-relaxed text-fg-muted",
+    bar: "mt-6 flex flex-col gap-2 border-t border-line pt-5 text-start text-[12px] text-fg-subtle sm:flex-row sm:items-center sm:justify-between",
   },
 } as const;
 

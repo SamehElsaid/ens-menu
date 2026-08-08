@@ -1,7 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import CustomInput from "@/components/Custom/CustomInput";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Button,
+  Field,
+  Input,
+  Spinner,
+  Switch,
+  Textarea,
+} from "@/components/ui";
 import CurrencySelector from "@/components/Global/CurrencySelector";
 import { useTranslations, useLocale } from "next-intl";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
@@ -26,7 +33,6 @@ import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
 import { toast } from "react-toastify";
 import type { Menu, MenusResponse, UploadResponse } from "@/types/Menu";
 import { useParams, useRouter } from "next/navigation";
-import CustomBtn from "@/components/Custom/CustomBtn";
 import DeleteMenuConfirm from "../../../../../components/Dashboard/DeleteMenuConfirm";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import ImageLoad from "@/components/ImageLoad";
@@ -99,6 +105,7 @@ export default function SettingsPage() {
     menu?.isActive ?? false,
   );
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [allMenus, setAllMenus] = useState<Menu[]>([]);
   const { menu: menuId } = useParams();
@@ -190,8 +197,8 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[40vh] gap-3">
-        <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+        <Spinner size="lg" />
+        <p className="text-sm text-fg-muted">
           {locale === "ar"
             ? "جاري تحميل إعدادات القائمة..."
             : "Loading menu settings..."}
@@ -379,87 +386,79 @@ export default function SettingsPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              {tMenusCreate("nameEn")} *
-            </label>
-            <Controller
-              name="name"
-              control={control}
-              render={({ field }) => (
-                <CustomInput
+          <Controller
+            name="name"
+            control={control}
+            render={({ field }) => (
+              <Field
+                label={tMenusCreate("nameEn")}
+                required
+                error={errors.name?.message}
+              >
+                <Input
                   type="text"
                   value={field.value}
                   onChange={field.onChange}
                   onBlur={field.onBlur}
                   placeholder={tSettings("namePlaceholder")}
-                  error={errors.name?.message}
                 />
-              )}
-            />
-          </div>
+              </Field>
+            )}
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              {tMenusCreate("nameAr")} *
-            </label>
-            <Controller
-              name="nameAr"
-              control={control}
-              render={({ field }) => (
-                <CustomInput
+          <Controller
+            name="nameAr"
+            control={control}
+            render={({ field }) => (
+              <Field
+                label={tMenusCreate("nameAr")}
+                required
+                error={errors.nameAr?.message}
+              >
+                <Input
                   type="text"
                   value={field.value}
                   onChange={field.onChange}
                   onBlur={field.onBlur}
                   placeholder="قائمة مطعمي"
-                  error={errors.nameAr?.message}
                 />
-              )}
-            />
-          </div>
+              </Field>
+            )}
+          />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              {tMenusCreate("descriptionEn")}
-            </label>
-            <Controller
-              name="description"
-              control={control}
-              render={({ field }) => (
-                <CustomInput
-                  type="textarea"
+          <Controller
+            name="description"
+            control={control}
+            render={({ field }) => (
+              <Field label={tMenusCreate("descriptionEn")}>
+                <Textarea
                   rows={3}
-                  value={field.value}
+                  value={field.value ?? ""}
                   onChange={field.onChange}
                   onBlur={field.onBlur}
                   placeholder={tSettings("descriptionPlaceholder")}
                 />
-              )}
-            />
-          </div>
+              </Field>
+            )}
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              {tMenusCreate("descriptionAr")}
-            </label>
-            <Controller
-              name="descriptionAr"
-              control={control}
-              render={({ field }) => (
-                <CustomInput
-                  type="textarea"
+          <Controller
+            name="descriptionAr"
+            control={control}
+            render={({ field }) => (
+              <Field label={tMenusCreate("descriptionAr")}>
+                <Textarea
                   rows={3}
-                  value={field.value}
+                  value={field.value ?? ""}
                   onChange={field.onChange}
                   onBlur={field.onBlur}
                   placeholder="اكتب وصف القائمة بالعربية..."
                 />
-              )}
-            />
-          </div>
+              </Field>
+            )}
+          />
         </div>
       </section>
 
@@ -504,31 +503,35 @@ export default function SettingsPage() {
                   )}
                 </div>
                 {(logoPreview || initialLogo) && (
-                  <button
+                  <Button
                     type="button"
+                    variant="danger"
+                    size="sm"
+                    iconOnly
                     onClick={handleRemoveLogo}
-                    className="absolute -top-2 -right-2 w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-colors"
+                    className="absolute -top-2 -end-2 size-7 rounded-full!"
+                    aria-label={tCommon("remove")}
                   >
                     <IoCloseOutline className="text-sm" />
-                  </button>
+                  </Button>
                 )}
               </div>
 
               <div className="flex flex-col items-center gap-2 w-full">
-                <label className="cursor-pointer">
-                  <input
-                    type="file"
-                    accept=".png,.ico,.jpg,.jpeg,image/png,image/x-icon,image/vnd.microsoft.icon,image/jpeg"
-                    onChange={handleLogoChange}
-                    className="hidden"
-                  />
-                  <div className="px-4 py-2 rounded-lg transition-colors flex items-center gap-2 bg-primary hover:bg-primary/90 text-white">
-                    <IoCloudUploadOutline className="text-xl" />
-                    <span className="text-sm font-medium">
-                      {tMenusCreate("logoUpload")}
-                    </span>
-                  </div>
-                </label>
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept=".png,.ico,.jpg,.jpeg,image/png,image/x-icon,image/vnd.microsoft.icon,image/jpeg"
+                  onChange={handleLogoChange}
+                  className="sr-only"
+                />
+                <Button
+                  type="button"
+                  onClick={() => logoInputRef.current?.click()}
+                  startIcon={<IoCloudUploadOutline className="text-xl" />}
+                >
+                  {tMenusCreate("logoUpload")}
+                </Button>
                 <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
                   {tMenusCreate("logoHint")}
                 </p>
@@ -622,29 +625,11 @@ export default function SettingsPage() {
               name="chatbotEnabled"
               control={control}
               render={({ field }) => (
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={field.value}
-                  onClick={() => field.onChange(!field.value)}
-                  className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:ring-offset-2 ${
-                    field.value
-                      ? "bg-violet-500"
-                      : "bg-slate-200 dark:bg-slate-600"
-                  }`}
-                >
-                  <span
-                    className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${
-                      field.value
-                        ? locale === "ar"
-                          ? "-translate-x-5"
-                          : "translate-x-5"
-                        : locale === "ar"
-                          ? "translate-x-0"
-                          : "translate-x-0"
-                    }`}
-                  />
-                </button>
+                <Switch
+                  checked={field.value}
+                  onChange={(e) => field.onChange(e.target.checked)}
+                  aria-label={tSettings("chatbotEnabled")}
+                />
               )}
             />
           </div>
@@ -690,41 +675,26 @@ export default function SettingsPage() {
                 name="taxEnabled"
                 control={control}
                 render={({ field }) => (
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={field.value}
-                    onClick={() => field.onChange(!field.value)}
-                    className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:ring-offset-2 ${
-                      field.value
-                        ? "bg-amber-500"
-                        : "bg-slate-200 dark:bg-slate-600"
-                    }`}
-                  >
-                    <span
-                      className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${
-                        field.value
-                          ? locale === "ar"
-                            ? "-translate-x-5"
-                            : "translate-x-5"
-                          : "translate-x-0"
-                      }`}
-                    />
-                  </button>
+                  <Switch
+                    checked={field.value}
+                    onChange={(e) => field.onChange(e.target.checked)}
+                    aria-label={tSettings("taxEnabled")}
+                  />
                 )}
               />
             </div>
           </div>
           {taxEnabledWatch && (
-            <div className="space-y-1.5 ps-1">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                {tSettings("taxPercent")}
-              </label>
-              <Controller
-                name="taxPercent"
-                control={control}
-                render={({ field }) => (
-                  <CustomInput
+            <Controller
+              name="taxPercent"
+              control={control}
+              render={({ field }) => (
+                <Field
+                  label={tSettings("taxPercent")}
+                  error={errors.taxPercent?.message}
+                  className="ps-1"
+                >
+                  <Input
                     type="number"
                     value={
                       field.value === null || field.value === undefined
@@ -737,12 +707,9 @@ export default function SettingsPage() {
                     }}
                     placeholder={tSettings("taxPercentPlaceholder")}
                   />
-                )}
-              />
-              {errors.taxPercent?.message && (
-                <p className="text-xs text-red-500">{errors.taxPercent.message}</p>
+                </Field>
               )}
-            </div>
+            />
           )}
 
           <div className="flex items-center justify-between gap-4 rounded-xl border border-slate-100 dark:border-slate-800 p-4">
@@ -764,41 +731,26 @@ export default function SettingsPage() {
                 name="serviceEnabled"
                 control={control}
                 render={({ field }) => (
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={field.value}
-                    onClick={() => field.onChange(!field.value)}
-                    className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:ring-offset-2 ${
-                      field.value
-                        ? "bg-amber-500"
-                        : "bg-slate-200 dark:bg-slate-600"
-                    }`}
-                  >
-                    <span
-                      className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${
-                        field.value
-                          ? locale === "ar"
-                            ? "-translate-x-5"
-                            : "translate-x-5"
-                          : "translate-x-0"
-                      }`}
-                    />
-                  </button>
+                  <Switch
+                    checked={field.value}
+                    onChange={(e) => field.onChange(e.target.checked)}
+                    aria-label={tSettings("serviceEnabled")}
+                  />
                 )}
               />
             </div>
           </div>
           {serviceEnabledWatch && (
-            <div className="space-y-1.5 ps-1">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                {tSettings("servicePercent")}
-              </label>
-              <Controller
-                name="servicePercent"
-                control={control}
-                render={({ field }) => (
-                  <CustomInput
+            <Controller
+              name="servicePercent"
+              control={control}
+              render={({ field }) => (
+                <Field
+                  label={tSettings("servicePercent")}
+                  error={errors.servicePercent?.message}
+                  className="ps-1"
+                >
+                  <Input
                     type="number"
                     value={
                       field.value === null || field.value === undefined
@@ -811,14 +763,9 @@ export default function SettingsPage() {
                     }}
                     placeholder={tSettings("servicePercentPlaceholder")}
                   />
-                )}
-              />
-              {errors.servicePercent?.message && (
-                <p className="text-xs text-red-500">
-                  {errors.servicePercent.message}
-                </p>
+                </Field>
               )}
-            </div>
+            />
           )}
         </div>
       </section>
@@ -874,24 +821,16 @@ export default function SettingsPage() {
                 ? "قم بتفعيل أو إيقاف القائمة من هنا."
                 : "Activate or pause this menu from here."}
             </p>
-            <button
+            <Button
               type="button"
+              variant={localIsActive ? "dangerGhost" : "primary"}
+              size="sm"
               onClick={handleToggleStatus}
               disabled={togglingStatus}
-              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold shadow-sm transition-colors ${
-                localIsActive
-                  ? "bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25"
-                  : "bg-emerald-500 text-white hover:bg-emerald-600 dark:bg-emerald-500 dark:hover:bg-emerald-600"
-              } disabled:opacity-60`}
+              loading={togglingStatus}
             >
-              {togglingStatus
-                ? locale === "ar"
-                  ? "جاري التحديث..."
-                  : "Updating..."
-                : localIsActive
-                  ? tMenuCard("pause")
-                  : tMenuCard("play")}
-            </button>
+              {localIsActive ? tMenuCard("pause") : tMenuCard("play")}
+            </Button>
           </div>
         </div>
 
@@ -914,13 +853,14 @@ export default function SettingsPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3 mt-auto">
-            <button
+            <Button
               type="button"
+              variant="dangerGhost"
+              size="sm"
               onClick={() => setIsDeleteModalOpen(true)}
-              className="inline-flex items-center justify-center rounded-xl border border-red-300/70 dark:border-red-900/70 bg-white dark:bg-slate-900 px-4 py-2 text-xs font-semibold text-red-600 dark:text-red-300 shadow-sm hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
             >
               {tSettings("deleteThisMenu")}
-            </button>
+            </Button>
             <p className="text-[11px] text-red-500/80 dark:text-red-300/80">
               {locale === "ar"
                 ? "لحذف القائمة اكتب اسمها في النافذة المنبثقة للتأكيد."
@@ -935,23 +875,19 @@ export default function SettingsPage() {
         id="onboarding-settings-save"
         className="flex flex-col md:flex-row justify-end gap-3 pt-4 pb-10 border-t border-slate-100 dark:border-slate-800 mt-4"
       >
-        <button
-          type="button"
-          disabled
-          className="inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-100 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-70"
-        >
+        <Button type="button" variant="secondary" disabled>
           {tCommon("cancel")}
-        </button>
-        <CustomBtn
+        </Button>
+        <Button
+          type="submit"
           loading={isSubmitting}
           disabled={(!isDirty && !logoDirty) || isSubmitting}
+          size="lg"
           className="w-fit!"
+          startIcon={<IoSaveOutline className="text-xl" />}
         >
-          <div className="flex items-center justify-center gap-2">
-            <IoSaveOutline className="text-xl" />
-            {tSettings("saveChanges")}
-          </div>
-        </CustomBtn>
+          {tSettings("saveChanges")}
+        </Button>
       </div>
 
       {isDeleteModalOpen && (

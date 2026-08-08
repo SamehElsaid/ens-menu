@@ -360,7 +360,7 @@ export default function SubscriptionManagePanel({
                   onClick={() => onProBillingChange(cycle)}
                   className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${
                     proBillingChoice === cycle
-                      ? "bg-primary text-white shadow-sm"
+                      ? "bg-brand text-on-brand shadow-sm"
                       : "text-slate-600 hover:bg-white dark:text-slate-300 dark:hover:bg-slate-800"
                   }`}
                 >

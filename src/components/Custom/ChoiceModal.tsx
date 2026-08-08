@@ -6,7 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useTranslations } from "next-intl";
 import { FaPlus } from "react-icons/fa";
-import CustomInput from "./CustomInput";
+import { Button, Field, Input, Modal } from "@/components/ui";
 
 export type ChoiceFormValues = {
   nameAr: string;
@@ -24,6 +24,8 @@ interface ChoiceModalProps {
   onSubmit: (values: ChoiceFormValues) => void;
   initialValues?: ChoiceFormValues | null;
 }
+
+const CHOICE_FORM_ID = "choice-form";
 
 const createChoiceSchema = (t: ReturnType<typeof useTranslations<"">>) =>
   yup.object().shape({
@@ -79,17 +81,8 @@ export default function ChoiceModal({
         nameAr: initialValues?.nameAr || "",
         nameEn: initialValues?.nameEn || "",
       });
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
     }
-
-    return () => {
-      document.body.style.overflow = "unset";
-    };
   }, [isOpen, initialValues, reset]);
-
-  if (!isOpen) return null;
 
   const onFormSubmit = (data: ChoiceFormData) => {
     onSubmit({
@@ -99,91 +92,69 @@ export default function ChoiceModal({
   };
 
   return (
-    <div  style={{ zIndex: 66666666666 }} className="fixed inset-0 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-lg">
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
-              <FaPlus className="text-primary" />
-            </div>
-            <h2 className="text-lg font-semibold">
-              {t("personal.addChoice") || "Add Choice"}
-            </h2>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            ✕
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-          <Controller
-            control={control}
-            name="nameAr"
-            render={({ field: { value, onChange } }) => (
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  {t("personal.choiceNameAr") || "Choice Name (Arabic)"}
-                </label>
-                <CustomInput
-                  id="choiceNameAr"
-                  type="text"
-                  value={value}
-                  onChange={(e) => onChange(e.target.value)}
-                  placeholder={
-                    t("personal.choiceNameArPlaceholder") ||
-                    "Enter choice name in Arabic"
-                  }
-                  error={errors.nameAr?.message as string}
-                />
-              </div>
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="nameEn"
-            render={({ field: { value, onChange } }) => (
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  {t("personal.choiceNameEn") || "Choice Name (English)"}
-                </label>
-                <CustomInput
-                  id="choiceNameEn"
-                  type="text"
-                  value={value}
-                  onChange={(e) => onChange(e.target.value)}
-                  placeholder={
-                    t("personal.choiceNameEnPlaceholder") ||
-                    "Enter choice name in English"
-                  }
-                  error={errors.nameEn?.message as string}
-                />
-              </div>
-            )}
-          />
-
-          <div className="flex items-center gap-3 justify-end pt-4 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2.5 rounded-lg font-medium transition-all duration-200 bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      title={t("personal.addChoice") || "Add Choice"}
+      icon={<FaPlus className="size-4" />}
+      closeLabel={t("common.close")}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>
+            {t("form.cancel") || "Cancel"}
+          </Button>
+          <Button variant="primary" type="submit" form={CHOICE_FORM_ID}>
+            {t("form.submit") || "Submit"}
+          </Button>
+        </>
+      }
+    >
+      <form
+        id={CHOICE_FORM_ID}
+        onSubmit={handleSubmit(onFormSubmit)}
+        className="flex flex-col gap-4"
+      >
+        <Controller
+          control={control}
+          name="nameAr"
+          render={({ field: { value, onChange } }) => (
+            <Field
+              label={t("personal.choiceNameAr") || "Choice Name (Arabic)"}
+              error={errors.nameAr?.message as string}
             >
-              {t("form.cancel") || "Cancel"}
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-2.5 rounded-lg font-medium transition-all duration-200 bg-primary text-white hover:bg-primary/90"
+              <Input
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder={
+                  t("personal.choiceNameArPlaceholder") ||
+                  "Enter choice name in Arabic"
+                }
+                data-autofocus
+              />
+            </Field>
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="nameEn"
+          render={({ field: { value, onChange } }) => (
+            <Field
+              label={t("personal.choiceNameEn") || "Choice Name (English)"}
+              error={errors.nameEn?.message as string}
             >
-              {t("form.submit") || "Submit"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+              <Input
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder={
+                  t("personal.choiceNameEnPlaceholder") ||
+                  "Enter choice name in English"
+                }
+              />
+            </Field>
+          )}
+        />
+      </form>
+    </Modal>
   );
 }
-

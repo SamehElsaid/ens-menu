@@ -40,13 +40,14 @@ export default function DeleteMenuConfirm({
       message={
         <>
           {t("deletePermanentInstruction")}{" "}
-          <strong>«{labelText}»</strong>
+          <span className="font-semibold text-fg">«{labelText}»</span>
         </>
       }
       typeConfirmLabel={t("typeMenuNameToConfirm")}
       confirmPlaceholder={labelText}
       cancelLabel={tCommon("cancel")}
       confirmDeleteLabel={tCommon("confirmDelete")}
+      deletingLabel={t("deleting")}
       closeAriaLabel={tCommon("close")}
       onClose={onClose}
       onDelete={handleDelete}

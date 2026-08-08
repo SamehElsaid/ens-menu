@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import CustomBtn from "./CustomBtn";
+import { Button } from "@/components/ui";
 import type SunEditorCore from "suneditor/src/lib/core";
 import SunEditor from "suneditor-react";
 
@@ -56,9 +56,10 @@ const ShowEditor = ({ initialTemplateName, showMore = false }: ShowEditorProps) 
         defaultValue={initialTemplateName}
       />
       {showMore && initialTemplateName.length > 600 && (
-        <CustomBtn
+        <Button
           className="w-full lg:w-auto"
           variant={showMoreState ? "secondary" : "danger"}
+          size="sm"
           onClick={() => {
             setShowMoreState((prev) => !prev);
             setTimeout(() => {
@@ -72,10 +73,8 @@ const ShowEditor = ({ initialTemplateName, showMore = false }: ShowEditorProps) 
             }, 0);
           }}
         >
-          <div className="text-xs">
-            {showMoreState ? t("showMore") : t("showLess")}
-          </div>
-        </CustomBtn>
+          {showMoreState ? t("showMore") : t("showLess")}
+        </Button>
       )}
     </div>
   );

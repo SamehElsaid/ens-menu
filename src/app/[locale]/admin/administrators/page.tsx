@@ -5,14 +5,20 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { ColDef } from "ag-grid-community";
 import { IoArrowBack, IoAddOutline } from "react-icons/io5";
-import { FaSpinner, FaUserShield, FaClock, FaHistory } from "react-icons/fa";
-import LinkTo from "@/components/Global/LinkTo";
+import { FaUserShield, FaClock, FaHistory } from "react-icons/fa";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import DataTable from "@/components/Custom/DataTable";
 import { axiosGet, axiosDelete } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import { useAppSelector } from "@/store/hooks";
-import ConfirmationModal from "@/components/Custom/ConfirmationModal";
+import { FiAlertTriangle } from "react-icons/fi";
+import {
+  Button,
+  ButtonLink,
+  ConfirmDialog,
+  PageHeader,
+  Spinner,
+} from "@/components/ui";
 import AddAdministratorModal from "@/components/Dashboard/AddAdministratorModal";
 import EditAdministratorPermissionsModal from "@/components/Admin/EditAdministratorPermissionsModal";
 import {
@@ -251,28 +257,26 @@ export default function AdministratorsPage() {
                     return (
                         <div className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
                             {canManageAdmins && (
-                                <button
-                                    type="button"
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
                                     onClick={() =>
                                         setPermissionsModal({ open: true, admin })
                                     }
-                                    className="px-3 py-1.5 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800"
                                 >
                                     {t("actions.permissions")}
-                                </button>
+                                </Button>
                             )}
                             {!isCurrentUser && canManageAdmins && (
-                                <button
+                                <Button
+                                    variant="danger"
+                                    size="sm"
                                     onClick={() => setDeleteModal({ isOpen: true, admin })}
                                     disabled={isLoading}
-                                    className="px-3 py-1.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-lg transition-colors flex items-center gap-1"
+                                    loading={isLoading}
                                 >
-                                    {isLoading ? (
-                                        <FaSpinner className="animate-spin text-xs" />
-                                    ) : (
-                                        t("actions.delete")
-                                    )}
-                                </button>
+                                    {t("actions.delete")}
+                                </Button>
                             )}
                         </div>
                     );
@@ -284,33 +288,26 @@ export default function AdministratorsPage() {
 
     return (
         <div className="space-y-6">
-            {/* Header Section */}
-            <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                    <div className={`flex items-center gap-4 mb-4 ${isRTL ? "flex-row-reverse" : ""}`}>
-                        <button
-                            onClick={() => router.back()}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${isRTL ? "flex-row-reverse" : ""}`}
-                        >
-                            <IoArrowBack className="text-lg" />
-                            <span className="font-medium">{t("back")}</span>
-                        </button>
-                    </div>
-                    <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-                        {t("title")}
-                    </h1>
-                    <p className="text-slate-500 dark:text-slate-400">
-                        {t("subtitle")}
-                    </p>
-                </div>
-            </div>
+            <PageHeader
+                title={t("title")}
+                description={t("subtitle")}
+                actions={
+                    <Button
+                        variant="secondary"
+                        startIcon={<IoArrowBack className="rtl:rotate-180" />}
+                        onClick={() => router.back()}
+                    >
+                        {t("back")}
+                    </Button>
+                }
+            />
 
             {/* Statistics Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <CardDashBoard borderColor="border-blue-200 dark:border-blue-500/20" hover={true}>
                     <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-xl bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-500/20 dark:to-blue-600/10 flex items-center justify-center shadow-sm">
-                            <FaUserShield className="text-blue-600 dark:text-blue-400 text-xl" />
+                        <div className="flex size-14 items-center justify-center rounded-xl bg-info-soft">
+                            <FaUserShield className="text-xl text-info-fg" />
                         </div>
                         <div className="flex-1">
                             <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
@@ -318,7 +315,7 @@ export default function AdministratorsPage() {
                             </p>
                             <p className="text-3xl font-bold text-slate-900 dark:text-slate-100 transition-all duration-300">
                                 {loading ? (
-                                    <span className="inline-block w-8 h-8 border-2 border-slate-300 dark:border-slate-600 border-t-transparent rounded-full animate-spin"></span>
+                                    <Spinner size="md" />
                                 ) : (
                                     stats.total.toLocaleString()
                                 )}
@@ -329,8 +326,8 @@ export default function AdministratorsPage() {
 
                 <CardDashBoard borderColor="border-purple-200 dark:border-purple-500/20" hover={true}>
                     <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-xl bg-linear-to-br from-purple-50 to-purple-100 dark:from-purple-500/20 dark:to-purple-600/10 flex items-center justify-center shadow-sm">
-                            <FaClock className="text-purple-600 dark:text-purple-400 text-xl" />
+                        <div className="flex size-14 items-center justify-center rounded-xl bg-brand-soft">
+                            <FaClock className="text-xl text-brand-soft-fg" />
                         </div>
                         <div className="flex-1">
                             <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
@@ -338,7 +335,7 @@ export default function AdministratorsPage() {
                             </p>
                             <p className="text-lg font-semibold text-slate-900 dark:text-slate-100 transition-all duration-300">
                                 {loading ? (
-                                    <span className="inline-block w-6 h-6 border-2 border-purple-300 dark:border-purple-600 border-t-transparent rounded-full animate-spin"></span>
+                                    <Spinner size="sm" />
                                 ) : stats.lastLogin ? (
                                     formatDate(stats.lastLogin)
                                 ) : (
@@ -353,20 +350,19 @@ export default function AdministratorsPage() {
             {/* Add New Administrator Button */}
             {canManageAdmins && (
                 <div className={`flex flex-wrap items-center gap-3 ${isRTL ? "justify-start" : "justify-end"}`}>
-                    <LinkTo
+                    <ButtonLink
                         href="/admin/administrators/log"
-                        className="flex items-center gap-2 px-5 py-3 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 rounded-xl font-semibold transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+                        variant="secondary"
+                        startIcon={<FaHistory />}
                     >
-                        <FaHistory className="text-base" />
-                        <span>{t("viewActivityLog")}</span>
-                    </LinkTo>
-                    <button
+                        {t("viewActivityLog")}
+                    </ButtonLink>
+                    <Button
+                        startIcon={<IoAddOutline />}
                         onClick={() => setShowAddModal(true)}
-                        className="flex items-center gap-2 px-6 py-3 bg-linear-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                     >
-                        <IoAddOutline className="text-lg" />
-                        <span>{t("addNewAdmin")}</span>
-                    </button>
+                        {t("addNewAdmin")}
+                    </Button>
                 </div>
             )}
 
@@ -395,16 +391,17 @@ export default function AdministratorsPage() {
             )}
 
             {/* Delete Confirmation Modal */}
-            <ConfirmationModal
-                isOpen={deleteModal.isOpen}
+            <ConfirmDialog
+                open={deleteModal.isOpen}
                 onClose={() => setDeleteModal({ isOpen: false, admin: null })}
                 onConfirm={handleDelete}
                 title={t("deleteConfirmTitle")}
-                message={t("deleteConfirm", { name: deleteModal.admin?.name || "" })}
-                confirmText={t("actions.delete")}
-                cancelText={t("actions.cancel")}
-                isLoading={loadingAdminId === deleteModal.admin?.id}
-                loadingText={t("deleting")}
+                description={t("deleteConfirm", { name: deleteModal.admin?.name || "" })}
+                confirmLabel={t("actions.delete")}
+                cancelLabel={t("actions.cancel")}
+                loading={loadingAdminId === deleteModal.admin?.id}
+                tone="danger"
+                icon={<FiAlertTriangle />}
             />
 
             <EditAdministratorPermissionsModal

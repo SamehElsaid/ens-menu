@@ -11,6 +11,8 @@ import {
   MENU_IMPORT_MAX_FILE_SIZE_MB,
 } from "@/lib/menuImport/constants";
 import ImagePreviewCard from "../upload/ImagePreviewCard";
+import { cn } from "@/lib/cn";
+import { Button, SectionHeader, focusRing } from "@/components/ui";
 
 interface UploadStepProps {
   file: File | null;
@@ -71,15 +73,12 @@ export default function UploadStep({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="text-center max-w-lg mx-auto">
-        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-          {t("uploadTitle")}
-        </h2>
-        <p className="text-slate-500 dark:text-slate-400 text-sm">
-          {t("uploadDescription")}
-        </p>
-      </div>
+    <div className="flex flex-col gap-6">
+      <SectionHeader
+        title={t("uploadTitle")}
+        description={t("uploadDescription")}
+        className="mx-auto max-w-lg text-center sm:justify-center"
+      />
 
       {!file || !previewUrl ? (
         <div
@@ -93,33 +92,29 @@ export default function UploadStep({
             setIsDragOver(true);
           }}
           onDragLeave={() => setIsDragOver(false)}
-          className={`relative flex flex-col items-center justify-center gap-4 p-10 sm:p-14 rounded-2xl border-2 border-dashed transition-all ${
+          className={cn(
+            "relative flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed p-10 transition-colors duration-150 sm:p-14",
+            focusRing,
             isPreparing
-              ? "border-primary/50 bg-primary/5 cursor-wait"
-              : `cursor-pointer ${
-                  isDragOver
-                    ? "border-primary bg-primary/5 dark:bg-primary/10 scale-[1.01]"
-                    : "border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 hover:border-primary/50 hover:bg-primary/5"
-                }`
-          }`}
+              ? "cursor-wait border-brand-line bg-brand-soft/50"
+              : isDragOver
+                ? "cursor-pointer border-brand bg-brand-soft"
+                : "cursor-pointer border-line-strong bg-surface-2 hover:border-brand-line hover:bg-brand-soft/40",
+          )}
         >
           {isPreparing && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/70 dark:bg-slate-900/70">
-              <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
+            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-surface/80">
+              <p className="text-sm font-medium text-fg">
                 {t("preparingImage")}
               </p>
             </div>
           )}
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
-            <IoCloudUploadOutline className="text-3xl text-primary" />
-          </div>
+          <span className="flex size-14 items-center justify-center rounded-xl bg-brand-soft text-2xl text-brand-soft-fg">
+            <IoCloudUploadOutline aria-hidden />
+          </span>
           <div className="text-center">
-            <p className="font-semibold text-slate-800 dark:text-slate-200">
-              {t("dropzoneTitle")}
-            </p>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              {t("dropzoneHint")}
-            </p>
+            <p className="font-semibold text-fg">{t("dropzoneTitle")}</p>
+            <p className="mt-1 text-[13px] text-fg-muted">{t("dropzoneHint")}</p>
           </div>
         </div>
       ) : (
@@ -139,37 +134,37 @@ export default function UploadStep({
         onChange={handleInputChange}
       />
 
-      <ul className="grid sm:grid-cols-3 gap-3 max-w-2xl mx-auto text-sm text-slate-500 dark:text-slate-400">
+      <ul className="mx-auto grid max-w-2xl gap-3 text-[13px] text-fg-muted sm:grid-cols-3">
         {[t("tip1"), t("tip2"), t("tip3")].map((tip) => (
           <li
             key={tip}
-            className="flex items-start gap-2 p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700"
+            className="flex items-start gap-2 rounded-xl border border-line bg-surface p-3"
           >
-            <span className="text-primary shrink-0">•</span>
+            <span className="shrink-0 text-brand" aria-hidden>
+              •
+            </span>
             <span>{tip}</span>
           </li>
         ))}
       </ul>
 
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-        <button
-          type="button"
-          disabled={!file || isProcessing || isPreparing}
-          onClick={onAnalyze}
-          className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary text-white rounded-xl font-semibold shadow-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-        >
-          {t("startAnalysis")}
-        </button>
+      <div className="flex flex-col-reverse items-center justify-center gap-3 pt-2 sm:flex-row">
         {showSkip && onSkip && (
-          <button
-            type="button"
+          <Button
+            variant="ghost"
             disabled={isProcessing || isPreparing}
             onClick={onSkip}
-            className="inline-flex items-center gap-2 px-6 py-3 text-slate-600 dark:text-slate-300 hover:text-primary font-medium transition-colors disabled:opacity-50"
           >
             {t("skipOnboarding")}
-          </button>
+          </Button>
         )}
+        <Button
+          size="lg"
+          disabled={!file || isProcessing || isPreparing}
+          onClick={onAnalyze}
+        >
+          {t("startAnalysis")}
+        </Button>
       </div>
     </div>
   );

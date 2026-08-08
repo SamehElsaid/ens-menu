@@ -9,8 +9,15 @@ import {
   IoAddOutline,
   IoTrashOutline,
 } from "react-icons/io5";
-import { FaSpinner, FaCheck, FaTimes, FaMagic } from "react-icons/fa";
+import { FaCheck, FaTimes, FaMagic } from "react-icons/fa";
 import CardDashBoard from "@/components/Card/CardDashBoard";
+import {
+  Button,
+  EmptyState,
+  LoadingBlock,
+  Modal,
+  PageHeader,
+} from "@/components/ui";
 import { axiosGet, axiosPost, axiosPatch, axiosDelete } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 
@@ -58,6 +65,7 @@ const EMPTY_FORM: MetaForm = {
 export default function AdminMetadataPage() {
   const locale = useLocale();
   const t = useTranslations("adminMetadata");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const isRTL = locale === "ar";
 
@@ -264,42 +272,37 @@ export default function AdminMetadataPage() {
 
   return (
     <div className="space-y-6 pb-10">
-      {/* Header */}
-      <div className="flex flex-col gap-4">
-        <div className={`flex items-center gap-4 ${isRTL ? "flex-row-reverse" : ""}`}>
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${isRTL ? "flex-row-reverse" : ""}`}
-          >
-            <IoArrowBack className="text-lg" />
-            <span className="font-medium">{t("back")}</span>
-          </button>
-        </div>
-        <div className={`flex items-start justify-between gap-4 ${isRTL ? "flex-row-reverse" : ""}`}>
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-1">
-              {t("title")}
-            </h1>
-            <p className="text-slate-500 dark:text-slate-400">{t("subtitle")}</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => openCreate()}
-            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-semibold hover:bg-primary/90 transition-colors shadow-sm shrink-0"
-          >
-            <IoAddOutline className="text-lg" />
-            {t("addNew")}
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          <>
+            <Button
+              variant="secondary"
+              startIcon={<IoArrowBack className="rtl:rotate-180" />}
+              onClick={() => router.back()}
+            >
+              {t("back")}
+            </Button>
+            <Button startIcon={<IoAddOutline />} onClick={() => openCreate()}>
+              {t("addNew")}
+            </Button>
+          </>
+        }
+      />
 
-      {/* Table */}
       <CardDashBoard>
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <FaSpinner className="animate-spin text-3xl text-primary" />
-          </div>
+          <LoadingBlock label={tCommon("loading")} className="py-20" />
+        ) : metaList.length === 0 ? (
+          <EmptyState
+            title={t("empty")}
+            action={
+              <Button startIcon={<IoAddOutline />} onClick={() => openCreate()}>
+                {t("addNew")}
+              </Button>
+            }
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -320,14 +323,7 @@ export default function AdminMetadataPage() {
                 </tr>
               </thead>
               <tbody>
-                {metaList.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="py-16 text-center text-slate-400 dark:text-slate-500">
-                      {t("empty")}
-                    </td>
-                  </tr>
-                ) : (
-                  metaList.map((item) => (
+                {metaList.map((item) => (
                     <tr
                       key={item.pageName}
                       className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
@@ -343,140 +339,134 @@ export default function AdminMetadataPage() {
                       </td>
                       <td className="py-3 px-4">
                         <div className={`flex items-center gap-2 ${isRTL ? "justify-start flex-row-reverse" : "justify-end"}`}>
-                          <button
-                            type="button"
+                          <Button
+                            variant="subtle"
+                            size="sm"
+                            startIcon={<IoCreateOutline />}
                             onClick={() => openEdit(item)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 font-medium text-sm transition-colors"
                           >
-                            <IoCreateOutline className="text-base" />
                             {t("edit")}
-                          </button>
+                          </Button>
                           {confirmDeleteId === item.id ? (
                             <div className="inline-flex items-center gap-1.5">
-                              <span className="text-xs text-red-500 font-medium">{t("confirmDelete")}</span>
-                              <button
-                                type="button"
+                              <span className="text-xs font-medium text-danger">{t("confirmDelete")}</span>
+                              <Button
+                                variant="danger"
+                                size="sm"
+                                iconOnly
+                                aria-label={t("delete")}
                                 onClick={() => handleDelete(item.id)}
-                                disabled={deletingId === item.id}
-                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium text-sm transition-colors disabled:opacity-50"
+                                loading={deletingId === item.id}
                               >
-                                {deletingId === item.id ? (
-                                  <FaSpinner className="animate-spin text-xs" />
-                                ) : (
-                                  <FaCheck className="text-xs" />
-                                )}
-                              </button>
-                              <button
-                                type="button"
+                                <FaCheck className="text-xs" />
+                              </Button>
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                iconOnly
+                                aria-label={t("modal.cancel")}
                                 onClick={() => setConfirmDeleteId(null)}
-                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-600 font-medium text-sm transition-colors"
                               >
                                 <FaTimes className="text-xs" />
-                              </button>
+                              </Button>
                             </div>
                           ) : (
-                            <button
-                              type="button"
+                            <Button
+                              variant="dangerGhost"
+                              size="sm"
+                              startIcon={<IoTrashOutline />}
                               onClick={() => handleDelete(item.id)}
-                              disabled={deletingId === item.id}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-500/10 text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 font-medium text-sm transition-colors disabled:opacity-50"
+                              loading={deletingId === item.id}
                             >
-                              {deletingId === item.id ? (
-                                <FaSpinner className="animate-spin text-sm" />
-                              ) : (
-                                <IoTrashOutline className="text-base" />
-                              )}
                               {t("delete")}
-                            </button>
+                            </Button>
                           )}
                         </div>
                       </td>
                     </tr>
-                  ))
-                )}
+                  ))}
               </tbody>
             </table>
           </div>
         )}
       </CardDashBoard>
 
-      {/* Main Modal (Create / Edit) */}
-      {modal.open && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 space-y-5">
-              {/* Header */}
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
-                  {modal.isEdit ? t("modal.editTitle") : t("modal.createTitle")}
-                </h2>
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                >
-                  <FaTimes />
-                </button>
-              </div>
+      <Modal
+        open={modal.open}
+        onClose={closeModal}
+        title={modal.isEdit ? t("modal.editTitle") : t("modal.createTitle")}
+        size="lg"
+        dismissible={!saving}
+        footer={
+          <>
+            <Button variant="secondary" onClick={closeModal} disabled={saving}>
+              {t("modal.cancel")}
+            </Button>
+            <Button onClick={handleSave} loading={saving}>
+              {t("modal.save")}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-5">
+          <div>
+            <label className={labelClass}>{t("modal.pageName")}</label>
+            <input
+              type="text"
+              value={modal.form.pageName}
+              onChange={(e) => setField("pageName", e.target.value)}
+              disabled={modal.isEdit}
+              placeholder="home, about, pricing..."
+              className={`${inputClass} ${modal.isEdit ? "cursor-not-allowed opacity-60" : ""}`}
+              dir="ltr"
+            />
+          </div>
 
-              {/* Page Name */}
-              <div>
-                <label className={labelClass}>{t("modal.pageName")}</label>
-                <input
-                  type="text"
-                  value={modal.form.pageName}
-                  onChange={(e) => setField("pageName", e.target.value)}
-                  disabled={modal.isEdit}
-                  placeholder="home, about, pricing..."
-                  className={`${inputClass} ${modal.isEdit ? "opacity-60 cursor-not-allowed" : ""}`}
-                  dir="ltr"
-                />
-              </div>
+          {modal.form.pageName.trim() && (
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-line" />
+              <Button
+                variant="subtle"
+                size="sm"
+                startIcon={<FaMagic />}
+                onClick={() => setGenModal((prev) => ({ ...prev, open: true }))}
+              >
+                {t("generate.btn")}
+              </Button>
+              <div className="h-px flex-1 bg-line" />
+            </div>
+          )}
 
-              {/* Generate from API button — only when pageName is filled */}
-              {modal.form.pageName.trim() && (
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
-                  <button
-                    type="button"
-                    onClick={() => setGenModal((prev) => ({ ...prev, open: true }))}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-violet-300 dark:border-violet-600 bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-500/20 font-semibold text-sm transition-colors shrink-0"
-                  >
-                    <FaMagic className="text-sm" />
-                    {t("generate.btn")}
-                  </button>
-                  <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
-                </div>
-              )}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>
+                {t("modal.title")} {langBadge("AR")}
+              </label>
+              <input
+                type="text"
+                value={modal.form.titleAr}
+                onChange={(e) => setField("titleAr", e.target.value)}
+                className={inputClass}
+                dir="rtl"
+                placeholder="العنوان بالعربية"
+              />
+            </div>
+            <div>
+              <label className={labelClass}>
+                {t("modal.title")} {langBadge("EN")}
+              </label>
+              <input
+                type="text"
+                value={modal.form.titleEn}
+                onChange={(e) => setField("titleEn", e.target.value)}
+                className={inputClass}
+                dir="ltr"
+                placeholder="Title in English"
+              />
+            </div>
+          </div>
 
-              {/* Title */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className={labelClass}>{t("modal.title")} {langBadge("AR")}</label>
-                  <input
-                    type="text"
-                    value={modal.form.titleAr}
-                    onChange={(e) => setField("titleAr", e.target.value)}
-                    className={inputClass}
-                    dir="rtl"
-                    placeholder="العنوان بالعربية"
-                  />
-                </div>
-                <div>
-                  <label className={labelClass}>{t("modal.title")} {langBadge("EN")}</label>
-                  <input
-                    type="text"
-                    value={modal.form.titleEn}
-                    onChange={(e) => setField("titleEn", e.target.value)}
-                    className={inputClass}
-                    dir="ltr"
-                    placeholder="Title in English"
-                  />
-                </div>
-              </div>
-
-              {/* Description */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label className={labelClass}>{t("modal.description")} {langBadge("AR")}</label>
                   <textarea
@@ -501,8 +491,7 @@ export default function AdminMetadataPage() {
                 </div>
               </div>
 
-              {/* Keywords */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label className={labelClass}>{t("modal.keywords")} {langBadge("AR")}</label>
                   <textarea
@@ -527,136 +516,74 @@ export default function AdminMetadataPage() {
                 </div>
               </div>
 
-              {/* Save / Cancel */}
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  disabled={saving}
-                  className="flex-1 px-4 py-2.5 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 rounded-xl font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 transition-colors"
-                >
-                  {t("modal.cancel")}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="flex-1 px-4 py-2.5 bg-primary text-white rounded-xl font-semibold hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
-                >
-                  {saving ? (
-                    <>
-                      <FaSpinner className="animate-spin text-sm" />
-                      {t("modal.saving")}
-                    </>
-                  ) : (
-                    t("modal.save")
-                  )}
-                </button>
-              </div>
-            </div>
+        </div>
+      </Modal>
+
+      <Modal
+        open={modal.open && genModal.open}
+        onClose={closeGenModal}
+        title={t("generate.title")}
+        description={modal.form.pageName || "—"}
+        icon={<FaMagic />}
+        size="md"
+        dismissible={!generating}
+        footer={
+          <>
+            <Button variant="secondary" onClick={closeGenModal} disabled={generating}>
+              {t("modal.cancel")}
+            </Button>
+            <Button
+              startIcon={<FaMagic />}
+              onClick={handleGenerate}
+              loading={generating}
+            >
+              {t("generate.run")}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-5">
+          <div>
+            <label className={labelClass}>{t("generate.pageType")}</label>
+            <input
+              type="text"
+              value={genModal.pageType}
+              onChange={(e) =>
+                setGenModal((prev) => ({ ...prev, pageType: e.target.value }))
+              }
+              placeholder="blog, landing, product..."
+              className={inputClass}
+              dir="ltr"
+            />
+          </div>
+
+          <div>
+            <label className={labelClass}>{t("generate.articleTitle")}</label>
+            <input
+              type="text"
+              value={genModal.articleTitle}
+              onChange={(e) =>
+                setGenModal((prev) => ({ ...prev, articleTitle: e.target.value }))
+              }
+              placeholder={t("generate.articleTitlePlaceholder")}
+              className={inputClass}
+            />
+          </div>
+
+          <div>
+            <label className={labelClass}>{t("generate.articleContent")}</label>
+            <textarea
+              value={genModal.articleContent}
+              onChange={(e) =>
+                setGenModal((prev) => ({ ...prev, articleContent: e.target.value }))
+              }
+              rows={6}
+              placeholder={t("generate.articleContentPlaceholder")}
+              className={textareaClass}
+            />
           </div>
         </div>
-      )}
-
-      {/* Generate Sub-Modal */}
-      {modal.open && genModal.open && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-60 p-4 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 space-y-5">
-              {/* Header */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-500/20 flex items-center justify-center">
-                    <FaMagic className="text-violet-600 dark:text-violet-400 text-sm" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
-                      {t("generate.title")}
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      {modal.form.pageName || "—"}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={closeGenModal}
-                  className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                >
-                  <FaTimes />
-                </button>
-              </div>
-
-              {/* Page Type */}
-              <div>
-                <label className={labelClass}>{t("generate.pageType")}</label>
-                <input
-                  type="text"
-                  value={genModal.pageType}
-                  onChange={(e) => setGenModal((prev) => ({ ...prev, pageType: e.target.value }))}
-                  placeholder="blog, landing, product..."
-                  className={inputClass}
-                  dir="ltr"
-                />
-              </div>
-
-              {/* Article Title */}
-              <div>
-                <label className={labelClass}>{t("generate.articleTitle")}</label>
-                <input
-                  type="text"
-                  value={genModal.articleTitle}
-                  onChange={(e) => setGenModal((prev) => ({ ...prev, articleTitle: e.target.value }))}
-                  placeholder={t("generate.articleTitlePlaceholder")}
-                  className={inputClass}
-                />
-              </div>
-
-              {/* Article Content */}
-              <div>
-                <label className={labelClass}>{t("generate.articleContent")}</label>
-                <textarea
-                  value={genModal.articleContent}
-                  onChange={(e) => setGenModal((prev) => ({ ...prev, articleContent: e.target.value }))}
-                  rows={6}
-                  placeholder={t("generate.articleContentPlaceholder")}
-                  className={textareaClass}
-                />
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-3 pt-1">
-                <button
-                  type="button"
-                  onClick={closeGenModal}
-                  disabled={generating}
-                  className="flex-1 px-4 py-2.5 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 rounded-xl font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 transition-colors"
-                >
-                  {t("modal.cancel")}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleGenerate}
-                  disabled={generating}
-                  className="flex-1 px-4 py-2.5 bg-violet-600 text-white rounded-xl font-semibold hover:bg-violet-700 disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
-                >
-                  {generating ? (
-                    <>
-                      <FaSpinner className="animate-spin text-sm" />
-                      {t("generate.generating")}
-                    </>
-                  ) : (
-                    <>
-                      <FaMagic className="text-sm" />
-                      {t("generate.run")}
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 }

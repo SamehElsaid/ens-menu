@@ -1,8 +1,6 @@
- 
-
 import "react-phone-number-input/style.css";
 import "react-datepicker/dist/react-datepicker.css";
-import { ChangeEvent, useRef, useState } from "react";
+import { ChangeEvent, useId, useRef, useState } from "react";
 import { UnmountClosed } from "react-collapse";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { IoIosArrowDown } from "react-icons/io";
@@ -19,6 +17,8 @@ import { ar as arLocale } from "date-fns/locale/ar";
 import { enUS as enLocale } from "date-fns/locale/en-US";
 import { useLocale, useTranslations } from "next-intl";
 import { format } from "date-fns";
+import { cn } from "@/lib/cn";
+import { focusRing } from "@/components/ui";
 
 registerLocale("ar", arLocale);
 registerLocale("en", enLocale);
@@ -55,6 +55,13 @@ type OptionType = {
   value: string;
 };
 
+/**
+ * Multi-purpose form control used across the dashboard and auth flows.
+ *
+ * Styling comes from the shared tokens so it matches `@/components/ui/Input`.
+ * Prefer `Field` + `Input` on new surfaces; this stays for the existing forms
+ * that depend on its `select` / `tel` / `date` / `choice` branches.
+ */
 export default function CustomInput({
   type,
   placeholder,
@@ -78,7 +85,13 @@ export default function CustomInput({
   const phoneRef = useRef(null);
   const t = useTranslations();
   const locale = useLocale();
+  const generatedId = useId();
   void _color;
+  void focus;
+
+  const controlId = id?.replace(" ", "-");
+  const errorId = `${controlId ?? generatedId}-error`;
+  const describedBy = error ? errorId : undefined;
 
   const checkingLabel = loadingLabel ?? t("auth.checkingAvailability");
 
@@ -104,75 +117,92 @@ export default function CustomInput({
     });
   };
 
+  const isSmall = size === "small";
+
+  /** Shared control chrome, matching `@/components/ui/Input`. */
+  const controlChrome = cn(
+    "w-full min-w-0 rounded-lg border bg-surface text-sm text-fg placeholder:text-fg-subtle",
+    "transition-colors duration-150 outline-none",
+    "hover:border-fg-subtle focus:border-brand",
+    "disabled:cursor-not-allowed disabled:bg-surface-2 disabled:text-fg-subtle",
+    error ? "border-danger hover:border-danger" : "border-line-strong",
+  );
+
+  /** Decorative affix; the input keeps its own label from the caller. */
+  const affix = (node: React.ReactNode, position: "textarea" | "center") => (
+    <span
+      className={cn(
+        "pointer-events-none absolute start-3 flex items-center text-base text-fg-subtle",
+        position === "textarea" ? "top-3" : "top-1/2 -translate-y-1/2",
+      )}
+      aria-hidden
+    >
+      {node}
+    </span>
+  );
+
   return (
     <>
-      <div className="w-full relative text-slate-500 dark:text-slate-200">
+      <div className="relative w-full">
         {type === "choice" ? (
-          <div className="w-full">
-            <div
-              className={`rounded-lg ${
-                error
-                  ? "border border-red-300 bg-red-50/30"
-                  : "border border-gray-200 bg-gray-50/80"
-              } shadow-sm`}
-            >
-              <div className="flex items-center gap-2">
-                {(props.options as OptionType[])?.map((option) => {
-                  const isSelected =
-                    (props.value as OptionType)?.value === option.value;
+          <div
+            role="group"
+            className={cn(
+              "flex items-center gap-1 rounded-lg border p-1",
+              error ? "border-danger bg-danger-soft" : "border-line bg-surface-2",
+            )}
+          >
+            {(props.options as OptionType[])?.map((option) => {
+              const isSelected =
+                (props.value as OptionType)?.value === option.value;
 
-                  return (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => {
-                        props.onChange?.(
-                          option as unknown as ChangeEvent<HTMLInputElement>,
-                        );
-                      }}
-                      className={`flex-1 rounded-2xl  px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
-                        isSelected
-                          ? "bg-accent-purple text-white shadow-md"
-                          : "bg-transparent text-accent-purple hover:text-accent-purple/80"
-                      } ${error && !isSelected ? "text-red-600" : ""}`}
-                    >
-                      {option.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => {
+                    props.onChange?.(
+                      option as unknown as ChangeEvent<HTMLInputElement>,
+                    );
+                  }}
+                  className={cn(
+                    "flex-1 rounded-md px-4 py-2 text-[13px] font-medium transition-colors duration-150",
+                    focusRing,
+                    isSelected
+                      ? "bg-brand text-on-brand"
+                      : "text-fg-muted hover:bg-surface hover:text-fg",
+                  )}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
           </div>
         ) : type === "select" ? (
-          <div className="relative ">
-            <label
-              htmlFor={id}
-              className={`duration-200 z-10 absolute start-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-2xl border ${
-                error
-                  ? "bg-red-50 dark:bg-red-950/40 text-red-500 border-red-200 dark:border-red-500/50"
-                  : focus
-                    ? "text-accent-purple border-accent-purple/20 dark:bg-slate-800 dark:border-slate-600"
-                    : "text-accent-purple border-accent-purple/20 dark:bg-slate-800 dark:border-slate-600"
-              }`}
-            >
-              {icon}
-            </label>
+          <div className="relative">
+            {icon ? affix(icon, "center") : null}
             <Select
               instanceId={id}
               {...props}
-              className="basic-single "
-              classNamePrefix={`cursor-text ${size == "small" ? "small" : ""} ${
+              className={cn(
+                "basic-single",
+                icon ? "[&_.select__control]:ps-10" : undefined,
+              )}
+              classNamePrefix={`cursor-text ${isSmall ? "small" : ""} ${
                 error ? "error" : ""
               } select`}
               isSearchable={(props?.isSearchable as boolean) || false}
               name={id}
               inputId={id}
+              aria-invalid={error ? true : undefined}
+              aria-errormessage={describedBy}
               isClearable={true}
               noOptionsMessage={() => (
-                <div className="text-accent-purple">{t("auth.noOptions")}</div>
+                <div className="text-fg-muted">{t("auth.noOptions")}</div>
               )}
               loadingMessage={() => (
-                <div className="text-accent-purple">{t("auth.loading")}</div>
+                <div className="text-fg-muted">{t("auth.loading")}</div>
               )}
               placeholder={t("auth.selectPlaceholder")}
               options={
@@ -197,14 +227,13 @@ export default function CustomInput({
             <div className="relative">
               <PhoneInput
                 labels={locales[locale as keyof typeof locales]}
-                style={{
-                  border: props?.value === undefined && "1px solid #00cfe8",
-                }}
                 ref={phoneRef}
                 defaultCountry={"EG"}
-                className={`phoneNumber ${loading ? "phoneNumber--checking" : ""} ${Boolean(error) ? "error" : ""} ${
-                  active ? "main" : ""
-                } ${props?.value === undefined ? "error" : ""} `}
+                className={cn(
+                  "phoneNumber",
+                  loading && "phoneNumber--checking",
+                  Boolean(error) && "error",
+                )}
                 placeholder="123-456-7890"
                 {...props}
                 value={props?.value as string | undefined}
@@ -228,7 +257,7 @@ export default function CustomInput({
               showTimeSelect={type === "time"}
               locale={locale}
               timeCaption={t("workSchedule.timeCaption")}
-              timeFormat="hh:mm aa" // 👈 12-hour format
+              timeFormat="hh:mm aa"
               dateFormat={type === "date" ? "yyyy-MM-dd" : "HH:mm"}
               open={openDate}
               onCalendarOpen={() => setOpenDate(true)}
@@ -240,44 +269,34 @@ export default function CustomInput({
                 )
               }
               customInput={
-                <div className="flex  items-center flex-col rounded-2xl  w-full relative overflow-hidden">
-                  {icon && (
-                    <label
-                      htmlFor={id}
-                      className={`duration-200 absolute start-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-2xl  border ${
-                        error
-                          ? "bg-red-50 text-red-500 border-red-200"
-                          : focus
-                            ? "text-accent-purple border-accent-purple/20"
-                            : " text-accent-purple border-accent-purple/20"
-                      }`}
-                    >
-                      {icon}
-                    </label>
-                  )}
-                  <div
-                    className="absolute inset-0  z-50"
+                <div className="relative flex w-full flex-col items-center">
+                  {icon ? affix(icon, "center") : null}
+                  <button
+                    type="button"
+                    className="absolute inset-0 z-10 rounded-lg"
                     onClick={() => setOpenDate((prev) => !prev)}
-                  ></div>
+                    aria-label={placeholder}
+                    aria-haspopup="dialog"
+                    aria-expanded={openDate}
+                  />
                   <input
-                    id={id?.replace(" ", "-")}
+                    id={controlId}
                     type="text"
                     placeholder={placeholder}
+                    readOnly
                     onFocus={() => (setOpen ? setOpen(true) : setFocus(true))}
                     onBlur={() => (setOpen ? setOpen(false) : setFocus(false))}
                     {...props}
-                    className={`w-full date-input   duration-200 ${
-                      size == "small" ? "py-2.5" : "py-3.5"
-                    } ${
-                      icon ? "ps-14" : "ps-4"
-                    } outline-none rounded-2xl  pe-4! border  border-accent-purple/20  focus:border-accent-purple focus:ring-2 focus:ring-accent-purple/20  disabled:opacity-80 ${
-                      className || ""
-                    } ${
-                      error
-                        ? "border-red-500 focus:border-red-500 focus:ring-red-200 bg-red-50 "
-                        : ""
-                    } `}
-                    {...props}
+                    aria-invalid={error ? true : undefined}
+                    aria-describedby={describedBy}
+                    className={cn(
+                      controlChrome,
+                      "date-input",
+                      isSmall ? "h-9" : "h-10",
+                      icon ? "ps-10" : "ps-3",
+                      "pe-3",
+                      className,
+                    )}
                     value={
                       type === "date"
                         ? formatDate(props.value as Date | null | undefined)
@@ -292,30 +311,16 @@ export default function CustomInput({
           </div>
         ) : (
           <div
-            className={`flex ${
-              type === "textarea" ? "items-start" : "items-center"
-            } flex-col rounded-2xl  w-full relative overflow-hidden`}
-          >
-            {icon && (
-              <label
-                htmlFor={id}
-                className={`duration-200 absolute start-3 ${
-                  type === "textarea" ? "top-3" : "top-1/2 -translate-y-1/2"
-                } flex items-center justify-center w-9 h-9 rounded-2xl border text-xl ${
-                  error
-                    ? "bg-red-50 text-red-500 border-red-200 dark:bg-red-950/40 dark:border-red-500/50 dark:text-red-400"
-                    : focus
-                      ? "text-accent-purple border-accent-purple/20 dark:bg-slate-800 dark:border-slate-600 dark:text-purple-400"
-                      : "text-accent-purple/60 border-accent-purple/20 dark:bg-slate-800 dark:border-slate-600 dark:text-purple-400"
-                }`}
-              >
-                {icon}
-              </label>
+            className={cn(
+              "relative flex w-full flex-col",
+              type === "textarea" ? "items-start" : "items-center",
             )}
+          >
+            {icon ? affix(icon, type === "textarea" ? "textarea" : "center") : null}
 
             {type === "textarea" ? (
               <textarea
-                id={id?.replace(" ", "-")}
+                id={controlId}
                 placeholder={placeholder}
                 onFocus={() => (setOpen ? setOpen(true) : setFocus(true))}
                 onBlur={() => (setOpen ? setOpen(false) : setFocus(false))}
@@ -329,48 +334,47 @@ export default function CustomInput({
                 }}
                 value={props.value as string | undefined}
                 disabled={props.disabled}
-                className={`w-full resize-y duration-200 ${
-                  size == "small" ? "py-2.5" : "py-3.5"
-                } ${
-                  icon ? "ps-14" : "ps-4"
-                } pe-4 outline-none rounded-2xl border border-accent-purple/20 focus:border-accent-purple focus:ring-2 focus:ring-accent-purple/20 disabled:opacity-80 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600 dark:placeholder:text-slate-400 dark:focus:border-accent-purple dark:focus:ring-accent-purple/20 ${
-                  className || ""
-                } ${
-                  error
-                    ? "border-red-500 focus:border-red-500 focus:ring-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-500/50 dark:focus:border-red-500 dark:focus:ring-red-900/30"
-                    : ""
-                } `}
+                aria-invalid={error ? true : undefined}
+                aria-describedby={describedBy}
+                className={cn(
+                  controlChrome,
+                  "resize-y py-2.5 leading-relaxed",
+                  icon ? "ps-10" : "ps-3",
+                  "pe-3",
+                  className,
+                )}
               />
             ) : (
               <>
-                {" "}
                 <input
-                  id={id?.replace(" ", "-")}
+                  id={controlId}
                   type={active ? "text" : type}
                   placeholder={placeholder}
                   onFocus={() => (setOpen ? setOpen(true) : setFocus(true))}
                   onBlur={() => (setOpen ? setOpen(false) : setFocus(false))}
                   {...props}
-                  className={`w-full ${type === "color" ? "opacity-0!" : ""} ${
-                    type === "password" ? "pe-12" : "pe-4"
-                  } duration-200 ${size == "small" ? "py-2.5" : "py-3.5"} ${
-                    icon ? "ps-14" : "ps-4"
-                  } outline-none rounded-2xl border ${
-                    type === "color" ? "bg-background-two" : ""
-                  } border-accent-purple/20 focus:border-accent-purple focus:ring-2 focus:ring-accent-purple/20 disabled:opacity-80 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600 dark:placeholder:text-slate-400 dark:focus:border-accent-purple dark:focus:ring-accent-purple/20 ${
-                    className || ""
-                  } ${loading ? "register-field-input--checking" : ""} ${
-                    error
-                      ? "border-red-500 focus:border-red-500 focus:ring-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-500/50 dark:focus:border-red-500 dark:focus:ring-red-900/30"
-                      : ""
-                  } ${type === "color" ? "h-[54.18px]" : ""}`}
-                  {...props}
+                  aria-invalid={error ? true : undefined}
+                  aria-describedby={describedBy}
+                  className={cn(
+                    controlChrome,
+                    isSmall ? "h-9" : "h-10",
+                    icon ? "ps-10" : "ps-3",
+                    type === "password" || setOpen ? "pe-10" : "pe-3",
+                    type === "color" && "cursor-pointer p-1",
+                    loading && "register-field-input--checking",
+                    className,
+                  )}
                 />
                 {type === "password" && (
                   <button
                     type="button"
-                    className="absolute h-full flex items-center pe-3! end-3 transform text-xl text-accent-purple/70 hover:text-accent-purple dark:text-purple-400 dark:hover:text-purple-300 duration-200"
+                    className="absolute end-1 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-fg-subtle transition-colors hover:text-fg"
                     onClick={() => setActive(!active)}
+                    aria-label={
+                      active ? t("auth.hidePassword") : t("auth.showPassword")
+                    }
+                    aria-pressed={active}
+                    tabIndex={-1}
                   >
                     {active ? <FaRegEye /> : <FaRegEyeSlash />}
                   </button>
@@ -379,7 +383,9 @@ export default function CustomInput({
                   <button
                     type="button"
                     onClick={() => setOpen(true)}
-                    className="absolute h-full flex items-center end-3 transform text-xl text-accent-purple/70 hover:text-accent-purple dark:text-purple-400 dark:hover:text-purple-300 duration-200"
+                    className="absolute end-1 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-fg-subtle transition-colors hover:text-fg"
+                    aria-label={placeholder}
+                    tabIndex={-1}
                   >
                     <IoIosArrowDown />
                   </button>
@@ -392,7 +398,9 @@ export default function CustomInput({
         {loading && type !== "tel" && fieldLoadingHint}
 
         <UnmountClosed isOpened={Boolean(error)}>
-          <p className="text-xs text-red-500 dark:text-red-400 mt-1">{error}</p>
+          <p id={errorId} role="alert" className="mt-1.5 text-xs font-medium text-danger">
+            {error}
+          </p>
         </UnmountClosed>
       </div>
     </>

@@ -14,6 +14,7 @@ import {
   IoPersonOutline,
   IoTimeOutline,
 } from "react-icons/io5";
+import { Badge, EmptyState, Skeleton } from "@/components/ui";
 
 interface RecentActivityListProps {
   entries: MenuAuditLogEntry[];
@@ -24,15 +25,15 @@ interface RecentActivityListProps {
 
 function ActivityRowSkeleton() {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl bg-slate-50/80 p-3 dark:bg-slate-700/50 animate-pulse">
+    <div className="flex items-center justify-between gap-4 rounded-xl bg-surface-2 p-3">
       <div className="flex flex-1 items-center gap-3">
-        <div className="h-8 w-8 shrink-0 rounded-lg bg-slate-200 dark:bg-slate-600" />
+        <Skeleton className="size-8 shrink-0 rounded-lg" />
         <div className="min-w-0 flex-1 space-y-2">
-          <div className="h-4 max-w-[220px] rounded-lg bg-slate-200 dark:bg-slate-600" />
-          <div className="h-3 w-28 rounded-lg bg-slate-100 dark:bg-slate-700" />
+          <Skeleton className="h-4 max-w-[220px]" />
+          <Skeleton className="h-3 w-28" />
         </div>
       </div>
-      <div className="h-4 w-20 rounded-lg bg-slate-200 dark:bg-slate-600" />
+      <Skeleton className="h-4 w-20" />
     </div>
   );
 }
@@ -41,13 +42,13 @@ export default function RecentActivityList({
   entries,
   loading,
   menuSlugOrId,
-  isRTL,
+  isRTL: _isRTL,
 }: RecentActivityListProps) {
   const t = useTranslations("menuOverview");
 
   if (loading) {
     return (
-      <ul className="space-y-2">
+      <ul className="space-y-2" aria-busy="true">
         {[1, 2, 3, 4, 5].map((i) => (
           <li key={i}>
             <ActivityRowSkeleton />
@@ -59,23 +60,18 @@ export default function RecentActivityList({
 
   if (entries.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
-        <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-700 dark:text-slate-500">
-          <IoTimeOutline className="text-2xl" />
-        </div>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          {t("noRecentActivity")}
-        </p>
-        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-          {t("activityHint")}
-        </p>
-      </div>
+      <EmptyState
+        size="sm"
+        icon={<IoTimeOutline />}
+        title={t("noRecentActivity")}
+        description={t("activityHint")}
+      />
     );
   }
 
   return (
     <ul className="space-y-2">
-      {entries.map((entry, index) => {
+      {entries.map((entry) => {
         const visual = getAuditVisual(entry.actionType, entry.entityType);
         const Icon = visual.icon;
         const title = resolveAuditTitle(entry);
@@ -84,41 +80,30 @@ export default function RecentActivityList({
         return (
           <li
             key={entry.id}
-            className={`flex items-center justify-between gap-4 rounded-xl border border-transparent bg-slate-50/80 p-3 transition-all duration-200 hover:border-slate-200 hover:bg-slate-100 dark:bg-slate-700/50 dark:hover:border-slate-600 dark:hover:bg-slate-700 ${isRTL ? "flex-row-reverse" : ""}`}
-            style={{ animationDelay: `${index * 30}ms` }}
+            className="flex items-center justify-between gap-4 rounded-xl border border-transparent bg-surface-2/80 p-3 transition-colors duration-150 hover:border-line hover:bg-surface-2"
           >
-            <div
-              className={`flex min-w-0 flex-1 items-start gap-3 ${isRTL ? "flex-row-reverse text-end" : ""}`}
-            >
-              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-600">
-                <Icon className="text-base text-violet-600 dark:text-violet-400" />
+            <div className="flex min-w-0 flex-1 items-start gap-3 text-start">
+              <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-surface text-brand shadow-xs ring-1 ring-line">
+                <Icon className="text-base" aria-hidden />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
-                  {title}
-                </p>
-                <div
-                  className={`mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400 ${isRTL ? "justify-end" : ""}`}
-                >
-                  <span
-                    className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${visual.badgeClass}`}
-                  >
+                <p className="truncate text-sm font-semibold text-fg">{title}</p>
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-fg-muted">
+                  <Badge tone="neutral" size="sm">
                     {t(`activityCategories.${category}` as never)}
-                  </span>
-                  {entry.userName?.trim() && (
+                  </Badge>
+                  {entry.userName?.trim() ? (
                     <span className="inline-flex items-center gap-1">
-                      <IoPersonOutline className="shrink-0" />
+                      <IoPersonOutline className="shrink-0" aria-hidden />
                       {entry.userName.trim()}
                     </span>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </div>
 
-            <div
-              className={`flex shrink-0 items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}
-            >
-              <span className="text-xs text-slate-500 dark:text-slate-400 md:text-sm">
+            <div className="flex shrink-0 items-center gap-3">
+              <span className="text-xs text-fg-muted md:text-sm">
                 {entry.isUndated ? (
                   t("legacyDate")
                 ) : (
@@ -133,11 +118,12 @@ export default function RecentActivityList({
       <li className="pt-2">
         <LinkTo
           href={`/dashboard/${menuSlugOrId}/history`}
-          className={`inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline ${isRTL ? "flex-row-reverse" : ""}`}
+          className="inline-flex items-center gap-1 rounded-sm text-sm font-medium text-brand transition-colors hover:text-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
           {t("viewAllActivity")}
           <IoChevronForwardOutline
-            className={`text-sm shrink-0 ${isRTL ? "rotate-180" : ""}`}
+            className="shrink-0 text-sm rtl:rotate-180"
+            aria-hidden
           />
         </LinkTo>
       </li>

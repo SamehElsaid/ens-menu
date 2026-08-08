@@ -1,7 +1,17 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import CardDashBoard from "@/components/Card/CardDashBoard";
+import {
+  Badge,
+  Button,
+  EmptyState,
+  SectionHeader,
+  Table,
+  TableShell,
+  Td,
+  Th,
+  Tr,
+} from "@/components/ui";
 import {
   AdminRankedList,
   AdminSectionCard,
@@ -23,7 +33,6 @@ export default function FollowUpTeamPerformance({
 }: FollowUpTeamPerformanceProps) {
   const t = useTranslations("adminFollowUps.teamReport");
   const tFollowUps = useTranslations("adminFollowUps");
-  const isRTL = dir === "rtl";
 
   const teamStats = report.teamStats ?? [];
   const rankedItems = teamStats.map((row, index) => ({
@@ -42,24 +51,20 @@ export default function FollowUpTeamPerformance({
     }));
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-            {t("title")}
-          </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            {t("subtitle")}
-          </p>
-        </div>
-        {report.period && (
-          <span className="text-xs font-medium px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-            {t(`period.${report.period}`)}
-          </span>
-        )}
-      </div>
+    <div className="flex flex-col gap-4" dir={dir}>
+      <SectionHeader
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          report.period ? (
+            <Badge tone="neutral" size="md">
+              {t(`period.${report.period}`)}
+            </Badge>
+          ) : undefined
+        }
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <AdminSectionCard
           title={t("leaderboardTitle")}
           subtitle={t("leaderboardHint")}
@@ -92,116 +97,102 @@ export default function FollowUpTeamPerformance({
         </AdminSectionCard>
       </div>
 
-      <CardDashBoard>
-        <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-4">
-          {t("tableTitle")}
-        </h3>
+      <div className="flex flex-col gap-3">
+        <SectionHeader title={t("tableTitle")} />
 
         {teamStats.length === 0 ? (
-          <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-8">
-            {t("noTeamData")}
-          </p>
+          <EmptyState title={t("noTeamData")} size="sm" />
         ) : (
-          <div className="overflow-x-auto -mx-2 px-2">
-            <table
-              className="w-full min-w-[640px] text-sm"
-              dir={dir}
-            >
+          <TableShell>
+            <Table caption={t("tableTitle")} className="min-w-[640px]">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400">
-                  <th className={`py-2 font-medium ${isRTL ? "text-right" : "text-left"}`}>
-                    {t("columns.agent")}
-                  </th>
-                  <th className="py-2 font-medium text-center">
+                <tr>
+                  <Th>{t("columns.agent")}</Th>
+                  <Th align="center" numeric>
                     {t("columns.calls")}
-                  </th>
-                  <th className="py-2 font-medium text-center">
+                  </Th>
+                  <Th align="center" numeric>
                     {t("columns.answeredRate")}
-                  </th>
-                  <th className="py-2 font-medium text-center">
+                  </Th>
+                  <Th align="center" numeric>
                     {t("columns.overdue")}
-                  </th>
-                  <th className="py-2 font-medium text-center">
+                  </Th>
+                  <Th align="center" numeric>
                     {t("columns.onboarding")}
-                  </th>
-                  <th className="py-2 font-medium text-center">
+                  </Th>
+                  <Th align="center" numeric>
                     {t("columns.upgrade")}
-                  </th>
-                  <th className="py-2 font-medium text-center">
+                  </Th>
+                  <Th align="center" numeric>
                     {t("columns.callbacks")}
-                  </th>
+                  </Th>
                 </tr>
               </thead>
               <tbody>
                 {teamStats.map((row) => (
-                  <tr
-                    key={row.adminName}
-                    className="border-b border-slate-100 dark:border-slate-800 last:border-0"
-                  >
-                    <td className={`py-3 font-medium ${isRTL ? "text-right" : "text-left"}`}>
+                  <Tr key={row.adminName}>
+                    <Td className="font-medium">
                       {onAgentClick ? (
-                        <button
-                          type="button"
+                        <Button
+                          variant="link"
+                          size="sm"
                           onClick={() => onAgentClick(row.adminName)}
-                          className="text-primary hover:underline"
                         >
                           {row.adminName}
-                        </button>
+                        </Button>
                       ) : (
-                        <span className="text-slate-900 dark:text-slate-100">
-                          {row.adminName}
-                        </span>
+                        <span className="text-fg">{row.adminName}</span>
                       )}
-                    </td>
-                    <td className="py-3 text-center tabular-nums font-semibold text-primary">
+                    </Td>
+                    <Td align="center" numeric className="font-semibold">
                       {onAgentClick ? (
-                        <button
-                          type="button"
+                        <Button
+                          variant="link"
+                          size="sm"
                           onClick={() => onAgentClick(row.adminName)}
-                          className="hover:underline"
                         >
                           {row.totalCalls}
-                        </button>
+                        </Button>
                       ) : (
                         row.totalCalls
                       )}
-                    </td>
-                    <td className="py-3 text-center tabular-nums">
+                    </Td>
+                    <Td align="center" numeric>
                       <span
                         className={
                           row.answeredRate >= 50
-                            ? "text-emerald-600 dark:text-emerald-400 font-medium"
-                            : "text-slate-600 dark:text-slate-400"
+                            ? "font-medium text-success"
+                            : "text-fg-muted"
                         }
                       >
                         {row.answeredRate}%
                       </span>
-                    </td>
-                    <td className="py-3 text-center tabular-nums">
+                    </Td>
+                    <Td align="center" numeric>
                       {row.overdueFollowUps > 0 ? (
-                        <span className="text-red-600 dark:text-red-400 font-medium">
+                        <span className="font-medium text-danger">
                           {row.overdueFollowUps}
                         </span>
                       ) : (
-                        <span className="text-slate-400">0</span>
+                        <span className="text-fg-subtle">0</span>
                       )}
-                    </td>
-                    <td className="py-3 text-center tabular-nums text-slate-700 dark:text-slate-300">
+                    </Td>
+                    <Td align="center" numeric>
                       {row.onboardingCalls}
-                    </td>
-                    <td className="py-3 text-center tabular-nums text-slate-700 dark:text-slate-300">
+                    </Td>
+                    <Td align="center" numeric>
                       {row.upgradeCalls}
-                    </td>
-                    <td className="py-3 text-center tabular-nums text-slate-700 dark:text-slate-300">
+                    </Td>
+                    <Td align="center" numeric>
                       {row.callbackRequested}
-                    </td>
-                  </tr>
+                    </Td>
+                  </Tr>
                 ))}
               </tbody>
-            </table>
-          </div>
+            </Table>
+          </TableShell>
         )}
-      </CardDashBoard>
+      </div>
     </div>
   );
 }

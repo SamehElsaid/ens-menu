@@ -2,8 +2,9 @@
 
 import { useCallback, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { FiAlertTriangle } from "react-icons/fi";
+import { Button, ButtonLink, ConfirmDialog } from "@/components/ui";
 import CardDashBoard from "@/components/Card/CardDashBoard";
-import ConfirmationModal from "@/components/Custom/ConfirmationModal";
 import { axiosDelete, axiosPatch, axiosPost } from "@/shared/axiosCall";
 import { publicMenuLinkUrl } from "@/lib/publicMenuUrl";
 import { toast } from "react-toastify";
@@ -159,37 +160,26 @@ export default function AdminUserMenusSection({
           </h2>
           {menus.length > 0 ? (
             featuredOnHomepage ? (
-              <button
-                type="button"
+              <Button
+                variant="danger"
+                size="sm"
+                loading={featureOnHomepageLoading}
                 onClick={handleRemoveFromHomepage}
-                disabled={featureOnHomepageLoading}
-                className="px-4 py-2.5 rounded-xl bg-orange-600 text-white text-sm font-semibold hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
               >
-                {featureOnHomepageLoading ? (
-                  <>
-                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    {t("lists.removeFromHomepageLoading")}
-                  </>
-                ) : (
-                  t("lists.removeFromHomepage")
-                )}
-              </button>
+                {featureOnHomepageLoading
+                  ? t("lists.removeFromHomepageLoading")
+                  : t("lists.removeFromHomepage")}
+              </Button>
             ) : (
-              <button
-                type="button"
+              <Button
+                size="sm"
+                loading={featureOnHomepageLoading}
                 onClick={handleFeatureOnHomepage}
-                disabled={featureOnHomepageLoading}
-                className="px-4 py-2.5 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
               >
-                {featureOnHomepageLoading ? (
-                  <>
-                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    {t("lists.addToHomepageLoading")}
-                  </>
-                ) : (
-                  t("lists.addToHomepage")
-                )}
-              </button>
+                {featureOnHomepageLoading
+                  ? t("lists.addToHomepageLoading")
+                  : t("lists.addToHomepage")}
+              </Button>
             )
           ) : null}
         </div>
@@ -239,34 +229,27 @@ export default function AdminUserMenusSection({
                 <div
                   className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}
                 >
-                  <a
+                  <ButtonLink
                     href={publicMenuLinkUrl(menu.slug)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors"
+                    external
+                    variant="secondary"
+                    size="sm"
                   >
                     {t("lists.view")}
-                  </a>
-                  <button
+                  </ButtonLink>
+                  <Button
+                    variant={menu.isActive ? "danger" : "primary"}
+                    size="sm"
+                    className="min-w-[100px]"
+                    loading={updatingMenuId === menu.id}
                     onClick={() => setConfirmingMenu(menu)}
-                    disabled={updatingMenuId === menu.id}
-                    className={`px-4 py-2 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[100px] ${
-                      menu.isActive
-                        ? "bg-red-600 hover:bg-red-700 disabled:hover:bg-red-600"
-                        : "bg-green-600 hover:bg-green-700 disabled:hover:bg-green-600"
-                    }`}
                   >
-                    {updatingMenuId === menu.id ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>{t("lists.updating")}</span>
-                      </>
-                    ) : menu.isActive ? (
-                      t("lists.stop")
-                    ) : (
-                      t("lists.activate")
-                    )}
-                  </button>
+                    {updatingMenuId === menu.id
+                      ? t("lists.updating")
+                      : menu.isActive
+                        ? t("lists.stop")
+                        : t("lists.activate")}
+                  </Button>
                 </div>
               </div>
             ))}
@@ -281,8 +264,8 @@ export default function AdminUserMenusSection({
       </CardDashBoard>
 
       {confirmingMenu && (
-        <ConfirmationModal
-          isOpen={true}
+        <ConfirmDialog
+          open={true}
           onClose={() =>
             updatingMenuId !== confirmingMenu.id && setConfirmingMenu(null)
           }
@@ -292,19 +275,20 @@ export default function AdminUserMenusSection({
               ? t("lists.confirmStopTitle")
               : t("lists.confirmActivateTitle")
           }
-          message={
+          description={
             confirmingMenu.isActive
               ? t("lists.confirmStopMessage", { menuName: confirmingMenuName })
               : t("lists.confirmActivateMessage", {
                   menuName: confirmingMenuName,
                 })
           }
-          confirmText={
+          confirmLabel={
             confirmingMenu.isActive ? t("lists.stop") : t("lists.activate")
           }
-          cancelText={t("lists.cancel")}
-          isLoading={updatingMenuId === confirmingMenu.id}
-          loadingText={t("lists.updating")}
+          cancelLabel={t("lists.cancel")}
+          loading={updatingMenuId === confirmingMenu.id}
+          tone="brand"
+          icon={<FiAlertTriangle />}
         />
       )}
     </>

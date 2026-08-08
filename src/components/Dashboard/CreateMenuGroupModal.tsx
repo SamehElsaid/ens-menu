@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import { axiosPost } from "@/shared/axiosCall";
-import CustomInput from "@/components/Custom/CustomInput";
+import { Field, Input } from "@/components/ui";
 import type { Menu } from "@/types/Menu";
 import { menusAvailableForGroup } from "@/lib/menuDeliveryGroups";
 import {
@@ -31,7 +31,6 @@ export default function CreateMenuGroupModal({
 }: CreateMenuGroupModalProps) {
   const t = useTranslations("Menus.createGroupModal");
   const locale = useLocale();
-  const isRTL = locale === "ar";
 
   const availableMenus = useMemo(
     () => menusAvailableForGroup(menus),
@@ -81,7 +80,6 @@ export default function CreateMenuGroupModal({
       subtitle={t("description")}
       onClose={onClose}
       closeLabel={t("cancel")}
-      isRTL={isRTL}
       footer={
         <MenuGroupModalFooter
           cancelLabel={t("cancel")}
@@ -95,13 +93,15 @@ export default function CreateMenuGroupModal({
         />
       }
     >
-      <div className="space-y-5">
-        <CustomInput
-          label={t("nameLabel")}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder={t("namePlaceholder")}
-        />
+      <div className="flex flex-col gap-5">
+        <Field label={t("nameLabel")}>
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={t("namePlaceholder")}
+            data-autofocus
+          />
+        </Field>
 
         <div>
           <MenuGroupSectionLabel>{t("menusLabel")}</MenuGroupSectionLabel>

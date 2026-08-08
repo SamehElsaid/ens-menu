@@ -10,6 +10,7 @@ import DeleteCategoryConfirm from "@/components/Dashboard/DeleteCategoryConfirm"
 import CategoriesCardGrid from "@/components/Dashboard/CategoriesCardGrid";
 import MobileFloatingAddButton from "@/components/Dashboard/mobile/MobileFloatingAddButton";
 import LinkTo from "@/components/Global/LinkTo";
+import { Button, buttonClasses } from "@/components/ui";
 import { Category } from "@/types/Menu";
 import { IoAddCircleOutline, IoSearchOutline, IoRefreshOutline } from "react-icons/io5";
 
@@ -108,36 +109,30 @@ export default function CategoriesPage() {
 
   return (
     <>
-      <div
+      <PageTitleWithHelp
         id="onboarding-categories-header"
-        className="flex flex-col  sm:flex-row items-start sm:items-center justify-between gap-4 mb-8"
-      >
-        <div>
-          <PageTitleWithHelp>
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100">
-              {t("title")}
-            </h1>
-          </PageTitleWithHelp>
-          <p className="text-slate-500 mt-1 dark:text-slate-400">
-            {t("subtitle")}
-          </p>
-        </div>
-        <div id="onboarding-categories-actions" className="flex flex-wrap items-center gap-3">
-          <LinkTo
-            href={`/dashboard/${menuId}`}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-primary/30 dark:hover:border-primary/50 text-sm font-medium transition-all"
-          >
-            {tStaff("backToOverview")}
-          </LinkTo>
-          <button
-            onClick={openAddModal}
-            className="hidden md:inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold shadow-lg hover:opacity-90 transition-all hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <IoAddCircleOutline className="text-xl" />
-            {t("addCategory")}
-          </button>
-        </div>
-      </div>
+        className="mb-8"
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          <>
+            <LinkTo
+              href={`/dashboard/${menuId}`}
+              className={buttonClasses({ variant: "secondary" })}
+            >
+              {tStaff("backToOverview")}
+            </LinkTo>
+            <Button
+              id="onboarding-categories-actions"
+              onClick={openAddModal}
+              className="hidden md:inline-flex"
+              startIcon={<IoAddCircleOutline className="size-4.5" />}
+            >
+              {t("addCategory")}
+            </Button>
+          </>
+        }
+      />
 
       <div
         id="onboarding-categories-filters"
@@ -165,23 +160,26 @@ export default function CategoriesPage() {
               />
             </div>
           </div>
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center shrink-0">
-            <button
+          <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+            <Button
               type="button"
               onClick={handleSearch}
-              className="h-11 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 bg-primary text-white rounded-xl font-semibold shadow-md hover:opacity-90 hover:shadow-lg transition-all"
+              fullWidth
+              className="sm:w-auto"
+              startIcon={<IoSearchOutline className="size-4" />}
             >
-              <IoSearchOutline className="text-lg" />
               {t("search")}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="secondary"
               onClick={handleReset}
-              className="h-11 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 rounded-xl border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+              fullWidth
+              className="sm:w-auto"
+              startIcon={<IoRefreshOutline className="size-4" />}
             >
-              <IoRefreshOutline className="text-lg" />
               {t("reset")}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

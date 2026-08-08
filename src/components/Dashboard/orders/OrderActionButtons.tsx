@@ -86,7 +86,7 @@ function actionsForStatus(
             action: "TABLE_CALL_COMPLETED",
             labelKey: "finish",
             className:
-              "bg-violet-600 text-white hover:bg-violet-700 dark:bg-violet-600 dark:hover:bg-violet-500",
+              "bg-brand text-on-brand hover:bg-brand-hover active:bg-brand-active",
           },
         ];
       default:
@@ -125,7 +125,7 @@ function actionsForStatus(
           action: "TABLE_CALL_DELIVERED",
           labelKey: "markDelivered",
           className:
-            "bg-violet-600 text-white hover:bg-violet-700 dark:bg-violet-600 dark:hover:bg-violet-500",
+            "bg-brand text-on-brand hover:bg-brand-hover active:bg-brand-active",
         },
       ];
     default:

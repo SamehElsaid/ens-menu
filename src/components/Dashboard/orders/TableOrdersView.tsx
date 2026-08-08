@@ -75,24 +75,20 @@ export default function TableOrdersView() {
 
       <header
         id="onboarding-orders-header"
-        className="relative overflow-hidden rounded-2xl border border-violet-200/60 bg-linear-to-br from-violet-50 via-fuchsia-50/80 to-white p-6 shadow-sm dark:border-violet-500/20 dark:from-violet-950/50 dark:via-fuchsia-950/30 dark:to-slate-900 md:p-8"
+        className="rounded-2xl border border-line bg-surface p-6 shadow-sm md:p-8"
       >
-        <div
-          className="pointer-events-none absolute -end-16 -top-16 h-48 w-48 rounded-full bg-linear-to-br from-violet-400/20 to-fuchsia-400/10 blur-2xl dark:from-violet-500/15 dark:to-fuchsia-500/10"
-          aria-hidden
-        />
-        <div className="relative flex flex-wrap items-start justify-between gap-4">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-brand text-on-brand shadow-sm">
               <IoReceiptOutline className="text-2xl" aria-hidden />
             </div>
             <div>
               <PageTitleWithHelp>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white md:text-3xl">
+                <h1 className="text-2xl font-bold tracking-tight text-fg md:text-3xl">
                   {t("title")}
                 </h1>
               </PageTitleWithHelp>
-              <p className="mt-1 max-w-xl text-sm text-slate-600 dark:text-slate-300">
+              <p className="mt-1 max-w-xl text-sm text-fg-muted">
                 {t("subtitle")}
               </p>
             </div>
@@ -109,7 +105,7 @@ export default function TableOrdersView() {
             {t("searchPlaceholder")}
           </label>
           <IoSearchOutline
-            className={`pointer-events-none absolute top-1/2 h-5 w-5 -translate-y-1/2 text-violet-500 dark:text-violet-400 ${isRTL ? "end-3" : "start-3"}`}
+            className={`pointer-events-none absolute top-1/2 h-5 w-5 -translate-y-1/2 text-brand ${isRTL ? "end-3" : "start-3"}`}
             aria-hidden
           />
           <input
@@ -118,14 +114,14 @@ export default function TableOrdersView() {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder={t("searchPlaceholder")}
-            className={`w-full rounded-xl border border-violet-200/90 bg-white/90 py-3 text-sm text-slate-900 shadow-inner shadow-violet-500/5 placeholder:text-slate-400 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-500/35 dark:border-violet-500/30 dark:bg-slate-800/90 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-violet-400 dark:focus:ring-violet-400/25 ${isRTL ? "pe-11 ps-4" : "ps-11 pe-4"}`}
+            className={`w-full rounded-xl border border-line-strong bg-surface py-3 text-sm text-fg placeholder:text-fg-subtle focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/35 ${isRTL ? "pe-11 ps-4" : "ps-11 pe-4"}`}
             autoComplete="off"
           />
         </div>
 
         <OrdersFilters
           translationNs="tableOrders"
-          theme="violet"
+          theme="brand"
           dateFrom={dateFrom}
           dateTo={dateTo}
           statusFilter={statusFilter}

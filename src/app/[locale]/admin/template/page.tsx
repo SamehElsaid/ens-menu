@@ -4,8 +4,17 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "react-toastify";
+import { IoAddOutline } from "react-icons/io5";
 import { templateApi } from "@/lib/template-builder/data/api";
 import type { TemplateListItem } from "@/lib/template-builder/schema";
+import {
+  Button,
+  ButtonLink,
+  EmptyState,
+  PageHeader,
+  Skeleton,
+  SkeletonRegion,
+} from "@/components/ui";
 
 export default function TemplateListPage() {
   const locale = useLocale();
@@ -40,47 +49,50 @@ export default function TemplateListPage() {
 
   return (
     <div className="mx-auto max-w-5xl p-4 md:p-6">
-      <div className="mb-6 flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-            {t("title")}
-          </h1>
-          <p className="mt-1 text-sm text-slate-500">{t("subtitle")}</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => void create()}
-          disabled={creating}
-          className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-500 disabled:opacity-50"
-        >
-          {creating ? t("creating") : t("newTemplate")}
-        </button>
-      </div>
+      <PageHeader
+        className="mb-6"
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          <Button loading={creating} onClick={() => void create()}>
+            {creating ? t("creating") : t("newTemplate")}
+          </Button>
+        }
+      />
 
       {loading ? (
-        <p className="text-sm text-slate-500">{t("loading")}</p>
+        <SkeletonRegion label={t("loading")}>
+          <div className="space-y-2">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-16 w-full rounded-xl" />
+            ))}
+          </div>
+        </SkeletonRegion>
       ) : items.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 p-10 text-center dark:border-slate-700">
-          <p className="mb-4 text-slate-500">{t("noTemplates")}</p>
-          <button
-            type="button"
-            onClick={() => void create()}
-            className="text-sm font-medium text-violet-600 hover:underline"
-          >
-            {t("createFromStarter")}
-          </button>
-        </div>
+        <EmptyState
+          title={t("noTemplates")}
+          action={
+            <Button
+              variant="secondary"
+              startIcon={<IoAddOutline />}
+              onClick={() => void create()}
+              loading={creating}
+            >
+              {t("createFromStarter")}
+            </Button>
+          }
+        />
       ) : (
         <ul className="space-y-2">
           {items.map((item) => (
             <li
               key={item.id}
-              className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900"
+              className="flex flex-wrap items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3"
             >
               <div className="min-w-0 flex-1">
                 <Link
                   href={`/${locale}/admin/template/${item.id}`}
-                  className="flex items-center gap-3 font-medium text-slate-900 hover:text-violet-600 dark:text-white"
+                  className="flex items-center gap-3 font-medium text-fg hover:text-brand"
                 >
                   {item.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -94,48 +106,50 @@ export default function TemplateListPage() {
                     {locale === "ar" && item.nameAr ? item.nameAr : item.name}
                   </span>
                 </Link>
-                <p className="mt-0.5 text-xs text-slate-500">
+                <p className="mt-0.5 text-xs text-fg-muted">
                   {item.slug} · {new Date(item.updatedAt).toLocaleString(locale)}
                 </p>
               </div>
-              <Link
+              <ButtonLink
                 href={`/${locale}/admin/template/${item.id}`}
-                className="rounded-md bg-violet-600 px-3 py-1.5 text-xs text-white"
+                size="sm"
               >
                 {t("edit")}
-              </Link>
-              <button
-                type="button"
+              </ButtonLink>
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={async () => {
                   await templateApi.duplicateTemplate(item.id);
                   toast.success(t("duplicated"));
                   await refresh();
                 }}
-                className="rounded-md border border-slate-300 px-3 py-1.5 text-xs dark:border-slate-600"
               >
                 {t("duplicate")}
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={async () => {
-                  toast.info((await templateApi.publishTemplate(item.id)).message);
+                  toast.info(
+                    (await templateApi.publishTemplate(item.id)).message,
+                  );
                 }}
-                className="rounded-md border border-slate-300 px-3 py-1.5 text-xs dark:border-slate-600"
               >
                 {t("publish")}
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="dangerGhost"
+                size="sm"
                 onClick={async () => {
                   if (!confirm(t("deleteConfirm"))) return;
                   await templateApi.deleteTemplate(item.id);
                   toast.success(t("deleted"));
                   await refresh();
                 }}
-                className="rounded-md border border-red-200 px-3 py-1.5 text-xs text-red-600"
               >
                 {t("delete")}
-              </button>
+              </Button>
             </li>
           ))}
         </ul>

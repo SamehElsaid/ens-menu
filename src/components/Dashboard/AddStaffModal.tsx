@@ -1,17 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useLocale, useTranslations } from "next-intl";
 import { axiosPost, axiosPatch } from "@/shared/axiosCall";
-import CustomInput from "@/components/Custom/CustomInput";
 import { toast } from "react-toastify";
 import { MenuStaff } from "@/types/Menu";
 import { useAccountStaffRoles } from "@/hooks/useAccountStaffRoles";
 import { useDashboardMenus, localizedMenuName } from "@/hooks/useDashboardMenus";
 import { roleDisplayName, isComingSoonStaffRole } from "@/shared/roleDisplayName";
 import {
-  IoCloseOutline,
   IoEllipseSharp,
   IoCheckmarkCircle,
   IoRemoveCircle,
@@ -20,7 +18,8 @@ import {
   IoRestaurantOutline,
   IoShieldCheckmarkOutline,
 } from "react-icons/io5";
-import CustomBtn from "../Custom/CustomBtn";
+import { Button, Field, Input, Modal, Spinner, focusRing } from "@/components/ui";
+import { cn } from "@/lib/cn";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -39,6 +38,8 @@ interface AddStaffModalProps {
   onClose: () => void;
   onRefresh?: () => void;
 }
+
+const STAFF_FORM_ID = "add-staff-form";
 
 function buildStaffPayload(data: AddStaffFormData): Record<string, unknown> {
   const payload: Record<string, unknown> = {
@@ -60,10 +61,10 @@ export default function AddStaffModal({
   onRefresh,
 }: AddStaffModalProps) {
   const t = useTranslations("Staff.addModal");
+  const tCommon = useTranslations("common");
   const locale = useLocale();
   const isEdit = Boolean(staff?.id);
   const [isSaving, setIsSaving] = useState(false);
-  const modalRef = useRef<HTMLDivElement>(null);
   const { roles, loading: rolesLoading } = useAccountStaffRoles();
   const { menus, loading: menusLoading } = useDashboardMenus();
 
@@ -112,14 +113,6 @@ export default function AddStaffModal({
     }
   }, [staff, reset]);
 
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !isSaving) onClose();
-    };
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, [onClose, isSaving]);
-
   const onSubmit = async (data: AddStaffFormData) => {
     try {
       setIsSaving(true);
@@ -158,397 +151,348 @@ export default function AddStaffModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]"
-      onClick={(e) => e.target === e.currentTarget && !isSaving && onClose()}
+    <Modal
+      open
+      onClose={onClose}
+      title={isEdit ? t("editTitle") : t("title")}
+      description={t("subtitle")}
+      icon={<IoPeopleOutline className="size-5" />}
+      dismissible={!isSaving}
+      closeLabel={tCommon("close")}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose} disabled={isSaving}>
+            {t("cancel")}
+          </Button>
+          <Button
+            variant="primary"
+            type="submit"
+            form={STAFF_FORM_ID}
+            loading={isSaving}
+            disabled={isSaving}
+            startIcon={<IoAddCircleOutline className="size-4.5" />}
+          >
+            {isEdit ? t("save") : t("create")}
+          </Button>
+        </>
+      }
     >
-      <div
-        ref={modalRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="add-staff-title"
-        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col animate-[fadeIn_0.25s_ease-out] border border-gray-200/50 dark:border-gray-700/50"
-        onClick={(e) => e.stopPropagation()}
+      <form
+        id={STAFF_FORM_ID}
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-col gap-6"
       >
-        <div className="shrink-0 px-6 pt-6 pb-4 border-b border-gray-200 dark:border-gray-700 bg-linear-to-br from-primary/5 to-transparent dark:from-primary/10">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-primary/20 to-accent-purple/10 flex items-center justify-center shadow-sm ring-1 ring-primary/10">
-                <IoPeopleOutline className="text-primary text-2xl" />
-              </div>
-              <div>
-                <h2
-                  id="add-staff-title"
-                  className="text-xl font-bold text-gray-900 dark:text-white tracking-tight"
-                >
-                  {isEdit ? t("editTitle") : t("title")}
-                </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                  {t("subtitle")}
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSaving}
-              className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
-              aria-label={t("closeAriaLabel")}
-            >
-              <IoCloseOutline className="text-xl" />
-            </button>
-          </div>
-        </div>
-
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col min-h-0 flex-1"
-        >
-          <div className="overflow-y-auto p-6 space-y-6">
-            <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t("roleLabel")} *
-                </label>
-                <Controller
-                  name="roleId"
-                  control={control}
-                  rules={{
-                    validate: (v) => {
-                      if (v == null || !Number.isFinite(v)) {
-                        return t("roleRequired");
-                      }
-                      const role = roles.find((r) => r.id === v);
-                      if (
-                        role &&
-                        isComingSoonStaffRole(role) &&
-                        (!isEdit || staff?.roleId !== role.id)
-                      ) {
-                        return t("roleComingSoon");
-                      }
-                      return true;
-                    },
-                  }}
-                  render={({ field }) => {
-                    if (rolesLoading) {
+        <section className="flex flex-col gap-4">
+          <Field label={t("roleLabel")} required error={errors.roleId?.message}>
+            <Controller
+              name="roleId"
+              control={control}
+              rules={{
+                validate: (v) => {
+                  if (v == null || !Number.isFinite(v)) {
+                    return t("roleRequired");
+                  }
+                  const role = roles.find((r) => r.id === v);
+                  if (
+                    role &&
+                    isComingSoonStaffRole(role) &&
+                    (!isEdit || staff?.roleId !== role.id)
+                  ) {
+                    return t("roleComingSoon");
+                  }
+                  return true;
+                },
+              }}
+              render={({ field }) => {
+                if (rolesLoading) {
+                  return (
+                    <div className="flex items-center gap-2 rounded-lg border border-line bg-surface-2 px-4 py-3 text-sm text-fg-muted">
+                      <Spinner size="sm" />
+                      {t("rolesLoading")}
+                    </div>
+                  );
+                }
+                if (roles.length === 0) {
+                  return (
+                    <p className="rounded-lg border border-warning/30 bg-warning-soft px-4 py-3 text-sm text-warning">
+                      {t("noRolesHint")}
+                    </p>
+                  );
+                }
+                return (
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {roles.map((role) => {
+                      const isSelected = field.value === role.id;
+                      const isComingSoon = isComingSoonStaffRole(role);
                       return (
-                        <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-500 dark:border-gray-600 dark:bg-gray-700/40 dark:text-gray-400">
-                          <span
-                            className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"
-                            aria-hidden
-                          />
-                          {t("rolesLoading")}
-                        </div>
+                        <button
+                          key={role.id}
+                          type="button"
+                          disabled={isComingSoon}
+                          aria-disabled={isComingSoon}
+                          onClick={() => {
+                            if (isComingSoon) return;
+                            field.onChange(role.id);
+                          }}
+                          className={cn(
+                            "flex items-center gap-2.5 rounded-lg border px-3.5 py-3 text-start text-sm font-medium transition-colors duration-150",
+                            focusRing,
+                            isComingSoon
+                              ? "cursor-not-allowed border-dashed border-line bg-surface-2 text-fg-subtle opacity-80"
+                              : isSelected
+                                ? "border-brand/50 bg-brand-soft text-brand ring-1 ring-brand/20"
+                                : "border-line text-fg-muted hover:border-line-strong hover:bg-surface-2",
+                          )}
+                        >
+                          <IoShieldCheckmarkOutline className="shrink-0 text-lg" />
+                          <span className="min-w-0 flex-1 truncate">
+                            {roleDisplayName(role, locale)}
+                          </span>
+                          {isComingSoon && (
+                            <span className="shrink-0 rounded-md bg-surface-3 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-fg-subtle">
+                              {t("roleComingSoon")}
+                            </span>
+                          )}
+                        </button>
                       );
-                    }
-                    if (roles.length === 0) {
-                      return (
-                        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300">
-                          {t("noRolesHint")}
-                        </p>
-                      );
-                    }
-                    return (
-                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                        {roles.map((role) => {
-                          const isSelected = field.value === role.id;
-                          const isComingSoon = isComingSoonStaffRole(role);
-                          return (
-                            <button
-                              key={role.id}
-                              type="button"
-                              disabled={isComingSoon}
-                              aria-disabled={isComingSoon}
-                              onClick={() => {
-                                if (isComingSoon) return;
-                                field.onChange(role.id);
-                              }}
-                              className={`flex items-center gap-2.5 rounded-xl border px-3.5 py-3 text-start text-sm font-medium transition-all duration-200 ${
-                                isComingSoon
-                                  ? "cursor-not-allowed border-dashed border-gray-200 bg-gray-50/80 text-gray-400 opacity-80 dark:border-gray-700 dark:bg-gray-800/40 dark:text-gray-500"
-                                  : isSelected
-                                    ? "border-primary/50 bg-primary/5 text-primary ring-1 ring-primary/20 dark:bg-primary/10"
-                                    : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700/40"
-                              }`}
-                            >
-                              <IoShieldCheckmarkOutline className="shrink-0 text-lg" />
-                              <span className="min-w-0 flex-1 truncate">
-                                {roleDisplayName(role, locale)}
-                              </span>
-                              {isComingSoon && (
-                                <span className="shrink-0 rounded-md bg-slate-200/80 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-700/80 dark:text-slate-400">
-                                  {t("roleComingSoon")}
-                                </span>
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    );
-                  }}
-                />
-                {errors.roleId && (
-                  <p className="mt-1.5 text-xs text-red-500">
-                    {errors.roleId.message}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t("menusLabel")} *
-                </label>
-                <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
-                  {t("menusHint")}
-                </p>
-                <Controller
-                  name="menuIds"
-                  control={control}
-                  rules={{
-                    validate: (v) =>
-                      v.length > 0 ? true : t("menusRequired"),
-                  }}
-                  render={({ field }) => {
-                    if (menusLoading) {
-                      return (
-                        <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-500 dark:border-gray-600 dark:bg-gray-700/40 dark:text-gray-400">
-                          <span
-                            className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"
-                            aria-hidden
-                          />
-                          {t("menusLoading")}
-                        </div>
-                      );
-                    }
-                    if (menus.length === 0) {
-                      return (
-                        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300">
-                          {t("noMenusHint")}
-                        </p>
-                      );
-                    }
-                    return (
-                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                        {menus.map((menu) => {
-                          const isSelected = field.value.includes(menu.id);
-                          return (
-                            <button
-                              key={menu.id}
-                              type="button"
-                              onClick={() =>
-                                field.onChange(
-                                  isSelected
-                                    ? field.value.filter((id) => id !== menu.id)
-                                    : [...field.value, menu.id],
-                                )
-                              }
-                              className={`flex items-center gap-2.5 rounded-xl border px-3.5 py-3 text-start text-sm font-medium transition-all duration-200 ${
-                                isSelected
-                                  ? "border-primary/50 bg-primary/5 text-primary ring-1 ring-primary/20 dark:bg-primary/10"
-                                  : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700/40"
-                              }`}
-                            >
-                              <IoRestaurantOutline className="shrink-0 text-lg" />
-                              <span className="min-w-0 flex-1 truncate">
-                                {localizedMenuName(menu, locale)}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    );
-                  }}
-                />
-                {errors.menuIds && (
-                  <p className="mt-1.5 text-xs text-red-500">
-                    {errors.menuIds.message}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t("name")} *
-                </label>
-                <Controller
-                  name="name"
-                  control={control}
-                  rules={{
-                    required: t("nameRequired"),
-                    maxLength: { value: 255, message: t("nameMax") },
-                  }}
-                  render={({ field }) => (
-                    <CustomInput
-                      type="text"
-                      value={field.value}
-                      onChange={(e) => field.onChange(e.target.value)}
-                      onBlur={field.onBlur}
-                      className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                      placeholder={t("namePlaceholder")}
-                      error={errors.name?.message}
-                    />
-                  )}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t("email")} *
-                </label>
-                <Controller
-                  name="email"
-                  control={control}
-                  rules={{
-                    required: t("emailRequired"),
-                    validate: (v) => {
-                      const s = v.trim();
-                      if (!s) return t("emailRequired");
-                      return EMAIL_RE.test(s) ? true : t("emailInvalid");
-                    },
-                  }}
-                  render={({ field }) => (
-                    <CustomInput
-                      type="email"
-                      value={field.value}
-                      onChange={(e) => field.onChange(e.target.value)}
-                      onBlur={field.onBlur}
-                      className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                      placeholder={t("emailPlaceholder")}
-                      error={errors.email?.message}
-                    />
-                  )}
-                />
-              </div>
-            </section>
-
-            <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50 space-y-4">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {isEdit ? t("passwordHintEdit") : t("passwordHintCreate")}
-              </p>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t("password")}
-                  {!isEdit && " *"}
-                </label>
-                <Controller
-                  name="password"
-                  control={control}
-                  rules={{
-                    validate: (v) => {
-                      const s = (v ?? "").trim();
-                      if (!s) return isEdit ? true : t("passwordRequired");
-                      if (s.length < 8) return t("passwordMin");
-                      if (s.length > 128) return t("passwordMax");
-                      return true;
-                    },
-                  }}
-                  render={({ field }) => (
-                    <CustomInput
-                      type="password"
-                      value={field.value}
-                      onChange={(e) => field.onChange(e.target.value)}
-                      onBlur={field.onBlur}
-                      className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                      placeholder={t("passwordPlaceholder")}
-                      autoComplete="new-password"
-                      error={errors.password?.message}
-                    />
-                  )}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t("confirmPassword")}
-                </label>
-                <Controller
-                  name="confirmPassword"
-                  control={control}
-                  rules={{
-                    validate: (value) => {
-                      const p = (passwordValue ?? "").trim();
-                      const c = (value ?? "").trim();
-                      if (!p && !c) return true;
-                      if (!p && c) return t("confirmWithoutPassword");
-                      if (p && c !== p) return t("passwordMismatch");
-                      if (p && !c) return t("confirmRequired");
-                      return true;
-                    },
-                  }}
-                  render={({ field }) => (
-                    <CustomInput
-                      type="password"
-                      value={field.value}
-                      onChange={(e) => field.onChange(e.target.value)}
-                      onBlur={field.onBlur}
-                      className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                      placeholder={t("confirmPasswordPlaceholder")}
-                      autoComplete="new-password"
-                      error={errors.confirmPassword?.message}
-                    />
-                  )}
-                />
-              </div>
-            </section>
-
-            <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
-              <div className="flex items-center gap-2 mb-4">
-                <IoEllipseSharp className="text-primary text-lg shrink-0" />
-                <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-                  {t("status")}
-                </h3>
-              </div>
-              <Controller
-                name="isActive"
-                control={control}
-                render={({ field }) => (
-                  <div className="flex rounded-2xl p-1 bg-gray-100 dark:bg-gray-600/40 border border-gray-200/80 dark:border-gray-600/50 w-fit">
-                    <button
-                      type="button"
-                      onClick={() => field.onChange(true)}
-                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                        field.value === true
-                          ? "bg-white dark:bg-gray-700 text-primary shadow-sm border border-gray-200/80 dark:border-gray-600 ring-1 ring-primary/20"
-                          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                      }`}
-                    >
-                      <IoCheckmarkCircle className="text-lg" />
-                      {t("active")}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => field.onChange(false)}
-                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                        field.value === false
-                          ? "bg-white dark:bg-gray-700 text-red-600 dark:text-red-400 shadow-sm border border-gray-200/80 dark:border-gray-600 ring-1 ring-red-500/20"
-                          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                      }`}
-                    >
-                      <IoRemoveCircle className="text-lg" />
-                      {t("inactive")}
-                    </button>
+                    })}
                   </div>
-                )}
-              />
-            </section>
-          </div>
+                );
+              }}
+            />
+          </Field>
 
-          <div className="shrink-0 justify-end flex gap-3 p-6 pt-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-3 rounded-2xl border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-gray-400/30"
-              disabled={isSaving}
-            >
-              {t("cancel")}
-            </button>
-            <div className="w-fit!">
-              <CustomBtn type="submit" loading={isSaving} disabled={isSaving}>
-                <div className="flex items-center justify-center gap-2">
-                  <IoAddCircleOutline className="text-xl" />
-                  {isEdit ? t("save") : t("create")}
-                </div>
-              </CustomBtn>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
+          <Field
+            label={t("menusLabel")}
+            required
+            hint={t("menusHint")}
+            error={errors.menuIds?.message}
+          >
+            <Controller
+              name="menuIds"
+              control={control}
+              rules={{
+                validate: (v) => (v.length > 0 ? true : t("menusRequired")),
+              }}
+              render={({ field }) => {
+                if (menusLoading) {
+                  return (
+                    <div className="flex items-center gap-2 rounded-lg border border-line bg-surface-2 px-4 py-3 text-sm text-fg-muted">
+                      <Spinner size="sm" />
+                      {t("menusLoading")}
+                    </div>
+                  );
+                }
+                if (menus.length === 0) {
+                  return (
+                    <p className="rounded-lg border border-warning/30 bg-warning-soft px-4 py-3 text-sm text-warning">
+                      {t("noMenusHint")}
+                    </p>
+                  );
+                }
+                return (
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {menus.map((menu) => {
+                      const isSelected = field.value.includes(menu.id);
+                      return (
+                        <button
+                          key={menu.id}
+                          type="button"
+                          onClick={() =>
+                            field.onChange(
+                              isSelected
+                                ? field.value.filter((id) => id !== menu.id)
+                                : [...field.value, menu.id],
+                            )
+                          }
+                          className={cn(
+                            "flex items-center gap-2.5 rounded-lg border px-3.5 py-3 text-start text-sm font-medium transition-colors duration-150",
+                            focusRing,
+                            isSelected
+                              ? "border-brand/50 bg-brand-soft text-brand ring-1 ring-brand/20"
+                              : "border-line text-fg-muted hover:border-line-strong hover:bg-surface-2",
+                          )}
+                        >
+                          <IoRestaurantOutline className="shrink-0 text-lg" />
+                          <span className="min-w-0 flex-1 truncate">
+                            {localizedMenuName(menu, locale)}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              }}
+            />
+          </Field>
+
+          <Field label={t("name")} required error={errors.name?.message}>
+            <Controller
+              name="name"
+              control={control}
+              rules={{
+                required: t("nameRequired"),
+                maxLength: { value: 255, message: t("nameMax") },
+              }}
+              render={({ field }) => (
+                <Input
+                  type="text"
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  onBlur={field.onBlur}
+                  placeholder={t("namePlaceholder")}
+                  data-autofocus
+                />
+              )}
+            />
+          </Field>
+
+          <Field label={t("email")} required error={errors.email?.message}>
+            <Controller
+              name="email"
+              control={control}
+              rules={{
+                required: t("emailRequired"),
+                validate: (v) => {
+                  const s = v.trim();
+                  if (!s) return t("emailRequired");
+                  return EMAIL_RE.test(s) ? true : t("emailInvalid");
+                },
+              }}
+              render={({ field }) => (
+                <Input
+                  type="email"
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  onBlur={field.onBlur}
+                  placeholder={t("emailPlaceholder")}
+                />
+              )}
+            />
+          </Field>
+        </section>
+
+        <section className="flex flex-col gap-4">
+          <p className="text-sm text-fg-muted">
+            {isEdit ? t("passwordHintEdit") : t("passwordHintCreate")}
+          </p>
+
+          <Field
+            label={t("password")}
+            required={!isEdit}
+            error={errors.password?.message}
+          >
+            <Controller
+              name="password"
+              control={control}
+              rules={{
+                validate: (v) => {
+                  const s = (v ?? "").trim();
+                  if (!s) return isEdit ? true : t("passwordRequired");
+                  if (s.length < 8) return t("passwordMin");
+                  if (s.length > 128) return t("passwordMax");
+                  return true;
+                },
+              }}
+              render={({ field }) => (
+                <Input
+                  type="password"
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  onBlur={field.onBlur}
+                  placeholder={t("passwordPlaceholder")}
+                  autoComplete="new-password"
+                />
+              )}
+            />
+          </Field>
+
+          <Field label={t("confirmPassword")} error={errors.confirmPassword?.message}>
+            <Controller
+              name="confirmPassword"
+              control={control}
+              rules={{
+                validate: (value) => {
+                  const p = (passwordValue ?? "").trim();
+                  const c = (value ?? "").trim();
+                  if (!p && !c) return true;
+                  if (!p && c) return t("confirmWithoutPassword");
+                  if (p && c !== p) return t("passwordMismatch");
+                  if (p && !c) return t("confirmRequired");
+                  return true;
+                },
+              }}
+              render={({ field }) => (
+                <Input
+                  type="password"
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  onBlur={field.onBlur}
+                  placeholder={t("confirmPasswordPlaceholder")}
+                  autoComplete="new-password"
+                />
+              )}
+            />
+          </Field>
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
+            <IoEllipseSharp className="size-3 shrink-0 text-fg-subtle" aria-hidden />
+            {t("status")}
+          </h3>
+          <Controller
+            name="isActive"
+            control={control}
+            render={({ field }) => (
+              <div className="flex w-fit gap-1 rounded-lg border border-line bg-surface-2 p-1">
+                <button
+                  type="button"
+                  aria-pressed={field.value === true}
+                  onClick={() => field.onChange(true)}
+                  className={cn(
+                    "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-150",
+                    focusRing,
+                    field.value === true
+                      ? "bg-surface text-fg shadow-xs"
+                      : "text-fg-muted hover:text-fg",
+                  )}
+                >
+                  <IoCheckmarkCircle
+                    className={cn(
+                      "size-4",
+                      field.value === true ? "text-success" : "text-fg-subtle",
+                    )}
+                    aria-hidden
+                  />
+                  {t("active")}
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={field.value === false}
+                  onClick={() => field.onChange(false)}
+                  className={cn(
+                    "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-150",
+                    focusRing,
+                    field.value === false
+                      ? "bg-surface text-fg shadow-xs"
+                      : "text-fg-muted hover:text-fg",
+                  )}
+                >
+                  <IoRemoveCircle
+                    className={cn(
+                      "size-4",
+                      field.value === false ? "text-danger" : "text-fg-subtle",
+                    )}
+                    aria-hidden
+                  />
+                  {t("inactive")}
+                </button>
+              </div>
+            )}
+          />
+        </section>
+      </form>
+    </Modal>
   );
 }

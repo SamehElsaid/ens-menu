@@ -15,18 +15,24 @@ import CategorySearchSelect, {
   type CategoryOption,
 } from "@/components/Dashboard/CategorySearchSelect";
 import MobileFloatingAddButton from "@/components/Dashboard/mobile/MobileFloatingAddButton";
-import LinkTo from "@/components/Global/LinkTo";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  SearchInput,
+  Select,
+  Toolbar,
+} from "@/components/ui";
 import { Item } from "@/types/Menu";
 import {
   IoAddCircleOutline,
-  IoSearchOutline,
   IoRefreshOutline,
   IoCameraOutline,
 } from "react-icons/io5";
 
 export default function ItemsPage() {
   const t = useTranslations("Items");
-  const tStaff = useTranslations("Staff");
   const locale = useLocale();
   const params = useParams();
   const menuId =
@@ -46,13 +52,12 @@ export default function ItemsPage() {
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [totalItems, setTotalItems] = useState<number>(0);
-  const [searchInput, setSearchInput] = useState("");
-  const [categoryFilterId, setCategoryFilterId] = useState<string>("");
-  const [selectedCategoryFilter, setSelectedCategoryFilter] =
-    useState<CategoryOption | null>(null);
-  const [availableFilter, setAvailableFilter] = useState<string>("");
+  // Filters apply as they change — the search field debounces itself — so the
+  // list never sits behind an extra "Search" click.
   const [appliedSearch, setAppliedSearch] = useState("");
   const [appliedCategoryId, setAppliedCategoryId] = useState<string>("");
+  const [selectedCategoryFilter, setSelectedCategoryFilter] =
+    useState<CategoryOption | null>(null);
   const [appliedAvailableFilter, setAppliedAvailableFilter] =
     useState<string>("");
 
@@ -133,18 +138,8 @@ export default function ItemsPage() {
     appliedCategoryId.length > 0 ||
     appliedAvailableFilter.length > 0;
 
-  const handleSearch = useCallback(() => {
-    setAppliedSearch(searchInput);
-    setAppliedCategoryId(categoryFilterId);
-    setAppliedAvailableFilter(availableFilter);
-    setPage(1);
-  }, [searchInput, categoryFilterId, availableFilter]);
-
   const handleReset = useCallback(() => {
-    setSearchInput("");
-    setCategoryFilterId("");
     setSelectedCategoryFilter(null);
-    setAvailableFilter("");
     setAppliedSearch("");
     setAppliedCategoryId("");
     setAppliedAvailableFilter("");
@@ -202,143 +197,102 @@ export default function ItemsPage() {
 
   return (
     <>
-      <div
+      <PageTitleWithHelp
         id="onboarding-items-header"
-        className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8"
-      >
-        <div>
-          <PageTitleWithHelp>
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100">
-              {t("title")}
-            </h1>
-          </PageTitleWithHelp>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">
-            {t("subtitle")}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <LinkTo
-            href={`/dashboard/${menuId}`}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-primary/30 dark:hover:border-primary/50 text-sm font-medium transition-all"
-          >
-            {tStaff("backToOverview")}
-          </LinkTo>
-          <MenuImportEntryButton menuId={menuId} variant="secondary" />
-          <button
-            id="onboarding-add-item"
-            onClick={openAddModal}
-            className="hidden md:inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold shadow-lg hover:opacity-90 transition-all hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <IoAddCircleOutline className="text-xl" />
-            {t("addItem")}
-          </button>
-        </div>
-      </div>
+        className="mb-3"
+        title={t("title")}
+        description={t("subtitle")}
+        meta={
+          !loading && totalItems > 0 ? (
+            <Badge tone="neutral">
+              <span data-numeric>{totalItems}</span>
+            </Badge>
+          ) : undefined
+        }
+        actions={
+          <>
+            <MenuImportEntryButton menuId={menuId} variant="secondary" />
+            <Button
+              id="onboarding-add-item"
+              onClick={openAddModal}
+              className="hidden md:inline-flex"
+              startIcon={<IoAddCircleOutline className="size-4" />}
+            >
+              {t("addItem")}
+            </Button>
+          </>
+        }
+      />
 
-      <div
-        id="onboarding-items-filters"
-        className="mb-6 p-5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm"
-      >
-        <div className="flex flex-wrap items-end gap-4">
-          <div
-            className="flex-1 min-w-[200px]"
-            dir={locale === "ar" ? "rtl" : "ltr"}
-          >
-            <label className="block text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2">
-              {t("search")}
-            </label>
-            <div className="relative">
-              <IoSearchOutline
-                className={`absolute top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-xl pointer-events-none ${locale === "ar" ? "right-3" : "left-3"}`}
-              />
-              <input
-                type="text"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                placeholder={t("searchByName")}
-                className={`w-full h-11 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-shadow ${locale === "ar" ? "pr-10 pl-4" : "pl-10 pr-4"}`}
-              />
-            </div>
-          </div>
-          <div className="min-w-[220px]">
-            <label className="block text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2">
-              {t("category")}
-            </label>
-            {menuId ? (
-              <CategorySearchSelect
-                menuId={menuId}
-                instanceId="items-category-filter"
-                variant="filter"
-                value={categoryFilterId}
-                selectedOption={selectedCategoryFilter}
-                placeholder={t("allCategories")}
-                onChange={(id, option) => {
-                  setCategoryFilterId(id);
-                  setSelectedCategoryFilter(option);
-                }}
-              />
-            ) : null}
-          </div>
-          <div className="min-w-40">
-            <label className="block text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2">
-              {t("availability")}
-            </label>
-            <select
-              value={availableFilter}
-              onChange={(e) => setAvailableFilter(e.target.value)}
-              className={`w-full h-11 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-shadow appearance-none bg-size-[1.25rem] bg-no-repeat ${locale === "ar" ? "bg-position-[left_0.75rem_center] pl-10 pr-4" : "bg-position-[right_0.75rem_center] pr-10 pl-4"}`}
-              style={{
-                backgroundImage:
-                  "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")",
+      <Card id="onboarding-items-filters" padded="sm" className="mb-3">
+        <Toolbar
+          search={
+            <SearchInput
+              value={appliedSearch}
+              onChange={(value) => {
+                setAppliedSearch(value);
+                setPage(1);
               }}
-            >
-              <option value="">{t("allStatus")}</option>
-              <option value="true">{t("available")}</option>
-              <option value="false">{t("unavailable")}</option>
-            </select>
-          </div>
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center shrink-0">
-            <button
-              type="button"
-              onClick={handleSearch}
-              className="h-11 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 bg-primary text-white rounded-xl font-semibold shadow-md hover:opacity-90 hover:shadow-lg transition-all"
-            >
-              <IoSearchOutline className="text-lg" />
-              {t("search")}
-            </button>
-            <button
-              type="button"
-              onClick={handleReset}
-              className="h-11 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 rounded-xl border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-            >
-              <IoRefreshOutline className="text-lg" />
-              {t("reset")}
-            </button>
-          </div>
-        </div>
-      </div>
+              placeholder={t("searchByName")}
+              label={t("search")}
+            />
+          }
+          filters={
+            <>
+              {menuId ? (
+                <div className="min-w-48 flex-1 sm:flex-none">
+                  <CategorySearchSelect
+                    menuId={menuId}
+                    instanceId="items-category-filter"
+                    variant="filter"
+                    value={appliedCategoryId}
+                    selectedOption={selectedCategoryFilter}
+                    placeholder={t("allCategories")}
+                    onChange={(id, option) => {
+                      setAppliedCategoryId(id);
+                      setSelectedCategoryFilter(option);
+                      setPage(1);
+                    }}
+                  />
+                </div>
+              ) : null}
+              <Select
+                value={appliedAvailableFilter}
+                onChange={(e) => {
+                  setAppliedAvailableFilter(e.target.value);
+                  setPage(1);
+                }}
+                aria-label={t("availability")}
+                className="min-w-36"
+              >
+                <option value="">{t("allStatus")}</option>
+                <option value="true">{t("available")}</option>
+                <option value="false">{t("unavailable")}</option>
+              </Select>
+              {isFiltered ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleReset}
+                  startIcon={<IoRefreshOutline className="size-3.5" />}
+                >
+                  {t("reset")}
+                </Button>
+              ) : null}
+            </>
+          }
+        />
+      </Card>
 
-      {!loading && totalItems > 0 && (
-        <div className="mb-4 flex flex-wrap items-center gap-3">
-          <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-            <span className="text-sm text-slate-500 dark:text-slate-400">
-              {t("totalItemsLabel")}
-            </span>
-            <span className="text-lg font-bold text-slate-900 dark:text-slate-100 tabular-nums">
-              {totalItems}
-            </span>
-          </div>
-          {items.some((item) => !getImageUrl(item)) && (
-            <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/5 border border-dashed border-primary/30">
-              <IoCameraOutline className="text-primary text-lg shrink-0" />
-              <span className="text-sm text-primary font-medium">
-                {t("missingImagesHint")}
-              </span>
-            </div>
-          )}
-        </div>
-      )}
+      {!loading && items.some((item) => !getImageUrl(item)) ? (
+        <Alert
+          tone="info"
+          icon={<IoCameraOutline />}
+          className="mb-3"
+        >
+          {t("missingImagesHint")}
+        </Alert>
+      ) : null}
 
       <div id="onboarding-items-table">
         <ItemsCardGrid

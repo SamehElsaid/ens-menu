@@ -29,7 +29,6 @@ export default function RemoveMenuFromGroupConfirm({
 }: RemoveMenuFromGroupConfirmProps) {
   const t = useTranslations("Menus.removeFromGroupModal");
   const locale = useLocale();
-  const isRTL = locale === "ar";
   const [isSaving, setIsSaving] = useState(false);
 
   const groupMeta = resolveMenuGroupMeta(menu);
@@ -75,7 +74,6 @@ export default function RemoveMenuFromGroupConfirm({
       }
       onClose={onClose}
       closeLabel={t("cancel")}
-      isRTL={isRTL}
       maxWidth="md"
       footer={
         <MenuGroupModalFooter

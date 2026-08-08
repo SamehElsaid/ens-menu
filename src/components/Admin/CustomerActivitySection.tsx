@@ -4,7 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { axiosGet } from "@/shared/axiosCall";
 import { formatAdminDate } from "@/lib/fetchAdminAnalytics";
-import CardDashBoard from "@/components/Card/CardDashBoard";
+import {
+  Card,
+  EmptyState,
+  LoadingBlock,
+  SectionHeader,
+  StatCard,
+  StatGrid,
+} from "@/components/ui";
 import type { UserActivityLogResponse } from "@/types/AdminCustomer";
 
 interface Props {
@@ -46,65 +53,67 @@ export default function CustomerActivitySection({ userId }: Props) {
   };
 
   return (
-    <CardDashBoard>
-      <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">
-        {t("title")}
-      </h2>
+    <Card padded="lg">
+      <SectionHeader title={t("title")} className="mb-4" />
       {loading ? (
-        <p className="text-slate-500">{t("loading")}</p>
+        <LoadingBlock label={t("loading")} />
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div className="rounded-xl bg-slate-500/5 border p-4">
-              <p className="text-xs text-slate-500 mb-1">{t("lastLogin")}</p>
-              <p className="font-semibold">
-                {data?.lastLoginAt
+          <StatGrid columns={3} className="mb-6">
+            <StatCard
+              label={t("lastLogin")}
+              value={
+                data?.lastLoginAt
                   ? formatAdminDate(data.lastLoginAt, locale)
-                  : "—"}
-              </p>
-            </div>
-            <div className="rounded-xl bg-slate-500/5 border p-4">
-              <p className="text-xs text-slate-500 mb-1">{t("lastUpdate")}</p>
-              <p className="font-semibold">
-                {data?.lastAccountUpdate
+                  : "—"
+              }
+            />
+            <StatCard
+              label={t("lastUpdate")}
+              value={
+                data?.lastAccountUpdate
                   ? formatAdminDate(data.lastAccountUpdate, locale)
-                  : "—"}
-              </p>
-            </div>
-            <div className="rounded-xl bg-slate-500/5 border p-4">
-              <p className="text-xs text-slate-500 mb-1">{t("lastOrder")}</p>
-              <p className="font-semibold">
-                {data?.lastOrder
+                  : "—"
+              }
+            />
+            <StatCard
+              label={t("lastOrder")}
+              value={
+                data?.lastOrder
                   ? formatAdminDate(data.lastOrder.createdAt, locale)
-                  : "—"}
-              </p>
-            </div>
-          </div>
+                  : "—"
+              }
+            />
+          </StatGrid>
           {data?.entries.length === 0 ? (
-            <p className="text-slate-500">{t("empty")}</p>
+            <EmptyState title={t("empty")} size="sm" />
           ) : (
-            <div className="space-y-2">
+            <ul className="flex flex-col">
               {data?.entries.map((entry) => (
-                <div
+                <li
                   key={entry.id}
-                  className="flex flex-wrap justify-between gap-2 py-2 border-b border-slate-100 dark:border-slate-800 text-sm"
+                  className="flex flex-wrap justify-between gap-2 border-b border-line py-2 text-sm last:border-b-0"
                 >
                   <div>
-                    <span className="font-semibold">{actionLabel(entry.action)}</span>
+                    <span className="font-semibold text-fg">
+                      {actionLabel(entry.action)}
+                    </span>
                     {entry.details && (
-                      <span className="text-slate-500 ms-2">{entry.details}</span>
+                      <span className="ms-2 text-fg-muted">{entry.details}</span>
                     )}
-                    <span className="text-slate-400 ms-2">· {entry.adminName}</span>
+                    <span className="ms-2 text-fg-subtle">
+                      · {entry.adminName}
+                    </span>
                   </div>
-                  <span className="text-slate-500">
+                  <span className="text-fg-muted">
                     {formatAdminDate(entry.createdAt, locale)}
                   </span>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
         </>
       )}
-    </CardDashBoard>
+    </Card>
   );
 }

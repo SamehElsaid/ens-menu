@@ -12,7 +12,13 @@ import {
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import DataTable from "@/components/Custom/DataTable";
 import PhoneDisplay from "@/components/Global/PhoneDisplay";
-import Loader from "@/components/Global/Loader";
+import {
+  Button,
+  LoadingBlock,
+  Modal,
+  PageHeader,
+  buttonClasses,
+} from "@/components/ui";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import type { AdminDomainTransferRequest } from "@/types/DomainTransfer";
 import { toast } from "react-toastify";
@@ -42,6 +48,7 @@ function statusBadgeClass(status: AdminDomainTransferRequest["status"]): string 
 export default function AdminDomainTransfersPage() {
   const locale = useLocale();
   const t = useTranslations("adminDomainTransfers");
+  const tCommon = useTranslations("common");
   const textDir = locale === "ar" ? "rtl" : "ltr";
 
   const [requests, setRequests] = useState<AdminDomainTransferRequest[]>([]);
@@ -210,7 +217,7 @@ export default function AdminDomainTransfersPage() {
           <button
             type="button"
             onClick={() => void openDetail(params.data!.id)}
-            className="rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20"
+            className={buttonClasses({ variant: "subtle", size: "sm" })}
           >
             {t("view")}
           </button>
@@ -222,31 +229,28 @@ export default function AdminDomainTransfersPage() {
 
   return (
     <div className="space-y-6" dir={textDir}>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-900 dark:text-white">
-            <IoGlobeOutline className="text-primary" />
+      <PageHeader
+        title={
+          <>
+            <IoGlobeOutline className="text-brand" aria-hidden />
             {t("title")}
-          </h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            {t("description")}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => void loadRequests()}
-          className="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-        >
-          <IoRefreshOutline />
-          {t("refresh")}
-        </button>
-      </div>
+          </>
+        }
+        description={t("description")}
+        actions={
+          <Button
+            variant="secondary"
+            startIcon={<IoRefreshOutline />}
+            onClick={() => void loadRequests()}
+          >
+            {t("refresh")}
+          </Button>
+        }
+      />
 
       <CardDashBoard>
         {loading ? (
-          <div className="flex min-h-[200px] items-center justify-center">
-            <Loader />
-          </div>
+          <LoadingBlock label={tCommon("loading")} className="min-h-[200px]" />
         ) : (
           <DataTable
             rowData={requests}
@@ -257,62 +261,53 @@ export default function AdminDomainTransfersPage() {
         )}
       </CardDashBoard>
 
-      {(selected || detailLoading) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div
-            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900"
-            dir={textDir}
-          >
-            {detailLoading ? (
-              <div className="flex min-h-[200px] items-center justify-center">
-                <Loader />
+      <Modal
+        open={selected !== null || detailLoading}
+        onClose={() => {
+          setSelected(null);
+          setShowCancelConfirm(false);
+        }}
+        title={selected ? t("detailTitle") : undefined}
+        description={
+          selected ? (
+            <span className="font-mono" dir="ltr">
+              {selected.domainUrl}
+            </span>
+          ) : undefined
+        }
+        size="lg"
+        dismissible={!sending && !completing && !cancelling}
+      >
+        {detailLoading ? (
+          <LoadingBlock label={tCommon("loading")} className="min-h-[200px]" />
+        ) : selected ? (
+          <div className="space-y-5">
+            <div className="grid gap-3 rounded-xl bg-surface-2 p-4 text-sm sm:grid-cols-2">
+              <div>
+                <span className="text-fg-muted">{t("colUser")}: </span>
+                <span className="font-medium">{selected.userName}</span>
               </div>
-            ) : selected ? (
-              <div className="space-y-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                      {t("detailTitle")}
-                    </h2>
-                    <p className="mt-1 font-mono text-sm text-primary" dir="ltr">
-                      {selected.domainUrl}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setSelected(null)}
-                    className="text-slate-400 hover:text-slate-600"
-                  >
-                    ✕
-                  </button>
+              <div>
+                <span className="text-fg-muted">{t("email")}: </span>
+                <span className="font-medium" dir="ltr">
+                  {selected.userEmail}
+                </span>
+              </div>
+              {selected.userPhone && (
+                <div>
+                  <span className="text-fg-muted">{t("phone")}: </span>
+                  <PhoneDisplay value={selected.userPhone} />
                 </div>
-
-                <div className="grid gap-3 rounded-xl bg-slate-50 p-4 text-sm dark:bg-slate-800/50 sm:grid-cols-2">
-                  <div>
-                    <span className="text-slate-500">{t("colUser")}: </span>
-                    <span className="font-medium">{selected.userName}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-500">{t("email")}: </span>
-                    <span className="font-medium" dir="ltr">
-                      {selected.userEmail}
-                    </span>
-                  </div>
-                  {selected.userPhone && (
-                    <div>
-                      <span className="text-slate-500">{t("phone")}: </span>
-                      <PhoneDisplay value={selected.userPhone} />
-                    </div>
-                  )}
-                  <div>
-                    <span className="text-slate-500">{t("colStatus")}: </span>
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusBadgeClass(selected.status)}`}
-                    >
-                      {t(`status.${selected.status}`)}
-                    </span>
-                  </div>
-                </div>
+              )}
+              <div>
+                <span className="text-fg-muted">{t("colStatus")}: </span>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusBadgeClass(selected.status)}`}
+                >
+                  {t(`status.${selected.status}`)}
+                </span>
+              </div>
+            </div>
 
                 {selected.status === "user_confirmed" && (
                   <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
@@ -406,57 +401,52 @@ export default function AdminDomainTransfersPage() {
                       {t("dnsConfigHint")}
                     </p>
                     <div className="flex flex-wrap gap-3">
-                      <button
-                        type="button"
+                      <Button
                         onClick={() => void handleSendMessage()}
                         disabled={sending || !message.trim()}
-                        className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-50"
+                        loading={sending}
                       >
-                        {sending
-                          ? t("sending")
-                          : selected.status === "pending"
-                            ? t("sendDnsConfig")
-                            : t("sendMessage")}
-                      </button>
-                      <button
-                        type="button"
+                        {selected.status === "pending"
+                          ? t("sendDnsConfig")
+                          : t("sendMessage")}
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        startIcon={<IoCheckmarkCircleOutline />}
                         onClick={() => void handleComplete()}
-                        disabled={completing}
-                        className="flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                        loading={completing}
                       >
-                        <IoCheckmarkCircleOutline />
-                        {completing ? t("completing") : t("markComplete")}
-                      </button>
+                        {t("markComplete")}
+                      </Button>
                       {!showCancelConfirm ? (
-                        <button
-                          type="button"
+                        <Button
+                          variant="dangerGhost"
+                          startIcon={<IoCloseCircleOutline />}
                           onClick={() => setShowCancelConfirm(true)}
-                          className="flex items-center gap-2 rounded-xl border border-red-200 px-5 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
                         >
-                          <IoCloseCircleOutline />
                           {t("cancelRequest")}
-                        </button>
+                        </Button>
                       ) : (
-                        <div className="flex w-full flex-wrap items-center gap-2 border-t border-red-100 pt-3 dark:border-red-900/30">
-                          <span className="text-sm text-slate-600 dark:text-slate-300">
+                        <div className="flex w-full flex-wrap items-center gap-2 border-t border-danger-line pt-3">
+                          <span className="text-sm text-fg-muted">
                             {t("cancelConfirm")}
                           </span>
-                          <button
-                            type="button"
+                          <Button
+                            variant="danger"
+                            size="sm"
                             onClick={() => void handleCancel()}
-                            disabled={cancelling}
-                            className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+                            loading={cancelling}
                           >
-                            {cancelling ? t("cancelling") : t("confirmCancel")}
-                          </button>
-                          <button
-                            type="button"
+                            {t("confirmCancel")}
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="sm"
                             onClick={() => setShowCancelConfirm(false)}
                             disabled={cancelling}
-                            className="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300"
                           >
                             {t("cancelDismiss")}
-                          </button>
+                          </Button>
                         </div>
                       )}
                     </div>
@@ -473,11 +463,9 @@ export default function AdminDomainTransfersPage() {
                     })}
                   </div>
                 )}
-              </div>
-            ) : null}
           </div>
-        </div>
-      )}
+        ) : null}
+      </Modal>
     </div>
   );
 }

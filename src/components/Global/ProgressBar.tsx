@@ -3,7 +3,7 @@ import HolyLoader from "holy-loader";
 export default function ProgressBar() {
   return (
     <HolyLoader
-      color="#9234ea"
+      color="var(--brand)"
       height="3px"
       easing="linear"
       showSpinner={false}

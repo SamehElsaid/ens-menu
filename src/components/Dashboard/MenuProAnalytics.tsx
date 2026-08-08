@@ -35,6 +35,7 @@ import {
 import { FaChartLine } from "react-icons/fa";
 import { MdOutlineFastfood, MdOutlineTableBar } from "react-icons/md";
 import { BiCategory } from "react-icons/bi";
+import { Button, SegmentedControl, Skeleton, SkeletonRegion } from "@/components/ui";
 
 const PERIODS: MenuAnalyticsPeriod[] = ["7d", "30d", "90d"];
 
@@ -42,17 +43,17 @@ type RankedItem = { id: number | string; label: string; count: number };
 
 function InsightsPanelSkeleton() {
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 animate-pulse">
-      <div className="h-6 w-36 rounded-lg bg-slate-200 dark:bg-slate-600 mb-4" />
+    <SkeletonRegion
+      label="Loading analytics"
+      className="rounded-2xl border border-line bg-surface shadow-sm p-6"
+    >
+      <Skeleton className="mb-4 h-6 w-36" rounded="md" />
       <div className="grid grid-cols-2 gap-3">
         {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className="h-20 rounded-xl bg-slate-100 dark:bg-slate-700/50"
-          />
+          <Skeleton key={i} className="h-20" rounded="lg" />
         ))}
       </div>
-    </div>
+    </SkeletonRegion>
   );
 }
 
@@ -72,16 +73,16 @@ function SectionCard({
   return (
     <div
       dir={dir}
-      className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 transition-all duration-200 hover:shadow-md"
+      className="rounded-2xl border border-line bg-surface shadow-sm p-6 transition-all duration-200 hover:shadow-md"
     >
       <div className="flex items-center gap-2 mb-1">
-        <span className="text-primary text-xl shrink-0">{icon}</span>
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+        <span className="text-brand text-xl shrink-0">{icon}</span>
+        <h2 className="text-lg font-semibold text-fg">
           {title}
         </h2>
       </div>
       {hint ? (
-        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">{hint}</p>
+        <p className="text-xs text-fg-muted mb-4">{hint}</p>
       ) : (
         <div className="mb-3" />
       )}
@@ -739,30 +740,25 @@ export default function MenuProAnalytics({
       {onPeriodChange && (
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap gap-2">
-            {PERIODS.map((p) => (
-              <button
-                key={p}
-                type="button"
-                onClick={() => onPeriodChange(p)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-                  period === p
-                    ? "bg-primary text-white"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-                }`}
-              >
-                {t(`period.${p}`)}
-              </button>
-            ))}
+            <SegmentedControl
+              label={t("analytics")}
+              value={period}
+              onChange={onPeriodChange}
+              options={PERIODS.map((p) => ({
+                value: p,
+                label: t(`period.${p}`),
+              }))}
+            />
           </div>
           {analytics && (
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={handleExport}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              startIcon={<IoDownloadOutline className="text-lg" />}
             >
-              <IoDownloadOutline className="text-lg" />
               {t("exportCsv")}
-            </button>
+            </Button>
           )}
         </div>
       )}

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { IoCloseOutline, IoImageOutline } from "react-icons/io5";
+import { Button } from "@/components/ui";
 
 interface ImagePreviewCardProps {
   file: File;
@@ -24,36 +25,36 @@ export default function ImagePreviewCard({
   const t = useTranslations("MenuImport");
 
   return (
-    <div className="max-w-md mx-auto">
-      <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
+    <div className="mx-auto max-w-md">
+      <div className="relative overflow-hidden rounded-xl border border-line bg-surface">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={previewUrl}
           alt={file.name}
-          className="w-full max-h-72 object-contain bg-slate-100 dark:bg-slate-900"
+          className="max-h-72 w-full bg-surface-2 object-contain"
         />
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="sm"
+          iconOnly
           onClick={onRemove}
-          className="absolute top-3 end-3 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
           aria-label={t("removeImage")}
+          className="absolute end-3 top-3 shadow-sm"
         >
           <IoCloseOutline className="text-lg" />
-        </button>
+        </Button>
       </div>
-      <div className="flex items-center justify-between gap-3 mt-3 px-1">
-        <div className="flex items-center gap-2 min-w-0 text-sm text-slate-600 dark:text-slate-400">
-          <IoImageOutline className="shrink-0" />
+      <div className="mt-3 flex items-center justify-between gap-3 px-1">
+        <div className="flex min-w-0 items-center gap-2 text-[13px] text-fg-muted">
+          <IoImageOutline className="shrink-0" aria-hidden />
           <span className="truncate">{file.name}</span>
-          <span className="text-slate-400 shrink-0">({formatFileSize(file.size)})</span>
+          <span className="shrink-0 text-fg-subtle">
+            ({formatFileSize(file.size)})
+          </span>
         </div>
-        <button
-          type="button"
-          onClick={onReplace}
-          className="text-sm font-medium text-primary hover:underline shrink-0"
-        >
+        <Button variant="link" size="sm" onClick={onReplace}>
           {t("replaceImage")}
-        </button>
+        </Button>
       </div>
     </div>
   );

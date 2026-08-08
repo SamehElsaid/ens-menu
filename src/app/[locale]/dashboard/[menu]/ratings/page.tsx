@@ -13,6 +13,7 @@ import {
 import { axiosGet } from "@/shared/axiosCall";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import LinkTo from "@/components/Global/LinkTo";
+import { Button } from "@/components/ui";
 import RatingsCardGrid from "@/components/Dashboard/ratings/RatingsCardGrid";
 import RatingStars from "@/components/Dashboard/ratings/RatingStars";
 import type {
@@ -107,18 +108,10 @@ export default function RatingsPage() {
           {t("backToOverview")}
         </LinkTo>
 
-        <div className="flex flex-col gap-1.5 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
-          <div className="min-w-0 flex-1">
-            <PageTitleWithHelp>
-              <h1 className="text-xl font-bold text-slate-800 sm:text-2xl md:text-3xl dark:text-slate-100">
-                {t("title")}
-              </h1>
-            </PageTitleWithHelp>
-            <p className="mt-0.5 text-sm text-slate-500 md:mt-1 dark:text-slate-400">
-              {t("subtitle")}
-            </p>
-          </div>
-        </div>
+        <PageTitleWithHelp
+          title={t("title")}
+          description={t("subtitle")}
+        />
       </div>
 
       <div className="mb-5 rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800/80 md:mb-6 md:p-5">
@@ -149,22 +142,25 @@ export default function RatingsPage() {
           </div>
 
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-            <button
+            <Button
               type="submit"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-white shadow-md transition hover:opacity-90 hover:shadow-lg"
+              fullWidth
+              className="sm:w-auto"
+              startIcon={<IoSearchOutline className="size-4" />}
             >
-              <IoSearchOutline className="text-lg" aria-hidden />
               {t("search")}
-            </button>
+            </Button>
             {hasActiveFilter ? (
-              <button
+              <Button
                 type="button"
+                variant="secondary"
                 onClick={clearFilter}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border-2 border-slate-200 px-5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
+                fullWidth
+                className="sm:w-auto"
+                startIcon={<IoRefreshOutline className="size-4" />}
               >
-                <IoRefreshOutline className="text-lg" aria-hidden />
                 {t("clearFilter")}
-              </button>
+              </Button>
             ) : null}
           </div>
         </form>

@@ -13,7 +13,13 @@ import {
   mergeCallItemIntoDraft,
   resolveMenuItemName,
 } from "@/lib/orderItemDraft";
-import { IoAddOutline, IoChevronDownOutline, IoChevronUpOutline, IoSearchOutline } from "react-icons/io5";
+import {
+  IoAddOutline,
+  IoChevronDownOutline,
+  IoChevronUpOutline,
+  IoSearchOutline,
+} from "react-icons/io5";
+import { Button, Field, Input, Select } from "@/components/ui";
 
 type PickerLabels = {
   addProduct: string;
@@ -140,41 +146,39 @@ export default function OrderAddItemPicker({
   if (!open) return null;
 
   return (
-    <div className="mb-4 rounded-xl border border-dashed border-violet-300/70 bg-violet-50/40 dark:border-violet-700/50 dark:bg-violet-950/20">
-      <button
+    <div className="mb-4 rounded-xl border border-dashed border-brand-line bg-brand-soft/40">
+      <Button
         type="button"
+        variant="ghost"
+        fullWidth
         onClick={() => setExpanded((v) => !v)}
-        className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-sm font-semibold text-violet-800 dark:text-violet-300"
+        className="justify-between px-3 py-2.5 text-sm font-semibold text-brand-soft-fg hover:bg-brand-soft/60"
+        startIcon={<IoAddOutline />}
+        endIcon={expanded ? <IoChevronUpOutline /> : <IoChevronDownOutline />}
       >
-        <span className="inline-flex items-center gap-1.5">
-          <IoAddOutline />
-          {labels.addProduct}
-        </span>
-        {expanded ? <IoChevronUpOutline /> : <IoChevronDownOutline />}
-      </button>
+        {labels.addProduct}
+      </Button>
 
       {expanded && (
-        <div className="border-t border-violet-200/60 px-3 pb-3 pt-2 dark:border-violet-800/60">
-          <div className="relative mb-2">
-            <IoSearchOutline className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
+        <div className="border-t border-brand-line px-3 pb-3 pt-2">
+          <Field className="mb-2">
+            <Input
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={labels.addProductSearch}
-              className="w-full rounded-lg border border-slate-200 bg-white py-2 ps-9 pe-3 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-200 dark:border-slate-600 dark:bg-slate-900 dark:focus:border-violet-600 dark:focus:ring-violet-900/40"
+              startIcon={<IoSearchOutline />}
             />
-          </div>
+          </Field>
 
           {configItem ? (
-            <div className="rounded-lg border border-violet-200 bg-white p-3 dark:border-violet-800 dark:bg-slate-900">
-              <p className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
+            <div className="rounded-lg border border-line bg-surface p-3">
+              <p className="mb-2 text-sm font-semibold text-fg">
                 {resolveMenuItemName(configItem, locale)}
               </p>
               {configSizes.length > 0 && (
-                <label className="mb-2 block text-xs font-medium text-slate-500 dark:text-slate-400">
-                  {labels.addProductSelectSize}
-                  <select
+                <Field label={labels.addProductSelectSize} className="mb-2">
+                  <Select
                     value={selectedSize ? JSON.stringify(selectedSize) : ""}
                     onChange={(e) => {
                       try {
@@ -187,7 +191,6 @@ export default function OrderAddItemPicker({
                         setSelectedSize(null);
                       }
                     }}
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800"
                   >
                     <option value="">{labels.addProductNone}</option>
                     {configSizes.map((size) => (
@@ -201,13 +204,12 @@ export default function OrderAddItemPicker({
                         — {size.price} {currency}
                       </option>
                     ))}
-                  </select>
-                </label>
+                  </Select>
+                </Field>
               )}
               {configVariants.length > 0 && (
-                <label className="mb-3 block text-xs font-medium text-slate-500 dark:text-slate-400">
-                  {labels.addProductSelectVariant}
-                  <select
+                <Field label={labels.addProductSelectVariant} className="mb-3">
+                  <Select
                     value={selectedVariant ? JSON.stringify(selectedVariant) : ""}
                     onChange={(e) => {
                       try {
@@ -220,7 +222,6 @@ export default function OrderAddItemPicker({
                         setSelectedVariant(null);
                       }
                     }}
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800"
                   >
                     <option value="">{labels.addProductNone}</option>
                     {configVariants.map((variant) => (
@@ -234,59 +235,63 @@ export default function OrderAddItemPicker({
                         — {variant.price} {currency}
                       </option>
                     ))}
-                  </select>
-                </label>
+                  </Select>
+                </Field>
               )}
               <div className="flex gap-2">
-                <button
+                <Button
                   type="button"
                   disabled={!canConfirmConfig}
                   onClick={() => {
                     if (!configItem) return;
                     commitAdd(configItem, selectedSize, selectedVariant);
                   }}
-                  className="flex-1 rounded-lg bg-violet-600 px-3 py-2 text-xs font-semibold text-white hover:bg-violet-700 disabled:opacity-50"
+                  className="flex-1"
+                  size="sm"
                 >
                   {labels.addProductConfirm}
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  variant="secondary"
                   onClick={resetConfig}
-                  className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 dark:border-slate-600 dark:text-slate-300"
+                  size="sm"
                 >
                   {labels.addProductNone}
-                </button>
+                </Button>
               </div>
             </div>
           ) : loading ? (
-            <p className="py-4 text-center text-sm text-slate-500 dark:text-slate-400">
+            <p className="py-4 text-center text-sm text-fg-muted">
               {labels.addProductLoading}
             </p>
           ) : menuItems.length === 0 ? (
-            <p className="py-4 text-center text-sm text-slate-500 dark:text-slate-400">
+            <p className="py-4 text-center text-sm text-fg-muted">
               {labels.addProductEmpty}
             </p>
           ) : filtered.length === 0 ? (
-            <p className="py-4 text-center text-sm text-slate-500 dark:text-slate-400">
+            <p className="py-4 text-center text-sm text-fg-muted">
               {labels.addProductNoResults}
             </p>
           ) : (
             <ul className="max-h-48 space-y-1 overflow-y-auto">
               {filtered.map((item) => (
                 <li key={item.id}>
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    fullWidth
                     onClick={() => handlePickItem(item)}
-                    className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-2 text-start text-sm hover:bg-violet-100/80 dark:hover:bg-violet-900/30"
+                    className="justify-between px-2 py-2 text-start text-sm hover:bg-surface-2"
                   >
-                    <span className="min-w-0 truncate font-medium text-slate-800 dark:text-slate-100">
+                    <span className="min-w-0 truncate font-medium text-fg">
                       {resolveMenuItemName(item, locale)}
                     </span>
-                    <span className="shrink-0 text-xs font-semibold text-violet-700 dark:text-violet-300">
+                    <span className="shrink-0 text-xs font-semibold text-brand-soft-fg">
                       {item.price}
                       {currency ? ` ${currency}` : ""}
                     </span>
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>

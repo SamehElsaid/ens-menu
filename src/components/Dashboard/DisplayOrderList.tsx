@@ -304,7 +304,7 @@ export function DisplayOrderCategoryStrip({
           <span
             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
               allActive
-                ? "bg-primary text-white"
+                ? "bg-brand text-on-brand"
                 : "bg-primary/10 text-primary"
             }`}
           >

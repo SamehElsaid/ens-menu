@@ -3,6 +3,8 @@
 import LinkTo from "@/components/Global/LinkTo";
 import { useTranslations } from "next-intl";
 import { IoSparklesOutline, IoCameraOutline } from "react-icons/io5";
+import { cn } from "@/lib/cn";
+import { Badge, buttonClasses, focusRing } from "@/components/ui";
 
 type Variant = "primary" | "secondary" | "card";
 
@@ -25,38 +27,48 @@ export default function MenuImportEntryButton({
     return (
       <LinkTo
         href={href}
-        className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 bg-linear-to-br from-primary/5 via-white to-violet-50 dark:from-primary/10 dark:via-slate-800 dark:to-slate-800 rounded-2xl border-2 border-primary/20 dark:border-primary/30 shadow-sm hover:border-primary/40 hover:shadow-md transition-all duration-200 group ${className}`}
+        className={cn(
+          "group flex flex-col items-start justify-between gap-4 rounded-xl border border-line bg-surface p-5",
+          "transition-[border-color,background-color] duration-150 hover:border-brand-line hover:bg-brand-soft/30",
+          "sm:flex-row sm:items-center",
+          focusRing,
+          className,
+        )}
       >
         <div className="min-w-0 flex-1 text-start">
-          <div className="inline-flex items-center gap-2 mb-2">
-            <IoSparklesOutline className="text-primary text-lg shrink-0" />
-            <span className="text-xs font-semibold uppercase tracking-wide text-primary">
-              {t("badge")}
-            </span>
-          </div>
-          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-1">
+          <Badge tone="brand" icon={<IoSparklesOutline aria-hidden />}>
+            {t("badge")}
+          </Badge>
+          <h3 className="mt-2 text-[15px] font-semibold tracking-[-0.011em] text-fg">
             {t("emptyMenuTitle")}
           </h3>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">
+          <p className="mt-1 text-[13px] leading-relaxed text-fg-muted">
             {t("emptyMenuDescription")}
           </p>
         </div>
-        <span className="inline-flex items-center gap-2 px-5 py-3 bg-primary text-white rounded-xl font-semibold shadow-md group-hover:opacity-90 transition-all shrink-0">
-          <IoCameraOutline className="text-xl" />
+        <span
+          className={buttonClasses({
+            variant: "primary",
+            className: "pointer-events-none",
+          })}
+        >
+          <IoCameraOutline className="text-lg" aria-hidden />
           {t("entryButton")}
         </span>
       </LinkTo>
     );
   }
 
-  const styles =
-    variant === "primary"
-      ? "inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold shadow-lg hover:opacity-90 transition-all hover:scale-[1.02] active:scale-[0.98]"
-      : "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-primary/30 dark:border-primary/40 text-primary dark:text-primary bg-primary/5 dark:bg-primary/10 hover:bg-primary/10 dark:hover:bg-primary/20 font-semibold text-sm transition-all";
-
   return (
-    <LinkTo href={href} className={`${styles} ${className}`}>
-      <IoSparklesOutline className="text-lg shrink-0" />
+    <LinkTo
+      href={href}
+      className={buttonClasses({
+        variant: variant === "primary" ? "primary" : "secondary",
+        size: variant === "primary" ? "lg" : "md",
+        className,
+      })}
+    >
+      <IoSparklesOutline className="shrink-0 text-lg" aria-hidden />
       {t("entryButton")}
     </LinkTo>
   );

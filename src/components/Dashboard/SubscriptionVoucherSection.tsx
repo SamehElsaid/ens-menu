@@ -194,7 +194,7 @@ export default function SubscriptionVoucherSection({
                   onClick={() => onBillingChange(cycle)}
                   className={`rounded-lg px-3 py-2 text-xs font-semibold transition-colors sm:px-4 sm:text-sm ${
                     billingCycle === cycle
-                      ? "bg-primary text-white shadow-sm"
+                      ? "bg-brand text-on-brand shadow-sm"
                       : "text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
                   }`}
                 >

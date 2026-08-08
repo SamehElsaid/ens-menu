@@ -5,9 +5,26 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useParams, useSearchParams } from "next/navigation";
 import { IoArrowBack } from "react-icons/io5";
-import { FaCheckCircle, FaTimesCircle, FaTimes } from "react-icons/fa";
-import CardDashBoard from "@/components/Card/CardDashBoard";
-import ConfirmationModal from "@/components/Custom/ConfirmationModal";
+import { FaBan, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FiAlertTriangle } from "react-icons/fi";
+import {
+  Badge,
+  Button,
+  Card,
+  ConfirmDialog,
+  ErrorState,
+  Field,
+  Input,
+  LoadingBlock,
+  Modal,
+  PageHeader,
+  SectionHeader,
+  Select,
+  StatCard,
+  StatGrid,
+  Textarea,
+} from "@/components/ui";
+import type { StatusTone } from "@/components/ui";
 import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
 import { safeAdminUsersListReturnPath } from "@/lib/adminUsersListUrl";
 import { toast } from "react-toastify";
@@ -104,6 +121,7 @@ export default function UserDetailsPage() {
   const t = useTranslations("adminUsers.userDetails");
   const tAccount = useTranslations("adminUsers.userDetails.accountActions");
   const tCustomer = useTranslations("adminUsers.userDetails.customerSections");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
@@ -455,16 +473,16 @@ export default function UserDetailsPage() {
     return tCustomer(`accountStatus.${status}`);
   };
 
-  const getAccountStatusClass = (status?: AccountStatus) => {
+  const getAccountStatusTone = (status?: AccountStatus): StatusTone => {
     switch (status) {
       case "deleted":
-        return "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300";
+        return "neutral";
       case "blocked":
-        return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400";
+        return "warning";
       case "suspended":
-        return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+        return "danger";
       default:
-        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+        return "success";
     }
   };
 
@@ -606,23 +624,18 @@ export default function UserDetailsPage() {
   }, [userId, locale, t, fetchUserDetails]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-slate-600 dark:text-slate-400">{t("loading")}</p>
-        </div>
-      </div>
-    );
+    return <LoadingBlock label={t("loading")} className="min-h-[400px]" />;
   }
 
   if (!userData || !userData.user) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <p className="text-red-600 dark:text-red-400">{t("error")}</p>
-        </div>
-      </div>
+      <ErrorState
+        title={t("error")}
+        description={tCommon("errorDescription")}
+        onRetry={fetchUserDetails}
+        retryLabel={tCommon("retry")}
+        className="min-h-[400px]"
+      />
     );
   }
 
@@ -651,106 +664,92 @@ export default function UserDetailsPage() {
 
   const textDir = isRTL ? "rtl" : "ltr";
   return (
-    <div className="space-y-6 pb-8 text-slate-800 dark:text-slate-100" dir={textDir}>
-      {/* Header Section */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1">
-          <div
-            className={`flex items-center gap-4 mb-4 ${isRTL ? "flex-row-reverse" : ""}`}
+    <div className="space-y-6 pb-8 text-fg" dir={textDir}>
+      <PageHeader
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          <Button
+            variant="secondary"
+            startIcon={<IoArrowBack />}
+            onClick={() => router.push(listReturnPath)}
           >
-            <button
-              type="button"
-              onClick={() => router.push(listReturnPath)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${isRTL ? "flex-row-reverse" : ""}`}
-            >
-              <IoArrowBack className="text-lg" />
-              <span className="font-medium">{t("back")}</span>
-            </button>
-          </div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-            {t("title")}
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400">{t("subtitle")}</p>
-        </div>
-      </div>
+            {t("back")}
+          </Button>
+        }
+      />
 
-      {/* Subscription Information Card */}
-      <CardDashBoard>
-        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-6">
-          {t("subscriptionInfo.title")}
-        </h2>
-        <div
-          className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${isRTL ? "text-right" : "text-left"}`}
-        >
+      <Card padded="lg" className="space-y-6">
+        <SectionHeader
+          title={t("subscriptionInfo.title")}
+          actions={
+            <Button onClick={openSubscriptionModal}>
+              {t("subscriptionInfo.changeSubscription")}
+            </Button>
+          }
+        />
+        <dl className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <dt className="mb-1 text-[13px] text-fg-muted">
               {t("subscriptionInfo.currentPlan")}
-            </p>
-            <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            </dt>
+            <dd className="text-[15px] font-semibold text-fg">
               {subscription.planName || t("free")}
-            </p>
+            </dd>
           </div>
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <dt className="mb-1 text-[13px] text-fg-muted">
               {t("subscriptionInfo.paymentType")}
-            </p>
-            <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            </dt>
+            <dd className="text-[15px] font-semibold text-fg">
               {getBillingCycleLabel(subscription.billingCycle)}
-            </p>
+            </dd>
           </div>
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <dt className="mb-1 text-[13px] text-fg-muted">
               {t("subscriptionInfo.startDate")}
-            </p>
-            <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            </dt>
+            <dd className="text-[15px] font-semibold text-fg">
               {formatDate(subscription.startDate)}
-            </p>
+            </dd>
           </div>
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <dt className="mb-1 text-[13px] text-fg-muted">
               {t("subscriptionInfo.endDate")}
-            </p>
-            <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            </dt>
+            <dd className="text-[15px] font-semibold text-fg">
               {formatDate(subscription.endDate)}
-            </p>
+            </dd>
           </div>
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <dt className="mb-1 text-[13px] text-fg-muted">
               {t("subscriptionInfo.menuLimit")}
-            </p>
-            <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            </dt>
+            <dd className="text-[15px] font-semibold text-fg">
               {t("subscriptionInfo.menuLimitValue", {
                 total: String(effectiveMenuLimit),
                 base: String(planBaseMenus),
                 extra: String(currentExtraMenus),
               })}
-            </p>
+            </dd>
           </div>
-        </div>
+        </dl>
 
         {hasActiveSubscription && (
-          <div
-            className={`mt-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/40 p-4 ${isRTL ? "text-right" : "text-left"}`}
-          >
-            <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-1">
-              {t("subscriptionInfo.extraMenusTitle")}
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
-              {t("subscriptionInfo.extraMenusHint", {
+          <Card variant="ghost" padded="md" className="space-y-3">
+            <SectionHeader
+              title={t("subscriptionInfo.extraMenusTitle")}
+              description={t("subscriptionInfo.extraMenusHint", {
                 base: String(planBaseMenus),
               })}
-            </p>
-            <div
-              className={`flex flex-wrap items-end gap-3 ${isRTL ? "flex-row-reverse" : ""}`}
-            >
-              <div className="min-w-[140px]">
-                <label
-                  htmlFor="admin-extra-menus"
-                  className="block text-xs text-slate-500 dark:text-slate-400 mb-1"
-                >
-                  {t("subscriptionInfo.extraMenusCount")}
-                </label>
-                <input
+            />
+            <div className="flex flex-wrap items-end gap-3">
+              <Field
+                label={t("subscriptionInfo.extraMenusCount")}
+                htmlFor="admin-extra-menus"
+                className="w-full max-w-[160px]"
+              >
+                <Input
                   id="admin-extra-menus"
                   type="number"
                   min={0}
@@ -758,710 +757,497 @@ export default function UserDetailsPage() {
                   value={extraMenusInput}
                   onChange={(e) => setExtraMenusInput(e.target.value)}
                   disabled={extraMenusSaving}
-                  className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
                 />
-              </div>
-              <p className="text-sm text-slate-600 dark:text-slate-300 pb-2">
+              </Field>
+              <p className="pb-2.5 text-[13px] text-fg-muted">
                 {t("subscriptionInfo.extraMenusPreview", {
                   total: String(
-                    planBaseMenus +
-                      (parseInt(extraMenusInput, 10) || 0),
+                    planBaseMenus + (parseInt(extraMenusInput, 10) || 0),
                   ),
                 })}
               </p>
-              <button
-                type="button"
+              <Button
                 onClick={() => void handleSaveExtraMenus()}
-                disabled={extraMenusSaving}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition-colors"
+                loading={extraMenusSaving}
+                className="mb-px"
               >
                 {extraMenusSaving
                   ? t("subscriptionInfo.saving")
                   : t("subscriptionInfo.extraMenusSave")}
-              </button>
+              </Button>
             </div>
-          </div>
+          </Card>
         )}
-
-        <div
-          className={`flex items-center gap-3 mt-6 ${isRTL ? "flex-row-reverse" : ""}`}
-        >
-          <button
-            type="button"
-            onClick={openSubscriptionModal}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors"
-          >
-            {t("subscriptionInfo.changeSubscription")}
-          </button>
-        </div>
-      </CardDashBoard>
+      </Card>
 
       {userAnalytics && (
-      <CardDashBoard>
-        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-6">
-          {t("analytics.title")}
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          <div className="rounded-xl bg-primary/5 dark:bg-primary/10 border border-primary/10 p-4">
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
-              {t("analytics.menusCount")}
-            </p>
-            <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
-              {userAnalytics.menusCount}
-            </p>
-          </div>
-          <div className="rounded-xl bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/10 p-4">
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
-              {t("analytics.activeMenus")}
-            </p>
-            <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
-              {userAnalytics.activeMenus}
-            </p>
-          </div>
-          <div className="rounded-xl bg-sky-500/5 dark:bg-sky-500/10 border border-sky-500/10 p-4">
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
-              {t("analytics.totalItems")}
-            </p>
-            <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
-              {userAnalytics.totalItems}
-            </p>
-          </div>
-          <div className="rounded-xl bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/10 p-4">
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
-              {t("analytics.activeItems")}
-            </p>
-            <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
-              {userAnalytics.activeItems}
-            </p>
-          </div>
-          <div className="rounded-xl bg-slate-500/5 border border-slate-200 dark:border-slate-600 p-4">
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
-              {t("analytics.daysSinceLogin")}
-            </p>
-            <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
-              {userAnalytics.daysSinceLogin ?? t("analytics.neverLoggedIn")}
-            </p>
-          </div>
-          {userAnalytics.daysUntilExpiry !== null &&
-            userAnalytics.daysUntilExpiry <= 7 && (
-              <div className="rounded-xl bg-red-500/5 border border-red-500/20 p-4 col-span-2">
-                <p className="text-xs text-red-600 dark:text-red-400 mb-1">
-                  {t("analytics.expiringSoon")}
-                </p>
-                <p className="text-lg font-bold text-red-700 dark:text-red-300">
-                  {t("analytics.daysUntilExpiry", {
+        <Card padded="lg" className="space-y-6">
+          <SectionHeader title={t("analytics.title")} />
+          <StatGrid columns={4}>
+            <StatCard
+              label={t("analytics.menusCount")}
+              value={userAnalytics.menusCount}
+            />
+            <StatCard
+              label={t("analytics.activeMenus")}
+              value={userAnalytics.activeMenus}
+            />
+            <StatCard
+              label={t("analytics.totalItems")}
+              value={userAnalytics.totalItems}
+            />
+            <StatCard
+              label={t("analytics.activeItems")}
+              value={userAnalytics.activeItems}
+            />
+            <StatCard
+              label={t("analytics.daysSinceLogin")}
+              value={
+                userAnalytics.daysSinceLogin ?? t("analytics.neverLoggedIn")
+              }
+            />
+            {userAnalytics.daysUntilExpiry !== null &&
+              userAnalytics.daysUntilExpiry <= 7 && (
+                <StatCard
+                  className="col-span-2 border-danger-line bg-danger-soft"
+                  label={t("analytics.expiringSoon")}
+                  value={t("analytics.daysUntilExpiry", {
                     days: userAnalytics.daysUntilExpiry,
                   })}
-                </p>
-              </div>
-            )}
-        </div>
-      </CardDashBoard>
+                />
+              )}
+          </StatGrid>
+        </Card>
       )}
 
       {user && (
-        <CardDashBoard>
+        <Card padded="lg">
           <UserFollowUpTimeline
             userId={user.id}
             userName={user.name}
             phoneNumber={user.phoneNumber}
           />
-        </CardDashBoard>
+        </Card>
       )}
 
-      {/* Change Subscription Modal */}
-      {subscriptionModalOpen && (
-        <div
-          className="fixed m-0 p-4 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-          style={{
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            width: "100vw",
-            minHeight: "100dvh",
-          }}
-        >
-          <div
-            className={`bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto ${isRTL ? "text-right" : "text-left"}`}
-          >
-            <div className="p-6">
-              <div
-                className={`flex items-center justify-between mb-6 ${isRTL ? "flex-row-reverse" : ""}`}
+      <Modal
+        open={subscriptionModalOpen}
+        onClose={() => setSubscriptionModalOpen(false)}
+        title={t("subscriptionInfo.changeSubscription")}
+        closeLabel={tCommon("close")}
+        dismissible={!subscriptionSubmitting}
+        footer={
+          plansLoading ? undefined : (
+            <>
+              <Button
+                variant="secondary"
+                onClick={() => setSubscriptionModalOpen(false)}
+                disabled={subscriptionSubmitting}
               >
-                <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-                  {t("subscriptionInfo.changeSubscription")}
-                </h3>
-                <button
-                  type="button"
-                  onClick={() =>
-                    !subscriptionSubmitting && setSubscriptionModalOpen(false)
+                {t("lists.cancel")}
+              </Button>
+              <Button
+                type="submit"
+                form="admin-change-subscription-form"
+                loading={subscriptionSubmitting}
+              >
+                {subscriptionSubmitting
+                  ? t("subscriptionInfo.saving")
+                  : t("subscriptionInfo.save")}
+              </Button>
+            </>
+          )
+        }
+      >
+        {plansLoading ? (
+          <LoadingBlock label={t("loading")} />
+        ) : (
+          <form
+            id="admin-change-subscription-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleChangeSubscription();
+            }}
+            className="flex flex-col gap-4"
+          >
+            <Field label={t("subscriptionInfo.plan")} required>
+              <Select
+                value={subscriptionForm.planId || ""}
+                onChange={(e) => {
+                  const id = Number(e.target.value);
+                  const plan = plans.find((p) => p.id === id);
+                  setSubscriptionForm((prev) => ({
+                    ...prev,
+                    planId: id,
+                    billingCycle:
+                      plan?.name?.toLowerCase() === "free"
+                        ? "free"
+                        : prev.billingCycle === "free"
+                          ? "yearly"
+                          : prev.billingCycle,
+                  }));
+                }}
+                required
+              >
+                <option value="">{t("subscriptionInfo.selectPlan")}</option>
+                {plans.map((plan) => (
+                  <option key={plan.id} value={plan.id}>
+                    {plan.name}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+
+            {plans
+              .find((p) => p.id === subscriptionForm.planId)
+              ?.name?.toLowerCase() !== "free" && (
+              <Field label={t("subscriptionInfo.billingCycle")}>
+                <Select
+                  value={subscriptionForm.billingCycle}
+                  onChange={(e) =>
+                    setSubscriptionForm((prev) => ({
+                      ...prev,
+                      billingCycle: e.target.value,
+                    }))
                   }
-                  disabled={subscriptionSubmitting}
-                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50"
                 >
-                  <FaTimes className="text-lg" />
-                </button>
-              </div>
-              {plansLoading ? (
-                <div className="py-8 text-center text-slate-500 dark:text-slate-400">
-                  {t("loading")}
-                </div>
-              ) : (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleChangeSubscription();
-                  }}
-                  className="space-y-4"
-                >
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                      {t("subscriptionInfo.plan")}
-                    </label>
-                    <select
-                      value={subscriptionForm.planId || ""}
-                      onChange={(e) => {
-                        const id = Number(e.target.value);
-                        const plan = plans.find((p) => p.id === id);
-                        setSubscriptionForm((prev) => ({
-                          ...prev,
-                          planId: id,
-                          billingCycle:
-                            plan?.name?.toLowerCase() === "free"
-                              ? "free"
-                              : prev.billingCycle === "free"
-                                ? "yearly"
-                                : prev.billingCycle,
-                        }));
-                      }}
-                      className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary focus:border-primary"
-                      required
-                    >
-                      <option value="">
-                        {t("subscriptionInfo.selectPlan")}
-                      </option>
-                      {plans.map((plan) => (
-                        <option key={plan.id} value={plan.id}>
-                          {plan.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  {plans
-                    .find((p) => p.id === subscriptionForm.planId)
-                    ?.name?.toLowerCase() !== "free" && (
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                        {t("subscriptionInfo.billingCycle")}
-                      </label>
-                      <select
-                        value={subscriptionForm.billingCycle}
-                        onChange={(e) =>
-                          setSubscriptionForm((prev) => ({
-                            ...prev,
-                            billingCycle: e.target.value,
-                          }))
-                        }
-                        className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary focus:border-primary"
-                      >
-                        <option value="monthly">{t("monthly")}</option>
-                        <option value="yearly">{t("yearly")}</option>
-                      </select>
-                    </div>
-                  )}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                      {t("subscriptionInfo.startDate")}
-                    </label>
-                    <input
-                      type="date"
-                      value={subscriptionForm.startDate}
-                      onChange={(e) =>
-                        setSubscriptionForm((prev) => ({
-                          ...prev,
-                          startDate: e.target.value,
-                        }))
-                      }
-                      className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary focus:border-primary"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                      {t("subscriptionInfo.endDateOptional")}
-                    </label>
-                    <input
-                      type="date"
-                      value={subscriptionForm.endDate}
-                      onChange={(e) =>
-                        setSubscriptionForm((prev) => ({
-                          ...prev,
-                          endDate: e.target.value,
-                        }))
-                      }
-                      className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary focus:border-primary"
-                    />
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      {t("subscriptionInfo.endDateHint")}
-                    </p>
-                  </div>
-                  <div
-                    className={`flex gap-3 pt-2 ${isRTL ? "flex-row-reverse" : ""}`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() =>
-                        !subscriptionSubmitting &&
-                        setSubscriptionModalOpen(false)
-                      }
-                      disabled={subscriptionSubmitting}
-                      className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50"
-                    >
-                      {t("lists.cancel")}
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={subscriptionSubmitting}
-                      className="flex-1 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    >
-                      {subscriptionSubmitting ? (
-                        <>
-                          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          {t("subscriptionInfo.saving")}
-                        </>
-                      ) : (
-                        t("subscriptionInfo.save")
-                      )}
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+                  <option value="monthly">{t("monthly")}</option>
+                  <option value="yearly">{t("yearly")}</option>
+                </Select>
+              </Field>
+            )}
+
+            <Field label={t("subscriptionInfo.startDate")}>
+              <Input
+                type="date"
+                value={subscriptionForm.startDate}
+                onChange={(e) =>
+                  setSubscriptionForm((prev) => ({
+                    ...prev,
+                    startDate: e.target.value,
+                  }))
+                }
+              />
+            </Field>
+
+            <Field
+              label={t("subscriptionInfo.endDateOptional")}
+              hint={t("subscriptionInfo.endDateHint")}
+            >
+              <Input
+                type="date"
+                value={subscriptionForm.endDate}
+                onChange={(e) =>
+                  setSubscriptionForm((prev) => ({
+                    ...prev,
+                    endDate: e.target.value,
+                  }))
+                }
+              />
+            </Field>
+          </form>
+        )}
+      </Modal>
 
       {/* Apply Free Limits Confirmation */}
       {applyFreeConfirmOpen && (
-        <ConfirmationModal
-          isOpen={true}
+        <ConfirmDialog
+          open={true}
           onClose={() => !applyFreeLoading && setApplyFreeConfirmOpen(false)}
           onConfirm={handleApplyFreeLimits}
           title={t("subscriptionInfo.applyFreeConfirmTitle")}
-          message={t("subscriptionInfo.applyFreeConfirmMessage")}
-          confirmText={t("subscriptionInfo.applyFreeRestrictions")}
-          cancelText={t("lists.cancel")}
-          isLoading={applyFreeLoading}
-          loadingText={t("subscriptionInfo.applyFreeLoading")}
+          description={t("subscriptionInfo.applyFreeConfirmMessage")}
+          confirmLabel={t("subscriptionInfo.applyFreeRestrictions")}
+          cancelLabel={t("lists.cancel")}
+          loading={applyFreeLoading}
+          tone="brand"
+          icon={<FiAlertTriangle />}
         />
       )}
 
-      {/* Basic Information Card */}
-      <CardDashBoard>
-        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-6">
-          {t("basicInfo.title")}
-        </h2>
-        <div
-          className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${isRTL ? "text-right" : "text-left"}`}
-        >
+      <Card padded="lg" className="space-y-6">
+        <SectionHeader title={t("basicInfo.title")} />
+        <dl className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <dt className="mb-1 text-[13px] text-fg-muted">
               {t("basicInfo.name")}
-            </p>
-            <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-              {user.name}
-            </p>
+            </dt>
+            <dd className="text-[15px] font-semibold text-fg">{user.name}</dd>
           </div>
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <dt className="mb-1 text-[13px] text-fg-muted">
               {t("basicInfo.restaurantName")}
-            </p>
-            <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            </dt>
+            <dd className="text-[15px] font-semibold text-fg">
               {user.restaurantName?.trim() || "—"}
-            </p>
+            </dd>
           </div>
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <dt className="mb-1 text-[13px] text-fg-muted">
               {t("basicInfo.plan")}
-            </p>
-            <span
-              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                user.planName?.toLowerCase() === "free" || !user.planName
-                  ? "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400"
-                  : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-              }`}
-            >
-              {user.planName || t("free")}
-            </span>
+            </dt>
+            <dd>
+              <Badge
+                tone={
+                  user.planName?.toLowerCase() === "free" || !user.planName
+                    ? "brand"
+                    : "info"
+                }
+              >
+                {user.planName || t("free")}
+              </Badge>
+            </dd>
           </div>
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <dt className="mb-1 text-[13px] text-fg-muted">
               {t("basicInfo.emailStatus")}
-            </p>
-            <span
-              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400`}
-            >
-              {t("unverified")}
-            </span>
+            </dt>
+            <dd>
+              <Badge tone="warning">{t("unverified")}</Badge>
+            </dd>
           </div>
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <dt className="mb-1 text-[13px] text-fg-muted">
               {t("basicInfo.email")}
-            </p>
-            <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-              {user.email}
-            </p>
+            </dt>
+            <dd className="text-[15px] font-semibold text-fg">{user.email}</dd>
           </div>
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <dt className="mb-1 text-[13px] text-fg-muted">
               {t("basicInfo.status")}
-            </p>
-            <span
-              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${getAccountStatusClass(user.accountStatus)}`}
-            >
-              {getAccountStatusLabel(user.accountStatus)}
-            </span>
+            </dt>
+            <dd>
+              <Badge tone={getAccountStatusTone(user.accountStatus)} dot>
+                {getAccountStatusLabel(user.accountStatus)}
+              </Badge>
+            </dd>
           </div>
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <dt className="mb-1 text-[13px] text-fg-muted">
               {tCustomer("lastActivity")}
-            </p>
-            <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            </dt>
+            <dd className="text-[15px] font-semibold text-fg">
               {formatDate(user.lastLoginAt ?? user.updatedAt ?? null)}
-            </p>
+            </dd>
           </div>
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <dt className="mb-1 text-[13px] text-fg-muted">
               {t("basicInfo.phoneNumber")}
-            </p>
-            {user.phoneNumber ? (
-              <PhoneDisplay
-                value={user.phoneNumber}
-                className="text-lg font-semibold text-slate-900 dark:text-slate-100"
-              />
-            ) : (
-              <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                -
-              </p>
-            )}
+            </dt>
+            <dd className="text-[15px] font-semibold text-fg">
+              {user.phoneNumber ? (
+                <PhoneDisplay value={user.phoneNumber} />
+              ) : (
+                "-"
+              )}
+            </dd>
           </div>
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <dt className="mb-1 text-[13px] text-fg-muted">
               {t("basicInfo.registrationDate")}
-            </p>
-            <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            </dt>
+            <dd className="text-[15px] font-semibold text-fg">
               {formatDate(user.createdAt)}
-            </p>
+            </dd>
           </div>
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <dt className="mb-1 text-[13px] text-fg-muted">
               {t("basicInfo.lastLogin")}
-            </p>
-            <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            </dt>
+            <dd className="text-[15px] font-semibold text-fg">
               {formatDate(user.lastLoginAt)}
-            </p>
+            </dd>
           </div>
-        </div>
-      </CardDashBoard>
+        </dl>
+      </Card>
 
-      {/* Account management */}
-      <CardDashBoard>
-        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">
-          {tAccount("title")}
-        </h2>
+      <Card padded="lg" className="space-y-4">
+        <SectionHeader title={tAccount("title")} />
         {user.isSuspended && user.suspendedReason && (
-          <p className="text-sm text-red-600 dark:text-red-400 mb-4">
+          <p className="text-[13px] text-danger">
             {tAccount("suspendedReasonLabel")}: {user.suspendedReason}
           </p>
         )}
         {user.isBlocked && user.blockedReason && (
-          <p className="text-sm text-orange-600 dark:text-orange-400 mb-4">
+          <p className="text-[13px] text-warning">
             {tCustomer("block.reasonLabel")}: {user.blockedReason}
           </p>
         )}
-        <div
-          className={`flex flex-wrap gap-3 ${isRTL ? "flex-row-reverse" : ""}`}
-        >
-          <button
-            type="button"
-            onClick={openEditProfile}
-            className="px-4 py-2.5 rounded-xl bg-slate-700 text-white font-semibold hover:bg-slate-800 transition-colors"
-          >
+        <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" onClick={openEditProfile}>
             {tCustomer("profile.edit")}
-          </button>
-          <button
-            type="button"
-            onClick={() => setPasswordModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-colors"
-          >
+          </Button>
+          <Button onClick={() => setPasswordModalOpen(true)}>
             {tAccount("changePassword")}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="secondary"
             onClick={handleSendResetLink}
-            disabled={resetLinkLoading}
-            className="px-4 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+            loading={resetLinkLoading}
           >
-            {resetLinkLoading ? tCustomer("resetLink.sending") : tCustomer("resetLink.send")}
-          </button>
+            {resetLinkLoading
+              ? tCustomer("resetLink.sending")
+              : tCustomer("resetLink.send")}
+          </Button>
           {user.isSuspended ? (
-            <button
-              type="button"
+            <Button
               onClick={() => setReactivateConfirmOpen(true)}
               disabled={accountActionLoading}
-              className="px-4 py-2.5 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 disabled:opacity-50 transition-colors"
             >
               {tAccount("reactivate")}
-            </button>
+            </Button>
           ) : (
-            <button
-              type="button"
-              onClick={() => setSuspendModalOpen(true)}
-              className="px-4 py-2.5 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors"
-            >
+            <Button variant="danger" onClick={() => setSuspendModalOpen(true)}>
               {tAccount("suspend")}
-            </button>
+            </Button>
           )}
-          <button
-            type="button"
-            onClick={() => setBlockModalOpen(true)}
-            className={`px-4 py-2.5 rounded-xl text-white font-semibold transition-colors ${
-              user.isBlocked
-                ? "bg-amber-600 hover:bg-amber-700"
-                : "bg-orange-600 hover:bg-orange-700"
-            }`}
-          >
-            {user.isBlocked ? tCustomer("block.unblock") : tCustomer("block.block")}
-          </button>
+          <Button variant="secondary" onClick={() => setBlockModalOpen(true)}>
+            {user.isBlocked
+              ? tCustomer("block.unblock")
+              : tCustomer("block.block")}
+          </Button>
           {user.deletedAt ? (
-            <button
-              type="button"
+            <Button
+              variant="secondary"
               onClick={handleRestoreUser}
               disabled={accountActionLoading}
-              className="px-4 py-2.5 rounded-xl bg-teal-600 text-white font-semibold hover:bg-teal-700 disabled:opacity-50 transition-colors"
             >
               {tCustomer("restore.action")}
-            </button>
+            </Button>
           ) : (
-            <button
-              type="button"
+            <Button
+              variant="dangerGhost"
               onClick={() => setSoftDeleteConfirmOpen(true)}
-              className="px-4 py-2.5 rounded-xl bg-slate-500 text-white font-semibold hover:bg-slate-600 transition-colors"
             >
               {tCustomer("softDelete.action")}
-            </button>
+            </Button>
           )}
         </div>
-      </CardDashBoard>
+      </Card>
 
-      {passwordModalOpen && (
-        <div
-          className="fixed m-0 p-4 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-          style={{
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            width: "100vw",
-            minHeight: "100dvh",
+      <Modal
+        open={passwordModalOpen}
+        onClose={() => setPasswordModalOpen(false)}
+        title={tAccount("changePassword")}
+        closeLabel={tCommon("close")}
+        dismissible={!passwordSubmitting}
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              onClick={() => setPasswordModalOpen(false)}
+              disabled={passwordSubmitting}
+            >
+              {t("lists.cancel")}
+            </Button>
+            <Button
+              type="submit"
+              form="admin-set-password-form"
+              loading={passwordSubmitting}
+            >
+              {passwordSubmitting
+                ? tAccount("savingPassword")
+                : tAccount("savePassword")}
+            </Button>
+          </>
+        }
+      >
+        <form
+          id="admin-set-password-form"
+          className="flex flex-col gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSetPassword();
           }}
         >
-          <div
-            className={`bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-md w-full p-6 ${isRTL ? "text-right" : "text-left"}`}
+          <Field
+            label={tAccount("newPassword")}
+            hint={tAccount("passwordHint")}
+            required
           >
-            <div
-              className={`flex items-center justify-between mb-4 ${isRTL ? "flex-row-reverse" : ""}`}
-            >
-              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-                {tAccount("changePassword")}
-              </h3>
-              <button
-                type="button"
-                onClick={() =>
-                  !passwordSubmitting && setPasswordModalOpen(false)
-                }
-                disabled={passwordSubmitting}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-lg"
-              >
-                <FaTimes className="text-lg" />
-              </button>
-            </div>
-            <form
-              className="space-y-4"
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSetPassword();
-              }}
-            >
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  {tAccount("newPassword")}
-                </label>
-                <input
-                  type="password"
-                  required
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800"
-                  dir="ltr"
-                  autoComplete="new-password"
-                />
-                <p className="text-xs text-slate-500 mt-1">
-                  {tAccount("passwordHint")}
-                </p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  {tAccount("confirmPassword")}
-                </label>
-                <input
-                  type="password"
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800"
-                  dir="ltr"
-                  autoComplete="new-password"
-                />
-              </div>
-              <div
-                className={`flex gap-3 pt-2 ${isRTL ? "flex-row-reverse" : ""}`}
-              >
-                <button
-                  type="button"
-                  onClick={() =>
-                    !passwordSubmitting && setPasswordModalOpen(false)
-                  }
-                  disabled={passwordSubmitting}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 font-medium disabled:opacity-50"
-                >
-                  {t("lists.cancel")}
-                </button>
-                <button
-                  type="submit"
-                  disabled={passwordSubmitting}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-primary text-white font-semibold disabled:opacity-50"
-                >
-                  {passwordSubmitting
-                    ? tAccount("savingPassword")
-                    : tAccount("savePassword")}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {suspendModalOpen && (
-        <div
-          className="fixed m-0 p-4 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-          style={{
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            width: "100vw",
-            minHeight: "100dvh",
-          }}
-        >
-          <div
-            className={`bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-md w-full p-6 ${isRTL ? "text-right" : "text-left"}`}
-          >
-            <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-              {tAccount("suspendConfirmTitle")}
-            </h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-              {tAccount("suspendConfirmMessage")}
-            </p>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-              {tAccount("suspendReason")}
-            </label>
-            <textarea
-              rows={3}
-              value={suspendReason}
-              onChange={(e) => setSuspendReason(e.target.value)}
-              placeholder={tAccount("suspendReasonPlaceholder")}
-              className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 mb-4 resize-y"
+            <Input
+              type="password"
+              required
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              dir="ltr"
+              autoComplete="new-password"
             />
-            <div className={`flex gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
-              <button
-                type="button"
-                onClick={() =>
-                  !suspendSubmitting && setSuspendModalOpen(false)
-                }
-                disabled={suspendSubmitting}
-                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 font-medium disabled:opacity-50"
-              >
-                {t("lists.cancel")}
-              </button>
-              <button
-                type="button"
-                onClick={handleSuspendUser}
-                disabled={suspendSubmitting}
-                className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white font-semibold disabled:opacity-50"
-              >
-                {suspendSubmitting ? t("lists.updating") : tAccount("suspend")}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </Field>
+          <Field label={tAccount("confirmPassword")} required>
+            <Input
+              type="password"
+              required
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              dir="ltr"
+              autoComplete="new-password"
+            />
+          </Field>
+        </form>
+      </Modal>
 
-      <ConfirmationModal
-        isOpen={reactivateConfirmOpen}
+      <ConfirmDialog
+        open={suspendModalOpen}
+        onClose={() => setSuspendModalOpen(false)}
+        onConfirm={handleSuspendUser}
+        title={tAccount("suspendConfirmTitle")}
+        description={tAccount("suspendConfirmMessage")}
+        confirmLabel={
+          suspendSubmitting ? t("lists.updating") : tAccount("suspend")
+        }
+        cancelLabel={t("lists.cancel")}
+        loading={suspendSubmitting}
+        tone="danger"
+        icon={<FaBan />}
+      >
+        <Field label={tAccount("suspendReason")}>
+          <Textarea
+            rows={3}
+            value={suspendReason}
+            onChange={(e) => setSuspendReason(e.target.value)}
+            placeholder={tAccount("suspendReasonPlaceholder")}
+          />
+        </Field>
+      </ConfirmDialog>
+
+      <ConfirmDialog
+        open={reactivateConfirmOpen}
         onClose={() => !accountActionLoading && setReactivateConfirmOpen(false)}
         onConfirm={handleReactivateUser}
         title={tAccount("reactivateConfirmTitle")}
-        message={tAccount("reactivateConfirmMessage")}
-        confirmText={tAccount("reactivate")}
-        cancelText={t("lists.cancel")}
-        isLoading={accountActionLoading}
-        loadingText={t("lists.updating")}
+        description={tAccount("reactivateConfirmMessage")}
+        confirmLabel={tAccount("reactivate")}
+        cancelLabel={t("lists.cancel")}
+        loading={accountActionLoading}
+        tone="brand"
+        icon={<FiAlertTriangle />}
       />
 
-      {/* Statistics Section */}
-      <div>
-        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">
-          {t("statistics.title")}
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <CardDashBoard borderColor="border-purple-200 dark:border-purple-500/20">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-purple-900 dark:text-purple-400 mb-2">
-                {user.planName || t("free")}
-              </p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                {t("statistics.subscriptionType")}
-              </p>
-            </div>
-          </CardDashBoard>
-          <CardDashBoard borderColor="border-green-200 dark:border-green-500/20">
-            <div className="text-center">
-              {user.isEmailVerified ? (
-                <FaCheckCircle className="text-3xl text-emerald-600 dark:text-emerald-400 mx-auto mb-2" />
+      <section className="space-y-4">
+        <SectionHeader title={t("statistics.title")} />
+        <StatGrid columns={3}>
+          <StatCard
+            label={t("statistics.subscriptionType")}
+            value={user.planName || t("free")}
+          />
+          <StatCard
+            label={t("statistics.emailVerification")}
+            value={user.isEmailVerified ? t("verified") : t("unverified")}
+            icon={
+              user.isEmailVerified ? (
+                <FaCheckCircle className="text-success" />
               ) : (
-                <FaTimesCircle className="text-3xl text-red-600 dark:text-red-400 mx-auto mb-2" />
-              )}
-              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                {user.isEmailVerified ? t("verified") : t("unverified")}
-              </p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                {t("statistics.emailVerification")}
-              </p>
-            </div>
-          </CardDashBoard>
-          <CardDashBoard borderColor="border-blue-200 dark:border-blue-500/20">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-blue-900 dark:text-blue-400 mb-2">
-                {menus.length}
-              </p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                {t("statistics.numberOfLists")}
-              </p>
-            </div>
-          </CardDashBoard>
-        </div>
-      </div>
+                <FaTimesCircle className="text-danger" />
+              )
+            }
+          />
+          <StatCard
+            label={t("statistics.numberOfLists")}
+            value={menus.length}
+          />
+        </StatGrid>
+      </section>
 
       <AdminUserMenusSection
         userId={userId}
@@ -1484,147 +1270,165 @@ export default function UserDetailsPage() {
       <CustomerActivitySection userId={Number(userId)} />
       <CustomerSupportSection userId={Number(userId)} />
 
-      {editProfileOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-md w-full p-6 space-y-3">
-            <h3 className="text-xl font-bold">{tCustomer("profile.edit")}</h3>
-            <input
+      <Modal
+        open={editProfileOpen}
+        onClose={() => setEditProfileOpen(false)}
+        title={tCustomer("profile.edit")}
+        closeLabel={tCommon("close")}
+        dismissible={!profileSubmitting}
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              onClick={() => setEditProfileOpen(false)}
+            >
+              {t("lists.cancel")}
+            </Button>
+            <Button
+              type="submit"
+              form="admin-edit-profile-form"
+              loading={profileSubmitting}
+            >
+              {tCustomer("profile.save")}
+            </Button>
+          </>
+        }
+      >
+        <form
+          id="admin-edit-profile-form"
+          className="flex flex-col gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSaveProfile();
+          }}
+        >
+          <Field label={t("basicInfo.name")}>
+            <Input
               value={profileForm.name}
               onChange={(e) =>
                 setProfileForm((f) => ({ ...f, name: e.target.value }))
               }
               placeholder={t("basicInfo.name")}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
             />
-            <input
+          </Field>
+          <Field label={t("basicInfo.restaurantName")}>
+            <Input
               value={profileForm.restaurantName}
               onChange={(e) =>
                 setProfileForm((f) => ({ ...f, restaurantName: e.target.value }))
               }
               placeholder={t("basicInfo.restaurantName")}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
             />
-            <input
+          </Field>
+          <Field label={t("basicInfo.email")}>
+            <Input
               value={profileForm.email}
               onChange={(e) =>
                 setProfileForm((f) => ({ ...f, email: e.target.value }))
               }
               placeholder={t("basicInfo.email")}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
               dir="ltr"
             />
-            <input
+          </Field>
+          <Field label={t("basicInfo.phoneNumber")}>
+            <Input
               value={profileForm.phoneNumber}
               onChange={(e) =>
                 setProfileForm((f) => ({ ...f, phoneNumber: e.target.value }))
               }
               placeholder={t("basicInfo.phoneNumber")}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
               dir="ltr"
             />
-            <div className="flex gap-2 pt-2">
-              <button
-                type="button"
-                onClick={handleSaveProfile}
-                disabled={profileSubmitting}
-                className="flex-1 py-2 rounded-xl bg-primary text-white font-semibold disabled:opacity-50"
-              >
-                {tCustomer("profile.save")}
-              </button>
-              <button
-                type="button"
-                onClick={() => setEditProfileOpen(false)}
-                className="flex-1 py-2 rounded-xl border border-slate-200"
-              >
-                {t("lists.cancel")}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </Field>
+        </form>
+      </Modal>
 
-      {blockModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold mb-2">
-              {user.isBlocked ? tCustomer("block.unblock") : tCustomer("block.block")}
-            </h3>
-            {!user.isBlocked && (
-              <textarea
-                rows={3}
-                value={blockReason}
-                onChange={(e) => setBlockReason(e.target.value)}
-                placeholder={tCustomer("block.reasonPlaceholder")}
-                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 mb-4"
-              />
-            )}
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={handleToggleBlock}
-                disabled={blockSubmitting}
-                className="flex-1 py-2 rounded-xl bg-orange-600 text-white font-semibold disabled:opacity-50"
-              >
-                {tCustomer("profile.save")}
-              </button>
-              <button
-                type="button"
-                onClick={() => setBlockModalOpen(false)}
-                className="flex-1 py-2 rounded-xl border border-slate-200"
-              >
-                {t("lists.cancel")}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal
+        open={blockModalOpen}
+        onClose={() => setBlockModalOpen(false)}
+        title={
+          user.isBlocked ? tCustomer("block.unblock") : tCustomer("block.block")
+        }
+        closeLabel={tCommon("close")}
+        dismissible={!blockSubmitting}
+        size="sm"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setBlockModalOpen(false)}>
+              {t("lists.cancel")}
+            </Button>
+            <Button onClick={handleToggleBlock} loading={blockSubmitting}>
+              {tCustomer("profile.save")}
+            </Button>
+          </>
+        }
+      >
+        {user.isBlocked ? (
+          <p className="text-sm leading-relaxed text-fg-muted">
+            {tCustomer("block.unblock")}
+          </p>
+        ) : (
+          <Field label={tCustomer("block.reasonLabel")}>
+            <Textarea
+              rows={3}
+              value={blockReason}
+              onChange={(e) => setBlockReason(e.target.value)}
+              placeholder={tCustomer("block.reasonPlaceholder")}
+            />
+          </Field>
+        )}
+      </Modal>
 
-      <ConfirmationModal
-        isOpen={softDeleteConfirmOpen}
+      <ConfirmDialog
+        open={softDeleteConfirmOpen}
         onClose={() => !softDeleteLoading && setSoftDeleteConfirmOpen(false)}
         onConfirm={handleSoftDelete}
         title={tCustomer("softDelete.title")}
-        message={tCustomer("softDelete.message")}
-        confirmText={tCustomer("softDelete.action")}
-        cancelText={t("lists.cancel")}
-        isLoading={softDeleteLoading}
-        loadingText={t("lists.updating")}
+        description={tCustomer("softDelete.message")}
+        confirmLabel={tCustomer("softDelete.action")}
+        cancelLabel={t("lists.cancel")}
+        loading={softDeleteLoading}
+        tone="brand"
+        icon={<FiAlertTriangle />}
       />
 
-      {selectedOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold mb-4">
-              {tCustomer("orders.orderDetails")}
-            </h3>
-            <dl className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <dt className="text-slate-500">{tCustomer("orders.plan")}</dt>
-                <dd className="font-semibold">{selectedOrder.planName}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-slate-500">{tCustomer("orders.status")}</dt>
-                <dd className="font-semibold capitalize">{selectedOrder.status}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-slate-500">{tCustomer("orders.amount")}</dt>
-                <dd className="font-semibold">{selectedOrder.amount}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-slate-500">{tCustomer("orders.date")}</dt>
-                <dd>{formatDate(selectedOrder.createdAt)}</dd>
-              </div>
-            </dl>
-            <button
-              type="button"
-              onClick={() => setSelectedOrder(null)}
-              className="mt-6 w-full py-2 rounded-xl border border-slate-200"
-            >
-              {t("lists.cancel")}
-            </button>
+      <Modal
+        open={Boolean(selectedOrder)}
+        onClose={() => setSelectedOrder(null)}
+        title={tCustomer("orders.orderDetails")}
+        closeLabel={tCommon("close")}
+        size="sm"
+        footer={
+          <Button variant="secondary" onClick={() => setSelectedOrder(null)}>
+            {t("lists.cancel")}
+          </Button>
+        }
+      >
+        <dl className="flex flex-col gap-2 text-[13px]">
+          <div className="flex justify-between gap-3">
+            <dt className="text-fg-muted">{tCustomer("orders.plan")}</dt>
+            <dd className="font-semibold text-fg">{selectedOrder?.planName}</dd>
           </div>
-        </div>
-      )}
+          <div className="flex justify-between gap-3">
+            <dt className="text-fg-muted">{tCustomer("orders.status")}</dt>
+            <dd className="font-semibold capitalize text-fg">
+              {selectedOrder?.status}
+            </dd>
+          </div>
+          <div className="flex justify-between gap-3">
+            <dt className="text-fg-muted">{tCustomer("orders.amount")}</dt>
+            <dd className="font-semibold tabular-nums text-fg">
+              {selectedOrder?.amount}
+            </dd>
+          </div>
+          <div className="flex justify-between gap-3">
+            <dt className="text-fg-muted">{tCustomer("orders.date")}</dt>
+            <dd className="text-fg">
+              {formatDate(selectedOrder?.createdAt ?? null)}
+            </dd>
+          </div>
+        </dl>
+      </Modal>
     </div>
   );
 }

@@ -12,7 +12,6 @@ import CategorySearchSelect, {
 import { useLocale, useTranslations } from "next-intl";
 import { axiosPost, axiosPatch } from "@/shared/axiosCall";
 import { _resizeImage } from "@/shared/_shared";
-import CustomInput from "@/components/Custom/CustomInput";
 import { toast } from "react-toastify";
 import { Item, Category, UploadResponse } from "@/types/Menu";
 import {
@@ -25,7 +24,16 @@ import {
   IoRemoveCircle,
   IoTrashOutline,
 } from "react-icons/io5";
-import CustomBtn from "../Custom/CustomBtn";
+import {
+  Button,
+  Field,
+  Input,
+  Modal,
+  Spinner,
+  Textarea,
+  focusRing,
+} from "@/components/ui";
+import { cn } from "@/lib/cn";
 import { MdOutlineFastfood } from "react-icons/md";
 
 type PriceMode = "single" | "multiple";
@@ -144,6 +152,8 @@ interface AddItemModalProps {
   isItemLoading?: boolean;
 }
 
+const ITEM_FORM_ID = "add-item-form";
+
 export default function AddItemModal({
   menuId,
   item = null,
@@ -153,6 +163,7 @@ export default function AddItemModal({
   isItemLoading = false,
 }: AddItemModalProps) {
   const t = useTranslations("Items.addModal");
+  const tCommon = useTranslations("common");
   const locale = useLocale();
   const isEdit = Boolean(item?.id) || isItemLoading;
   const [image, setImage] = useState<File | null>(null);
@@ -174,7 +185,6 @@ export default function AddItemModal({
   const [variantFieldErrors, setVariantFieldErrors] = useState<
     Record<string, Partial<Record<VariantFieldKey, string>>>
   >({});
-  const modalRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const tItems = useTranslations("Items");
@@ -293,14 +303,6 @@ export default function AddItemModal({
   const nameEn = watch("nameEn");
   const defaultImageSearchQuery = (nameAr || nameEn || "").trim();
   const isImageBusy = isImageLoading || isCreating;
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !isCreating) onClose();
-    };
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, [onClose, isCreating]);
 
   const validateSizes = () => {
     const nextErrors: Record<
@@ -614,79 +616,59 @@ export default function AddItemModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]"
-      onClick={(e) => e.target === e.currentTarget && !isCreating && !isItemLoading && onClose()}
-    >
-      <div
-        ref={modalRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="add-item-title"
-        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col animate-[fadeIn_0.25s_ease-out] border border-gray-200/50 dark:border-gray-700/50"
-        onClick={(e) => e.stopPropagation()}
+    <>
+      <Modal
+        open
+        onClose={onClose}
+        title={isEdit ? t("editTitle") : t("title")}
+        description={`${t("nameEn")} / ${t("nameAr")}`}
+        icon={<MdOutlineFastfood className="size-5" />}
+        size="lg"
+        dismissible={!isCreating && !isItemLoading}
+        closeLabel={tCommon("close")}
+        footer={
+          isItemLoading ? undefined : (
+            <>
+              <Button variant="secondary" onClick={onClose} disabled={isCreating}>
+                {t("cancel")}
+              </Button>
+              <Button
+                variant="primary"
+                type="submit"
+                form={ITEM_FORM_ID}
+                loading={isCreating}
+                disabled={isCreating}
+                startIcon={<IoAddCircleOutline className="size-4.5" />}
+              >
+                {isEdit ? t("save") : t("create")}
+              </Button>
+            </>
+          )
+        }
       >
-        <div className="shrink-0 px-6 pt-6 pb-4 border-b border-gray-200 dark:border-gray-700 bg-linear-to-br from-primary/5 to-transparent dark:from-primary/10">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-primary/20 to-accent-purple/10 flex items-center justify-center shadow-sm ring-1 ring-primary/10">
-                <MdOutlineFastfood className="text-primary text-2xl" />
-              </div>
-              <div>
-                <h2
-                  id="add-item-title"
-                  className="text-xl font-bold text-gray-900 dark:text-white tracking-tight"
-                >
-                  {isEdit ? t("editTitle") : t("title")}
-                </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                  {t("nameEn")} / {t("nameAr")}
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isCreating}
-              className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
-              aria-label="Close"
-            >
-              <IoCloseOutline className="text-xl" />
-            </button>
-          </div>
-        </div>
-
         {isItemLoading ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-24 px-6">
-            <div
-              className="h-10 w-10 animate-spin rounded-full border-[3px] border-primary border-t-transparent"
-              aria-hidden
-            />
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {tItems("loading")}
-            </p>
+          <div className="flex flex-col items-center justify-center gap-3 py-16">
+            <Spinner size="md" />
+            <p className="text-sm text-fg-muted">{tItems("loading")}</p>
           </div>
         ) : (
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col min-h-0 flex-1"
-        >
-          <div className="overflow-y-auto p-6 space-y-6">
-            <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
-              <div className="flex items-center gap-2 mb-4">
-                <IoImageOutline className="text-primary text-lg shrink-0" />
-                <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-                  {t("image")}
-                </h3>
-              </div>
+          <form
+            id={ITEM_FORM_ID}
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col gap-6"
+          >
+            <section className="flex flex-col gap-3">
+              <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
+                <IoImageOutline className="size-4 shrink-0 text-fg-muted" aria-hidden />
+                {t("image")}
+              </h3>
               <div
-                className={`relative rounded-2xl border-2 border-dashed transition-all duration-200 ${
+                className={cn(
+                  "relative rounded-xl border border-dashed transition-colors duration-150",
                   isDragOver
-                    ? "border-primary bg-primary/5 dark:bg-primary/10"
-                    : imagePreview
-                      ? "border-primary/40 bg-primary/5 dark:bg-primary/10"
-                      : "border-gray-300 dark:border-gray-600 bg-gray-100/50 dark:bg-gray-600/20"
-                }`}
+                    ? "border-brand bg-brand-soft"
+                    : "border-line-strong bg-surface-2",
+                )}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -703,171 +685,137 @@ export default function AddItemModal({
                   type="button"
                   disabled={isImageBusy}
                   onClick={() => setPexelsModalOpen(true)}
-                  className="flex w-full flex-col items-center justify-center py-8 px-6 min-h-[120px] disabled:opacity-70"
+                  className={cn(
+                    "flex min-h-40 w-full flex-col items-center justify-center rounded-xl px-6 py-8 disabled:opacity-70",
+                    focusRing,
+                  )}
                 >
                   {imagePreview ? (
-                    <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-inner ring-1 ring-black/5">
+                    <div className="relative size-28 overflow-hidden rounded-lg bg-surface ring-1 ring-line">
                       <img
                         src={imagePreview}
                         alt="Preview"
-                        className="w-full h-full object-cover"
+                        className="size-full object-cover"
                       />
                       {isImageLoading && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                          <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        <div className="absolute inset-0 flex items-center justify-center bg-overlay">
+                          <Spinner size="sm" className="text-on-brand" />
                         </div>
                       )}
                     </div>
                   ) : (
                     <>
-                      <div className="w-12 h-12 rounded-2xl bg-gray-200/80 dark:bg-gray-600/50 flex items-center justify-center mb-2">
-                        <IoImageOutline className="text-2xl text-primary" />
-                      </div>
-                      <span className="text-sm font-medium text-primary text-center">
+                      <span className="mb-3 flex size-12 items-center justify-center rounded-lg bg-surface-3 text-fg-muted">
+                        <IoImageOutline className="size-6" aria-hidden />
+                      </span>
+                      <span className="text-center text-sm font-medium text-fg">
                         {t("searchImage")}
                       </span>
-                      <span className="mt-1 text-xs text-gray-500 dark:text-gray-400 text-center">
+                      <span className="mt-1 text-center text-xs text-fg-muted">
                         {t("imageHint")}
                       </span>
                     </>
                   )}
                 </button>
                 {imagePreview && !isImageBusy && (
-                  <button
-                    type="button"
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    iconOnly
                     onClick={handleRemoveImage}
-                    className="absolute top-3 end-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
                     aria-label={t("removeImage")}
+                    className="absolute end-3 top-3"
                   >
-                    <IoCloseOutline className="text-lg" />
-                  </button>
+                    <IoCloseOutline className="size-4.5" />
+                  </Button>
                 )}
               </div>
             </section>
 
-            <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
-              <div className="flex items-center gap-2 mb-4">
-                <IoPricetagOutline className="text-primary text-lg shrink-0" />
-                <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-                  {t("nameEn")} / {t("nameAr")}
-                </h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t("nameEn")} *
-                  </label>
+            <section className="flex flex-col gap-3">
+              <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
+                <IoPricetagOutline className="size-4 shrink-0 text-fg-muted" aria-hidden />
+                {t("nameEn")} / {t("nameAr")}
+              </h3>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <Field label={t("nameEn")} required error={errors.nameEn?.message}>
                   <Controller
                     name="nameEn"
                     control={control}
                     rules={{ required: t("nameEnRequired") }}
                     render={({ field }) => (
-                      <CustomInput
+                      <Input
                         type="text"
                         value={field.value}
                         onChange={(e) => field.onChange(e.target.value)}
                         onBlur={field.onBlur}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                         placeholder={t("namePlaceholder")}
-                        error={errors.nameEn?.message}
+                        data-autofocus
                       />
                     )}
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t("nameAr")} *
-                  </label>
+                </Field>
+                <Field label={t("nameAr")} required error={errors.nameAr?.message}>
                   <Controller
                     name="nameAr"
                     control={control}
                     rules={{ required: t("nameArRequired") }}
                     render={({ field }) => (
-                      <CustomInput
+                      <Input
                         type="text"
                         value={field.value}
                         onChange={(e) => field.onChange(e.target.value)}
                         onBlur={field.onBlur}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                         placeholder="مثال: برجر"
                         dir="rtl"
-                        error={errors.nameAr?.message}
                       />
                     )}
                   />
-                </div>
+                </Field>
               </div>
             </section>
 
-            <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
-              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
+            <section className="flex flex-col gap-3">
+              <h3 className="text-[13px] font-semibold text-fg">
                 {t("descriptionEn")} / {t("descriptionAr")}
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t("descriptionEn")}
-                  </label>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <Field label={t("descriptionEn")} error={errors.descriptionEn?.message}>
                   <Controller
                     name="descriptionEn"
                     control={control}
                     render={({ field }) => (
-                      <CustomInput
-                        type="textarea"
+                      <Textarea
                         rows={3}
                         value={field.value}
-                        onChange={(e) =>
-                          field.onChange(
-                            (e as React.ChangeEvent<HTMLInputElement>).target
-                              .value,
-                          )
-                        }
+                        onChange={(e) => field.onChange(e.target.value)}
                         onBlur={field.onBlur}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                         placeholder={t("optionalPlaceholder")}
-                        error={errors.descriptionEn?.message}
                       />
                     )}
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t("descriptionAr")}
-                  </label>
+                </Field>
+                <Field label={t("descriptionAr")} error={errors.descriptionAr?.message}>
                   <Controller
                     name="descriptionAr"
                     control={control}
                     render={({ field }) => (
-                      <CustomInput
-                        type="textarea"
+                      <Textarea
                         rows={3}
                         value={field.value}
-                        onChange={(e) =>
-                          field.onChange(
-                            (e as React.ChangeEvent<HTMLInputElement>).target
-                              .value,
-                          )
-                        }
+                        onChange={(e) => field.onChange(e.target.value)}
                         onBlur={field.onBlur}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                         placeholder="اختياري"
                         dir="rtl"
-                        error={errors.descriptionAr?.message}
                       />
                     )}
                   />
-                </div>
+                </Field>
               </div>
             </section>
 
-            <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
-              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
-                {t("category")}
-              </h3>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t("category")} *
-                </label>
+            <section className="flex flex-col gap-3">
+              <Field label={t("category")} required error={errors.categoryId?.message}>
                 <Controller
                   name="categoryId"
                   control={control}
@@ -889,48 +837,42 @@ export default function AddItemModal({
                     />
                   )}
                 />
-                {errors.categoryId?.message && (
-                  <p className="text-xs text-red-500 mt-1">
-                    {errors.categoryId.message}
-                  </p>
-                )}
-              </div>
+              </Field>
             </section>
 
-            <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
-              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
-                {t("price")}
-              </h3>
-              <div className="flex rounded-2xl p-1 bg-gray-100 dark:bg-gray-600/40 border border-gray-200/80 dark:border-gray-600/50 w-fit mb-4">
+            <section className="flex flex-col gap-3">
+              <h3 className="text-[13px] font-semibold text-fg">{t("price")}</h3>
+              <div className="mb-2 flex w-fit gap-1 rounded-lg border border-line bg-surface-2 p-1">
                 <button
                   type="button"
                   onClick={() => handlePriceModeChange("single")}
-                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  className={cn(
+                    "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-150",
+                    focusRing,
                     priceMode === "single"
-                      ? "bg-white dark:bg-gray-700 text-primary shadow-sm border border-gray-200/80 dark:border-gray-600 ring-1 ring-primary/20"
-                      : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                  }`}
+                      ? "bg-surface text-fg shadow-xs"
+                      : "text-fg-muted hover:text-fg",
+                  )}
                 >
                   {t("oneSize")}
                 </button>
                 <button
                   type="button"
                   onClick={() => handlePriceModeChange("multiple")}
-                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  className={cn(
+                    "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-150",
+                    focusRing,
                     priceMode === "multiple"
-                      ? "bg-white dark:bg-gray-700 text-primary shadow-sm border border-gray-200/80 dark:border-gray-600 ring-1 ring-primary/20"
-                      : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                  }`}
+                      ? "bg-surface text-fg shadow-xs"
+                      : "text-fg-muted hover:text-fg",
+                  )}
                 >
                   {t("multipleSizes")}
                 </button>
               </div>
 
               {priceMode === "single" ? (
-                <div className="max-w-md">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t("price")} *
-                  </label>
+                <Field label={t("price")} required error={errors.price?.message} className="max-w-md">
                   <Controller
                     name="price"
                     control={control}
@@ -941,63 +883,48 @@ export default function AddItemModal({
                           : t("priceRequired"),
                     }}
                     render={({ field }) => (
-                      <CustomInput
+                      <Input
                         type="number"
                         min={0}
                         step="0.01"
                         value={field.value}
                         onChange={(e) => field.onChange(e.target.value)}
                         onBlur={field.onBlur}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                         placeholder="0"
-                        error={errors.price?.message}
                       />
                     )}
                   />
-                </div>
+                </Field>
               ) : (
                 <div className="space-y-4">
                   {sizes.map((size) => (
                     <div
                       key={size.id}
-                      className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr_auto] gap-3 items-start p-4 rounded-2xl border border-gray-200 dark:border-gray-600 bg-white/70 dark:bg-gray-800/50"
+                      className="grid grid-cols-1 items-start gap-3 rounded-lg border border-line bg-surface p-4 md:grid-cols-[1fr_1fr_1fr_auto]"
                     >
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          {t("sizeNameAr")} *
-                        </label>
-                        <CustomInput
+                      <Field label={t("sizeNameAr")} required error={sizeFieldErrors[size.id]?.nameAr}>
+                        <Input
                           type="text"
                           value={size.nameAr}
                           onChange={(e) =>
                             updateSizeRow(size.id, { nameAr: e.target.value })
                           }
-                          className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                           placeholder="مثال: صغير"
                           dir="rtl"
-                          error={sizeFieldErrors[size.id]?.nameAr}
                         />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          {t("sizeNameEn")} *
-                        </label>
-                        <CustomInput
+                      </Field>
+                      <Field label={t("sizeNameEn")} required error={sizeFieldErrors[size.id]?.nameEn}>
+                        <Input
                           type="text"
                           value={size.nameEn}
                           onChange={(e) =>
                             updateSizeRow(size.id, { nameEn: e.target.value })
                           }
-                          className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                           placeholder="e.g. Small"
-                          error={sizeFieldErrors[size.id]?.nameEn}
                         />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          {t("price")} *
-                        </label>
-                        <CustomInput
+                      </Field>
+                      <Field label={t("price")} required error={sizeFieldErrors[size.id]?.price}>
+                        <Input
                           type="number"
                           min={0}
                           step="0.01"
@@ -1005,18 +932,19 @@ export default function AddItemModal({
                           onChange={(e) =>
                             updateSizeRow(size.id, { price: e.target.value })
                           }
-                          className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                           placeholder="0"
-                          error={sizeFieldErrors[size.id]?.price}
                         />
-                      </div>
+                      </Field>
                       <button
                         type="button"
                         onClick={() => removeSizeRow(size.id)}
-                        className="mt-8 p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                        className={cn(
+                          "mt-7 rounded-lg p-2 text-fg-subtle transition-colors hover:bg-danger-soft hover:text-danger",
+                          focusRing,
+                        )}
                         aria-label={tItems("deleteConfirmTitle")}
                       >
-                        <IoTrashOutline className="text-lg" />
+                        <IoTrashOutline className="size-4.5" />
                       </button>
                     </div>
                   ))}
@@ -1024,22 +952,26 @@ export default function AddItemModal({
                   <button
                     type="button"
                     onClick={addSizeRow}
-                    className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                    className={cn(
+                      "inline-flex items-center gap-2 text-sm font-medium text-brand hover:text-brand/80",
+                      focusRing,
+                    )}
                   >
-                    <IoAddCircleOutline className="text-lg" />
+                    <IoAddCircleOutline className="size-4.5" />
                     {t("addSize")}
                   </button>
 
                   {sizesError && (
-                    <p className="text-xs text-red-500">{sizesError}</p>
+                    <p className="text-xs text-danger">{sizesError}</p>
                   )}
                 </div>
               )}
 
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600 max-w-md">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t("discountPercent")}
-                </label>
+              <Field
+                label={t("discountPercent")}
+                error={errors.discountPercent?.message}
+                className="max-w-md border-t border-line pt-4"
+              >
                 <Controller
                   name="discountPercent"
                   control={control}
@@ -1048,58 +980,45 @@ export default function AddItemModal({
                     max: { value: 100, message: t("discountMaxError") },
                   }}
                   render={({ field }) => (
-                    <>
-                      <CustomInput
-                        type="number"
-                        min={0}
-                        max={100}
-                        step="1"
-                        value={field.value}
-                        onChange={(e) => {
-                          const raw = e.target.value;
-                          if (raw === "" || raw === "-") {
-                            field.onChange(raw);
-                            return;
-                          }
-                          const num = Number(raw);
-                          field.onChange(
-                            Math.min(100, Math.max(0, num)).toString()
-                          );
-                        }}
-                        onBlur={field.onBlur}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                        placeholder="0"
-                      />
-                      {errors.discountPercent && (
-                        <p className="mt-1 text-sm text-red-500">
-                          {errors.discountPercent.message}
-                        </p>
-                      )}
-                    </>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={100}
+                      step="1"
+                      value={field.value}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        if (raw === "" || raw === "-") {
+                          field.onChange(raw);
+                          return;
+                        }
+                        const num = Number(raw);
+                        field.onChange(Math.min(100, Math.max(0, num)).toString());
+                      }}
+                      onBlur={field.onBlur}
+                      placeholder="0"
+                    />
                   )}
                 />
-              </div>
+              </Field>
             </section>
 
-            <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
-              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1">
-                {t("addOns")}
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                {t("addOnsHint")}
-              </p>
+            <section className="flex flex-col gap-3">
+              <h3 className="text-[13px] font-semibold text-fg">{t("addOns")}</h3>
+              <p className="text-sm text-fg-muted">{t("addOnsHint")}</p>
 
               <div className="space-y-4">
                 {variants.map((variant) => (
                   <div
                     key={variant.id}
-                    className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr_auto] gap-3 items-start p-4 rounded-2xl border border-gray-200 dark:border-gray-600 bg-white/70 dark:bg-gray-800/50"
+                    className="grid grid-cols-1 items-start gap-3 rounded-lg border border-line bg-surface p-4 md:grid-cols-[1fr_1fr_1fr_auto]"
                   >
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        {t("variantLabelAr")} *
-                      </label>
-                      <CustomInput
+                    <Field
+                      label={t("variantLabelAr")}
+                      required
+                      error={variantFieldErrors[variant.id]?.labelAr}
+                    >
+                      <Input
                         type="text"
                         value={variant.labelAr}
                         onChange={(e) =>
@@ -1107,17 +1026,16 @@ export default function AddItemModal({
                             labelAr: e.target.value,
                           })
                         }
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                         placeholder="مثال: جبنة إضافية"
                         dir="rtl"
-                        error={variantFieldErrors[variant.id]?.labelAr}
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        {t("variantLabelEn")} *
-                      </label>
-                      <CustomInput
+                    </Field>
+                    <Field
+                      label={t("variantLabelEn")}
+                      required
+                      error={variantFieldErrors[variant.id]?.labelEn}
+                    >
+                      <Input
                         type="text"
                         value={variant.labelEn}
                         onChange={(e) =>
@@ -1125,16 +1043,15 @@ export default function AddItemModal({
                             labelEn: e.target.value,
                           })
                         }
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                         placeholder="e.g. Extra cheese"
-                        error={variantFieldErrors[variant.id]?.labelEn}
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        {t("price")} *
-                      </label>
-                      <CustomInput
+                    </Field>
+                    <Field
+                      label={t("price")}
+                      required
+                      error={variantFieldErrors[variant.id]?.price}
+                    >
+                      <Input
                         type="number"
                         min={0}
                         step="0.01"
@@ -1144,18 +1061,19 @@ export default function AddItemModal({
                             price: e.target.value,
                           })
                         }
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                         placeholder="0"
-                        error={variantFieldErrors[variant.id]?.price}
                       />
-                    </div>
+                    </Field>
                     <button
                       type="button"
                       onClick={() => removeVariantRow(variant.id)}
-                      className="mt-8 p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                      className={cn(
+                        "mt-7 rounded-lg p-2 text-fg-subtle transition-colors hover:bg-danger-soft hover:text-danger",
+                        focusRing,
+                      )}
                       aria-label={tItems("deleteConfirmTitle")}
                     >
-                      <IoTrashOutline className="text-lg" />
+                      <IoTrashOutline className="size-4.5" />
                     </button>
                   </div>
                 ))}
@@ -1163,84 +1081,77 @@ export default function AddItemModal({
                 <button
                   type="button"
                   onClick={addVariantRow}
-                  className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                  className={cn(
+                    "inline-flex items-center gap-2 text-sm font-medium text-brand hover:text-brand/80",
+                    focusRing,
+                  )}
                 >
-                  <IoAddCircleOutline className="text-lg" />
+                  <IoAddCircleOutline className="size-4.5" />
                   {t("addVariant")}
                 </button>
               </div>
             </section>
 
-            <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
-              <div className="flex items-center gap-2 mb-1">
-                <IoEllipseSharp className="text-primary text-lg shrink-0" />
-                <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-                  {t("currentlyAvailable")}
-                </h3>
-              </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                {tItems("availableToOrderNow")}
-              </p>
+            <section className="flex flex-col gap-3">
+              <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
+                <IoEllipseSharp className="size-3 shrink-0 text-fg-subtle" aria-hidden />
+                {t("currentlyAvailable")}
+              </h3>
+              <p className="text-sm text-fg-muted">{tItems("availableToOrderNow")}</p>
               <Controller
                 name="isAvailable"
                 control={control}
                 render={({ field }) => (
-                  <div className="flex rounded-2xl p-1 bg-gray-100 dark:bg-gray-600/40 border border-gray-200/80 dark:border-gray-600/50 w-fit">
+                  <div className="flex w-fit gap-1 rounded-lg border border-line bg-surface-2 p-1">
                     <button
                       type="button"
+                      aria-pressed={field.value === true}
                       onClick={() => field.onChange(true)}
-                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                      className={cn(
+                        "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-150",
+                        focusRing,
                         field.value === true
-                          ? "bg-white dark:bg-gray-700 text-primary shadow-sm border border-gray-200/80 dark:border-gray-600 ring-1 ring-primary/20"
-                          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                      }`}
+                          ? "bg-surface text-fg shadow-xs"
+                          : "text-fg-muted hover:text-fg",
+                      )}
                     >
-                      <IoCheckmarkCircle className="text-lg" />
+                      <IoCheckmarkCircle
+                        className={cn(
+                          "size-4",
+                          field.value === true ? "text-success" : "text-fg-subtle",
+                        )}
+                        aria-hidden
+                      />
                       {t("active")}
                     </button>
                     <button
                       type="button"
+                      aria-pressed={field.value === false}
                       onClick={() => field.onChange(false)}
-                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                      className={cn(
+                        "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-150",
+                        focusRing,
                         field.value === false
-                          ? "bg-white dark:bg-gray-700 text-red-600 dark:text-red-400 shadow-sm border border-gray-200/80 dark:border-gray-600 ring-1 ring-red-500/20"
-                          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                      }`}
+                          ? "bg-surface text-fg shadow-xs"
+                          : "text-fg-muted hover:text-fg",
+                      )}
                     >
-                      <IoRemoveCircle className="text-lg" />
+                      <IoRemoveCircle
+                        className={cn(
+                          "size-4",
+                          field.value === false ? "text-danger" : "text-fg-subtle",
+                        )}
+                        aria-hidden
+                      />
                       {t("inactive")}
                     </button>
                   </div>
                 )}
               />
             </section>
-          </div>
-
-          <div className="shrink-0 justify-end flex gap-3 p-6 pt-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-3 rounded-2xl border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-all disabled:opacity-50"
-              disabled={isCreating}
-            >
-              {t("cancel")}
-            </button>
-            <div className="w-fit!">
-              <CustomBtn
-                type="submit"
-                loading={isCreating}
-                disabled={isCreating}
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <IoAddCircleOutline className="text-xl" />
-                  {isEdit ? t("save") : t("create")}
-                </div>
-              </CustomBtn>
-            </div>
-          </div>
-        </form>
+          </form>
         )}
-      </div>
+      </Modal>
 
       <PexelsImagePickerModal
         open={pexelsModalOpen}
@@ -1254,6 +1165,6 @@ export default function AddItemModal({
         }}
         onSelectPhoto={handlePexelsPhotoSelect}
       />
-    </div>
+    </>
   );
 }

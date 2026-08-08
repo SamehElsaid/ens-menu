@@ -12,6 +12,7 @@ import AdsCardGrid from "@/components/Dashboard/advertisements/AdsCardGrid";
 import AdsEmptyState from "@/components/Dashboard/advertisements/AdsEmptyState";
 import { canAddMenuAd } from "@/lib/adPlanLimits";
 import LinkTo from "@/components/Global/LinkTo";
+import { Button } from "@/components/ui";
 import { DemoDataBanner } from "@/components/Admin/AdminAnalyticsWidgets";
 import { fetchMenuAnalytics } from "@/lib/fetchMenuAnalytics";
 import { Advertisement } from "@/types/Menu";
@@ -237,33 +238,25 @@ export default function AdvertisementsPage() {
           )}
         </div>
       )}
-      <div
+      <PageTitleWithHelp
         id="onboarding-advertisements-header"
-        className="dashboard-ads-header mb-4 flex flex-col gap-3 overflow-visible sm:flex-row sm:items-start sm:justify-between sm:gap-4 md:mb-6"
+        className="dashboard-ads-header mb-4 md:mb-6"
         dir={textDir}
-      >
-        <div className="min-w-0">
-          <PageTitleWithHelp>
-            <h1 className="text-xl font-bold text-slate-800 sm:text-2xl md:text-3xl dark:text-slate-100">
-              {t("title")}
-            </h1>
-          </PageTitleWithHelp>
-          <p className="mt-0.5 text-sm text-slate-500 md:mt-1 dark:text-slate-400">
-            {t("description")}
-          </p>
-        </div>
-        <button
-          id="onboarding-advertisements-actions"
-          type="button"
-          onClick={handleAddClick}
-          disabled={!canAddAd}
-          title={!canAddAd ? t("freePlanLimitReached") : undefined}
-          className="inline-flex h-10 shrink-0 items-center justify-center gap-2 self-start rounded-xl bg-primary px-4 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 sm:h-11 sm:px-5"
-        >
-          <IoAddCircleOutline className="text-lg" aria-hidden />
-          {t("addButton")}
-        </button>
-      </div>
+        title={t("title")}
+        description={t("description")}
+        actions={
+          <Button
+            id="onboarding-advertisements-actions"
+            type="button"
+            onClick={handleAddClick}
+            disabled={!canAddAd}
+            title={!canAddAd ? t("freePlanLimitReached") : undefined}
+            startIcon={<IoAddCircleOutline className="size-4.5" />}
+          >
+            {t("addButton")}
+          </Button>
+        }
+      />
 
       {adAnalyticsDemo && (
         <DemoDataBanner message={t("demoDataBanner")} dir={textDir} />

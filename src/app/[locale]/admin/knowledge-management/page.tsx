@@ -9,12 +9,23 @@ import {
   IoLibraryOutline,
   IoSearchOutline,
 } from "react-icons/io5";
-import { FaSpinner, FaTrash, FaEdit } from "react-icons/fa";
+import { FaTrash, FaEdit } from "react-icons/fa";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import { axiosGet, axiosDelete } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
-import ConfirmationModal from "@/components/Custom/ConfirmationModal";
-import Pagination from "@/components/Custom/Pagination";
+import { FiAlertTriangle } from "react-icons/fi";
+import {
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  NoResultsState,
+  PageHeader,
+  Pagination,
+  SearchInput,
+  Skeleton,
+  SkeletonRegion,
+  Spinner,
+} from "@/components/ui";
 import ViewTime from "@/shared/ViewTime";
 
 const PAGE_LIMIT = 10;
@@ -43,6 +54,7 @@ interface SearchInformationResponse {
 export default function KnowledgeManagementPage() {
   const locale = useLocale();
   const t = useTranslations("adminKnowledge");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const isRTL = locale === "ar";
 
@@ -151,31 +163,26 @@ export default function KnowledgeManagementPage() {
 
   return (
     <div className="space-y-6 pb-10">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1">
-          <div className={`flex items-center gap-4 mb-4 ${isRTL ? "flex-row-reverse" : ""}`}>
-            <button
-              onClick={() => router.back()}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${isRTL ? "flex-row-reverse" : ""}`}
-            >
-              <IoArrowBack className="text-lg" />
-              <span className="font-medium">{t("back")}</span>
-            </button>
-          </div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-            {t("title")}
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400">{t("subtitle")}</p>
-        </div>
-      </div>
+      <PageHeader
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          <Button
+            variant="secondary"
+            startIcon={<IoArrowBack className="rtl:rotate-180" />}
+            onClick={() => router.back()}
+          >
+            {t("back")}
+          </Button>
+        }
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <CardDashBoard borderColor="border-violet-200 dark:border-violet-500/20" hover>
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-xl bg-linear-to-br from-violet-50 to-violet-100 dark:from-violet-500/20 dark:to-violet-600/10 flex items-center justify-center shadow-sm">
-              <IoLibraryOutline className="text-violet-600 dark:text-violet-400 text-2xl" />
+            <div className="flex size-14 items-center justify-center rounded-xl bg-brand-soft">
+              <IoLibraryOutline className="text-2xl text-brand-soft-fg" />
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
@@ -183,7 +190,7 @@ export default function KnowledgeManagementPage() {
               </p>
               <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
                 {loading ? (
-                  <span className="inline-block w-8 h-8 border-2 border-slate-300 dark:border-slate-600 border-t-transparent rounded-full animate-spin" />
+                  <Spinner size="md" label={tCommon("loading")} />
                 ) : (
                   pagination.total.toLocaleString()
                 )}
@@ -194,8 +201,8 @@ export default function KnowledgeManagementPage() {
 
         <CardDashBoard borderColor="border-sky-200 dark:border-sky-500/20" hover>
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-xl bg-linear-to-br from-sky-50 to-sky-100 dark:from-sky-500/20 dark:to-sky-600/10 flex items-center justify-center shadow-sm">
-              <IoSearchOutline className="text-sky-600 dark:text-sky-400 text-2xl" />
+            <div className="flex size-14 items-center justify-center rounded-xl bg-info-soft">
+              <IoSearchOutline className="text-2xl text-info-fg" />
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
@@ -203,7 +210,7 @@ export default function KnowledgeManagementPage() {
               </p>
               <p className="text-3xl font-bold text-sky-600 dark:text-sky-400">
                 {loading ? (
-                  <span className="inline-block w-8 h-8 border-2 border-sky-300 dark:border-sky-600 border-t-transparent rounded-full animate-spin" />
+                  <Spinner size="md" label={tCommon("loading")} />
                 ) : (
                   items.length.toLocaleString()
                 )}
@@ -213,70 +220,54 @@ export default function KnowledgeManagementPage() {
         </CardDashBoard>
       </div>
 
-      {/* Toolbar */}
-      <div className={`flex items-center gap-3 flex-wrap ${isRTL ? "flex-row-reverse" : ""}`}>
-        <div className="relative flex-1 min-w-[220px]">
-          <IoSearchOutline
-            className={`absolute top-1/2 -translate-y-1/2 text-slate-400 text-lg ${isRTL ? "right-3" : "left-3"}`}
-          />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t("searchPlaceholder")}
-            dir={isRTL ? "rtl" : "ltr"}
-            className={`w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400 transition ${isRTL ? "pr-10 pl-4" : "pl-10 pr-4"}`}
-          />
-        </div>
-        <button
-          onClick={openAdd}
-          className="flex items-center gap-2 px-6 py-2.5 bg-linear-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 whitespace-nowrap"
-        >
-          <IoAddOutline className="text-lg" />
-          <span>{t("addNew")}</span>
-        </button>
+      <div className={`flex flex-wrap items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder={t("searchPlaceholder")}
+          label={t("searchPlaceholder")}
+          className="min-w-[220px] flex-1"
+        />
+        <Button startIcon={<IoAddOutline />} onClick={openAdd}>
+          {t("addNew")}
+        </Button>
       </div>
 
-      {/* List */}
       {loading ? (
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <CardDashBoard key={i}>
-              <div className="space-y-3">
-                <div className="h-5 w-40 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
-                <div className="h-4 w-full bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+        <SkeletonRegion label={tCommon("loading")}>
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <CardDashBoard key={i}>
+                <Skeleton className="mb-3 h-5 w-40" />
+                <Skeleton className="mb-3 h-4 w-full" />
                 <div className="flex gap-2">
-                  {[1, 2].map((j) => (
-                    <div key={j} className="h-9 w-20 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
-                  ))}
+                  <Skeleton className="h-9 w-20 rounded-lg" />
+                  <Skeleton className="h-9 w-20 rounded-lg" />
                 </div>
-              </div>
-            </CardDashBoard>
-          ))}
-        </div>
-      ) : items.length === 0 ? (
-        <CardDashBoard>
-          <div className="text-center py-16">
-            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-linear-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center">
-              <IoLibraryOutline className="text-5xl text-slate-400 dark:text-slate-500" />
-            </div>
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
-              {debouncedSearch ? t("noResults") : t("emptyTitle")}
-            </h3>
-            <p className="text-slate-500 dark:text-slate-400 mb-6 max-w-md mx-auto">
-              {debouncedSearch ? t("noResultsDescription") : t("emptyDescription")}
-            </p>
-            {!debouncedSearch && (
-              <button
-                onClick={openAdd}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-              >
-                <IoAddOutline className="text-lg" />
-                <span>{t("addNew")}</span>
-              </button>
-            )}
+              </CardDashBoard>
+            ))}
           </div>
-        </CardDashBoard>
+        </SkeletonRegion>
+      ) : items.length === 0 ? (
+        debouncedSearch ? (
+          <NoResultsState
+            title={t("noResults")}
+            description={t("noResultsDescription")}
+            onClear={() => setSearch("")}
+            clearLabel={tCommon("clearSearch")}
+          />
+        ) : (
+          <EmptyState
+            title={t("emptyTitle")}
+            description={t("emptyDescription")}
+            icon={<IoLibraryOutline />}
+            action={
+              <Button startIcon={<IoAddOutline />} onClick={openAdd}>
+                {t("addNew")}
+              </Button>
+            }
+          />
+        )
       ) : (
         <>
           <div className="space-y-4">
@@ -321,26 +312,25 @@ export default function KnowledgeManagementPage() {
                       </div>
 
                       <div className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
-                        <button
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          startIcon={<FaEdit />}
                           onClick={() => openEdit(item)}
                           disabled={isBusy}
-                          className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
                         >
-                          <FaEdit className="text-xs" />
                           {t("actions.edit")}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          startIcon={<FaTrash />}
                           onClick={() => setDeleteModal({ isOpen: true, item })}
                           disabled={isBusy}
-                          className="px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+                          loading={isBusy}
                         >
-                          {isBusy ? (
-                            <FaSpinner className="animate-spin text-xs" />
-                          ) : (
-                            <FaTrash className="text-xs" />
-                          )}
                           {t("actions.delete")}
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -353,27 +343,37 @@ export default function KnowledgeManagementPage() {
           <Pagination
             page={page}
             totalPages={pagination.totalPages}
-            total={pagination.total}
-            limit={pagination.limit}
-            loading={loading}
             onPageChange={setPage}
+            disabled={loading}
+            summary={tCommon("paginationInfo", {
+              from: ((page - 1) * pagination.limit + 1).toLocaleString(),
+              to: Math.min(page * pagination.limit, pagination.total).toLocaleString(),
+              total: pagination.total.toLocaleString(),
+            })}
+            labels={{
+              region: tCommon("pagination"),
+              previous: tCommon("previousPage"),
+              next: tCommon("nextPage"),
+              page: (n) => tCommon("goToPage", { page: n }),
+            }}
           />
         </>
       )}
 
       {/* Delete Confirmation */}
-      <ConfirmationModal
-        isOpen={deleteModal.isOpen}
+      <ConfirmDialog
+        open={deleteModal.isOpen}
         onClose={() => setDeleteModal({ isOpen: false, item: null })}
         onConfirm={handleDelete}
         title={t("deleteConfirmTitle")}
-        message={t("deleteConfirm", {
+        description={t("deleteConfirm", {
           title: deleteModal.item ? getTitle(deleteModal.item) : "",
         })}
-        confirmText={t("actions.delete")}
-        cancelText={t("actions.cancel")}
-        isLoading={loadingItemId === deleteModal.item?.id}
-        loadingText={t("deleting")}
+        confirmLabel={t("actions.delete")}
+        cancelLabel={t("actions.cancel")}
+        loading={loadingItemId === deleteModal.item?.id}
+        tone="danger"
+        icon={<FiAlertTriangle />}
       />
 
     </div>

@@ -14,7 +14,7 @@ import {
 import { importRefDomId } from "@/lib/menuImport/importRefDomId";
 import ReviewItemRow from "./ReviewItemRow";
 import PexelsImagePickerModal from "./PexelsImagePickerModal";
-import ConfirmationModal from "@/components/Custom/ConfirmationModal";
+import { FiAlertTriangle } from "react-icons/fi";
 import {
   IoChevronDownOutline,
   IoChevronUpOutline,
@@ -23,6 +23,16 @@ import {
   IoImageOutline,
   IoCloseOutline,
 } from "react-icons/io5";
+import { cn } from "@/lib/cn";
+import {
+  Badge,
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  Input,
+  Spinner,
+  focusRing,
+} from "@/components/ui";
 
 interface ReviewCategoryBlockProps {
   category: ImportCategory;
@@ -69,6 +79,7 @@ export default function ReviewCategoryBlock({
   onResolveDuplicate,
 }: ReviewCategoryBlockProps) {
   const t = useTranslations("MenuImport");
+  const tCommon = useTranslations("common");
   const uiLocale = useLocale();
   const fileRef = useRef<HTMLInputElement>(null);
   const [collapsed, setCollapsed] = useState(true);
@@ -86,14 +97,19 @@ export default function ReviewCategoryBlock({
 
   const CATEGORY_THUMB_SIZE = 72;
 
-  const missingFieldClass =
-    "border-amber-400 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-600";
-  const normalFieldClass =
-    "border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50";
   const hasMissingName =
     category.flags.includes("missing_name_ar") ||
     category.flags.includes("missing_name_en") ||
     category.flags.includes("needs_review");
+
+  const missingNameAr =
+    !category.nameAr.trim() &&
+    (category.flags.includes("missing_name_ar") ||
+      category.flags.includes("needs_review"));
+  const missingNameEn =
+    !category.nameEn.trim() &&
+    (category.flags.includes("missing_name_en") ||
+      category.flags.includes("needs_review"));
 
   useEffect(() => {
     if (!scrollTargetRefId) return;
@@ -160,32 +176,46 @@ export default function ReviewCategoryBlock({
     <>
       <section
         id={importRefDomId(category.id)}
-        className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden scroll-mt-24"
+        className="scroll-mt-24 overflow-hidden rounded-xl border border-line bg-surface"
       >
         <div
-          className={`flex items-start gap-3 px-5 py-4 border-b border-slate-100 dark:border-slate-700 ${hasMissingName ? "bg-amber-50/50 dark:bg-amber-900/10" : ""}`}
+          className={cn(
+            "flex items-start gap-3 border-b border-line px-4 py-4 sm:px-5",
+            hasMissingName && "bg-warning-soft/50",
+          )}
         >
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
+            iconOnly
             onClick={() => setCollapsed((v) => !v)}
-            className="mt-2 text-slate-400 hover:text-slate-600 shrink-0"
+            aria-expanded={!collapsed}
+            aria-label={collapsed ? tCommon("showMore") : tCommon("showLess")}
+            className="mt-1"
           >
             {collapsed ? (
               <IoChevronDownOutline className="text-xl" />
             ) : (
               <IoChevronUpOutline className="text-xl" />
             )}
-          </button>
-          <div className="flex items-start gap-3 shrink-0">
+          </Button>
+
+          <div className="flex shrink-0 items-start gap-2">
             <button
               type="button"
               disabled={isImageBusy}
               onClick={() => setPexelsModalOpen(true)}
-              className={`relative w-[4.5rem] h-[4.5rem] rounded-xl flex flex-col items-center justify-center overflow-hidden shrink-0 transition-all hover:scale-[1.03] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-80 ${
+              aria-label={
+                displayImageUrl ? t("replaceImage") : t("addImage")
+              }
+              className={cn(
+                "relative flex size-[4.5rem] shrink-0 flex-col items-center justify-center overflow-hidden rounded-xl",
+                "transition-colors duration-150 disabled:pointer-events-none disabled:opacity-80",
+                focusRing,
                 displayImageUrl
-                  ? "border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 hover:border-primary"
-                  : "border-2 border-dashed border-primary/35 bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/15 hover:border-primary/60"
-              }`}
+                  ? "border border-line bg-surface-2 hover:border-brand"
+                  : "border border-dashed border-brand-line bg-brand-soft/50 hover:border-brand hover:bg-brand-soft",
+              )}
             >
               {displayImageUrl ? (
                 showResizedThumb ? (
@@ -209,19 +239,22 @@ export default function ReviewCategoryBlock({
                 )
               ) : (
                 <>
-                  <IoImageOutline className="text-lg text-primary" />
-                  <span className="text-[9px] font-semibold text-primary mt-0.5 leading-none">
+                  <IoImageOutline
+                    className="text-lg text-brand-soft-fg"
+                    aria-hidden
+                  />
+                  <span className="mt-0.5 text-[9px] font-semibold leading-none text-brand-soft-fg">
                     {t("addImage")}
                   </span>
                 </>
               )}
               {isImageLoading && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/55 backdrop-blur-[1px]">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span className="text-[8px] font-semibold text-white mt-1 leading-none px-1 text-center">
+                <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/55">
+                  <Spinner size="md" className="text-white" />
+                  <span className="px-1 text-center text-[8px] font-semibold leading-none text-white">
                     {t("uploadingImage")}
                   </span>
-                </div>
+                </span>
               )}
             </button>
             <input
@@ -237,103 +270,101 @@ export default function ReviewCategoryBlock({
               }}
             />
             {displayImageUrl && !isImageBusy && (
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="xs"
+                iconOnly
+                aria-label={t("removeImage")}
                 onClick={() => {
                   setLocalPreview(null);
                   onUpdateCategory({ imageUrl: undefined });
                 }}
-                className="text-xs text-slate-400 hover:text-red-500"
               >
                 <IoCloseOutline />
-              </button>
+              </Button>
             )}
           </div>
-          <div className="flex-1 min-w-0 space-y-2">
+
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
             {category.matchedCategoryId && (
-              <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
+              <Badge tone="success" className="self-start">
                 {t("categoryReusedExisting")}
-              </p>
+              </Badge>
             )}
-            <div className="grid sm:grid-cols-2 gap-2">
-            <input
-              type="text"
-              value={category.nameAr}
-              onChange={(e) => onUpdateCategory({ nameAr: e.target.value })}
-              placeholder={t("nameAr")}
-              className={`w-full px-3 py-2 rounded-lg border text-sm ${
-                !category.nameAr.trim() &&
-                (category.flags.includes("missing_name_ar") ||
-                  category.flags.includes("needs_review"))
-                  ? missingFieldClass
-                  : normalFieldClass
-              }`}
-              dir="rtl"
-            />
-            <input
-              type="text"
-              value={category.nameEn}
-              onChange={(e) => onUpdateCategory({ nameEn: e.target.value })}
-              placeholder={t("nameEn")}
-              className={`w-full px-3 py-2 rounded-lg border text-sm ${
-                !category.nameEn.trim() &&
-                (category.flags.includes("missing_name_en") ||
-                  category.flags.includes("needs_review"))
-                  ? missingFieldClass
-                  : normalFieldClass
-              }`}
-              dir="ltr"
-            />
+            <div className="grid gap-2 sm:grid-cols-2">
+              <Input
+                inputSize="sm"
+                value={category.nameAr}
+                onChange={(e) => onUpdateCategory({ nameAr: e.target.value })}
+                placeholder={t("nameAr")}
+                aria-label={t("nameAr")}
+                aria-invalid={missingNameAr || undefined}
+                dir="rtl"
+              />
+              <Input
+                inputSize="sm"
+                value={category.nameEn}
+                onChange={(e) => onUpdateCategory({ nameEn: e.target.value })}
+                placeholder={t("nameEn")}
+                aria-label={t("nameEn")}
+                aria-invalid={missingNameEn || undefined}
+                dir="ltr"
+              />
             </div>
           </div>
-          <button
-            type="button"
+
+          <Button
+            variant="dangerGhost"
+            size="sm"
+            iconOnly
             onClick={() => setConfirmDelete(true)}
-            className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 shrink-0"
+            aria-label={t("deleteCategory")}
             title={t("deleteCategory")}
+            className="mt-1"
           >
             <IoTrashOutline className="text-lg" />
-          </button>
+          </Button>
         </div>
 
         {!collapsed && (
-          <div className="divide-y divide-slate-100 dark:divide-slate-700">
+          <div>
             {category.items.map((item) => (
-              <ReviewItemRow
-                key={item.id}
-                item={item}
-                currency={currency}
-                locale={locale}
-                uiLocale={uiLocale}
-                onUpdate={(patch) => onUpdateItem(item.id, patch)}
-                onUpdateVariant={(variantId, patch) =>
-                  onUpdateVariant(item.id, variantId, patch)
-                }
-                onDelete={() => onDeleteItem(item.id)}
-                onAddVariant={() => onAddVariant(item.id)}
-                onRemoveVariant={(variantId) =>
-                  onRemoveVariant(item.id, variantId)
-                }
-                onImageChange={(url) => onItemImage(item.id, url)}
-                onResolveDuplicate={(resolution, variantId) =>
-                  onResolveDuplicate(item.id, resolution, variantId)
-                }
-              />
+              <div key={item.id} className="border-b border-line last:border-b-0">
+                <ReviewItemRow
+                  item={item}
+                  currency={currency}
+                  locale={locale}
+                  uiLocale={uiLocale}
+                  onUpdate={(patch) => onUpdateItem(item.id, patch)}
+                  onUpdateVariant={(variantId, patch) =>
+                    onUpdateVariant(item.id, variantId, patch)
+                  }
+                  onDelete={() => onDeleteItem(item.id)}
+                  onAddVariant={() => onAddVariant(item.id)}
+                  onRemoveVariant={(variantId) =>
+                    onRemoveVariant(item.id, variantId)
+                  }
+                  onImageChange={(url) => onItemImage(item.id, url)}
+                  onResolveDuplicate={(resolution, variantId) =>
+                    onResolveDuplicate(item.id, resolution, variantId)
+                  }
+                />
+              </div>
             ))}
             {category.items.length === 0 && (
-              <p className="px-5 py-4 text-sm text-slate-400 text-center">
-                {t("emptyCategory")}
-              </p>
+              <div className="px-4 py-4 sm:px-5">
+                <EmptyState size="sm" title={t("emptyCategory")} />
+              </div>
             )}
-            <div className="px-5 py-3">
-              <button
-                type="button"
+            <div className="px-4 py-3 sm:px-5">
+              <Button
+                variant="link"
+                size="sm"
                 onClick={onAddItem}
-                className="inline-flex items-center gap-1.5 text-sm text-primary font-medium hover:underline"
+                startIcon={<IoAddCircleOutline className="text-base" />}
               >
-                <IoAddCircleOutline className="text-base" />
                 {t("addItem")}
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -352,19 +383,21 @@ export default function ReviewCategoryBlock({
       />
 
       {confirmDelete && (
-        <ConfirmationModal
-          isOpen={confirmDelete}
+        <ConfirmDialog
+          open={confirmDelete}
           title={t("deleteCategoryConfirmTitle")}
-          message={t("deleteCategoryConfirmMsg", {
+          description={t("deleteCategoryConfirmMsg", {
             count: category.items.length,
           })}
-          confirmText={t("delete")}
-          cancelText={t("cancel")}
+          confirmLabel={t("delete")}
+          cancelLabel={t("cancel")}
           onConfirm={() => {
             onDeleteCategory();
             setConfirmDelete(false);
           }}
           onClose={() => setConfirmDelete(false)}
+          tone="brand"
+          icon={<FiAlertTriangle />}
         />
       )}
     </>

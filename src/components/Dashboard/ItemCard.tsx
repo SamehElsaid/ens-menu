@@ -12,10 +12,10 @@ import {
 import { getItemVariants, itemHasVariants } from "@/lib/itemVariants";
 import {
   IoCreateOutline,
-  IoEllipseSharp,
   IoTrashOutline,
   IoCameraOutline,
 } from "react-icons/io5";
+import { Badge, Button, Card } from "@/components/ui";
 
 interface ItemCardProps {
   item: Item;
@@ -56,14 +56,13 @@ export default function ItemCard({
     : null;
 
   return (
-    <article
-      className={`group flex flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-xl dark:bg-slate-800/95 dark:shadow-slate-950/20 dark:hover:shadow-slate-950/40 ${
-        available
-          ? "border-slate-200/90 hover:border-primary/25 dark:border-slate-700/80 dark:hover:border-primary/40"
-          : "border-amber-200/80 bg-slate-50/40 hover:border-amber-300/60 dark:border-amber-900/40 dark:bg-amber-950/10 dark:hover:border-amber-800/50"
-      }`}
+    <Card
+      as="article"
+      padded="none"
+      interactive
+      className="flex h-full flex-col overflow-hidden"
     >
-      <div className="dashboard-card-media relative aspect-4/3 overflow-hidden bg-linear-to-br from-slate-100 via-slate-50 to-primary/5 dark:from-slate-800 dark:via-slate-900 dark:to-primary/10">
+      <div className="dashboard-card-media relative aspect-4/3 overflow-hidden bg-surface-2">
         {imageUrl ? (
           <div className="absolute inset-0">
             <LoadImage
@@ -72,7 +71,7 @@ export default function ItemCard({
               width={800}
               height={600}
               cover
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="h-full w-full object-cover"
               wrapperClassName="dashboard-card-media__fill"
             />
           </div>
@@ -80,37 +79,29 @@ export default function ItemCard({
           <button
             type="button"
             onClick={() => onEdit(item)}
-            title={t("addImage")}
-            className="flex h-full w-full flex-col items-center justify-center gap-2 text-slate-400 transition-colors hover:text-primary dark:text-slate-500 dark:hover:text-primary"
+            className="flex h-full w-full flex-col items-center justify-center gap-2 text-fg-subtle transition-colors hover:text-brand"
           >
-            <IoCameraOutline className="text-4xl opacity-70" aria-hidden />
-            <span className="text-xs font-semibold">{t("addImage")}</span>
+            <IoCameraOutline className="text-3xl" aria-hidden />
+            <span className="text-xs font-medium">{t("addImage")}</span>
           </button>
         )}
 
-        <div className={`absolute top-3 z-10 flex flex-col gap-1.5 ${isRTL ? "left-3" : "right-3"}`}>
-          <span
-            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold shadow-sm backdrop-blur-sm ${
-              available
-                ? "bg-emerald-500/90 text-white"
-                : "bg-amber-500/90 text-white"
-            }`}
-          >
-            <IoEllipseSharp className="text-[7px]" aria-hidden />
+        <div className="absolute end-3 top-3 z-10 flex flex-col items-end gap-1.5">
+          <Badge tone={available ? "success" : "warning"} variant="solid" dot>
             {available ? t("available") : t("unavailable")}
-          </span>
+          </Badge>
           {hasDiscount && item.discountPercent != null && (
-            <span className="inline-flex rounded-full bg-red-500/90 px-2.5 py-1 text-xs font-bold text-white shadow-sm backdrop-blur-sm">
+            <Badge tone="danger" variant="solid">
               -{item.discountPercent}%
-            </span>
+            </Badge>
           )}
         </div>
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-4">
-        <div className="min-w-0 space-y-1">
+        <div className="min-w-0">
           <h3
-            className="truncate text-lg font-bold text-slate-900 dark:text-slate-50"
+            className="truncate text-sm font-semibold text-fg"
             dir={isRTL ? "rtl" : "ltr"}
             title={name}
           >
@@ -118,7 +109,7 @@ export default function ItemCard({
           </h3>
           {categoryName && (
             <p
-              className="truncate text-sm font-medium text-slate-500 dark:text-slate-400"
+              className="mt-0.5 truncate text-[13px] text-fg-muted"
               dir={isRTL ? "rtl" : "ltr"}
             >
               {categoryName}
@@ -127,49 +118,49 @@ export default function ItemCard({
         </div>
 
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-          <span className="text-xl font-extrabold tabular-nums tracking-tight text-primary">
+          <span className="text-base font-semibold tabular-nums text-fg">
             {hasMultipleSizes
               ? `${locale === "ar" ? "من " : "From "}${priceLabel}`
               : priceLabel}
           </span>
+          {originalPriceLabel && (
+            <span className="text-[13px] tabular-nums text-fg-subtle line-through">
+              {originalPriceLabel}
+            </span>
+          )}
           {hasMultipleSizes ? (
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+            <span className="text-[13px] text-fg-muted">
               {t("sizesCount", { count: sizes.length })}
             </span>
           ) : null}
           {hasAddOns ? (
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+            <span className="text-[13px] text-fg-muted">
               {t("addOnsCount", { count: variants.length })}
             </span>
           ) : null}
-          {originalPriceLabel && (
-            <span className="text-sm text-slate-400 line-through tabular-nums dark:text-slate-500">
-              {originalPriceLabel}
-            </span>
-          )}
         </div>
 
-        <div className="flex items-center gap-2 border-t border-slate-100 pt-3 dark:border-slate-700/80">
-          <button
-            type="button"
+        <div className="mt-auto grid grid-cols-2 gap-2 border-t border-line pt-3">
+          <Button
+            variant="secondary"
+            size="sm"
+            fullWidth
             onClick={() => onEdit(item)}
-            title={t("edit")}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-700 transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary active:scale-[0.98] dark:border-slate-600 dark:bg-slate-700/50 dark:text-slate-200 dark:hover:border-primary/40 dark:hover:bg-primary/10 dark:hover:text-primary"
+            startIcon={<IoCreateOutline />}
           >
-            <IoCreateOutline className="text-base" aria-hidden />
             {t("edit")}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="dangerGhost"
+            size="sm"
+            fullWidth
             onClick={() => onDelete(item)}
-            title={t("delete")}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-red-200/80 bg-red-50 px-3 py-2.5 text-sm font-medium text-red-600 transition-all hover:border-red-300 hover:bg-red-100 active:scale-[0.98] dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300 dark:hover:border-red-800 dark:hover:bg-red-950/50"
+            startIcon={<IoTrashOutline />}
           >
-            <IoTrashOutline className="text-base" aria-hidden />
             {t("delete")}
-          </button>
+          </Button>
         </div>
       </div>
-    </article>
+    </Card>
   );
 }

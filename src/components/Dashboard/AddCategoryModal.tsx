@@ -9,7 +9,6 @@ import PexelsImagePickerModal from "@/components/MenuImport/review/PexelsImagePi
 import { useLocale, useTranslations } from "next-intl";
 import { axiosPost, axiosPatch } from "@/shared/axiosCall";
 import { _resizeImage } from "@/shared/_shared";
-import CustomInput from "@/components/Custom/CustomInput";
 import { toast } from "react-toastify";
 import { Category } from "@/types/Menu";
 import { UploadResponse } from "@/types/Menu";
@@ -22,8 +21,9 @@ import {
   IoCheckmarkCircle,
   IoRemoveCircle,
 } from "react-icons/io5";
-import CustomBtn from "../Custom/CustomBtn";
 import { BiCategory } from "react-icons/bi";
+import { Button, Field, Input, Modal, Spinner, focusRing } from "@/components/ui";
+import { cn } from "@/lib/cn";
 
 export interface AddCategoryFormData {
   nameAr: string;
@@ -38,6 +38,8 @@ interface AddCategoryModalProps {
   onRefresh?: () => void;
 }
 
+const CATEGORY_FORM_ID = "add-category-form";
+
 export default function AddCategoryModal({
   menuId,
   category = null,
@@ -45,6 +47,7 @@ export default function AddCategoryModal({
   onRefresh,
 }: AddCategoryModalProps) {
   const t = useTranslations("Categories.addModal");
+  const tCommon = useTranslations("common");
   const locale = useLocale();
   const isEdit = Boolean(category?.id);
   const [image, setImage] = useState<File | null>(null);
@@ -54,7 +57,6 @@ export default function AddCategoryModal({
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [pexelsModalOpen, setPexelsModalOpen] = useState(false);
-  const modalRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -95,14 +97,6 @@ export default function AddCategoryModal({
   const nameEn = watch("nameEn");
   const defaultImageSearchQuery = (nameAr || nameEn || "").trim();
   const isImageBusy = isImageLoading || isCreating;
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !isCreating) onClose();
-    };
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, [onClose, isCreating]);
 
   const onSubmit = async (data: AddCategoryFormData) => {
     try {
@@ -232,251 +226,214 @@ export default function AddCategoryModal({
   const handleDragLeave = () => setIsDragOver(false);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]"
-      onClick={(e) => e.target === e.currentTarget && !isCreating && onClose()}
-    >
-      <div
-        ref={modalRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="add-category-title"
-        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col animate-[fadeIn_0.25s_ease-out] border border-gray-200/50 dark:border-gray-700/50"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="shrink-0 px-6 pt-6 pb-4 border-b border-gray-200 dark:border-gray-700 bg-linear-to-br from-primary/5 to-transparent dark:from-primary/10">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-primary/20 to-accent-purple/10 flex items-center justify-center shadow-sm ring-1 ring-primary/10">
-                <BiCategory className="text-primary text-2xl" />
-              </div>
-              <div>
-                <h2
-                  id="add-category-title"
-                  className="text-xl font-bold text-gray-900 dark:text-white tracking-tight"
-                >
-                  {isEdit ? t("editTitle") : t("title")}
-                </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                  {t("names")}
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
+    <>
+      <Modal
+        open
+        onClose={onClose}
+        title={isEdit ? t("editTitle") : t("title")}
+        description={t("names")}
+        icon={<BiCategory className="size-5" />}
+        dismissible={!isCreating}
+        closeLabel={tCommon("close")}
+        footer={
+          <>
+            <Button variant="secondary" onClick={onClose} disabled={isCreating}>
+              {t("cancel")}
+            </Button>
+            <Button
+              variant="primary"
+              type="submit"
+              form={CATEGORY_FORM_ID}
+              loading={isCreating}
               disabled={isCreating}
-              className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
-              aria-label="Close"
+              startIcon={<IoAddCircleOutline className="size-4.5" />}
             >
-              <IoCloseOutline className="text-xl" />
-            </button>
-          </div>
-        </div>
-
+              {isEdit ? t("save") : t("create")}
+            </Button>
+          </>
+        }
+      >
         <form
+          id={CATEGORY_FORM_ID}
           onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col min-h-0 flex-1"
+          className="flex flex-col gap-6"
         >
-          <div className="overflow-y-auto p-6 space-y-6">
-            {/* Image section */}
-            <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
-              <div className="flex items-center gap-2 mb-4">
-                <IoImageOutline className="text-primary text-lg shrink-0" />
-                <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-                  {t("image")}
-                </h3>
-              </div>
-              <div
-                className={`relative rounded-2xl border-2 border-dashed transition-all duration-200 ${
-                  isDragOver
-                    ? "border-primary bg-primary/5 dark:bg-primary/10"
-                    : imagePreview
-                      ? "border-primary/40 bg-primary/5 dark:bg-primary/10"
-                      : "border-gray-300 dark:border-gray-600 bg-gray-100/50 dark:bg-gray-600/20"
-                }`}
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
+          <section className="flex flex-col gap-3">
+            <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
+              <IoImageOutline className="size-4 shrink-0 text-fg-muted" aria-hidden />
+              {t("image")}
+            </h3>
+            <div
+              className={cn(
+                "relative rounded-xl border border-dashed transition-colors duration-150",
+                isDragOver
+                  ? "border-brand bg-brand-soft"
+                  : "border-line-strong bg-surface-2",
+              )}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+            >
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
+                onChange={handleImageChange}
+                className="hidden"
+                disabled={isImageBusy}
+              />
+              <button
+                type="button"
+                disabled={isImageBusy}
+                onClick={() => setPexelsModalOpen(true)}
+                className={cn(
+                  "flex min-h-40 w-full flex-col items-center justify-center rounded-xl px-6 py-8 disabled:opacity-70",
+                  focusRing,
+                )}
               >
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
-                  onChange={handleImageChange}
-                  className="hidden"
-                  disabled={isImageBusy}
-                />
-                <button
-                  type="button"
-                  disabled={isImageBusy}
-                  onClick={() => setPexelsModalOpen(true)}
-                  className="flex w-full flex-col items-center justify-center py-10 px-6 min-h-[160px] disabled:opacity-70"
-                >
-                  {imagePreview ? (
-                    <div className="relative w-28 h-28 rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-inner ring-1 ring-black/5">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-full h-full object-cover"
-                      />
-                      {isImageLoading && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                          <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <>
-                      <div className="w-14 h-14 rounded-2xl bg-gray-200/80 dark:bg-gray-600/50 flex items-center justify-center mb-3">
-                        <IoImageOutline className="text-3xl text-primary" />
+                {imagePreview ? (
+                  <div className="relative size-28 overflow-hidden rounded-lg bg-surface ring-1 ring-line">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="size-full object-cover"
+                    />
+                    {isImageLoading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-overlay">
+                        <Spinner size="sm" className="text-on-brand" />
                       </div>
-                      <span className="text-sm font-medium text-primary text-center">
-                        {t("searchImage")}
-                      </span>
-                      <span className="mt-1 text-xs text-gray-500 dark:text-gray-400 text-center">
-                        {t("imageHint")}
-                      </span>
-                    </>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <span className="mb-3 flex size-12 items-center justify-center rounded-lg bg-surface-3 text-fg-muted">
+                      <IoImageOutline className="size-6" aria-hidden />
+                    </span>
+                    <span className="text-center text-sm font-medium text-fg">
+                      {t("searchImage")}
+                    </span>
+                    <span className="mt-1 text-center text-xs text-fg-muted">
+                      {t("imageHint")}
+                    </span>
+                  </>
+                )}
+              </button>
+              {imagePreview && !isImageBusy && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  iconOnly
+                  onClick={handleRemoveImage}
+                  aria-label={t("removeImage")}
+                  className="absolute end-3 top-3"
+                >
+                  <IoCloseOutline className="size-4.5" />
+                </Button>
+              )}
+            </div>
+          </section>
+
+          <section className="flex flex-col gap-3">
+            <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
+              <IoPricetagOutline className="size-4 shrink-0 text-fg-muted" aria-hidden />
+              {t("names")}
+            </h3>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <Field label={t("nameEn")} required error={errors.nameEn?.message}>
+                <Controller
+                  name="nameEn"
+                  control={control}
+                  rules={{ required: t("nameEnRequired") }}
+                  render={({ field }) => (
+                    <Input
+                      type="text"
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      onBlur={field.onBlur}
+                      placeholder={t("namePlaceholder")}
+                      data-autofocus
+                    />
                   )}
-                </button>
-                {imagePreview && !isImageBusy && (
+                />
+              </Field>
+              <Field label={t("nameAr")} required error={errors.nameAr?.message}>
+                <Controller
+                  name="nameAr"
+                  control={control}
+                  rules={{ required: t("nameArRequired") }}
+                  render={({ field }) => (
+                    <Input
+                      type="text"
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      onBlur={field.onBlur}
+                      placeholder="مثال: مشروبات"
+                      dir="rtl"
+                    />
+                  )}
+                />
+              </Field>
+            </div>
+          </section>
+
+          <section className="flex flex-col gap-3">
+            <h3 className="flex items-center gap-2 text-[13px] font-semibold text-fg">
+              <IoEllipseSharp className="size-3 shrink-0 text-fg-subtle" aria-hidden />
+              {t("status")}
+            </h3>
+            <Controller
+              name="isActive"
+              control={control}
+              render={({ field }) => (
+                <div className="flex w-fit gap-1 rounded-lg border border-line bg-surface-2 p-1">
                   <button
                     type="button"
-                    onClick={handleRemoveImage}
-                    className="absolute top-3 end-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
-                    aria-label={t("removeImage")}
+                    aria-pressed={field.value === true}
+                    onClick={() => field.onChange(true)}
+                    className={cn(
+                      "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-150",
+                      focusRing,
+                      field.value === true
+                        ? "bg-surface text-fg shadow-xs"
+                        : "text-fg-muted hover:text-fg",
+                    )}
                   >
-                    <IoCloseOutline className="text-lg" />
+                    <IoCheckmarkCircle
+                      className={cn(
+                        "size-4",
+                        field.value === true ? "text-success" : "text-fg-subtle",
+                      )}
+                      aria-hidden
+                    />
+                    {t("active")}
                   </button>
-                )}
-              </div>
-            </section>
-
-            {/* Names section */}
-            <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
-              <div className="flex items-center gap-2 mb-4">
-                <IoPricetagOutline className="text-primary text-lg shrink-0" />
-                <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-                  {t("names")}
-                </h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t("nameEn")} *
-                  </label>
-                  <Controller
-                    name="nameEn"
-                    control={control}
-                    rules={{ required: t("nameEnRequired") }}
-                    render={({ field }) => (
-                      <CustomInput
-                        type="text"
-                        value={field.value}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        onBlur={field.onBlur}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                        placeholder={t("namePlaceholder")}
-                        error={errors.nameEn?.message}
-                      />
+                  <button
+                    type="button"
+                    aria-pressed={field.value === false}
+                    onClick={() => field.onChange(false)}
+                    className={cn(
+                      "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-150",
+                      focusRing,
+                      field.value === false
+                        ? "bg-surface text-fg shadow-xs"
+                        : "text-fg-muted hover:text-fg",
                     )}
-                  />
+                  >
+                    <IoRemoveCircle
+                      className={cn(
+                        "size-4",
+                        field.value === false ? "text-danger" : "text-fg-subtle",
+                      )}
+                      aria-hidden
+                    />
+                    {t("inactive")}
+                  </button>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t("nameAr")} *
-                  </label>
-                  <Controller
-                    name="nameAr"
-                    control={control}
-                    rules={{ required: t("nameArRequired") }}
-                    render={({ field }) => (
-                      <CustomInput
-                        type="text"
-                        value={field.value}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        onBlur={field.onBlur}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                        placeholder="مثال: مشروبات"
-                        dir="rtl"
-                        error={errors.nameAr?.message}
-                      />
-                    )}
-                  />
-                </div>
-              </div>
-            </section>
-
-            {/* Status section */}
-            <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
-              <div className="flex items-center gap-2 mb-4">
-                <IoEllipseSharp className="text-primary text-lg shrink-0" />
-                <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-                  {t("status")}
-                </h3>
-              </div>
-              <Controller
-                name="isActive"
-                control={control}
-                render={({ field }) => (
-                  <div className="flex rounded-2xl p-1 bg-gray-100 dark:bg-gray-600/40 border border-gray-200/80 dark:border-gray-600/50 w-fit">
-                    <button
-                      type="button"
-                      onClick={() => field.onChange(true)}
-                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                        field.value === true
-                          ? "bg-white dark:bg-gray-700 text-primary shadow-sm border border-gray-200/80 dark:border-gray-600 ring-1 ring-primary/20"
-                          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                      }`}
-                    >
-                      <IoCheckmarkCircle className="text-lg" />
-                      {t("active")}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => field.onChange(false)}
-                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                        field.value === false
-                          ? "bg-white dark:bg-gray-700 text-red-600 dark:text-red-400 shadow-sm border border-gray-200/80 dark:border-gray-600 ring-1 ring-red-500/20"
-                          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                      }`}
-                    >
-                      <IoRemoveCircle className="text-lg" />
-                      {t("inactive")}
-                    </button>
-                  </div>
-                )}
-              />
-            </section>
-          </div>
-
-          {/* Footer */}
-          <div className="shrink-0 justify-end flex gap-3 p-6 pt-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-3 rounded-2xl border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-gray-400/30"
-              disabled={isCreating}
-            >
-              {t("cancel")}
-            </button>
-            <div className="w-fit!">
-              <CustomBtn
-                type="submit"
-                loading={isCreating}
-                disabled={isCreating}
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <IoAddCircleOutline className="text-xl" />
-                  {isEdit ? t("save") : t("create")}
-                </div>
-              </CustomBtn>
-            </div>
-          </div>
+              )}
+            />
+          </section>
         </form>
-      </div>
+      </Modal>
 
       <PexelsImagePickerModal
         open={pexelsModalOpen}
@@ -490,6 +447,6 @@ export default function AddCategoryModal({
         }}
         onSelectPhoto={handlePexelsPhotoSelect}
       />
-    </div>
+    </>
   );
 }

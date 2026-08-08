@@ -1,11 +1,21 @@
 "use client";
 import { useState, type ReactNode } from "react";
+import { cn } from "@/lib/cn";
 import { DashboardContentSection } from "@/components/Dashboard/DashboardContentSection";
 import { DashboardHeader } from "@/components/Dashboard/DashboardHeader";
 import {
   DashboardSidebar,
   type SidebarVariant,
 } from "@/components/Dashboard/DashboardSidebar";
+
+/**
+ * Application shell for the merchant dashboard and the admin back-office.
+ *
+ * The main column is offset with padding rather than a max-width calculation,
+ * so the sticky header spans the full content area and nothing overflows when
+ * the rail is absent. Keep this inset in step with `SIDEBAR_WIDTH`.
+ */
+const SIDEBAR_INSET = "lg:ps-[240px]";
 
 export default function Layout({
   children,
@@ -26,28 +36,33 @@ export default function Layout({
     (segment || isAdmin || variant === "account") && !hideSidebar;
 
   return (
-    <div className="w-full bg-[#f6f8fb] text-slate-800 dark:bg-[#0d1117] dark:text-slate-100 lg:min-h-screen">
-      <div className="flex w-full bg-[#f6f8fb] dark:bg-[#0d1117] lg:min-h-screen">
-        {showSidebar && (
-          <DashboardSidebar
-            isMenuOpen={isMenuOpen}
-            setIsMenuOpen={setIsMenuOpen}
-            segment={segment}
-            isAdmin={isAdmin}
-            variant={variant}
-          />
+    <div className="min-h-dvh bg-app text-fg">
+      {showSidebar ? (
+        <DashboardSidebar
+          isMenuOpen={isMenuOpen}
+          setIsMenuOpen={setIsMenuOpen}
+          segment={segment}
+          isAdmin={isAdmin}
+          variant={variant}
+        />
+      ) : null}
+
+      <div
+        className={cn(
+          "flex min-h-dvh flex-col",
+          showSidebar && SIDEBAR_INSET,
         )}
-        <main
-          className={` flex-1 ms-auto ${showSidebar ? "lg:max-w-[calc(100%-288px)]" : "lg:max-w-full"} w-full`}
-        >
-          <DashboardHeader
-            setIsMenuOpen={setIsMenuOpen}
-            segment={segment}
-            isAdmin={isAdmin}
-            hideSidebar={hideSidebar}
-            hasSidebar={Boolean(showSidebar)}
-          />
-          <div className="mx-auto mt-4 max-w-[1500px] px-4 pb-8 pt-1 sm:mt-6 sm:px-6 sm:pb-10">
+      >
+        <DashboardHeader
+          setIsMenuOpen={setIsMenuOpen}
+          segment={segment}
+          isAdmin={isAdmin}
+          hideSidebar={hideSidebar}
+          hasSidebar={Boolean(showSidebar)}
+        />
+
+        <main className="flex-1">
+          <div className="mx-auto w-full max-w-[1400px] px-4 py-4 sm:px-6 sm:py-5">
             <DashboardContentSection>{children}</DashboardContentSection>
           </div>
         </main>

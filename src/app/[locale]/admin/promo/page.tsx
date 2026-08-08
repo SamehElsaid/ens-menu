@@ -4,19 +4,25 @@ import { useLocale, useTranslations } from "next-intl";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { IoArrowBack, IoMegaphoneOutline } from "react-icons/io5";
-import { FaSpinner, FaSave } from "react-icons/fa";
+import { FaSave } from "react-icons/fa";
 import CardDashBoard from "@/components/Card/CardDashBoard";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
+import {
+  Badge,
+  Button,
+  Field,
+  LoadingBlock,
+  PageHeader,
+  SectionHeader,
+  Skeleton,
+  Switch,
+  Textarea,
+} from "@/components/ui";
 
 interface PromoTextLocalized {
   ar: string;
   en: string;
-}
-
-interface PromoData {
-  text: string;
-  boolean: boolean;
 }
 
 interface PromoResponse {
@@ -82,15 +88,20 @@ export default function AdminPromoPage() {
       return;
     }
 
+    setSaving(true);
     try {
-      setSaving(true);
-      const localized: PromoTextLocalized = { ar: textAr.trim(), en: textEn.trim() };
-      const payload: PromoData = {
-        text: JSON.stringify(localized),
+      const payload = {
+        text: JSON.stringify({
+          ar: textAr.trim(),
+          en: textEn.trim(),
+        }),
         boolean: promoEnabled,
       };
-      const result = await axiosPost<PromoData, PromoResponse>("/promo", locale, payload);
-
+      const result = await axiosPost<typeof payload, PromoResponse>(
+        "/promo",
+        locale,
+        payload,
+      );
       if (result.status) {
         toast.success(t("saveSuccess"));
       } else {
@@ -103,191 +114,133 @@ export default function AdminPromoPage() {
     }
   };
 
-  const textareaClass =
-    "w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors resize-none";
-
   return (
     <div className="space-y-6 pb-10">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1">
-          <div className={`flex items-center gap-4 mb-4 ${isRTL ? "flex-row-reverse" : ""}`}>
-            <button
-              onClick={() => router.back()}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${isRTL ? "flex-row-reverse" : ""}`}
-            >
-              <IoArrowBack className="text-lg" />
-              <span className="font-medium">{t("back")}</span>
-            </button>
-          </div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-            {t("title")}
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400">{t("subtitle")}</p>
-        </div>
-      </div>
+      <PageHeader
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          <Button
+            variant="secondary"
+            startIcon={<IoArrowBack className="rtl:rotate-180" />}
+            onClick={() => router.back()}
+          >
+            {t("back")}
+          </Button>
+        }
+      />
 
-      {/* Status Card */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <CardDashBoard
-          borderColor={
-            promoEnabled
-              ? "border-green-200 dark:border-green-500/20"
-              : "border-slate-200 dark:border-slate-700"
-          }
-          hover
-        >
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <CardDashBoard hover>
           <div className="flex items-center gap-4">
             <div
-              className={`w-14 h-14 rounded-xl flex items-center justify-center shadow-sm transition-colors ${promoEnabled ? "bg-green-50 dark:bg-green-500/20" : "bg-slate-100 dark:bg-slate-800"
-                }`}
+              className={`flex size-14 items-center justify-center rounded-xl ${
+                promoEnabled ? "bg-success-soft text-success-fg" : "bg-surface-2 text-fg-subtle"
+              }`}
             >
-              <IoMegaphoneOutline
-                className={`text-2xl transition-colors ${promoEnabled
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-slate-400 dark:text-slate-500"
-                  }`}
-              />
+              <IoMegaphoneOutline className="text-2xl" aria-hidden />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+              <p className="mb-1 text-sm font-medium text-fg-muted">
                 {t("statusLabel")}
               </p>
-              <p
-                className={`text-xl font-bold transition-colors ${promoEnabled
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-slate-500 dark:text-slate-400"
-                  }`}
-              >
+              <Badge tone={promoEnabled ? "success" : "neutral"} size="md">
                 {promoEnabled ? t("statusActive") : t("statusInactive")}
-              </p>
+              </Badge>
             </div>
           </div>
         </CardDashBoard>
 
-        <CardDashBoard borderColor="border-blue-200 dark:border-blue-500/20" hover>
+        <CardDashBoard hover>
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-xl bg-blue-50 dark:bg-blue-500/20 flex items-center justify-center shadow-sm shrink-0">
-              <span className="text-2xl">📝</span>
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-info-soft text-info-fg">
+              <IoMegaphoneOutline className="text-2xl" aria-hidden />
             </div>
-            <div className="flex-1 min-w-0 space-y-1">
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+            <div className="min-w-0 flex-1 space-y-1">
+              <p className="text-sm font-medium text-fg-muted">
                 {t("currentText")}
               </p>
               {loading ? (
-                <p className="text-sm text-slate-400">...</p>
+                <Skeleton className="h-4 w-3/4" />
               ) : (
-                <>
-                  <p
-                    className="text-sm font-semibold text-slate-900 dark:text-slate-100 whitespace-pre-wrap"
-                    dir={isRTL ? "rtl" : "ltr"}
-                  >
-                    {(isRTL ? textAr : textEn) || "—"}
-                  </p>
-                </>
+                <p
+                  className="whitespace-pre-wrap text-sm font-semibold text-fg"
+                  dir={isRTL ? "rtl" : "ltr"}
+                >
+                  {(isRTL ? textAr : textEn) || "—"}
+                </p>
               )}
             </div>
           </div>
         </CardDashBoard>
       </div>
 
-      {/* Edit Form */}
       <CardDashBoard>
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <FaSpinner className="animate-spin text-3xl text-primary" />
-          </div>
+          <LoadingBlock label={t("formTitle")} />
         ) : (
           <div className="space-y-6">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-              {t("formTitle")}
-            </h2>
+            <SectionHeader title={t("formTitle")} />
 
-            {/* Arabic Text */}
-            <div className="space-y-2">
-              <label
-                htmlFor="promo-text-ar"
-                className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300"
-              >
-                <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-500 dark:text-slate-400">
-                  AR
+            <Field
+              label={
+                <span className="inline-flex items-center gap-2">
+                  <Badge tone="neutral" size="sm">
+                    AR
+                  </Badge>
+                  {t("textLabelAr")}
                 </span>
-                {t("textLabelAr")}
-              </label>
-              <textarea
+              }
+            >
+              <Textarea
                 id="promo-text-ar"
                 value={textAr}
                 onChange={(e) => setTextAr(e.target.value)}
                 rows={3}
                 dir="rtl"
                 placeholder={t("textPlaceholderAr")}
-                className={textareaClass}
               />
-            </div>
+            </Field>
 
-            {/* English Text */}
-            <div className="space-y-2">
-              <label
-                htmlFor="promo-text-en"
-                className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300"
-              >
-                <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-500 dark:text-slate-400">
-                  EN
+            <Field
+              label={
+                <span className="inline-flex items-center gap-2">
+                  <Badge tone="neutral" size="sm">
+                    EN
+                  </Badge>
+                  {t("textLabelEn")}
                 </span>
-                {t("textLabelEn")}
-              </label>
-              <textarea
+              }
+            >
+              <Textarea
                 id="promo-text-en"
                 value={textEn}
                 onChange={(e) => setTextEn(e.target.value)}
                 rows={3}
                 dir="ltr"
                 placeholder={t("textPlaceholderEn")}
-                className={textareaClass}
+              />
+            </Field>
+
+            <div className="rounded-lg border border-line bg-surface-2/50 p-4">
+              <Switch
+                id="promo-toggle"
+                align="between"
+                checked={promoEnabled}
+                onChange={(e) => setPromoEnabled(e.target.checked)}
+                label={t("enableLabel")}
+                hint={t("enableDescription")}
               />
             </div>
 
-            {/* Toggle */}
-            <div className="flex items-center justify-between p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
-              <div>
-                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  {t("enableLabel")}
-                </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  {t("enableDescription")}
-                </p>
-              </div>
-              <button
-                id="promo-toggle"
-                role="switch"
-                aria-checked={promoEnabled}
-                onClick={() => setPromoEnabled((prev) => !prev)}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 ${promoEnabled ? "bg-green-500" : "bg-slate-300 dark:bg-slate-600"
-                  }`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-lg transform transition-transform duration-200 ${promoEnabled
-                      ? isRTL ? "-translate-x-5" : "translate-x-5"
-                      : "translate-x-0"
-                    }`}
-                />
-              </button>
-            </div>
-
-            {/* Save Button */}
             <div className="flex justify-end">
-              <button
+              <Button
                 onClick={handleSave}
-                disabled={saving}
-                className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                loading={saving}
+                startIcon={<FaSave />}
               >
-                {saving ? (
-                  <FaSpinner className="animate-spin text-sm" />
-                ) : (
-                  <FaSave className="text-sm" />
-                )}
-                <span>{saving ? t("saving") : t("save")}</span>
-              </button>
+                {saving ? t("saving") : t("save")}
+              </Button>
             </div>
           </div>
         )}

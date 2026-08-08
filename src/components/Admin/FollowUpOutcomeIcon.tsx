@@ -8,6 +8,7 @@ import {
   IoReturnUpBack,
   IoTimeOutline,
 } from "react-icons/io5";
+import { cn } from "@/lib/cn";
 import type { FollowUpOutcome } from "@/types/AdminFollowUp";
 
 type FollowUpOutcomeIconProps = {
@@ -16,29 +17,30 @@ type FollowUpOutcomeIconProps = {
   size?: "sm" | "md";
 };
 
+/** Each outcome keeps a distinct glyph, so the tone is never the only signal. */
 const OUTCOME_STYLES: Record<
   FollowUpOutcome,
   { Icon: typeof IoCheckmarkCircle; className: string }
 > = {
   answered: {
     Icon: IoCheckmarkCircle,
-    className: "text-emerald-600 dark:text-emerald-400",
+    className: "text-success",
   },
   no_answer: {
     Icon: IoCloseCircle,
-    className: "text-red-500 dark:text-red-400",
+    className: "text-danger",
   },
   busy: {
     Icon: IoTimeOutline,
-    className: "text-amber-500 dark:text-amber-400",
+    className: "text-warning",
   },
   wrong_number: {
     Icon: IoAlertCircle,
-    className: "text-orange-500 dark:text-orange-400",
+    className: "text-warning",
   },
   callback_requested: {
     Icon: IoReturnUpBack,
-    className: "text-blue-500 dark:text-blue-400",
+    className: "text-info",
   },
 };
 
@@ -54,11 +56,11 @@ export default function FollowUpOutcomeIcon({
 
   return (
     <span
-      className={`inline-flex shrink-0 ${className}`}
+      className={cn("inline-flex shrink-0", className)}
       title={label}
       aria-label={label}
     >
-      <Icon className={`${sizeClass} ${colorClass}`} aria-hidden />
+      <Icon className={cn(sizeClass, colorClass)} aria-hidden />
     </span>
   );
 }

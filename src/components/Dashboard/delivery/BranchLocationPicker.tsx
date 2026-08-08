@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { IoLocationSharp, IoLocateOutline, IoSearchOutline } from "react-icons/io5";
+import { Button } from "@/components/ui";
 import { loadGoogleMaps } from "@/lib/loadGoogleMaps";
 
 const DEFAULT_LAT = 29.9602;
@@ -323,19 +324,17 @@ export default function BranchLocationPicker({
               )}
               <span className="hidden sm:inline">{t("currentLocationBtn")}</span>
             </button>
-            <button
+            <Button
               type="button"
+              size="sm"
+              loading={isGeocoding}
+              disabled={isLoading}
+              startIcon={<IoSearchOutline className="text-lg shrink-0" />}
+              className="whitespace-nowrap"
               onClick={handleGoToArea}
-              disabled={isLoading || isGeocoding}
-              className="inline-flex items-center justify-center gap-1.5 rounded-2xl bg-primary text-white px-3 py-2.5 text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
             >
-              {isGeocoding ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <IoSearchOutline className="text-lg shrink-0" />
-              )}
               <span className="hidden sm:inline">{t("goToAreaBtn")}</span>
-            </button>
+            </Button>
           </div>
         </div>
         {locationError ? (

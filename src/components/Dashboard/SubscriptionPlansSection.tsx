@@ -6,8 +6,8 @@ import { useSearchParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
 import { HiOutlineArrowRight } from "react-icons/hi";
-import { IoCloseOutline } from "react-icons/io5";
 import LinkTo from "@/components/Global/LinkTo";
+import { ConfirmDialog } from "@/components/ui";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import { performAuthLogout } from "@/shared/authLogout";
 import { resolveAuthMeSession } from "@/shared/resolveAuthMeSession";
@@ -548,11 +548,11 @@ export default function SubscriptionPlansSection({
           }
         >
           <PageTitleWithHelp>
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100">
+            <h1 className="text-2xl md:text-3xl font-bold text-fg">
               {t("subscriptionPageTitle")}
             </h1>
           </PageTitleWithHelp>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-fg-muted">
             {t("subscriptionPageDescription")}
           </p>
         </header>
@@ -593,13 +593,13 @@ export default function SubscriptionPlansSection({
 
         <section
           id="onboarding-subscription-plans"
-          className="rounded-3xl border border-slate-100 dark:border-slate-800 bg-gradient-to-b from-white to-slate-50/80 dark:from-slate-900 dark:to-slate-950 shadow-sm p-5 md:p-8"
+          className="rounded-2xl border border-line bg-surface shadow-sm p-5 md:p-8"
         >
           <div className={`mb-6 ${isRTL ? "text-right" : "text-left"}`}>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+            <h2 className="text-lg font-bold text-fg">
               {t("comparePlansTitle")}
             </h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-sm text-fg-muted">
               {t("comparePlansDescription")}
             </p>
           </div>
@@ -771,76 +771,24 @@ export default function SubscriptionPlansSection({
 
         <SubscriptionPaymentMethods className="mt-6" />
 
-        {downgradeModalOpen && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]"
-            onClick={(e) =>
-              e.target === e.currentTarget &&
-              !downgradeLoading &&
-              setDowngradeModalOpen(false)
-            }
-          >
-            <div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="downgrade-plan-title"
-              className="bg-white dark:bg-slate-900 rounded-[28px] shadow-2xl max-w-md w-full p-6 md:p-7 border border-slate-200 dark:border-slate-700 animate-[fadeIn_0.25s_ease-out]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400">
-                <HiOutlineArrowRight
-                  className={`h-6 w-6 ${isRTL ? "rotate-180" : ""}`}
-                />
-              </div>
-              <div
-                className={`flex items-center justify-between mb-4 ${isRTL ? "flex-row-reverse" : ""}`}
-              >
-                <h2
-                  id="downgrade-plan-title"
-                  className="text-lg font-bold text-slate-900 dark:text-slate-100"
-                >
-                  {t("downgradeConfirmTitle")}
-                </h2>
-                <button
-                  type="button"
-                  onClick={() =>
-                    !downgradeLoading && setDowngradeModalOpen(false)
-                  }
-                  disabled={downgradeLoading}
-                  className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
-                  aria-label={tRoot("common.close")}
-                >
-                  <IoCloseOutline className="text-xl" />
-                </button>
-              </div>
-              <p
-                className={`text-sm text-slate-600 dark:text-slate-400 mb-6 ${isRTL ? "text-right" : "text-left"}`}
-              >
-                {t("downgradeConfirmBody")}
-              </p>
-              <div
-                className={`flex gap-3 ${isRTL ? "flex-row-reverse justify-start" : "justify-end"}`}
-              >
-                <button
-                  type="button"
-                  onClick={() => setDowngradeModalOpen(false)}
-                  disabled={downgradeLoading}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50"
-                >
-                  {tRoot("form.cancel")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void handleConfirmDowngrade()}
-                  disabled={downgradeLoading}
-                  className="px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-medium hover:bg-primary/90 disabled:opacity-60"
-                >
-                  {downgradeLoading ? t("downgrading") : t("downgradeConfirm")}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <ConfirmDialog
+          open={downgradeModalOpen}
+          onClose={() => setDowngradeModalOpen(false)}
+          onConfirm={handleConfirmDowngrade}
+          title={t("downgradeConfirmTitle")}
+          description={t("downgradeConfirmBody")}
+          confirmLabel={
+            downgradeLoading ? t("downgrading") : t("downgradeConfirm")
+          }
+          cancelLabel={tRoot("form.cancel")}
+          loading={downgradeLoading}
+          tone="danger"
+          icon={
+            <HiOutlineArrowRight
+              className={`h-6 w-6 ${isRTL ? "rotate-180" : ""}`}
+            />
+          }
+        />
       </div>
     </>
   );

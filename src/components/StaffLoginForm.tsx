@@ -1,8 +1,9 @@
 "use client";
 
 import { Controller, useForm } from "react-hook-form";
-import CustomInput from "@/components/Custom/CustomInput";
-import CustomBtn from "@/components/Custom/CustomBtn";
+import { Alert } from "@/components/ui/Alert";
+import { Button } from "@/components/ui/Button";
+import { Field, Input } from "@/components/ui";
 import { useLocale, useTranslations } from "next-intl";
 import { axiosPost } from "@/shared/axiosCall";
 import { encryptData } from "@/shared/encryption";
@@ -130,31 +131,26 @@ export default function StaffLoginForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-      {apiError && (
-        <p className="text-sm text-red-600 dark:text-red-400" role="alert">
-          {apiError}
-        </p>
-      )}
+      {apiError && <Alert tone="danger">{apiError}</Alert>}
 
       <Controller
         control={control}
         name="menuSlug"
         rules={{ required: t("menuSlugRequired") }}
         render={({ field: { value, onChange } }) => (
-          <CustomInput
-            type="text"
-            placeholder={t("menuSlugPlaceholder")}
-            id="menuSlug"
-            icon={<IoRestaurantOutline />}
-            label={t("menuSlug")}
-            error={errors.menuSlug?.message}
-            value={value}
-            onChange={(e) => {
-              setApiError(null);
-              onChange(e);
-            }}
-            className="bg-white/80 text-slate-900 placeholder:text-slate-400 dark:bg-slate-900/60 dark:text-slate-100 dark:placeholder:text-slate-400 dark:border-slate-700"
-          />
+          <Field label={t("menuSlug")} error={errors.menuSlug?.message}>
+            <Input
+              type="text"
+              inputSize="md"
+              startIcon={<IoRestaurantOutline size={14} />}
+              placeholder={t("menuSlugPlaceholder")}
+              value={value}
+              onChange={(e) => {
+                setApiError(null);
+                onChange(e);
+              }}
+            />
+          </Field>
         )}
       />
 
@@ -163,20 +159,20 @@ export default function StaffLoginForm() {
         name="email"
         rules={{ required: t("emailRequired") }}
         render={({ field: { value, onChange } }) => (
-          <CustomInput
-            type="email"
-            placeholder={t("email")}
-            id="email"
-            icon={<FaEnvelope />}
-            label={t("email")}
-            error={errors.email?.message}
-            value={value}
-            onChange={(e) => {
-              setApiError(null);
-              onChange(e);
-            }}
-            className="bg-white/80 text-slate-900 placeholder:text-slate-400 dark:bg-slate-900/60 dark:text-slate-100 dark:placeholder:text-slate-400 dark:border-slate-700"
-          />
+          <Field label={t("email")} error={errors.email?.message}>
+            <Input
+              type="email"
+              inputSize="md"
+              startIcon={<FaEnvelope size={14} />}
+              placeholder={t("email")}
+              autoComplete="email"
+              value={value}
+              onChange={(e) => {
+                setApiError(null);
+                onChange(e);
+              }}
+            />
+          </Field>
         )}
       />
 
@@ -185,29 +181,32 @@ export default function StaffLoginForm() {
         name="password"
         rules={{ required: t("passwordRequired") }}
         render={({ field: { value, onChange } }) => (
-          <CustomInput
-            type="password"
-            placeholder={t("password")}
-            id="password"
-            icon={<TbLockPassword />}
-            label={t("password")}
-            error={errors.password?.message}
-            value={value}
-            onChange={(e) => {
-              setApiError(null);
-              onChange(e);
-            }}
-            className="bg-white/80 text-slate-900 placeholder:text-slate-400 dark:bg-slate-900/60 dark:text-slate-100 dark:placeholder:text-slate-400 dark:border-slate-700"
-          />
+          <Field label={t("password")} error={errors.password?.message}>
+            <Input
+              type="password"
+              inputSize="md"
+              startIcon={<TbLockPassword size={15} />}
+              placeholder={t("password")}
+              autoComplete="current-password"
+              value={value}
+              onChange={(e) => {
+                setApiError(null);
+                onChange(e);
+              }}
+            />
+          </Field>
         )}
       />
 
-      <CustomBtn type="submit" loading={loading} disabled={loading}>
+      <Button type="submit" loading={loading} fullWidth size="lg" className="mt-1">
         {t("staffLoginSubmit")}
-      </CustomBtn>
+      </Button>
 
-      <p className="text-center text-sm text-slate-500 dark:text-slate-400 pt-2">
-        <LinkTo href="/auth/login" className="text-primary font-medium">
+      <p className="pt-2 text-center text-[13px] text-fg-muted">
+        <LinkTo
+          href="/auth/login"
+          className="rounded-sm font-medium text-brand transition-colors hover:text-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        >
           {t("ownerLoginLink")}
         </LinkTo>
       </p>

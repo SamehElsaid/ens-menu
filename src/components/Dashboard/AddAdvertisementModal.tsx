@@ -1,12 +1,12 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLocale, useTranslations } from "next-intl";
 import { axiosPost, axiosPatch } from "@/shared/axiosCall";
 import { _resizeImage } from "@/shared/_shared";
-import CustomInput from "@/components/Custom/CustomInput";
 import { toast } from "react-toastify";
 import { Advertisement, UploadResponse } from "@/types/Menu";
 import {
@@ -15,7 +15,15 @@ import {
   IoCloudUploadOutline,
 } from "react-icons/io5";
 import { HiSpeakerphone } from "react-icons/hi";
-import CustomBtn from "../Custom/CustomBtn";
+import {
+  Button,
+  Field,
+  Input,
+  Modal,
+  Textarea,
+  focusRing,
+} from "@/components/ui";
+import { cn } from "@/lib/cn";
 import {
   createAdvertisementSchema,
   type AdvertisementFormSchema,
@@ -35,6 +43,8 @@ interface AddAdvertisementModalProps {
   onRefresh?: () => void;
 }
 
+const AD_FORM_ID = "add-advertisement-form";
+
 export default function AddAdvertisementModal({
   menuId,
   ad = null,
@@ -44,18 +54,17 @@ export default function AddAdvertisementModal({
 }: AddAdvertisementModalProps) {
   const locale = useLocale();
   const t = useTranslations("Advertisements.addModal");
+  const tCommon = useTranslations("common");
   const isEdit = Boolean(ad?.id);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
-  const modalRef = useRef<HTMLDivElement | null>(null);
 
   const {
     control,
     handleSubmit,
     formState: { errors },
-
     setValue,
     trigger,
     reset,
@@ -108,14 +117,6 @@ export default function AddAdvertisementModal({
     }
   }, [ad, reset, handleImageUrlChange]);
 
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !isSubmitting) onClose();
-    };
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, [onClose, isSubmitting]);
-
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -166,6 +167,7 @@ export default function AddAdvertisementModal({
     const reader = new FileReader();
     reader.onloadend = () => setImagePreview(reader.result as string);
     reader.readAsDataURL(resized);
+    handleImageUrlChange(resized);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -207,7 +209,6 @@ export default function AddAdvertisementModal({
         }
       }
 
-      // For new advertisements, image is required
       if (!imageUrl && !isEdit) {
         toast.error(t("imageRequired"));
         setIsSubmitting(false);
@@ -269,278 +270,192 @@ export default function AddAdvertisementModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]"
-      onClick={(e) =>
-        e.target === e.currentTarget && !isSubmitting && onClose()
+    <Modal
+      open
+      onClose={onClose}
+      title={isEdit ? t("editTitle") : t("title")}
+      description={t("headerSubtitle")}
+      icon={<HiSpeakerphone className="size-5" />}
+      size="lg"
+      dismissible={!isSubmitting}
+      closeLabel={tCommon("close")}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose} disabled={isSubmitting}>
+            {t("cancel")}
+          </Button>
+          <Button
+            variant="primary"
+            type="submit"
+            form={AD_FORM_ID}
+            loading={isSubmitting}
+            disabled={isSubmitting}
+            startIcon={<IoAddCircleOutline className="size-4.5" />}
+          >
+            {isEdit ? t("save") : t("create")}
+          </Button>
+        </>
       }
     >
-      <div
-        ref={modalRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="add-advertisement-title"
-        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-gray-200/50 dark:border-gray-700/50"
-        onClick={(e) => e.stopPropagation()}
+      <form
+        id={AD_FORM_ID}
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-col gap-6"
       >
-        <div className="shrink-0 px-6 pt-6 pb-4 border-b border-gray-200 dark:border-gray-700 bg-linear-to-br from-primary/5 to-transparent dark:from-primary/10">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-primary/20 to-accent-purple/10 flex items-center justify-center shadow-sm ring-1 ring-primary/10">
-                <HiSpeakerphone className="text-primary text-2xl" />
-              </div>
-              <div>
-                <h2
-                  id="add-advertisement-title"
-                  className="text-xl font-bold text-gray-900 dark:text-white tracking-tight"
-                >
-                  {isEdit ? t("editTitle") : t("title")}
-                </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                  {t("headerSubtitle")}
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
-              aria-label="Close"
-            >
-              <IoCloseOutline className="text-xl" />
-            </button>
+        <section className="flex flex-col gap-3">
+          <h3 className="text-[13px] font-semibold text-fg">{t("sectionTitles")}</h3>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <Field label={t("titleEn")} required error={errors.title?.message}>
+              <Controller
+                name="title"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type="text"
+                    value={field.value}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    onBlur={field.onBlur}
+                    placeholder={t("titlePlaceholder")}
+                    data-autofocus
+                  />
+                )}
+              />
+            </Field>
+            <Field label={t("titleAr")} required error={errors.titleAr?.message}>
+              <Controller
+                name="titleAr"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type="text"
+                    value={field.value}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    onBlur={field.onBlur}
+                    placeholder="مثال: عرض الصيف"
+                    dir="rtl"
+                  />
+                )}
+              />
+            </Field>
           </div>
-        </div>
+        </section>
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col min-h-0 flex-1"
-        >
-          <div className="overflow-y-auto p-6 space-y-6">
-            <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
-              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
-                {t("sectionTitles")}
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t("titleEn")} *
-                  </label>
-                  <Controller
-                    name="title"
-                    control={control}
-                    render={({ field }) => (
-                      <CustomInput
-                        type="text"
-                        value={field.value}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        onBlur={field.onBlur}
-                        placeholder={t("titlePlaceholder")}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                        error={errors.title?.message}
-                      />
-                    )}
+        <section className="flex flex-col gap-3">
+          <h3 className="text-[13px] font-semibold text-fg">{t("sectionContent")}</h3>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <Field label={t("contentEn")} required error={errors.content?.message}>
+              <Controller
+                name="content"
+                control={control}
+                render={({ field }) => (
+                  <Textarea
+                    rows={3}
+                    value={field.value}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    onBlur={field.onBlur}
+                    placeholder={t("contentPlaceholder")}
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t("titleAr")} *
-                  </label>
-                  <Controller
-                    name="titleAr"
-                    control={control}
-                    render={({ field }) => (
-                      <CustomInput
-                        type="text"
-                        value={field.value}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        onBlur={field.onBlur}
-                        placeholder="مثال: عرض الصيف"
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                        error={errors.titleAr?.message}
-                      />
-                    )}
+                )}
+              />
+            </Field>
+            <Field label={t("contentAr")} required error={errors.contentAr?.message}>
+              <Controller
+                name="contentAr"
+                control={control}
+                render={({ field }) => (
+                  <Textarea
+                    rows={3}
+                    value={field.value}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    onBlur={field.onBlur}
+                    placeholder="تفاصيل العرض..."
+                    dir="rtl"
                   />
-                </div>
-              </div>
-            </section>
+                )}
+              />
+            </Field>
+          </div>
+        </section>
 
-            <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
-              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
-                {t("sectionContent")}
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t("contentEn")} *
-                  </label>
-                  <Controller
-                    name="content"
-                    control={control}
-                    render={({ field }) => (
-                      <CustomInput
-                        type="textarea"
-                        rows={3}
-                        value={field.value}
-                        onChange={(e) =>
-                          field.onChange(
-                            (e as React.ChangeEvent<HTMLInputElement>).target
-                              .value,
-                          )
-                        }
-                        onBlur={field.onBlur}
-                        placeholder={t("contentPlaceholder")}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                        error={errors.content?.message}
-                      />
-                    )}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t("contentAr")} *
-                  </label>
-                  <Controller
-                    name="contentAr"
-                    control={control}
-                    render={({ field }) => (
-                      <CustomInput
-                        type="textarea"
-                        rows={3}
-                        value={field.value}
-                        onChange={(e) =>
-                          field.onChange(
-                            (e as React.ChangeEvent<HTMLInputElement>).target
-                              .value,
-                          )
-                        }
-                        onBlur={field.onBlur}
-                        placeholder="تفاصيل العرض..."
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                        error={errors.contentAr?.message}
-                      />
-                    )}
-                  />
-                </div>
-              </div>
-            </section>
-
-            <section className="rounded-2xl bg-gray-50/80 dark:bg-gray-700/30 p-5 border border-gray-100 dark:border-gray-600/50">
-              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
-                {t("sectionMedia")}
-              </h3>
-
-              <div className="grid grid-cols-1  gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t("image")} *
-                  </label>
-                  <label
-                    className={`relative ${errors.imageUrl?.message ? "border-red-500 bg-red-50" : ""} block w-full cursor-pointer rounded-2xl border-2 border-dashed transition-all duration-200 ${
-                      isDragOver
-                        ? "border-primary bg-primary/5 dark:bg-primary/10"
-                        : imagePreview
-                          ? "border-primary/40 bg-primary/5 dark:bg-primary/10"
-                          : "border-gray-300 dark:border-gray-600 bg-gray-100/50 dark:bg-gray-600/20 hover:border-primary/40 hover:bg-primary/5 dark:hover:bg-primary/10"
-                    }`}
-                    onDrop={handleDrop}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                  >
-                    <input
-                      type="file"
-                      accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
-                      onChange={handleImageChange}
-                      className="hidden"
+        <section className="flex flex-col gap-3">
+          <h3 className="text-[13px] font-semibold text-fg">{t("sectionMedia")}</h3>
+          <Field label={t("image")} required error={errors.imageUrl?.message}>
+            <label
+              className={cn(
+                "relative block w-full cursor-pointer rounded-xl border border-dashed transition-colors duration-150",
+                isDragOver
+                  ? "border-brand bg-brand-soft"
+                  : errors.imageUrl?.message
+                    ? "border-danger bg-danger-soft/30"
+                    : "border-line-strong bg-surface-2",
+              )}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+            >
+              <input
+                type="file"
+                accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+              <div className="flex min-h-32 flex-col items-center justify-center py-8 px-6">
+                {imagePreview ? (
+                  <div className="relative size-24 overflow-hidden rounded-lg bg-surface ring-1 ring-line">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="size-full object-contain"
                     />
-                    <div className="flex flex-col items-center justify-center py-8 px-6 min-h-[120px]">
-                      {imagePreview ? (
-                        <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-inner ring-1 ring-black/5">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={imagePreview}
-                            alt="Preview"
-                            className="w-full h-full object-contain"
-                          />
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              handleRemoveImage();
-                            }}
-                            className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity text-white"
-                            aria-label={t("image")}
-                          >
-                            <IoCloseOutline className="text-2xl" />
-                          </button>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="w-12 h-12 rounded-2xl bg-gray-200/80 dark:bg-gray-600/50 flex items-center justify-center mb-2">
-                            <IoCloudUploadOutline className="text-2xl text-gray-500 dark:text-gray-400" />
-                          </div>
-                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400 text-center">
-                            {t("imageHint")}
-                          </span>
-                        </>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleRemoveImage();
+                      }}
+                      className={cn(
+                        "absolute inset-0 flex items-center justify-center bg-overlay text-on-brand opacity-0 transition-opacity hover:opacity-100",
+                        focusRing,
                       )}
-                    </div>
-                  </label>
-                  <UnmountClosed isOpened={Boolean(errors.imageUrl?.message)}>
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.imageUrl?.message}
-                    </p>
-                  </UnmountClosed>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t("linkUrl")}
-                  </label>
-                  <Controller
-                    name="linkUrl"
-                    control={control}
-                    render={({ field }) => (
-                      <CustomInput
-                        type="text"
-                        value={field.value ?? ""}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        onBlur={field.onBlur}
-                        placeholder={t("linkUrlPlaceholder")}
-                        className="px-4 py-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                        error={errors.linkUrl?.message}
-                      />
-                    )}
-                  />
-                </div>
+                      aria-label={t("image")}
+                    >
+                      <IoCloseOutline className="size-6" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <span className="mb-3 flex size-12 items-center justify-center rounded-lg bg-surface-3 text-fg-muted">
+                      <IoCloudUploadOutline className="size-6" aria-hidden />
+                    </span>
+                    <span className="text-center text-sm font-medium text-fg-muted">
+                      {t("imageHint")}
+                    </span>
+                  </>
+                )}
               </div>
-            </section>
-          </div>
+            </label>
+            <UnmountClosed isOpened={Boolean(errors.imageUrl?.message)}>
+              <p className="mt-1 text-xs text-danger">{errors.imageUrl?.message}</p>
+            </UnmountClosed>
+          </Field>
 
-          <div className="shrink-0 justify-end flex gap-3 p-6 pt-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-3 rounded-2xl border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-all disabled:opacity-50"
-              disabled={isSubmitting}
-            >
-              {t("cancel")}
-            </button>
-            <div className="w-fit!">
-              <CustomBtn
-                type="submit"
-                loading={isSubmitting}
-                disabled={isSubmitting}
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <IoAddCircleOutline className="text-xl" />
-                  {isEdit ? t("save") : t("create")}
-                </div>
-              </CustomBtn>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
+          <Field label={t("linkUrl")} error={errors.linkUrl?.message}>
+            <Controller
+              name="linkUrl"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  type="text"
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  onBlur={field.onBlur}
+                  placeholder={t("linkUrlPlaceholder")}
+                />
+              )}
+            />
+          </Field>
+        </section>
+      </form>
+    </Modal>
   );
 }

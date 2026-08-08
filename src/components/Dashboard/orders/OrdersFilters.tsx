@@ -14,7 +14,7 @@ const STATUS_OPTIONS: OrderStatusFilter[] = [
   "cancelled",
 ];
 
-type OrdersFiltersTheme = "violet" | "emerald";
+type OrdersFiltersTheme = "brand" | "emerald";
 
 export interface OrdersFilterMenu {
   id: number;
@@ -48,14 +48,13 @@ const themeClasses: Record<
     clearBtn: string;
   }
 > = {
-  violet: {
+  brand: {
     dateInput:
-      "border-violet-200/90 bg-white/90 focus:border-violet-400 focus:ring-violet-500/35 dark:border-violet-500/30 dark:bg-slate-800/90 dark:focus:border-violet-400 dark:focus:ring-violet-400/25",
-    statusActive: "bg-violet-600 text-white shadow-sm dark:bg-violet-500",
+      "border-line bg-surface focus:border-brand focus:ring-brand/35",
+    statusActive: "bg-brand text-on-brand shadow-sm",
     statusIdle:
-      "bg-white/80 text-slate-600 ring-1 ring-violet-200/80 hover:bg-violet-50 dark:bg-slate-800/80 dark:text-slate-300 dark:ring-violet-500/25 dark:hover:bg-violet-950/40",
-    clearBtn:
-      "text-violet-700 hover:bg-violet-50 dark:text-violet-300 dark:hover:bg-violet-950/40",
+      "bg-surface text-fg-muted ring-1 ring-line hover:bg-brand-soft",
+    clearBtn: "text-brand hover:bg-brand-soft",
   },
   emerald: {
     dateInput:
@@ -90,7 +89,7 @@ export default function OrdersFilters({
   const showMenuFilter = Boolean(onMenuFilterChange && (menus?.length ?? 0) > 1);
 
   return (
-    <div className="mt-4 space-y-4 border-t border-white/60 pt-4 dark:border-slate-700/50">
+    <div className="mt-4 space-y-4 border-t border-line pt-4">
       {showMenuFilter && (
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">

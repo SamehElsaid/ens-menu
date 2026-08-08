@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import { axiosPost } from "@/shared/axiosCall";
+import { Alert } from "@/components/ui";
 import { updateMenuGroupMembership } from "@/lib/menuGroupActions";
 import type { Menu } from "@/types/Menu";
 import type { MenuGroupSummary } from "@/lib/menuDeliveryGroups";
@@ -36,7 +37,6 @@ export default function AddMenuToGroupModal({
 }: AddMenuToGroupModalProps) {
   const t = useTranslations("Menus.addToGroupModal");
   const locale = useLocale();
-  const isRTL = locale === "ar";
 
   const [selectedGroupId, setSelectedGroupId] = useState<number>(
     groups.length === 1 ? groups[0]!.id : 0,
@@ -73,7 +73,6 @@ export default function AddMenuToGroupModal({
       subtitle={t("description", { name: menuName })}
       onClose={onClose}
       closeLabel={t("cancel")}
-      isRTL={isRTL}
       maxWidth="md"
       footer={
         <MenuGroupModalFooter
@@ -89,7 +88,7 @@ export default function AddMenuToGroupModal({
       <MenuGroupMenuPreview menu={menu} name={menuName} />
 
       <MenuGroupSectionLabel>{t("pickGroup")}</MenuGroupSectionLabel>
-      <div className="space-y-2">
+      <div className="flex flex-col gap-2">
         {groups.map((group) => (
           <MenuGroupGroupOption
             key={group.id}
@@ -122,7 +121,6 @@ export function ManageMenuGroupModal({
 }: ManageMenuGroupModalProps) {
   const t = useTranslations("Menus.manageGroupModal");
   const locale = useLocale();
-  const isRTL = locale === "ar";
 
   const addableMenus = useMemo(
     () => menusAvailableToJoinGroup(menus),
@@ -181,7 +179,6 @@ export function ManageMenuGroupModal({
       subtitle={t("description")}
       onClose={onClose}
       closeLabel={t("cancel")}
-      isRTL={isRTL}
       footer={
         <MenuGroupModalFooter
           cancelLabel={t("cancel")}
@@ -213,9 +210,9 @@ export function ManageMenuGroupModal({
         ))}
       </MenuGroupPickList>
       {willDissolveGroup && hasChanges ? (
-        <p className="mt-3 text-xs text-amber-700 dark:text-amber-300">
+        <Alert tone="warning" className="mt-3">
           {t("dissolveWarning")}
-        </p>
+        </Alert>
       ) : null}
     </MenuGroupModalShell>
   );

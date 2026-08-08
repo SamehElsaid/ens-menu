@@ -1,5 +1,5 @@
 type MenuRefSource =
-  | { uuid?: string; id?: number }
+  | { uuid?: string | null; id?: number | null }
   | null
   | undefined;
 

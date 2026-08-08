@@ -48,17 +48,15 @@ export default async function RegisterPageView({ locale }: RegisterPageViewProps
         className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(ellipse_at_50%_0%,rgba(124,58,237,0.08),transparent_70%)] dark:bg-[radial-gradient(ellipse_at_50%_0%,rgba(124,58,237,0.12),transparent_70%)]"
       />
 
-      <div className="home-section-shell relative z-[1]">
+      <div className="home-section-shell relative z-1">
         <div className="mx-auto max-w-6xl">
           {/* Mobile / tablet hero */}
           <div className="mb-6 text-center lg:hidden">
-            <h1 className="text-[1.45rem] font-bold leading-tight tracking-tight text-slate-900 sm:text-[1.65rem] dark:text-white">
+            <h1 className="text-[1.45rem] font-bold leading-tight tracking-[-0.02em] text-fg sm:text-[1.65rem]">
               {t("headline")}{" "}
-              <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent rtl:bg-gradient-to-l dark:from-purple-400 dark:to-indigo-400">
-                {t("headlineAccent")}
-              </span>
+              <span className="text-brand">{t("headlineAccent")}</span>
             </h1>
-            <p className="mx-auto mt-2 max-w-md text-[14px] leading-relaxed text-slate-500 dark:text-slate-400">
+            <p className="mx-auto mt-2 max-w-md text-[14px] leading-relaxed text-fg-muted">
               {t("subtitle")}
             </p>
           </div>
@@ -79,12 +77,12 @@ export default async function RegisterPageView({ locale }: RegisterPageViewProps
 
           <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-12 xl:gap-16">
             <div className="register-page__form mx-auto w-full max-w-[440px] lg:max-w-none lg:justify-self-start">
-              <div className="register-form-card rounded-2xl border border-slate-200/70 bg-white/80 p-5 shadow-[0_8px_40px_-20px_rgba(124,58,237,0.18)] backdrop-blur-md sm:p-6 dark:border-slate-700/50 dark:bg-slate-900/55 dark:shadow-[0_8px_40px_-20px_rgba(124,58,237,0.12)]">
+              <div className="register-form-card rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-6">
                 <div className="mb-5 hidden text-start lg:block">
-                  <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                  <h2 className="text-xl font-semibold tracking-[-0.016em] text-fg">
                     {t("formTitle")}
                   </h2>
-                  <p className="mt-1 text-[13px] text-slate-500 dark:text-slate-400">
+                  <p className="mt-1 text-[13px] text-fg-muted">
                     {t("formSubtitle")}
                   </p>
                 </div>

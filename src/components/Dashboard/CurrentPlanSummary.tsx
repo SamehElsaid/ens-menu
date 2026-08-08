@@ -13,6 +13,7 @@ import {
   getSubscriptionDaysRemaining,
 } from "@/lib/subscriptionMenus";
 import type { Subscription } from "@/types/Subscription";
+import { Skeleton, SkeletonRegion } from "@/components/ui";
 
 type CurrentPlanSummaryProps = {
   subscriptionInfo: Subscription | null;
@@ -128,36 +129,31 @@ export default function CurrentPlanSummary({
 
   if (loading) {
     return (
-      <div
-        className={`rounded-[24px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 md:p-6 animate-pulse space-y-4 ${className}`}
-        aria-hidden
+      <SkeletonRegion
+        label={t("currentPlanSummary")}
+        className={`rounded-2xl border border-line bg-surface p-5 md:p-6 space-y-4 ${className}`}
       >
-        <div className="h-4 w-1/3 bg-slate-200 dark:bg-slate-700 rounded-lg" />
-
-        <div className="h-8 w-1/4 bg-slate-200 dark:bg-slate-700 rounded-lg" />
-
+        <Skeleton className="h-4 w-1/3" rounded="md" />
+        <Skeleton className="h-8 w-1/4" rounded="md" />
         <div className="grid grid-cols-2 gap-3">
           {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="h-12 rounded-xl bg-slate-100 dark:bg-slate-800"
-            />
+            <Skeleton key={i} className="h-12" rounded="lg" />
           ))}
         </div>
-      </div>
+      </SkeletonRegion>
     );
   }
 
   return (
     <div
-      className={`relative overflow-hidden rounded-3xl border border-primary/20 bg-linear-to-br from-primary/8 via-white to-slate-50 dark:from-primary/15 dark:via-slate-900 dark:to-slate-950 p-5 md:p-6 shadow-sm ${isRTL ? "text-right" : "text-left"} ${className}`}
+      className={`relative overflow-hidden rounded-2xl border border-brand-line bg-surface p-5 md:p-6 shadow-sm ${isRTL ? "text-right" : "text-left"} ${className}`}
     >
       <div
         className={`absolute top-0 ${isRTL ? "left-0 rounded-br-[80px]" : "right-0 rounded-bl-[80px]"} h-24 w-24 bg-primary/10 dark:bg-primary/15 pointer-events-none`}
         aria-hidden
       />
 
-      <p className="relative text-xs font-semibold uppercase tracking-wider text-primary/80 dark:text-primary mb-3">
+      <p className="relative text-xs font-semibold uppercase tracking-wider text-brand-soft-fg mb-3">
         {t("currentPlanSummary")}
       </p>
 
@@ -167,7 +163,7 @@ export default function CurrentPlanSummary({
         <div
           className={`flex items-center gap-2.5 ${isRTL ? "flex-row-reverse" : ""}`}
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-soft text-brand-soft-fg">
             {isPro ? (
               <HiOutlineSparkles className="h-5 w-5" />
             ) : (
@@ -175,7 +171,7 @@ export default function CurrentPlanSummary({
             )}
           </span>
 
-          <span className="text-xl font-bold text-slate-900 dark:text-slate-50">
+          <span className="text-xl font-bold text-fg">
             {displayPlanName}
           </span>
         </div>
@@ -183,8 +179,8 @@ export default function CurrentPlanSummary({
         <span
           className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
             isInGracePeriod
-              ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
-              : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+              ? "bg-warning-soft text-warning-fg"
+              : "bg-success-soft text-success-fg"
           }`}
         >
           {statusLabel}
@@ -194,10 +190,10 @@ export default function CurrentPlanSummary({
       {isInGracePeriod && (
         <div
           role="alert"
-          className={`relative mb-5 flex gap-3 rounded-2xl border border-amber-300/80 bg-amber-50 px-4 py-3 dark:border-amber-700/60 dark:bg-amber-950/40 ${isRTL ? "flex-row-reverse text-right" : "text-left"}`}
+          className={`relative mb-5 flex gap-3 rounded-xl border border-warning-line bg-warning-soft px-4 py-3 ${isRTL ? "flex-row-reverse text-right" : "text-left"}`}
         >
           <IoWarningOutline className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
-          <p className="text-sm text-amber-900 dark:text-amber-100">
+          <p className="text-sm text-warning-fg">
             {t("subscriptionGraceWarning")}
           </p>
         </div>
@@ -302,13 +298,13 @@ export default function CurrentPlanSummary({
         ].map((item) => (
           <div
             key={item.label}
-            className="rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-white/70 dark:bg-slate-900/50 px-3 py-2.5"
+            className="rounded-xl border border-line bg-surface-2 px-3 py-2.5"
           >
-            <dt className="text-xs text-slate-500 dark:text-slate-400 mb-0.5">
+            <dt className="text-xs text-fg-muted mb-0.5">
               {item.label}
             </dt>
 
-            <dd className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+            <dd className="text-sm font-semibold text-fg">
               {item.value}
             </dd>
           </div>

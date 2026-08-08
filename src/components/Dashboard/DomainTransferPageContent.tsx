@@ -87,7 +87,7 @@ function TimelineStep({
             state === "done"
               ? "border-emerald-500 bg-emerald-500 text-white"
               : state === "active"
-                ? "border-primary bg-primary/10 text-primary animate-pulse"
+                ? "border-brand bg-brand-soft text-brand motion-safe:animate-pulse"
                 : "border-slate-200 bg-slate-50 text-slate-400 dark:border-slate-700 dark:bg-slate-800"
           }`}
         >
