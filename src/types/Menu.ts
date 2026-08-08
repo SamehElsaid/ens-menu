@@ -55,6 +55,13 @@ export interface Menu {
   taxPercent?: number | null;
   serviceEnabled?: boolean;
   servicePercent?: number | null;
+  googleReviewsEnabled?: boolean;
+  googleReviewsUrl?: string | null;
+  googleReviewsPosition?: "top" | "bottom" | "after_order";
+  googleReviewsButtonTextAr?: string | null;
+  googleReviewsButtonTextEn?: string | null;
+  googleReviewsShowIcon?: boolean;
+  googleReviewsOpenInNewTab?: boolean;
   workingHours: WorkHours;
   createdAt: string;
   updatedAt: string;

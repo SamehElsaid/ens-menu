@@ -23,6 +23,7 @@ export default function ContactFab() {
   const isRtl = isRtlLocale(locale);
   const t = useTranslations("contactFab");
   const isAdminRoute = pathname.startsWith("/admin");
+  const isDashboardRoute = pathname.startsWith("/dashboard");
 
   /**
    * The trigger is loud by design inside the product, where it is the only way
@@ -58,7 +59,7 @@ export default function ContactFab() {
     };
   }, [open]);
 
-  if (!mounted || isAdminRoute) return null;
+  if (!mounted || isAdminRoute || isDashboardRoute) return null;
 
   const options = [
     {

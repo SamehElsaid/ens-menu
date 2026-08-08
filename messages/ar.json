@@ -3302,6 +3302,7 @@
     "settingsGeneral": "الإعدادات",
     "settingsDesign": "التصميم",
     "settingsMedia": "الوسائط",
+    "settingsGoogleReviews": "تقييمات جوجل",
     "settingsDelivery": "طلبات أونلاين",
     "Categories": "التصنيفات",
     "Items": "المنتجات",
@@ -5094,6 +5095,50 @@
     "savedSuccess": "تم حفظ إعدادات الميديا بنجاح.",
     "addressArPlaceholder": "العنوان بالعربية",
     "addressEnPlaceholder": "العنوان بالإنجليزية"
+  },
+  "settingsGoogleReviewsPage": {
+    "title": "تقييمات جوجل",
+    "badge": "تقييمات جوجل",
+    "description": "أضف رابط صفحة التقييم على Google وتحكم في ظهور زر التقييم في المنيو. الزبون يكتب التقييم على Google وليس داخل ENSmenu.",
+    "enabled": "إظهار زر التقييم في المنيو",
+    "enabledOn": "مفعّل",
+    "enabledOff": "متوقف",
+    "enabledOffWarning": "زر التقييم متوقف حاليًا. فعّله من الأعلى ليظهر في صفحة المنيو.",
+    "url": {
+      "title": "رابط التقييم على Google",
+      "label": "رابط صفحة التقييم",
+      "placeholder": "https://g.page/r/.../review أو رابط Google Maps",
+      "hint": "استخدم رابط Google Maps أو Google Reviews الخاص بنشاطك.",
+      "invalid": "يرجى إدخال رابط صالح من Google Maps أو Google Reviews.",
+      "required": "رابط التقييم مطلوب عند تفعيل الزر.",
+      "preview": "معاينة الرابط",
+      "test": "اختبار الرابط"
+    },
+    "position": {
+      "title": "مكان ظهور الزر",
+      "top": "أعلى المنيو",
+      "bottom": "أسفل المنيو",
+      "after_order": "بعد إتمام الطلب"
+    },
+    "buttonText": {
+      "title": "نص الزر",
+      "ar": "النص بالعربية",
+      "en": "النص بالإنجليزية",
+      "arPlaceholder": "قيّم تجربتك على Google",
+      "enPlaceholder": "Rate your experience on Google"
+    },
+    "showIcon": "إظهار أيقونة Google والنجوم",
+    "showIconOn": "ظاهر",
+    "showIconOff": "مخفي",
+    "openInNewTab": "فتح الرابط في صفحة جديدة",
+    "openInNewTabOn": "صفحة جديدة",
+    "openInNewTabOff": "نفس الصفحة",
+    "previewLabel": "معاينة مباشرة",
+    "buttons": {
+      "save": "حفظ التغييرات"
+    },
+    "noMenuSelected": "لم يتم تحديد منيو.",
+    "savedSuccess": "تم حفظ إعدادات تقييمات جوجل بنجاح."
   },
   "Unauthorized": {
     "title": "غير مسموح",

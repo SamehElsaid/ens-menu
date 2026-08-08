@@ -3399,6 +3399,7 @@
     "settingsGeneral": "General",
     "settingsDesign": "Design",
     "settingsMedia": "Media",
+    "settingsGoogleReviews": "Google Reviews",
     "settingsDelivery": "Online orders",
     "Categories": "Categories",
     "Items": "Items",
@@ -5191,6 +5192,50 @@
     "savedSuccess": "Media settings saved successfully.",
     "addressArPlaceholder": "Address in Arabic",
     "addressEnPlaceholder": "Address in English"
+  },
+  "settingsGoogleReviewsPage": {
+    "title": "Google Reviews",
+    "badge": "Google Reviews",
+    "description": "Add your Google review link and control how the review button appears on your public menu. Guests leave reviews on Google, not inside ENSmenu.",
+    "enabled": "Show review button on menu",
+    "enabledOn": "Enabled",
+    "enabledOff": "Disabled",
+    "enabledOffWarning": "The review button is turned off. Enable it above so it appears on your public menu.",
+    "url": {
+      "title": "Google review link",
+      "label": "Review page URL",
+      "placeholder": "https://g.page/r/.../review or Google Maps link",
+      "hint": "Use a Google Maps or Google Reviews link for your business.",
+      "invalid": "Please enter a valid Google Maps or Google Reviews link.",
+      "required": "A review link is required when the button is enabled.",
+      "preview": "Preview link",
+      "test": "Test link"
+    },
+    "position": {
+      "title": "Button position",
+      "top": "Top of menu",
+      "bottom": "Bottom of menu",
+      "after_order": "After order"
+    },
+    "buttonText": {
+      "title": "Button text",
+      "ar": "Arabic text",
+      "en": "English text",
+      "arPlaceholder": "قيّم تجربتك على Google",
+      "enPlaceholder": "Rate your experience on Google"
+    },
+    "showIcon": "Show Google icon and stars",
+    "showIconOn": "Visible",
+    "showIconOff": "Hidden",
+    "openInNewTab": "Open link in a new tab",
+    "openInNewTabOn": "New tab",
+    "openInNewTabOff": "Same tab",
+    "previewLabel": "Live preview",
+    "buttons": {
+      "save": "Save changes"
+    },
+    "noMenuSelected": "No menu selected.",
+    "savedSuccess": "Google Reviews settings saved successfully."
   },
   "Unauthorized": {
     "title": "Access denied",
