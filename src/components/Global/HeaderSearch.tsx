@@ -29,16 +29,10 @@ interface SearchResponse {
 }
 
 /**
- * Knowledge-base search from the header.
+ * Knowledge-base search from the public header.
  *
- * The overlay is now the `Modal` primitive rather than a hand-rolled portal.
- * DESIGN.md §12 gives dialogs to `Modal` and `Sheet` alone because they own
- * focus trapping, scroll locking, Escape and focus restoration — this one had
- * the scroll lock and Escape but no trap and no focus return, so tabbing left
- * the open palette and landed behind the backdrop.
- *
- * Results are a ruled list, not a set of rows each restating the search icon:
- * the row's job is to show the article title and where it goes.
+ * Trigger styling matches the site header icon buttons; the overlay stays on
+ * the shared `Modal` primitive for focus trap, Escape, and scroll lock.
  */
 export default function HeaderSearch() {
   const locale = useLocale();
@@ -113,15 +107,18 @@ export default function HeaderSearch() {
 
   return (
     <>
-      <Button
-        variant="ghost"
-        size="sm"
-        iconOnly
+      <button
+        type="button"
         onClick={() => setIsOpen(true)}
         aria-label={t("label")}
+        className={
+          "flex size-10 items-center justify-center rounded-site-control text-site-fg " +
+          "transition-colors duration-(--dur-settle) hover:bg-site-tint hover:text-site-ink " +
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-site-brand/35"
+        }
       >
-        <IoSearchOutline className="size-4" aria-hidden />
-      </Button>
+        <IoSearchOutline className="size-[18px]" aria-hidden />
+      </button>
 
       <Modal
         open={isOpen}

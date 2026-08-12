@@ -29,76 +29,82 @@ export function Hero({ locale }: { locale: string }) {
     >
       <div aria-hidden className="s-aurora" />
       <PrismSlot locale={locale} />
+      {/* Cinematic light streak — GSAP owns opacity/travel on capable devices. */}
+      <div aria-hidden data-home="streak" className="s-home-streak" />
 
       <Container className="pt-[calc(var(--s-header-h)+2.5rem)] pb-0 lg:pt-[calc(var(--s-header-h)+4.5rem)]">
         <Grid className="items-center gap-y-14">
           <Col span={7}>
-            <div data-home="eyebrow" className="s-enter-soft w-fit">
-              <Pill>{t("eyebrow")}</Pill>
-            </div>
+            <div data-home="copy">
+              <div data-home="eyebrow" className="s-enter-soft w-fit">
+                <Pill>{t("eyebrow")}</Pill>
+              </div>
 
-            {/* Title starts invisible under HomeMotion; without JS the CSS
-                fallback keeps it painted for LCP (see public.css). */}
-            <h1
-              data-home="title"
-              className="s-home-title mt-6 text-site-display"
-            >
-              {t("titleLead")}{" "}
-              <span
-                data-home="title-accent"
-                className="s-grad-text whitespace-nowrap"
+              <h1
+                data-home="title"
+                className="s-home-title mt-6 text-site-display"
               >
-                {t("titleAccent")}
-              </span>
-            </h1>
+                {t("titleLead")}{" "}
+                <span
+                  data-home="title-accent"
+                  className="s-grad-text whitespace-nowrap"
+                >
+                  {t("titleAccent")}
+                </span>
+              </h1>
 
-            <p
-              data-home="lead"
-              className="s-enter s-enter-d1 mt-7 max-w-xl text-site-lead text-site-fg"
-            >
-              {t("lead")}
-            </p>
+              <p
+                data-home="lead"
+                className="s-enter s-enter-d1 mt-7 max-w-xl text-site-lead text-site-fg"
+              >
+                {t("lead")}
+              </p>
 
-            <div
-              data-home="ctas"
-              className="s-enter s-enter-d1 mt-9 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center"
-            >
-              <Magnetic>
-                <SiteButtonLink href="/auth/register" size="lg">
-                  {t("primaryCta")}
-                  <Arrow className="s-cta-arrow size-4" aria-hidden />
+              <div
+                data-home="ctas"
+                className="s-enter s-enter-d1 mt-9 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center"
+              >
+                <Magnetic>
+                  <SiteButtonLink href="/auth/register" size="lg">
+                    {t("primaryCta")}
+                    <Arrow className="s-cta-arrow size-4" aria-hidden />
+                  </SiteButtonLink>
+                </Magnetic>
+                <SiteButtonLink
+                  href="/#how-it-works"
+                  variant="secondary"
+                  size="lg"
+                  prefetch={false}
+                >
+                  {t("secondaryCta")}
                 </SiteButtonLink>
-              </Magnetic>
-              <SiteButtonLink
-                href="/#how-it-works"
-                variant="secondary"
-                size="lg"
-                prefetch={false}
-              >
-                {t("secondaryCta")}
-              </SiteButtonLink>
+              </div>
             </div>
           </Col>
 
           <Col span={5}>
             <div
               data-home="proof"
-              className="s-enter-still s-enter-d2 relative mx-auto w-full max-w-[19rem] sm:w-[30rem] sm:max-w-none lg:w-full"
+              className="s-enter-still s-enter-d2 relative mx-auto w-full max-w-76 sm:w-120 sm:max-w-none lg:w-full"
+              style={{ perspective: "1200px" }}
             >
               <div
                 data-home="paper"
-                className="absolute start-0 top-1/2 hidden w-[12.5rem] -translate-y-1/2 sm:block lg:w-[10.5rem]"
+                className="absolute start-0 top-1/2 hidden w-50 -translate-y-1/2 backface-hidden sm:block lg:w-42"
               >
-                <figure className="overflow-hidden rounded-site-card border border-site-line bg-site-bg shadow-site">
+                <figure className="overflow-hidden rounded-site-card border border-site-line bg-[#f3ebe0] shadow-site">
                   <Image
                     src="/images/demo/paper-menu.jpg"
                     alt={t("paperAlt")}
                     width={520}
                     height={720}
                     sizes="12.5rem"
-                    className="aspect-3/4 w-full object-cover"
+                    /* Keep the parchment menu in frame — the photo is mostly
+                       dark wood around a centred sheet, and default cover crops
+                       into the table and reads as a black card. */
+                    className="aspect-3/4 w-full object-cover object-[50%_35%]"
                   />
-                  <figcaption className="s-ticket border-t border-site-line px-3 py-2 text-site-muted">
+                  <figcaption className="s-ticket border-t border-site-line bg-site-bg/95 px-3 py-2 text-site-muted">
                     {t("beforeLabel")}
                   </figcaption>
                 </figure>
@@ -123,14 +129,29 @@ export function Hero({ locale }: { locale: string }) {
                 >
                   <span
                     aria-hidden
-                    className="size-1.5 rounded-full bg-site-brand"
+                    data-home="pulse"
+                    className="s-home-pulse size-1.5 rounded-full bg-site-brand"
                   />
                   {t("afterLabel")}
                 </span>
-                <PhoneMenu
-                  priority
-                  className="w-[17.5rem] sm:w-[19rem] lg:w-[17.5rem]"
-                />
+                <div
+                  data-home="phone-shell"
+                  className="s-home-phone-shell relative"
+                >
+                  <span
+                    aria-hidden
+                    data-home="phone-glow"
+                    className="s-home-phone-glow"
+                  />
+                  {/* The slot is the measurement the travelling phone flies to.
+                      Its box is always reserved, so the swap costs no layout. */}
+                  <div
+                    data-story="hero-slot"
+                    className="relative z-10 w-70 sm:w-76 lg:w-70"
+                  >
+                    <PhoneMenu priority className="w-full" />
+                  </div>
+                </div>
               </div>
             </div>
           </Col>

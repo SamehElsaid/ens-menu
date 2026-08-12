@@ -7,10 +7,11 @@ import { fetchHomepageFeaturedLogosServer } from "@/lib/homepageFeaturedLogos";
 import Hero from "@/components/site/home/Hero";
 import LogoStrip from "@/components/site/home/LogoStrip";
 import HomeMotion from "@/components/site/home/HomeMotion";
+import HomeStory from "@/components/site/home/story/HomeStory";
+import StoryPhone from "@/components/site/home/story/StoryPhone";
 import {
   Features,
   HomeFaq,
-  HowItWorks,
   Plans,
   Showcase,
 } from "@/components/site/home/Sections";
@@ -79,9 +80,14 @@ async function Page({ params }: Props) {
       <HashScroll />
       <HomeMotion />
       <JsonLd data={buildWebApplicationJsonLd()} />
+      {/* One continuous story: the promise (hero), how it is made true (the
+          travelling phone), then the venues it is already running for. The logo
+          strip follows the story rather than interrupting it — the phone has to
+          travel through an uninterrupted span for the composition to hold. */}
       <Hero locale={locale} />
+      <HomeStory />
+      <StoryPhone />
       <LogoStrip initialLogos={featuredLogos} />
-      <HowItWorks />
       <Features />
       <Showcase />
       <Plans />

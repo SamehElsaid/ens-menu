@@ -130,7 +130,11 @@
     --s-max: 1240px;
     --s-max-prose: 68ch;
     --s-gap: clamp(1rem, 1.8vw, 1.75rem);
-    --s-header-h: 4.5rem;
+    /* Floating inset bar: top inset + bar + breathing room under the pill.
+       Sticky/offset call sites keep using `--s-header-h` as the clearance. */
+    --s-header-inset: 0.625rem;
+    --s-header-bar: 3.5rem;
+    --s-header-h: calc(var(--s-header-inset) + var(--s-header-bar) + 0.375rem);
 
     color-scheme: light;
     background-color: var(--s-ground);
@@ -1899,6 +1903,45 @@
 }
 
 /* --------------------------------------------------------------------------
+   Public floating header (DESIGN.md §8 / REDESIGN-PLAN Phase 4)
+   -------------------------------------------------------------------------- */
+
+.public-world .s-site-nav {
+  border: 1px solid color-mix(in oklab, var(--s-line) 88%, transparent);
+  border-radius: var(--s-r-xl);
+  background: color-mix(in oklab, var(--s-bg) 78%, transparent);
+  box-shadow: var(--s-shadow-sm);
+  backdrop-filter: blur(18px) saturate(1.35);
+  -webkit-backdrop-filter: blur(18px) saturate(1.35);
+  transition:
+    background-color var(--dur-settle) var(--ease-settle),
+    border-color var(--dur-settle) var(--ease-settle),
+    box-shadow var(--dur-settle) var(--ease-settle);
+}
+
+.public-world .s-site-nav[data-elevated="true"] {
+  border-color: color-mix(in oklab, var(--s-line-strong) 70%, transparent);
+  background: color-mix(in oklab, var(--s-bg) 92%, transparent);
+  box-shadow: var(--s-shadow);
+}
+
+.public-world .s-site-mobile-sheet {
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--s-line) 90%, transparent);
+  border-radius: var(--s-r-xl);
+  background: color-mix(in oklab, var(--s-ground) 96%, transparent);
+  box-shadow: var(--s-shadow-lg);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-world .s-site-nav {
+    transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
    Presence exits without Motion (M3 / M4).
 
    The SiteHeader mega-panel and mobile drawer used to enter with a keyframe and
@@ -2030,6 +2073,64 @@
   padding-block-end: 0.08em;
 }
 
+/**
+ * Diagonal light streak behind the hero composition.
+ * Painted softly; GSAP drives travel + opacity.
+ */
+.s-home-streak {
+  position: absolute;
+  inset: 8% -15% auto;
+  height: 42%;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    color-mix(in oklab, var(--s-brand) 18%, transparent) 45%,
+    color-mix(in oklab, var(--brand-magenta, #bb0bb5) 12%, transparent) 58%,
+    transparent 78%
+  );
+  filter: blur(18px);
+  transform-origin: center;
+}
+
+.dark .s-home-streak {
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    color-mix(in oklab, var(--s-brand) 28%, transparent) 45%,
+    color-mix(in oklab, var(--brand-magenta, #bb0bb5) 18%, transparent) 58%,
+    transparent 78%
+  );
+}
+
+/** Soft brand bloom under the phone — sells the glass→product handoff. */
+.s-home-phone-shell {
+  transform-style: preserve-3d;
+}
+
+.s-home-phone-glow {
+  position: absolute;
+  inset: 8% -12% -6%;
+  z-index: 0;
+  border-radius: 40%;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    55% 50% at 50% 55%,
+    color-mix(in oklab, var(--s-brand) 42%, transparent) 0%,
+    color-mix(in oklab, var(--brand-magenta, #bb0bb5) 18%, transparent) 42%,
+    transparent 72%
+  );
+  filter: blur(22px);
+}
+
+.s-home-pulse {
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
 /** Active how-it-works medallion while the step is in the reading band. */
 .s-step-live {
   box-shadow:
@@ -2052,8 +2153,10 @@
 
 @media (hover: hover) and (pointer: fine) {
   .s-depth-card:hover {
-    transform: translateY(-3px) rotateX(1.5deg);
-    box-shadow: var(--shadow-site-lg, 0 22px 48px -28px rgb(15 23 42 / 0.28));
+    transform: translateY(-4px);
+    box-shadow:
+      0 18px 40px -24px color-mix(in oklab, var(--s-brand) 28%, transparent),
+      var(--shadow-site-lg, 0 22px 48px -28px rgb(15 23 42 / 0.28));
   }
 }
 
@@ -2062,6 +2165,156 @@
   .s-depth-card:hover {
     transform: none;
     transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   The travelling phone (`StoryPhone`) and the story chapters
+   -------------------------------------------------------------------------- */
+
+/**
+ * The one device that travels the page.
+ *
+ * The layer itself is styled entirely by utilities in `StoryPhone` — fixed,
+ * pointer-events-none, below the header — and deliberately carries no
+ * `will-change`: the phone is written with `force3D`, which promotes it for
+ * exactly as long as it is being animated, and a standing promotion on a
+ * viewport-sized layer is a cost paid by every visitor who never scrolls.
+ * What is left for the stylesheet is the light, the lane, and the gates below.
+ */
+
+/** The residue of the hero's real light, now carried by the phone. */
+.s-story-glow {
+  inset: 6% -16% -8%;
+  opacity: 0.5;
+}
+
+/** The empty column the phone flies into: a plate of light, not content. */
+.s-story-lane::before {
+  content: "";
+  position: absolute;
+  inset: 10% -8%;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    58% 46% at 50% 50%,
+    color-mix(in oklab, var(--s-brand) 12%, transparent) 0%,
+    transparent 72%
+  );
+  transition: opacity var(--dur-story) var(--ease-settle);
+}
+
+html[data-story="travel"] .public-world .s-story-lane::before {
+  opacity: 1;
+}
+
+/** The AI read, sweeping the photographed page. */
+.s-story-scanline {
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    color-mix(in oklab, var(--s-brand) 45%, transparent) 45%,
+    color-mix(in oklab, var(--s-brand-bright, #bb0bb5) 30%, transparent) 60%,
+    transparent 100%
+  );
+}
+
+/**
+ * Once the travelling phone is live it *is* the hero's phone: the static one
+ * keeps its box (so nothing reflows) and gives up its pixels and its bloom.
+ */
+html[data-story="travel"] .public-world #hero [data-story="hero-slot"] > * {
+  visibility: hidden;
+}
+
+html[data-story="travel"] .public-world #hero [data-home="phone-glow"] {
+  opacity: 0 !important;
+}
+
+/**
+ * The chapter medallion lights while its chapter is being told. Transitioning
+ * colour and shadow only keeps this clear of the entrance tween, which owns the
+ * mark's transform and opacity.
+ */
+.public-world [data-story="chapter-mark"] {
+  transition:
+    box-shadow var(--dur-settle) var(--ease-settle),
+    background-color var(--dur-settle) var(--ease-settle),
+    border-color var(--dur-settle) var(--ease-settle);
+}
+
+/* Desktop: the chapter being told is the one that is lit. */
+@media (min-width: 1024px) {
+  html[data-story="travel"] .public-world [data-story="chapter"] {
+    transition: opacity var(--dur-reveal) var(--ease-settle);
+  }
+
+  html[data-story="travel"]
+    .public-world
+    [data-story="chapter"]:not(.is-live) {
+    opacity: 0.42;
+  }
+}
+
+/**
+ * Mobile is a different composition, not a squeezed desktop one: the phone
+ * holds the upper band and every chapter's words are padded to read below it.
+ * Copy therefore rises into clear space and only ever passes behind the device
+ * on its way out — the one arrangement in which a fixed visual can never cover
+ * something that has not been read yet.
+ */
+@media (max-width: 1023px) {
+  html[data-story] .public-world [data-story="chapter"] {
+    min-height: 94svh;
+    justify-content: flex-start;
+    padding-top: 56svh;
+    padding-bottom: 2.5rem;
+  }
+
+  html[data-story] .public-world [data-story="coda"] {
+    padding-top: 56svh;
+  }
+}
+
+/* No phone, no lane: the chapters read as a plain numbered argument. */
+@media (prefers-reduced-motion: reduce) {
+  .public-world [data-story="lane"] {
+    display: none;
+  }
+}
+
+/**
+ * FAQ rows: the light runs down the list instead of the rows fading in.
+ * `--s-row-draw` is written by `HomeMotion`; unset, there is simply no line.
+ */
+.public-world [data-home="faq-panel"] details {
+  position: relative;
+}
+
+.public-world [data-home="faq-panel"] details::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 2px;
+  pointer-events: none;
+  border-radius: 2px;
+  background: var(--s-grad-vivid);
+  opacity: 0.65;
+  transform: scaleY(var(--s-row-draw, 0));
+  transform-origin: top center;
+}
+
+/**
+ * Cards the director animates keep their hover shadow but give up their hover
+ * transform: an inline transform from GSAP would defeat the rule anyway, and
+ * leaving `transform` in the transition list smooths every scrub write a second
+ * time, which is what makes a pointer tilt feel like it is dragging.
+ */
+@media (hover: hover) and (pointer: fine) {
+  html[data-home-motion="desktop"] .public-world [data-home="card"] {
+    transition-property: box-shadow, border-color;
   }
 }
 
@@ -2081,22 +2334,21 @@ html[data-home-motion] .public-world [data-home-section] .s-reveal-line-block {
   animation: none !important;
 }
 
-html[data-home-motion="desktop"] .public-world #hero [data-home="eyebrow"],
-html[data-home-motion="desktop"] .public-world #hero [data-home="lead"],
-html[data-home-motion="desktop"] .public-world #hero [data-home="ctas"],
-html[data-home-motion="desktop"] .public-world #hero [data-home="after-label"],
-html[data-home-motion="desktop"] .public-world #hero [data-home="assurance"],
-html[data-home-motion="desktop"] .public-world #hero [data-home="dish-row"],
-html[data-home-motion="mobile"] .public-world #hero [data-home="eyebrow"],
-html[data-home-motion="mobile"] .public-world #hero [data-home="lead"],
-html[data-home-motion="mobile"] .public-world #hero [data-home="ctas"],
-html[data-home-motion="mobile"] .public-world #hero [data-home="after-label"],
-html[data-home-motion="mobile"] .public-world #hero [data-home="assurance"],
-html[data-home-motion="mobile"] .public-world #hero [data-home="dish-row"] {
+html[data-home-motion] .public-world #hero [data-home="eyebrow"],
+html[data-home-motion] .public-world #hero [data-home="lead"],
+html[data-home-motion] .public-world #hero [data-home="ctas"],
+html[data-home-motion] .public-world #hero [data-home="after-label"],
+html[data-home-motion] .public-world #hero [data-home="assurance"],
+html[data-home-motion]
+  .public-world
+  #hero
+  [data-story="hero-slot"]
+  [data-part="row"] {
   opacity: 0;
 }
 
-/* Paper is desktop-only in the entrance; leave mobile CSS alone for it. */
+/* Paper + badge are only choreographed on the desktop pin path — on mobile the
+   layout hides them, so they must not be left at opacity 0 there. */
 html[data-home-motion="desktop"] .public-world #hero [data-home="paper"],
 html[data-home-motion="desktop"] .public-world #hero [data-home="badge"] {
   opacity: 0;

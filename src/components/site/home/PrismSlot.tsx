@@ -83,8 +83,8 @@ export function PrismSlot({ locale }: { locale: string }) {
   /**
    * Tier down once, never back up.
    *
-   * A → B swaps the transmission pass out for a cheaper material rather than
-   * degrading its quality. Anything below that goes to the static path and
+   * A → B steps the environment and the light motes down rather than degrading
+   * the pane itself. Anything below that goes to the static path and
    * records the decision for the session, so a device that has already proved
    * itself slow is not asked to prove it again on the next pageview.
    */

@@ -6,16 +6,62 @@ import { useReducedMotion } from "@/motion/useReducedMotion";
 /**
  * Home page motion director.
  *
- * One coordinated GSAP system for the marketing home — cinematic entrance,
- * pinned paper→phone scroll story, and section continuity. CSS view-timeline
- * reveals remain as progressive enhancement; when this mounts on a capable
- * desktop they are overridden so the choreography owns the clock.
+ * One clock per moment, one vocabulary for the whole page. The thesis is the
+ * design language's own (`DESIGN.md` §1, `MOTION-BLUEPRINT.md` §2): *light
+ * moves, glass does not*. So nothing here flies in from the side — content
+ * arrives by being lit, the light travels down the page, and the one object
+ * that genuinely travels is the phone (owned by `StoryPhone`, not this file).
  *
- * Mobile gets a dedicated lighter path (no pin, shorter entrance, depth cards
- * only). Reduced motion: this component no-ops entirely.
+ * What lives here:
+ *   1. the hero entrance, in three waves of decreasing weight;
+ *   2. the hero exit — an unpinned scrub that hands the paper menu, the light
+ *      and the composition over to the story section;
+ *   3. one reveal grammar per section, deliberately different per section so
+ *      the page never reads as the same fade repeated seven times.
+ *
+ * What is deliberately absent: `pin`. Pinning the hero was the previous
+ * implementation's largest structural risk (a spacer, shifted measurements for
+ * every later trigger, and a fight with hash navigation) and the travelling
+ * phone gets a better result without it.
+ *
+ * Reduced motion: this component no-ops, and the CSS progressive path
+ * (`s-enter*`, `s-reveal*`) is what runs instead.
  */
 
 const DESKTOP_MQ = "(min-width: 1024px) and (hover: hover) and (pointer: fine)";
+
+/** The motion language. Every duration, ease and stagger on this page comes
+ *  from here, which is what makes seven sections feel like one composition. */
+const M = {
+  ease: {
+    /** Content arriving. */
+    enter: "power3.out",
+    /** The heaviest arrivals — display type, the hero. */
+    arrive: "power4.out",
+    /** Small settles. */
+    settle: "power2.out",
+    /** Anything leaving. */
+    exit: "power2.in",
+    /** Badges and marks only, never type. */
+    pop: "back.out(1.7)",
+  },
+  dur: {
+    mark: 0.42,
+    settle: 0.5,
+    reveal: 0.62,
+    story: 0.9,
+    display: 1.05,
+  },
+  stagger: {
+    tight: 0.03,
+    standard: 0.06,
+    editorial: 0.09,
+  },
+  /** Reveal distance. Block axis only, so RTL needs no mirrored rule. */
+  rise: { desktop: 34, mobile: 18 },
+  /** Scrub smoothing — the page's single "scroll feel" constant. */
+  scrub: { desktop: 0.55, mobile: 0.3 },
+} as const;
 
 function q<T extends Element>(root: ParentNode, sel: string) {
   return root.querySelector(sel) as T | null;
@@ -23,6 +69,13 @@ function q<T extends Element>(root: ParentNode, sel: string) {
 
 function qa<T extends Element>(root: ParentNode, sel: string) {
   return Array.from(root.querySelectorAll(sel)) as T[];
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 export default function HomeMotion() {
@@ -33,13 +86,18 @@ export default function HomeMotion() {
     if (typeof window === "undefined") return;
 
     const desktop = window.matchMedia(DESKTOP_MQ).matches;
-    /* Set early so CSS can kill competing s-enter / s-reveal before GSAP loads. */
+    const rtl = document.dir === "rtl";
+    const sign = rtl ? -1 : 1;
+    const rise = desktop ? M.rise.desktop : M.rise.mobile;
+    const scrub = desktop ? M.scrub.desktop : M.scrub.mobile;
+
     document.documentElement.dataset.homeMotion = desktop
       ? "desktop"
       : "mobile";
 
     let killed = false;
     let ctx: { revert: () => void } | null = null;
+    const cleanups: Array<() => void> = [];
 
     void Promise.all([
       import("gsap"),
@@ -48,528 +106,891 @@ export default function HomeMotion() {
       if (killed) return;
       gsap.registerPlugin(ScrollTrigger);
 
+      /**
+       * Word-level split for display headings.
+       *
+       * Words, never characters: splitting characters breaks Arabic shaping,
+       * and even at word level this only runs on desktop and only on headings
+       * that are a single text node — a heading carrying markup is left alone.
+       * The original HTML is restored on teardown.
+       */
+      const splitWords = (el: HTMLElement | null) => {
+        if (!el || !desktop) return null;
+        if (el.children.length > 0) return null;
+        const text = el.textContent ?? "";
+        const words = text.trim().split(/\s+/);
+        if (words.length < 2 || words.length > 24) return null;
+
+        const original = el.innerHTML;
+        el.innerHTML = words
+          .map(
+            (word) =>
+              `<span data-word style="display:inline-block">${escapeHtml(word)}</span>`,
+          )
+          .join(" ");
+        cleanups.push(() => {
+          el.innerHTML = original;
+        });
+        return qa<HTMLElement>(el, "[data-word]");
+      };
+
       ctx = gsap.context(() => {
+        /* ================================================================== */
+        /* 1. Hero — the opening                                              */
+        /* ================================================================== */
+
         const hero = q<HTMLElement>(document, "#hero");
         if (!hero) return;
 
-        /* ------------------------------------------------------------------ */
-        /* 1. Cinematic entrance                                              */
-        /* ------------------------------------------------------------------ */
+        const copy = q(hero, "[data-home='copy']");
         const eyebrow = q(hero, "[data-home='eyebrow']");
-        const title = q(hero, "[data-home='title']");
+        const title = q<HTMLElement>(hero, "[data-home='title']");
         const titleAccent = q(hero, "[data-home='title-accent']");
         const lead = q(hero, "[data-home='lead']");
-        const ctas = q(hero, "[data-home='ctas']");
+        const ctas = q<HTMLElement>(hero, "[data-home='ctas']");
         const paper = q(hero, "[data-home='paper']");
         const phone = q(hero, "[data-home='phone']");
+        const phoneGlow = q(hero, "[data-home='phone-glow']");
         const badge = q(hero, "[data-home='badge']");
         const afterLabel = q(hero, "[data-home='after-label']");
+        const pulse = q(hero, "[data-home='pulse']");
+        const streak = q(hero, "[data-home='streak']");
+        const proof = q<HTMLElement>(hero, "[data-home='proof']");
         const assurances = qa(hero, "[data-home='assurance']");
-        const dishRows = qa(hero, "[data-home='dish-row']");
+        const heroRows = qa(hero, "[data-story='hero-slot'] [data-part='row']");
         const aurora = q<HTMLElement>(hero, ".s-aurora");
         const seam = q(hero, ".s-home-seam");
 
+        /* Three waves. Primary carries the argument, secondary the action,
+           tertiary the proof — nothing arrives at the same time as its own
+           heading, and nothing decorative arrives before something readable. */
         const enter = gsap.timeline({
-          defaults: { ease: "power3.out" },
-          /* Sit behind the Prism glass arrival so type never leads the light. */
-          delay: desktop ? 0.22 : 0.12,
+          defaults: { ease: M.ease.enter },
+          delay: desktop ? 0.18 : 0.08,
         });
 
-        /* Aurora is owned by PrismStage during the WebGL handoff. HomeMotion
-           only settles it during the pin scrub below. */
+        if (streak) {
+          gsap.set(streak, { autoAlpha: 0, xPercent: -40 * sign, scaleX: 0.4 });
+          enter
+            .to(
+              streak,
+              {
+                autoAlpha: 0.85,
+                xPercent: 0,
+                scaleX: 1,
+                duration: 1.15,
+                ease: M.ease.settle,
+              },
+              0,
+            )
+            .to(streak, { autoAlpha: 0.32, duration: 0.8 }, 0.95);
+        }
 
         if (eyebrow) {
           gsap.set(eyebrow, { autoAlpha: 0, y: 14 });
-          enter.to(eyebrow, { autoAlpha: 1, y: 0, duration: 0.55 }, 0.15);
+          enter.to(eyebrow, { autoAlpha: 1, y: 0, duration: 0.55 }, 0.16);
         }
 
+        /* The headline is the page's one masked reveal. `.s-home-title` owns
+           the clip box, so the mask cannot eat Arabic marks. */
         if (title) {
-          /* Clip reveal — opacity stays 1 for LCP; motion is the mask. */
-          gsap.set(title, {
-            clipPath: "inset(0 0 100% 0)",
-            y: 22,
-          });
+          gsap.set(title, { clipPath: "inset(0 0 100% 0)", y: 26 });
           enter.to(
             title,
             {
               clipPath: "inset(0 0 0% 0)",
               y: 0,
-              duration: 1.05,
-              ease: "power4.out",
+              duration: M.dur.display,
+              ease: M.ease.arrive,
             },
             0.28,
           );
         }
 
+        /* The gradient word fills once, on arrival, and then never repaints. */
         if (titleAccent) {
           gsap.set(titleAccent, {
             backgroundSize: "0% 100%",
-            backgroundPosition: document.dir === "rtl" ? "100% 0" : "0% 0",
+            backgroundPosition: rtl ? "100% 0" : "0% 0",
           });
           enter.to(
             titleAccent,
-            {
-              backgroundSize: "100% 100%",
-              duration: 0.95,
-              ease: "power2.out",
-            },
-            0.55,
+            { backgroundSize: "100% 100%", duration: 1, ease: M.ease.settle },
+            0.56,
           );
         }
 
         if (lead) {
           gsap.set(lead, { autoAlpha: 0, y: 18 });
-          enter.to(lead, { autoAlpha: 1, y: 0, duration: 0.65 }, 0.48);
+          enter.to(lead, { autoAlpha: 1, y: 0, duration: 0.65 }, 0.5);
         }
 
         if (ctas) {
-          gsap.set(ctas, { autoAlpha: 0, y: 16 });
-          enter.to(ctas, { autoAlpha: 1, y: 0, duration: 0.6 }, 0.62);
+          const kids = Array.from(ctas.children);
+          const targets = kids.length ? kids : [ctas];
+          gsap.set(targets, { autoAlpha: 0, y: 16 });
+          enter.to(
+            targets,
+            {
+              autoAlpha: 1,
+              y: 0,
+              duration: M.dur.settle,
+              stagger: M.stagger.standard,
+            },
+            0.66,
+          );
         }
 
         if (afterLabel) {
-          gsap.set(afterLabel, { autoAlpha: 0, y: 10 });
-          enter.to(afterLabel, { autoAlpha: 1, y: 0, duration: 0.45 }, 0.55);
+          gsap.set(afterLabel, { autoAlpha: 0, y: 12 });
+          enter.to(afterLabel, { autoAlpha: 1, y: 0, duration: 0.42 }, 0.6);
         }
 
         if (phone) {
           gsap.set(phone, {
             autoAlpha: 1,
-            y: desktop ? 48 : 28,
-            rotateY: desktop ? (document.dir === "rtl" ? -8 : 8) : 0,
-            transformPerspective: 900,
+            y: desktop ? 52 : 30,
+            rotateY: desktop ? -10 * sign : 0,
+            rotateX: desktop ? 5 : 0,
+            transformPerspective: 1100,
           });
           enter.to(
             phone,
             {
               y: 0,
               rotateY: 0,
-              duration: 1.05,
-              ease: "power3.out",
+              rotateX: 0,
+              duration: 1.15,
+              ease: M.ease.enter,
             },
-            0.4,
+            0.36,
+          );
+        }
+
+        if (phoneGlow) {
+          gsap.set(phoneGlow, { autoAlpha: 0, scale: 0.7 });
+          enter.to(
+            phoneGlow,
+            { autoAlpha: 0.62, scale: 1, duration: 0.9, ease: M.ease.settle },
+            0.72,
           );
         }
 
         if (paper && desktop) {
-          gsap.set(paper, {
-            autoAlpha: 0,
-            x: document.dir === "rtl" ? 36 : -36,
-            rotate: document.dir === "rtl" ? 4 : -4,
-            scale: 0.94,
-          });
+          gsap.set(paper, { autoAlpha: 0, y: 22, scale: 0.94 });
           enter.to(
             paper,
-            {
-              autoAlpha: 1,
-              x: 0,
-              rotate: 0,
-              scale: 1,
-              duration: 0.95,
-              ease: "power3.out",
-            },
-            0.55,
+            { autoAlpha: 1, y: 0, scale: 1, duration: 1, ease: M.ease.enter },
+            0.54,
           );
         }
 
         if (badge && desktop) {
-          gsap.set(badge, { autoAlpha: 0, scale: 0.55 });
+          gsap.set(badge, { autoAlpha: 0, scale: 0.4, rotate: -16 });
           enter.to(
             badge,
-            { autoAlpha: 1, scale: 1, duration: 0.5, ease: "back.out(1.4)" },
-            0.85,
+            {
+              autoAlpha: 1,
+              scale: 1,
+              rotate: 0,
+              duration: M.dur.mark,
+              ease: M.ease.pop,
+            },
+            0.92,
           );
         }
 
-        if (dishRows.length) {
-          gsap.set(dishRows, { autoAlpha: 0, y: 10 });
+        if (heroRows.length) {
+          gsap.set(heroRows, { autoAlpha: 0, y: 14, scale: 0.97 });
           enter.to(
-            dishRows,
+            heroRows,
             {
               autoAlpha: 1,
               y: 0,
+              scale: 1,
+              stagger: M.stagger.standard,
               duration: 0.4,
-              stagger: 0.07,
-              ease: "power2.out",
+              ease: M.ease.settle,
             },
-            0.85,
+            0.88,
           );
         }
 
         if (assurances.length) {
-          gsap.set(assurances, { autoAlpha: 0, y: 16 });
+          gsap.set(assurances, { autoAlpha: 0, y: 20 });
           enter.to(
             assurances,
             {
               autoAlpha: 1,
               y: 0,
-              duration: 0.5,
-              stagger: 0.08,
-              ease: "power2.out",
+              duration: M.dur.settle,
+              stagger: M.stagger.editorial,
             },
-            1.05,
+            1.1,
           );
         }
 
-        /* ------------------------------------------------------------------ */
-        /* 2. Desktop pin — paper becomes phone                               */
-        /* ------------------------------------------------------------------ */
-        if (desktop && paper && phone) {
-          const pinTarget = q<HTMLElement>(hero, "[data-home='proof']");
-          const story = gsap.timeline({
-            scrollTrigger: {
-              trigger: hero,
-              start: "top top",
-              end: "+=130%",
-              pin: true,
-              pinSpacing: true,
-              scrub: 0.65,
-              anticipatePin: 1,
-              invalidateOnRefresh: true,
-            },
+        /* The live dot is the page's only permanent loop besides the marquee,
+           and it is 6px of one element. */
+        if (pulse) {
+          enter.add(() => {
+            gsap.to(pulse, {
+              scale: 1.55,
+              autoAlpha: 0.45,
+              duration: 1.35,
+              ease: "sine.inOut",
+              yoyo: true,
+              repeat: -1,
+            });
           });
-
-          story
-            .to(
-              paper,
-              {
-                autoAlpha: 0.2,
-                scale: 0.88,
-                y: -28,
-                filter: "saturate(0.35)",
-                duration: 1,
-                ease: "none",
-              },
-              0,
-            )
-            .to(
-              badge,
-              {
-                scale: 1.25,
-                autoAlpha: 0,
-                duration: 0.45,
-                ease: "none",
-              },
-              0.25,
-            )
-            .to(
-              phone,
-              {
-                y: -18,
-                scale: 1.06,
-                boxShadow:
-                  "0 32px 80px -20px color-mix(in oklab, var(--s-brand) 45%, transparent)",
-                duration: 1,
-                ease: "none",
-              },
-              0.15,
-            );
-
-          if (dishRows.length) {
-            story.fromTo(
-              dishRows,
-              { autoAlpha: 0.35, x: document.dir === "rtl" ? -8 : 8 },
-              {
-                autoAlpha: 1,
-                x: 0,
-                stagger: 0.12,
-                duration: 0.5,
-                ease: "none",
-              },
-              0.4,
-            );
-          }
-
-          if (pinTarget) {
-            /* Keep TypeScript happy — pin is the hero section itself. */
-            void pinTarget;
-          }
-
-          /* Aurora settles into the seam as the pin releases. */
-          if (aurora) {
-            story.to(
-              aurora,
-              { "--s-aurora-opacity": 0.4, duration: 0.6, ease: "none" },
-              0.7,
-            );
-          }
-
-          if (seam) {
-            story.fromTo(
-              seam,
-              { scaleX: 0.2, autoAlpha: 0.2 },
-              { scaleX: 1, autoAlpha: 1, duration: 0.5, ease: "none" },
-              0.75,
-            );
-          }
         }
 
-        /* ------------------------------------------------------------------ */
-        /* 3. Section continuity — depth enters, not fade-ins                 */
-        /* ------------------------------------------------------------------ */
-        const sections = qa<HTMLElement>(
-          document,
-          "[data-home-section]",
-        );
+        /* Paper drifts against the phone on pointer — two objects at two
+           depths, which is the only parallax this page allows itself besides
+           the phone's own. The phone is owned by `StoryPhone`.
+           The drift is written to the leaf *inside* the paper, never to the
+           paper itself: the exit scrub below owns `paper`'s x and y, and two
+           writers on one property is how a pointer move turns into a stutter
+           halfway down the hero. */
+        const paperLeaf = paper ? q<HTMLElement>(paper, "figure") : null;
+        if (desktop && proof && paperLeaf) {
+          const px = gsap.quickTo(paperLeaf, "x", {
+            duration: 0.7,
+            ease: M.ease.settle,
+          });
+          const py = gsap.quickTo(paperLeaf, "y", {
+            duration: 0.7,
+            ease: M.ease.settle,
+          });
+          const onMove = (event: PointerEvent) => {
+            const rect = proof.getBoundingClientRect();
+            const nx = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
+            const ny = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+            px(nx * -12 * sign);
+            py(ny * 7);
+          };
+          const onLeave = () => {
+            px(0);
+            py(0);
+          };
+          proof.addEventListener("pointermove", onMove, { passive: true });
+          proof.addEventListener("pointerleave", onLeave);
+          cleanups.push(() => {
+            proof.removeEventListener("pointermove", onMove);
+            proof.removeEventListener("pointerleave", onLeave);
+          });
+        }
+
+        /* ================================================================== */
+        /* 2. Hero exit — the handoff, unpinned                               */
+        /* ================================================================== */
+
+        /**
+         * The paper does not fade out; it goes *into* the phone. As the hero
+         * leaves, the photograph shrinks and travels toward the device, and the
+         * story's first chapter opens with that same photograph inside the
+         * import screen. That continuity is the whole reason the phone travels.
+         */
+        const exit = gsap.timeline({
+          defaults: { ease: "none" },
+          scrollTrigger: {
+            trigger: hero,
+            start: "top top",
+            end: "bottom top",
+            scrub,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        if (copy) {
+          exit.to(
+            copy,
+            { y: -30 * (desktop ? 1 : 0.5), autoAlpha: 0.45, duration: 1 },
+            0,
+          );
+        }
+
+        if (paper && desktop) {
+          exit.to(
+            paper,
+            {
+              scale: 0.42,
+              x: 120 * sign,
+              y: -30,
+              autoAlpha: 0,
+              duration: 0.62,
+            },
+            0.1,
+          );
+        }
+
+        if (badge && desktop) {
+          exit.to(
+            badge,
+            { scale: 1.5, autoAlpha: 0, duration: 0.3, ease: M.ease.exit },
+            0.12,
+          );
+        }
+
+        if (assurances.length) {
+          exit.to(
+            assurances,
+            { y: -18, autoAlpha: 0.3, duration: 0.7, stagger: 0.04 },
+            0.25,
+          );
+        }
+
+        /* The light leaves the glass and follows the phone: the WebGL pool
+           fades on its own scroll signal, the DOM glow takes over, and the seam
+           is what the light leaves behind. */
+        if (phoneGlow) {
+          exit.to(phoneGlow, { autoAlpha: 0.95, scale: 1.2, duration: 0.5 }, 0);
+        }
+
+        if (aurora) {
+          exit.to(
+            aurora,
+            { "--s-aurora-opacity": 0.28, duration: 0.7 },
+            0.2,
+          );
+        }
+
+        if (streak) {
+          exit.to(streak, { autoAlpha: 0.08, y: 46, duration: 0.6 }, 0.3);
+        }
+
+        if (seam) {
+          exit.fromTo(
+            seam,
+            { scaleX: 0.12, autoAlpha: 0.1 },
+            { scaleX: 1, autoAlpha: 1, duration: 0.45 },
+            0.5,
+          );
+        }
+
+        /* ================================================================== */
+        /* 3. Section grammar                                                 */
+        /* ================================================================== */
+
+        /** Every section heading: ticket, then words, then lead. */
+        const headingIn = (section: HTMLElement) => {
+          const heading = q<HTMLElement>(section, "[data-home='section-heading']");
+          if (!heading) return;
+          const ticket = q(heading, ".s-ticket");
+          const h = q<HTMLElement>(heading, "h2, h3");
+          const p = q(heading, "p");
+          const words = splitWords(h);
+
+          const tl = gsap.timeline({
+            defaults: { ease: M.ease.enter },
+            scrollTrigger: { trigger: heading, start: "top 82%", once: true },
+          });
+
+          if (ticket) {
+            tl.from(ticket, { autoAlpha: 0, y: 12, duration: 0.4 }, 0);
+          }
+          if (words?.length) {
+            tl.from(
+              words,
+              {
+                autoAlpha: 0,
+                y: 26,
+                duration: 0.75,
+                ease: M.ease.arrive,
+                stagger: { each: M.stagger.tight, from: "start" },
+              },
+              0.06,
+            );
+          } else if (h) {
+            tl.from(
+              h,
+              {
+                autoAlpha: 0,
+                y: rise,
+                duration: M.dur.story,
+                ease: M.ease.arrive,
+              },
+              0.06,
+            );
+          }
+          if (p) {
+            tl.from(p, { autoAlpha: 0, y: 16, duration: M.dur.reveal }, 0.2);
+          }
+        };
+
+        const sections = qa<HTMLElement>(document, "[data-home-section]");
 
         sections.forEach((section) => {
           const kind = section.dataset.homeSection;
-          const heading = q(section, "[data-home='section-heading']");
-          const cards = qa(section, "[data-home='card']");
-          const steps = qa(section, "[data-home='step']");
-          const media = qa(section, "[data-home='media']");
+          if (kind === "hero") return;
 
-          if (heading) {
-            gsap.from(heading, {
-              autoAlpha: 0,
-              y: desktop ? 36 : 20,
-              duration: desktop ? 0.9 : 0.55,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: heading,
-                start: "top 82%",
-                once: true,
-              },
-            });
-          }
+          headingIn(section);
 
-          if (kind === "how" && steps.length) {
-            steps.forEach((step, i) => {
-              const medallion = q(step, "[data-home='step-mark']");
-              const line = q(step, "[data-home='step-line']");
-              const body = q(step, "[data-home='step-body']");
+          /* ---------------- the story chapters ---------------- */
+          if (kind === "story") {
+            const chapters = qa<HTMLElement>(section, "[data-story='chapter']");
+
+            chapters.forEach((chapter) => {
+              const mark = q(chapter, "[data-story='chapter-mark']");
+              const rule = q(chapter, "[data-story='chapter-rule']");
+              const chapterTitle = q(chapter, "[data-story='chapter-title']");
+              const body = q(chapter, "[data-story='chapter-body']");
 
               const tl = gsap.timeline({
+                defaults: { ease: M.ease.enter },
                 scrollTrigger: {
-                  trigger: step,
-                  start: "top 78%",
-                  end: "top 40%",
-                  toggleActions: "play none none reverse",
+                  trigger: chapter,
+                  start: "top 72%",
+                  once: true,
                 },
               });
 
-              if (medallion) {
-                tl.fromTo(
-                  medallion,
-                  { scale: 0.7, autoAlpha: 0.4 },
+              if (mark) {
+                tl.from(
+                  mark,
                   {
-                    scale: 1,
-                    autoAlpha: 1,
-                    duration: 0.45,
-                    ease: "power2.out",
+                    scale: 0.5,
+                    autoAlpha: 0,
+                    rotate: -10,
+                    duration: M.dur.mark,
+                    ease: M.ease.pop,
                   },
                   0,
                 );
               }
-              if (body) {
-                tl.fromTo(
-                  body,
-                  { autoAlpha: 0, x: document.dir === "rtl" ? -18 : 18 },
+              if (rule) {
+                tl.from(
+                  rule,
                   {
-                    autoAlpha: 1,
-                    x: 0,
-                    duration: 0.55,
-                    ease: "power3.out",
+                    scaleX: 0,
+                    transformOrigin: rtl ? "right center" : "left center",
+                    duration: 0.7,
+                    ease: M.ease.settle,
                   },
                   0.08,
                 );
               }
-              if (line) {
-                gsap.fromTo(
-                  line,
-                  { scaleY: 0, transformOrigin: "top center" },
+              if (chapterTitle) {
+                tl.from(
+                  chapterTitle,
                   {
-                    scaleY: 1,
-                    duration: 0.7,
-                    ease: "power2.out",
+                    autoAlpha: 0,
+                    y: rise * 0.7,
+                    duration: 0.75,
+                    ease: M.ease.arrive,
+                  },
+                  0.1,
+                );
+              }
+              if (body) {
+                tl.from(
+                  body,
+                  { autoAlpha: 0, y: 18, duration: M.dur.reveal },
+                  0.2,
+                );
+              }
+
+              /* Which chapter the page is currently telling. CSS owns the
+                 transition, so this costs one class toggle per crossing. */
+              ScrollTrigger.create({
+                trigger: chapter,
+                start: "top 62%",
+                end: "bottom 62%",
+                onToggle: (self) => {
+                  chapter.classList.toggle("is-live", self.isActive);
+                  if (mark) mark.classList.toggle("s-step-live", self.isActive);
+                },
+              });
+            });
+
+            const coda = q<HTMLElement>(section, "[data-story='coda']");
+            if (coda) {
+              const codaTitle = q<HTMLElement>(coda, "[data-story='coda-title']");
+              const words = splitWords(codaTitle);
+              const tl = gsap.timeline({
+                defaults: { ease: M.ease.enter },
+                scrollTrigger: { trigger: coda, start: "top 76%", once: true },
+              });
+              tl.from(
+                q(coda, "[data-story='coda-eyebrow']"),
+                { autoAlpha: 0, y: 12, duration: 0.4 },
+                0,
+              );
+              if (words?.length) {
+                tl.from(
+                  words,
+                  {
+                    autoAlpha: 0,
+                    y: 28,
+                    duration: 0.8,
+                    ease: M.ease.arrive,
+                    stagger: { each: M.stagger.tight },
+                  },
+                  0.06,
+                );
+              } else if (codaTitle) {
+                tl.from(
+                  codaTitle,
+                  { autoAlpha: 0, y: rise, duration: M.dur.story },
+                  0.06,
+                );
+              }
+              tl.from(
+                [
+                  q(coda, "[data-story='coda-body']"),
+                  q(coda, "[data-story='coda-cta']"),
+                ].filter(Boolean),
+                {
+                  autoAlpha: 0,
+                  y: 20,
+                  duration: M.dur.reveal,
+                  stagger: M.stagger.editorial,
+                },
+                0.22,
+              );
+            }
+
+            const storySeam = q(section, "[data-story='seam']");
+            if (storySeam) {
+              gsap.fromTo(
+                storySeam,
+                { scaleX: 0.1, autoAlpha: 0.15 },
+                {
+                  scaleX: 1,
+                  autoAlpha: 1,
+                  ease: "none",
+                  scrollTrigger: {
+                    trigger: storySeam,
+                    start: "top 96%",
+                    end: "top 62%",
+                    scrub,
+                  },
+                },
+              );
+            }
+          }
+
+          /* ---------------- tinted bands arrive as a wipe ---------------- */
+          const wipe = q(section, "[data-home='wipe']");
+          if (wipe) {
+            gsap.fromTo(
+              wipe,
+              { scaleY: 0, transformOrigin: "top center" },
+              {
+                scaleY: 1,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: section,
+                  start: "top bottom",
+                  end: `top ${desktop ? 42 : 60}%`,
+                  scrub,
+                },
+              },
+            );
+          }
+
+          /* ---------------- card grids: depth, not a fade ---------------- */
+          const cards = qa<HTMLElement>(section, "[data-home='card']");
+          if (cards.length) {
+            gsap.from(cards, {
+              autoAlpha: 0,
+              y: desktop ? 54 : 24,
+              rotateX: desktop ? 12 : 0,
+              scale: desktop ? 0.93 : 0.98,
+              transformOrigin: "50% 120%",
+              transformPerspective: 1200,
+              duration: desktop ? 0.85 : 0.5,
+              ease: M.ease.enter,
+              stagger: { each: desktop ? 0.09 : 0.05, from: "start" },
+              scrollTrigger: {
+                trigger: cards[0] ?? section,
+                start: "top 80%",
+                once: true,
+              },
+            });
+
+            /**
+             * Pointer-aware depth on cards.
+             *
+             * Once GSAP writes an inline transform, the stylesheet's hover lift
+             * can never win, so the lift moves here too and `public.css` drops
+             * `transform` from these cards' transition list under
+             * `data-home-motion="desktop"`. The hover shadow stays in CSS — it
+             * is not a transform and it does not need a clock.
+             */
+            if (desktop) {
+              cards.forEach((card) => {
+                const to = (property: string) =>
+                  gsap.quickTo(card, property, {
+                    duration: 0.45,
+                    ease: M.ease.settle,
+                  });
+                const tiltX = to("rotateX");
+                const tiltY = to("rotateY");
+                const lift = to("y");
+                gsap.set(card, { transformPerspective: 900 });
+
+                const onMove = (event: PointerEvent) => {
+                  const rect = card.getBoundingClientRect();
+                  const nx = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
+                  const ny =
+                    ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+                  tiltY(nx * 3.5);
+                  tiltX(ny * -2.5);
+                  lift(-4);
+                };
+                const onLeave = () => {
+                  tiltX(0);
+                  tiltY(0);
+                  lift(0);
+                };
+                card.addEventListener("pointermove", onMove, { passive: true });
+                card.addEventListener("pointerleave", onLeave);
+                cleanups.push(() => {
+                  card.removeEventListener("pointermove", onMove);
+                  card.removeEventListener("pointerleave", onLeave);
+                });
+              });
+            }
+          }
+
+          /* ---------------- showcase: the frame opens ---------------- */
+          if (kind === "showcase") {
+            qa<HTMLElement>(section, "[data-home='media']").forEach(
+              (frame, index) => {
+                /* The wrapper, never the `img`: the image carries the CSS hover
+                   breathe, and a transition and a scrub on one transform is how
+                   a parallax starts feeling like elastic. */
+                const inner =
+                  q<HTMLElement>(frame, "[data-home='media-inner']") ?? frame;
+                const lead = index === 0;
+                gsap.set(frame, { overflow: "hidden" });
+                gsap.fromTo(
+                  frame,
+                  {
+                    clipPath: lead
+                      ? "inset(34% 0% 34% 0% round 14px)"
+                      : "inset(14% 10% 14% 10% round 14px)",
+                  },
+                  {
+                    clipPath: "inset(0% 0% 0% 0% round 0px)",
+                    ease: "none",
                     scrollTrigger: {
-                      trigger: step,
-                      start: "top 70%",
-                      end: "bottom 55%",
-                      scrub: 0.4,
+                      trigger: frame,
+                      start: "top 88%",
+                      end: "top 38%",
+                      scrub,
+                    },
+                  },
+                );
+                if (desktop) {
+                  gsap.fromTo(
+                    inner,
+                    { scale: 1.16, yPercent: 8 },
+                    {
+                      scale: 1,
+                      yPercent: -4,
+                      ease: "none",
+                      scrollTrigger: {
+                        trigger: frame,
+                        start: "top 92%",
+                        end: "bottom 20%",
+                        scrub,
+                      },
+                    },
+                  );
+                }
+              },
+            );
+
+            const showcaseCta = q(section, "[data-home='showcase-cta']");
+            if (showcaseCta) {
+              gsap.from(showcaseCta, {
+                autoAlpha: 0,
+                y: 20,
+                duration: M.dur.reveal,
+                ease: M.ease.enter,
+                scrollTrigger: {
+                  trigger: showcaseCta,
+                  start: "top 92%",
+                  once: true,
+                },
+              });
+            }
+          }
+
+          /* ---------------- plans: a comparison, staged ---------------- */
+          if (kind === "plans") {
+            const free = q<HTMLElement>(section, "[data-home='plan-free']");
+            const pro = q<HTMLElement>(section, "[data-home='plan-pro']");
+            if (free && pro) {
+              const tl = gsap.timeline({
+                defaults: { ease: M.ease.enter },
+                scrollTrigger: { trigger: free, start: "top 78%", once: true },
+              });
+              tl.from(free, { autoAlpha: 0, y: 32, duration: 0.7 }, 0).from(
+                pro,
+                { autoAlpha: 0, y: 44, scale: 0.95, duration: 0.85 },
+                0.1,
+              );
+
+              if (desktop) {
+                gsap.fromTo(
+                  pro,
+                  { scale: 0.985, y: 8 },
+                  {
+                    scale: 1.02,
+                    y: -8,
+                    ease: "none",
+                    scrollTrigger: {
+                      trigger: pro,
+                      start: "top 72%",
+                      end: "bottom 45%",
+                      scrub,
+                    },
+                  },
+                );
+                gsap.fromTo(
+                  free,
+                  { autoAlpha: 1 },
+                  {
+                    autoAlpha: 0.82,
+                    ease: "none",
+                    scrollTrigger: {
+                      trigger: pro,
+                      start: "top 62%",
+                      end: "bottom 45%",
+                      scrub,
                     },
                   },
                 );
               }
-
-              /* Active step glow while in the middle of the viewport. */
-              if (medallion && desktop) {
-                ScrollTrigger.create({
-                  trigger: step,
-                  start: "top 55%",
-                  end: "bottom 45%",
-                  onEnter: () => medallion.classList.add("s-step-live"),
-                  onEnterBack: () => medallion.classList.add("s-step-live"),
-                  onLeave: () => medallion.classList.remove("s-step-live"),
-                  onLeaveBack: () => medallion.classList.remove("s-step-live"),
-                });
-              }
-
-              void i;
-            });
-          }
-
-          if (cards.length) {
-            gsap.from(cards, {
-              autoAlpha: 0,
-              y: desktop ? 48 : 24,
-              rotateX: desktop ? 10 : 0,
-              scale: desktop ? 0.94 : 0.98,
-              transformOrigin: "50% 100%",
-              transformPerspective: 1100,
-              duration: desktop ? 0.85 : 0.5,
-              stagger: desktop ? 0.09 : 0.06,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: section,
-                start: "top 72%",
-                once: true,
-              },
-            });
-          }
-
-          if (kind === "showcase" && media.length && desktop) {
-            media.forEach((el) => {
-              gsap.fromTo(
-                el,
-                { scale: 1.12, yPercent: 8 },
-                {
-                  scale: 1,
-                  yPercent: 0,
-                  ease: "none",
-                  scrollTrigger: {
-                    trigger: el,
-                    start: "top 90%",
-                    end: "top 30%",
-                    scrub: 0.5,
-                  },
-                },
-              );
-            });
-          }
-
-          if (kind === "plans") {
-            const pro = q(section, "[data-home='plan-pro']");
-            const free = q(section, "[data-home='plan-free']");
-            if (pro && free && desktop) {
-              gsap.from(free, {
-                autoAlpha: 0,
-                x: -28,
-                duration: 0.75,
-                ease: "power3.out",
-                scrollTrigger: {
-                  trigger: free,
-                  start: "top 80%",
-                  once: true,
-                },
-              });
-              gsap.from(pro, {
-                autoAlpha: 0,
-                x: 28,
-                scale: 0.96,
-                duration: 0.85,
-                ease: "power3.out",
-                scrollTrigger: {
-                  trigger: pro,
-                  start: "top 80%",
-                  once: true,
-                },
-              });
-              gsap.to(pro, {
-                scale: 1.02,
-                ease: "none",
-                scrollTrigger: {
-                  trigger: pro,
-                  start: "top 70%",
-                  end: "top 35%",
-                  scrub: 0.4,
-                },
-              });
             }
           }
 
+          /* ---------------- faq: rows draw, they do not fade ---------------- */
           if (kind === "faq") {
-            const panel = q(section, "[data-home='faq-panel']");
-            if (panel) {
-              gsap.from(panel, {
+            const panel = q<HTMLElement>(section, "[data-home='faq-panel']");
+            const rows = panel ? qa<HTMLElement>(panel, "details") : [];
+            if (rows.length) {
+              gsap.from(rows, {
                 autoAlpha: 0,
-                y: desktop ? 32 : 18,
-                duration: desktop ? 0.75 : 0.5,
-                ease: "power3.out",
+                y: 14,
+                duration: M.dur.settle,
+                stagger: M.stagger.standard,
+                ease: M.ease.enter,
                 scrollTrigger: {
-                  trigger: panel,
+                  trigger: panel ?? section,
                   start: "top 82%",
                   once: true,
                 },
               });
+              gsap.fromTo(
+                rows,
+                { "--s-row-draw": 0 },
+                {
+                  "--s-row-draw": 1,
+                  ease: "none",
+                  stagger: M.stagger.standard,
+                  scrollTrigger: {
+                    trigger: panel ?? section,
+                    start: "top 86%",
+                    end: "center 60%",
+                    scrub,
+                  },
+                },
+              );
+            } else if (panel) {
+              gsap.from(panel, {
+                autoAlpha: 0,
+                y: rise,
+                duration: M.dur.story,
+                ease: M.ease.enter,
+                scrollTrigger: { trigger: panel, start: "top 82%", once: true },
+              });
             }
           }
 
+          /* ---------------- the closing band ---------------- */
           if (kind === "cta") {
-            const band = q(section, "[data-home='cta-band']") ?? section;
-            const copy = q(band, "h2");
-            const leadCopy = q(band, "p");
+            const band = q<HTMLElement>(section, "[data-home='cta-band']") ?? section;
+            const bloom = q(band, ".s-bloom");
+            const h = q<HTMLElement>(band, "h2");
+            const words = splitWords(h);
+            const bandLead = q(band, "p");
             const actions = q(band, "[data-home='cta-actions']");
+
             const tl = gsap.timeline({
-              scrollTrigger: {
-                trigger: band,
-                start: "top 82%",
-                once: true,
-              },
+              defaults: { ease: M.ease.enter },
+              scrollTrigger: { trigger: band, start: "top 84%", once: true },
             });
-            if (copy) {
-              tl.from(
-                copy,
-                {
-                  autoAlpha: 0,
-                  y: desktop ? 40 : 24,
-                  duration: 0.85,
-                  ease: "power3.out",
-                },
+
+            if (bloom) {
+              gsap.set(bloom, { autoAlpha: 0.12, scale: 1.1 });
+              tl.to(
+                bloom,
+                { autoAlpha: 0.45, scale: 1, duration: 1.1, ease: M.ease.settle },
                 0,
               );
             }
-            if (leadCopy) {
+            if (words?.length) {
               tl.from(
-                leadCopy,
+                words,
                 {
                   autoAlpha: 0,
-                  y: 18,
-                  duration: 0.65,
-                  ease: "power2.out",
+                  y: 30,
+                  duration: 0.8,
+                  ease: M.ease.arrive,
+                  stagger: { each: M.stagger.tight },
                 },
-                0.1,
+                0.05,
+              );
+            } else if (h) {
+              tl.from(
+                h,
+                { autoAlpha: 0, y: rise, duration: M.dur.story, ease: M.ease.arrive },
+                0.05,
+              );
+            }
+            if (bandLead) {
+              tl.from(
+                bandLead,
+                { autoAlpha: 0, y: 18, duration: M.dur.reveal },
+                0.2,
               );
             }
             if (actions) {
               tl.from(
                 actions,
-                {
-                  autoAlpha: 0,
-                  y: 22,
-                  duration: 0.7,
-                  ease: "power3.out",
-                },
-                0.2,
+                { autoAlpha: 0, y: 22, duration: M.dur.reveal },
+                0.28,
               );
             }
           }
         });
 
-        /* Logo strip: soft handoff from hero seam. */
+        /* ---------------- the light lands on real venues ---------------- */
         const logos = q<HTMLElement>(document, "[data-home-section='logos']");
         if (logos) {
-          gsap.from(logos, {
-            autoAlpha: 0,
-            y: 20,
-            duration: 0.7,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: logos,
-              start: "top 90%",
-              once: true,
-            },
+          const tiles = qa(logos, "li");
+          const tl = gsap.timeline({
+            defaults: { ease: M.ease.enter },
+            scrollTrigger: { trigger: logos, start: "top 92%", once: true },
           });
+          tl.from(logos, { autoAlpha: 0, y: 14, duration: M.dur.settle }, 0);
+          if (tiles.length) {
+            tl.from(
+              tiles,
+              {
+                autoAlpha: 0,
+                y: 12,
+                scale: 0.94,
+                duration: M.dur.mark,
+                stagger: M.stagger.tight,
+              },
+              0.08,
+            );
+          }
         }
 
         ScrollTrigger.refresh();
@@ -578,6 +999,7 @@ export default function HomeMotion() {
 
     return () => {
       killed = true;
+      cleanups.forEach((fn) => fn());
       ctx?.revert();
       delete document.documentElement.dataset.homeMotion;
     };

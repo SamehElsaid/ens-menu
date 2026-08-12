@@ -19,7 +19,11 @@ const measure: Record<PageKind, string> = {
 
 export type PageShellProps = {
   kind?: PageKind;
-  /** `PageHeader` — title, description, breadcrumbs, primary actions. */
+  /**
+   * `PageHeader` / page intro. Inside the console shell, `PageHeader` lifts
+   * title and actions into the sticky chrome; this slot is then free for
+   * accompanying bands (stat grids, alerts) that should stay in the page.
+   */
   header?: ReactNode;
   /**
    * Search, filters and view controls. Sticks under the app header on scroll so

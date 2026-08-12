@@ -17,11 +17,13 @@ import {
  * The floating route to a human. Public site only — the dashboard and admin get
  * support from inside the product.
  *
- * The wrapper declares `public-world` itself. The FAB is portalled to
- * `document.body`, so it lands outside the shell that scopes the public token
- * layer, which is why this control used to carry hardcoded dark and light hex
- * values and a route check to decide which set to use. Claiming the scope
- * removes both.
+ * The wrapper declares `public-world` itself (with `bg-transparent`). The FAB
+ * is portalled to `document.body`, so it lands outside the shell that scopes
+ * the public token layer, which is why this control used to carry hardcoded
+ * dark and light hex values and a route check to decide which set to use.
+ * Claiming the scope removes both — but `.public-world` also paints the page
+ * ground, so the transparent override is required or the fixed wrapper shows
+ * as a light rectangle behind the rounded pill.
  *
  * A FAB genuinely floats, so it keeps its elevation. The picker is no longer
  * two glowing coloured pills: it is one rounded panel of two rows divided by a
@@ -80,7 +82,10 @@ export default function ContactFab() {
   const ui = (
     <div
       ref={wrapRef}
-      className="public-world fixed end-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-102 sm:end-6 sm:bottom-6"
+      /* `public-world` brings the site tokens; `bg-transparent` cancels the
+         page-ground fill that class also sets — otherwise the wrapper paints a
+         light rectangle behind the rounded pill. */
+      className="public-world fixed end-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-102 bg-transparent sm:end-6 sm:bottom-6"
     >
       {open && (
         <div

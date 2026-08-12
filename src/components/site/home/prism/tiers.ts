@@ -20,12 +20,18 @@ const DECLINED_KEY = "ens.prism.declined";
 export type TierConfig = {
   /** Never uncapped `devicePixelRatio`: on a 3× phone that is 9× the pixels. */
   dpr: [number, number];
+  /** MSAA on the canvas. Off only on the leanest mobile tier. */
+  antialias: boolean;
   /** drei `RoundedBox` smoothness. 4 → ~2,400 tris, 2 → ~600. */
   smoothness: number;
-  /** `MeshTransmissionMaterial` costs a second render pass. Tier A only. */
+  /** Real transmission glass. Tier A only — it costs an extra render pass. */
   transmission: boolean;
   transmissionSamples: number;
   transmissionResolution: number;
+  /** How much environment the pane picks up. */
+  envMapIntensity: number;
+  /** Tier B/C opacity. Transmission tiers ignore this. */
+  paneOpacity: number;
   /** The additive shader plane where the dispersed light lands. */
   pool: boolean;
   poolIntensity: number;
@@ -40,21 +46,22 @@ export type TierConfig = {
   scrollTracks: "full" | "reduced" | "yaw";
   /** Mobile moves the pane out of the text column entirely. */
   composition: "centre" | "corner";
-  /** Secondary glass fragments for layered depth. */
-  shards: "full" | "reduced" | "none";
   /** Sparse additive light motes. Tier A only. */
   motes: boolean;
 };
 
 export const TIER_CONFIG: Record<Exclude<Tier, "D">, TierConfig> = {
   A: {
-    dpr: [1, 1.5],
-    smoothness: 4,
+    dpr: [1, 1.75],
+    antialias: true,
+    smoothness: 5,
     transmission: true,
     transmissionSamples: 6,
     transmissionResolution: 256,
+    envMapIntensity: 0.7,
+    paneOpacity: 1,
     pool: true,
-    poolIntensity: 1,
+    poolIntensity: 0.35,
     pointer: true,
     idle: true,
     gsapEntrance: true,
@@ -62,20 +69,22 @@ export const TIER_CONFIG: Record<Exclude<Tier, "D">, TierConfig> = {
     fullEnvironment: true,
     scrollTracks: "full",
     composition: "centre",
-    shards: "full",
-    motes: true,
+    motes: false,
   },
   /* Not a smaller A: the material changes rather than its quality dropping, so
      the object still looks deliberate instead of looking like A having a bad
      time. No transmission means no second render pass at all. */
   B: {
-    dpr: [1, 1],
-    smoothness: 3,
+    dpr: [1, 1.25],
+    antialias: true,
+    smoothness: 4,
     transmission: false,
     transmissionSamples: 0,
     transmissionResolution: 0,
+    envMapIntensity: 0.75,
+    paneOpacity: 0.26,
     pool: true,
-    poolIntensity: 0.6,
+    poolIntensity: 0.25,
     pointer: false,
     idle: true,
     gsapEntrance: true,
@@ -83,7 +92,6 @@ export const TIER_CONFIG: Record<Exclude<Tier, "D">, TierConfig> = {
     fullEnvironment: true,
     scrollTracks: "reduced",
     composition: "centre",
-    shards: "reduced",
     motes: false,
   },
   /* Mobile is a different composition, not a smaller one. At 390px the hero is
@@ -92,10 +100,13 @@ export const TIER_CONFIG: Record<Exclude<Tier, "D">, TierConfig> = {
      dropped entirely — `.s-aurora` already does that job for free. */
   C: {
     dpr: [1, 1.25],
-    smoothness: 2,
+    antialias: true,
+    smoothness: 3,
     transmission: false,
     transmissionSamples: 0,
     transmissionResolution: 0,
+    envMapIntensity: 0.65,
+    paneOpacity: 0.22,
     pool: false,
     poolIntensity: 0,
     pointer: false,
@@ -105,7 +116,6 @@ export const TIER_CONFIG: Record<Exclude<Tier, "D">, TierConfig> = {
     fullEnvironment: false,
     scrollTracks: "yaw",
     composition: "corner",
-    shards: "none",
     motes: false,
   },
 };
@@ -196,7 +206,7 @@ export function detectTier(): Tier {
 
   if (fine && width >= 1024) {
     /* Comfortably capable, or merely capable. `deviceMemory` reports 4 on a lot
-       of low-end laptops that will run the transmission pass but not enjoy it. */
+       of low-end laptops that will run the full rig but not enjoy it. */
     return memory > 0 && memory < 8 ? "B" : "A";
   }
 

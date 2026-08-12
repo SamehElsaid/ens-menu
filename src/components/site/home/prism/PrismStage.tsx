@@ -189,15 +189,24 @@ export default function PrismStage(props: PrismStageProps | null = null) {
             yaw: 0,
             pitch: 0,
             z: 0,
-            duration: 1.15,
+            duration: 1.25,
             ease: "power3.out",
           },
           0,
         )
+        /* Light through glass does not fade up linearly, it catches: the pool
+           overshoots by 14% as the pane swings toward the beam, then settles as
+           the pane does. Two tweens on one uniform target, so the frame loop
+           still damps toward a single number. */
         .to(
           entrance,
-          { intensity: 1, duration: 1.05, ease: "power2.out" },
-          0.28,
+          { intensity: 1.14, duration: 0.95, ease: "power2.out" },
+          0.22,
+        )
+        .to(
+          entrance,
+          { intensity: 1, duration: 0.95, ease: "power1.inOut" },
+          1.05,
         )
         .to(
           aurora,

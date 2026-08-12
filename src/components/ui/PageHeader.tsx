@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useLayoutEffect, type ReactNode } from "react";
 import { FiChevronRight } from "react-icons/fi";
 import { cn } from "@/lib/cn";
+import { useConsoleChromeOptional } from "@/components/Dashboard/ConsoleChromeContext";
 
 export type Crumb = { label: ReactNode; href?: string };
 
@@ -74,18 +77,26 @@ export type PageHeaderProps = {
   meta?: ReactNode;
   /** Removes the closing rule — for headers that sit directly on a toolbar. */
   bare?: boolean;
+  /**
+   * Where the header renders.
+   * - `chrome` (default inside the console shell): title / description /
+   *   actions lift into the sticky console header.
+   * - `local`: keep the in-page header (marketing, gated screens, opt-out).
+   */
+  placement?: "chrome" | "local";
+  /** Applied to the chrome `<h1>` when placement is `chrome`. */
+  anchorId?: string;
   className?: string;
 };
 
 /**
  * The single page-title treatment.
  *
- * Two changes from the previous version carry the new hierarchy. The title is
- * larger and set at display weight, so the top of a dense screen has one clear
- * focal point instead of a 17px heading competing with the 13px rows below it.
- * And the header closes with a rule: on a work surface the page title, its
- * toolbar and its collection used to run together as one grey mass, and the
- * rule is what separates "what this page is" from "what is on it".
+ * Inside the console shell the default placement is `chrome`: identity and
+ * actions live in the sticky two-level header so the scrollable column starts
+ * with the work surface (stats, toolbar, table) rather than a second title
+ * block. Outside the shell — or with `placement="local"` — it still renders
+ * the classic in-page header.
  */
 export function PageHeader({
   title,
@@ -96,10 +107,53 @@ export function PageHeader({
   actions,
   meta,
   bare = false,
+  placement,
+  anchorId,
   className,
 }: PageHeaderProps) {
+  const chrome = useConsoleChromeOptional();
+  const setPageMeta = chrome?.setPageMeta;
+  const clearPageMeta = chrome?.clearPageMeta;
+  const resolvedPlacement =
+    placement ?? (chrome ? "chrome" : "local");
+
+  useLayoutEffect(() => {
+    if (resolvedPlacement !== "chrome" || !setPageMeta) return;
+
+    setPageMeta({
+      title,
+      description,
+      actions,
+      meta,
+      eyebrow: breadcrumbs?.length ? undefined : eyebrow,
+      anchorId,
+    });
+  }, [
+    resolvedPlacement,
+    setPageMeta,
+    title,
+    description,
+    actions,
+    meta,
+    eyebrow,
+    breadcrumbs,
+    anchorId,
+  ]);
+
+  useLayoutEffect(() => {
+    if (resolvedPlacement !== "chrome" || !clearPageMeta) return;
+    return () => {
+      clearPageMeta();
+    };
+  }, [clearPageMeta, resolvedPlacement]);
+
+  if (resolvedPlacement === "chrome") {
+    return null;
+  }
+
   return (
     <header
+      id={anchorId}
       className={cn(
         "flex flex-col gap-2",
         !bare && "border-b border-line pb-3",

@@ -5,7 +5,7 @@ import LoginForm from "@/components/LoginForm";
 import { AuthAside, AuthShell } from "@/components/site/AuthShell";
 import { Alert } from "@/components/site/Form";
 import LinkTo from "@/components/Global/LinkTo";
-import { axiosGet } from "@/shared/axiosCall";
+import { serverGet } from "@/shared/serverApi";
 import { buildSeoMetadata } from "@/lib/seo";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /** The promo strip is owner-controlled copy stored as either a plain string or
  *  a `{ ar, en }` blob; both shapes have shipped, so both are read. */
 async function getPromo(locale: string) {
-  const promo = await axiosGet<{ data: { text: string; boolean: boolean } }>(
+  const promo = await serverGet<{ data: { text: string; boolean: boolean } }>(
     "/promo",
     locale,
   );

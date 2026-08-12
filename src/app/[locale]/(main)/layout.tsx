@@ -27,10 +27,9 @@ export default async function MainLayout({
           {t("skipToContent")}
         </a>
         <SiteHeader />
-        {/* The header is fixed, so the document reserves its height here once
-            rather than every page remembering to. A hero that wants to run
-            under the transparent header pulls itself back up with
-            `-mt-(--s-header-h)`. */}
+        {/* The header is a floating inset bar. Document clearance uses
+            `--s-header-h` (inset + bar + breathing room). Heroes that want
+            to run under it pull back with `-mt-(--s-header-h)`. */}
         <main
           id="main"
           className="flex w-full flex-1 flex-col pt-(--s-header-h)"

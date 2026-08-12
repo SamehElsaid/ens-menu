@@ -16,7 +16,7 @@ export function DashboardContentSection({
   children: ReactNode;
 }) {
   return (
-    <div className="mx-auto w-full max-w-[110rem] px-4 py-5 sm:px-6 sm:py-6">
+    <div className="mx-auto w-full max-w-[110rem] px-4 py-4 sm:px-6 sm:py-5">
       {children}
     </div>
   );

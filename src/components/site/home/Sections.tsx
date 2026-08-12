@@ -12,10 +12,6 @@ import {
   FiSmartphone,
   FiTruck,
   FiUsers,
-  FiUploadCloud,
-  FiCpu,
-  FiEdit3,
-  FiMaximize,
 } from "react-icons/fi";
 import { templatesInfo } from "@/modules/TemplateShow/data";
 import {
@@ -33,90 +29,19 @@ import {
 import { SiteButtonLink } from "../Button";
 
 /**
- * The homepage argument, in five numbered movements.
+ * The homepage argument, after the phone story has made its case.
  *
  * Motion hooks (`data-home-section`, `data-home=*`) are consumed by
- * `HomeMotion` — depth enters, step thread, showcase media scrub, plan
- * confrontation. CSS `s-reveal*` remains the progressive path without GSAP.
+ * `HomeMotion` — the tint wipe, the depth cascade on card grids, the showcase
+ * frame opening, the plan comparison. CSS `s-reveal*` remains the progressive
+ * path when GSAP never arrives.
+ *
+ * Chapter one (hero) lives in `Hero.tsx` and chapter two in `story/`.
  */
 
 /** Shared by every side heading: stays put under the fixed header. */
 const stickyHeading =
   "self-start lg:sticky lg:top-[calc(var(--s-header-h)+3rem)]";
-
-/* -------------------------------------------------------------------------- */
-/* 01 — How it works                                                           */
-/* -------------------------------------------------------------------------- */
-
-const STEPS = [
-  { id: "upload", icon: FiUploadCloud },
-  { id: "extract", icon: FiCpu },
-  { id: "review", icon: FiEdit3 },
-  { id: "publish", icon: FiMaximize },
-] as const;
-
-export function HowItWorks() {
-  const t = useTranslations("site.how");
-
-  return (
-    <Section id="how-it-works" tone="default" data-home-section="how">
-      <Container>
-        <Grid className="gap-y-12">
-          <Col span={4} className={stickyHeading}>
-            <div data-home="section-heading">
-              <SectionHeading
-                index={1}
-                eyebrow={t("eyebrow")}
-                title={t("title")}
-                lead={t("lead")}
-              />
-            </div>
-          </Col>
-
-          <Col span={7} start={6}>
-            <ol className="s-stagger flex flex-col">
-              {STEPS.map(({ id, icon: Icon }, index) => (
-                <li
-                  key={id}
-                  data-home="step"
-                  className="s-reveal flex gap-5"
-                >
-                  <div className="flex flex-col items-center">
-                    <span
-                      data-home="step-mark"
-                      className="flex size-11 shrink-0 items-center justify-center rounded-site-control border border-site-brand-line bg-site-brand-tint text-site-brand-text transition-[box-shadow,background-color,border-color] duration-(--dur-settle)"
-                    >
-                      <Icon className="size-5" aria-hidden />
-                    </span>
-                    {index < STEPS.length - 1 ? (
-                      <span
-                        aria-hidden
-                        data-home="step-line"
-                        className="s-reveal-line-block my-2 w-px flex-1 bg-site-line"
-                      />
-                    ) : null}
-                  </div>
-                  <div
-                    data-home="step-body"
-                    className={index < STEPS.length - 1 ? "pb-10" : ""}
-                  >
-                    <p className="s-ticket text-site-brand-text">
-                      {String(index + 1).padStart(2, "0")}
-                    </p>
-                    <h3 className="mt-1 text-site-h3">{t(`${id}.title`)}</h3>
-                    <p className="mt-2.5 max-w-prose text-site-body text-site-fg">
-                      {t(`${id}.body`)}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </Col>
-        </Grid>
-      </Container>
-    </Section>
-  );
-}
 
 /* -------------------------------------------------------------------------- */
 /* 02 — Features                                                               */
@@ -135,7 +60,16 @@ export function Features() {
   const t = useTranslations("site.features");
 
   return (
-    <Section id="features" tone="tint" data-home-section="features">
+    <Section id="features" tone="default" data-home-section="features">
+      {/* The tint is a layer, not the section's background, so the band can
+          arrive as a wipe from the seam above it instead of as a hard edge.
+          Untransformed — which is what a no-JS visitor gets — it is exactly the
+          `tone="tint"` band it replaces. */}
+      <span
+        aria-hidden
+        data-home="wipe"
+        className="absolute inset-0 -z-10 origin-top bg-site-tint"
+      />
       <Container>
         <div data-home="section-heading">
           <SectionHeading
@@ -252,20 +186,26 @@ export function Showcase() {
                       lead ? "aspect-16/9" : "min-h-44 flex-1"
                     }`}
                   >
-                    <Image
-                      src={tpl.image}
-                      alt={t("previewAlt", {
-                        name: isAr ? tpl.nameAr : tpl.name,
-                      })}
-                      fill
-                      loading="lazy"
-                      sizes={
-                        lead
-                          ? "(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 46rem"
-                          : "(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 22rem"
-                      }
-                      className="s-media-breathe object-cover object-top will-change-transform"
-                    />
+                    {/* Two owners, two elements: the scroll parallax is written
+                        to this wrapper and the hover breathe stays on the image
+                        itself, so a GSAP transform and a CSS transition never
+                        land on the same property. */}
+                    <div data-home="media-inner" className="absolute inset-0">
+                      <Image
+                        src={tpl.image}
+                        alt={t("previewAlt", {
+                          name: isAr ? tpl.nameAr : tpl.name,
+                        })}
+                        fill
+                        loading="lazy"
+                        sizes={
+                          lead
+                            ? "(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 46rem"
+                            : "(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 22rem"
+                        }
+                        className="s-media-breathe object-cover object-top will-change-transform"
+                      />
+                    </div>
                   </div>
 
                   <div className="flex items-start justify-between gap-4 border-t border-site-line p-5">

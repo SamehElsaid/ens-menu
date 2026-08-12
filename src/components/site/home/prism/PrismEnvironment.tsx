@@ -99,24 +99,24 @@ export function PrismEnvironment({
   return (
     <EnvironmentBake resolution={config.envResolution}>
       {/* The key. Gives the pane its clean top edge and the long specular streak
-          that is most of its sense of material. Dropped in dark mode, so the
+          that is most of its sense of material. Dimmed in dark mode, so the
           pane is a lit object in a dark room rather than a bright object pasted
           onto one. */}
       <Lightformer
         form="rect"
-        intensity={dark ? 1.1 : 1.6}
+        intensity={dark ? 1.4 : 2.0}
         color="#ffffff"
         position={[0, 3.2, 1.8]}
         rotation={[-Math.PI / 2, 0, 0]}
         scale={[6, 2.2, 1]}
       />
 
-      {/* The brand source, at the screen position of `.s-aurora`'s first wash
-          (18% 8%). This is the light that disperses. */}
+      {/* Soft brand fill — kept gentle so the pane never picks up a dark purple
+          face that reads as a shadow. */}
       <Lightformer
         form="rect"
-        intensity={2.2}
-        color={dark ? "#7f22d2" : "#9035e8"}
+        intensity={0.9}
+        color={dark ? "#c4b5fd" : "#e9d5ff"}
         position={[direction * -3.2, 1.7, 1.4]}
         rotation={[0, direction * (Math.PI / 2.6), 0]}
         scale={[2.6, 4, 1]}
@@ -124,24 +124,19 @@ export function PrismEnvironment({
 
       {config.fullEnvironment ? (
         <>
-          {/* The magenta end of `--s-grad-vivid`, matching the aurora's second
-              wash at 84% 2%. Two brand hues and a violet falloff — never a
-              spectrum. A seven-colour prism is a physics diagram. */}
           <Lightformer
             form="rect"
-            intensity={1.1}
-            color={dark ? "#8f0a8b" : "#bb0bb5"}
+            intensity={0.55}
+            color={dark ? "#e9d5ff" : "#fce7f3"}
             position={[direction * 3.4, 2.2, 1]}
             rotation={[0, direction * (-Math.PI / 2.6), 0]}
             scale={[2, 3, 1]}
           />
 
-          {/* Low fill, so the pane's shadow side does not go dead. `#7046f9` is
-              the second stop of the brand gradient. */}
           <Lightformer
             form="rect"
-            intensity={0.4}
-            color="#7046f9"
+            intensity={0.55}
+            color="#ffffff"
             position={[0, -2.6, 1]}
             rotation={[Math.PI / 2, 0, 0]}
             scale={[5, 2, 1]}

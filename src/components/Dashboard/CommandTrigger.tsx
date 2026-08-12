@@ -15,11 +15,11 @@ const readIsMac = () =>
 const serverIsMac = () => false;
 
 /**
- * Opens the command palette — CONSOLE-REDESIGN.md §3.
+ * Opens the command palette from the console utility row.
  *
- * Shaped like an input rather than drawn as a magnifying glass, because an icon
- * gives no hint that the thing behind it can also navigate. Under `sm` there is
- * no room for the shape, so it degrades to the icon.
+ * Centred in the header on desktop as an input-shaped control — the primary
+ * way to move across 40+ destinations. Below `md` it collapses to an icon so
+ * the mobile bar can keep the page title as the main signal.
  */
 export function CommandTrigger({ onOpen }: { onOpen: () => void }) {
   const t = useTranslations("Dashboard");
@@ -31,15 +31,19 @@ export function CommandTrigger({ onOpen }: { onOpen: () => void }) {
         type="button"
         onClick={onOpen}
         className={cn(
-          "hidden h-8 items-center gap-2 rounded-lg border border-line bg-surface-2 ps-2.5 pe-1.5 md:flex",
-          "text-[13px] text-fg-subtle settle hover:border-line-strong hover:text-fg-muted",
-          "w-52 lg:w-64",
+          "group hidden h-9 w-full max-w-md items-center gap-2 rounded-lg border border-line bg-surface-2/80 ps-3 pe-2 md:flex",
+          "text-[13px] text-fg-subtle settle",
+          "hover:border-brand-line hover:bg-brand-soft/40 hover:text-fg-muted",
+          "focus-visible:border-brand focus-visible:bg-surface",
           focusRing,
         )}
       >
-        <FiSearch className="size-3.5 shrink-0" aria-hidden />
+        <FiSearch
+          className="size-3.5 shrink-0 text-fg-subtle transition-colors duration-(--dur-settle) group-hover:text-brand"
+          aria-hidden
+        />
         <span className="flex-1 truncate text-start">{t("commandOpen")}</span>
-        <kbd className="shrink-0 rounded border border-line bg-surface px-1.5 font-mono text-[10px] leading-5 text-fg-subtle">
+        <kbd className="shrink-0 rounded-md border border-line bg-surface px-1.5 font-mono text-[10px] leading-5 text-fg-subtle transition-colors duration-(--dur-settle) group-hover:border-brand-line">
           {isMac ? "⌘K" : "Ctrl K"}
         </kbd>
       </button>

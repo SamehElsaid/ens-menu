@@ -8,32 +8,42 @@ import { focusRing } from "@/components/ui";
 import type { ConsoleCrumb } from "@/lib/consoleNav";
 
 /**
- * The header trail — CONSOLE-REDESIGN.md §3.
+ * Header trail.
  *
- * On narrow screens the middle of the trail collapses rather than the ends. The
- * first crumb says which product surface you are in and the last says which page
- * you are on; the levels in between are the ones you can infer. Truncating from
- * the right instead — which is what `text-overflow` alone would do — removes
- * exactly the crumb the operator needs.
+ * `full` — classic trail including the current page (legacy single-bar header).
+ * `ancestry` — every crumb except the current page. Used by the two-level
+ * chrome, where the current page is the context-row title and repeating it in
+ * the trail is noise.
+ *
+ * On narrow screens the middle collapses rather than the ends: the first crumb
+ * names the product surface and the last visible crumb is the nearest parent.
  */
 export function ConsoleBreadcrumbs({
   crumbs,
   label,
+  mode = "full",
 }: {
   crumbs: ConsoleCrumb[];
   label: string;
+  mode?: "full" | "ancestry";
 }) {
-  if (crumbs.length === 0) return <div className="min-w-0 flex-1" />;
+  const items =
+    mode === "ancestry" && crumbs.length > 0 ? crumbs.slice(0, -1) : crumbs;
 
-  const first = crumbs[0];
-  const last = crumbs[crumbs.length - 1];
-  const middle = crumbs.slice(1, -1);
+  if (items.length === 0) {
+    return mode === "ancestry" ? null : <div className="min-w-0 flex-1" />;
+  }
+
+  const first = items[0];
+  const last = items[items.length - 1];
+  const middle = items.slice(1, -1);
   const hasMiddle = middle.length > 0;
+  const currentIsLast = mode === "full";
 
   return (
-    <nav aria-label={label} className="min-w-0 flex-1">
-      <ol className="flex items-center gap-1 text-[13px]">
-        {crumbs.length > 1 ? (
+    <nav aria-label={label} className="min-w-0">
+      <ol className="flex items-center gap-1 text-[12px] leading-none sm:text-[13px]">
+        {items.length > 1 ? (
           <>
             <Crumb crumb={first} className="hidden sm:inline-flex" />
             <Separator className="hidden sm:inline-flex" />
@@ -49,8 +59,6 @@ export function ConsoleBreadcrumbs({
             ))
           : null}
 
-        {/* Stands in for the hidden middle so the trail does not silently look
-            like a two-level hierarchy on a phone. */}
         {hasMiddle ? (
           <>
             <li className="inline-flex text-fg-subtle md:hidden" aria-hidden>
@@ -61,12 +69,29 @@ export function ConsoleBreadcrumbs({
         ) : null}
 
         <li className="min-w-0">
-          <span
-            aria-current="page"
-            className="block truncate font-semibold text-fg"
-          >
-            {last.label}
-          </span>
+          {currentIsLast || !last.href ? (
+            <span
+              aria-current={currentIsLast ? "page" : undefined}
+              className={cn(
+                "block truncate",
+                currentIsLast
+                  ? "font-semibold text-fg"
+                  : "font-medium text-fg-muted",
+              )}
+            >
+              {last.label}
+            </span>
+          ) : (
+            <LinkTo
+              href={last.href}
+              className={cn(
+                "block max-w-[14ch] truncate rounded px-0.5 font-medium text-fg-muted settle hover:text-brand lg:max-w-[22ch]",
+                focusRing,
+              )}
+            >
+              {last.label}
+            </LinkTo>
+          )}
         </li>
       </ol>
     </nav>

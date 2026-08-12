@@ -221,6 +221,38 @@
         "potatoWedges": "بطاطس ودجز"
       }
     },
+    "story": {
+      "progressLabel": "التقدم في الخطوات الأربع",
+      "coda": {
+        "eyebrow": "وهذه هي المهمة كلها",
+        "title": "نفس القائمة على كل طاولة الليلة",
+        "body": "غيّر سعرًا في السابعة مساءً فيرى الضيف التالي السعر الجديد. بلا إعادة طباعة، وبلا تطبيق يحمّله ضيوفك.",
+        "cta": "ابدأ مجانًا"
+      },
+      "phone": {
+        "importTitle": "استيراد القائمة",
+        "stepOf": "خطوة {index} من ٤",
+        "fileName": "menu-photo.jpg",
+        "fileMeta": "صفحتان · JPG",
+        "uploadHint": "صورة أو ملف PDF. لا كتابة يدوية.",
+        "readingTitle": "نقرأ قائمتك",
+        "aiChip": "AI",
+        "found": "{items} طبقًا · {categories} أقسام",
+        "reviewTitle": "راجع وانشر",
+        "priceLabel": "السعر",
+        "availableLabel": "متاح اليوم",
+        "savedLabel": "تم الحفظ",
+        "publishCta": "انشر القائمة",
+        "livePill": "مباشر",
+        "liveTitle": "قائمتك مباشرة الآن",
+        "menuUrl": "yourvenue.ensmenu.com",
+        "scanHint": "يمسح الضيف الرمز على الطاولة",
+        "viewsLabel": "مشاهدات اليوم",
+        "downloadQr": "تنزيل الرمز",
+        "qrAlt": "رمز QR لقائمتك المباشرة",
+        "catSides": "مقبلات"
+      }
+    },
     "hero": {
       "eyebrow": "استيراد القائمة بالذكاء الاصطناعي",
       "titleLead": "قائمتك الورقية على كل طاولة",

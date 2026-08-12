@@ -32,7 +32,7 @@ export default function PageTitleWithHelp({
 }: PageTitleWithHelpProps) {
   if (title != null) {
     return (
-      <div id={id} dir={dir} className={cn(className)}>
+      <div dir={dir} className={cn(className)}>
         <PageHeader
           title={title}
           description={description}
@@ -42,6 +42,7 @@ export default function PageTitleWithHelp({
           actions={actions}
           meta={meta}
           bare={bare}
+          anchorId={id}
         />
       </div>
     );

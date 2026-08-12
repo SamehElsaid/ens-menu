@@ -7,8 +7,6 @@ import { MathUtils } from "three";
 import type { Mesh } from "three";
 import { Prism } from "./Prism";
 import { LightPool } from "./LightPool";
-import { GlassShards } from "./GlassShards";
-import { LightMotes } from "./LightMotes";
 import { PrismEnvironment } from "./PrismEnvironment";
 import type { PrismSignals } from "./signals";
 import type { TierConfig } from "./tiers";
@@ -47,9 +45,8 @@ function CameraRig({ signals }: { signals: React.RefObject<PrismSignals> }) {
 /**
  * Explicit teardown.
  *
- * `<Canvas>`'s own unmount handling is not sufficient here: the transmission
- * material keeps an internal framebuffer, and the environment keeps a cube
- * target, neither of which is reached by walking the scene graph. Forcing
+ * `<Canvas>`'s own unmount handling is not sufficient here: the environment
+ * keeps a cube target which is not reached by walking the scene graph. Forcing
  * context loss is the only thing that reliably hands *all* of it back — a
  * disposed renderer whose context is merely parked still holds GPU memory, and
  * on a route the user visits repeatedly that accumulates.
@@ -126,10 +123,17 @@ export function PrismCanvas({
          ACES would quietly shift those two hues toward something else. */
       flat
       gl={{
-        antialias: false,
+        /* MSAA is on: without it the pane's silhouette stairs into a hard black
+           stroke against the transparent clear, which is exactly the broken
+           border the composition cannot afford. */
+        antialias: config.antialias,
         powerPreference: "high-performance",
         alpha: true,
+        premultipliedAlpha: true,
       }}
+      /* Explicit transparent clear. Left implicit, the pane reads as a slab
+         sitting on a dark rectangle rather than as glass over the hero wash. */
+      onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
       camera={{
         /* A long lens. Wide-angle distortion on a glass pane dramatises the
            object and reads cheap; 32° reads photographed, and keeps the pane's
@@ -140,7 +144,7 @@ export function PrismCanvas({
       /* The scene has no click target, no drag, no orbit and nothing focusable.
          Nothing in it carries an `onPointer*` handler, and the container above
          it is `pointer-events: none`, so no event ever reaches it to raycast. */
-      style={{ pointerEvents: "none" }}
+      style={{ pointerEvents: "none", background: "transparent" }}
     >
       <Suspense fallback={null}>
         {/* Keyed on the theme: the environment is baked exactly once, so a theme
@@ -152,37 +156,19 @@ export function PrismCanvas({
           mirrored={mirrored}
           dark={dark}
         />
-        <ambientLight intensity={dark ? 0.18 : 0.28} />
+        <ambientLight intensity={dark ? 0.45 : 0.55} />
         <directionalLight
-          position={[mirrored ? 3 : -3, 4, 3]}
-          intensity={0.55}
-          castShadow={false}
-          color="#f5e9ff"
-        />
-        <directionalLight
-          position={[mirrored ? -2.2 : 2.2, 1.2, 2]}
+          position={[mirrored ? 2.4 : -2.4, 3.2, 2.8]}
           intensity={0.28}
           castShadow={false}
-          color="#ffd6f5"
+          color="#ffffff"
         />
-        <pointLight
-          position={[mirrored ? -0.4 : 0.4, 0.6, 1.4]}
-          intensity={0.45}
-          distance={4}
-          decay={2}
-          color="#d8b4fe"
+        <Prism
+          signals={signals}
+          config={config}
+          mirrored={mirrored}
+          dark={dark}
         />
-        <Prism signals={signals} config={config} mirrored={mirrored} />
-        {config.shards !== "none" ? (
-          <GlassShards
-            signals={signals}
-            config={config}
-            mirrored={mirrored}
-          />
-        ) : null}
-        {config.motes ? (
-          <LightMotes signals={signals} mirrored={mirrored} dark={dark} />
-        ) : null}
         {config.pool ? (
           <LightPool
             signals={signals}

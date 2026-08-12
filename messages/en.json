@@ -221,6 +221,38 @@
         "potatoWedges": "Potato wedges"
       }
     },
+    "story": {
+      "progressLabel": "Progress through the four steps",
+      "coda": {
+        "eyebrow": "And that is the whole job",
+        "title": "The same menu, on every table by tonight",
+        "body": "Change a price at 7pm and the next guest to scan sees the new one. No reprinting, no app for them to install.",
+        "cta": "Start free"
+      },
+      "phone": {
+        "importTitle": "Import menu",
+        "stepOf": "Step {index} of 4",
+        "fileName": "menu-photo.jpg",
+        "fileMeta": "2 pages · JPG",
+        "uploadHint": "A photo or a PDF. Nothing typed by hand.",
+        "readingTitle": "Reading your menu",
+        "aiChip": "AI",
+        "found": "{items} dishes · {categories} categories",
+        "reviewTitle": "Review & publish",
+        "priceLabel": "Price",
+        "availableLabel": "Available today",
+        "savedLabel": "Saved",
+        "publishCta": "Publish menu",
+        "livePill": "LIVE",
+        "liveTitle": "Your menu is live",
+        "menuUrl": "yourvenue.ensmenu.com",
+        "scanHint": "Guests scan at the table",
+        "viewsLabel": "Views today",
+        "downloadQr": "Download QR",
+        "qrAlt": "QR code for your live menu",
+        "catSides": "Sides"
+      }
+    },
     "hero": {
       "eyebrow": "AI menu import",
       "titleLead": "Your paper menu, live on every table",

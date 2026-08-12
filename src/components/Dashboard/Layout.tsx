@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn";
 import { DashboardContentSection } from "@/components/Dashboard/DashboardContentSection";
 import ConsoleHeader from "@/components/Dashboard/ConsoleHeader";
 import ConsoleSidebar from "@/components/Dashboard/ConsoleSidebar";
+import { ConsoleChromeProvider } from "@/components/Dashboard/ConsoleChromeContext";
 import CommandPalette, {
   useCommandPalette,
 } from "@/components/Dashboard/CommandPalette";
@@ -15,17 +16,13 @@ import { buttonClasses } from "@/components/ui";
 import type { ConsoleScope } from "@/lib/consoleNav";
 
 /**
- * Console shell — CONSOLE-REDESIGN.md §4.
+ * Console shell — rail + two-level header + content as one Admin frame.
  *
  * The rail is fixed and the content column is inset by `--rail-w`, so collapse
  * is one custom-property change rather than two components trying to agree on a
- * number. The old shell hard-coded `lg:ps-[240px]` beside a `SIDEBAR_WIDTH`
- * constant and relied on a comment to keep them in step.
- *
- * Document scroll is kept deliberately. Making the content column its own scroll
- * container is the fashionable choice, but it breaks `position: sticky` table
- * headers, breaks scroll restoration and misbehaves on iOS. With document
- * scroll, `sticky top-12` under a 48px header gives sticky tables for free.
+ * number. Document scroll is kept deliberately: sticky table headers and the
+ * sticky page toolbar offset from `--console-header-h`, which the header
+ * measures live as its context row grows or collapses.
  */
 export default function Layout({
   children,
@@ -60,59 +57,64 @@ export default function Layout({
   const canReachAdmin = holdsAdminRole && !isAdmin;
 
   return (
-    <div
-      className="console-shell min-h-dvh bg-app text-fg"
-      data-rail={showSidebar && collapsed ? "collapsed" : "expanded"}
-    >
-      {/* Seventeen rail rows stand between a keyboard user and the page. */}
-      <a
-        href="#console-main"
-        className={cn(
-          "console-skip-link",
-          buttonClasses({ variant: "primary", size: "sm" }),
-        )}
-      >
-        {t("skipToContent")}
-      </a>
-
-      {showSidebar ? (
-        <ConsoleSidebar
-          isMenuOpen={isMenuOpen}
-          setIsMenuOpen={setIsMenuOpen}
-          collapsed={collapsed}
-          venueRef={venueRef}
-          scope={scope}
-          isAdmin={isAdmin}
-          canReachAdmin={canReachAdmin}
-        />
-      ) : null}
-
+    <ConsoleChromeProvider>
       <div
-        className={cn("flex min-h-dvh flex-col", showSidebar && "console-main")}
+        className="console-shell min-h-dvh bg-app text-fg"
+        data-rail={showSidebar && collapsed ? "collapsed" : "expanded"}
       >
-        <ConsoleHeader
-          setIsMenuOpen={setIsMenuOpen}
-          onToggleRail={toggle}
-          railCollapsed={collapsed}
-          scope={scope}
+        {/* Seventeen rail rows stand between a keyboard user and the page. */}
+        <a
+          href="#console-main"
+          className={cn(
+            "console-skip-link",
+            buttonClasses({ variant: "primary", size: "sm" }),
+          )}
+        >
+          {t("skipToContent")}
+        </a>
+
+        {showSidebar ? (
+          <ConsoleSidebar
+            isMenuOpen={isMenuOpen}
+            setIsMenuOpen={setIsMenuOpen}
+            collapsed={collapsed}
+            venueRef={venueRef}
+            scope={scope}
+            isAdmin={isAdmin}
+            canReachAdmin={canReachAdmin}
+          />
+        ) : null}
+
+        <div
+          className={cn(
+            "flex min-h-dvh flex-col",
+            showSidebar && "console-main",
+          )}
+        >
+          <ConsoleHeader
+            setIsMenuOpen={setIsMenuOpen}
+            onToggleRail={toggle}
+            railCollapsed={collapsed}
+            scope={scope}
+            venueRef={venueRef}
+            isAdmin={isAdmin}
+            hideSidebar={hideSidebar}
+            hasSidebar={showSidebar}
+            onOpenCommand={openPalette}
+          />
+
+          <main id="console-main" className="flex-1">
+            <DashboardContentSection>{children}</DashboardContentSection>
+          </main>
+        </div>
+
+        <CommandPalette
+          open={open}
+          onClose={closePalette}
           venueRef={venueRef}
-          isAdmin={isAdmin}
-          hideSidebar={hideSidebar}
-          hasSidebar={showSidebar}
-          onOpenCommand={openPalette}
+          canReachAdmin={holdsAdminRole}
         />
-
-        <main id="console-main" className="flex-1">
-          <DashboardContentSection>{children}</DashboardContentSection>
-        </main>
       </div>
-
-      <CommandPalette
-        open={open}
-        onClose={closePalette}
-        venueRef={venueRef}
-        canReachAdmin={holdsAdminRole}
-      />
-    </div>
+    </ConsoleChromeProvider>
   );
 }

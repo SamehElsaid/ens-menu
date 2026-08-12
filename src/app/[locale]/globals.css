@@ -319,7 +319,10 @@ body {
          height change turns into a day of chasing overlaps. --- */
   --rail-w: 16.5rem;
   --rail-w-collapsed: 3.75rem;
-  --console-header-h: 3rem;
+  /* Utility row matches ScopeSwitcher (`h-12`) so the rail/header junction
+     shares one horizontal rhythm. Fallback until ConsoleHeader measures. */
+  --console-header-util-h: 3rem;
+  --console-header-h: 6.75rem;
 
   /* Content measure by page kind. A ten-column ledger and a six-field form do
      not want the same measure, and one 1400px value for both is why the forms
@@ -2357,6 +2360,160 @@ body.recaptcha-modal-open {
 @media (min-width: 640px) {
   .dashboard-header__logo {
     max-height: none;
+  }
+}
+
+/* ==========================================================================
+   Console header — two-level chrome (utility + page context)
+   ========================================================================== */
+
+.console-header {
+  position: sticky;
+  top: 0;
+  /* Shared surface with `.console-rail` so the frame reads as one shell. */
+  background: var(--surface);
+}
+
+.console-header__util {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  height: var(--console-header-util-h);
+  padding-inline: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .console-header__util {
+    padding-inline: 1rem;
+    gap: 0.75rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .console-header__util {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(14rem, 28rem) minmax(0, 1fr);
+    align-items: center;
+  }
+}
+
+.console-header__leading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.console-header__end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .console-header__end {
+    display: contents;
+  }
+}
+
+.console-header__center {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
+.console-header__trailing {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.console-header__tools {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.console-header__divider {
+  display: none;
+  width: 1px;
+  height: 1.25rem;
+  margin-inline: 0.25rem;
+  background: var(--line);
+}
+
+@media (min-width: 640px) {
+  .console-header__divider {
+    display: block;
+  }
+}
+
+.console-header__context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  padding: 0.625rem 0.75rem 0.875rem;
+  border-top: 1px solid color-mix(in oklab, var(--line) 85%, transparent);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--brand) 4%, transparent) 0%,
+      transparent 100%
+    ),
+    var(--surface);
+}
+
+@media (min-width: 640px) {
+  .console-header__context {
+    padding-inline: 1rem;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+}
+
+.console-header__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  color: var(--fg);
+}
+
+@media (min-width: 640px) {
+  .console-header__title {
+    font-size: 1.25rem;
+  }
+}
+
+.console-header__description {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--fg-muted);
+}
+
+.console-header__actions {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .console-header__context {
+    transition:
+      background-color var(--dur-settle) var(--ease-settle),
+      border-color var(--dur-settle) var(--ease-settle);
   }
 }
 
