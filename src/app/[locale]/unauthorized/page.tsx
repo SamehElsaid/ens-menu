@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { FiArrowLeft } from "react-icons/fi";
 import StatusScreen from "@/components/site/StatusScreen";
-import { SiteButtonLink, SiteSpinner } from "@/components/site";
+import { SiteButtonLink } from "@/components/site";
 
 /**
  * Unauthorized.
@@ -84,12 +84,11 @@ function UnauthorizedContent() {
 
 export default function UnauthorizedPage() {
   return (
+    /* Reserved height and nothing else. A spinner or a shimmer here would
+       suggest access is still being decided; it is not — the answer is known and
+       the only thing outstanding is reading the reason out of the URL. */
     <Suspense
-      fallback={
-        <div className="public-world flex min-h-dvh items-center justify-center bg-site-bg">
-          <SiteSpinner className="size-6 text-site-brand" />
-        </div>
-      }
+      fallback={<div className="public-world min-h-dvh bg-site-bg" />}
     >
       <UnauthorizedContent />
     </Suspense>

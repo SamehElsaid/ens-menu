@@ -39,7 +39,9 @@ export default function AboutPage() {
   return (
     <>
       <AboutView />
-      <CtaBand />
+      {/* This page already spends its one raking pass on the vision card, so the
+          band reveals without a second one (MOTION-BLUEPRINT.md §10.5). */}
+      <CtaBand rake={false} />
     </>
   );
 }

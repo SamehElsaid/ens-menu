@@ -30,6 +30,7 @@ import {
   IoSearchOutline,
   IoStarOutline,
   IoColorPaletteOutline,
+  IoListOutline,
 } from "react-icons/io5";
 
 export type NavItem = {
@@ -39,17 +40,12 @@ export type NavItem = {
   /** Resolved at runtime in the sidebar (e.g. pending table orders). */
   dynamicBadge?: "pendingOrders" | "pendingDeliveryOrders";
   badges?: Array<{ label: string; variant: "new" | "beta" | "soon" }>;
-  /** Visual cluster within a section (e.g. table ordering). */
-  subgroup?: string;
   /** Requires Pro plan — locked for free accounts in sidebar. */
   proFeature?: boolean;
   /** Non-clickable placeholder (e.g. coming soon). */
   comingSoon?: boolean;
-  active?: boolean;
   key?: string;
   link?: string;
-  parentLink?: string;
-  dependentParent?: boolean;
   /** Match route exactly (e.g. settings root vs. settings/design). */
   exactMatch?: boolean;
   navId?: string;
@@ -57,25 +53,41 @@ export type NavItem = {
   permission?: string;
   /** Owner/admin only — never shown to staff regardless of permissions. */
   ownerOnly?: boolean;
-  children?: NavItem[];
+  /** Extra terms the command palette should match on beyond the label. */
+  keywords?: string[];
 };
 
 export type NavSection = {
-  /** Internal key for React lists */
+  /** Internal key for React lists, and the key into `SECTION_LABEL`. */
   id: string;
   items: NavItem[];
 };
 
-export const navSections: NavSection[] = [
+/**
+ * Console navigation — CONSOLE-REDESIGN.md §2.
+ *
+ * The rail is one stable frame with two zones. `venueNavSections` fills the
+ * upper zone when a venue is selected; `accountNavSections` is the lower zone
+ * and is present on every page in the merchant console, including inside a
+ * venue. That is the whole point: orders, staff and billing span every venue an
+ * account owns, so they must not disappear the moment someone opens one.
+ *
+ * Consequently nothing appears in both lists. Subscription in particular used to
+ * exist in both, pointing at two different URLs — one of which was a redirect.
+ * It is an account-level fact and now lives only in the account zone.
+ */
+export const venueNavSections: NavSection[] = [
   {
-    id: "overview",
+    id: "venueOverview",
     items: [
       {
         label: "Overview",
         icon: FaChartLine,
         key: "overview",
         link: "",
+        exactMatch: true,
         permission: "dashboard:access",
+        keywords: ["home", "summary"],
       },
       {
         label: "analytics",
@@ -83,53 +95,12 @@ export const navSections: NavSection[] = [
         key: "analytics",
         link: "analytics",
         permission: "analytics:view",
+        keywords: ["views", "stats", "reports"],
       },
     ],
   },
   {
-    id: "account",
-    items: [
-      {
-        label: "Personal",
-        icon: FaUserAlt,
-        key: "personal",
-        link: "personal",
-        ownerOnly: true,
-      },
-      {
-        label: "Subscription",
-        icon: FaCreditCard,
-        key: "subscription",
-        link: "subscription",
-        ownerOnly: true,
-      },
-      {
-        label: "domainTransfer",
-        icon: IoGlobeOutline,
-        key: "domain-transfer",
-        link: "domain-transfer",
-        ownerOnly: true,
-      },
-    ],
-  },
-  {
-    id: "import",
-    items: [
-      {
-        label: "menuImport",
-        icon: IoSparklesOutline,
-        key: "import",
-        link: "import",
-        permission: "menu:import",
-        badges: [
-          { label: "badgeNew", variant: "new" },
-          { label: "badgeBeta", variant: "beta" },
-        ],
-      },
-    ],
-  },
-  {
-    id: "menu",
+    id: "venueMenu",
     items: [
       {
         label: "Categories",
@@ -144,6 +115,7 @@ export const navSections: NavSection[] = [
         key: "items",
         link: "items",
         permission: "menu:items",
+        keywords: ["products", "dishes", "prices"],
       },
       {
         label: "displayOrder",
@@ -151,6 +123,7 @@ export const navSections: NavSection[] = [
         key: "display-order",
         link: "display-order",
         permission: "menu:items",
+        keywords: ["sort", "arrange", "reorder"],
       },
       {
         label: "tables",
@@ -159,6 +132,7 @@ export const navSections: NavSection[] = [
         link: "table",
         proFeature: true,
         permission: "menu:tables",
+        keywords: ["qr", "seating"],
       },
       {
         label: "Advertisements",
@@ -166,11 +140,21 @@ export const navSections: NavSection[] = [
         key: "advertisements",
         link: "advertisements",
         permission: "ads:manage",
+        keywords: ["ads", "promotions", "banners"],
+      },
+      {
+        label: "menuImport",
+        icon: IoSparklesOutline,
+        key: "import",
+        link: "import",
+        permission: "menu:import",
+        badges: [{ label: "badgeBeta", variant: "beta" }],
+        keywords: ["ai", "upload", "scan"],
       },
     ],
   },
   {
-    id: "settings",
+    id: "venueSettings",
     items: [
       {
         label: "settingsGeneral",
@@ -188,6 +172,7 @@ export const navSections: NavSection[] = [
         link: "settings/design",
         navId: "onboarding-sidebar-settings-design",
         permission: "settings:manage",
+        keywords: ["theme", "template", "colours"],
       },
       {
         label: "settingsMedia",
@@ -196,6 +181,7 @@ export const navSections: NavSection[] = [
         link: "settings/media",
         navId: "onboarding-sidebar-settings-media",
         permission: "settings:manage",
+        keywords: ["logo", "images", "social"],
       },
       {
         label: "settingsGoogleReviews",
@@ -212,11 +198,32 @@ export const navSections: NavSection[] = [
         link: "settings/delivery",
         navId: "onboarding-sidebar-settings-delivery",
         permission: "settings:manage",
+        keywords: ["zones", "shipping", "branches"],
+      },
+      {
+        label: "domainTransfer",
+        icon: IoGlobeOutline,
+        key: "domain-transfer",
+        link: "domain-transfer",
+        ownerOnly: true,
+        keywords: ["dns", "custom domain"],
+      },
+      /* A plan is bought per menu in this product, not per account, so billing
+         belongs to the venue zone. The account-level `/dashboard/subscription`
+         URL survives for existing deep links but is no longer advertised as a
+         destination, because it can only guess which menu you meant. */
+      {
+        label: "Subscription",
+        icon: FaCreditCard,
+        key: "subscription",
+        link: "subscription",
+        ownerOnly: true,
+        keywords: ["billing", "plan", "invoice", "upgrade", "pro"],
       },
     ],
   },
   {
-    id: "activity",
+    id: "venueActivity",
     items: [
       {
         label: "history",
@@ -224,6 +231,7 @@ export const navSections: NavSection[] = [
         key: "history",
         link: "history",
         permission: "orders:view",
+        keywords: ["audit", "log", "changes"],
       },
       {
         label: "ratings",
@@ -231,19 +239,23 @@ export const navSections: NavSection[] = [
         key: "ratings",
         link: "ratings",
         permission: "analytics:view",
+        keywords: ["reviews", "feedback"],
       },
     ],
   },
 ];
 
 /**
- * Sidebar for `/dashboard` itself. Orders and staff are account-level: they
- * span every menu the signed-in account can reach, so they live here rather
- * than inside a single menu's sidebar.
+ * The lower zone — one flat group of five. The zone is titled "Account" in the
+ * rail, so sub-headings here would label rows that are already labelled.
+ *
+ * Orders, delivery and staff span every menu the account owns. Personal is the
+ * signed-in user's own profile and has nothing to do with any single menu,
+ * which is why it moved out of `/dashboard/{menu}/personal`.
  */
 export const accountNavSections: NavSection[] = [
   {
-    id: "accountOverview",
+    id: "accountMain",
     items: [
       {
         label: "myMenus",
@@ -251,12 +263,8 @@ export const accountNavSections: NavSection[] = [
         key: "menus",
         link: "",
         permission: "dashboard:access",
+        keywords: ["venues", "all menus", "switch"],
       },
-    ],
-  },
-  {
-    id: "accountOperations",
-    items: [
       {
         label: "orders",
         icon: IoReceiptOutline,
@@ -265,6 +273,7 @@ export const accountNavSections: NavSection[] = [
         proFeature: true,
         dynamicBadge: "pendingOrders",
         permission: "orders:view",
+        keywords: ["tickets", "kitchen"],
       },
       {
         label: "deliveryOrders",
@@ -281,133 +290,180 @@ export const accountNavSections: NavSection[] = [
         link: "staff",
         proFeature: true,
         permission: "staff:manage",
+        keywords: ["team", "roles", "permissions"],
       },
-    ],
-  },
-  {
-    id: "accountSettings",
-    items: [
       {
-        label: "Subscription",
-        icon: FaCreditCard,
-        key: "subscription",
-        link: "subscription",
+        label: "Personal",
+        icon: FaUserAlt,
+        key: "personal",
+        link: "personal",
         ownerOnly: true,
+        keywords: ["profile", "password", "phone", "account"],
       },
     ],
   },
 ];
 
+/**
+ * Back office — CONSOLE-REDESIGN.md §2.
+ *
+ * Grouped by the job being done rather than left as one list of fourteen. The
+ * groups are what make a rail of this length scannable: nobody reads past about
+ * seven undifferentiated rows.
+ *
+ * `administrators/log` is included deliberately — the page existed but appeared
+ * in no rail, so the only route to it was a link on the administrators page.
+ */
 export const adminNavSections: NavSection[] = [
   {
-    id: "overview",
+    id: "adminOverview",
     items: [
       {
         label: "Overview",
         icon: FaChartLine,
         key: "overview",
         link: "",
+        exactMatch: true,
+        keywords: ["home", "dashboard"],
       },
       {
         label: "analytics",
         icon: IoStatsChartOutline,
         key: "analytics",
         link: "analytics",
+        keywords: ["growth", "reports", "platform"],
       },
     ],
   },
   {
-    id: "account",
+    id: "adminCustomers",
     items: [
       {
-        label: "Personal",
+        label: "users",
         icon: FaUserAlt,
-        key: "personal",
-        link: "personal",
-      },
-    ],
-  },
-  {
-    id: "admin",
-    items: [
-      { label: "users", icon: FaUserAlt, key: "users", link: "users" },
-      {
-        label: "customerEmails",
-        icon: IoMailOutline,
-        key: "broadcast",
-        link: "broadcast",
+        key: "users",
+        link: "users",
+        keywords: ["accounts", "merchants", "customers"],
       },
       {
         label: "followUps",
         icon: IoCallOutline,
         key: "follow-ups",
         link: "follow-ups",
+        keywords: ["sales", "calls", "queue"],
+      },
+      {
+        label: "customerEmails",
+        icon: IoMailOutline,
+        key: "broadcast",
+        link: "broadcast",
+        keywords: ["email", "campaign", "announce"],
       },
       {
         label: "domainTransfers",
         icon: IoGlobeOutline,
         key: "domain-transfers",
         link: "domain-transfers",
+        keywords: ["dns", "requests"],
       },
+    ],
+  },
+  {
+    id: "adminRevenue",
+    items: [
       {
         label: "plans",
         icon: IoDocumentTextOutline,
         key: "plans",
         link: "plans",
+        keywords: ["pricing", "tiers", "limits"],
       },
       {
         label: "payments",
         icon: FaCreditCard,
         key: "payments",
         link: "payments",
-      },
-      {
-        label: "advertisements",
-        icon: HiSpeakerphone,
-        key: "advertisements",
-        link: "advertisements",
-      },
-      {
-        label: "administrators",
-        icon: IoSettingsOutline,
-        key: "administrators",
-        link: "administrators",
-      },
-      {
-        label: "appVersion",
-        icon: IoPhonePortraitOutline,
-        key: "app-version",
-        link: "app-version",
-      },
-      {
-        label: "promo",
-        icon: IoPricetagOutline,
-        key: "promo",
-        link: "promo",
+        keywords: ["transactions", "revenue", "ledger"],
       },
       {
         label: "vouchers",
         icon: IoTicketOutline,
         key: "vouchers",
         link: "vouchers",
+        keywords: ["coupons", "discount", "codes"],
       },
+      {
+        label: "promo",
+        icon: IoPricetagOutline,
+        key: "promo",
+        link: "promo",
+        keywords: ["banner", "offer"],
+      },
+    ],
+  },
+  {
+    id: "adminContent",
+    items: [
       {
         label: "knowledgeManagement",
         icon: IoLibraryOutline,
         key: "knowledge-management",
         link: "knowledge-management",
+        keywords: ["help", "articles", "docs"],
       },
       {
         label: "metadata",
         icon: IoSearchOutline,
         key: "metadata",
         link: "metadata",
+        keywords: ["seo", "title", "description"],
       },
       {
         label: "templateBuilder",
         icon: IoColorPaletteOutline,
         key: "templates",
         link: "template",
+        keywords: ["design", "builder", "themes"],
+      },
+      {
+        label: "advertisements",
+        icon: HiSpeakerphone,
+        key: "advertisements",
+        link: "advertisements",
+        keywords: ["ads", "banners"],
+      },
+    ],
+  },
+  {
+    id: "adminPlatform",
+    items: [
+      {
+        label: "administrators",
+        icon: IoSettingsOutline,
+        key: "administrators",
+        link: "administrators",
+        keywords: ["admins", "access", "permissions"],
+      },
+      {
+        label: "adminActivityLog",
+        icon: IoListOutline,
+        key: "administrators-log",
+        link: "administrators/log",
+        keywords: ["audit", "history", "who did"],
+      },
+      {
+        label: "appVersion",
+        icon: IoPhonePortraitOutline,
+        key: "app-version",
+        link: "app-version",
+        keywords: ["mobile", "release", "build"],
+      },
+      {
+        label: "Personal",
+        icon: FaUserAlt,
+        key: "personal",
+        link: "personal",
+        keywords: ["profile", "password"],
       },
     ],
   },

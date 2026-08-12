@@ -16,10 +16,17 @@ import {
   HiOutlineBell,
   HiOutlineShieldCheck,
   HiOutlineCreditCard,
-  HiOutlineChatAlt2,
 } from "react-icons/hi";
 import { FaStore, FaWhatsapp } from "react-icons/fa";
-import { Button, Field, Input, Modal, Spinner } from "@/components/ui";
+import {
+  Button,
+  Field,
+  Input,
+  LoadingBlock,
+  Modal,
+  Spinner,
+} from "@/components/ui";
+import { cn } from "@/lib/cn";
 import { toast } from "react-toastify";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
@@ -382,9 +389,7 @@ export function RequirePhone({
           showClose={false}
           title={t("title")}
         >
-          <div className="flex justify-center py-12">
-            <Spinner size="md" />
-          </div>
+          <LoadingBlock />
         </Modal>
       );
     }
@@ -526,126 +531,96 @@ export function RequirePhone({
   };
 
   const isModal = variant === "modal";
-  const panelPadding = isModal ? "p-6" : "p-8";
   const gateTitle = requiresVerification ? t("verifyTitle") : t("title");
   const gateSubtitle = requiresVerification
     ? t("verifySubtitle")
     : t("subtitle");
   const displayPhone = userProfile?.phoneNumber?.trim() ?? "";
+  const gateSteps = [
+    { key: "stepProfile", active: !requiresVerification },
+    { key: "stepVerify", active: requiresVerification },
+  ] as const;
 
   const verificationContent = (
-    <div className={isModal ? "space-y-3" : "mb-7 space-y-4"}>
-      {isModal && displayPhone && (
-        <div className="rounded-lg border border-line bg-slate-50 px-4 py-3 text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-fg-subtle">
-            {t("verifyPhoneLabel")}
-          </p>
-          <p className="mt-0.5 text-base font-bold tabular-nums text-fg dir-ltr">
+    <div className="space-y-3">
+      {displayPhone && (
+        <div className="rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-center">
+          <p className="ui-label">{t("verifyPhoneLabel")}</p>
+          <p className="ui-figure mt-0.5 text-base text-fg" dir="ltr">
             {displayPhone}
           </p>
         </div>
       )}
 
       {verificationReference ? (
-        <div
-          className={`rounded-lg border text-center ${
-            isModal
-              ? "border-brand-line bg-brand-soft px-4 py-5"
-              : "border-line bg-surface-2 p-4"
-          }`}
-        >
-          <p className="text-xs font-semibold uppercase tracking-wide text-brand">
-            {t("timerLabel")}
-          </p>
-          <p className="mt-1 text-3xl font-bold tabular-nums text-fg">
+        /* The countdown is the loudest thing here because it is the only fact
+           that changes while the user is away in another app. */
+        <div className="rounded-lg border border-accent-line bg-accent-soft px-3 py-4 text-center">
+          <p className="ui-label">{t("timerLabel")}</p>
+          <p
+            className="ui-figure mt-1 text-3xl leading-none text-fg"
+            role="timer"
+          >
             {formattedTime}
           </p>
-          <p className="mt-2 text-xs text-fg-muted">
+          <p className="mt-2 text-xs text-fg-muted" aria-live="polite">
             {verificationExpired
               ? t("verificationExpired")
               : t("checkingStatus")}
           </p>
         </div>
       ) : (
-        <div
-          className={`rounded-lg border ${
-            isModal
-              ? "border-line bg-surface-2 px-4 py-4"
-              : "border-line bg-surface-2 p-4 text-center"
-          }`}
-        >
-          {isModal ? (
-            <ol className="space-y-2.5 text-sm text-fg-muted">
-              <li className="flex items-start gap-2.5">
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#25D366]/15 text-[10px] font-bold text-[#25D366]">
-                  1
-                </span>
-                <span>{t("whatsappReadyTitle")}</span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#25D366]/15 text-[10px] font-bold text-[#25D366]">
-                  2
-                </span>
-                <span>{t("whatsappReadySubtitle")}</span>
-              </li>
-            </ol>
-          ) : (
-            <>
-              <p className="text-sm font-semibold text-fg">
-                {t("whatsappReadyTitle")}
-              </p>
-              <p className="mt-2 text-xs leading-relaxed text-fg-muted">
-                {t("whatsappReadySubtitle")}
-              </p>
-            </>
-          )}
+        <div className="rounded-lg border border-line bg-surface-2 px-3 py-3">
+          <p className="text-[13px] font-semibold text-fg">
+            {t("whatsappReadyTitle")}
+          </p>
+          <p className="mt-1 text-xs leading-relaxed text-fg-muted">
+            {t("whatsappReadySubtitle")}
+          </p>
         </div>
       )}
 
-      <button
+      {/* The WhatsApp mark stays on the glyph and never on the fill —
+          DESIGN.md §14.4. The action itself is ink, like every other primary. */}
+      <Button
         type="button"
+        size="lg"
+        fullWidth
         onClick={handleOpenWhatsapp}
         disabled={startingVerification || !canOpenWhatsapp}
-        className={`group relative w-full overflow-hidden rounded-lg py-3.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 ${
-          isModal
-            ? "bg-[#25D366] shadow-[#25D366]/25 hover:bg-[#20BD5A] hover:shadow-md hover:shadow-[#25D366]/30"
-            : "bg-brand hover:bg-brand-hover"
-        }`}
-      >
-        <span className="flex items-center justify-center gap-2">
-          {startingVerification ? (
-            <>
-              <Spinner size="sm" className="text-white" />
-              {t("startingVerification")}
-            </>
+        aria-busy={startingVerification || undefined}
+        startIcon={
+          startingVerification ? (
+            <Spinner size="sm" />
           ) : (
-            <>
-              {isModal ? (
-                <FaWhatsapp className="text-lg" />
-              ) : (
-                <HiOutlineChatAlt2 className="text-lg" />
-              )}
-              {t("openWhatsapp")}
-            </>
-          )}
-        </span>
-      </button>
+            <FaWhatsapp className="size-4.5" />
+          )
+        }
+      >
+        {startingVerification ? t("startingVerification") : t("openWhatsapp")}
+      </Button>
 
       {showVerificationRetry && (
-        <button
+        <Button
           type="button"
+          variant="secondary"
+          size="lg"
+          fullWidth
           onClick={handleRestartVerification}
-          className="w-full rounded-lg border border-line py-3 text-sm font-semibold text-fg transition hover:border-brand hover:text-brand"
         >
           {t("restartVerification")}
-        </button>
+        </Button>
       )}
 
       {verificationReference && !verificationExpired && (
-        <div className="flex items-center justify-center gap-2 text-xs text-fg-subtle">
-          <Spinner size="sm" />
+        <p
+          className="flex items-center justify-center gap-2 text-xs text-fg-subtle"
+          role="status"
+          aria-live="polite"
+        >
+          <Spinner size="xs" />
           <span>{t("checkingNow")}</span>
-        </div>
+        </p>
       )}
     </div>
   );
@@ -697,25 +672,26 @@ export function RequirePhone({
       <Button
         type="submit"
         variant="primary"
-        className="w-full"
+        size="lg"
+        fullWidth
         disabled={saving || !isValid}
         loading={saving}
       >
         {t("submit")}
       </Button>
 
-      <div className="flex items-center gap-1.5 text-xs text-fg-subtle">
-        <HiOutlineLockClosed className="shrink-0" />
+      <p className="flex items-center gap-1.5 text-xs text-fg-subtle">
+        <HiOutlineLockClosed className="shrink-0" aria-hidden />
         <span>{t("trustBadge")}</span>
-      </div>
+      </p>
     </form>
   );
 
   const modalPanel = (
     <>
       {userName && (
-        <p className="mb-3 truncate text-xs text-fg-muted">
-          {t("welcomeBack")} {userName}
+        <p className="ui-label mb-3 truncate">
+          {t("welcomeBack")} · {userName}
         </p>
       )}
       {requiresVerification ? verificationContent : profileFormContent}
@@ -723,70 +699,85 @@ export function RequirePhone({
   );
 
   const gatePanel = (
-    <div className="relative w-full max-w-md">
-      <div className="mb-8 flex items-center justify-center gap-2">
-        <div
-          className={`h-1.5 rounded-full ${requiresVerification ? "w-10 bg-brand" : "w-6 bg-brand/30"}`}
-        />
-        <div
-          className={`h-1.5 rounded-full ${requiresVerification ? "w-6 bg-brand/30" : "w-10 bg-brand"}`}
-        />
-      </div>
+    <div className="w-full max-w-md">
+      {/* Two steps, named. The previous pair of anonymous dashes said "there is
+          more than one screen" without saying which one this is; the rule
+          thickness and `aria-current` carry the position without a hue. */}
+      <ol className="mb-4 flex gap-3">
+        {gateSteps.map((step) => (
+          <li
+            key={step.key}
+            aria-current={step.active ? "step" : undefined}
+            className={cn(
+              "ui-label min-w-0 flex-1 truncate pt-1.5",
+              step.active ? "border-t-2 border-accent" : "border-t border-line",
+            )}
+          >
+            {t(step.key)}
+          </li>
+        ))}
+      </ol>
 
-      <div className="overflow-hidden rounded-lg border border-line bg-surface shadow-lg">
-        <div className="h-1 w-full bg-brand" />
+      <div className="rounded-xl border border-line bg-surface">
+        <header className="flex items-start gap-3 border-b border-line px-4 py-4 sm:px-5">
+          {userName ? (
+            typeof userProfile?.profileImage === "string" &&
+            userProfile.profileImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={userProfile.profileImage}
+                alt=""
+                className="size-9 shrink-0 rounded-full border border-line object-cover"
+              />
+            ) : (
+              <span
+                className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-semibold text-on-brand"
+                aria-hidden
+              >
+                {initial}
+              </span>
+            )
+          ) : null}
 
-        <div className={panelPadding}>
-          {userName && (
-            <div className="mb-6 flex items-center gap-3">
-              {typeof userProfile?.profileImage === "string" &&
-              userProfile.profileImage ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={userProfile.profileImage}
-                  alt=""
-                  className="h-10 w-10 rounded-full object-cover ring-2 ring-brand/20"
-                />
-              ) : (
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-bold text-on-brand ring-4 ring-brand/10">
-                  {initial}
-                </div>
-              )}
-              <div>
-                <p className="text-xs text-fg-subtle">{t("welcomeBack")}</p>
-                <p className="text-sm font-semibold text-fg-muted">
-                  {userName}
-                </p>
-              </div>
-            </div>
-          )}
-
-          <div className="mb-5 flex justify-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-brand shadow-sm">
-              <HiOutlinePhone className="text-2xl text-on-brand" />
-            </div>
+          <div className="min-w-0">
+            {userName && (
+              <p className="ui-label mb-1 truncate">
+                {t("welcomeBack")} · {userName}
+              </p>
+            )}
+            <h1 className="text-[21px] leading-tight font-semibold tracking-[-0.03em] text-fg">
+              {gateTitle}
+            </h1>
+            <p className="mt-1.5 text-[13px] leading-relaxed text-fg-muted">
+              {gateSubtitle}
+            </p>
           </div>
+        </header>
 
-          <h1 className="mb-2 text-2xl font-bold text-fg">{gateTitle}</h1>
-          <p className="mb-6 text-sm leading-relaxed text-fg-muted">
-            {gateSubtitle}
-          </p>
-
+        <div className="px-4 py-4 sm:px-5">
           {requiresVerification ? (
             verificationContent
           ) : (
             <>
-              <ul className="mb-7 space-y-2.5">
+              {/* Pulled flush so the header's rule doubles as this band's top
+                  edge: the gate reads as three stacked bands, not as a card
+                  with a list floating inside its padding. */}
+              <ul className="-mx-4 -mt-4 mb-4 divide-y divide-line border-b border-line sm:-mx-5">
                 {benefits.map(({ icon: Icon, key }) => (
-                  <li key={key} className="flex items-start gap-3">
-                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-brand-soft">
-                      <Icon className="text-sm text-brand" />
+                  <li
+                    key={key}
+                    className="flex items-start gap-2.5 px-4 py-2.5 sm:px-5"
+                  >
+                    <Icon
+                      className="mt-0.5 size-4 shrink-0 text-fg-subtle"
+                      aria-hidden
+                    />
+                    <span className="min-w-0 text-[13px] leading-relaxed text-fg-muted">
+                      {t(key)}
                     </span>
-                    <span className="text-sm text-fg-muted">{t(key)}</span>
                   </li>
                 ))}
               </ul>
-              <div className="mb-6 border-t border-line" />
               {profileFormContent}
             </>
           )}
@@ -820,7 +811,7 @@ export function RequirePhone({
   }
 
   return (
-    <div className="relative flex min-h-[calc(100vh-80px)] items-center justify-center bg-app px-4 py-12">
+    <div className="flex min-h-[calc(100vh-80px)] items-center justify-center bg-app px-4 py-10">
       {gatePanel}
     </div>
   );

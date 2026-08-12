@@ -3,8 +3,15 @@
 import { useCallback, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { FiAlertTriangle } from "react-icons/fi";
-import { Button, ButtonLink, ConfirmDialog } from "@/components/ui";
-import CardDashBoard from "@/components/Card/CardDashBoard";
+import {
+  Badge,
+  Button,
+  ButtonLink,
+  Card,
+  ConfirmDialog,
+  EmptyState,
+  SectionHeader,
+} from "@/components/ui";
 import { axiosDelete, axiosPatch, axiosPost } from "@/shared/axiosCall";
 import { publicMenuLinkUrl } from "@/lib/publicMenuUrl";
 import { toast } from "react-toastify";
@@ -151,81 +158,81 @@ export default function AdminUserMenusSection({
 
   return (
     <>
-      <CardDashBoard>
-        <div
-          className={`mb-6 flex flex-wrap items-center justify-between gap-3 ${isRTL ? "flex-row-reverse" : ""}`}
-        >
-          <h2 className="text-xl font-bold text-fg">
-            {t("lists.title")} ({menus.length})
-          </h2>
-          {menus.length > 0 ? (
-            featuredOnHomepage ? (
-              <Button
-                variant="danger"
-                size="sm"
-                loading={featureOnHomepageLoading}
-                onClick={handleRemoveFromHomepage}
-              >
-                {featureOnHomepageLoading
-                  ? t("lists.removeFromHomepageLoading")
-                  : t("lists.removeFromHomepage")}
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                loading={featureOnHomepageLoading}
-                onClick={handleFeatureOnHomepage}
-              >
-                {featureOnHomepageLoading
-                  ? t("lists.addToHomepageLoading")
-                  : t("lists.addToHomepage")}
-              </Button>
-            )
-          ) : null}
-        </div>
-        {menus.length > 0 ? (
-          <div className="space-y-4">
-            {menus.map((menu) => (
-              <div key={menu.id} className="p-4 border border-line rounded-lg">
-                <div
-                  className={`flex items-start justify-between mb-3 ${isRTL ? "flex-row-reverse" : ""}`}
+      <Card padded="lg">
+        <SectionHeader
+          title={`${t("lists.title")} (${menus.length})`}
+          className="mb-4"
+          actions={
+            menus.length > 0 ? (
+              featuredOnHomepage ? (
+                <Button
+                  variant="danger"
+                  size="sm"
+                  loading={featureOnHomepageLoading}
+                  onClick={handleRemoveFromHomepage}
                 >
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-fg mb-2">
+                  {featureOnHomepageLoading
+                    ? t("lists.removeFromHomepageLoading")
+                    : t("lists.removeFromHomepage")}
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  loading={featureOnHomepageLoading}
+                  onClick={handleFeatureOnHomepage}
+                >
+                  {featureOnHomepageLoading
+                    ? t("lists.addToHomepageLoading")
+                    : t("lists.addToHomepage")}
+                </Button>
+              )
+            ) : null
+          }
+        />
+        {menus.length > 0 ? (
+          // The menus share edges as one ruled list: an operator reads down a
+          // roster of menus, not a stack of separate panels.
+          <ul className="flex flex-col divide-y divide-line overflow-hidden rounded-xl border border-line">
+            {menus.map((menu) => (
+              <li
+                key={menu.id}
+                className="flex flex-wrap items-start justify-between gap-3 p-3"
+              >
+                <div className="flex min-w-0 flex-col gap-1.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-semibold text-fg">
                       {isRTL
                         ? menu.nameAr || menu.name
                         : menu.nameEn || menu.name}
-                    </h3>
-                    <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold mb-3 ${
-                        menu.isActive
-                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                          : "bg-gray-100 text-gray-800  dark:text-fg-subtle"
-                      }`}
-                    >
+                    </span>
+                    <Badge tone={menu.isActive ? "success" : "neutral"} dot>
                       {menu.isActive
                         ? t("status.active")
                         : t("status.suspended")}
-                    </span>
-                    <div
-                      className={`flex flex-wrap gap-4 text-sm text-fg-muted ${isRTL ? "flex-row-reverse" : ""}`}
-                    >
-                      <span>
-                        {t("lists.link")}: {menu.slug}
-                      </span>
-                      <span>
-                        {t("lists.products")}:{" "}
-                        {menu.itemsCount || menu.activeItemsCount || 0}
-                      </span>
-                      <span>
-                        {t("lists.date")}: {formatDate(menu.createdAt)}
-                      </span>
-                    </div>
+                    </Badge>
                   </div>
+                  <dl className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-fg-muted">
+                    <div className="flex items-center gap-1.5">
+                      <dt className="ui-label">{t("lists.link")}</dt>
+                      <dd className="font-mono" dir="ltr">
+                        {menu.slug}
+                      </dd>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <dt className="ui-label">{t("lists.products")}</dt>
+                      <dd className="ui-figure" lang="en">
+                        {menu.itemsCount || menu.activeItemsCount || 0}
+                      </dd>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <dt className="ui-label">{t("lists.date")}</dt>
+                      <dd className="ui-figure" lang="en">
+                        {formatDate(menu.createdAt)}
+                      </dd>
+                    </div>
+                  </dl>
                 </div>
-                <div
-                  className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}
-                >
+                <div className="flex shrink-0 items-center gap-1.5">
                   <ButtonLink
                     href={publicMenuLinkUrl(menu.slug)}
                     external
@@ -235,9 +242,8 @@ export default function AdminUserMenusSection({
                     {t("lists.view")}
                   </ButtonLink>
                   <Button
-                    variant={menu.isActive ? "danger" : "primary"}
+                    variant={menu.isActive ? "dangerGhost" : "secondary"}
                     size="sm"
-                    className="min-w-[100px]"
                     loading={updatingMenuId === menu.id}
                     onClick={() => setConfirmingMenu(menu)}
                   >
@@ -248,15 +254,13 @@ export default function AdminUserMenusSection({
                         : t("lists.activate")}
                   </Button>
                 </div>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         ) : (
-          <div className="text-center py-8">
-            <p className="text-fg-muted">{t("lists.noMenus")}</p>
-          </div>
+          <EmptyState title={t("lists.noMenus")} size="sm" />
         )}
-      </CardDashBoard>
+      </Card>
 
       {confirmingMenu && (
         <ConfirmDialog

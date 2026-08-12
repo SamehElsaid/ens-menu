@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { pushPurchaseEvent } from "@/shared/gtmEvents";
@@ -32,6 +32,24 @@ function PaymentCallbackContent() {
     "loading" | "success" | "pending" | "error"
   >("loading");
   const [message, setMessage] = useState("");
+  const [elapsed, setElapsed] = useState(0);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const resolving = phase === "loading";
+
+  /* Counting only while verifying, so the interval stops the moment the verdict
+     lands rather than ticking behind a resolved screen. */
+  useEffect(() => {
+    if (!resolving) return;
+    const id = setInterval(() => setElapsed((s) => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [resolving]);
+
+  /* Focus the verdict when it arrives, so a keyboard user is not left on a
+     spinner that has already been replaced. */
+  useEffect(() => {
+    if (phase === "loading") return;
+    headingRef.current?.focus();
+  }, [phase]);
 
   const redirectParams = useMemo(() => {
     const params: Record<string, string> = {};
@@ -132,6 +150,7 @@ function PaymentCallbackContent() {
   }, [redirectParams, locale, t]);
 
   const handleRecover = async () => {
+    setElapsed(0);
     setPhase("loading");
     const orderId =
       typeof redirectParams.customerReference === "string"
@@ -183,9 +202,22 @@ function PaymentCallbackContent() {
     <StatusScreen
       code={code}
       tone={tone}
+      phase={phase}
+      live
+      headingRef={headingRef}
       label={t("paymentResultTitle")}
       title={phase === "loading" ? t("paymentResultChecking") : message}
       body={phase === "success" ? t("yourPlanUpdateHint") : undefined}
+      /* No fake progress bar. An honest elapsed count is the only thing that can
+         truthfully say "still working" while a payment is being verified, and it
+         only appears once the wait is long enough to worry about. */
+      footNote={
+        phase === "loading" && elapsed >= 5 ? (
+          <span dir="ltr" className="tabular-nums">
+            {elapsed}s
+          </span>
+        ) : undefined
+      }
     >
       {phase === "loading" ? (
         <SiteSpinner className="size-6 text-site-brand" />

@@ -14,22 +14,21 @@ import {
   controlHeight,
   controlRadius,
   controlText,
-  settle,
   type ControlSize,
 } from "./styles";
 
 /**
- * Shared control chrome. Text inputs always match `:focus-visible`, so the
- * global ring covers pointer focus too; the border shift is the local signal.
+ * Shared control chrome.
+ *
+ * All of the state — rest, hover, focus, invalid, disabled — lives in the
+ * `ui-field` class in `globals.css`, because `border-color` written as a
+ * Tailwind utility and `border-color` written in a stylesheet rule resolve by
+ * source order rather than by specificity, and getting that wrong means focus
+ * silently loses to the resting border. See DESIGN.md §10.
  */
 export const inputBase = cn(
-  "w-full min-w-0 bg-surface text-fg placeholder:text-fg-subtle",
-  "border border-line-strong",
-  settle,
-  "hover:border-fg-subtle focus:border-brand",
-  "disabled:cursor-not-allowed disabled:bg-surface-2 disabled:text-fg-subtle",
-  "aria-[invalid]:border-danger aria-[invalid]:hover:border-danger",
-  "read-only:bg-surface-2",
+  "ui-field w-full min-w-0 text-fg placeholder:text-fg-subtle",
+  "disabled:text-fg-subtle read-only:bg-surface-2",
 );
 
 type Common = {
@@ -73,8 +72,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         controlHeight[inputSize],
         controlText[inputSize],
         controlRadius[inputSize],
-        hasStart ? "ps-8" : "ps-2.5",
-        hasEnd ? "pe-8" : "pe-2.5",
+        hasStart ? "ps-9" : "ps-3",
+        hasEnd ? "pe-9" : "pe-3",
         className,
       )}
       {...merged}
@@ -89,7 +88,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     <div className={cn("relative flex w-full items-center", wrapperClassName)}>
       {hasStart ? (
         <span
-          className="pointer-events-none absolute start-2.5 flex items-center text-fg-subtle"
+          className="pointer-events-none absolute start-3 flex items-center text-fg-subtle"
           aria-hidden
         >
           {startIcon}
@@ -100,7 +99,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         <button
           type="button"
           onClick={() => setRevealed((v) => !v)}
-          className="absolute end-0.5 flex size-7 items-center justify-center rounded-md text-fg-subtle transition-colors hover:text-fg"
+          className="absolute end-1 flex size-8 items-center justify-center rounded-md text-fg-subtle transition-colors hover:bg-surface-2 hover:text-fg"
           aria-label={revealed ? "Hide password" : "Show password"}
           aria-pressed={revealed}
           tabIndex={-1}
@@ -109,7 +108,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         </button>
       ) : endIcon ? (
         <span
-          className="pointer-events-none absolute end-2.5 flex items-center text-fg-subtle"
+          className="pointer-events-none absolute end-3 flex items-center text-fg-subtle"
           aria-hidden
         >
           {endIcon}
@@ -131,7 +130,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         rows={rows}
         className={cn(
           inputBase,
-          "resize-y rounded-lg px-2.5 py-2 text-sm leading-relaxed",
+          "resize-y rounded-lg px-3 py-2.5 text-sm leading-relaxed",
           className,
         )}
         {...fieldProps}
@@ -154,7 +153,7 @@ export function ReadonlyValue({
   return (
     <div
       className={cn(
-        "flex min-h-9 w-full items-center rounded-lg bg-surface-2 px-2.5 text-sm text-fg sm:min-h-8",
+        "flex min-h-10 w-full items-center rounded-lg border border-line bg-surface-2 px-3 text-sm text-fg sm:min-h-9",
         mono && "font-mono tabular-nums",
         className,
       )}

@@ -1,4 +1,4 @@
-import type { ComponentProps, ReactNode } from "react";
+﻿import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { SiteNavLink } from "./SiteNavLink";
 
@@ -11,27 +11,42 @@ import { SiteNavLink } from "./SiteNavLink";
  */
 
 export type SiteButtonVariant =
-  "primary" | "secondary" | "ghost" | "inverse" | "inverseGhost";
+  "primary" | "secondary" | "accent" | "ghost" | "inverse" | "inverseGhost";
 
 export type SiteButtonSize = "sm" | "md" | "lg";
 
+/**
+ * One travel value across the whole vocabulary.
+ *
+ * The primary action carries a brand-coloured cast rather than a grey drop
+ * shadow, so the light source in the page's palette is the thing lighting the
+ * button. Hover deepens the fill and the cast together; the only movement is a
+ * 1px press, which is feedback rather than decoration.
+ */
 const base =
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap font-semibold " +
-  "transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out " +
+  /* `group` so an arrow inside the label can respond to the button's own hover
+     rather than needing its own listener or a wrapper. */
+  "group inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap font-semibold " +
+  "tracking-[-0.01em] " +
+  "transition-[background-color,border-color,color,box-shadow,transform] " +
+  "duration-(--dur-settle) ease-(--ease-settle) " +
   "disabled:pointer-events-none disabled:opacity-55 " +
   "motion-safe:active:translate-y-px";
 
 const variants: Record<SiteButtonVariant, string> = {
+  /** The light source. One per page — see DESIGN.md §3. */
   primary:
-    "bg-site-brand text-white shadow-site-brand hover:bg-site-brand-hover " +
-    "motion-safe:hover:-translate-y-px",
+    "bg-site-action text-site-action-fg shadow-site-brand hover:bg-site-action-hover",
   secondary:
-    "border border-site-line-strong bg-site-bg text-site-ink hover:border-site-brand-line hover:bg-site-brand-tint hover:text-site-brand-deep",
-  ghost: "text-site-fg hover:bg-site-tint hover:text-site-ink",
-  inverse:
-    "bg-white text-site-ink-bg hover:bg-white/90 motion-safe:hover:-translate-y-px",
+    "border border-site-line-strong bg-site-bg text-site-ink hover:border-site-brand hover:bg-site-brand-tint hover:text-site-brand-deep",
+  /** The soft brand action: "see it live", secondary CTAs inside brand areas.
+   *  Never the page's primary action. */
+  accent:
+    "border border-site-brand-line bg-site-brand-tint text-site-brand-deep hover:border-site-brand hover:bg-site-brand hover:text-white",
+  ghost: "text-site-fg hover:bg-site-brand-tint hover:text-site-brand-deep",
+  inverse: "bg-site-on-ink text-site-ink hover:bg-white",
   inverseGhost:
-    "border border-site-on-ink-line bg-site-on-ink-raise text-white hover:bg-white/12",
+    "border border-site-on-ink-line bg-site-on-ink-raise text-site-on-ink hover:bg-white/12 hover:border-site-on-ink",
 };
 
 const sizes: Record<SiteButtonSize, string> = {
@@ -77,10 +92,34 @@ export function SiteButton({
       {...props}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
-      className={siteButtonClasses({ variant, size, block, className })}
+      className={siteButtonClasses({
+        variant,
+        size,
+        block,
+        className: cn("relative", className),
+      })}
     >
-      {loading ? <SiteSpinner /> : null}
-      {children}
+      {loading ? (
+        /* Over the label rather than beside it. A spinner added to the row
+           widens the button, and a button that grows while a form is being
+           submitted moves everything under it — on a sign-in panel that is the
+           submit button jumping out from under the cursor. */
+        <span className="absolute inset-0 grid place-items-center">
+          <SiteSpinner />
+        </span>
+      ) : null}
+      {/* Faded, not hidden: `visibility: hidden` would take the label out of the
+          accessibility tree and leave the button unnamed for exactly as long as
+          it is doing something. The inner flex repeats the button's own gap so
+          wrapping the children changes nothing about how they sit. */}
+      <span
+        className={cn(
+          "inline-flex items-center justify-center gap-2",
+          loading && "opacity-0",
+        )}
+      >
+        {children}
+      </span>
     </button>
   );
 }

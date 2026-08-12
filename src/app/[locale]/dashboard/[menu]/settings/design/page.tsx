@@ -8,12 +8,12 @@ import LoadImage from "@/components/ImageLoad";
 import { templatesInfo } from "@/modules/TemplateShow/data";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import TemplateDesignCustomizePanel from "@/components/Settings/TemplateDesignCustomizePanel";
-import { FiEye, FiSettings, FiChevronDown } from "react-icons/fi";
+import { FiEye, FiSettings, FiChevronDown, FiTool } from "react-icons/fi";
 import { HiOutlineHand, HiOutlineColorSwatch } from "react-icons/hi";
 import { axiosPatch } from "@/shared/axiosCall";
 import type { Menu } from "@/types/Menu";
 import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
-import { FaCheck, FaSpinner, FaCrown } from "react-icons/fa";
+import { FaCheck, FaCrown } from "react-icons/fa";
 import { toast } from "react-toastify";
 import {
   menuRefFromRouteParam,
@@ -23,9 +23,16 @@ import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import { isFreePlanUser } from "@/lib/subscription";
 import ProUpgradeModal from "@/components/Dashboard/ProUpgradeModal";
 import { useCurrentPlanCapabilities } from "@/hooks/useCurrentPlanCapabilities";
-
-const customizeButtonClassName =
-  "flex-1 inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-xs font-medium border border-line text-fg-muted bg-raised hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  CardFooter,
+  PageShell,
+  SectionHeader,
+} from "@/components/ui";
+import { cn } from "@/lib/cn";
 
 export default function DesignPage() {
   const locale = useLocale();
@@ -145,9 +152,7 @@ export default function DesignPage() {
     }
 
     if (!resolvedMenuId) {
-      toast.error(
-        locale === "ar" ? "لا توجد قائمة محددة." : "No menu selected.",
-      );
+      toast.error(t("cards.noMenuSelected"));
       return;
     }
 
@@ -158,11 +163,7 @@ export default function DesignPage() {
           skipLoadingUi: true,
         });
         if (!activated) {
-          toast.error(
-            locale === "ar"
-              ? "تعذّر تفعيل القالب. حاول مرة أخرى."
-              : "Could not activate the template. Please try again.",
-          );
+          toast.error(t("cards.activateFailed"));
           return;
         }
       }
@@ -195,188 +196,184 @@ export default function DesignPage() {
   };
 
   return (
-    <div className="space-y-8 mb-2">
-      {/* Page header */}
-      <header
-        id="onboarding-design-header"
-        className={`flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between ${
-          isRTL ? "text-right sm:flex-row-reverse" : "text-left"
-        }`}
-      >
-        <div className="min-w-0 flex-1">
-          <PageTitleWithHelp>
-            <h1 className="text-2xl md:text-3xl font-bold text-fg mb-0">
-              {t("title")}
-            </h1>
-          </PageTitleWithHelp>
-          <p className="text-sm md:text-base text-fg-muted max-w-2xl mt-2">
-            {t("subtitle")}
-          </p>
-        </div>
-        <button
-          type="button"
-          id="onboarding-choose-design-cta"
-          onClick={scrollToTemplatePicker}
-          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-primary/90 dark:hover:bg-primary/80 sm:text-sm"
-        >
-          <HiOutlineColorSwatch className="text-base shrink-0" />
-          {t("headerCta")}
-          <FiChevronDown className="text-sm shrink-0 opacity-90" />
-        </button>
-      </header>
-
-      {/* Helpful tips */}
-      <div className="rounded-lg border border-sky-100 dark:border-sky-900/50 bg-sky-50/70 dark:bg-sky-900/30 px-4 py-4 md:px-6 md:py-5 flex flex-col gap-3">
-        <div className={`flex items-center gap-2`}>
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-sky-100 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 text-sm font-bold">
-            ✨
-          </div>
-          <h3 className="text-sm md:text-base font-semibold text-sky-900 dark:text-sky-200">
-            {t("tips.title")}
-          </h3>
-        </div>
-        <ul className={`text-[11px] md:text-xs text-fg-muted space-y-1.5`}>
+    <PageShell
+      kind="wide"
+      header={
+        <PageTitleWithHelp
+          id="onboarding-design-header"
+          eyebrow={t("eyebrow")}
+          title={t("title")}
+          description={t("subtitle")}
+          breadcrumbs={[
+            {
+              label: t("breadcrumbs.dashboard"),
+              href: menuDashboardPath(menu),
+            },
+            {
+              label: t("breadcrumbs.settings"),
+              href: menuDashboardPath(menu, "settings"),
+            },
+            { label: t("title") },
+          ]}
+          breadcrumbsLabel={t("title")}
+          actions={
+            <Button
+              type="button"
+              id="onboarding-choose-design-cta"
+              size="sm"
+              onClick={scrollToTemplatePicker}
+              startIcon={<HiOutlineColorSwatch aria-hidden />}
+              endIcon={<FiChevronDown aria-hidden />}
+            >
+              {t("headerCta")}
+            </Button>
+          }
+        />
+      }
+    >
+      <Alert tone="info" title={t("tips.title")}>
+        <ul className="mt-1 flex list-disc flex-col gap-1 ps-4">
           <li>{t("tips.tip1")}</li>
           <li>{t("tips.tip2")}</li>
           <li>{t("tips.tip3")}</li>
         </ul>
-      </div>
+      </Alert>
 
-      {/* Templates grid */}
       <section
         id="onboarding-design-templates"
-        aria-label={t("headerCta")}
-        className="bg-slate-50/60 rounded-lg border border-line p-4 md:p-6 lg:p-8 scroll-mt-24"
+        aria-label={t("gallery.title")}
+        className="flex scroll-mt-24 flex-col gap-3"
       >
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <SectionHeader
+          ruled
+          eyebrow={t("gallery.eyebrow")}
+          title={t("gallery.title")}
+        />
+
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {templatesForMenu.map((template, templateIndex) => {
             const isActive = template.id === activeTemplateId;
-            const isNew = template.isNew;
             const linkView =
               "https://" + template.slug + process.env.NEXT_PUBLIC_MENU_URL;
             const isCustomizeLoading = customizeLoadingSlug === template.slug;
             const isLocked = !allowedThemes.includes(template.id);
+            const isSelecting =
+              typeof isLoading === "string" && isLoading === template.id;
+            const showNew =
+              template.isNew &&
+              !isActive &&
+              !template.isUnderConstruction &&
+              !isLocked;
+            const showDefault = template.id === "default";
+            const showCustomize = Boolean(template.canEdit) && !isLocked;
+            const hasStatus =
+              isActive ||
+              showDefault ||
+              showNew ||
+              Boolean(template.isUnderConstruction) ||
+              isLocked;
 
             return (
-              <div
+              <Card
                 key={template.id}
-                className={`group relative cursor-pointer rounded-[28px] border bg-raised shadow-sm transition-all duration-200 overflow-hidden flex flex-col ${
-                  isActive
-                    ? "border-primary ring-2 ring-primary/30 shadow-xl shadow-primary/10 dark:shadow-primary/20"
-                    : isLocked
-                      ? "border-amber-200 dark:border-amber-700/50 opacity-90"
-                      : "border-line hover:border-primary/60 dark:hover:border-primary/50 hover:shadow-md"
-                }`}
+                as="article"
+                padded="none"
+                interactive={!isActive}
+                active={isActive}
+                className="flex h-full min-w-0 flex-col overflow-hidden"
               >
-                {/* Top status & image */}
-                <div className="relative p-4 pb-0">
-                  <div className="relative rounded-lg overflow-hidden bg-surface-3 aspect-4/3">
-                    <div className="relative h-full w-full overflow-hidden">
-                      {template.hidePreviewImage ? (
-                        <div
-                          className="absolute inset-0"
-                          style={{
-                            background: `linear-gradient(135deg, ${template.colors[0]}B8 0%, ${template.colors[1] ?? template.colors[0]}99 42%, rgb(15 23 42 / 0.72) 100%)`,
-                          }}
-                          aria-hidden
-                        />
-                      ) : (
-                        <LoadImage
-                          src={template.image}
-                          disableLazy
-                          alt={isRTL ? template.nameAr : template.name}
-                          className="w-full auto-scroll-image"
-                        />
-                      )}
-                      {template.hidePreviewImage ? (
-                        <div
-                          className="absolute inset-0 backdrop-blur-xl bg-white/25"
-                          aria-hidden
-                        />
-                      ) : null}
+                <div className="relative aspect-4/3 overflow-hidden border-b border-line bg-surface-3">
+                  {template.hidePreviewImage ? (
+                    <div
+                      className="absolute inset-0 flex items-center justify-center bg-surface-3 text-fg-subtle"
+                      aria-hidden
+                    >
+                      <HiOutlineColorSwatch className="text-2xl" />
                     </div>
+                  ) : (
+                    <LoadImage
+                      src={template.image}
+                      disableLazy
+                      alt={isRTL ? template.nameAr : template.name}
+                      className="w-full auto-scroll-image"
+                    />
+                  )}
 
-                    {isActive && (
-                      <div className="absolute top-3 inset-x-3 flex items-center justify-between gap-2 text-xs">
-                        <span className="inline-flex items-center rounded-full bg-emerald-500 text-white px-3 py-1 font-semibold shadow-lg shadow-emerald-500/40 dark:shadow-emerald-500/30">
-                          {t("badges.activeNow")}
-                        </span>
-                        <span className="inline-flex items-center rounded-full bg-emerald-50/80 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 border border-emerald-200 dark:border-emerald-500/40 backdrop-blur">
-                          {t("badges.currentTemplate")}
-                        </span>
-                      </div>
-                    )}
-
-                    {template.isUnderConstruction && (
-                      <span className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full bg-slate-600/90 text-white px-2.5 py-0.5 text-[11px] font-semibold shadow-sm border border-slate-500/40">
-                        {t("badges.underConstruction")}
-                      </span>
-                    )}
-                    {isNew &&
-                      !isActive &&
-                      !template.isUnderConstruction &&
-                      !isLocked && (
-                        <span className="absolute top-3 right-3 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 px-2.5 py-0.5 text-[11px] font-semibold shadow-sm border border-amber-200/50 dark:border-amber-500/30">
-                          {t("badges.new")}
-                        </span>
-                      )}
-
-                    {/* Pro lock overlay */}
-                    {isLocked && (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40 backdrop-blur-[2px]">
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400 text-amber-900 px-3 py-1 text-[11px] font-bold shadow-md">
-                          <FaCrown className="text-xs" />
-                          {t("badges.pro")}
-                        </span>
-                      </div>
-                    )}
-                  </div>
+                  {/* The lock veils the preview in the panel's own surface
+                      colour rather than a black scrim, so the badge on top of
+                      it keeps its contrast in both themes. */}
+                  {isLocked ? (
+                    <div className="absolute inset-0 flex items-center justify-center bg-surface/70 backdrop-blur-[2px]">
+                      <Badge
+                        tone="warning"
+                        size="md"
+                        icon={<FaCrown aria-hidden />}
+                      >
+                        {t("badges.pro")}
+                      </Badge>
+                    </div>
+                  ) : null}
                 </div>
 
-                {/* Content */}
-                <div className="p-5 pt-4 flex flex-col flex-1">
-                  <div className={`flex items-center justify-between gap-2`}>
-                    <div>
-                      <h2 className="text-base font-semibold text-fg">
-                        {isRTL ? template.nameAr : template.name}
-                      </h2>
-                      <p className="mt-1 text-[11px] text-fg-subtle">
-                        {template.id === "default"
-                          ? t("cards.defaultHelper")
-                          : t("cards.templateHelper")}
-                      </p>
+                <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4">
+                  {isActive ? (
+                    <p className="ui-label mb-1.5">
+                      {t("badges.currentTemplate")}
+                    </p>
+                  ) : null}
+
+                  {hasStatus ? (
+                    <div className="mb-2.5 flex flex-wrap items-center gap-1.5">
+                      {isActive ? (
+                        <Badge tone="accent" dot>
+                          {t("badges.activeNow")}
+                        </Badge>
+                      ) : null}
+                      {showDefault ? (
+                        <Badge>{t("badges.default")}</Badge>
+                      ) : null}
+                      {showNew ? (
+                        <Badge tone="info">{t("badges.new")}</Badge>
+                      ) : null}
+                      {template.isUnderConstruction ? (
+                        <Badge icon={<FiTool aria-hidden />}>
+                          {t("badges.underConstruction")}
+                        </Badge>
+                      ) : null}
+                      {isLocked ? (
+                        <Badge tone="warning" icon={<FaCrown aria-hidden />}>
+                          {t("badges.pro")}
+                        </Badge>
+                      ) : null}
                     </div>
+                  ) : null}
 
-                    {template.id === "default" && (
-                      <span className="inline-flex items-center rounded-full bg-primary/10 dark:bg-primary/20 text-primary px-2.5 py-1 text-[11px] font-semibold">
-                        {t("badges.default")}
-                      </span>
-                    )}
-                    {isLocked && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 px-2.5 py-1 text-[11px] font-bold border border-amber-200/60 dark:border-amber-500/30">
-                        <FaCrown className="text-[10px]" />
-                        {t("badges.pro")}
-                      </span>
-                    )}
-                  </div>
-
-                  <p
-                    className={`text-xs text-fg-muted leading-relaxed line-clamp-2 mt-3 ${
-                      isRTL ? "text-right" : "text-left"
-                    }`}
-                  >
+                  <h3 className="truncate text-sm font-semibold text-fg">
+                    {isRTL ? template.nameAr : template.name}
+                  </h3>
+                  <p className="mt-1 text-xs text-fg-subtle">
+                    {showDefault
+                      ? t("cards.defaultHelper")
+                      : t("cards.templateHelper")}
+                  </p>
+                  <p className="mt-2 line-clamp-2 text-start text-xs leading-relaxed text-fg-muted">
                     {isRTL ? template.descriptionAr : template.description}
                   </p>
 
-                  <div className="mt-auto pt-4 space-y-2">
-                    {/* Primary select button */}
-                    <button
+                  <div className="flex-1" />
+
+                  <CardFooter className="flex-col items-stretch gap-2">
+                    <Button
                       type="button"
                       id={
                         templateIndex === 0
                           ? "onboarding-select-template"
                           : undefined
                       }
+                      variant={isActive ? "secondary" : "primary"}
+                      size="sm"
+                      fullWidth
+                      loading={isSelecting}
                       disabled={
                         isLocked
                           ? false
@@ -392,84 +389,73 @@ export default function DesignPage() {
                         }
                         handleSelectTemplate(template.id);
                       }}
-                      className={`w-full inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-xs font-semibold shadow-sm transition-colors ${
-                        isLocked
-                          ? "bg-amber-400 hover:bg-amber-500 text-amber-900"
-                          : isActive
-                            ? "bg-emerald-500 hover:bg-emerald-600 dark:hover:bg-emerald-600 text-white"
-                            : "bg-primary hover:bg-primary/90 dark:hover:bg-primary/80 text-white"
-                      }`}
-                    >
-                      {isLocked ? (
-                        <>
-                          <FaCrown className="text-sm" />
-                          {t("cards.buttonUpgrade")}
-                        </>
-                      ) : typeof isLoading === "string" ? (
-                        isLoading === template.id ? (
-                          <FaSpinner className="animate-spin text-sm md:text-base" />
+                      startIcon={
+                        isLocked ? (
+                          <FaCrown aria-hidden />
+                        ) : isActive ? (
+                          <FaCheck aria-hidden />
                         ) : (
-                          <FaCheck className="text-sm md:text-base" />
+                          <HiOutlineHand aria-hidden />
                         )
-                      ) : !isActive ? (
-                        <HiOutlineHand className="text-sm md:text-base" />
-                      ) : (
-                        <FaCheck className="text-sm md:text-base" />
-                      )}
-                      {!isLocked &&
-                        (isActive
-                          ? t("cards.buttonActive")
-                          : t("cards.buttonUse"))}
-                    </button>
-
-                    {/* Secondary actions row: preview + customize */}
-                    <div
-                      className={`flex gap-2 ${
-                        isRTL ? "flex-row-reverse" : ""
-                      }`}
+                      }
                     >
-                      <button
+                      {isLocked
+                        ? t("cards.buttonUpgrade")
+                        : isActive
+                          ? t("cards.buttonActive")
+                          : t("cards.buttonUse")}
+                    </Button>
+
+                    <div
+                      className={cn(
+                        "grid gap-2",
+                        showCustomize ? "grid-cols-2" : "grid-cols-1",
+                      )}
+                    >
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="sm"
+                        fullWidth
                         onClick={(e) => {
                           e.stopPropagation();
                           window.open(linkView, "_blank");
                         }}
-                        className="flex-1 inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-xs font-medium border border-line text-fg-muted bg-raised hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
+                        startIcon={<FiEye aria-hidden />}
                       >
-                        <FiEye className="text-sm" />
                         {t("cards.preview")}
-                      </button>
-                      {template.canEdit && !isLocked && (
-                        <button
+                      </Button>
+                      {showCustomize ? (
+                        <Button
                           type="button"
+                          variant="secondary"
+                          size="sm"
+                          fullWidth
+                          loading={isCustomizeLoading}
                           disabled={Boolean(customizeLoadingSlug)}
                           onClick={(e) => {
                             e.stopPropagation();
                             void handleOpenCustomize(template);
                           }}
-                          className={`${customizeButtonClassName} disabled:opacity-60 disabled:cursor-wait`}
+                          startIcon={<FiSettings aria-hidden />}
                         >
-                          {isCustomizeLoading ? (
-                            <FaSpinner className="animate-spin text-sm" />
-                          ) : (
-                            <FiSettings className="text-sm" />
-                          )}
                           {t("cards.customize")}
-                        </button>
-                      )}
+                        </Button>
+                      ) : null}
                     </div>
-                  </div>
+                  </CardFooter>
                 </div>
-              </div>
+              </Card>
             );
           })}
         </div>
       </section>
+
       <ProUpgradeModal
         open={upgradeModalOpen}
         onClose={() => setUpgradeModalOpen(false)}
         subscriptionHref={subscriptionHref}
       />
-    </div>
+    </PageShell>
   );
 }

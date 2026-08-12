@@ -2,12 +2,19 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "@/i18n/navigation";
-import { ColDef } from "ag-grid-community";
-import { IoArrowBack } from "react-icons/io5";
-import CardDashBoard from "@/components/Card/CardDashBoard";
-import DataTable from "@/components/Custom/DataTable";
-import { Button, PageHeader } from "@/components/ui";
+import {
+  Badge,
+  DataTable,
+  EmptyState,
+  PageHeader,
+  PageShell,
+  Pagination,
+  Select,
+  Toolbar,
+  type DataColumn,
+  type StatusTone,
+} from "@/components/ui";
+import { useDataTableLabels } from "@/hooks/useDataTableLabels";
 import { axiosGet } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import { formatAdminDate } from "@/lib/fetchAdminAnalytics";
@@ -29,11 +36,24 @@ const ACTION_FILTER_OPTIONS: Array<AdminActivityAction | "all"> = [
   "user_subscription_updated",
 ];
 
+/** Destructive entries carry danger so a deletion is legible at a glance. */
+const ACTION_TONE: Record<AdminActivityAction, StatusTone> = {
+  admin_created: "success",
+  admin_deleted: "danger",
+  admin_permissions_updated: "info",
+  user_deleted: "danger",
+  user_soft_deleted: "warning",
+  user_restored: "success",
+  user_subscription_updated: "brand",
+};
+
 export default function AdminActivityLogPage() {
   const locale = useLocale();
   const t = useTranslations("adminActivityLog");
-  const router = useRouter();
-  const isRTL = locale === "ar";
+  const tCommon = useTranslations("common");
+  const tAdmin = useTranslations("adminDashboard");
+  const tAdministrators = useTranslations("adminAdministrators");
+  const tableLabels = useDataTableLabels();
 
   const [entries, setEntries] = useState<AdminActivityLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -130,170 +150,173 @@ export default function AdminActivityLogPage() {
     [t],
   );
 
-  const columnDefs: ColDef<AdminActivityLogEntry>[] = useMemo(
+  const columns: DataColumn<AdminActivityLogEntry>[] = useMemo(
     () => [
       {
-        headerName: t("columns.date"),
-        field: "createdAt",
-        width: 170,
-        cellRenderer: (params: { data: AdminActivityLogEntry }) => {
-          const entry = params.data;
-          if (!entry) return null;
-          return (
-            <span className="text-fg-muted text-sm">
-              {formatAdminDate(entry.createdAt, locale)}
-            </span>
-          );
-        },
-      },
-      {
-        headerName: t("columns.actor"),
-        field: "actorAdminName",
-        flex: 1,
-        minWidth: 140,
-        cellRenderer: (params: { data: AdminActivityLogEntry }) => (
-          <span className="font-medium text-fg">
-            {params.data?.actorAdminName ?? "—"}
+        id: "createdAt",
+        header: t("columns.date"),
+        numeric: true,
+        cell: (entry) => (
+          <span className="ui-figure text-[12px] text-fg-muted" lang="en">
+            {formatAdminDate(entry.createdAt, locale)}
           </span>
         ),
       },
       {
-        headerName: t("columns.action"),
-        field: "action",
-        flex: 1,
-        minWidth: 160,
-        cellRenderer: (params: { data: AdminActivityLogEntry }) => {
-          const entry = params.data;
-          if (!entry) return null;
-          return (
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-surface-2 text-fg-muted">
-              {actionLabel(entry.action)}
-            </span>
-          );
-        },
+        id: "actor",
+        header: t("columns.actor"),
+        cell: (entry) => (
+          <span className="font-medium text-fg">
+            {entry.actorAdminName ?? "—"}
+          </span>
+        ),
       },
       {
-        headerName: t("columns.target"),
-        flex: 1.2,
-        minWidth: 200,
-        cellRenderer: (params: { data: AdminActivityLogEntry }) => {
-          const entry = params.data;
-          if (!entry) return null;
-          return (
-            <div>
-              <p className="font-medium text-fg">{entry.targetName}</p>
-              {entry.targetEmail && (
-                <p className="text-xs text-fg-subtle">{entry.targetEmail}</p>
-              )}
-            </div>
-          );
-        },
+        id: "action",
+        header: t("columns.action"),
+        cell: (entry) => (
+          <Badge tone={ACTION_TONE[entry.action] ?? "neutral"} dot>
+            {actionLabel(entry.action)}
+          </Badge>
+        ),
       },
       {
-        headerName: t("columns.targetType"),
-        field: "targetType",
-        width: 110,
-        cellRenderer: (params: { data: AdminActivityLogEntry }) => {
-          const type = params.data?.targetType;
-          if (!type) return null;
-          return (
-            <span className="text-xs font-medium text-fg-muted">
-              {t(`targetTypes.${type}` as Parameters<typeof t>[0])}
+        id: "target",
+        header: t("columns.target"),
+        primary: true,
+        cell: (entry) => (
+          <span className="flex min-w-0 flex-col">
+            <span className="truncate font-medium text-fg">
+              {entry.targetName}
             </span>
-          );
-        },
+            {entry.targetEmail ? (
+              <span
+                className="truncate font-mono text-[12px] text-fg-subtle"
+                dir="ltr"
+              >
+                {entry.targetEmail}
+              </span>
+            ) : null}
+          </span>
+        ),
       },
       {
-        headerName: t("columns.details"),
-        flex: 1,
-        minWidth: 160,
-        cellRenderer: (params: { data: AdminActivityLogEntry }) => {
-          const entry = params.data;
-          if (!entry) return null;
-          return (
-            <span className="text-sm text-fg-muted">
-              {formatDetails(entry)}
+        id: "targetType",
+        header: t("columns.targetType"),
+        cell: (entry) =>
+          entry.targetType ? (
+            <span className="text-[12px] text-fg-muted">
+              {t(`targetTypes.${entry.targetType}` as Parameters<typeof t>[0])}
             </span>
-          );
-        },
+          ) : null,
+      },
+      {
+        id: "details",
+        header: t("columns.details"),
+        hideOnMobile: true,
+        cell: (entry) => (
+          <span className="text-[12px] text-fg-muted">
+            {formatDetails(entry)}
+          </span>
+        ),
       },
     ],
     [t, locale, actionLabel, formatDetails],
   );
 
+  /**
+   * An audit trail reads top-to-bottom, so the filters sit in one toolbar rule
+   * above a single ruled table instead of inside a floating card.
+   */
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title={t("title")}
-        description={t("subtitle")}
-        actions={
-          <Button
-            variant="secondary"
-            startIcon={<IoArrowBack className="rtl:rotate-180" />}
-            onClick={() => router.push("/admin/administrators")}
-          >
-            {t("back")}
-          </Button>
-        }
-      />
-
-      <CardDashBoard>
-        <div
-          className={`flex flex-wrap items-end gap-4 mb-6 ${isRTL ? "flex-row-reverse" : ""}`}
-        >
-          <div>
-            <label className="block text-xs font-medium text-fg-subtle mb-1">
-              {t("filters.action")}
-            </label>
-            <select
-              value={actionFilter}
-              onChange={(e) =>
-                setActionFilter(e.target.value as AdminActivityAction | "all")
-              }
-              className="rounded-lg border border-line bg-raised px-3 py-2 text-sm min-w-[200px]"
-            >
-              {ACTION_FILTER_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option === "all"
-                    ? t("filters.allActions")
-                    : actionLabel(option)}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-fg-subtle mb-1">
-              {t("filters.targetType")}
-            </label>
-            <select
-              value={targetFilter}
-              onChange={(e) =>
-                setTargetFilter(
-                  e.target.value as AdminActivityTargetType | "all",
-                )
-              }
-              className="rounded-lg border border-line bg-raised px-3 py-2 text-sm min-w-[160px]"
-            >
-              <option value="all">{t("filters.allTargets")}</option>
-              <option value="admin">{t("targetTypes.admin")}</option>
-              <option value="user">{t("targetTypes.user")}</option>
-            </select>
-          </div>
-        </div>
-
-        <DataTable<AdminActivityLogEntry>
-          rowData={entries}
-          columnDefs={columnDefs}
-          loading={loading}
-          locale={locale}
-          showRowNumbers
-          pagination
+    <PageShell
+      kind="table"
+      header={
+        <PageHeader
+          eyebrow={t("eyebrow")}
+          title={t("title")}
+          description={t("subtitle")}
+          breadcrumbs={[
+            { label: tAdmin("title"), href: "/admin" },
+            {
+              label: tAdministrators("title"),
+              href: "/admin/administrators",
+            },
+            { label: t("title") },
+          ]}
+          breadcrumbsLabel={tCommon("breadcrumb")}
+        />
+      }
+      toolbar={
+        <Toolbar
+          filters={
+            <>
+              <Select
+                inputSize="sm"
+                aria-label={t("filters.action")}
+                value={actionFilter}
+                onChange={(e) =>
+                  setActionFilter(e.target.value as AdminActivityAction | "all")
+                }
+                wrapperClassName="w-full sm:w-56"
+              >
+                {ACTION_FILTER_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option === "all"
+                      ? t("filters.allActions")
+                      : actionLabel(option)}
+                  </option>
+                ))}
+              </Select>
+              <Select
+                inputSize="sm"
+                aria-label={t("filters.targetType")}
+                value={targetFilter}
+                onChange={(e) =>
+                  setTargetFilter(
+                    e.target.value as AdminActivityTargetType | "all",
+                  )
+                }
+                wrapperClassName="w-full sm:w-44"
+              >
+                <option value="all">{t("filters.allTargets")}</option>
+                <option value="admin">{t("targetTypes.admin")}</option>
+                <option value="user">{t("targetTypes.user")}</option>
+              </Select>
+            </>
+          }
+        />
+      }
+      footer={
+        <Pagination
           page={page}
           totalPages={totalPages}
-          paginationPageSize={itemsPerPage}
           onPageChange={setPage}
+          disabled={loading}
+          labels={{
+            region: tCommon("pagination"),
+            previous: tCommon("previousPage"),
+            next: tCommon("nextPage"),
+            page: (n) => tCommon("goToPage", { page: n }),
+          }}
         />
-      </CardDashBoard>
-    </div>
+      }
+    >
+      {/* Twenty audit rows per page with a sticky head: the column that says
+          whether a row is a deletion has to stay named while you scroll. */}
+      <DataTable<AdminActivityLogEntry>
+        columns={columns}
+        rows={entries}
+        getRowKey={(row, index) => String(row.id ?? index)}
+        caption={t("title")}
+        loading={loading}
+        skeletonRows={itemsPerPage}
+        tableId="admin-activity-log"
+        stickyHeader
+        densityControl
+        labels={tableLabels}
+        empty={<EmptyState title={t("empty")} size="sm" />}
+      />
+    </PageShell>
   );
 }

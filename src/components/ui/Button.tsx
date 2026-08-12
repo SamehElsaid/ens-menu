@@ -16,7 +16,9 @@ import {
 
 export type ButtonVariant =
   | "primary"
+  | "gradient"
   | "secondary"
+  | "accent"
   | "ghost"
   | "subtle"
   | "danger"
@@ -24,29 +26,45 @@ export type ButtonVariant =
   | "link";
 
 /**
- * A solid fill carries a one-pixel inner highlight along its top edge, which is
- * what stops a flat rectangle of colour from reading as a coloured div.
+ * The primary action is the brand.
+ *
+ * `#9035E8` carries white at 5.44:1, so the button is the literal brand hex
+ * rather than a darkened stand-in — which is the whole reason this anchor
+ * works as a product colour. It ships with `shadow-brand`: a purple-tinted
+ * shadow, so the fill reads as a lit surface rather than as a coloured
+ * rectangle. That one detail is the most premium thing in the system, which is
+ * also why it is spent on exactly one control per view.
+ *
+ * `gradient` exists for hero and marketing CTAs only — DESIGN.md §3 caps the
+ * budget at one gradient moment per page, and a dashboard is not one.
+ *
+ * `accent` is the same hue at tint strength and means "live / selected", so a
+ * page can carry both without two things competing for "click here".
  */
 const variants: Record<ButtonVariant, string> = {
   primary:
-    "bg-brand text-on-brand shadow-xs shadow-inset-highlight hover:bg-brand-hover active:bg-brand-active",
+    "bg-brand text-on-brand shadow-brand hover:bg-brand-hover hover:shadow-brand-lg active:bg-brand-active active:shadow-brand",
+  gradient:
+    "text-white shadow-brand bg-[image:var(--grad-brand)] hover:shadow-brand-lg active:shadow-brand",
   secondary:
-    "bg-surface text-fg border border-line-strong hover:bg-surface-2 active:bg-surface-3",
+    "bg-surface text-fg border border-line-control shadow-2xs hover:bg-surface-2 hover:border-fg-subtle active:bg-surface-3",
+  accent:
+    "bg-brand-soft text-brand-soft-fg hover:bg-brand-soft-hover active:bg-brand-soft-hover",
   ghost: "text-fg-muted hover:bg-surface-2 hover:text-fg active:bg-surface-3",
   subtle:
-    "bg-brand-soft text-brand-soft-fg hover:bg-brand-soft-hover active:bg-brand-soft-hover",
+    "bg-brand-soft text-brand-soft-fg border border-brand-line hover:bg-brand-soft-hover active:bg-brand-soft-hover",
   danger:
-    "bg-danger text-white shadow-xs shadow-inset-highlight hover:bg-danger-hover active:bg-danger-hover",
+    "bg-danger text-on-status shadow-2xs hover:bg-danger-hover active:bg-danger-hover",
   dangerGhost:
     "text-danger hover:bg-danger-soft active:bg-danger-soft border border-transparent hover:border-danger-line",
-  link: "text-brand underline-offset-4 hover:underline p-0! h-auto!",
+  link: "text-brand-soft-fg underline underline-offset-4 decoration-brand-line hover:decoration-current p-0! h-auto!",
 };
 
 const paddingSize: Record<ControlSize, string> = {
-  xs: "px-2 gap-1",
-  sm: "px-2.5 gap-1.5",
-  md: "px-3 gap-1.5",
-  lg: "px-3.5 gap-2",
+  xs: "px-2.5 gap-1",
+  sm: "px-3 gap-1.5",
+  md: "px-3.5 gap-1.5",
+  lg: "px-4 gap-2",
 };
 
 export function buttonClasses({
@@ -63,7 +81,7 @@ export function buttonClasses({
   className?: string;
 } = {}) {
   return cn(
-    "inline-flex shrink-0 items-center justify-center whitespace-nowrap font-medium",
+    "inline-flex shrink-0 items-center justify-center whitespace-nowrap font-semibold",
     settle,
     "disabled:pointer-events-none disabled:opacity-45",
     "motion-reduce:transition-none",

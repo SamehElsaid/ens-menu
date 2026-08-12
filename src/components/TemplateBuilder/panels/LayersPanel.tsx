@@ -10,6 +10,14 @@ import type { BuilderNode } from "@/lib/template-builder/schema";
 import { getComponentDef } from "@/lib/template-builder/library/registry";
 import { useBuilderStore } from "../store/useBuilderStore";
 import { useComponentLabel } from "../i18n";
+import { focusRing, interactive } from "@/components/ui";
+
+const layerRow = (selected: boolean) =>
+  `mb-0.5 w-full truncate rounded-md px-2 py-1.5 text-start text-xs row-settle ${focusRing} ${
+    selected
+      ? "bg-accent font-medium text-on-accent"
+      : `text-fg-muted ${interactive}`
+  }`;
 
 function Row({
   node,
@@ -47,18 +55,14 @@ function Row({
           transform: CSS.Transform.toString(transform),
           transition,
           opacity: isDragging ? 0.45 : 1,
-          paddingLeft: 8 + depth * 12,
+          paddingInlineStart: 8 + depth * 12,
         }}
         {...attributes}
         {...listeners}
         onClick={() => select(node.id)}
-        className={`mb-0.5 w-full truncate rounded px-2 py-1.5 text-left text-xs ${
-          selectedId === node.id
-            ? "bg-violet-600 text-white"
-            : "text-slate-300 hover:bg-slate-700/60"
-        }`}
+        className={layerRow(selectedId === node.id)}
       >
-        <span className="mr-1 opacity-50">
+        <span className="me-1 opacity-50">
           {getComponentDef(node.type)?.icon ?? "•"}
         </span>
         {node.name || labelOf(node.type, getComponentDef(node.type)?.label)}
@@ -97,11 +101,7 @@ export function LayersPanel() {
       <button
         type="button"
         onClick={() => select(root.id)}
-        className={`mb-0.5 w-full truncate rounded px-2 py-1.5 text-left text-xs ${
-          selectedId === root.id
-            ? "bg-violet-600 text-white"
-            : "text-slate-300 hover:bg-slate-700/60"
-        }`}
+        className={layerRow(selectedId === root.id)}
       >
         ⬚ {root.name || labelOf(root.type, "Page")}
       </button>

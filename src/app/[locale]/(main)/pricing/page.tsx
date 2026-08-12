@@ -39,7 +39,10 @@ export default function PricingRoutePage() {
   return (
     <>
       <PricingView />
-      <CtaBand />
+      {/* The rake belongs to the Pro column here — it is part of the price
+          recalculation, which is this page's signature (MOTION-BLUEPRINT.md
+          §10.2). One per page, so the band goes without. */}
+      <CtaBand rake={false} />
     </>
   );
 }

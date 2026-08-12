@@ -248,13 +248,13 @@ export default function AddStaffModal({
                             field.onChange(role.id);
                           }}
                           className={cn(
-                            "flex items-center gap-2.5 rounded-lg border px-3.5 py-3 text-start text-sm font-medium transition-colors duration-150",
+                            "flex items-center gap-2.5 rounded-lg border px-3.5 py-3 text-start text-sm font-medium transition-colors duration-(--dur-settle)",
                             focusRing,
                             isComingSoon
                               ? "cursor-not-allowed border-dashed border-line bg-surface-2 text-fg-subtle opacity-80"
                               : isSelected
-                                ? "border-brand/50 bg-brand-soft text-brand ring-1 ring-brand/20"
-                                : "border-line text-fg-muted hover:border-line-strong hover:bg-surface-2",
+                                ? "border-brand bg-brand-soft font-semibold text-brand-soft-fg shadow-xs"
+                                : "border-line text-fg-muted hover:border-brand-line hover:bg-brand-soft/40",
                           )}
                         >
                           <IoShieldCheckmarkOutline className="shrink-0 text-lg" />
@@ -262,7 +262,7 @@ export default function AddStaffModal({
                             {roleDisplayName(role, locale)}
                           </span>
                           {isComingSoon && (
-                            <span className="shrink-0 rounded-md bg-surface-3 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-fg-subtle">
+                            <span className="ui-label shrink-0 rounded-full bg-surface-3 px-2 py-0.5 text-fg-subtle">
                               {t("roleComingSoon")}
                             </span>
                           )}
@@ -319,7 +319,7 @@ export default function AddStaffModal({
                             )
                           }
                           className={cn(
-                            "flex items-center gap-2.5 rounded-lg border px-3.5 py-3 text-start text-sm font-medium transition-colors duration-150",
+                            "flex items-center gap-2.5 rounded-lg border px-3.5 py-3 text-start text-sm font-medium transition-colors duration-(--dur-settle)",
                             focusRing,
                             isSelected
                               ? "border-brand/50 bg-brand-soft text-brand ring-1 ring-brand/20"
@@ -470,7 +470,7 @@ export default function AddStaffModal({
                   aria-pressed={field.value === true}
                   onClick={() => field.onChange(true)}
                   className={cn(
-                    "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-150",
+                    "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-(--dur-settle)",
                     focusRing,
                     field.value === true
                       ? "bg-surface text-fg shadow-xs"
@@ -491,7 +491,7 @@ export default function AddStaffModal({
                   aria-pressed={field.value === false}
                   onClick={() => field.onChange(false)}
                   className={cn(
-                    "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-150",
+                    "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-(--dur-settle)",
                     focusRing,
                     field.value === false
                       ? "bg-surface text-fg shadow-xs"

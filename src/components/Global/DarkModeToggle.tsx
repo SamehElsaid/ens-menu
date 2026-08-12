@@ -1,26 +1,9 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import { FiMoon, FiSun } from "react-icons/fi";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui";
-
-function useDarkMode() {
-  const subscribe = (callback: () => void) => {
-    const observer = new MutationObserver(callback);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-    return () => observer.disconnect();
-  };
-
-  const getSnapshot = () => document.documentElement.classList.contains("dark");
-
-  const getServerSnapshot = () => false;
-
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-}
+import { useDarkMode } from "@/hooks/useDarkMode";
 
 const DarkModeToggle: React.FC = () => {
   const isDarkMode = useDarkMode();

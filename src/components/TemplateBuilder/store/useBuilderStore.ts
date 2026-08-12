@@ -22,7 +22,12 @@ import { templateApi } from "@/lib/template-builder/data/api";
 
 const MAX_HISTORY = 50;
 
-type Hist = { root: BuilderNode; globalStyles: TemplateDocument["globalStyles"]; name: string; customCode: TemplateDocument["customCode"] };
+type Hist = {
+  root: BuilderNode;
+  globalStyles: TemplateDocument["globalStyles"];
+  name: string;
+  customCode: TemplateDocument["customCode"];
+};
 
 type State = {
   document: TemplateDocument | null;
@@ -30,7 +35,6 @@ type State = {
   breakpoint: Breakpoint;
   leftTab: "components" | "layers";
   rightTab: "content" | "style" | "code" | "theme";
-  uiDark: boolean;
   previewLocale: "en" | "ar";
   dirty: boolean;
   saving: boolean;
@@ -43,16 +47,33 @@ type State = {
   setBreakpoint: (bp: Breakpoint) => void;
   setLeftTab: (t: "components" | "layers") => void;
   setRightTab: (t: "content" | "style" | "code" | "theme") => void;
-  setUiDark: (v: boolean) => void;
   setPreviewLocale: (locale: "en" | "ar") => void;
   setCodeModalOpen: (v: boolean) => void;
   select: (id: string | null) => void;
   pushHistory: () => void;
   undo: () => void;
   redo: () => void;
-  updateMeta: (patch: Partial<Pick<TemplateDocument, "name" | "nameAr" | "description" | "descriptionAr" | "image" | "slug" | "seoMeta" | "customCode" | "globalStyles">>) => void;
+  updateMeta: (
+    patch: Partial<
+      Pick<
+        TemplateDocument,
+        | "name"
+        | "nameAr"
+        | "description"
+        | "descriptionAr"
+        | "image"
+        | "slug"
+        | "seoMeta"
+        | "customCode"
+        | "globalStyles"
+      >
+    >,
+  ) => void;
   updateSelectedProps: (props: Record<string, unknown>) => void;
-  updateSelectedStyles: (bp: Breakpoint, styles: Record<string, unknown>) => void;
+  updateSelectedStyles: (
+    bp: Breakpoint,
+    styles: Record<string, unknown>,
+  ) => void;
   updateSelectedCustomCode: (code: BuilderNode["customCode"]) => void;
   updateSelectedName: (name: string) => void;
   addNode: (type: string, parentId?: string, index?: number) => void;
@@ -63,7 +84,14 @@ type State = {
   moveSelected: (parentId: string, index: number) => void;
   reorderInParent: (parentId: string, from: number, to: number) => void;
   /** Silent autosave of current document. Pass meta to apply catalog fields then persist. */
-  save: (meta?: Partial<Pick<TemplateDocument, "name" | "nameAr" | "description" | "descriptionAr" | "image">>) => Promise<void>;
+  save: (
+    meta?: Partial<
+      Pick<
+        TemplateDocument,
+        "name" | "nameAr" | "description" | "descriptionAr" | "image"
+      >
+    >,
+  ) => Promise<void>;
 };
 
 function snap(doc: TemplateDocument): Hist {
@@ -81,7 +109,6 @@ export const useBuilderStore = create<State>((set, get) => ({
   breakpoint: "desktop",
   leftTab: "components",
   rightTab: "content",
-  uiDark: true,
   previewLocale: "en",
   dirty: false,
   saving: false,
@@ -103,7 +130,6 @@ export const useBuilderStore = create<State>((set, get) => ({
   setBreakpoint: (bp) => set({ breakpoint: bp }),
   setLeftTab: (t) => set({ leftTab: t }),
   setRightTab: (t) => set({ rightTab: t }),
-  setUiDark: (v) => set({ uiDark: v }),
   setPreviewLocale: (locale) => set({ previewLocale: locale }),
   setCodeModalOpen: (v) => set({ codeModalOpen: v }),
   select: (id) => set({ selectedId: id }),
@@ -172,7 +198,10 @@ export const useBuilderStore = create<State>((set, get) => ({
           ...n,
           styles: {
             ...n.styles,
-            [bp]: { ...(n.styles[bp] ?? (bp === "desktop" ? n.styles.desktop : {})), ...styles },
+            [bp]: {
+              ...(n.styles[bp] ?? (bp === "desktop" ? n.styles.desktop : {})),
+              ...styles,
+            },
           },
         })),
       },
@@ -187,7 +216,10 @@ export const useBuilderStore = create<State>((set, get) => ({
     set({
       document: {
         ...doc,
-        root: updateNode(doc.root, selectedId, (n) => ({ ...n, customCode: code })),
+        root: updateNode(doc.root, selectedId, (n) => ({
+          ...n,
+          customCode: code,
+        })),
       },
       dirty: true,
     });
@@ -214,8 +246,7 @@ export const useBuilderStore = create<State>((set, get) => ({
     let targetParent = parentId ?? selectedId ?? doc.root.id;
     const target = findNode(doc.root, targetParent);
     const canNest =
-      target &&
-      (CONTAINER_TYPES.has(target.type) || target.id === doc.root.id);
+      target && (CONTAINER_TYPES.has(target.type) || target.id === doc.root.id);
     let insertIndex = index;
     if (!canNest && target) {
       const parent = findParentOf(doc.root, target.id);

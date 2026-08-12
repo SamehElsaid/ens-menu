@@ -19,7 +19,7 @@ import {
   Alert,
   Badge,
   Button,
-  Card,
+  PageShell,
   SearchInput,
   Select,
   Toolbar,
@@ -200,96 +200,101 @@ export default function ItemsPage() {
   }, []);
 
   return (
-    <>
-      <PageTitleWithHelp
-        id="onboarding-items-header"
-        className="mb-3"
-        title={t("title")}
-        description={t("subtitle")}
-        meta={
-          !loading && totalItems > 0 ? (
-            <Badge tone="neutral">
-              <span data-numeric>{totalItems}</span>
-            </Badge>
-          ) : undefined
-        }
-        actions={
-          <>
-            <MenuImportEntryButton menuId={menuId} variant="secondary" />
-            <Button
-              id="onboarding-add-item"
-              onClick={openAddModal}
-              className="hidden md:inline-flex"
-              startIcon={<IoAddCircleOutline className="size-4" />}
-            >
-              {t("addItem")}
-            </Button>
-          </>
-        }
-      />
-
-      <Card id="onboarding-items-filters" padded="sm" className="mb-3">
-        <Toolbar
-          search={
-            <SearchInput
-              value={appliedSearch}
-              onChange={(value) => {
-                setAppliedSearch(value);
-                setPage(1);
-              }}
-              placeholder={t("searchByName")}
-              label={t("search")}
-            />
+    <PageShell
+      kind="wide"
+      header={
+        <PageTitleWithHelp
+          id="onboarding-items-header"
+          title={t("title")}
+          description={t("subtitle")}
+          meta={
+            !loading && totalItems > 0 ? (
+              <Badge tone="neutral">
+                <span data-numeric>{totalItems}</span>
+              </Badge>
+            ) : undefined
           }
-          filters={
+          actions={
             <>
-              {menuId ? (
-                <div className="min-w-48 flex-1 sm:flex-none">
-                  <CategorySearchSelect
-                    menuId={menuId}
-                    instanceId="items-category-filter"
-                    variant="filter"
-                    value={appliedCategoryId}
-                    selectedOption={selectedCategoryFilter}
-                    placeholder={t("allCategories")}
-                    onChange={(id, option) => {
-                      setAppliedCategoryId(id);
-                      setSelectedCategoryFilter(option);
-                      setPage(1);
-                    }}
-                  />
-                </div>
-              ) : null}
-              <Select
-                value={appliedAvailableFilter}
-                onChange={(e) => {
-                  setAppliedAvailableFilter(e.target.value);
-                  setPage(1);
-                }}
-                aria-label={t("availability")}
-                className="min-w-36"
+              <MenuImportEntryButton menuId={menuId} variant="secondary" />
+              <Button
+                id="onboarding-add-item"
+                onClick={openAddModal}
+                className="hidden md:inline-flex"
+                startIcon={<IoAddCircleOutline className="size-4" />}
               >
-                <option value="">{t("allStatus")}</option>
-                <option value="true">{t("available")}</option>
-                <option value="false">{t("unavailable")}</option>
-              </Select>
-              {isFiltered ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={handleReset}
-                  startIcon={<IoRefreshOutline className="size-3.5" />}
-                >
-                  {t("reset")}
-                </Button>
-              ) : null}
+                {t("addItem")}
+              </Button>
             </>
           }
         />
-      </Card>
-
+      }
+      /* The filter row rides the sticky shelf instead of sitting in its own
+         card: on a menu of 200 items the category filter used to scroll away. */
+      toolbar={
+        <div id="onboarding-items-filters">
+          <Toolbar
+            search={
+              <SearchInput
+                value={appliedSearch}
+                onChange={(value) => {
+                  setAppliedSearch(value);
+                  setPage(1);
+                }}
+                placeholder={t("searchByName")}
+                label={t("search")}
+              />
+            }
+            filters={
+              <>
+                {menuId ? (
+                  <div className="min-w-48 flex-1 sm:flex-none">
+                    <CategorySearchSelect
+                      menuId={menuId}
+                      instanceId="items-category-filter"
+                      variant="filter"
+                      value={appliedCategoryId}
+                      selectedOption={selectedCategoryFilter}
+                      placeholder={t("allCategories")}
+                      onChange={(id, option) => {
+                        setAppliedCategoryId(id);
+                        setSelectedCategoryFilter(option);
+                        setPage(1);
+                      }}
+                    />
+                  </div>
+                ) : null}
+                <Select
+                  value={appliedAvailableFilter}
+                  onChange={(e) => {
+                    setAppliedAvailableFilter(e.target.value);
+                    setPage(1);
+                  }}
+                  aria-label={t("availability")}
+                  className="min-w-36"
+                >
+                  <option value="">{t("allStatus")}</option>
+                  <option value="true">{t("available")}</option>
+                  <option value="false">{t("unavailable")}</option>
+                </Select>
+                {isFiltered ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleReset}
+                    startIcon={<IoRefreshOutline className="size-3.5" />}
+                  >
+                    {t("reset")}
+                  </Button>
+                ) : null}
+              </>
+            }
+          />
+        </div>
+      }
+    >
       {!loading && items.some((item) => !getImageUrl(item)) ? (
-        <Alert tone="info" icon={<IoCameraOutline />} className="mb-3">
+        <Alert tone="info" icon={<IoCameraOutline />}>
           {t("missingImagesHint")}
         </Alert>
       ) : null}
@@ -319,9 +324,7 @@ export default function ItemsPage() {
       />
 
       {!loading && items.length === 0 && !isFiltered && (
-        <div className="mt-4 md:mt-6">
-          <MenuImportEntryButton menuId={menuId} variant="card" />
-        </div>
+        <MenuImportEntryButton menuId={menuId} variant="card" />
       )}
 
       {(showAddModal || isEditItemLoading || editingItem) && menuId && (
@@ -343,7 +346,6 @@ export default function ItemsPage() {
           onDeleted={refreshList}
         />
       )}
-      <div className="pb-10" />
-    </>
+    </PageShell>
   );
 }

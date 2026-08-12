@@ -70,23 +70,6 @@ export default async function RootLayout({
         <JsonLd data={[buildOrganizationJsonLd(), buildWebSiteJsonLd()]} />
       </head>
       <body suppressHydrationWarning>
-        {/*
-          THESIS: the working surface of a live venue, read every day by the
-          person who runs it. It refuses the airy marketing-grade dashboard:
-          nothing is spaced for a screenshot.
-          OWN-WORLD: true-graphite neutrals, one indigo accent spent only on
-          decisions, hairlines over shadows, 13px base, 32px controls, tabular
-          figures, Readex Pro across Arabic and Latin.
-          STORY: the owner sees what guests see, changes it, and knows it
-          published — without leaving the menu they are holding.
-          FIRST VIEWPORT: 240px rail with a menu switcher at its head, 48px
-          header carrying search and account, then the page's own title row and
-          its primary action at the inline end.
-          FORM: the category standard, played straight (canon; grounded list
-          candidate 3 declined by the user); seed key 199dcbcb.
-          FINISH: unreviewed and undocumented is unfinished; this build ends
-          with the finish review, the verdict, and DESIGN.md
-        */}
         <Suspense fallback={null}>
           <GoogleTagManager />
           <GoogleGtag />

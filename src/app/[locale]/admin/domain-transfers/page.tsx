@@ -2,26 +2,44 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import type { ColDef, ICellRendererParams } from "ag-grid-community";
 import {
   IoCheckmarkCircleOutline,
   IoCloseCircleOutline,
   IoGlobeOutline,
   IoRefreshOutline,
 } from "react-icons/io5";
-import CardDashBoard from "@/components/Card/CardDashBoard";
-import DataTable from "@/components/Custom/DataTable";
 import PhoneDisplay from "@/components/Global/PhoneDisplay";
 import {
+  Alert,
+  Badge,
   Button,
+  DataTable,
+  EmptyState,
+  Field,
   LoadingBlock,
   Modal,
+  NoResultsState,
   PageHeader,
-  buttonClasses,
+  PageShell,
+  Pagination,
+  SearchInput,
+  Select,
+  StatCard,
+  StatGrid,
+  Textarea,
+  Toolbar,
+  type DataColumn,
+  type StatusTone,
 } from "@/components/ui";
+import { useDataTableLabels } from "@/hooks/useDataTableLabels";
+import { cn } from "@/lib/cn";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import type { AdminDomainTransferRequest } from "@/types/DomainTransfer";
 import { toast } from "react-toastify";
+
+const PAGE_SIZE = 20;
+
+type TransferStatus = AdminDomainTransferRequest["status"];
 
 function formatDateTime(value: string, locale: string): string {
   return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-US", {
@@ -30,31 +48,44 @@ function formatDateTime(value: string, locale: string): string {
   }).format(new Date(value));
 }
 
-function statusBadgeClass(
-  status: AdminDomainTransferRequest["status"],
-): string {
-  switch (status) {
-    case "completed":
-      return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400";
-    case "user_confirmed":
-      return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
-    case "awaiting_user":
-      return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400";
-    case "cancelled":
-      return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
-    default:
-      return "bg-slate-100 text-slate-700  ";
-  }
-}
+const STATUS_TONE: Record<TransferStatus, StatusTone> = {
+  pending: "neutral",
+  awaiting_user: "warning",
+  user_confirmed: "info",
+  completed: "success",
+  cancelled: "danger",
+};
+
+const STATUSES: TransferStatus[] = [
+  "pending",
+  "awaiting_user",
+  "user_confirmed",
+  "completed",
+  "cancelled",
+];
+
+/** The four states a request can still be moved out of, in queue order. */
+const SUMMARY_STATUSES: TransferStatus[] = [
+  "pending",
+  "awaiting_user",
+  "user_confirmed",
+  "completed",
+];
 
 export default function AdminDomainTransfersPage() {
   const locale = useLocale();
   const t = useTranslations("adminDomainTransfers");
   const tCommon = useTranslations("common");
-  const textDir = locale === "ar" ? "rtl" : "ltr";
+  const tAdmin = useTranslations("adminDashboard");
+  const tableLabels = useDataTableLabels();
 
   const [requests, setRequests] = useState<AdminDomainTransferRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<TransferStatus | "all">(
+    "all",
+  );
+  const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<AdminDomainTransferRequest | null>(
     null,
   );
@@ -81,21 +112,24 @@ export default function AdminDomainTransfersPage() {
     void loadRequests();
   }, [loadRequests]);
 
-  const openDetail = async (requestId: number) => {
-    setDetailLoading(true);
-    const result = await axiosGet<{ request: AdminDomainTransferRequest }>(
-      `/admin/domain-transfers/${requestId}`,
-      locale,
-    );
-    setDetailLoading(false);
-    if (result.status && result.data) {
-      setSelected(result.data.request);
-      setMessage("");
-      setShowCancelConfirm(false);
-    } else {
-      toast.error(t("loadDetailError"));
-    }
-  };
+  const openDetail = useCallback(
+    async (requestId: number) => {
+      setDetailLoading(true);
+      const result = await axiosGet<{ request: AdminDomainTransferRequest }>(
+        `/admin/domain-transfers/${requestId}`,
+        locale,
+      );
+      setDetailLoading(false);
+      if (result.status && result.data) {
+        setSelected(result.data.request);
+        setMessage("");
+        setShowCancelConfirm(false);
+      } else {
+        toast.error(t("loadDetailError"));
+      }
+    },
+    [locale, t],
+  );
 
   const handleSendMessage = async () => {
     if (!selected || !message.trim()) return;
@@ -164,102 +198,254 @@ export default function AdminDomainTransfersPage() {
     }
   };
 
-  const columnDefs = useMemo<ColDef<AdminDomainTransferRequest>[]>(
+  const counts = useMemo(() => {
+    const map = new Map<TransferStatus, number>();
+    for (const request of requests) {
+      map.set(request.status, (map.get(request.status) ?? 0) + 1);
+    }
+    return map;
+  }, [requests]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return requests.filter((request) => {
+      if (statusFilter !== "all" && request.status !== statusFilter) {
+        return false;
+      }
+      if (!q) return true;
+      return (
+        request.userName?.toLowerCase().includes(q) ||
+        request.domainUrl?.toLowerCase().includes(q) ||
+        request.userEmail?.toLowerCase().includes(q)
+      );
+    });
+  }, [requests, query, statusFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageRows = filtered.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+
+  const columns = useMemo<DataColumn<AdminDomainTransferRequest>[]>(
     () => [
       {
-        field: "userName",
-        headerName: t("colUser"),
-        flex: 1,
-        minWidth: 140,
-      },
-      {
-        field: "domainUrl",
-        headerName: t("colDomain"),
-        flex: 1.2,
-        minWidth: 160,
-        cellRenderer: (
-          params: ICellRendererParams<AdminDomainTransferRequest>,
-        ) => (
-          <span dir="ltr" className="font-mono text-sm">
-            {params.value}
+        id: "user",
+        header: t("colUser"),
+        primary: true,
+        cell: (row) => (
+          <span className="min-w-0">
+            <span className="block truncate font-medium text-fg">
+              {row.userName}
+            </span>
+            <span
+              className="block truncate font-mono text-[11px] text-fg-subtle"
+              dir="ltr"
+            >
+              {row.userEmail}
+            </span>
           </span>
         ),
       },
       {
-        field: "status",
-        headerName: t("colStatus"),
-        width: 150,
-        cellRenderer: (
-          params: ICellRendererParams<AdminDomainTransferRequest>,
-        ) => (
-          <span
-            className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusBadgeClass(params.value)}`}
-          >
-            {t(`status.${params.value}`)}
+        id: "domain",
+        header: t("colDomain"),
+        cell: (row) => (
+          <span className="ui-figure text-[13px] text-fg" dir="ltr">
+            {row.domainUrl}
           </span>
         ),
       },
       {
-        field: "createdAt",
-        headerName: t("colDate"),
-        width: 170,
-        valueFormatter: (params) =>
-          params.value ? formatDateTime(String(params.value), locale) : "",
+        id: "status",
+        header: t("colStatus"),
+        cell: (row) => (
+          <Badge tone={STATUS_TONE[row.status] ?? "neutral"} dot>
+            {t(`status.${row.status}`)}
+          </Badge>
+        ),
       },
       {
-        headerName: t("colActions"),
-        width: 120,
-        sortable: false,
-        filter: false,
-        cellRenderer: (
-          params: ICellRendererParams<AdminDomainTransferRequest>,
-        ) => (
-          <button
-            type="button"
-            onClick={() => void openDetail(params.data!.id)}
-            className={buttonClasses({ variant: "subtle", size: "sm" })}
-          >
-            {t("view")}
-          </button>
+        id: "createdAt",
+        header: t("colDate"),
+        numeric: true,
+        cell: (row) => (
+          <span className="ui-figure text-[12px] text-fg-muted" lang="en">
+            {row.createdAt ? formatDateTime(row.createdAt, locale) : "—"}
+          </span>
         ),
       },
     ],
     [locale, t],
   );
 
+  const adminMessages = selected?.messages ?? [];
+
+  /**
+   * The queue first, the conversation second.
+   *
+   * The counts across the top say how much work is waiting in each state before
+   * any row is read, the filter narrows to one of those states, and the table
+   * carries the domain as a mono ticket because that string — not the customer
+   * name — is what an operator matches against a DNS record.
+   */
   return (
-    <div className="space-y-6" dir={textDir}>
-      <PageHeader
-        title={
-          <>
-            <IoGlobeOutline className="text-brand" aria-hidden />
-            {t("title")}
-          </>
+    <PageShell
+      kind="table"
+      header={
+        <>
+          <PageHeader
+            title={
+              <span className="inline-flex items-center gap-2">
+                <IoGlobeOutline className="text-fg-subtle" aria-hidden />
+                {t("title")}
+              </span>
+            }
+            description={t("description")}
+            breadcrumbs={[
+              { label: tAdmin("title"), href: "/admin" },
+              { label: t("title") },
+            ]}
+            breadcrumbsLabel={tCommon("breadcrumb")}
+            actions={
+              <Button
+                variant="secondary"
+                startIcon={<IoRefreshOutline />}
+                onClick={() => void loadRequests()}
+                loading={loading}
+              >
+                {t("refresh")}
+              </Button>
+            }
+          />
+
+          {/* The tiles were marked `active` by the status filter but had no way
+              to set it, so the highlight could never appear from a click on the
+              thing it highlighted. Each tile now selects its own state, and
+              clicking the selected one clears back to everything. */}
+          <StatGrid columns={4} ruled>
+            {SUMMARY_STATUSES.map((status) => (
+              <StatCard
+                key={status}
+                label={t(`status.${status}`)}
+                value={
+                  <span lang="en">
+                    {(counts.get(status) ?? 0).toLocaleString("en-US")}
+                  </span>
+                }
+                loading={loading}
+                active={statusFilter === status}
+                onClick={() => {
+                  setStatusFilter((current) =>
+                    current === status ? "all" : status,
+                  );
+                  setPage(1);
+                }}
+              />
+            ))}
+          </StatGrid>
+        </>
+      }
+      toolbar={
+        <Toolbar
+          search={
+            <SearchInput
+              value={query}
+              onChange={(value) => {
+                setQuery(value);
+                setPage(1);
+              }}
+              placeholder={tCommon("search")}
+              label={tCommon("search")}
+              clearLabel={tCommon("clearSearch")}
+            />
+          }
+          filters={
+            <Select
+              inputSize="sm"
+              aria-label={t("colStatus")}
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value as TransferStatus | "all");
+                setPage(1);
+              }}
+              wrapperClassName="w-auto"
+            >
+              <option value="all">{t("filterAll")}</option>
+              {STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {t(`status.${status}`)}
+                </option>
+              ))}
+            </Select>
+          }
+        />
+      }
+      footer={
+        <Pagination
+          page={currentPage}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          summary={
+            filtered.length > 0
+              ? tCommon("paginationInfo", {
+                  from: (currentPage - 1) * PAGE_SIZE + 1,
+                  to: Math.min(currentPage * PAGE_SIZE, filtered.length),
+                  total: filtered.length,
+                })
+              : undefined
+          }
+          labels={{
+            region: tCommon("pagination"),
+            previous: tCommon("previousPage"),
+            next: tCommon("nextPage"),
+            page: (n) => tCommon("goToPage", { page: n }),
+          }}
+        />
+      }
+    >
+      <DataTable<AdminDomainTransferRequest>
+        columns={columns}
+        rows={pageRows}
+        getRowKey={(row) => String(row.id)}
+        caption={t("title")}
+        loading={loading}
+        skeletonRows={8}
+        tableId="admin-domain-transfers"
+        stickyHeader
+        densityControl
+        labels={tableLabels}
+        empty={
+          query.trim() || statusFilter !== "all" ? (
+            <NoResultsState
+              title={tCommon("noResultsTitle")}
+              description={tCommon("noResultsDescription")}
+              onClear={() => {
+                setQuery("");
+                setStatusFilter("all");
+                setPage(1);
+              }}
+              clearLabel={tCommon("clearFilters")}
+            />
+          ) : (
+            <EmptyState
+              icon={<IoGlobeOutline />}
+              title={t("title")}
+              description={t("description")}
+            />
+          )
         }
-        description={t("description")}
-        actions={
+        rowActions={(row) => (
           <Button
             variant="secondary"
-            startIcon={<IoRefreshOutline />}
-            onClick={() => void loadRequests()}
+            size="sm"
+            onClick={() => void openDetail(row.id)}
           >
-            {t("refresh")}
+            {t("view")}
           </Button>
-        }
-      />
-
-      <CardDashBoard>
-        {loading ? (
-          <LoadingBlock label={tCommon("loading")} className="min-h-[200px]" />
-        ) : (
-          <DataTable
-            rowData={requests}
-            columnDefs={columnDefs}
-            pagination
-            paginationPageSize={20}
-          />
         )}
-      </CardDashBoard>
+      />
 
       <Modal
         open={selected !== null || detailLoading}
@@ -281,57 +467,66 @@ export default function AdminDomainTransfersPage() {
         {detailLoading ? (
           <LoadingBlock label={tCommon("loading")} className="min-h-[200px]" />
         ) : selected ? (
-          <div className="space-y-5">
-            <div className="grid gap-3 rounded-lg bg-surface-2 p-4 text-sm sm:grid-cols-2">
-              <div>
-                <span className="text-fg-muted">{t("colUser")}: </span>
-                <span className="font-medium">{selected.userName}</span>
+          <div className="flex flex-col gap-5">
+            {/* The request's facts are a ticket stub: mono captions above the
+                values, so the panel scans top-to-bottom rather than as prose. */}
+            <dl className="grid gap-3 rounded-lg border border-line bg-surface-2 p-3 sm:grid-cols-2">
+              <div className="min-w-0">
+                <dt className="ui-label">{t("colUser")}</dt>
+                <dd className="truncate text-[13px] font-medium text-fg">
+                  {selected.userName}
+                </dd>
               </div>
-              <div>
-                <span className="text-fg-muted">{t("email")}: </span>
-                <span className="font-medium" dir="ltr">
+              <div className="min-w-0">
+                <dt className="ui-label">{t("email")}</dt>
+                <dd
+                  className="truncate text-[13px] font-medium text-fg"
+                  dir="ltr"
+                >
                   {selected.userEmail}
-                </span>
+                </dd>
               </div>
               {selected.userPhone && (
-                <div>
-                  <span className="text-fg-muted">{t("phone")}: </span>
-                  <PhoneDisplay value={selected.userPhone} />
+                <div className="min-w-0">
+                  <dt className="ui-label">{t("phone")}</dt>
+                  <dd className="text-[13px] font-medium text-fg">
+                    <PhoneDisplay value={selected.userPhone} />
+                  </dd>
                 </div>
               )}
-              <div>
-                <span className="text-fg-muted">{t("colStatus")}: </span>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusBadgeClass(selected.status)}`}
-                >
-                  {t(`status.${selected.status}`)}
-                </span>
+              <div className="min-w-0">
+                <dt className="ui-label">{t("colStatus")}</dt>
+                <dd className="mt-0.5">
+                  <Badge tone={STATUS_TONE[selected.status]} dot>
+                    {t(`status.${selected.status}`)}
+                  </Badge>
+                </dd>
               </div>
-            </div>
+            </dl>
 
             {selected.status === "user_confirmed" && (
-              <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
-                {t("userConfirmedAlert")}
-              </div>
+              <Alert tone="info">{t("userConfirmedAlert")}</Alert>
             )}
 
-            {selected.messages && selected.messages.length > 0 && (
-              <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-fg">
-                  {t("messagesHistory")}
-                </h3>
-                <div className="max-h-60 space-y-2 overflow-y-auto">
-                  {selected.messages.map((msg) => (
-                    <div
+            {adminMessages.length > 0 && (
+              <section className="flex flex-col gap-2">
+                <h3 className="ui-label">{t("messagesHistory")}</h3>
+                {/* One ruled thread: the admin's turns take the ink-soft fill
+                    and the customer's stay on the sunken surface, so the
+                    exchange reads without either side needing a hue. */}
+                <ul className="flex max-h-60 flex-col gap-1.5 overflow-y-auto">
+                  {adminMessages.map((msg) => (
+                    <li
                       key={msg.id}
-                      className={`rounded-lg p-3 text-sm ${
+                      className={cn(
+                        "rounded-lg border p-2.5",
                         msg.senderType === "admin"
-                          ? "bg-primary/5 border border-primary/10"
-                          : "bg-emerald-50 border border-emerald-100 dark:bg-emerald-900/10 dark:border-emerald-800"
-                      }`}
+                          ? "border-brand-line bg-brand-soft"
+                          : "border-line bg-surface-2",
+                      )}
                     >
-                      <div className="mb-1 flex items-center justify-between gap-2 text-xs text-fg-subtle">
-                        <span>
+                      <div className="mb-1 flex items-center justify-between gap-2">
+                        <span className="ui-label">
                           {msg.senderType === "user"
                             ? t("customer")
                             : msg.message.startsWith("__system:") ||
@@ -339,21 +534,23 @@ export default function AdminDomainTransfersPage() {
                               ? t("system")
                               : msg.adminName || t("admin")}
                         </span>
-                        <span>{formatDateTime(msg.createdAt, locale)}</span>
+                        <span className="ui-figure text-[11px] text-fg-subtle">
+                          {formatDateTime(msg.createdAt, locale)}
+                        </span>
                       </div>
-                      <p className="whitespace-pre-wrap text-fg-muted">
+                      <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-fg">
                         {msg.message === "confirmed_steps"
                           ? t("userConfirmedSteps")
                           : msg.message}
                       </p>
-                    </div>
+                    </li>
                   ))}
-                </div>
-              </div>
+                </ul>
+              </section>
             )}
 
             {selected.status === "cancelled" && selected.cancelledAt && (
-              <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+              <Alert tone="danger">
                 {t("cancelledInfo", {
                   by:
                     selected.cancelledBy === "user"
@@ -361,42 +558,44 @@ export default function AdminDomainTransfersPage() {
                       : t("cancelledByAdmin"),
                   date: formatDateTime(selected.cancelledAt, locale),
                 })}
-              </div>
+              </Alert>
             )}
 
             {selected.status !== "completed" &&
               selected.status !== "cancelled" && (
-                <div className="space-y-3 border-t border-line pt-4 dark:border-line">
+                <div className="flex flex-col gap-3 border-t border-line pt-4">
                   {selected.status === "pending" && (
-                    <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
-                      {t("pendingDnsAlert")}
-                    </div>
+                    <Alert tone="warning">{t("pendingDnsAlert")}</Alert>
                   )}
 
-                  <label className="block text-sm font-medium text-fg-muted">
-                    {selected.status === "pending" ||
-                    !selected.messages?.some(
-                      (m) =>
-                        m.senderType === "admin" &&
-                        !m.message.startsWith("__system:"),
-                    )
-                      ? t("dnsConfigLabel")
-                      : t("replyLabel")}
-                  </label>
-                  <textarea
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    rows={6}
-                    placeholder={
-                      selected.status === "pending"
-                        ? t("dnsConfigPlaceholder")
-                        : t("replyPlaceholder")
+                  <Field
+                    label={
+                      selected.status === "pending" ||
+                      !adminMessages.some(
+                        (m) =>
+                          m.senderType === "admin" &&
+                          !m.message.startsWith("__system:"),
+                      )
+                        ? t("dnsConfigLabel")
+                        : t("replyLabel")
                     }
-                    className="w-full rounded-lg border border-line bg-white px-4 py-3 font-mono text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:text-white"
-                    dir="ltr"
-                  />
-                  <p className="text-xs text-fg-muted">{t("dnsConfigHint")}</p>
-                  <div className="flex flex-wrap gap-3">
+                    hint={t("dnsConfigHint")}
+                  >
+                    <Textarea
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      rows={6}
+                      placeholder={
+                        selected.status === "pending"
+                          ? t("dnsConfigPlaceholder")
+                          : t("replyPlaceholder")
+                      }
+                      className="font-mono"
+                      dir="ltr"
+                    />
+                  </Field>
+
+                  <div className="flex flex-wrap gap-2">
                     <Button
                       onClick={() => void handleSendMessage()}
                       disabled={sending || !message.trim()}
@@ -423,8 +622,12 @@ export default function AdminDomainTransfersPage() {
                         {t("cancelRequest")}
                       </Button>
                     ) : (
-                      <div className="flex w-full flex-wrap items-center gap-2 border-t border-danger-line pt-3">
-                        <span className="text-sm text-fg-muted">
+                      <div
+                        role="group"
+                        aria-label={t("cancelRequest")}
+                        className="flex w-full flex-wrap items-center gap-2 border-t border-danger-line pt-3"
+                      >
+                        <span className="text-[13px] text-fg-muted">
                           {t("cancelConfirm")}
                         </span>
                         <Button
@@ -450,18 +653,18 @@ export default function AdminDomainTransfersPage() {
               )}
 
             {selected.status === "completed" && (
-              <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300">
+              <Alert tone="success">
                 {t("completedBy", {
                   name: selected.completedByAdminName || t("admin"),
                   date: selected.completedAt
                     ? formatDateTime(selected.completedAt, locale)
                     : "",
                 })}
-              </div>
+              </Alert>
             )}
           </div>
         ) : null}
       </Modal>
-    </div>
+    </PageShell>
   );
 }

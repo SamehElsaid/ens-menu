@@ -20,12 +20,18 @@ import type {
   HeroStyleId,
   NavbarStyleId,
 } from "@/lib/template-builder/library/stylePresets";
+import { focusField, focusRing, focusRingInset, settle } from "@/components/ui";
 
-const input =
-  "w-full rounded border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs text-slate-200 outline-none focus:border-violet-500";
+const input = `w-full rounded-md border border-line bg-surface px-2 py-1.5 text-xs text-fg placeholder:text-fg-subtle ${settle} ${focusField}`;
 
-const codeArea =
-  "w-full min-h-[120px] resize-y rounded border border-slate-700 bg-slate-950 px-2.5 py-2 font-mono text-[12px] leading-relaxed text-slate-200 outline-none focus:border-violet-500";
+const codeArea = `w-full min-h-[120px] resize-y rounded-md border border-line bg-app px-2.5 py-2 font-mono text-[12px] leading-relaxed text-fg ${settle} ${focusField}`;
+
+const propertiesTab = (active: boolean) =>
+  `flex-1 border-b-2 py-1.5 text-xs ${settle} ${focusRingInset} ${
+    active
+      ? "border-accent font-semibold text-accent"
+      : "border-transparent text-fg-subtle hover:bg-surface-2 hover:text-fg-muted"
+  }`;
 
 function Field({
   label,
@@ -36,9 +42,7 @@ function Field({
 }) {
   return (
     <div className="mb-2.5 block">
-      <div className="mb-1 block text-[10px] uppercase tracking-wide text-slate-500">
-        {label}
-      </div>
+      <div className="ui-label mb-1 block">{label}</div>
       {children}
     </div>
   );
@@ -81,7 +85,7 @@ function ContentFields({
     case "heading":
       return (
         <>
-          <p className="mb-3 rounded-md border border-violet-500/30 bg-violet-500/10 p-2 text-[11px] leading-relaxed text-violet-200">
+          <p className="mb-3 rounded-md border border-info-line bg-info-soft p-2 text-[11px] leading-relaxed text-info-fg">
             {t("contentHint")}
           </p>
           {pair("text", "textAr", t("textEn"), t("textAr"))}
@@ -103,7 +107,7 @@ function ContentFields({
     case "text":
       return (
         <>
-          <p className="mb-3 rounded-md border border-violet-500/30 bg-violet-500/10 p-2 text-[11px] leading-relaxed text-violet-200">
+          <p className="mb-3 rounded-md border border-info-line bg-info-soft p-2 text-[11px] leading-relaxed text-info-fg">
             {t("contentHint")}
           </p>
           {pair("text", "textAr", t("textEn"), t("textAr"))}
@@ -414,7 +418,7 @@ function ContentFields({
       );
     default:
       return (
-        <p className="text-xs text-slate-500">{t("fullControlHintBlock")}</p>
+        <p className="text-xs text-fg-subtle">{t("fullControlHintBlock")}</p>
       );
   }
 }
@@ -430,7 +434,7 @@ function StyleFields({
   const set = (k: string, v: unknown) => onChange({ [k]: v });
   return (
     <div>
-      <p className="mb-2 text-[10px] text-slate-500">{t("tokensHint")}</p>
+      <p className="mb-2 text-[10px] text-fg-subtle">{t("tokensHint")}</p>
       {(
         [
           ["backgroundColor", t("background")],
@@ -536,12 +540,12 @@ export function PropertiesPanel() {
 
   if (!document || !selectedId) {
     return (
-      <div className="p-3 text-xs text-slate-500">{t("selectElement")}</div>
+      <div className="p-3 text-xs text-fg-subtle">{t("selectElement")}</div>
     );
   }
   const node = findNode(document.root, selectedId);
   if (!node)
-    return <div className="p-3 text-xs text-slate-500">{t("notFound")}</div>;
+    return <div className="p-3 text-xs text-fg-subtle">{t("notFound")}</div>;
 
   const tabs = [
     { id: "content" as const, label: t("content") },
@@ -569,42 +573,38 @@ export function PropertiesPanel() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b border-slate-700 px-3 py-2">
+      <div className="border-b border-line px-3 py-2">
         <input
           className={input}
           value={node.name ?? ""}
           onChange={(e) => updateSelectedName(e.target.value)}
           placeholder={labelOf(node.type, getComponentDef(node.type)?.label)}
         />
-        <p className="mt-1 text-[10px] text-slate-500">{node.type}</p>
+        <p className="mt-1 text-[10px] text-fg-subtle">{node.type}</p>
       </div>
-      <div className="flex border-b border-slate-700">
+      <div className="flex border-b border-line">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => setRightTab(tab.id)}
-            className={`flex-1 py-1.5 text-[10px] uppercase ${
-              rightTab === tab.id
-                ? "border-b-2 border-violet-500 text-violet-400"
-                : "text-slate-500"
-            }`}
+            className={propertiesTab(rightTab === tab.id)}
           >
             {tab.label}
           </button>
         ))}
       </div>
       {rightTab === "style" && (
-        <div className="flex gap-1 border-b border-slate-700 px-2 py-1.5">
+        <div className="flex gap-1 border-b border-line px-2 py-1.5">
           {(["desktop", "tablet", "mobile"] as Breakpoint[]).map((bp) => (
             <button
               key={bp}
               type="button"
               onClick={() => setBreakpoint(bp)}
-              className={`flex-1 rounded py-0.5 text-[10px] ${
+              className={`flex-1 rounded-md py-0.5 text-[11px] ${settle} ${focusRing} ${
                 breakpoint === bp
-                  ? "bg-violet-600 text-white"
-                  : "bg-slate-800 text-slate-400"
+                  ? "bg-accent font-medium text-on-accent"
+                  : "bg-surface-2 text-fg-muted hover:bg-surface-3 hover:text-fg"
               }`}
             >
               {bpLabel(bp)}
@@ -628,12 +628,12 @@ export function PropertiesPanel() {
         )}
         {rightTab === "code" && (
           <div className="space-y-2">
-            <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-2 text-[11px] leading-relaxed text-amber-100">
+            <div className="rounded-md border border-warning-line bg-warning-soft p-2 text-[11px] leading-relaxed text-warning-fg">
               <p>{t("codeHint")}</p>
               <button
                 type="button"
                 onClick={() => setRightTab("content")}
-                className="mt-2 rounded bg-violet-600 px-2 py-1 text-[10px] font-medium text-white"
+                className={`mt-2 rounded-md bg-accent px-2 py-1 text-[11px] font-medium text-on-accent ${settle} ${focusRing} hover:bg-accent-strong`}
               >
                 {t("goToContent")}
               </button>
@@ -682,9 +682,7 @@ export function PropertiesPanel() {
                 onChange={(e) => updateMeta({ name: e.target.value })}
               />
             </Field>
-            <p className="mb-2 mt-3 text-[10px] uppercase tracking-wide text-violet-400">
-              {t("theme")}
-            </p>
+            <p className="ui-label mb-2 mt-3">{t("theme")}</p>
             {Object.entries(document.globalStyles.colors).map(
               ([key, value]) => (
                 <Field key={key} label={key}>
@@ -703,7 +701,7 @@ export function PropertiesPanel() {
                           },
                         })
                       }
-                      className="h-7 w-8 rounded border border-slate-700 bg-transparent"
+                      className="h-7 w-8 rounded-md border border-line bg-transparent"
                     />
                     <input
                       className={input}

@@ -1,6 +1,8 @@
 "use client";
 
 import { FiArrowUpLeft } from "react-icons/fi";
+import { cn } from "@/lib/cn";
+import { focusRing } from "@/components/ui";
 
 export type ChatCtaVariant = "primary" | "secondary";
 
@@ -10,11 +12,18 @@ type Props = {
   variant?: ChatCtaVariant;
 };
 
+/**
+ * A link the assistant offers inside a message.
+ *
+ * Both variants were gradients on coloured glows that lifted and scaled on
+ * hover — four effects to say "this is a link". They are now the product's two
+ * flat action fills: ink for the one the assistant wants taken, a ruled surface
+ * for the alternative.
+ */
 const variantClasses: Record<ChatCtaVariant, string> = {
-  primary:
-    "bg-linear-to-r from-accent-purple to-deep-indigo text-white shadow-md shadow-purple-500/25 hover:shadow-lg hover:shadow-purple-500/35 ring-1 ring-white/10",
+  primary: "bg-brand text-on-brand hover:bg-brand-hover",
   secondary:
-    "border border-purple-200/80 bg-linear-to-r from-purple-50 to-violet-50 text-purple-700 ring-1 ring-purple-100/80 hover:border-purple-300 hover:from-purple-100 hover:to-violet-100 dark:border-purple-500/30 dark:from-purple-500/10 dark:to-violet-500/10 dark:text-purple-300 dark:ring-purple-500/15 dark:hover:border-purple-500/50",
+    "border border-line-control bg-surface text-fg hover:border-fg-subtle hover:bg-surface-2",
 };
 
 export default function ChatCtaButton({
@@ -27,10 +36,16 @@ export default function ChatCtaButton({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={`chat-link-btn inline-flex w-fit cursor-pointer items-center justify-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-semibold no-underline transition-all duration-200 hover:scale-[1.04] hover:-translate-y-px active:scale-[0.97] ${variantClasses[variant]}`}
+      className={cn(
+        "chat-link-btn inline-flex w-fit items-center justify-center gap-1.5 rounded-lg px-3 py-1.5",
+        "text-[13px] font-medium no-underline",
+        "transition-[background-color,border-color,color] duration-(--dur-fast) ease-(--ease-settle)",
+        focusRing,
+        variantClasses[variant],
+      )}
     >
       <span>{label}</span>
-      <FiArrowUpLeft size={12} className="shrink-0 opacity-80 rtl:rotate-90" />
+      <FiArrowUpLeft size={12} className="shrink-0 opacity-70 rtl:rotate-90" />
     </a>
   );
 }

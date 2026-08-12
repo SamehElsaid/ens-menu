@@ -2,9 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "@/i18n/navigation";
 import {
-  IoArrowBack,
   IoAddOutline,
   IoMegaphoneOutline,
   IoLinkOutline,
@@ -17,20 +15,23 @@ import {
   FaMousePointer,
   FaChartLine,
 } from "react-icons/fa";
-import CardDashBoard from "@/components/Card/CardDashBoard";
 import { axiosGet, axiosDelete, axiosPatch } from "@/shared/axiosCall";
 import { computeCtr } from "@/lib/fetchAdminAnalytics";
 import { toast } from "react-toastify";
 import { FiAlertTriangle } from "react-icons/fi";
 import {
+  Badge,
   Button,
   ConfirmDialog,
+  DataTable,
   EmptyState,
   PageHeader,
-  Skeleton,
-  SkeletonRegion,
-  Spinner,
+  PageShell,
+  StatCard,
+  StatGrid,
+  type DataColumn,
 } from "@/components/ui";
+import { useDataTableLabels } from "@/hooks/useDataTableLabels";
 import LoadImage from "@/components/ImageLoad";
 import AddAdvertisementModal from "@/components/Dashboard/AddAdvertisementModal";
 import type { Advertisement as BaseAdvertisement } from "@/types/Menu";
@@ -60,7 +61,8 @@ export default function AdminAdvertisementsPage() {
   const locale = useLocale();
   const t = useTranslations("adminAds");
   const tCommon = useTranslations("common");
-  const router = useRouter();
+  const tAdmin = useTranslations("adminDashboard");
+  const tableLabels = useDataTableLabels();
   const isRTL = locale === "ar";
 
   const [ads, setAds] = useState<Advertisement[]>([]);
@@ -215,377 +217,260 @@ export default function AdminAdvertisementsPage() {
     ads.reduce((sum, ad) => sum + (ad.impressionCount || 0), 0);
   const averageCtr = computeCtr(stats.totalClicks, totalImpressions);
 
+  const openCreate = () => {
+    setEditingAd(null);
+    setShowAddModal(true);
+  };
+
+  const columns: DataColumn<Advertisement>[] = [
+    {
+      id: "ad",
+      header: t("advertisement"),
+      primary: true,
+      cell: (ad) => {
+        const summary = getContent(ad)
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean)[0];
+        return (
+          <div className="flex min-w-0 items-start gap-2.5">
+            <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-sm border border-line bg-surface-2 text-fg-subtle">
+              {ad.imageUrl ? (
+                <LoadImage
+                  src={ad.imageUrl}
+                  alt=""
+                  className="size-10 object-cover"
+                  width={40}
+                  height={40}
+                />
+              ) : (
+                <IoMegaphoneOutline aria-hidden />
+              )}
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate font-medium text-fg">
+                {getTitle(ad)}
+              </span>
+              {summary ? (
+                <span className="block truncate text-xs text-fg-muted">
+                  {summary}
+                </span>
+              ) : null}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      id: "status",
+      header: t("status.active"),
+      cell: (ad) => (
+        <Badge tone={ad.isActive ? "accent" : "neutral"} dot>
+          {ad.isActive ? t("status.active") : t("status.inactive")}
+        </Badge>
+      ),
+    },
+    {
+      id: "clicks",
+      header: t("clicks"),
+      align: "end",
+      numeric: true,
+      cell: (ad) => (
+        <span className="ui-figure text-fg" lang="en">
+          {(ad.clickCount || 0).toLocaleString()}
+        </span>
+      ),
+    },
+    {
+      id: "views",
+      header: t("views"),
+      align: "end",
+      numeric: true,
+      cell: (ad) => (
+        <span className="ui-figure text-fg" lang="en">
+          {(ad.impressionCount || 0).toLocaleString()}
+        </span>
+      ),
+    },
+    {
+      id: "ctr",
+      header: t("ctr"),
+      align: "end",
+      numeric: true,
+      cell: (ad) => (
+        <span className="ui-figure text-fg" lang="en">
+          {computeCtr(ad.clickCount || 0, ad.impressionCount || 0)}%
+        </span>
+      ),
+    },
+    {
+      id: "createdAt",
+      header: t("createdAt"),
+      hideOnMobile: true,
+      cell: (ad) => (
+        <span className="whitespace-nowrap text-xs text-fg-muted">
+          {formatDate(ad.createdAt)}
+        </span>
+      ),
+    },
+  ];
+
   return (
-    <div className="space-y-6 pb-10" dir={isRTL ? "rtl" : "ltr"}>
-      <PageHeader
-        title={t("title")}
-        description={t("subtitle")}
-        actions={
-          <Button
-            variant="secondary"
-            startIcon={<IoArrowBack className="rtl:rotate-180" />}
-            onClick={() => router.back()}
-          >
-            {t("back")}
-          </Button>
+    <PageShell
+      kind="table"
+      header={
+        <>
+          <PageHeader
+            eyebrow={t("eyebrow")}
+            title={t("title")}
+            description={t("subtitle")}
+            breadcrumbs={[
+              { label: tAdmin("title"), href: "/admin" },
+              { label: t("title") },
+            ]}
+            breadcrumbsLabel={tCommon("breadcrumb")}
+            meta={
+              !loading ? (
+                <Badge>
+                  <span lang="en">{ads.length}</span>{" "}
+                  {ads.length === 1 ? t("advertisement") : t("advertisements")}
+                </Badge>
+              ) : undefined
+            }
+            actions={
+              <Button startIcon={<IoAddOutline />} onClick={openCreate}>
+                {t("addNewAd")}
+              </Button>
+            }
+          />
+
+          <StatGrid columns={4} ruled>
+            <StatCard
+              label={t("totalAds")}
+              value={<span lang="en">{stats.total.toLocaleString()}</span>}
+              icon={<IoMegaphoneOutline />}
+              loading={loading}
+            />
+            <StatCard
+              label={t("activeAds")}
+              value={<span lang="en">{stats.totalActive.toLocaleString()}</span>}
+              icon={<FaChartLine />}
+              loading={loading}
+            />
+            <StatCard
+              label={t("totalClicks")}
+              value={<span lang="en">{stats.totalClicks.toLocaleString()}</span>}
+              icon={<FaMousePointer />}
+              loading={loading}
+            />
+            <StatCard
+              label={t("averageCtr")}
+              value={<span lang="en">{averageCtr}%</span>}
+              icon={<FaEye />}
+              loading={loading}
+            />
+          </StatGrid>
+        </>
+      }
+    >
+      <DataTable<Advertisement>
+        columns={columns}
+        rows={ads}
+        getRowKey={(ad) => String(ad.id)}
+        caption={t("title")}
+        loading={loading}
+        tableId="admin-advertisements"
+        stickyHeader
+        densityControl
+        labels={tableLabels}
+        empty={
+          <EmptyState
+            title={t("noAdsTitle")}
+            description={t("noAdsDescription")}
+            icon={<IoMegaphoneOutline />}
+            action={
+              <Button startIcon={<IoAddOutline />} onClick={openCreate}>
+                {t("addNewAd")}
+              </Button>
+            }
+          />
         }
+        rowActions={(ad) => {
+          const isLoading = loadingAdId === ad.id;
+          return (
+            <div className="flex flex-wrap items-center justify-end gap-1">
+              <Button
+                variant="secondary"
+                size="sm"
+                iconOnly
+                aria-label={t("actions.edit")}
+                title={t("actions.edit")}
+                onClick={() => {
+                  setEditingAd(ad);
+                  setShowAddModal(true);
+                }}
+                disabled={isLoading}
+              >
+                <FaEdit />
+              </Button>
+
+              {ad.isActive ? (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  iconOnly
+                  aria-label={t("actions.deactivate")}
+                  title={t("actions.deactivate")}
+                  onClick={() => setDeactivateModal({ isOpen: true, ad })}
+                  disabled={isLoading}
+                >
+                  <FaBan />
+                </Button>
+              ) : (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  iconOnly
+                  aria-label={t("actions.activate")}
+                  title={t("actions.activate")}
+                  onClick={() => handleActivate(ad.id)}
+                  disabled={isLoading}
+                  loading={isLoading}
+                >
+                  <FaEye />
+                </Button>
+              )}
+
+              {ad.linkUrl ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  iconOnly
+                  aria-label={t("actions.viewLink")}
+                  title={t("actions.viewLink")}
+                  onClick={() => window.open(ad.linkUrl, "_blank")}
+                  disabled={isLoading}
+                >
+                  <IoLinkOutline />
+                </Button>
+              ) : null}
+
+              <Button
+                variant="dangerGhost"
+                size="sm"
+                iconOnly
+                aria-label={t("actions.delete")}
+                title={t("actions.delete")}
+                onClick={() => setDeleteModal({ isOpen: true, ad })}
+                disabled={isLoading}
+              >
+                <FaTrash />
+              </Button>
+            </div>
+          );
+        }}
       />
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <CardDashBoard
-          borderColor="border-blue-200 dark:border-blue-500/20"
-          hover={true}
-        >
-          <div className="flex items-center gap-4">
-            <div className="flex size-14 items-center justify-center rounded-lg bg-info-soft">
-              <IoMegaphoneOutline className="text-2xl text-info-fg" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-fg-muted mb-1">
-                {t("totalAds")}
-              </p>
-              <p className="text-3xl font-bold text-fg transition-all duration-300">
-                {loading ? (
-                  <Spinner size="md" label={tCommon("loading")} />
-                ) : (
-                  stats.total.toLocaleString()
-                )}
-              </p>
-            </div>
-          </div>
-        </CardDashBoard>
-
-        <CardDashBoard
-          borderColor="border-green-200 dark:border-green-500/20"
-          hover={true}
-        >
-          <div className="flex items-center gap-4">
-            <div className="flex size-14 items-center justify-center rounded-lg bg-success-soft">
-              <FaChartLine className="text-xl text-success-fg" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-fg-muted mb-1">
-                {t("activeAds")}
-              </p>
-              <p className="text-3xl font-bold text-green-600 dark:text-green-400 transition-all duration-300">
-                {loading ? (
-                  <Spinner size="md" label={tCommon("loading")} />
-                ) : (
-                  stats.totalActive.toLocaleString()
-                )}
-              </p>
-            </div>
-          </div>
-        </CardDashBoard>
-
-        <CardDashBoard
-          borderColor="border-purple-200 dark:border-purple-500/20"
-          hover={true}
-        >
-          <div className="flex items-center gap-4">
-            <div className="flex size-14 items-center justify-center rounded-lg bg-brand-soft">
-              <FaMousePointer className="text-xl text-brand-soft-fg" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-fg-muted mb-1">
-                {t("totalClicks")}
-              </p>
-              <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 transition-all duration-300">
-                {loading ? (
-                  <Spinner size="md" label={tCommon("loading")} />
-                ) : (
-                  stats.totalClicks.toLocaleString()
-                )}
-              </p>
-            </div>
-          </div>
-        </CardDashBoard>
-
-        <CardDashBoard
-          borderColor="border-emerald-200 dark:border-emerald-500/20"
-          hover={true}
-        >
-          <div className="flex items-center gap-4">
-            <div className="flex size-14 items-center justify-center rounded-lg bg-success-soft">
-              <FaChartLine className="text-xl text-success-fg" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-fg-muted mb-1">
-                {t("averageCtr")}
-              </p>
-              <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 transition-all duration-300">
-                {loading ? (
-                  <Spinner size="md" label={tCommon("loading")} />
-                ) : (
-                  `${averageCtr}%`
-                )}
-              </p>
-            </div>
-          </div>
-        </CardDashBoard>
-      </div>
-
-      {/* Add New Advertisement Button */}
-      <div
-        className={`flex items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}
-      >
-        <div className="text-sm text-fg-muted">
-          {!loading && (
-            <span>
-              {ads.length}{" "}
-              {ads.length === 1 ? t("advertisement") : t("advertisements")}
-            </span>
-          )}
-        </div>
-        <Button
-          startIcon={<IoAddOutline />}
-          onClick={() => {
-            setEditingAd(null);
-            setShowAddModal(true);
-          }}
-        >
-          {t("addNewAd")}
-        </Button>
-      </div>
-
-      {/* Advertisements List */}
-      {loading ? (
-        <SkeletonRegion label={tCommon("loading")}>
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <CardDashBoard key={i}>
-                <div
-                  className={`flex gap-6 ${isRTL ? "flex-row-reverse" : ""}`}
-                >
-                  <Skeleton className="size-32 shrink-0 rounded-lg" />
-                  <div className="flex-1 space-y-3">
-                    <Skeleton className="h-4 w-20" />
-                    <Skeleton className="h-6 w-48" />
-                    <Skeleton className="h-4 w-full" />
-                    <div className="flex gap-2">
-                      <Skeleton className="h-9 w-20 rounded-lg" />
-                      <Skeleton className="h-9 w-20 rounded-lg" />
-                    </div>
-                  </div>
-                </div>
-              </CardDashBoard>
-            ))}
-          </div>
-        </SkeletonRegion>
-      ) : ads.length === 0 ? (
-        <EmptyState
-          title={t("noAdsTitle")}
-          description={t("noAdsDescription")}
-          icon={<IoMegaphoneOutline />}
-          action={
-            <Button
-              startIcon={<IoAddOutline />}
-              onClick={() => {
-                setEditingAd(null);
-                setShowAddModal(true);
-              }}
-            >
-              {t("addNewAd")}
-            </Button>
-          }
-        />
-      ) : (
-        <div className="space-y-4">
-          {ads.map((ad) => {
-            const isLoading = loadingAdId === ad.id;
-            const isActive = ad.isActive ?? false;
-
-            return (
-              <CardDashBoard
-                key={ad.id}
-                hover={true}
-                className="transition-all duration-200 hover:shadow-lg"
-              >
-                <div
-                  className={`flex gap-6 ${isRTL ? "flex-row-reverse" : ""}`}
-                >
-                  {/* Image */}
-                  <div className="shrink-0">
-                    <div className="relative w-36 h-36 rounded-lg bg-surface-2 overflow-hidden group cursor-pointer shadow-md">
-                      {ad.imageUrl ? (
-                        <>
-                          <LoadImage
-                            src={ad.imageUrl}
-                            alt={getTitle(ad)}
-                            className="w-36 h-36 object-cover transition-transform duration-300 group-hover:scale-110"
-                            width={144}
-                            height={144}
-                          />
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
-                        </>
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-fg-subtle">
-                          <IoMegaphoneOutline className="text-5xl" />
-                        </div>
-                      )}
-                      {/* Status Badge Overlay */}
-                      <div
-                        className={`absolute top-2 ${isRTL ? "left-2" : "right-2"}`}
-                      >
-                        <span
-                          className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold shadow-md backdrop-blur-sm ${
-                            isActive
-                              ? "bg-green-500/90 text-white"
-                              : "bg-slate-500/90 text-white"
-                          }`}
-                        >
-                          {isActive ? t("status.active") : t("status.inactive")}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    {/* Title and Date */}
-                    <div className="flex items-start justify-between gap-4 mb-3">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-xl font-bold text-fg mb-1 line-clamp-1">
-                          {getTitle(ad)}
-                        </h3>
-                        {ad.createdAt && (
-                          <p className="text-xs text-fg-subtle">
-                            {t("createdAt")}: {formatDate(ad.createdAt)}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Description */}
-                    {getContent(ad) && (
-                      <div className="text-fg-muted mb-4 space-y-1 line-clamp-2">
-                        {getContent(ad)
-                          .split("\n")
-                          .filter((line) => line.trim())
-                          .slice(0, 2)
-                          .map((line, idx) => (
-                            <p key={idx} className="text-sm">
-                              {line}
-                            </p>
-                          ))}
-                      </div>
-                    )}
-
-                    {/* Metrics */}
-                    <div className="flex items-center gap-6 mb-4 p-3 bg-surface-2 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center">
-                          <FaMousePointer className="text-purple-600 dark:text-purple-400 text-sm" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-fg-muted">{t("clicks")}</p>
-                          <p className="text-sm font-semibold text-fg">
-                            {(ad.clickCount || 0).toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center">
-                          <FaEye className="text-blue-600 dark:text-blue-400 text-sm" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-fg-muted">{t("views")}</p>
-                          <p className="text-sm font-semibold text-fg">
-                            {(ad.impressionCount || 0).toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
-                          <FaChartLine className="text-emerald-600 dark:text-emerald-400 text-sm" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-fg-muted">{t("ctr")}</p>
-                          <p className="text-sm font-semibold text-fg">
-                            {computeCtr(
-                              ad.clickCount || 0,
-                              ad.impressionCount || 0,
-                            )}
-                            %
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div
-                      className={`flex flex-wrap items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
-                    >
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        startIcon={<FaEdit />}
-                        onClick={() => {
-                          setEditingAd(ad);
-                          setShowAddModal(true);
-                        }}
-                        disabled={isLoading}
-                      >
-                        {t("actions.edit")}
-                      </Button>
-
-                      {isActive ? (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          startIcon={<FaBan />}
-                          onClick={() =>
-                            setDeactivateModal({ isOpen: true, ad })
-                          }
-                          disabled={isLoading}
-                        >
-                          {t("actions.deactivate")}
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          startIcon={<FaEye />}
-                          onClick={() => handleActivate(ad.id)}
-                          disabled={isLoading}
-                          loading={isLoading}
-                        >
-                          {t("actions.activate")}
-                        </Button>
-                      )}
-
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        startIcon={<FaTrash />}
-                        onClick={() => setDeleteModal({ isOpen: true, ad })}
-                        disabled={isLoading}
-                      >
-                        {t("actions.delete")}
-                      </Button>
-
-                      {ad.linkUrl && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          startIcon={<IoLinkOutline />}
-                          onClick={() => window.open(ad.linkUrl, "_blank")}
-                          disabled={isLoading}
-                        >
-                          {t("actions.viewLink")}
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </CardDashBoard>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
       <ConfirmDialog
         open={deleteModal.isOpen}
         onClose={() => setDeleteModal({ isOpen: false, ad: null })}
@@ -601,6 +486,21 @@ export default function AdminAdvertisementsPage() {
         icon={<FiAlertTriangle />}
       />
 
+      <ConfirmDialog
+        open={deactivateModal.isOpen}
+        onClose={() => setDeactivateModal({ isOpen: false, ad: null })}
+        onConfirm={handleDeactivate}
+        title={t("deactivateConfirmTitle")}
+        description={t("deactivateConfirm", {
+          title: deactivateModal.ad ? getTitle(deactivateModal.ad) : "",
+        })}
+        confirmLabel={t("actions.deactivate")}
+        cancelLabel={t("actions.cancel")}
+        loading={loadingAdId === deactivateModal.ad?.id}
+        tone="brand"
+        icon={<FiAlertTriangle />}
+      />
+
       {showAddModal && (
         <AddAdvertisementModal
           adminMode
@@ -612,6 +512,6 @@ export default function AdminAdvertisementsPage() {
           onRefresh={fetchAds}
         />
       )}
-    </div>
+    </PageShell>
   );
 }

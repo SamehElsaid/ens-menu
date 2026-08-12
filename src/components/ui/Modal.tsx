@@ -78,7 +78,7 @@ export function Modal({
       role="presentation"
     >
       <div
-        className="absolute inset-0 bg-overlay backdrop-blur-[2px] motion-safe:animate-[ui-fade-in_180ms_ease-out]"
+        className="absolute inset-0 bg-overlay backdrop-blur-[2px] motion-safe:animate-[ui-fade-in_var(--dur-settle)_var(--ease-settle)]"
         onClick={dismissible ? onClose : undefined}
         aria-hidden
       />
@@ -93,8 +93,8 @@ export function Modal({
         className={cn(
           "relative flex max-h-[92dvh] w-full flex-col overflow-hidden bg-raised shadow-2xl outline-none",
           "rounded-t-2xl sm:rounded-2xl",
-          "motion-safe:animate-[ui-sheet-in_260ms_cubic-bezier(0.16,1,0.3,1)]",
-          "sm:motion-safe:animate-[ui-dialog-in_200ms_cubic-bezier(0.16,1,0.3,1)]",
+          "motion-safe:animate-[ui-sheet-in_var(--dur-sheet)_var(--ease-enter)]",
+          "sm:motion-safe:animate-[ui-dialog-in_var(--dur-overlay)_var(--ease-enter)]",
           sizes[size],
           className,
         )}

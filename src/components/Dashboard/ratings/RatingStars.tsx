@@ -21,19 +21,17 @@ export default function RatingStars({
     <span className="inline-flex items-center gap-0.5" aria-hidden>
       {[1, 2, 3, 4, 5].map((n) => {
         if (value >= n) {
-          return (
-            <IoStar key={n} className={`${sizeClassName} text-amber-400`} />
-          );
+          return <IoStar key={n} className={`${sizeClassName} text-accent`} />;
         }
         if (precise && value >= n - 0.5) {
           return (
-            <IoStarHalf key={n} className={`${sizeClassName} text-amber-400`} />
+            <IoStarHalf key={n} className={`${sizeClassName} text-accent`} />
           );
         }
         return (
           <IoStarOutline
             key={n}
-            className={`${sizeClassName} text-slate-300 dark:text-fg-muted`}
+            className={`${sizeClassName} text-fg-subtle/50`}
           />
         );
       })}

@@ -5,37 +5,37 @@ import { createPortal } from "react-dom";
 import { FaWhatsapp, FaTelegramPlane } from "react-icons/fa";
 import { FiX } from "react-icons/fi";
 import { BiSupport } from "react-icons/bi";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { isRtlLocale } from "@/lib/localeDirection";
 import {
   CONTACT_FAB_TELEGRAM_URL,
   CONTACT_FAB_WHATSAPP_URL,
 } from "@/lib/contactConstants";
 
+/**
+ * The floating route to a human. Public site only — the dashboard and admin get
+ * support from inside the product.
+ *
+ * The wrapper declares `public-world` itself. The FAB is portalled to
+ * `document.body`, so it lands outside the shell that scopes the public token
+ * layer, which is why this control used to carry hardcoded dark and light hex
+ * values and a route check to decide which set to use. Claiming the scope
+ * removes both.
+ *
+ * A FAB genuinely floats, so it keeps its elevation. The picker is no longer
+ * two glowing coloured pills: it is one rounded panel of two rows divided by a
+ * rule, with the third-party hue spent on the third-party glyph and nothing
+ * else.
+ */
 export default function ContactFab() {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
-  const locale = useLocale();
   const pathname = usePathname();
-  const isRtl = isRtlLocale(locale);
   const t = useTranslations("contactFab");
   const isAdminRoute = pathname.startsWith("/admin");
   const isDashboardRoute = pathname.startsWith("/dashboard");
-
-  /**
-   * The trigger is loud by design inside the product, where it is the only way
-   * out to a human. On the marketing site it would be the brightest thing on
-   * every page and it is not the primary action, so the public surface gets a
-   * quiet pill instead. The dashboard branch below is unchanged.
-   *
-   * The FAB is portalled to `document.body`, so it cannot inherit
-   * `.public-world`; the surface has to be decided from the route.
-   */
-  const isProductRoute =
-    pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
 
   useEffect(() => {
     setMounted(true);
@@ -65,36 +65,30 @@ export default function ContactFab() {
     {
       href: CONTACT_FAB_WHATSAPP_URL,
       label: t("whatsapp"),
-      icon: <FaWhatsapp className="text-xl" aria-hidden />,
-      className: "bg-[#25D366] hover:bg-[#20bd5a] shadow-green-500/30",
+      icon: <FaWhatsapp className="size-5 shrink-0" aria-hidden />,
+      /* Third-party brand hue, on the third-party glyph only. */
+      glyph: "text-[#25D366]",
     },
     {
       href: CONTACT_FAB_TELEGRAM_URL,
       label: t("telegram"),
-      icon: <FaTelegramPlane className="text-xl" aria-hidden />,
-      className: "bg-[#229ED9] hover:bg-[#1d8bc0] shadow-sky-500/30",
+      icon: <FaTelegramPlane className="size-5 shrink-0" aria-hidden />,
+      glyph: "text-[#229ED9]",
     },
   ];
 
   const ui = (
     <div
       ref={wrapRef}
-      className={cn(
-        "fixed z-102 bottom-[max(1rem,env(safe-area-inset-bottom))] sm:bottom-6",
-        isRtl ? "start-4 sm:start-6" : "end-4 sm:end-6",
-      )}
-      dir={isRtl ? "rtl" : "ltr"}
+      className="public-world fixed end-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-102 sm:end-6 sm:bottom-6"
     >
       {open && (
         <div
           role="menu"
           aria-label={t("label")}
-          className={cn(
-            "animate-contact-picker-in absolute bottom-[calc(100%+0.75rem)] flex w-max flex-col gap-2",
-            isRtl ? "start-0" : "end-0",
-          )}
+          className="animate-contact-picker-in absolute end-0 bottom-[calc(100%+0.75rem)] w-max overflow-hidden rounded-site-control border border-site-line bg-site-bg shadow-lg"
         >
-          {options.map((opt, i) => (
+          {options.map((opt) => (
             <a
               key={opt.href}
               role="menuitem"
@@ -102,64 +96,34 @@ export default function ContactFab() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setOpen(false)}
-              className={cn(
-                "animate-contact-picker-item flex items-center gap-2.5 rounded-full py-2.5 ps-3 pe-4 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-[1.04] active:scale-[0.96]",
-                opt.className,
-              )}
-              style={{ animationDelay: `${i * 60}ms` }}
+              className="flex items-center gap-3 border-t border-site-line px-4 py-3 text-site-sm font-semibold text-site-ink transition-colors duration-(--dur-settle) first:border-t-0 hover:bg-site-tint"
             >
-              {opt.icon}
+              <span className={opt.glyph}>{opt.icon}</span>
               <span>{opt.label}</span>
             </a>
           ))}
         </div>
       )}
 
-      {isProductRoute ? (
-        <div className="whatsapp-fab-wrap animate-whatsapp-fab-in">
-          {!open && (
-            <>
-              <span className="whatsapp-fab-ripple" aria-hidden />
-              <span
-                className="whatsapp-fab-ripple whatsapp-fab-ripple--delay"
-                aria-hidden
-              />
-            </>
-          )}
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            aria-label={t("label")}
-            aria-expanded={open}
-            aria-haspopup="menu"
-            className={cn(
-              "whatsapp-fab-btn relative flex size-14 items-center justify-center rounded-full border-2 border-white text-white dark:border-line",
-              open ? "bg-slate-600 hover:bg-slate-700" : "bg-[#25D366]",
-            )}
-          >
-            {open ? (
-              <FiX className="text-[1.6rem]" aria-hidden />
-            ) : (
-              <BiSupport className="text-[1.75rem]" aria-hidden />
-            )}
-          </button>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          aria-haspopup="menu"
-          className="flex h-12 items-center gap-2 rounded-full bg-[#12111c] ps-4 pe-5 text-[0.9375rem] font-semibold text-white shadow-[0_8px_28px_-8px_rgb(18_17_28/0.45)] transition-transform duration-150 ease-out hover:bg-[#26243a] motion-safe:hover:-translate-y-px dark:bg-white dark:text-[#12111c] dark:hover:bg-white/90"
-        >
-          {open ? (
-            <FiX className="size-5 shrink-0" aria-hidden />
-          ) : (
-            <BiSupport className="size-5 shrink-0" aria-hidden />
-          )}
-          <span>{t("label")}</span>
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-label={t("label")}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        className={cn(
+          "flex h-12 items-center gap-2 rounded-full ps-4 pe-5 text-[0.9375rem] font-semibold shadow-lg",
+          "bg-site-action text-site-action-fg transition-colors duration-(--dur-settle) hover:bg-site-action-hover",
+          "motion-safe:active:translate-y-px",
+        )}
+      >
+        {open ? (
+          <FiX className="size-5 shrink-0" aria-hidden />
+        ) : (
+          <BiSupport className="size-5 shrink-0" aria-hidden />
+        )}
+        <span>{t("label")}</span>
+      </button>
     </div>
   );
 

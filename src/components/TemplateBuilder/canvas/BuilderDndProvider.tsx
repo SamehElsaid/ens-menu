@@ -68,7 +68,7 @@ export function BuilderDndProvider({
       {children}
       <DragOverlay>
         {activeType ? (
-          <div className="rounded-md bg-violet-600 text-white px-3 py-2 text-sm shadow-lg">
+          <div className="rounded-md bg-accent text-on-accent px-3 py-2 text-sm shadow-lg">
             {getComponentDef(activeType)?.label ?? activeType}
           </div>
         ) : null}

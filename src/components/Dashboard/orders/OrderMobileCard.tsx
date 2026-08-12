@@ -1,23 +1,18 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import ViewTime from "@/shared/ViewTime";
-import {
-  orderStatusTone,
-  resolveEntryTime,
-  resolveListEntryStatus,
-} from "@/lib/tableOrders";
+import { resolveEntryTime, resolveListEntryStatus } from "@/lib/tableOrders";
 import type { CallEntry, OrderActionResult } from "@/lib/tableOrders";
 import OrderActionButtons from "./OrderActionButtons";
 import OrderChargesLines from "./OrderChargesLines";
+import { OrderStatusBadge } from "./orderStatusBadge";
 import { useAppSelector } from "@/store/hooks";
 import { resolveOrderCharges } from "@/lib/menuOrderCharges";
-import {
-  IoEllipseSharp,
-  IoEyeOutline,
-  IoReceiptOutline,
-} from "react-icons/io5";
+import { IoEyeOutline, IoReceiptOutline } from "react-icons/io5";
+import { cn } from "@/lib/cn";
+import { Badge, Button, Card } from "@/components/ui";
 
 interface OrderMobileCardProps {
   entry: CallEntry;
@@ -27,8 +22,19 @@ interface OrderMobileCardProps {
   menuId: string;
   /** Shown on account-level lists to tell orders from different menus apart. */
   menuLabel?: string;
+  /** A socket update just changed this ticket; its border says so for 1.2s. */
+  justChanged?: boolean;
 }
 
+/**
+ * One table ticket.
+ *
+ * The two things that interrupt service — a guest who changed the order after
+ * the kitchen accepted it, and a table asking for the bill — used to be a red
+ * two-pixel frame and a pair of tinted pills competing with the status. They
+ * are now badges on the same row as the status, so the card has one place a
+ * reader looks for "what is going on with this table" instead of three.
+ */
 export default function OrderMobileCard({
   entry,
   currency,
@@ -36,11 +42,11 @@ export default function OrderMobileCard({
   onActionComplete,
   menuId,
   menuLabel,
+  justChanged = false,
 }: OrderMobileCardProps) {
   const t = useTranslations("tableOrders");
   const menu = useAppSelector((s) => s.menuData.menu);
   const status = resolveListEntryStatus(entry);
-  const tone = orderStatusTone(status);
   const time = resolveEntryTime(entry.actionDetails);
   const charges = useMemo(
     () =>
@@ -57,98 +63,123 @@ export default function OrderMobileCard({
     [entry, menu],
   );
 
+  const rows: { id: string; label: string; value: ReactNode }[] = [];
+  const tableNumber = entry.tableNumber?.toString().trim();
+  const customerName = entry.customerName?.trim();
+  const orderNotes = entry.orderNotes?.trim();
+  if (tableNumber) {
+    rows.push({
+      id: "table",
+      label: t("colTable"),
+      value: (
+        <span className="ui-figure text-fg" lang="en">
+          {tableNumber}
+        </span>
+      ),
+    });
+  }
+  if (customerName) {
+    rows.push({ id: "customer", label: t("colCustomer"), value: customerName });
+  }
+  if (orderNotes) {
+    rows.push({
+      id: "notes",
+      label: t("colNotes"),
+      value: <span className="line-clamp-2">{orderNotes}</span>,
+    });
+  }
+  rows.push({
+    id: "items",
+    label: t("colItems"),
+    value: (
+      <span className="ui-figure text-fg" lang="en">
+        {entry.items?.length ?? 0}
+      </span>
+    ),
+  });
+
   return (
-    <article
-      className={[
-        "dashboard-order-card flex h-full flex-col overflow-hidden rounded-lg bg-surface shadow-sm",
-        entry.pendingBillRequest
-          ? "border-2 border-red-500 shadow-sm dark:border-red-500"
-          : "border border-line",
-      ].join(" ")}
+    <Card
+      as="article"
+      padded="none"
+      active={status === "pending" || entry.pendingBillRequest === true}
+      className={cn(
+        "flex h-full flex-col overflow-hidden",
+        justChanged && "ui-flash",
+      )}
     >
-      <div className="border-b border-line bg-surface-2 px-4 py-3">
+      <header className="border-b border-line px-3.5 py-3">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface ring-1 ring-line">
-              <IoReceiptOutline className="text-xl text-brand" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-fg">
-                {t("colOrderId")} #{entry.orderId}
-              </p>
-              {entry.tableNumber && (
-                <p className="text-xs text-fg-muted">
-                  {t("colTable")}: {entry.tableNumber}
-                </p>
-              )}
-            </div>
+          <div className="min-w-0">
+            <p className="ui-label flex items-center gap-1.5">
+              <IoReceiptOutline className="size-3.5" aria-hidden />
+              {t("colOrderId")}
+            </p>
+            <p className="ui-figure mt-0.5 text-base text-fg" lang="en">
+              #{entry.orderId}
+            </p>
           </div>
-          <span
-            className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${tone.pill}`}
-          >
-            <IoEllipseSharp className={`text-[5px] ${tone.dot}`} aria-hidden />
-            {t(`orderStatus.${status}` as never)}
-          </span>
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            <OrderStatusBadge
+              status={status}
+              label={t(`orderStatus.${status}` as never)}
+            />
+            {time ? (
+              <time className="ui-label">
+                <ViewTime data={time} />
+              </time>
+            ) : null}
+          </div>
         </div>
-        {menuLabel || entry.pendingGuestAddition ? (
-          <div className="mt-2 flex flex-wrap gap-1.5">
+        {menuLabel || entry.pendingGuestAddition || entry.pendingBillRequest ? (
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
             {menuLabel ? (
-              <span className="inline-flex max-w-full truncate rounded-full border border-brand-line bg-brand-soft px-2 py-0.5 text-[10px] font-semibold text-brand-soft-fg">
+              <Badge tone="neutral" className="max-w-full truncate">
                 {menuLabel}
-              </span>
+              </Badge>
             ) : null}
             {entry.pendingGuestAddition ? (
-              <span className="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
+              <Badge tone="warning" dot>
                 {t("guestAdditionBadge")}
-              </span>
+              </Badge>
+            ) : null}
+            {entry.pendingBillRequest ? (
+              <Badge tone="danger" dot>
+                {t("billRequestBadge")}
+              </Badge>
             ) : null}
           </div>
         ) : null}
-        {entry.pendingBillRequest ? (
-          <p className="mt-2 inline-flex rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700 dark:bg-red-900/40 dark:text-red-200">
-            {t("billRequestBadge")}
-          </p>
-        ) : null}
+      </header>
+
+      <dl className="divide-y divide-line border-b border-line">
+        {rows.map((row) => (
+          <div
+            key={row.id}
+            className="flex items-baseline justify-between gap-3 px-3.5 py-1.5"
+          >
+            <dt className="ui-label shrink-0">{row.label}</dt>
+            <dd className="min-w-0 text-end text-[13px] text-fg">
+              {row.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+
+      <div className="border-b border-line bg-surface-2/40 px-3.5 py-2.5">
+        <OrderChargesLines
+          charges={charges}
+          currency={currency}
+          labels={{
+            subtotal: t("detailsSubtotal"),
+            tax: t("detailsTax"),
+            service: t("detailsService"),
+            total: t("detailsTotal"),
+          }}
+        />
       </div>
 
-      <div className="space-y-2 px-4 py-3">
-        {entry.customerName?.trim() && (
-          <p className="text-sm text-fg-muted">
-            <span className="text-fg-subtle">{t("colCustomer")}: </span>
-            {entry.customerName.trim()}
-          </p>
-        )}
-        {entry.orderNotes?.trim() && (
-          <p className="text-sm text-fg-muted line-clamp-2">
-            <span className="text-fg-subtle">{t("colNotes")}: </span>
-            {entry.orderNotes.trim()}
-          </p>
-        )}
-        <p className="text-sm text-fg-muted">
-          <span className="text-fg-subtle">{t("colItems")}: </span>
-          {entry.items?.length ?? 0}
-        </p>
-        <div className="space-y-2">
-          <OrderChargesLines
-            charges={charges}
-            currency={currency}
-            labels={{
-              subtotal: t("detailsSubtotal"),
-              tax: t("detailsTax"),
-              service: t("detailsService"),
-              total: t("detailsTotal"),
-            }}
-            accent="brand"
-          />
-          {time && (
-            <time className="block text-end text-xs text-fg-muted">
-              <ViewTime data={time} />
-            </time>
-          )}
-        </div>
-      </div>
-
-      <div className="flex flex-1 flex-col gap-2 border-t border-line px-4 py-3 dark:border-line/80">
+      <div className="mt-auto flex flex-col gap-1.5 px-3.5 py-3">
         <OrderActionButtons
           menuId={menuId}
           entry={entry}
@@ -157,15 +188,16 @@ export default function OrderMobileCard({
           compact
           variant="table"
         />
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="sm"
+          fullWidth
           onClick={() => onView(entry.id)}
-          className="mt-auto inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-xs font-semibold text-fg transition-colors hover:bg-surface-3"
+          startIcon={<IoEyeOutline className="text-base" />}
         >
-          <IoEyeOutline className="text-base" />
           {t("view")}
-        </button>
+        </Button>
       </div>
-    </article>
+    </Card>
   );
 }

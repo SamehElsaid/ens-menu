@@ -7,6 +7,7 @@ import {
   AdminBarChart,
   AdminMetricsGrid,
   AdminRankedList,
+  AdminSectionCard,
   DemoDataBanner,
   type MetricItem,
 } from "@/components/Admin/AdminAnalyticsWidgets";
@@ -27,19 +28,23 @@ import {
   IoStatsChartOutline,
   IoDownloadOutline,
   IoTimeOutline,
-  IoTrendingUpOutline,
-  IoTrendingDownOutline,
-  IoRemoveOutline,
   IoChevronForwardOutline,
 } from "react-icons/io5";
 import { FaChartLine } from "react-icons/fa";
 import { MdOutlineFastfood, MdOutlineTableBar } from "react-icons/md";
 import { BiCategory } from "react-icons/bi";
 import {
+  Badge,
   Button,
+  Card,
+  EmptyState,
+  SectionHeader,
   SegmentedControl,
   Skeleton,
   SkeletonRegion,
+  StatCard,
+  StatGrid,
+  Toolbar,
 } from "@/components/ui";
 
 const PERIODS: MenuAnalyticsPeriod[] = ["7d", "30d", "90d"];
@@ -48,170 +53,126 @@ type RankedItem = { id: number | string; label: string; count: number };
 
 function InsightsPanelSkeleton() {
   return (
-    <SkeletonRegion
-      label="Loading analytics"
-      className="rounded-lg border border-line bg-surface shadow-sm p-6"
-    >
-      <Skeleton className="mb-4 h-6 w-36" rounded="md" />
-      <div className="grid grid-cols-2 gap-3">
-        {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} className="h-20" rounded="lg" />
-        ))}
-      </div>
+    <SkeletonRegion label="Loading analytics">
+      <Card padded="lg">
+        <Skeleton className="mb-4 h-4 w-32" rounded="sm" />
+        <div className="grid grid-cols-2 gap-2">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-20" rounded="lg" />
+          ))}
+        </div>
+      </Card>
     </SkeletonRegion>
   );
 }
 
-function SectionCard({
-  title,
-  hint,
-  icon,
-  children,
+/**
+ * Period-over-period movement, as an instrument rail.
+ *
+ * Three coloured pills gave the reader three hues and no figures worth reading.
+ * These are the same three numbers set as metrics with a direction arrow, so
+ * the movement is legible in greyscale and the label says which way is good.
+ */
+function ComparisonRail({
+  comparison,
+  labels,
+  periodLabel,
   dir,
 }: {
-  title: string;
-  hint?: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
+  comparison: { views: number; orders: number; revenue: number };
+  labels: { views: string; orders: string; revenue: string };
+  periodLabel: string;
   dir: "rtl" | "ltr";
 }) {
+  const rows = [
+    { id: "views", label: labels.views, value: comparison.views },
+    { id: "orders", label: labels.orders, value: comparison.orders },
+    { id: "revenue", label: labels.revenue, value: comparison.revenue },
+  ];
+
   return (
-    <div
-      dir={dir}
-      className="rounded-lg border border-line bg-surface shadow-sm p-6 transition-all duration-200 hover:shadow-md"
-    >
-      <div className="flex items-center gap-2 mb-1">
-        <span className="text-brand text-xl shrink-0">{icon}</span>
-        <h2 className="text-lg font-semibold text-fg">{title}</h2>
-      </div>
-      {hint ? (
-        <p className="text-xs text-fg-muted mb-4">{hint}</p>
-      ) : (
-        <div className="mb-3" />
-      )}
-      {children}
+    <div dir={dir}>
+      <StatGrid columns={3} ruled>
+        {rows.map((row) => (
+          <StatCard
+            key={row.id}
+            label={row.label}
+            value={
+              <span lang="en">
+                {formatChangePercent(row.value)}
+              </span>
+            }
+            delta={
+              row.value === 0
+                ? undefined
+                : {
+                    value: formatChangePercent(Math.abs(row.value)),
+                    direction: row.value > 0 ? "up" : "down",
+                  }
+            }
+            hint={periodLabel}
+          />
+        ))}
+      </StatGrid>
     </div>
   );
 }
 
-function ChangeBadge({
-  value,
-  label,
-  dir,
-}: {
-  value: number;
-  label: string;
-  dir: "rtl" | "ltr";
-}) {
-  const isUp = value > 0;
-  const isDown = value < 0;
-  const Icon = isUp
-    ? IoTrendingUpOutline
-    : isDown
-      ? IoTrendingDownOutline
-      : IoRemoveOutline;
-  const color = isUp
-    ? "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10"
-    : isDown
-      ? "text-red-600 dark:text-red-400 bg-red-500/10"
-      : "text-fg-subtle bg-slate-500/10";
-
-  return (
-    <span
-      dir={dir}
-      className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium ${color}`}
-    >
-      <Icon className="text-sm shrink-0" />
-      {formatChangePercent(value)} {label}
-    </span>
-  );
-}
-
-function PeakHoursChart({
-  points,
-  locale,
-  dir,
-}: {
-  points: { hour: number; count: number }[];
-  locale: string;
-  dir: "rtl" | "ltr";
-}) {
-  if (points.length === 0) return null;
-  const max = Math.max(...points.map((p) => p.count), 1);
-
-  return (
-    <div className="flex items-end gap-1.5 h-36 pt-2 overflow-x-auto" dir={dir}>
-      {points.map((point) => (
-        <div
-          key={point.hour}
-          className="flex flex-col items-center gap-1.5 min-w-[2rem] flex-1"
-        >
-          <span className="text-[10px] font-semibold text-primary tabular-nums">
-            {point.count}
-          </span>
-          <div className="w-full flex items-end justify-center h-20">
-            <div
-              className="w-full max-w-[1.75rem] rounded-t-md bg-orange-500/80 dark:bg-orange-500"
-              style={{
-                height: `${Math.max(8, (point.count / max) * 100)}%`,
-              }}
-            />
-          </div>
-          <span className="text-[10px] text-fg-muted tabular-nums">
-            {new Date(2000, 0, 1, point.hour).toLocaleTimeString(
-              locale === "ar" ? "ar-EG" : "en-US",
-              { hour: "numeric", hour12: true },
-            )}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
+/** Order status → token. Every consumer also prints the label, so the hue is
+ *  a second reading rather than the only one. */
+const statusFill: Record<string, string> = {
+  completed: "bg-success",
+  pending: "bg-warning",
+  cancelled: "bg-danger",
+};
 
 function StatusBreakdown({
   items,
-  locale,
   dir,
+  emptyMessage,
 }: {
   items: { label: string; count: number; status: string }[];
-  locale: string;
   dir: "rtl" | "ltr";
+  emptyMessage: string;
 }) {
-  const total = items.reduce((s, i) => s + i.count, 0) || 1;
-  const colors: Record<string, string> = {
-    completed: "bg-emerald-500",
-    pending: "bg-amber-500",
-    cancelled: "bg-red-500",
-  };
+  const total = items.reduce((s, i) => s + i.count, 0);
+  if (total === 0) return <EmptyState title={emptyMessage} size="sm" />;
 
   return (
-    <div className="space-y-3" dir={dir}>
-      <div className="flex h-3 rounded-full overflow-hidden">
+    <div dir={dir}>
+      <div
+        className="flex h-2 overflow-hidden rounded-sm bg-surface-3"
+        role="presentation"
+      >
         {items.map((item) => (
           <div
             key={item.status}
-            className={`${colors[item.status] ?? "bg-slate-400"}`}
+            className={statusFill[item.status] ?? "bg-line-strong"}
             style={{ width: `${(item.count / total) * 100}%` }}
             title={`${item.label}: ${item.count}`}
           />
         ))}
       </div>
-      <ul className="space-y-2">
+      <ul className="mt-3">
         {items.map((item) => (
           <li
             key={item.status}
-            className="flex items-center justify-between text-sm"
+            className="flex items-baseline justify-between gap-3 border-b border-line py-2 last:border-b-0"
           >
-            <span className="flex items-center gap-2 text-fg-muted">
+            <span className="flex items-center gap-2 text-sm text-fg">
               <span
-                className={`w-2.5 h-2.5 rounded-full ${colors[item.status] ?? "bg-slate-400"}`}
+                aria-hidden
+                className={`size-2 shrink-0 rounded-sm ${statusFill[item.status] ?? "bg-line-strong"}`}
               />
               {item.label}
             </span>
-            <span className="font-semibold tabular-nums text-fg">
-              {item.count.toLocaleString("en-US")} (
-              {Math.round((item.count / total) * 100)}%)
+            <span className="flex items-baseline gap-2">
+              <span lang="en" className="ui-figure text-[13px] text-fg">
+                {item.count.toLocaleString("en-US")}
+              </span>
+              <span lang="en" className="ui-label text-fg-subtle">
+                {Math.round((item.count / total) * 100)}%
+              </span>
             </span>
           </li>
         ))}
@@ -220,31 +181,51 @@ function StatusBreakdown({
   );
 }
 
+/**
+ * Items that get looked at but not ordered.
+ *
+ * This is a diagnostic list, so it is set as a ledger with both figures and
+ * the derived conversion rate visible — the amber boxes it replaces flagged
+ * every row as a warning without ever saying how bad each one was.
+ */
 function GapItemsList({
   items,
-  locale,
   dir,
+  viewsLabel,
+  ordersLabel,
 }: {
   items: { id: number; label: string; views: number; orders: number }[];
-  locale: string;
   dir: "rtl" | "ltr";
+  viewsLabel: string;
+  ordersLabel: string;
 }) {
-  if (items.length === 0) return null;
   return (
-    <ul className="space-y-3" dir={dir}>
-      {items.map((item) => (
-        <li
-          key={item.id}
-          className="rounded-lg border border-amber-200/60 dark:border-amber-500/20 bg-amber-50/50 dark:bg-amber-500/5 p-3"
-        >
-          <p className="text-sm font-medium text-fg mb-1">{item.label}</p>
-          <p className="text-xs text-fg-muted">
-            {item.views.toLocaleString("en-US")} ·{" "}
-            {item.orders.toLocaleString("en-US")}{" "}
-            {locale === "ar" ? "طلب" : "orders"}
-          </p>
-        </li>
-      ))}
+    <ul dir={dir}>
+      {items.map((item) => {
+        const rate = item.views > 0 ? (item.orders / item.views) * 100 : 0;
+        return (
+          <li
+            key={item.id}
+            className="flex items-baseline justify-between gap-3 border-b border-line py-2.5 last:border-b-0"
+          >
+            <div className="min-w-0">
+              <p className="truncate text-sm text-fg">{item.label}</p>
+              <p className="mt-0.5 text-[11px] text-fg-subtle">
+                <span lang="en">{item.views.toLocaleString("en-US")}</span>{" "}
+                {viewsLabel} ·{" "}
+                <span lang="en">{item.orders.toLocaleString("en-US")}</span>{" "}
+                {ordersLabel}
+              </p>
+            </div>
+            <span
+              lang="en"
+              className="ui-figure shrink-0 text-[13px] text-warning"
+            >
+              {rate.toFixed(1)}%
+            </span>
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -256,67 +237,16 @@ function DeadItemsList({
   items: { id: number; label: string }[];
   dir: "rtl" | "ltr";
 }) {
-  if (items.length === 0) return null;
   return (
-    <ul className="flex flex-wrap gap-2" dir={dir}>
+    <ul className="flex flex-wrap gap-1.5" dir={dir}>
       {items.map((item) => (
-        <li
-          key={item.id}
-          className="rounded-lg border border-line bg-surface-3 px-3 py-1.5 text-sm text-fg-muted"
-        >
-          {item.label}
+        <li key={item.id}>
+          <Badge tone="neutral" size="md">
+            {item.label}
+          </Badge>
         </li>
       ))}
     </ul>
-  );
-}
-
-function RevenueBarChart({
-  points,
-  locale,
-  currency,
-  dir,
-  emptyMessage,
-}: {
-  points: { date: string; amount: number }[];
-  locale: string;
-  currency: string;
-  dir: "rtl" | "ltr";
-  emptyMessage: string;
-}) {
-  const chartPoints = points.map((p) => ({ date: p.date, count: p.amount }));
-  if (chartPoints.length === 0) {
-    return (
-      <p className="text-sm text-fg-muted text-center py-12">{emptyMessage}</p>
-    );
-  }
-
-  const max = Math.max(...chartPoints.map((p) => p.count), 1);
-
-  return (
-    <div className="flex items-end gap-2 h-40 pt-2 overflow-x-auto" dir={dir}>
-      {chartPoints.map((point) => (
-        <div
-          key={point.date}
-          className="flex flex-1 flex-col items-center gap-2 min-w-[2rem]"
-        >
-          <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
-            {Math.round(point.count)}
-          </span>
-          <div className="w-full flex items-end justify-center h-24">
-            <div
-              className="w-full max-w-[2.5rem] rounded-t-lg bg-emerald-500/80 dark:bg-emerald-500"
-              style={{
-                height: `${Math.max(8, (point.count / max) * 100)}%`,
-              }}
-            />
-          </div>
-          <span className="text-[10px] text-fg-muted text-center truncate w-full">
-            {formatMenuChartDate(point.date, locale)}
-          </span>
-        </div>
-      ))}
-    </div>
   );
 }
 
@@ -373,111 +303,104 @@ export default function MenuProAnalytics({
         id: "views",
         label: t("totalViews"),
         value: (s?.totalViews ?? displayTotalViews).toLocaleString("en-US"),
-        tone: "amber",
       },
       {
         id: "today",
         label: t("viewsToday"),
         value: (s?.viewsToday ?? 0).toLocaleString("en-US"),
-        tone: "orange",
       },
       {
         id: "week",
         label: t("viewsThisWeek"),
         value: (s?.viewsThisWeek ?? 0).toLocaleString("en-US"),
-        tone: "sky",
       },
       {
         id: "active",
         label: t("activeItemsRate"),
         value: `${activeItemsRate}%`,
-        tone: "primary",
       },
     ];
   }, [analytics?.summary, displayTotalViews, activeItemsRate, t]);
 
-  const summaryMetrics = useMemo<MetricItem[]>(() => {
+  /**
+   * The ten summary figures, split in two.
+   *
+   * Ten metrics in one grid is a wall: nothing is more important than anything
+   * else and the reader has to read all ten to find the one they came for. Split
+   * into traffic and trade, each rail answers one question, and a four-column
+   * rail followed by a three-column one divides evenly at every breakpoint
+   * instead of leaving holes in a ruled panel.
+   */
+  const trafficMetrics = useMemo<MetricItem[]>(() => {
     const s = analytics?.summary;
-    if (!s || isFreePlan) {
-      return freeBasicMetrics;
-    }
-
-    const orders =
-      s.totalOrders ?? totalOrders ?? (analytics?._isDemoData ? 0 : 0);
-
     return [
       {
         id: "views",
         label: t("totalViews"),
-        value: (s.totalViews ?? displayTotalViews).toLocaleString("en-US"),
-        tone: "amber",
+        value: (s?.totalViews ?? displayTotalViews).toLocaleString("en-US"),
       },
       {
         id: "today",
         label: t("viewsToday"),
-        value: s.viewsToday.toLocaleString("en-US"),
-        tone: "orange",
+        value: (s?.viewsToday ?? 0).toLocaleString("en-US"),
       },
       {
         id: "week",
         label: t("viewsThisWeek"),
-        value: s.viewsThisWeek.toLocaleString("en-US"),
-        tone: "sky",
-      },
-      {
-        id: "orders",
-        label: t("totalOrders"),
-        value: orders.toLocaleString("en-US"),
-        tone: "emerald",
+        value: (s?.viewsThisWeek ?? 0).toLocaleString("en-US"),
       },
       {
         id: "conversion",
         label: t("conversionRate"),
-        value: `${s.conversionRate ?? 0}%`,
-        tone: "purple",
+        value: `${s?.conversionRate ?? 0}%`,
+      },
+    ];
+  }, [analytics?.summary, displayTotalViews, t]);
+
+  const tradeMetrics = useMemo<MetricItem[]>(() => {
+    const s = analytics?.summary;
+    const orders = s?.totalOrders ?? totalOrders ?? 0;
+
+    return [
+      {
+        id: "orders",
+        label: t("totalOrders"),
+        value: orders.toLocaleString("en-US"),
       },
       {
         id: "aov",
         label: t("averageOrderValue"),
-        value: formatMenuCurrency(s.averageOrderValue ?? 0, currency, locale),
-        tone: "primary",
+        value: formatMenuCurrency(s?.averageOrderValue ?? 0, currency, locale),
       },
       {
         id: "revToday",
         label: t("revenueToday"),
-        value: formatMenuCurrency(s.revenueToday ?? 0, currency, locale),
-        tone: "emerald",
+        value: formatMenuCurrency(s?.revenueToday ?? 0, currency, locale),
       },
       {
         id: "revWeek",
         label: t("revenueThisWeek"),
-        value: formatMenuCurrency(s.revenueThisWeek ?? 0, currency, locale),
-        tone: "sky",
+        value: formatMenuCurrency(s?.revenueThisWeek ?? 0, currency, locale),
       },
       {
         id: "active",
         label: t("activeItemsRate"),
         value: `${activeItemsRate}%`,
-        tone: "slate",
       },
       {
         id: "tables",
         label: t("tablesCount"),
         value: tablesCount.toLocaleString("en-US"),
-        tone: "slate",
       },
     ];
   }, [
-    analytics,
-    isFreePlan,
-    displayTotalViews,
+    analytics?.summary,
     activeItemsRate,
     tablesCount,
     totalOrders,
     currency,
     locale,
     t,
-    freeBasicMetrics,
   ]);
 
   const quickSummaryMetrics = useMemo<MetricItem[]>(() => {
@@ -488,44 +411,31 @@ export default function MenuProAnalytics({
       return freeBasicMetrics;
     }
 
-    const orders =
-      s.totalOrders ?? totalOrders ?? (analytics?._isDemoData ? 0 : 0);
+    const orders = s.totalOrders ?? totalOrders ?? 0;
 
     return [
       {
         id: "today",
         label: t("viewsToday"),
         value: s.viewsToday.toLocaleString("en-US"),
-        tone: "orange",
       },
       {
         id: "week",
         label: t("viewsThisWeek"),
         value: s.viewsThisWeek.toLocaleString("en-US"),
-        tone: "sky",
       },
       {
         id: "orders",
         label: t("totalOrders"),
         value: orders.toLocaleString("en-US"),
-        tone: "emerald",
       },
       {
         id: "conversion",
         label: t("conversionRate"),
         value: `${s.conversionRate ?? 0}%`,
-        tone: "purple",
       },
     ];
-  }, [
-    analytics,
-    isFreePlan,
-    displayTotalViews,
-    activeItemsRate,
-    totalOrders,
-    t,
-    freeBasicMetrics,
-  ]);
+  }, [analytics?.summary, isFreePlan, totalOrders, t, freeBasicMetrics]);
 
   const topTables = useMemo(
     () =>
@@ -604,49 +514,54 @@ export default function MenuProAnalytics({
       return <InsightsPanelSkeleton />;
     }
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         <InsightsPanelSkeleton />
         {!isFreePlan && <InsightsPanelSkeleton />}
       </div>
     );
   }
 
+  /**
+   * The overview's inset panel.
+   *
+   * Metrics run edge to edge across the top as one rail, and the two ranked
+   * lists sit below sharing a rule — the previous three floating cards read as
+   * unrelated widgets and put the numbers at three different scales.
+   */
   if (isQuick) {
     return (
-      <div className="space-y-4" dir={textDir}>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold text-fg flex items-center gap-2">
-            <IoStatsChartOutline className="text-primary text-xl" />
-            {t("quickInsightsTitle")}
-          </h2>
-          <LinkTo
-            href={`/dashboard/${menuSlugOrId}/analytics`}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-          >
-            {t("viewFullAnalytics")}
-            <IoChevronForwardOutline
-              className={`text-base ${locale === "ar" ? "rotate-180" : ""}`}
-            />
-          </LinkTo>
-        </div>
+      <section className="flex flex-col gap-3" dir={textDir}>
+        <SectionHeader
+          eyebrow={t("analytics")}
+          title={t("quickInsightsTitle")}
+          actions={
+            <LinkTo
+              href={`/dashboard/${menuSlugOrId}/analytics`}
+              className="inline-flex items-center gap-1 text-xs font-medium text-brand hover:underline"
+            >
+              {t("viewFullAnalytics")}
+              <IoChevronForwardOutline
+                className="size-3.5 rtl:-scale-x-100"
+                aria-hidden
+              />
+            </LinkTo>
+          }
+        />
 
         {analytics?._isDemoData && (
           <DemoDataBanner message={t("demoDataBanner")} dir={textDir} />
         )}
 
-        <div
-          className={`grid grid-cols-1 gap-4 ${isFreePlan ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}
-        >
-          <div className="bg-raised rounded-lg border border-line shadow-sm p-5">
-            <AdminMetricsGrid
-              items={quickSummaryMetrics}
-              columns={2}
-              dir={textDir}
-            />
-          </div>
+        <AdminMetricsGrid
+          items={quickSummaryMetrics}
+          columns={4}
+          dir={textDir}
+          ruled
+        />
 
-          <div className="bg-raised rounded-lg border border-line shadow-sm p-5">
-            <p className="text-sm font-semibold text-fg mb-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Card padded="md">
+            <p className="ui-label mb-2 text-fg-muted">
               {t("topVisitedItems")}
             </p>
             <AdminRankedList
@@ -654,11 +569,11 @@ export default function MenuProAnalytics({
               dir={textDir}
               emptyMessage={t("noVisitData")}
             />
-          </div>
+          </Card>
 
           {!isFreePlan && (
-            <div className="bg-raised rounded-lg border border-line shadow-sm p-5">
-              <p className="text-sm font-semibold text-fg mb-3">
+            <Card padded="md">
+              <p className="ui-label mb-2 text-fg-muted">
                 {t("topOrderedItems")}
               </p>
               <AdminRankedList
@@ -666,54 +581,39 @@ export default function MenuProAnalytics({
                 dir={textDir}
                 emptyMessage={t("noOrderData")}
               />
-            </div>
+            </Card>
           )}
         </div>
-      </div>
+      </section>
     );
   }
 
+  /**
+   * Free plan.
+   *
+   * The metrics lead as a rail, the 7-day ceiling is stated once as an inline
+   * note rather than a shouting banner, and the chart gets the full width —
+   * with four metrics there is no reason to squeeze it into half a row.
+   */
   if (isFreePlan && analytics) {
     return (
-      <div className="space-y-6" dir={textDir}>
+      <div className="flex flex-col gap-4" dir={textDir}>
         {analytics._isDemoData && (
           <DemoDataBanner message={t("demoDataBanner")} dir={textDir} />
         )}
 
-        <div className="rounded-lg border border-line bg-surface-2 px-4 py-3 text-sm text-fg-muted">
-          {t("freePlanLimit7d")}
-        </div>
+        <AdminMetricsGrid
+          items={freeBasicMetrics}
+          columns={4}
+          dir={textDir}
+          ruled
+        />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <SectionCard
-            title={t("insightsTitle")}
-            icon={<IoStatsChartOutline />}
-            dir={textDir}
-          >
-            <AdminMetricsGrid
-              items={freeBasicMetrics}
-              columns={2}
-              dir={textDir}
-            />
-          </SectionCard>
+        <p className="ui-label text-fg-subtle">{t("freePlanLimit7d")}</p>
 
-          <SectionCard
-            title={t("topVisitedItems")}
-            hint={t("topVisitedItemsHint")}
-            icon={<IoEyeOutline />}
-            dir={textDir}
-          >
-            <AdminRankedList
-              items={topVisitedItems}
-              dir={textDir}
-              emptyMessage={t("noVisitData")}
-            />
-          </SectionCard>
-        </div>
-
-        <SectionCard
+        <AdminSectionCard
           title={t("viewsChartTitle7d")}
-          icon={<FaChartLine />}
+          icon={<FaChartLine aria-hidden />}
           dir={textDir}
         >
           <AdminBarChart
@@ -722,7 +622,20 @@ export default function MenuProAnalytics({
             dir={textDir}
             emptyMessage={t("noVisitData")}
           />
-        </SectionCard>
+        </AdminSectionCard>
+
+        <AdminSectionCard
+          title={t("topVisitedItems")}
+          subtitle={t("topVisitedItemsHint")}
+          icon={<IoEyeOutline aria-hidden />}
+          dir={textDir}
+        >
+          <AdminRankedList
+            items={topVisitedItems}
+            dir={textDir}
+            emptyMessage={t("noVisitData")}
+          />
+        </AdminSectionCard>
       </div>
     );
   }
@@ -731,15 +644,26 @@ export default function MenuProAnalytics({
     return null;
   }
 
+  /**
+   * The full report.
+   *
+   * The old page was fourteen identical cards in seven equal two-column rows —
+   * every panel claimed the same importance, so the page had no reading order.
+   * This version is four named acts: the headline figures as edge-sharing rails,
+   * then the time series, then demand (what sells, where, to whom), then the
+   * two diagnostic lists that tell the owner what to fix. Each act is announced
+   * by a ruled section header, which is what lets someone scroll to the part
+   * they want instead of scanning every card title.
+   */
   return (
-    <div className="space-y-6" dir={textDir}>
+    <div className="flex flex-col gap-8" dir={textDir}>
       {analytics?._isDemoData && (
         <DemoDataBanner message={t("demoDataBanner")} dir={textDir} />
       )}
 
       {onPeriodChange && (
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap gap-2">
+        <Toolbar
+          filters={
             <SegmentedControl
               label={t("analytics")}
               value={period}
@@ -749,82 +673,70 @@ export default function MenuProAnalytics({
                 label: t(`period.${p}`),
               }))}
             />
-          </div>
-          {analytics && (
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={handleExport}
-              startIcon={<IoDownloadOutline className="text-lg" />}
-            >
-              {t("exportCsv")}
-            </Button>
-          )}
-        </div>
+          }
+          actions={
+            analytics ? (
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={handleExport}
+                startIcon={<IoDownloadOutline aria-hidden />}
+              >
+                {t("exportCsv")}
+              </Button>
+            ) : null
+          }
+        />
       )}
 
-      {analytics?.comparison && (
-        <div className="flex flex-wrap gap-2">
-          <ChangeBadge
-            value={analytics.comparison.viewsChangePercent}
-            label={t("vsPreviousPeriod")}
-            dir={textDir}
-          />
-          <ChangeBadge
-            value={analytics.comparison.ordersChangePercent}
-            label={t("ordersVsPrevious")}
-            dir={textDir}
-          />
-          <ChangeBadge
-            value={analytics.comparison.revenueChangePercent}
-            label={t("revenueVsPrevious")}
-            dir={textDir}
-          />
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <SectionCard
-          title={t("insightsTitle")}
-          icon={<IoStatsChartOutline />}
+      <section className="flex flex-col gap-3">
+        <SectionHeader
+          ruled
+          eyebrow={t("insightsTitle")}
+          title={t("totalViews")}
+          description={t("topVisitedItemsHint")}
+        />
+        <AdminMetricsGrid
+          items={trafficMetrics}
+          columns={4}
           dir={textDir}
-        >
-          <AdminMetricsGrid items={summaryMetrics} columns={3} dir={textDir} />
-        </SectionCard>
+          ruled
+        />
 
-        <SectionCard
-          title={t("topVisitedItems")}
-          hint={t("topVisitedItemsHint")}
-          icon={<IoEyeOutline />}
-          dir={textDir}
-        >
-          <AdminRankedList
-            items={topVisitedItems}
+        {analytics?.comparison && (
+          <ComparisonRail
             dir={textDir}
-            emptyMessage={t("noVisitData")}
+            periodLabel={t(`period.${period}`)}
+            comparison={{
+              views: analytics.comparison.viewsChangePercent,
+              orders: analytics.comparison.ordersChangePercent,
+              revenue: analytics.comparison.revenueChangePercent,
+            }}
+            labels={{
+              views: t("vsPreviousPeriod"),
+              orders: t("ordersVsPrevious"),
+              revenue: t("revenueVsPrevious"),
+            }}
           />
-        </SectionCard>
+        )}
+      </section>
 
-        <SectionCard
-          title={t("topOrderedItems")}
-          hint={t("topOrderedItemsHint")}
-          icon={<IoReceiptOutline />}
-          dir={textDir}
-        >
-          <AdminRankedList
-            items={topOrderedDisplay}
-            dir={textDir}
-            emptyMessage={t("noOrderData")}
-          />
-        </SectionCard>
-      </div>
+      <section className="flex flex-col gap-3">
+        <SectionHeader
+          ruled
+          eyebrow={t("totalOrders")}
+          title={t("revenueChartTitle")}
+        />
+        <AdminMetricsGrid items={tradeMetrics} columns={3} dir={textDir} ruled />
+      </section>
 
       {analytics && (
         <>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <SectionCard
+          <section className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            <AdminSectionCard
               title={viewsChartTitle}
-              icon={<FaChartLine />}
+              icon={<FaChartLine aria-hidden />}
               dir={textDir}
             >
               <AdminBarChart
@@ -833,169 +745,224 @@ export default function MenuProAnalytics({
                 dir={textDir}
                 emptyMessage={t("noVisitData")}
               />
-            </SectionCard>
+            </AdminSectionCard>
 
-            <SectionCard
+            <AdminSectionCard
               title={t("revenueChartTitle")}
-              icon={<FaChartLine />}
+              icon={<FaChartLine aria-hidden />}
               dir={textDir}
             >
-              <RevenueBarChart
-                points={analytics.revenueOverTime ?? []}
+              <AdminBarChart
+                points={(analytics.revenueOverTime ?? []).map((p) => ({
+                  date: p.date,
+                  count: p.amount,
+                }))}
                 locale={locale}
-                currency={currency}
                 dir={textDir}
+                tone="success"
+                formatValue={(v) => formatMenuCurrency(v, currency, locale)}
+                formatLabel={(d) => formatMenuChartDate(d, locale)}
                 emptyMessage={t("noRevenueData")}
               />
-            </SectionCard>
-          </div>
+            </AdminSectionCard>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <SectionCard
+            <AdminSectionCard
               title={t("peakHoursTitle")}
-              hint={t("peakHoursHint")}
-              icon={<IoTimeOutline />}
+              subtitle={t("peakHoursHint")}
+              icon={<IoTimeOutline aria-hidden />}
               dir={textDir}
             >
-              <PeakHoursChart
-                points={analytics.peakHours ?? []}
+              <AdminBarChart
+                points={(analytics.peakHours ?? []).map((p) => ({
+                  date: String(p.hour),
+                  count: p.count,
+                }))}
                 locale={locale}
                 dir={textDir}
+                tone="accent"
+                formatLabel={(hour) =>
+                  new Date(2000, 0, 1, Number(hour)).toLocaleTimeString(
+                    locale === "ar" ? "ar-EG" : "en-US",
+                    { hour: "numeric", hour12: true },
+                  )
+                }
+                emptyMessage={t("noVisitData")}
               />
-            </SectionCard>
+            </AdminSectionCard>
 
-            <SectionCard
+            <AdminSectionCard
               title={t("orderStatusTitle")}
-              hint={t("orderStatusHint")}
-              icon={<IoReceiptOutline />}
+              subtitle={t("orderStatusHint")}
+              icon={<IoReceiptOutline aria-hidden />}
               dir={textDir}
             >
               <StatusBreakdown
                 items={statusItems}
-                locale={locale}
                 dir={textDir}
+                emptyMessage={t("noOrderData")}
               />
-            </SectionCard>
-          </div>
+            </AdminSectionCard>
+          </section>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <SectionCard
-              title={t("topTablesTitle")}
-              hint={t("topTablesHint")}
-              icon={<MdOutlineTableBar />}
-              dir={textDir}
-            >
-              <AdminRankedList
-                items={topTables}
-                dir={textDir}
-                emptyMessage={t("noTableData")}
-              />
-            </SectionCard>
-
-            <SectionCard
-              title={t("topCategoriesTitle")}
-              hint={t("topCategoriesHint")}
-              icon={<BiCategory />}
-              dir={textDir}
-            >
-              <AdminRankedList
-                items={topCategories}
-                dir={textDir}
-                emptyMessage={t("noCategoryData")}
-              />
-            </SectionCard>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <SectionCard
-              title={t("viewToOrderGapTitle")}
-              hint={t("viewToOrderGapHint")}
-              icon={<IoEyeOutline />}
-              dir={textDir}
-            >
-              {gapItems.length === 0 ? (
-                <p className="text-sm text-fg-muted text-center py-8">
-                  {t("noGapData")}
-                </p>
-              ) : (
-                <GapItemsList items={gapItems} locale={locale} dir={textDir} />
-              )}
-            </SectionCard>
-
-            <SectionCard
-              title={t("deadItemsTitle")}
-              hint={t("deadItemsHint")}
-              icon={<MdOutlineFastfood />}
-              dir={textDir}
-            >
-              {deadItems.length === 0 ? (
-                <p className="text-sm text-fg-muted text-center py-8">
-                  {t("noDeadItems")}
-                </p>
-              ) : (
-                <DeadItemsList items={deadItems} dir={textDir} />
-              )}
-            </SectionCard>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <SectionCard
-              title={t("staffPerformanceTitle")}
-              hint={t("staffPerformanceHint")}
-              icon={<IoStatsChartOutline />}
-              dir={textDir}
-            >
-              <AdminRankedList
-                items={staffItems}
-                dir={textDir}
-                emptyMessage={t("noStaffData")}
-              />
-            </SectionCard>
-
-            {analytics.adMetrics && (
-              <SectionCard
-                title={t("adMetricsTitle")}
-                hint={t("adMetricsHint")}
-                icon={<IoEyeOutline />}
+          <section className="flex flex-col gap-3">
+            <SectionHeader
+              ruled
+              eyebrow={t("analytics")}
+              title={t("topOrderedItems")}
+              description={t("topOrderedItemsHint")}
+            />
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-4">
+              <AdminSectionCard
+                title={t("topVisitedItems")}
+                icon={<IoEyeOutline aria-hidden />}
                 dir={textDir}
               >
-                <AdminMetricsGrid
-                  items={[
-                    {
-                      id: "imp",
-                      label: t("adImpressions"),
-                      value:
-                        analytics.adMetrics.totalImpressions.toLocaleString(
-                          "en-US",
-                        ),
-                      tone: "sky",
-                    },
-                    {
-                      id: "clk",
-                      label: t("adClicks"),
-                      value:
-                        analytics.adMetrics.totalClicks.toLocaleString("en-US"),
-                      tone: "amber",
-                    },
-                    {
-                      id: "ctr",
-                      label: t("adCtr"),
-                      value: `${analytics.adMetrics.averageCtr}%`,
-                      tone: "emerald",
-                    },
-                  ]}
-                  columns={3}
+                <AdminRankedList
+                  items={topVisitedItems}
                   dir={textDir}
+                  emptyMessage={t("noVisitData")}
                 />
-                <LinkTo
-                  href={`/dashboard/${menuSlugOrId}/advertisements`}
-                  className="mt-4 inline-flex text-sm text-primary hover:underline"
-                >
-                  {t("viewAdsPage")}
-                </LinkTo>
-              </SectionCard>
-            )}
-          </div>
+              </AdminSectionCard>
+
+              <AdminSectionCard
+                title={t("topOrderedItems")}
+                icon={<IoReceiptOutline aria-hidden />}
+                dir={textDir}
+              >
+                <AdminRankedList
+                  items={topOrderedDisplay}
+                  dir={textDir}
+                  emptyMessage={t("noOrderData")}
+                />
+              </AdminSectionCard>
+
+              <AdminSectionCard
+                title={t("topCategoriesTitle")}
+                icon={<BiCategory aria-hidden />}
+                dir={textDir}
+              >
+                <AdminRankedList
+                  items={topCategories}
+                  dir={textDir}
+                  emptyMessage={t("noCategoryData")}
+                />
+              </AdminSectionCard>
+
+              <AdminSectionCard
+                title={t("topTablesTitle")}
+                icon={<MdOutlineTableBar aria-hidden />}
+                dir={textDir}
+              >
+                <AdminRankedList
+                  items={topTables}
+                  dir={textDir}
+                  emptyMessage={t("noTableData")}
+                />
+              </AdminSectionCard>
+            </div>
+          </section>
+
+          <section className="flex flex-col gap-3">
+            <SectionHeader
+              ruled
+              eyebrow={t("analytics")}
+              title={t("viewToOrderGapTitle")}
+              description={t("viewToOrderGapHint")}
+            />
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+              <AdminSectionCard
+                title={t("viewToOrderGapTitle")}
+                icon={<IoEyeOutline aria-hidden />}
+                dir={textDir}
+              >
+                {gapItems.length === 0 ? (
+                  <EmptyState title={t("noGapData")} size="sm" />
+                ) : (
+                  <GapItemsList
+                    items={gapItems}
+                    dir={textDir}
+                    viewsLabel={t("totalViews")}
+                    ordersLabel={t("totalOrders")}
+                  />
+                )}
+              </AdminSectionCard>
+
+              <AdminSectionCard
+                title={t("deadItemsTitle")}
+                subtitle={t("deadItemsHint")}
+                icon={<MdOutlineFastfood aria-hidden />}
+                dir={textDir}
+              >
+                {deadItems.length === 0 ? (
+                  <EmptyState title={t("noDeadItems")} size="sm" />
+                ) : (
+                  <DeadItemsList items={deadItems} dir={textDir} />
+                )}
+              </AdminSectionCard>
+
+              <AdminSectionCard
+                title={t("staffPerformanceTitle")}
+                subtitle={t("staffPerformanceHint")}
+                icon={<IoStatsChartOutline aria-hidden />}
+                dir={textDir}
+              >
+                <AdminRankedList
+                  items={staffItems}
+                  dir={textDir}
+                  emptyMessage={t("noStaffData")}
+                />
+              </AdminSectionCard>
+            </div>
+          </section>
+
+          {analytics.adMetrics && (
+            <section className="flex flex-col gap-3">
+              <SectionHeader
+                ruled
+                eyebrow={t("analytics")}
+                title={t("adMetricsTitle")}
+                description={t("adMetricsHint")}
+                actions={
+                  <LinkTo
+                    href={`/dashboard/${menuSlugOrId}/advertisements`}
+                    className="inline-flex items-center gap-1 text-xs font-medium text-brand hover:underline"
+                  >
+                    {t("viewAdsPage")}
+                    <IoChevronForwardOutline
+                      className="size-3.5 rtl:-scale-x-100"
+                      aria-hidden
+                    />
+                  </LinkTo>
+                }
+              />
+              <AdminMetricsGrid
+                ruled
+                columns={3}
+                dir={textDir}
+                items={[
+                  {
+                    id: "imp",
+                    label: t("adImpressions"),
+                    value:
+                      analytics.adMetrics.totalImpressions.toLocaleString(
+                        "en-US",
+                      ),
+                  },
+                  {
+                    id: "clk",
+                    label: t("adClicks"),
+                    value:
+                      analytics.adMetrics.totalClicks.toLocaleString("en-US"),
+                  },
+                  {
+                    id: "ctr",
+                    label: t("adCtr"),
+                    value: `${analytics.adMetrics.averageCtr}%`,
+                  },
+                ]}
+              />
+            </section>
+          )}
         </>
       )}
     </div>

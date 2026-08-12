@@ -3,29 +3,25 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "@/i18n/navigation";
-import {
-  IoArrowBack,
-  IoAddOutline,
-  IoLibraryOutline,
-  IoSearchOutline,
-} from "react-icons/io5";
+import { IoAddOutline, IoLibraryOutline } from "react-icons/io5";
 import { FaTrash, FaEdit } from "react-icons/fa";
-import CardDashBoard from "@/components/Card/CardDashBoard";
 import { axiosGet, axiosDelete } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import { FiAlertTriangle } from "react-icons/fi";
 import {
   Button,
   ConfirmDialog,
+  DataTable,
   EmptyState,
   NoResultsState,
   PageHeader,
+  PageShell,
   Pagination,
   SearchInput,
-  Skeleton,
-  SkeletonRegion,
-  Spinner,
+  Toolbar,
+  type DataColumn,
 } from "@/components/ui";
+import { useDataTableLabels } from "@/hooks/useDataTableLabels";
 import ViewTime from "@/shared/ViewTime";
 
 const PAGE_LIMIT = 10;
@@ -38,7 +34,7 @@ interface SearchInformation {
   updatedAt?: string;
 }
 
-interface Pagination {
+interface PaginationMeta {
   total: number;
   page: number;
   limit: number;
@@ -48,18 +44,20 @@ interface Pagination {
 interface SearchInformationResponse {
   success: boolean;
   data: SearchInformation[];
-  pagination: Pagination;
+  pagination: PaginationMeta;
 }
 
 export default function KnowledgeManagementPage() {
   const locale = useLocale();
   const t = useTranslations("adminKnowledge");
   const tCommon = useTranslations("common");
+  const tAdmin = useTranslations("adminDashboard");
+  const tableLabels = useDataTableLabels();
   const router = useRouter();
   const isRTL = locale === "ar";
 
   const [items, setItems] = useState<SearchInformation[]>([]);
-  const [pagination, setPagination] = useState<Pagination>({
+  const [pagination, setPagination] = useState<PaginationMeta>({
     total: 0,
     page: 1,
     limit: PAGE_LIMIT,
@@ -172,211 +170,93 @@ export default function KnowledgeManagementPage() {
     debouncedSearch,
   ]);
 
-  return (
-    <div className="space-y-6 pb-10">
-      <PageHeader
-        title={t("title")}
-        description={t("subtitle")}
-        actions={
-          <Button
-            variant="secondary"
-            startIcon={<IoArrowBack className="rtl:rotate-180" />}
-            onClick={() => router.back()}
-          >
-            {t("back")}
-          </Button>
-        }
-      />
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <CardDashBoard
-          borderColor="border-violet-200 dark:border-violet-500/20"
-          hover
-        >
-          <div className="flex items-center gap-4">
-            <div className="flex size-14 items-center justify-center rounded-lg bg-brand-soft">
-              <IoLibraryOutline className="text-2xl text-brand-soft-fg" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-fg-muted mb-1">
-                {t("totalItems")}
-              </p>
-              <p className="text-3xl font-bold text-fg">
-                {loading ? (
-                  <Spinner size="md" label={tCommon("loading")} />
-                ) : (
-                  pagination.total.toLocaleString()
-                )}
-              </p>
-            </div>
-          </div>
-        </CardDashBoard>
-
-        <CardDashBoard
-          borderColor="border-sky-200 dark:border-sky-500/20"
-          hover
-        >
-          <div className="flex items-center gap-4">
-            <div className="flex size-14 items-center justify-center rounded-lg bg-info-soft">
-              <IoSearchOutline className="text-2xl text-info-fg" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-fg-muted mb-1">
-                {t("filteredItems")}
-              </p>
-              <p className="text-3xl font-bold text-sky-600 dark:text-sky-400">
-                {loading ? (
-                  <Spinner size="md" label={tCommon("loading")} />
-                ) : (
-                  items.length.toLocaleString()
-                )}
-              </p>
-            </div>
-          </div>
-        </CardDashBoard>
-      </div>
-
-      <div
-        className={`flex flex-wrap items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}
-      >
-        <SearchInput
-          value={search}
-          onChange={setSearch}
-          placeholder={t("searchPlaceholder")}
-          label={t("searchPlaceholder")}
-          className="min-w-[220px] flex-1"
-        />
-        <Button startIcon={<IoAddOutline />} onClick={openAdd}>
-          {t("addNew")}
-        </Button>
-      </div>
-
-      {loading ? (
-        <SkeletonRegion label={tCommon("loading")}>
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <CardDashBoard key={i}>
-                <Skeleton className="mb-3 h-5 w-40" />
-                <Skeleton className="mb-3 h-4 w-full" />
-                <div className="flex gap-2">
-                  <Skeleton className="h-9 w-20 rounded-lg" />
-                  <Skeleton className="h-9 w-20 rounded-lg" />
-                </div>
-              </CardDashBoard>
-            ))}
-          </div>
-        </SkeletonRegion>
-      ) : items.length === 0 ? (
-        debouncedSearch ? (
-          <NoResultsState
-            title={t("noResults")}
-            description={t("noResultsDescription")}
-            onClear={() => setSearch("")}
-            clearLabel={tCommon("clearSearch")}
-          />
+  const columns: DataColumn<SearchInformation>[] = [
+    {
+      id: "titleAr",
+      header: t("titleAr"),
+      primary: isRTL,
+      cell: (item) => (
+        <span className="block min-w-0 truncate font-medium text-fg" lang="ar">
+          {item.titleAr}
+        </span>
+      ),
+    },
+    {
+      id: "titleEn",
+      header: t("titleEn"),
+      primary: !isRTL,
+      cell: (item) => (
+        <span className="block min-w-0 truncate font-medium text-fg" lang="en">
+          {item.titleEn}
+        </span>
+      ),
+    },
+    {
+      id: "createdAt",
+      header: t("createdAt"),
+      hideOnMobile: true,
+      cell: (item) =>
+        item.createdAt ? (
+          <span className="whitespace-nowrap text-xs text-fg-muted">
+            <ViewTime data={item.createdAt} />
+          </span>
         ) : (
-          <EmptyState
-            title={t("emptyTitle")}
-            description={t("emptyDescription")}
-            icon={<IoLibraryOutline />}
-            action={
-              <Button startIcon={<IoAddOutline />} onClick={openAdd}>
-                {t("addNew")}
-              </Button>
-            }
-          />
-        )
-      ) : (
-        <>
-          <div className="space-y-4">
-            {items.map((item) => {
-              const isBusy = loadingItemId === item.id;
-              return (
-                <CardDashBoard
-                  key={item.id}
-                  hover
-                  className="transition-all duration-200 hover:shadow-lg"
-                >
-                  <div
-                    className={`flex items-start justify-between gap-4 ${isRTL ? "flex-row-reverse" : ""}`}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-bold text-fg mb-3 line-clamp-1">
-                        {getTitle(item)}
-                      </h3>
+          <span className="text-fg-subtle">—</span>
+        ),
+    },
+    {
+      id: "updatedAt",
+      header: t("updatedAt"),
+      cell: (item) =>
+        item.updatedAt ? (
+          <span className="whitespace-nowrap text-xs text-fg-muted">
+            <ViewTime data={item.updatedAt} />
+          </span>
+        ) : (
+          <span className="text-fg-subtle">—</span>
+        ),
+    },
+  ];
 
-                      {/* Bilingual titles */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-surface-2 rounded-lg mb-4 text-xs">
-                        <div>
-                          <span className="font-semibold text-fg-muted">
-                            {t("titleAr")}:{" "}
-                          </span>
-                          <span className="text-fg-muted">{item.titleAr}</span>
-                        </div>
-                        <div>
-                          <span className="font-semibold text-fg-muted">
-                            {t("titleEn")}:{" "}
-                          </span>
-                          <span className="text-fg-muted">{item.titleEn}</span>
-                        </div>
-                      </div>
-
-                      {/* Timestamps */}
-                      <div
-                        className={`flex items-center gap-4 flex-wrap mb-4 text-xs text-fg-muted ${isRTL ? "flex-row-reverse" : ""}`}
-                      >
-                        {item.createdAt && (
-                          <span className="flex items-center gap-1.5 bg-surface-2 px-2.5 py-1 rounded-lg">
-                            <span className="font-semibold text-fg-muted">
-                              {t("createdAt")}:
-                            </span>
-                            <ViewTime data={item.createdAt} />
-                          </span>
-                        )}
-                        {item.updatedAt && (
-                          <span className="flex items-center gap-1.5 bg-violet-50 dark:bg-violet-500/10 px-2.5 py-1 rounded-lg">
-                            <span className="font-semibold text-violet-600 dark:text-violet-400">
-                              {t("updatedAt")}:
-                            </span>
-                            <span className="text-violet-700 dark:text-violet-300">
-                              <ViewTime data={item.updatedAt} />
-                            </span>
-                          </span>
-                        )}
-                      </div>
-
-                      <div
-                        className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
-                      >
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          startIcon={<FaEdit />}
-                          onClick={() => openEdit(item)}
-                          disabled={isBusy}
-                        >
-                          {t("actions.edit")}
-                        </Button>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          startIcon={<FaTrash />}
-                          onClick={() => setDeleteModal({ isOpen: true, item })}
-                          disabled={isBusy}
-                          loading={isBusy}
-                        >
-                          {t("actions.delete")}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardDashBoard>
-              );
-            })}
-          </div>
-
-          {/* Pagination */}
+  return (
+    <PageShell
+      kind="detail"
+      header={
+        /* The two metrics here were "total" and "rows on this page" — the second
+           was the page size dressed as an insight, and the first is already
+           stated by the pagination summary. Both are gone; an article list does
+           not need an instrument panel. */
+        <PageHeader
+          eyebrow={t("eyebrow")}
+          title={t("title")}
+          description={t("subtitle")}
+          breadcrumbs={[
+            { label: tAdmin("title"), href: "/admin" },
+            { label: t("title") },
+          ]}
+          breadcrumbsLabel={tCommon("breadcrumb")}
+          actions={
+            <Button startIcon={<IoAddOutline />} onClick={openAdd}>
+              {t("addNew")}
+            </Button>
+          }
+        />
+      }
+      toolbar={
+        <Toolbar
+          search={
+            <SearchInput
+              value={search}
+              onChange={setSearch}
+              placeholder={t("searchPlaceholder")}
+              label={t("searchPlaceholder")}
+              clearLabel={tCommon("clearSearch")}
+            />
+          }
+        />
+      }
+      footer={
+        items.length > 0 ? (
           <Pagination
             page={page}
             totalPages={pagination.totalPages}
@@ -397,10 +277,72 @@ export default function KnowledgeManagementPage() {
               page: (n) => tCommon("goToPage", { page: n }),
             }}
           />
-        </>
-      )}
+        ) : null
+      }
+    >
+      <DataTable<SearchInformation>
+        columns={columns}
+        rows={items}
+        getRowKey={(item) => String(item.id)}
+        caption={t("title")}
+        loading={loading}
+        tableId="admin-knowledge"
+        stickyHeader
+        densityControl
+        labels={tableLabels}
+        empty={
+          debouncedSearch ? (
+            <NoResultsState
+              title={t("noResults")}
+              description={t("noResultsDescription")}
+              onClear={() => setSearch("")}
+              clearLabel={tCommon("clearSearch")}
+            />
+          ) : (
+            <EmptyState
+              title={t("emptyTitle")}
+              description={t("emptyDescription")}
+              icon={<IoLibraryOutline />}
+              action={
+                <Button startIcon={<IoAddOutline />} onClick={openAdd}>
+                  {t("addNew")}
+                </Button>
+              }
+            />
+          )
+        }
+        rowActions={(item) => {
+          const isBusy = loadingItemId === item.id;
+          return (
+            <div className="flex items-center justify-end gap-1">
+              <Button
+                variant="secondary"
+                size="sm"
+                iconOnly
+                aria-label={t("actions.edit")}
+                title={t("actions.edit")}
+                onClick={() => openEdit(item)}
+                disabled={isBusy}
+              >
+                <FaEdit />
+              </Button>
+              <Button
+                variant="dangerGhost"
+                size="sm"
+                iconOnly
+                aria-label={t("actions.delete")}
+                title={t("actions.delete")}
+                onClick={() => setDeleteModal({ isOpen: true, item })}
+                disabled={isBusy}
+                loading={isBusy}
+              >
+                <FaTrash />
+              </Button>
+            </div>
+          );
+        }}
+      />
 
-      {/* Delete Confirmation */}
       <ConfirmDialog
         open={deleteModal.isOpen}
         onClose={() => setDeleteModal({ isOpen: false, item: null })}
@@ -415,6 +357,6 @@ export default function KnowledgeManagementPage() {
         tone="danger"
         icon={<FiAlertTriangle />}
       />
-    </div>
+    </PageShell>
   );
 }

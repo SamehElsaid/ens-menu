@@ -1,41 +1,34 @@
 "use client";
 
 import Image from "next/image";
+import { cn } from "@/lib/cn";
 
 const AI_AVATAR_SRC = "/images/AiAvatar.webp";
 
 type Props = {
   size?: number;
   className?: string;
-  glow?: boolean;
-  variant?: "default" | "onGradient";
+  /** For the panel's brand header band, where the page's hairline disappears. */
+  variant?: "default" | "onBrand";
 };
 
 export default function LenaAvatar({
   size = 36,
   className = "",
-  glow = false,
   variant = "default",
 }: Props) {
-  const ringClass =
-    variant === "onGradient"
-      ? "border-2 border-white/25 shadow-[0_4px_14px_rgba(0,0,0,0.15)]"
-      : "border border-purple-200/80 shadow-md shadow-purple-500/20 dark:border-purple-500/30";
-
   return (
     <div
-      className={`relative shrink-0 ${className}`}
+      className={cn("relative shrink-0", className)}
       style={{ width: size, height: size }}
     >
-      {glow && (
-        <span
-          aria-hidden
-          className="absolute inset-0 rounded-full bg-accent-purple/30 blur-md"
-        />
-      )}
-
       <div
-        className={`relative size-full overflow-hidden rounded-full bg-purple-50 ${ringClass} dark:bg-purple-950/40`}
+        className={cn(
+          "relative size-full overflow-hidden rounded-full bg-surface-2",
+          variant === "onBrand"
+            ? "border border-on-brand/25"
+            : "border border-line",
+        )}
       >
         <Image
           src={AI_AVATAR_SRC}

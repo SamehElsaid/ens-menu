@@ -7,7 +7,9 @@ import {
   type ReactNode,
   type LabelHTMLAttributes,
 } from "react";
+import { FiAlertCircle } from "react-icons/fi";
 import { cn } from "@/lib/cn";
+import { text } from "./styles";
 
 type FieldContextValue = {
   controlId: string;
@@ -94,7 +96,7 @@ export function Field({
         disabled,
       }}
     >
-      <div className={cn("flex w-full flex-col gap-1", className)}>
+      <div className={cn("flex w-full flex-col gap-1.5", className)}>
         {label ? (
           <Label
             htmlFor={controlId}
@@ -114,7 +116,11 @@ export function Field({
             role="alert"
             className="flex items-start gap-1.5 text-xs font-medium text-danger"
           >
-            {error}
+            {/* An icon beside the message, because the field's red border and
+                red text are both hue — on a greyscale or colour-blind screen
+                the shape is the only thing left that says "error". */}
+            <FiAlertCircle className="mt-px size-3.5 shrink-0" aria-hidden />
+            <span>{error}</span>
           </p>
         ) : hint ? (
           <p id={hintId} className="text-xs leading-relaxed text-fg-muted">
@@ -131,6 +137,12 @@ export type LabelProps = LabelHTMLAttributes<HTMLLabelElement> & {
   optionalLabel?: string;
 };
 
+/**
+ * The field label: sans, sentence case, always above the control and always
+ * visible. It sits one weight above body text and one shade below it, which is
+ * enough to read as a caption without the uppercase mono the previous
+ * direction used — that made an eight-field form look like a receipt.
+ */
 export function Label({
   className,
   children,
@@ -140,10 +152,7 @@ export function Label({
 }: LabelProps) {
   return (
     <label
-      className={cn(
-        "flex items-center gap-1 text-xs font-medium text-fg",
-        className,
-      )}
+      className={cn(text.label, "flex items-center gap-1 text-fg", className)}
       {...props}
     >
       <span>{children}</span>
@@ -206,13 +215,19 @@ export function Fieldset({
 }) {
   return (
     <fieldset className={cn("min-w-0", className)}>
-      <legend className="text-[13px] font-semibold text-fg">{legend}</legend>
+      <legend className="text-[13px] font-semibold tracking-[-0.02em] text-fg">
+        {legend}
+      </legend>
       {description ? (
         <p className="mt-1 text-xs leading-relaxed text-fg-muted">
           {description}
         </p>
       ) : null}
-      <div className="mt-2.5 flex flex-col gap-3">{children}</div>
+      {/* A rule under the legend, so a long settings page reads as a stack of
+          named groups instead of one continuous run of inputs. */}
+      <div className="mt-3 border-t border-line pt-3.5">
+        <div className="flex flex-col gap-3.5">{children}</div>
+      </div>
     </fieldset>
   );
 }

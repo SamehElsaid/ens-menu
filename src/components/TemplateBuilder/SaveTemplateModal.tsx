@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import type { TemplateCatalogMeta } from "@/lib/template-builder/schema";
 import { useBuilderStore } from "./store/useBuilderStore";
+import { focusField, focusRing, settle } from "@/components/ui";
 
 const IMAGE_ACCEPT = "image/png,image/jpeg,image/jpg,image/webp,image/gif";
 
@@ -27,7 +28,6 @@ export function SaveTemplateModal({ open, onClose }: Props) {
   const t = useTranslations("templateBuilder");
   const locale = useLocale();
   const router = useRouter();
-  const isRTL = locale === "ar";
   const document = useBuilderStore((s) => s.document);
   const saving = useBuilderStore((s) => s.saving);
   const save = useBuilderStore((s) => s.save);
@@ -103,31 +103,35 @@ export function SaveTemplateModal({ open, onClose }: Props) {
     router.push(`/${locale}/admin/template`);
   };
 
-  const inputClass =
-    "w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-violet-500";
-  const labelClass = "mb-1 block text-xs font-medium text-slate-300";
-  const errorClass = "mt-1 text-[11px] text-red-400";
+  /* Local classes rather than the `Field`/`Input`/`Button` primitives: `Modal`
+     portals to `document.body`, which escapes this route's dark token scope, so
+     the dialog would come back in whatever theme the rest of the app is in.
+     These carry the same semantic tokens, resolved dark here — the builder
+     keeping its own chrome is DESIGN.md §14.3. */
+  const inputClass = `w-full rounded-lg border border-line-strong bg-app px-3 py-2 text-sm text-fg placeholder:text-fg-subtle ${settle} ${focusField}`;
+  const labelClass = "mb-1 block text-xs font-medium text-fg-muted";
+  const errorClass = "mt-1 text-[11px] text-danger-fg";
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4"
       role="dialog"
       aria-modal="true"
+      aria-labelledby="tpl-save-title"
     >
       <form
         onSubmit={(e) => void onSubmit(e)}
-        dir={isRTL ? "rtl" : "ltr"}
-        className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-slate-700 bg-slate-900 shadow-2xl"
+        className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-2xl"
       >
-        <div className="flex items-center gap-2 border-b border-slate-700 px-4 py-3">
-          <h2 className="text-sm font-semibold text-white">
+        <div className="flex items-center gap-2 border-b border-line px-4 py-3">
+          <h2 id="tpl-save-title" className="text-sm font-semibold text-fg">
             {t("saveModal.title")}
           </h2>
           <div className="flex-1" />
           <button
             type="button"
             onClick={onClose}
-            className="text-xs text-slate-400 hover:text-white"
+            className={`rounded-md px-2 py-1 text-xs text-fg-muted ${settle} ${focusRing} hover:bg-surface-2 hover:text-fg`}
             disabled={saving}
           >
             {t("close")}
@@ -135,7 +139,7 @@ export function SaveTemplateModal({ open, onClose }: Props) {
         </div>
 
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4">
-          <p className="text-xs text-slate-400">{t("saveModal.subtitle")}</p>
+          <p className="text-xs text-fg-muted">{t("saveModal.subtitle")}</p>
 
           <div>
             <span className={labelClass}>{t("saveModal.image")}</span>
@@ -150,7 +154,7 @@ export function SaveTemplateModal({ open, onClose }: Props) {
               type="button"
               disabled={imageBusy || saving}
               onClick={() => fileRef.current?.click()}
-              className="flex w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-600 bg-slate-950/60 px-3 py-4 text-xs text-slate-400 hover:border-violet-500 hover:text-slate-200 disabled:opacity-50"
+              className={`flex w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-line-strong bg-app px-3 py-4 text-xs text-fg-muted ${settle} ${focusRing} hover:border-accent hover:text-fg disabled:opacity-50`}
             >
               {image ? (
                 <img
@@ -167,7 +171,11 @@ export function SaveTemplateModal({ open, onClose }: Props) {
               )}
               {image ? <span>{t("saveModal.changeImage")}</span> : null}
             </button>
-            {errors.image ? <p className={errorClass}>{errors.image}</p> : null}
+            {errors.image ? (
+              <p role="alert" className={errorClass}>
+                {errors.image}
+              </p>
+            ) : null}
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
@@ -183,7 +191,11 @@ export function SaveTemplateModal({ open, onClose }: Props) {
                 placeholder={t("saveModal.nameEnPlaceholder")}
                 disabled={saving}
               />
-              {errors.name ? <p className={errorClass}>{errors.name}</p> : null}
+              {errors.name ? (
+                <p role="alert" className={errorClass}>
+                  {errors.name}
+                </p>
+              ) : null}
             </div>
             <div>
               <label className={labelClass} htmlFor="tpl-name-ar">
@@ -199,7 +211,9 @@ export function SaveTemplateModal({ open, onClose }: Props) {
                 dir="rtl"
               />
               {errors.nameAr ? (
-                <p className={errorClass}>{errors.nameAr}</p>
+                <p role="alert" className={errorClass}>
+                  {errors.nameAr}
+                </p>
               ) : null}
             </div>
           </div>
@@ -218,7 +232,9 @@ export function SaveTemplateModal({ open, onClose }: Props) {
               rows={3}
             />
             {errors.description ? (
-              <p className={errorClass}>{errors.description}</p>
+              <p role="alert" className={errorClass}>
+                {errors.description}
+              </p>
             ) : null}
           </div>
 
@@ -237,24 +253,26 @@ export function SaveTemplateModal({ open, onClose }: Props) {
               dir="rtl"
             />
             {errors.descriptionAr ? (
-              <p className={errorClass}>{errors.descriptionAr}</p>
+              <p role="alert" className={errorClass}>
+                {errors.descriptionAr}
+              </p>
             ) : null}
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2 border-t border-slate-700 px-4 py-3">
+        <div className="flex items-center justify-end gap-2 border-t border-line px-4 py-3">
           <button
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="rounded-md border border-slate-600 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-800 disabled:opacity-50"
+            className={`rounded-md border border-line-strong px-3 py-1.5 text-xs text-fg-muted ${settle} ${focusRing} hover:bg-surface-2 hover:text-fg disabled:opacity-50`}
           >
             {t("close")}
           </button>
           <button
             type="submit"
             disabled={saving || imageBusy}
-            className="rounded-md bg-violet-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-violet-500 disabled:opacity-50"
+            className={`rounded-md bg-accent px-4 py-1.5 text-xs font-medium text-on-accent ${settle} ${focusRing} hover:bg-accent-strong disabled:opacity-50`}
           >
             {saving ? t("saving") : t("saveModal.confirm")}
           </button>

@@ -1,8 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { IoFastFoodOutline } from "react-icons/io5";
 import { Item } from "@/types/Menu";
+import { EmptyState, NoResultsState } from "@/components/ui";
 import ItemCard from "./ItemCard";
+import { CardGridSection, CardGridSkeleton } from "./CardGrid";
 import MobileListPagination from "./mobile/MobileListPagination";
 
 interface ItemsCardGridProps {
@@ -21,26 +24,16 @@ interface ItemsCardGridProps {
   onDelete: (item: Item) => void;
 }
 
-function ItemCardSkeleton() {
-  return (
-    <div
-      className="overflow-hidden rounded-lg border border-line bg-white"
-      aria-hidden
-    >
-      <div className="dashboard-mobile-shimmer aspect-4/3 bg-surface-3" />
-      <div className="space-y-3 p-4">
-        <div className="dashboard-mobile-shimmer h-6 w-2/3 rounded-md bg-surface-3" />
-        <div className="dashboard-mobile-shimmer h-4 w-1/3 rounded-md bg-surface-3" />
-        <div className="dashboard-mobile-shimmer h-7 w-1/4 rounded-md bg-surface-3" />
-        <div className="flex gap-2 border-t border-line pt-3 dark:border-line">
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-3" />
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-3" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
+/**
+ * The item collection.
+ *
+ * The grid, its loading placeholder and its pager come from `CardGrid` so this
+ * page keeps the same column rhythm as every other dashboard collection — it
+ * used to declare four breakpoints of its own and hand-roll a shimmer, which
+ * meant the card width changed when you moved between items and tables. An
+ * empty result and an empty menu are also two different situations, so they no
+ * longer share one message.
+ */
 export default function ItemsCardGrid({
   items,
   loading,
@@ -59,58 +52,45 @@ export default function ItemsCardGrid({
   const t = useTranslations("Items");
 
   if (loading) {
-    return (
-      <div
-        className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6"
-        aria-busy="true"
-        aria-label={t("loading")}
-      >
-        {Array.from({ length: 8 }).map((_, index) => (
-          <ItemCardSkeleton key={index} />
-        ))}
-      </div>
-    );
+    return <CardGridSkeleton count={8} media label={t("loading")} />;
   }
 
   if (items.length === 0) {
-    return (
-      <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
-        <p className="text-lg font-semibold text-fg">
-          {isFiltered ? t("noSearchResults") : t("noItems")}
-        </p>
-        {!isFiltered && (
-          <p className="mt-2 text-sm text-fg-muted">
-            {t("noItemsDescription")}
-          </p>
-        )}
-      </div>
+    return isFiltered ? (
+      <NoResultsState title={t("noSearchResults")} />
+    ) : (
+      <EmptyState
+        icon={<IoFastFoodOutline />}
+        title={t("noItems")}
+        description={t("noItemsDescription")}
+      />
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6">
-        {items.map((item) => (
-          <ItemCard
-            key={item.id}
-            item={item}
-            name={getName(item)}
-            categoryName={getCategoryName(item)}
-            imageUrl={getImageUrl(item)}
-            currency={currency}
-            locale={locale}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
-        ))}
-      </div>
-
-      <MobileListPagination
-        page={page}
-        totalPages={totalPages}
-        onPageChange={onPageChange}
-        locale={locale}
-      />
-    </div>
+    <CardGridSection
+      pagination={
+        <MobileListPagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          locale={locale}
+        />
+      }
+    >
+      {items.map((item) => (
+        <ItemCard
+          key={item.id}
+          item={item}
+          name={getName(item)}
+          categoryName={getCategoryName(item)}
+          imageUrl={getImageUrl(item)}
+          currency={currency}
+          locale={locale}
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
+      ))}
+    </CardGridSection>
   );
 }

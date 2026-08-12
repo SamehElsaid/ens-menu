@@ -15,7 +15,7 @@ import {
   IoChevronForwardOutline,
   IoArrowBack,
 } from "react-icons/io5";
-import { FaSpinner } from "react-icons/fa";
+import { SiteSpinner } from "@/components/site";
 import { axiosGet } from "@/shared/axiosCall";
 import ViewTime from "@/shared/ViewTime";
 import ShowEditor from "@/components/Custom/ShowEditor";
@@ -101,6 +101,22 @@ function KnowledgeBaseInner({
   const firstLoad = useRef(true);
   const skipInitialListFetch = useRef(Boolean(initialArticles));
   const skipInitialDetailFetch = useRef(Boolean(initialArticle));
+
+  /* Focus moves to the article heading when the reader picks a different
+     article — but never on the first paint, which would yank focus away from
+     wherever the visitor actually landed. */
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const firstArticleRender = useRef(true);
+  const articleId = article?.id ?? null;
+
+  useEffect(() => {
+    if (articleId === null) return;
+    if (firstArticleRender.current) {
+      firstArticleRender.current = false;
+      return;
+    }
+    headingRef.current?.focus();
+  }, [articleId]);
 
   /* ── debounce search → reset page ── */
   useEffect(() => {
@@ -239,23 +255,24 @@ function KnowledgeBaseInner({
       >
         {/* ── Header ── */}
         <div className="shrink-0 border-b border-site-line px-5 pt-6 pb-5">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <p className="inline-flex items-center gap-2 text-site-xs font-semibold tracking-[0.08em] text-site-brand uppercase">
+          <div className="mb-4 flex items-baseline justify-between gap-3">
+            <p className="s-ticket inline-flex items-center gap-2 text-site-muted">
               <IoLibraryOutline className="size-4" aria-hidden />
               {t("sectionLabel")}
             </p>
             {!listLoading && (
-              <span className="text-site-xs text-site-muted tabular-nums">
+              <span className="font-site-mono text-site-sm font-semibold text-site-ink tabular-nums">
                 {pagination.total}
               </span>
             )}
           </div>
 
-          {/* search input */}
+          {/* Search carries the site's field rule: a 2px inline-start edge that
+              states rest, hover, focus and error. No coloured blur ring. */}
           <div className="relative">
             <span className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 text-site-muted">
               {listLoading ? (
-                <FaSpinner className="size-4 animate-spin" aria-hidden />
+                <SiteSpinner className="size-4" />
               ) : (
                 <IoSearchOutline className="size-4" aria-hidden />
               )}
@@ -266,14 +283,14 @@ function KnowledgeBaseInner({
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t("searchPlaceholder")}
               aria-label={t("searchPlaceholder")}
-              className="h-11 w-full rounded-site-control border border-site-line bg-site-bg ps-10 pe-9 text-site-sm text-site-ink transition-[border-color,box-shadow] duration-150 placeholder:text-site-muted focus:border-site-brand focus:ring-2 focus:ring-site-brand/18 focus:outline-none [&::-webkit-search-cancel-button]:hidden"
+              className="s-field h-11 w-full rounded-site-control border border-site-line bg-site-bg ps-10 pe-9 text-site-sm text-site-ink placeholder:text-site-muted focus:outline-none [&::-webkit-search-cancel-button]:hidden"
             />
             {search && (
               <button
                 type="button"
                 onClick={() => setSearch("")}
                 aria-label={t("noResults")}
-                className="absolute end-2.5 top-1/2 -translate-y-1/2 rounded-full p-1 text-site-muted transition-colors hover:text-site-ink"
+                className="absolute end-2.5 top-1/2 -translate-y-1/2 p-1 text-site-muted transition-colors hover:text-site-ink"
               >
                 <IoCloseOutline size={16} aria-hidden />
               </button>
@@ -282,27 +299,36 @@ function KnowledgeBaseInner({
         </div>
 
         {/* ── Scrollable list ── */}
-        <nav className="max-h-[26rem] flex-1 overflow-y-auto p-3 md:max-h-none">
+        <nav className="max-h-[26rem] flex-1 overflow-y-auto md:max-h-none">
           {listLoading ? (
-            <div className="space-y-1.5">
+            /* Skeletons rather than an entrance animation on the results. The
+               list already costs a 500ms debounce plus a round trip; making the
+               reader then wait out a reveal before they can read what came back
+               is the one thing this page must not do. Shimmer says "working",
+               and then the content is simply there. */
+            <div className="space-y-px p-3">
               {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                 <div
                   key={i}
-                  className="h-10 animate-pulse rounded-site-sm bg-site-line"
+                  className="s-skeleton h-10"
                   style={{ opacity: 1 - i * 0.09 }}
                 />
               ))}
             </div>
           ) : articles.length === 0 ? (
-            <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
+            <div className="px-5 py-12">
               <IoSearchOutline
-                className="mb-3 size-7 text-site-muted"
+                className="mb-3 size-6 text-site-muted"
                 aria-hidden
               />
               <p className="text-site-sm text-site-muted">{t("noResults")}</p>
             </div>
           ) : (
-            <ul className="space-y-0.5">
+            /* Divided rows, and the open article is marked by a brand rule on
+               its inline-start edge — the same signal the dashboard's navigation
+               uses for the current item. A tinted pill could not survive next to
+               a long title wrapping to three lines. */
+            <ul>
               {articles.map((item) => {
                 const isActive = selectedId === item.id;
                 const slug = toSlug(item.titleEn, item.id);
@@ -311,10 +337,10 @@ function KnowledgeBaseInner({
                     <LinkTo
                       href={`/knowledge-base/${slug}`}
                       aria-current={isActive ? "page" : undefined}
-                      className={`flex w-full items-start gap-2.5 rounded-site-sm px-3 py-2.5 text-start text-site-sm transition-colors duration-150 ${
+                      className={`flex w-full items-start gap-2.5 border-b border-site-line border-s-2 px-4 py-3 text-start text-site-sm transition-colors duration-(--dur-tint) ease-(--ease-settle) ${
                         isActive
-                          ? "bg-site-brand-tint font-semibold text-site-brand-deep"
-                          : "text-site-fg hover:bg-site-bg hover:text-site-ink"
+                          ? "border-s-site-brand bg-site-bg font-semibold text-site-ink"
+                          : "border-s-transparent text-site-fg hover:bg-site-bg hover:text-site-ink"
                       }`}
                     >
                       <IoDocumentTextOutline
@@ -336,19 +362,19 @@ function KnowledgeBaseInner({
 
         {/* ── Sidebar pagination ── */}
         {pagination.totalPages > 1 && (
-          <div className="flex shrink-0 items-center justify-between gap-2 border-t border-site-line px-4 py-3">
+          <div className="flex shrink-0 items-stretch justify-between border-t border-site-line">
             <button
               type="button"
               onClick={() => setSidebarPage((p) => Math.max(1, p - 1))}
               disabled={sidebarPage <= 1 || listLoading}
               aria-label={t("backToList")}
-              className="flex size-9 items-center justify-center rounded-site-sm text-site-fg transition-colors hover:bg-site-bg hover:text-site-ink disabled:pointer-events-none disabled:opacity-35"
+              className="flex size-11 items-center justify-center border-e border-site-line text-site-fg transition-colors hover:bg-site-ink hover:text-site-ground disabled:pointer-events-none disabled:opacity-35"
             >
               <IoChevronBackOutline size={16} className="rtl:rotate-180" />
             </button>
 
-            <span className="text-site-xs text-site-muted tabular-nums">
-              <span className="font-semibold text-site-ink">{sidebarPage}</span>
+            <span className="s-ticket flex items-center px-4 text-site-muted">
+              <span className="text-site-ink">{sidebarPage}</span>
               {" / "}
               {pagination.totalPages}
             </span>
@@ -360,7 +386,7 @@ function KnowledgeBaseInner({
               }
               disabled={sidebarPage >= pagination.totalPages || listLoading}
               aria-label={t("sectionLabel")}
-              className="flex size-9 items-center justify-center rounded-site-sm text-site-fg transition-colors hover:bg-site-bg hover:text-site-ink disabled:pointer-events-none disabled:opacity-35"
+              className="flex size-11 items-center justify-center border-s border-site-line text-site-fg transition-colors hover:bg-site-ink hover:text-site-ground disabled:pointer-events-none disabled:opacity-35"
             >
               <IoChevronForwardOutline size={16} className="rtl:rotate-180" />
             </button>
@@ -374,30 +400,51 @@ function KnowledgeBaseInner({
           showingDetailOnMobile ? "block" : "hidden md:block"
         }`}
       >
-        {/* mobile back bar */}
+        {/* Reading progress, and it is the only thing on this page that reports
+            something the layout does not already show: how much of a long help
+            article is left. A `scroll()` timeline, so it is the scroll position
+            rather than a sample of it — no listener, no state, off the main
+            thread. Two placements because there are two layouts: on a phone it
+            rides the bottom edge of the sticky back bar, which is already the
+            thing pinned under the header. */}
         {showingDetailOnMobile && (
-          <div className="sticky top-(--s-header-h) z-20 border-b border-site-line bg-site-bg/92 px-5 py-3 backdrop-blur-sm md:hidden">
+          <div className="sticky top-(--s-header-h) z-20 border-b border-site-line bg-site-bg px-5 py-3 md:hidden">
             <button
               type="button"
               onClick={handleMobileBack}
-              className="inline-flex items-center gap-2 text-site-sm font-semibold text-site-brand transition-colors hover:text-site-brand-hover"
+              className="s-ticket inline-flex items-center gap-2 text-site-ink transition-colors duration-(--dur-tint) ease-(--ease-settle) hover:text-site-brand motion-safe:active:scale-[0.98]"
             >
               <IoArrowBack className="size-4 rtl:rotate-180" aria-hidden />
               <span>{t("backToList")}</span>
             </button>
+            <span
+              aria-hidden
+              className="absolute inset-x-0 bottom-0 h-0.5 bg-site-line"
+            >
+              <span className="s-progress-rule block h-full bg-site-brand" />
+            </span>
           </div>
         )}
+
+        {article ? (
+          <div
+            aria-hidden
+            className="sticky top-(--s-header-h) z-10 hidden h-0.5 bg-site-line md:block"
+          >
+            <span className="s-progress-rule block h-full bg-site-brand" />
+          </div>
+        ) : null}
 
         {/* loading skeleton */}
         {detailLoading && (
           <div className="mx-auto max-w-3xl space-y-5 px-5 py-10 md:px-10 md:py-14">
-            <div className="h-9 w-full max-w-md animate-pulse rounded-site-sm bg-site-line" />
+            <div className="s-skeleton h-9 w-full max-w-md rounded-site-sm" />
             <div className="h-px bg-site-line" />
             <div className="space-y-3 pt-2">
               {[100, 92, 96, 78, 88, 62, 82].map((w, i) => (
                 <div
                   key={i}
-                  className="h-4 animate-pulse rounded bg-site-line"
+                  className="s-skeleton h-4 rounded"
                   style={{ width: `${w}%` }}
                 />
               ))}
@@ -410,20 +457,17 @@ function KnowledgeBaseInner({
           !article &&
           (listLoading ? (
             <div className="flex h-[60vh] items-center justify-center">
-              <FaSpinner
-                className="size-6 animate-spin text-site-brand"
-                aria-hidden
-              />
+              <SiteSpinner className="size-6 text-site-brand" label={t("sectionLabel")} />
             </div>
           ) : (
-            <div className="flex h-[60vh] flex-col items-center justify-center px-6 text-center">
-              <span className="mb-6 flex size-16 items-center justify-center rounded-full bg-site-brand-tint text-site-brand">
-                <IoLibraryOutline className="size-7" aria-hidden />
+            <div className="mx-auto max-w-3xl px-5 py-16 md:px-10 md:py-20">
+              <span className="flex size-12 items-center justify-center bg-site-ink text-site-ground">
+                <IoLibraryOutline className="size-6" aria-hidden />
               </span>
               {/* The page's only heading while no article is open — the
                   article's own title takes the h1 once one is. */}
-              <h1 className="text-site-h3">{t("emptyTitle")}</h1>
-              <p className="mt-3 max-w-sm text-site-body text-site-fg">
+              <h1 className="mt-6 text-site-h2">{t("emptyTitle")}</h1>
+              <p className="mt-4 max-w-md text-site-lead text-site-fg">
                 {t("emptyDescription")}
               </p>
             </div>
@@ -431,20 +475,39 @@ function KnowledgeBaseInner({
 
         {/* article */}
         {!detailLoading && article && (
-          <article className="mx-auto max-w-3xl px-5 py-10 md:px-10 md:py-16">
-            <header className="border-b border-site-line pb-7">
-              <h1 className="text-site-h2">{getTitle(article)}</h1>
+          /* Keyed on the article, which is what makes both of these work: a
+              fresh node per article gives `@starting-style` a real "before" to
+              crossfade from on desktop, and re-runs the inline slide on mobile
+              where the same change is a navigation between two views rather
+              than a swap between two visible panes.
+
+              `data-sheet-side="end"` resolves the slide direction against the
+              document direction, so the article enters from the trailing edge in
+              both English and Arabic. */
+          <article
+            key={article.id}
+            data-sheet-side="end"
+            className="s-panel-enter mx-auto max-w-3xl px-5 py-10 md:animate-none md:px-10 md:py-16 motion-safe:animate-[ui-slide-in-inline_var(--dur-sheet)_var(--ease-enter)]"
+          >
+            <header className="border-b-2 border-site-ink pb-7">
+              <p className="s-ticket text-site-muted">{t("sectionLabel")}</p>
+              {/* Focus lands here on an article change, so a keyboard or screen
+                  reader user is moved into what they just chose instead of being
+                  left in the sidebar. `-1` keeps it out of the tab order. */}
+              <h1 ref={headingRef} tabIndex={-1} className="mt-4 text-site-h2">
+                {getTitle(article)}
+              </h1>
 
               {(article.createdAt || article.updatedAt) && (
-                <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-site-xs text-site-muted">
+                <div className="s-ticket mt-6 flex flex-wrap gap-x-8 gap-y-2 text-site-muted">
                   {article.createdAt && (
-                    <span className="flex items-center gap-1.5">
+                    <span className="flex items-center gap-2">
                       <IoCalendarOutline className="size-3.5" aria-hidden />
                       {t("createdAt")}: <ViewTime data={article.createdAt} />
                     </span>
                   )}
                   {article.updatedAt && (
-                    <span className="flex items-center gap-1.5">
+                    <span className="flex items-center gap-2">
                       <IoTimeOutline className="size-3.5" aria-hidden />
                       {t("updatedAt")}: <ViewTime data={article.updatedAt} />
                     </span>

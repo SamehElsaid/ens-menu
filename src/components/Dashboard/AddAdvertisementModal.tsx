@@ -400,7 +400,7 @@ export default function AddAdvertisementModal({
           <Field label={t("image")} required error={errors.imageUrl?.message}>
             <label
               className={cn(
-                "relative block w-full cursor-pointer rounded-lg border border-dashed transition-colors duration-150",
+                "relative block w-full cursor-pointer rounded-lg border border-dashed transition-colors duration-(--dur-settle)",
                 isDragOver
                   ? "border-brand bg-brand-soft"
                   : errors.imageUrl?.message

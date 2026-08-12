@@ -6,14 +6,31 @@ import { generateToken } from "../../../firebase/firebase-confing";
 import { syncFcmToken } from "@/shared/syncFcmToken";
 import {
   IoNotificationsOutline,
+  IoNotificationsOffOutline,
   IoClose,
   IoSettingsOutline,
   IoCheckmarkCircle,
   IoOpenOutline,
 } from "react-icons/io5";
+import { cn } from "@/lib/cn";
+import { Badge, Button, ButtonLink, Card, CardFooter } from "@/components/ui";
 
 type PermissionState = "default" | "granted" | "denied";
 
+/**
+ * Prompt for the browser notification permission, above an orders list.
+ *
+ * It used to be the loudest thing on the page: two nested gradient fields, two
+ * blurred colour blobs and a glowing gradient icon tile, all to say one sentence
+ * with one button. It is now an elevated panel with an inline edge — danger
+ * when the browser has blocked us, brand purple when it is only asking — and
+ * the actions sit behind a divider, so an operator scanning live orders sees a
+ * notice rather than a second, brighter application.
+ *
+ * The state is carried by an edge, an icon and a dotted badge together, because
+ * the difference between "not asked yet" and "blocked by the browser" decides
+ * whether the button can do anything at all.
+ */
 export function NotificationPermissionCard() {
   const t = useTranslations("notificationPermission");
   const locale = useLocale();
@@ -45,140 +62,103 @@ export function NotificationPermissionCard() {
   const isDenied = permission === "denied";
 
   return (
-    <div
-      role="alert"
-      className={[
-        "relative overflow-hidden rounded-lg border p-4 shadow-md transition-all sm:p-5",
-        isDenied
-          ? "border-red-200/70 bg-linear-to-br from-red-50 via-rose-50/50 to-white dark:border-red-500/20 dark:from-red-950/40 dark:via-rose-950/20 dark:to-slate-900"
-          : "border-violet-200/70 bg-linear-to-br from-violet-50 via-fuchsia-50/50 to-white dark:border-violet-500/20 dark:from-violet-950/40 dark:via-fuchsia-950/20 dark:to-slate-900",
-      ].join(" ")}
+    <Card
+      role={isDenied ? "alert" : "status"}
+      className={cn(
+        "before:absolute before:inset-y-0 before:start-0 before:w-0.5 before:rounded-s-xl before:content-['']",
+        isDenied ? "before:bg-danger" : "before:bg-brand",
+      )}
     >
-      {/* decorative blobs */}
-      <div
-        aria-hidden
-        className={[
-          "pointer-events-none absolute -end-14 -top-14 h-40 w-40 rounded-full blur-3xl",
-          isDenied
-            ? "bg-linear-to-br from-red-400/20 to-rose-400/10 dark:from-red-500/15"
-            : "bg-linear-to-br from-violet-400/20 to-fuchsia-400/10 dark:from-violet-500/15",
-        ].join(" ")}
-      />
-      <div
-        aria-hidden
-        className={[
-          "pointer-events-none absolute -start-8 bottom-0 h-24 w-24 rounded-full blur-2xl",
-          isDenied
-            ? "bg-linear-to-tr from-rose-300/15"
-            : "bg-linear-to-tr from-fuchsia-300/15",
-        ].join(" ")}
-      />
-
-      <div className="relative flex items-start gap-4">
-        {/* icon */}
-        <div
-          className={[
-            "relative flex h-12 w-12 shrink-0 items-center justify-center rounded-lg text-white shadow-lg",
+      <div className="flex items-start gap-3">
+        <span
+          aria-hidden
+          className={cn(
+            "flex size-9 shrink-0 items-center justify-center rounded-lg border text-[17px]",
             isDenied
-              ? "bg-linear-to-br from-red-500 to-rose-600 shadow-red-500/30"
-              : "bg-linear-to-br from-violet-600 to-fuchsia-600 shadow-violet-500/30",
-          ].join(" ")}
+              ? "border-danger-line bg-danger-soft text-danger"
+              : "border-line bg-surface-2 text-fg-muted",
+          )}
         >
           {justGranted ? (
-            <IoCheckmarkCircle className="text-2xl" aria-hidden />
+            <IoCheckmarkCircle />
+          ) : isDenied ? (
+            <IoNotificationsOffOutline />
           ) : (
-            <IoNotificationsOutline
-              className={[
-                "text-2xl",
-                !isDenied && !loading
-                  ? "animate-[wiggle_1.2s_ease-in-out_infinite]"
-                  : "",
-              ].join(" ")}
-              aria-hidden
-            />
+            <IoNotificationsOutline />
           )}
-          {!isDenied && !justGranted && (
-            <span
-              aria-hidden
-              className="absolute inset-0 rounded-lg animate-ping bg-violet-500/30"
-              style={{ animationDuration: "2s" }}
-            />
-          )}
-        </div>
+        </span>
 
-        {/* content */}
         <div className="min-w-0 flex-1">
-          <p
-            className={[
-              "text-sm font-bold",
-              isDenied
-                ? "text-red-700 dark:text-red-300"
-                : "text-violet-800 dark:text-violet-200",
-            ].join(" ")}
-          >
-            {isDenied ? t("deniedTitle") : t("title")}
-          </p>
-
-          <p className="mt-1 max-w-sm text-xs leading-relaxed text-fg-muted">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <p className="text-[13px] font-semibold text-fg">
+              {isDenied ? t("deniedTitle") : t("title")}
+            </p>
+            <Badge
+              tone={justGranted ? "success" : isDenied ? "danger" : "neutral"}
+              dot
+            >
+              {justGranted
+                ? t("statusOn")
+                : isDenied
+                  ? t("statusBlocked")
+                  : t("statusOff")}
+            </Badge>
+          </div>
+          <p className="mt-1 max-w-prose text-xs leading-relaxed text-fg-muted">
             {isDenied ? t("deniedDescription") : t("description")}
           </p>
-
-          <div className="mt-3 flex flex-wrap gap-2">
-            {/* primary action — always present */}
-            <button
-              type="button"
-              onClick={handleAllow}
-              disabled={loading || justGranted}
-              className={[
-                "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-md transition-all active:scale-95 disabled:opacity-60",
-                justGranted
-                  ? "bg-emerald-500 shadow-emerald-500/30"
-                  : isDenied
-                    ? "bg-linear-to-r from-red-500 to-rose-600 shadow-red-500/30 hover:from-red-400 hover:to-rose-500"
-                    : "bg-linear-to-r from-violet-600 to-fuchsia-600 shadow-violet-500/30 hover:from-violet-500 hover:to-fuchsia-500",
-              ].join(" ")}
-            >
-              {loading ? (
-                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-              ) : justGranted ? (
-                <IoCheckmarkCircle className="text-sm" aria-hidden />
-              ) : (
-                <IoNotificationsOutline className="text-sm" aria-hidden />
-              )}
-              {justGranted
-                ? t("allowBtn")
-                : isDenied
-                  ? t("tryAgain")
-                  : t("allowBtn")}
-            </button>
-
-            {/* secondary — open browser site settings */}
-            {isDenied && (
-              <a
-                href={getBrowserSettingsUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-red-200/80 bg-white px-4 py-2 text-xs font-medium text-red-700 shadow-sm transition-all hover:bg-red-50 dark:border-red-700/50 dark:text-red-300 dark:hover:bg-red-950/40"
-              >
-                <IoSettingsOutline className="text-sm" aria-hidden />
-                {t("openSettings")}
-                <IoOpenOutline className="text-[10px] opacity-60" aria-hidden />
-              </a>
-            )}
-          </div>
         </div>
 
-        {/* dismiss */}
-        <button
-          type="button"
-          onClick={() => setDismissed(true)}
+        <Button
+          variant="ghost"
+          size="sm"
+          iconOnly
           aria-label={t("dismiss")}
-          className="shrink-0 rounded-lg p-1.5 text-fg-subtle transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700/60 dark:hover:text-slate-200"
+          title={t("dismiss")}
+          onClick={() => setDismissed(true)}
+          className="-me-1 -mt-1"
         >
-          <IoClose className="text-base" aria-hidden />
-        </button>
+          <IoClose aria-hidden />
+        </Button>
       </div>
-    </div>
+
+      <CardFooter className="flex-wrap">
+        <Button
+          size="sm"
+          onClick={handleAllow}
+          loading={loading}
+          disabled={justGranted}
+          startIcon={
+            justGranted ? (
+              <IoCheckmarkCircle aria-hidden />
+            ) : (
+              <IoNotificationsOutline aria-hidden />
+            )
+          }
+        >
+          {justGranted
+            ? t("allowBtn")
+            : isDenied
+              ? t("tryAgain")
+              : t("allowBtn")}
+        </Button>
+
+        {isDenied && (
+          <ButtonLink
+            external
+            href={getBrowserSettingsUrl()}
+            variant="secondary"
+            size="sm"
+            target="_blank"
+            rel="noopener noreferrer"
+            startIcon={<IoSettingsOutline aria-hidden />}
+            endIcon={<IoOpenOutline className="opacity-60" aria-hidden />}
+          >
+            {t("openSettings")}
+          </ButtonLink>
+        )}
+      </CardFooter>
+    </Card>
   );
 }
 

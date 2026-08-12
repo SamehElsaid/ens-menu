@@ -7,6 +7,8 @@ import {
   IoSettingsOutline,
 } from "react-icons/io5";
 import type { ReactNode } from "react";
+import { Badge, Button, Card } from "@/components/ui";
+import { cn } from "@/lib/cn";
 
 type MenuDeliveryGroupPanelProps = {
   groupName: string;
@@ -27,50 +29,59 @@ export default function MenuDeliveryGroupPanel({
   const isMobile = layout === "mobile";
 
   return (
-    <section
-      className={`overflow-hidden rounded-lg border border-teal-200/80 bg-white shadow-md shadow-teal-500/5 ring-1 ring-teal-500/10 dark:border-teal-800/40  dark:shadow-none dark:ring-teal-500/10 ${
-        isMobile ? "col-span-full" : "col-span-full xl:col-span-2"
-      }`}
+    <Card
+      as="section"
+      padded="none"
+      className={cn(
+        "overflow-hidden",
+        isMobile ? "col-span-full" : "col-span-full xl:col-span-2",
+      )}
       aria-label={groupName}
     >
-      <div className="bg-linear-to-r from-teal-600 via-teal-600 to-emerald-600 px-4 py-3.5 dark:from-teal-900 dark:via-teal-900 dark:to-emerald-950">
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="flex min-w-0 flex-1 items-center gap-2.5">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/15 ring-1 ring-white/20">
-              <IoGitNetworkOutline className="text-lg text-white" aria-hidden />
-            </div>
-            <div className="min-w-0">
-              <h3 className="truncate text-base font-bold text-white">
-                {groupName}
-              </h3>
-              <p className="flex items-center gap-1 text-xs font-medium text-teal-100/90">
-                <IoPeopleOutline className="text-sm opacity-80" aria-hidden />
-                {t("groupMemberCount", { count: memberCount })}
-              </p>
-            </div>
-          </div>
-          {onManageGroup && (
-            <button
-              type="button"
-              onClick={onManageGroup}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-bold text-teal-800 shadow-sm transition hover:bg-teal-50 active:scale-[0.98] dark:bg-teal-950 dark:text-teal-100 dark:hover:bg-teal-900"
+      {/* The panel's identity is its label and its rule, not a coloured band:
+          a tinted header on a container of menu cards competes with the cards
+          it is meant to be holding. */}
+      <header className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line px-4 py-3">
+        <div className="min-w-0 flex-1">
+          <p className="ui-label flex items-center gap-1.5">
+            <IoGitNetworkOutline className="size-3.5" aria-hidden />
+            {t("menuGroupTitle")}
+          </p>
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            <h3 className="truncate text-sm font-semibold tracking-[-0.02em] text-fg">
+              {groupName}
+            </h3>
+            <Badge
+              tone="neutral"
+              icon={<IoPeopleOutline aria-hidden />}
+              className="tabular-nums"
             >
-              <IoSettingsOutline className="text-base" aria-hidden />
-              {t("manageGroup")}
-            </button>
-          )}
+              {t("groupMemberCount", { count: memberCount })}
+            </Badge>
+          </div>
         </div>
-      </div>
+        {onManageGroup && (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={onManageGroup}
+            startIcon={<IoSettingsOutline className="text-base" />}
+          >
+            {t("manageGroup")}
+          </Button>
+        )}
+      </header>
 
       <div
-        className={`bg-linear-to-b from-teal-50/30 to-white dark:from-teal-950/15 dark:to-slate-900 ${
+        className={cn(
+          "bg-surface",
           isMobile
             ? "flex flex-col gap-3 p-3"
-            : "grid gap-4 p-4 md:grid-cols-2 md:p-5"
-        }`}
+            : "grid gap-4 p-4 md:grid-cols-2 md:p-5",
+        )}
       >
         {menuCards}
       </div>
-    </section>
+    </Card>
   );
 }

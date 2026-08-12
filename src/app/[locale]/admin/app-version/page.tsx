@@ -2,12 +2,24 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "@/i18n/navigation";
-import { IoArrowBack } from "react-icons/io5";
-import CardDashBoard from "@/components/Card/CardDashBoard";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
-import { Button, EmptyState, LoadingBlock, PageHeader } from "@/components/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  Checkbox,
+  EmptyState,
+  Field,
+  Fieldset,
+  Input,
+  LoadingBlock,
+  PageColumns,
+  PageHeader,
+  PageShell,
+  SectionHeader,
+  Textarea,
+} from "@/components/ui";
 
 interface AppVersionData {
   latestVersion: string;
@@ -47,7 +59,7 @@ export default function AppVersionPage() {
   const locale = useLocale();
   const t = useTranslations("adminAppVersion");
   const tCommon = useTranslations("common");
-  const router = useRouter();
+  const tAdmin = useTranslations("adminDashboard");
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -146,166 +158,171 @@ export default function AppVersionPage() {
     }
   };
 
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title={t("title")}
-        description={t("subtitle")}
-        actions={
-          <Button
-            variant="secondary"
-            startIcon={<IoArrowBack className="rtl:rotate-180" />}
-            onClick={() => router.back()}
-          >
-            {t("back")}
-          </Button>
-        }
-      />
-
-      <CardDashBoard>
-        <h2 className="mb-4 text-lg font-semibold text-fg">
-          {t("currentVersion")}
-        </h2>
-        {loading ? (
-          <LoadingBlock label={tCommon("loading")} className="py-10" />
-        ) : currentVersion ? (
-          <dl className="grid max-w-2xl gap-3 text-sm">
-            <div className="flex flex-wrap gap-2">
-              <dt className="text-fg-muted">{t("fields.version")}:</dt>
-              <dd className="font-semibold text-fg" dir="ltr">
-                {currentVersion.latestVersion}
-              </dd>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <dt className="text-fg-muted">{t("fields.forceUpdate")}:</dt>
-              <dd className="text-fg">
+  /* Publishing a release means writing a version number that has to be higher
+     than the one already out, so the shipped release sits beside the form as
+     reference rather than above it as a block to scroll past. */
+  const currentReleaseCard = (
+    <Card padded="lg">
+      <SectionHeader title={t("currentVersion")} className="mb-4" ruled />
+      {loading ? (
+        <LoadingBlock label={tCommon("loading")} className="py-10" />
+      ) : currentVersion ? (
+        /* Stacked rather than a two-column spec sheet: at side-column width a
+           fixed label gutter left the download URL four characters to wrap in. */
+        <dl className="flex flex-col divide-y divide-line">
+          <div className="flex flex-col gap-0.5 pb-2.5">
+            <dt className="ui-label">{t("fields.version")}</dt>
+            <dd className="ui-figure text-base text-fg" dir="ltr">
+              {currentVersion.latestVersion}
+            </dd>
+          </div>
+          <div className="flex flex-col gap-1 py-2.5">
+            <dt className="ui-label">{t("fields.forceUpdate")}</dt>
+            <dd>
+              <Badge
+                tone={currentVersion.forceUpdate ? "warning" : "neutral"}
+                dot
+              >
                 {currentVersion.forceUpdate ? t("yes") : t("no")}
+              </Badge>
+            </dd>
+          </div>
+          <div className="flex min-w-0 flex-col gap-0.5 py-2.5">
+            <dt className="ui-label">{t("fields.downloadUrl")}</dt>
+            <dd className="min-w-0">
+              <a
+                href={currentVersion.downloadUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="break-all font-mono text-[12px] text-brand hover:underline"
+                dir="ltr"
+              >
+                {currentVersion.downloadUrl}
+              </a>
+            </dd>
+          </div>
+          {currentVersion.releaseNotes_ar && (
+            <div className="flex min-w-0 flex-col gap-0.5 py-2.5">
+              <dt className="ui-label">{t("fields.releaseNotesAr")}</dt>
+              <dd
+                className="min-w-0 text-[13px] leading-relaxed text-fg"
+                dir="rtl"
+              >
+                {currentVersion.releaseNotes_ar}
               </dd>
             </div>
-            <div className="flex flex-col gap-1">
-              <dt className="text-fg-muted">{t("fields.downloadUrl")}:</dt>
-              <dd>
-                <a
-                  href={currentVersion.downloadUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="break-all text-brand hover:underline"
-                  dir="ltr"
-                >
-                  {currentVersion.downloadUrl}
-                </a>
+          )}
+          {currentVersion.releaseNotes_en && (
+            <div className="flex min-w-0 flex-col gap-0.5 py-2.5">
+              <dt className="ui-label">{t("fields.releaseNotesEn")}</dt>
+              <dd
+                className="min-w-0 text-[13px] leading-relaxed text-fg"
+                dir="ltr"
+              >
+                {currentVersion.releaseNotes_en}
               </dd>
             </div>
-            {currentVersion.releaseNotes_ar && (
-              <div className="flex flex-col gap-1">
-                <dt className="text-fg-muted">{t("fields.releaseNotesAr")}:</dt>
-                <dd className="text-fg" dir="rtl">
-                  {currentVersion.releaseNotes_ar}
-                </dd>
-              </div>
-            )}
-            {currentVersion.releaseNotes_en && (
-              <div className="flex flex-col gap-1">
-                <dt className="text-fg-muted">{t("fields.releaseNotesEn")}:</dt>
-                <dd className="text-fg" dir="ltr">
-                  {currentVersion.releaseNotes_en}
-                </dd>
-              </div>
-            )}
-            {currentVersion.updatedAt && (
-              <p className="pt-2 text-xs text-fg-muted">
-                {t("lastUpdated")}:{" "}
+          )}
+          {currentVersion.updatedAt && (
+            <div className="flex flex-col gap-0.5 pt-2.5">
+              <dt className="ui-label">{t("lastUpdated")}</dt>
+              <dd className="ui-figure text-[12px] text-fg-muted">
                 {new Date(currentVersion.updatedAt).toLocaleString(
                   locale === "ar" ? "ar-EG" : "en-US",
                 )}
-              </p>
-            )}
-          </dl>
-        ) : (
-          <EmptyState title={t("noVersion")} size="sm" />
-        )}
-      </CardDashBoard>
+              </dd>
+            </div>
+          )}
+        </dl>
+      ) : (
+        <EmptyState title={t("noVersion")} size="sm" />
+      )}
+    </Card>
+  );
 
-      <CardDashBoard>
-        <h2 className="mb-4 text-lg font-semibold text-fg">{t("addNew")}</h2>
-        <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-fg-muted">
-              {t("fields.version")}
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="1.0.2"
-              value={latestVersion}
-              onChange={(e) => setLatestVersion(e.target.value)}
-              className="w-full rounded-lg border border-line-strong bg-surface px-4 py-2.5 text-fg"
-              dir="ltr"
-            />
-          </div>
+  return (
+    <PageShell
+      kind="detail"
+      header={
+        <PageHeader
+          eyebrow={t("eyebrow")}
+          title={t("title")}
+          description={t("subtitle")}
+          breadcrumbs={[
+            { label: tAdmin("title"), href: "/admin" },
+            { label: t("title") },
+          ]}
+          breadcrumbsLabel={tCommon("breadcrumb")}
+        />
+      }
+    >
+      <PageColumns side={currentReleaseCard}>
+        <Card padded="lg">
+          <SectionHeader title={t("addNew")} className="mb-4" ruled />
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            <Fieldset legend={t("groupRelease")}>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Field label={t("fields.version")} required>
+                  <Input
+                    type="text"
+                    required
+                    placeholder="1.0.2"
+                    value={latestVersion}
+                    onChange={(e) => setLatestVersion(e.target.value)}
+                    dir="ltr"
+                  />
+                </Field>
+                <Field label={t("fields.downloadUrl")} required>
+                  <Input
+                    type="url"
+                    required
+                    value={downloadUrl}
+                    onChange={(e) => setDownloadUrl(e.target.value)}
+                    placeholder="https://..."
+                    dir="ltr"
+                  />
+                </Field>
+              </div>
+              <Checkbox
+                id="forceUpdate"
+                label={t("fields.forceUpdate")}
+                hint={t("forceUpdateHint")}
+                checked={forceUpdate}
+                onChange={(e) => setForceUpdate(e.target.checked)}
+              />
+            </Fieldset>
 
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              id="forceUpdate"
-              checked={forceUpdate}
-              onChange={(e) => setForceUpdate(e.target.checked)}
-              className="size-4 rounded border-line-strong text-brand focus:ring-brand"
-            />
-            <label
-              htmlFor="forceUpdate"
-              className="text-sm font-medium text-fg-muted"
-            >
-              {t("fields.forceUpdate")}
-            </label>
-          </div>
+            <Fieldset legend={t("groupNotes")}>
+              <Field label={t("fields.releaseNotesEn")}>
+                <Textarea
+                  rows={4}
+                  value={releaseNotesEn}
+                  onChange={(e) => setReleaseNotesEn(e.target.value)}
+                  dir="ltr"
+                />
+              </Field>
+              <Field label={t("fields.releaseNotesAr")}>
+                <Textarea
+                  rows={4}
+                  value={releaseNotesAr}
+                  onChange={(e) => setReleaseNotesAr(e.target.value)}
+                  dir="rtl"
+                />
+              </Field>
+            </Fieldset>
 
-          <div>
-            <label className="mb-1 block text-sm font-medium text-fg-muted">
-              {t("fields.downloadUrl")}
-            </label>
-            <input
-              type="url"
-              required
-              value={downloadUrl}
-              onChange={(e) => setDownloadUrl(e.target.value)}
-              placeholder="https://..."
-              className="w-full rounded-lg border border-line-strong bg-surface px-4 py-2.5 text-fg"
-              dir="ltr"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium text-fg-muted">
-              {t("fields.releaseNotesAr")}
-            </label>
-            <textarea
-              rows={3}
-              value={releaseNotesAr}
-              onChange={(e) => setReleaseNotesAr(e.target.value)}
-              className="w-full resize-y rounded-lg border border-line-strong bg-surface px-4 py-2.5 text-fg"
-              dir="rtl"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium text-fg-muted">
-              {t("fields.releaseNotesEn")}
-            </label>
-            <textarea
-              rows={3}
-              value={releaseNotesEn}
-              onChange={(e) => setReleaseNotesEn(e.target.value)}
-              className="w-full resize-y rounded-lg border border-line-strong bg-surface px-4 py-2.5 text-fg"
-              dir="ltr"
-            />
-          </div>
-
-          <Button type="submit" loading={saving} className="w-full sm:w-auto">
-            {t("add")}
-          </Button>
-        </form>
-      </CardDashBoard>
-    </div>
+            <div className="flex justify-end border-t border-line pt-4">
+              <Button
+                type="submit"
+                loading={saving}
+                className="w-full sm:w-auto"
+              >
+                {t("add")}
+              </Button>
+            </div>
+          </form>
+        </Card>
+      </PageColumns>
+    </PageShell>
   );
 }

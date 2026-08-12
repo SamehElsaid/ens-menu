@@ -2,9 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "@/i18n/navigation";
 import {
-  IoArrowBack,
   IoTicketOutline,
   IoAddOutline,
   IoTrashOutline,
@@ -22,7 +20,6 @@ import { FiAlertTriangle } from "react-icons/fi";
 import {
   Badge,
   Button,
-  Card,
   Checkbox,
   ChoiceCard,
   ConfirmDialog,
@@ -34,16 +31,19 @@ import {
   Modal,
   NoResultsState,
   PageHeader,
+  PageShell,
   SearchInput,
-  SectionHeader,
   SegmentedControl,
   Select,
+  Sheet,
   StatCard,
   StatGrid,
   Toolbar,
   type DataColumn,
 } from "@/components/ui";
+import { useDataTableLabels } from "@/hooks/useDataTableLabels";
 import { cn } from "@/lib/cn";
+import { intlDateLocale } from "@/lib/formatDateTime";
 import {
   axiosDelete,
   axiosGet,
@@ -107,11 +107,11 @@ function usagePercent(v: Voucher): number {
 
 export default function AdminVouchersPage() {
   const locale = useLocale();
+  const numberLocale = intlDateLocale(locale);
   const t = useTranslations("adminVouchers");
   const tCommon = useTranslations("common");
-  const router = useRouter();
-  const isRTL = locale === "ar";
-  const textDir = isRTL ? "rtl" : "ltr";
+  const tAdmin = useTranslations("adminDashboard");
+  const tableLabels = useDataTableLabels();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -449,70 +449,75 @@ export default function AdminVouchersPage() {
   ];
 
   return (
-    <div className="space-y-6 pb-10 text-fg" dir={textDir}>
-      <PageHeader
-        title={t("title")}
-        description={t("subtitle")}
-        actions={
-          <>
-            <Button
-              variant="secondary"
-              startIcon={<IoArrowBack className="rtl:rotate-180" />}
-              onClick={() => router.back()}
-            >
-              {t("back")}
-            </Button>
-            <Button startIcon={<IoAddOutline />} onClick={openCreate}>
-              {t("create")}
-            </Button>
-            <Button
-              variant="secondary"
-              startIcon={
-                <IoRefreshOutline className={loading ? "animate-spin" : ""} />
-              }
-              onClick={() => void fetchVouchers()}
-              disabled={loading}
-            >
-              {t("refresh")}
-            </Button>
-          </>
-        }
-      />
+    <PageShell
+      kind="table"
+      header={
+        <>
+          <PageHeader
+            title={t("title")}
+            description={t("subtitle")}
+            breadcrumbs={[
+              { label: tAdmin("title"), href: "/admin" },
+              { label: t("title") },
+            ]}
+            breadcrumbsLabel={tCommon("breadcrumb")}
+            actions={
+              <>
+                <Button
+                  variant="secondary"
+                  startIcon={
+                    <IoRefreshOutline
+                      className={loading ? "animate-spin" : ""}
+                    />
+                  }
+                  onClick={() => void fetchVouchers()}
+                  disabled={loading}
+                >
+                  {t("refresh")}
+                </Button>
+                <Button startIcon={<IoAddOutline />} onClick={openCreate}>
+                  {t("create")}
+                </Button>
+              </>
+            }
+          />
 
-      {!loading && vouchers.length > 0 && (
-        <StatGrid columns={4}>
-          <StatCard
-            label={t("statsTotal")}
-            value={stats.total.toLocaleString(
-              locale === "ar" ? "ar-EG" : "en-US",
-            )}
-            icon={<IoTicketOutline />}
-          />
-          <StatCard
-            label={t("statsActive")}
-            value={stats.active.toLocaleString(
-              locale === "ar" ? "ar-EG" : "en-US",
-            )}
-            icon={<IoCheckmarkCircleOutline />}
-          />
-          <StatCard
-            label={t("statsRedemptions")}
-            value={stats.redemptions.toLocaleString(
-              locale === "ar" ? "ar-EG" : "en-US",
-            )}
-            icon={<IoPeopleOutline />}
-          />
-          <StatCard
-            label={t("statsExhausted")}
-            value={stats.exhausted.toLocaleString(
-              locale === "ar" ? "ar-EG" : "en-US",
-            )}
-            icon={<IoBanOutline />}
-          />
-        </StatGrid>
-      )}
-
-      <Card padded="md" className="space-y-4">
+          {/* The strip holds its place while the request is in flight: four
+              cards appearing after load pushed the whole table down under a
+              reader who had already started on it. It only disappears once we
+              know there are no vouchers at all, where four zeroes say
+              nothing. */}
+          {loading || vouchers.length > 0 ? (
+            <StatGrid columns={4}>
+              <StatCard
+                label={t("statsTotal")}
+                loading={loading}
+                value={stats.total.toLocaleString(numberLocale)}
+                icon={<IoTicketOutline />}
+              />
+              <StatCard
+                label={t("statsActive")}
+                loading={loading}
+                value={stats.active.toLocaleString(numberLocale)}
+                icon={<IoCheckmarkCircleOutline />}
+              />
+              <StatCard
+                label={t("statsRedemptions")}
+                loading={loading}
+                value={stats.redemptions.toLocaleString(numberLocale)}
+                icon={<IoPeopleOutline />}
+              />
+              <StatCard
+                label={t("statsExhausted")}
+                loading={loading}
+                value={stats.exhausted.toLocaleString(numberLocale)}
+                icon={<IoBanOutline />}
+              />
+            </StatGrid>
+          ) : null}
+        </>
+      }
+      toolbar={
         <Toolbar
           search={
             <SearchInput
@@ -551,96 +556,97 @@ export default function AdminVouchersPage() {
             </>
           }
         />
+      }
+    >
+      <DataTable<Voucher>
+        columns={columns}
+        rows={filteredVouchers}
+        getRowKey={(v) => String(v.id)}
+        caption={t("title")}
+        loading={loading}
+        tableId="admin-vouchers"
+        stickyHeader
+        densityControl
+        labels={tableLabels}
+        empty={
+          vouchers.length === 0 ? (
+            <EmptyState
+              icon={<IoTicketOutline />}
+              title={t("emptyTitle")}
+              description={t("emptyCta")}
+              action={
+                <Button startIcon={<IoAddOutline />} onClick={openCreate}>
+                  {t("create")}
+                </Button>
+              }
+            />
+          ) : (
+            <NoResultsState
+              title={t("empty")}
+              description={t("searchPlaceholder")}
+            />
+          )
+        }
+        rowActions={(v) => (
+          <div className="flex flex-wrap items-center gap-1">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => void loadRedemptions(v)}
+            >
+              {t("viewUsage")}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              iconOnly
+              onClick={() => openEdit(v)}
+              aria-label={t("edit")}
+            >
+              <IoCreateOutline />
+            </Button>
+            <Button
+              variant="dangerGhost"
+              size="sm"
+              iconOnly
+              onClick={() => setDeleteModal({ isOpen: true, voucher: v })}
+              aria-label={t("delete")}
+            >
+              <IoTrashOutline />
+            </Button>
+          </div>
+        )}
+      />
 
-        <DataTable<Voucher>
-          columns={columns}
-          rows={filteredVouchers}
-          getRowKey={(v) => String(v.id)}
-          caption={t("title")}
-          loading={loading}
-          empty={
-            vouchers.length === 0 ? (
-              <EmptyState
-                icon={<IoTicketOutline />}
-                title={t("emptyTitle")}
-                description={t("emptyCta")}
-                action={
-                  <Button startIcon={<IoAddOutline />} onClick={openCreate}>
-                    {t("create")}
-                  </Button>
-                }
-              />
-            ) : (
-              <NoResultsState
-                title={t("empty")}
-                description={t("searchPlaceholder")}
-              />
-            )
-          }
-          rowActions={(v) => (
-            <div className="flex flex-wrap items-center gap-1">
-              <Button
-                variant={selectedVoucher?.id === v.id ? "primary" : "secondary"}
-                size="sm"
-                onClick={() => void loadRedemptions(v)}
-              >
-                {t("viewUsage")}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                iconOnly
-                onClick={() => openEdit(v)}
-                aria-label={t("edit")}
-              >
-                <IoCreateOutline />
-              </Button>
-              <Button
-                variant="dangerGhost"
-                size="sm"
-                iconOnly
-                onClick={() => setDeleteModal({ isOpen: true, voucher: v })}
-                aria-label={t("delete")}
-              >
-                <IoTrashOutline />
-              </Button>
-            </div>
-          )}
-        />
-      </Card>
-
-      <Card padded="md" className="space-y-4">
-        <SectionHeader
-          title={t("usageTitle")}
-          actions={
-            selectedVoucher ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedVoucher(null)}
-              >
-                {tCommon("close")}
-              </Button>
-            ) : undefined
-          }
-        />
-        {!selectedVoucher ? (
-          <p className="py-8 text-center text-[13px] text-fg-muted">
-            {t("viewUsage")}
-          </p>
-        ) : redemptionsLoading ? (
+      {/* Redemptions used to be a full-width card under the table that was
+          empty until a row was picked — a permanent hole in the page whose only
+          content was an instruction to click something. It is a detail of one
+          voucher, so it now opens beside the row it belongs to. */}
+      <Sheet
+        open={Boolean(selectedVoucher)}
+        onClose={() => setSelectedVoucher(null)}
+        title={t("usageTitle")}
+        description={
+          selectedVoucher
+            ? t("redemptionsCount", { count: redemptions.length })
+            : undefined
+        }
+        side="end"
+        closeLabel={tCommon("close")}
+      >
+        {redemptionsLoading ? (
           <LoadingBlock label={tCommon("loading")} />
-        ) : (
-          <div className="space-y-4">
-            <Card variant="ghost" padded="sm">
-              <p className="text-xs text-fg-muted">{t("colCode")}</p>
-              <p className="font-mono text-lg font-bold text-brand" dir="ltr">
+        ) : selectedVoucher ? (
+          <div className="flex flex-col gap-4">
+            <div className="rounded-xl border border-brand-line bg-brand-soft px-3.5 py-3">
+              <p className="ui-label text-fg-muted">{t("colCode")}</p>
+              <p
+                className="mt-0.5 font-mono text-lg font-bold text-brand"
+                dir="ltr"
+              >
                 {selectedVoucher.code}
               </p>
-              <p className="mt-1 text-xs text-fg-muted">
-                {t("redemptionsCount", { count: redemptions.length })}
-              </p>
-            </Card>
+            </div>
             {redemptions.length === 0 ? (
               <EmptyState
                 icon={<IoPeopleOutline />}
@@ -648,7 +654,7 @@ export default function AdminVouchersPage() {
                 size="sm"
               />
             ) : (
-              <ul className="max-h-[420px] space-y-2 overflow-y-auto">
+              <ul className="flex flex-col gap-2">
                 {redemptions.map((r) => (
                   <li
                     key={r.id}
@@ -668,8 +674,8 @@ export default function AdminVouchersPage() {
               </ul>
             )}
           </div>
-        )}
-      </Card>
+        ) : null}
+      </Sheet>
 
       <Modal
         open={modalOpen}
@@ -906,6 +912,6 @@ export default function AdminVouchersPage() {
         tone="danger"
         icon={<FiAlertTriangle />}
       />
-    </div>
+    </PageShell>
   );
 }

@@ -184,17 +184,29 @@ export default function AppleSignInButton({
   }
 
   return (
+    /* Same chrome and the same height as the Google button — Apple's guidelines
+       require its button to be no less prominent than any other sign-in option
+       on the screen, so the two are one control with two marks.
+
+       The Apple logo is a §14.4 exemption and stays a solid mark, but it is the
+       one brand hue that is *defined* as the foreground: Apple permits black or
+       white only, so `currentColor` is the correct treatment — it inherits dark
+       on a light button and light on a dark one, which is exactly the pair Apple
+       allows. The 20px box gives it the clear space the guidelines ask for. */
     <SiteButton
       type="button"
       variant="secondary"
-      size="lg"
+      size="md"
       block
       onClick={handleAppleClick}
       loading={loading}
       className={className}
-      aria-label={ariaLabel || t("auth.loginWithApple")}
+      aria-label={ariaLabel}
     >
-      {loading ? null : <FaApple className="size-4" aria-hidden />}
+      {/* Stays mounted while loading — see the note in `GoogleSignInButton`. */}
+      <span className="me-1 flex shrink-0 items-center" aria-hidden>
+        <FaApple className="size-5" />
+      </span>
       <span>{t("auth.continueWithApple")}</span>
     </SiteButton>
   );

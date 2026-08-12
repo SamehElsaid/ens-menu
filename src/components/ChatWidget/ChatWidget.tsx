@@ -5,8 +5,8 @@ import { createPortal } from "react-dom";
 import { FiSend, FiX } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
 import { ALLOWED_CONTACT } from "@/lib/lena/assistantConfig";
-import { isRtlLocale } from "@/lib/localeDirection";
 import { cn } from "@/lib/cn";
+import { Alert, focusRing } from "@/components/ui";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { useChatSession } from "@/hooks/useChatSession";
@@ -46,7 +46,6 @@ export default function ChatWidget() {
   const locale = useLocale();
   const pathname = usePathname();
   const isAuthPage = pathname?.includes("/auth/");
-  const isRtl = isRtlLocale(locale);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [mounted, setMounted] = useState(false);
@@ -195,7 +194,7 @@ export default function ChatWidget() {
       {open && (
         <>
           <div
-            className="animate-chat-backdrop-in fixed inset-0 z-100 bg-black/45 backdrop-blur-[3px] sm:bg-black/25"
+            className="animate-chat-backdrop-in fixed inset-0 z-100 bg-overlay backdrop-blur-[2px]"
             onClick={() => setOpen(false)}
             aria-hidden
           />
@@ -204,39 +203,38 @@ export default function ChatWidget() {
             role="dialog"
             aria-label="محادثة لينا"
             aria-modal="true"
-            className="animate-chat-panel-in fixed inset-x-0 bottom-0 z-101 flex h-[min(92dvh,720px)] max-h-[92dvh] min-h-0 w-full flex-col overflow-hidden rounded-t-[1.35rem] border border-b-0 border-slate-200/80 bg-white shadow-[0_-12px_48px_rgba(0,0,0,0.18)] dark:border-slate-700/80 dark:bg-[#0d1117] sm:inset-x-auto sm:top-20 sm:end-6 sm:bottom-6 sm:h-auto sm:max-h-[calc(100dvh-6.5rem)] sm:w-[min(420px,calc(100vw-2rem))] sm:rounded-2xl sm:border sm:shadow-[0_25px_60px_-12px_rgba(0,0,0,0.22)]"
+            className="animate-chat-panel-in fixed inset-x-0 bottom-0 z-101 flex h-[min(92dvh,720px)] max-h-[92dvh] min-h-0 w-full flex-col overflow-hidden rounded-t-2xl border border-b-0 border-line bg-raised shadow-2xl sm:inset-x-auto sm:top-20 sm:end-6 sm:bottom-6 sm:h-auto sm:max-h-[calc(100dvh-6.5rem)] sm:w-[min(420px,calc(100vw-2rem))] sm:rounded-2xl sm:border"
           >
             {/* Mobile drag handle */}
             <div
               className="flex shrink-0 justify-center pt-2.5 pb-0 sm:hidden"
               aria-hidden
             >
-              <span className="h-1 w-10 rounded-full bg-slate-300/90 dark:bg-slate-600" />
+              <span className="h-1 w-10 rounded-full bg-line-strong" />
             </div>
 
-            {/* Header */}
-            <div className="relative shrink-0 overflow-hidden">
-              <div className="absolute inset-0 bg-linear-to-br from-accent-purple/95 via-[#7c3aed]/90 to-deep-indigo/95" />
-              <div className="absolute -top-8 -right-8 size-32 rounded-full bg-white opacity-15 blur-2xl" />
-              <div className="relative flex items-center justify-between gap-2 px-3 py-3 sm:px-4 sm:py-4">
+            {/* Header — an ink band with a rule at its base, not a gradient
+                field: the panel's own edge is what separates it from the page. */}
+            <div className="shrink-0 border-b border-line bg-brand text-on-brand">
+              <div className="flex items-center justify-between gap-2 px-3 py-3 sm:px-4">
                 <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
                   <LenaAvatar
-                    size={40}
-                    glow
-                    variant="onGradient"
+                    size={36}
+                    variant="onBrand"
                     className="sm:hidden"
                   />
                   <LenaAvatar
-                    size={44}
-                    glow
-                    variant="onGradient"
+                    size={40}
+                    variant="onBrand"
                     className="hidden sm:block"
                   />
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-bold tracking-tight text-white sm:text-[15px]">
+                    <p className="truncate text-sm font-semibold tracking-[-0.02em]">
                       لينا ✨
                     </p>
-                    <p className="truncate text-[11px] font-medium text-white/75 sm:text-xs">
+                    {/* Not `ui-label`: that class sets its own colour and it
+                        would fall back to body ink on this band. */}
+                    <p className="truncate text-[11px] tracking-[0.04em] text-on-brand/70">
                       مساعدة Ensmenu الذكية
                     </p>
                   </div>
@@ -245,7 +243,10 @@ export default function ChatWidget() {
                   type="button"
                   onClick={() => setOpen(false)}
                   aria-label="Close chat"
-                  className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 active:scale-[0.92] sm:size-8"
+                  className={cn(
+                    "flex size-9 shrink-0 items-center justify-center rounded-lg",
+                    "text-on-brand/80 transition-colors duration-(--dur-fast) hover:bg-on-brand/12 hover:text-on-brand sm:size-8",
+                  )}
                 >
                   <FiX size={20} className="sm:hidden" />
                   <FiX size={18} className="hidden sm:block" />
@@ -254,7 +255,7 @@ export default function ChatWidget() {
             </div>
 
             {/* Messages */}
-            <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain bg-slate-50/40 px-3 py-4 [-webkit-overflow-scrolling:touch] sm:gap-5 sm:px-4 sm:py-5 dark:bg-[#0d1117]/50">
+            <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain bg-surface-2 px-3 py-4 [-webkit-overflow-scrolling:touch] sm:gap-5 sm:px-4 sm:py-5">
               {messages.map((msg) => (
                 <ChatMessageBubble key={msg.id} message={msg} />
               ))}
@@ -270,18 +271,16 @@ export default function ChatWidget() {
                 />
               )}
 
-              {error && (
-                <p className="rounded-xl bg-red-50 px-3 py-2 text-center text-xs text-red-600 dark:bg-red-500/10 dark:text-red-400">
-                  {error}
-                </p>
-              )}
+              {error && <Alert tone="danger">{error}</Alert>}
 
               <div ref={scrollRef} />
             </div>
 
             {/* Input */}
-            <div className="shrink-0 border-t border-slate-200/70 bg-white/95 px-3 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-sm sm:p-3 dark:border-slate-700/70 dark:bg-[#0d1117]/95">
-              <div className="flex items-end gap-2 rounded-2xl border border-slate-200/90 bg-white p-1.5 shadow-sm transition-all duration-200 focus-within:border-accent-purple/35 focus-within:shadow-md focus-within:shadow-purple-500/8 sm:p-2 dark:border-slate-700/80 dark:bg-slate-800/50 dark:focus-within:border-purple-500/35">
+            <div className="shrink-0 border-t border-line bg-surface px-3 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-3">
+              {/* `ui-field` takes the brand border and its halo on focus, so the
+                  composer reports focus the same way every other field does. */}
+              <div className="ui-field flex items-end gap-2 rounded-lg border border-line-control bg-surface p-1.5 sm:p-2">
                 <textarea
                   ref={textareaRef}
                   rows={1}
@@ -290,20 +289,25 @@ export default function ChatWidget() {
                   onKeyDown={handleKeyDown}
                   disabled={loading}
                   placeholder="اكتب رسالتك..."
-                  className="max-h-24 min-h-11 flex-1 resize-none bg-transparent px-2 py-2.5 text-start text-base leading-snug text-slate-800 outline-none placeholder:text-slate-400 disabled:opacity-50 sm:max-h-28 sm:min-h-[42px] sm:text-sm dark:text-slate-200 dark:placeholder:text-slate-500"
+                  className="max-h-24 min-h-11 flex-1 resize-none bg-transparent px-2 py-2.5 text-start text-base leading-snug text-fg outline-none placeholder:text-fg-subtle disabled:opacity-50 sm:max-h-28 sm:min-h-[42px] sm:text-sm"
                 />
                 <button
                   type="button"
                   onClick={handleSend}
                   disabled={loading || !input.trim()}
                   aria-label="Send message"
-                  className="mb-0.5 flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-accent-purple to-deep-indigo text-white shadow-md shadow-purple-500/25 transition-transform active:scale-[0.92] disabled:cursor-not-allowed disabled:opacity-35 sm:size-10 sm:hover:scale-[1.05]"
+                  className={cn(
+                    "mb-0.5 flex size-11 shrink-0 items-center justify-center rounded-lg sm:size-10",
+                    "bg-brand text-on-brand transition-colors duration-(--dur-fast) hover:bg-brand-hover",
+                    "disabled:cursor-not-allowed disabled:opacity-40",
+                    focusRing,
+                  )}
                 >
                   <FiSend size={18} className="sm:hidden" />
                   <FiSend size={16} className="hidden sm:block" />
                 </button>
               </div>
-              <p className="mt-1.5 hidden text-center text-[10px] font-medium tracking-wide text-slate-400 sm:block dark:text-slate-600">
+              <p className="ui-label mt-2 hidden text-center sm:block">
                 Powered by Ensmenu
               </p>
             </div>
@@ -314,19 +318,17 @@ export default function ChatWidget() {
       {!open && (
         <div
           className={cn(
-            "chat-widget-fab fixed z-102 overflow-visible sm:bottom-6",
+            "chat-widget-fab fixed end-4 z-102 overflow-visible sm:end-6 sm:bottom-6",
             isAuthPage
               ? "bottom-[max(5.25rem,env(safe-area-inset-bottom))] size-12 sm:size-14"
               : "bottom-[max(1rem,env(safe-area-inset-bottom))] size-14",
-            isRtl ? "start-4 sm:start-6" : "end-4 sm:end-6",
           )}
         >
           {teaserVisible && (
             <div
               role="status"
               className={cn(
-                "animate-contact-picker-in pointer-events-auto absolute bottom-[calc(100%+0.75rem)] w-[min(260px,calc(100vw-5.5rem))]",
-                isRtl ? "start-0" : "end-0",
+                "animate-contact-picker-in pointer-events-auto absolute end-0 bottom-[calc(100%+0.75rem)] w-[min(260px,calc(100vw-5.5rem))]",
               )}
             >
               <button
@@ -335,7 +337,7 @@ export default function ChatWidget() {
                   setTeaserVisible(false);
                   setOpen(true);
                 }}
-                className="w-full rounded-2xl rounded-br-sm border border-slate-200/90 bg-white px-3.5 py-3 text-start text-[13px] leading-snug font-medium text-slate-700 shadow-lg shadow-slate-900/10 transition-colors hover:bg-purple-50/80 dark:border-slate-700/80 dark:bg-[#161b22] dark:text-slate-200 dark:hover:bg-purple-500/10"
+                className="w-full rounded-lg border border-line bg-raised px-3.5 py-3 text-start text-[13px] leading-snug font-medium text-fg shadow-lg transition-colors duration-(--dur-fast) hover:bg-surface-2"
               >
                 {teaserMessages[teaserIndex]}
               </button>
@@ -343,7 +345,7 @@ export default function ChatWidget() {
                 type="button"
                 onClick={() => setTeaserVisible(false)}
                 aria-label={t("dismissTeaser")}
-                className="absolute -top-1.5 -start-1.5 flex size-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                className="absolute -top-1.5 -start-1.5 flex size-6 items-center justify-center rounded-full border border-line bg-raised text-fg-muted shadow-lg transition-colors duration-(--dur-fast) hover:bg-surface-2 hover:text-fg"
               >
                 <FiX size={12} />
               </button>
@@ -363,7 +365,9 @@ export default function ChatWidget() {
                 rel="noopener noreferrer"
                 aria-label={t("contactWhatsApp")}
                 className={cn(
-                  "whatsapp-fab-btn relative flex items-center justify-center rounded-full border-2 border-white bg-[#25D366] text-white dark:border-slate-700",
+                  /* WhatsApp green on the WhatsApp glyph — the one sanctioned
+                     third-party hue. */
+                  "whatsapp-fab-btn relative flex items-center justify-center rounded-full border-2 border-surface bg-[#25D366] text-white",
                   isAuthPage ? "size-12 sm:size-14" : "size-14",
                 )}
               >
@@ -380,7 +384,10 @@ export default function ChatWidget() {
               type="button"
               onClick={() => setOpen(true)}
               aria-label={t("openChat")}
-              className="relative size-14 overflow-hidden rounded-full border-2 border-white shadow-lg shadow-purple-500/30 ring-2 ring-accent-purple/40 transition-transform hover:scale-105 active:scale-95 dark:border-slate-700 dark:ring-purple-500/30"
+              className={cn(
+                "relative size-14 overflow-hidden rounded-full border-2 border-surface bg-surface shadow-lg",
+                focusRing,
+              )}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -388,9 +395,11 @@ export default function ChatWidget() {
                 alt="لينا"
                 className="size-full object-cover object-center"
               />
+              {/* Live, so it is the accent — and it is a filled dot with a
+                  surface ring, which reads without relying on the hue. */}
               <span
                 aria-hidden
-                className="absolute -top-0.5 -right-0.5 size-3 rounded-full bg-accent-purple/90 ring-2 ring-white dark:ring-[#0d1117]"
+                className="absolute -top-0.5 -end-0.5 size-3 rounded-full bg-accent ring-2 ring-surface"
               />
             </button>
           )}

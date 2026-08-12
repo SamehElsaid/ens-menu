@@ -79,9 +79,7 @@ function SectionEyebrow({
 }) {
   return (
     <div className="flex items-center justify-between gap-2 px-3 pb-1 pt-2.5">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-subtle">
-        {children}
-      </p>
+      <p className="ui-label text-fg-subtle">{children}</p>
       {action}
     </div>
   );
@@ -464,7 +462,7 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
             style={dropdownStyle}
             role="dialog"
             aria-label={t("title")}
-            className="z-[9999] w-[22rem] overflow-hidden rounded-lg border border-line bg-raised shadow-lg motion-safe:animate-[ui-pop-in_140ms_cubic-bezier(0.16,1,0.3,1)]"
+            className="z-[9999] w-[22rem] overflow-hidden rounded-lg border border-line bg-raised shadow-lg motion-safe:animate-[ui-pop-in_var(--dur-pop)_var(--ease-enter)]"
           >
             <div className="flex items-center justify-between gap-2 border-b border-line px-3 py-2">
               <span className="flex items-center gap-1.5 text-[13px] font-semibold text-fg">

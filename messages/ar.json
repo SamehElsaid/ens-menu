@@ -522,9 +522,11 @@
     "back": "السابق",
     "edit": "تعديل",
     "delete": "حذف",
+    "remove": "إزالة",
     "close": "إغلاق",
     "cancel": "إلغاء",
     "openMenu": "فتح القائمة",
+    "breadcrumb": "مسار التنقل",
     "useDarkTheme": "التبديل إلى الوضع الداكن",
     "useLightTheme": "التبديل إلى الوضع الفاتح",
     "search": "بحث...",
@@ -548,6 +550,8 @@
     "clearFilters": "مسح عوامل التصفية",
     "noResultsTitle": "لا توجد نتائج",
     "noResultsDescription": "جرّب كلمة بحث مختلفة أو امسح عوامل التصفية.",
+    "emptyTitle": "لا توجد بيانات بعد",
+    "emptyDescription": "ستظهر السجلات هنا عند إضافتها.",
     "errorTitle": "حدث خطأ ما",
     "errorDescription": "تعذّر تحميل البيانات. تحقّق من اتصالك وحاول مرة أخرى."
   },
@@ -721,18 +725,24 @@
     "specialityRequired": "التخصص مطلوب",
     "switchToCenter": "التسجيل كمركز",
     "recaptchaLabel": "تأكيد أنك إنسان",
-    "recaptchaHint": "اضغط هنا لإكمال التحقق الأمني",
+    "recaptchaHint": "أكمل التحقق أدناه للمتابعة",
     "recaptchaVerified": "تم التحقق بنجاح",
     "recaptchaVerifiedHint": "يمكنك المتابعة الآن",
     "recaptchaVerifying": "جاري التحقق...",
     "recaptchaVerifyingHint": "يرجى الانتظار حتى نتأكد أنك إنسان",
     "recaptchaRejected": "فشل التحقق",
-    "recaptchaRejectedHint": "اضغط للمحاولة مرة أخرى",
+    "recaptchaRejectedHint": "لم يكتمل التحقق. أعد المحاولة للمتابعة.",
     "recaptchaBoot": "جاري تحميل التحقق الأمني...",
     "recaptchaOnSubmit": "تحقق أمني سريع عند الضغط على «إنشاء حساب»",
     "recaptchaModalTitle": "تحقق سريع",
     "recaptchaModalSubtitle": "خطوة واحدة لحماية حسابك — ثم نكمل التسجيل مباشرة.",
     "recaptchaModalClose": "إغلاق",
+    "recaptchaTicketLabel": "تحقق أمني",
+    "recaptchaRetry": "إعادة المحاولة",
+    "recaptchaStatusPending": "قيد الانتظار",
+    "recaptchaStatusChecking": "جاري التحقق",
+    "recaptchaStatusPassed": "تم التحقق",
+    "recaptchaStatusFailed": "فشل",
     "showPassword": "إظهار كلمة المرور",
     "hidePassword": "إخفاء كلمة المرور"
   },
@@ -1655,6 +1665,8 @@
       "noSetupRequired": "لا يحتاج تسجيل معقد • يعمل فورًا",
       "noBrowser": "مصمم لفريق الصالة",
       "videoAlt": "معاينة التطبيق",
+      "videoPause": "إيقاف معاينة التطبيق",
+      "videoPlay": "تشغيل معاينة التطبيق",
       "features": {
         "liveAlerts": "تنبيهات طلبات فورية",
         "tables": "خريطة طاولات حية",
@@ -1945,6 +1957,8 @@
       "whatsappLabel": "دعم واتساب",
       "whatsappDescription": "رد سريع على استفساراتك، مساعدة في إعداد المنيو، والدعم الفني من فريق ENSmenu.",
       "detailsTitle": "معلومات التواصل",
+      "channelsTitle": "تواصل معنا الآن",
+      "numbersTitle": "كل الأرقام ومن يرد عليها",
       "socialTitle": "تابعنا على وسائل التواصل",
       "whatsappCta": "راسلنا على واتساب",
       "whatsappResponseTime": "متوسط وقت الرد: أقل من 5 دقائق",
@@ -2635,6 +2649,8 @@
     "totalTablesLabel": "إجمالي الطاولات",
     "noTables": "لا توجد طاولات بعد",
     "noTablesDescription": "أضف طاولتك الأولى لتوليد رمز QR لكل طاولة.",
+    "proOnlyTitle": "الطاولات وروابط QR في خطة Pro",
+    "proOnlyDescription": "قم بترقية خطتك لمنح كل طاولة رمز QR خاصاً بها وتمكين الضيوف من نداء الطاقم منها.",
     "noMenuUrl": "عيّن رابطًا (slug) للقائمة من الإعدادات لتوليد الروابط",
     "deleteConfirmTitle": "حذف الطاولة",
     "deleteConfirm": "هل أنت متأكد من حذف الطاولة « {name} »؟ لا يمكن التراجع.",
@@ -2673,6 +2689,7 @@
     "backToOverview": "الرجوع للصفحة الرئيسية",
     "search": "بحث",
     "clearFilter": "مسح الفلتر",
+    "refresh": "تحديث",
     "searchPlaceholder": "ابحث بالاسم أو الموبايل أو الإيميل أو الملاحظات",
     "metricsTitle": "ملخص التقييمات",
     "totalLabel": "عدد التقييمات",
@@ -2777,6 +2794,7 @@
   },
   "Roles": {
     "subtitle": "أنشئ الأدوار واختر صلاحياتها",
+    "loading": "جارٍ تحميل الأدوار",
     "addRole": "إضافة دور",
     "edit": "تعديل",
     "delete": "حذف",
@@ -3007,6 +3025,7 @@
     "moveUp": "تحريك للأمام",
     "moveDown": "تحريك للخلف",
     "availableNow": "متاح الآن",
+    "unavailable": "مخفي",
     "dragHandle": "اسحب",
     "dropPlaceholder": "أفلت هنا",
     "unsavedChanges": "هناك تغييرات غير محفوظة"
@@ -3337,6 +3356,62 @@
     "navSectionAccount": "الحساب",
     "navSectionImport": "الاستيراد",
     "navSectionAdmin": "الإدارة",
+    "navSectionCustomers": "العملاء",
+    "navSectionRevenue": "الإيرادات",
+    "navSectionContent": "المحتوى",
+    "navSectionPlatform": "المنصة",
+    "navZoneVenue": "هذا المنيو",
+    "navZoneAccount": "الحساب",
+    "navAdminConsole": "لوحة الإدارة",
+    "navAllVenues": "كل المنيوهات",
+    "navChooseVenue": "اختر منيو",
+    "navChooseVenueHint": "اختر منيو لتعديل أصنافه وإعداداته",
+    "adminActivityLog": "سجل النشاط",
+    "railCollapse": "تصغير القائمة الجانبية",
+    "railExpand": "توسيع القائمة الجانبية",
+    "skipToContent": "تخطَّ إلى المحتوى",
+    "commandOpen": "ابحث أو انتقل إلى…",
+    "commandPlaceholder": "ابحث في الصفحات والمنيوهات والإجراءات",
+    "commandNoResults": "لا نتائج مطابقة",
+    "commandNoResultsHint": "جرّب اسم صفحة أو اسم منيو أو إجراء.",
+    "commandGroupRecent": "الأخيرة",
+    "commandGroupGoTo": "الانتقال إلى",
+    "commandGroupVenues": "تبديل المنيو",
+    "commandGroupActions": "إجراءات",
+    "commandGroupHelp": "مقالات المساعدة",
+    "attentionTitle": "يحتاج انتباهك",
+    "attentionAdminDescription": "حسابات تحتاج تصرفًا من أحد",
+    "attentionVenueDescription": "أمور في انتظارك على منيوهاتك",
+    "attentionAllClear": "لا شيء يحتاج انتباهك",
+    "attentionAllClearAdminHint": "لا حسابات موقوفة ولا تجارب على وشك الانتهاء ولا تسجيلات متوقفة حاليًا.",
+    "attentionAllClearVenueHint": "لا طلبات غير مقروءة ولا شيء ينتهي قريبًا.",
+    "attentionUnseenOrders": "طلبات طاولات غير مقروءة",
+    "attentionUnseenDelivery": "طلبات أونلاين غير مقروءة",
+    "attentionEmptyMenus": "منيوهات بدون أصناف",
+    "attentionEmptyMenusHint": "منيو منشور وفارغ يُفقدك العملاء",
+    "kpiActiveMenus": "{count} نشط",
+    "kpiUnseenHint": "غير مقروءة",
+    "kpiItems": "الأصناف",
+    "kpiItemsHint": "في كل المنيوهات",
+    "tableColumns": "الأعمدة",
+    "tableDensity": "الكثافة",
+    "tableDensityComfortable": "مريحة",
+    "tableDensityCompact": "مضغوطة",
+    "tableSelectAll": "تحديد كل الصفوف",
+    "tableSelectRow": "تحديد الصف",
+    "tableClearSelection": "إلغاء التحديد",
+    "tableSelectedCount": "{count, plural, zero {لا شيء محدد} one {عنصر واحد محدد} two {عنصران محددان} few {# عناصر محددة} many {# عنصرًا محددًا} other {# عنصر محدد}}",
+    "commandHintNavigate": "للتنقل",
+    "commandHintSelect": "للفتح",
+    "commandHintClose": "للإغلاق",
+    "commandScopeVenue": "المنيو",
+    "commandScopeAccount": "الحساب",
+    "commandScopeAdmin": "الإدارة",
+    "actionNewItem": "إضافة صنف",
+    "actionNewCategory": "إضافة تصنيف",
+    "actionInviteStaff": "إضافة موظف",
+    "actionNewVoucher": "إنشاء كوبون",
+    "actionViewLiveMenu": "فتح المنيو المنشور",
     "badgeSoon": "قريباً",
     "menuImport": "استيراد المنيو",
     "Menu Import": "استيراد المنيو",
@@ -3439,6 +3514,8 @@
     "itemsSaveSuccess": "تم حفظ الأصناف",
     "itemsSaveError": "تعذّر حفظ الأصناف",
     "removeItem": "حذف الصنف",
+    "qtyDecrease": "إنقاص الكمية",
+    "qtyIncrease": "زيادة الكمية",
     "addProduct": "إضافة منتج",
     "addProductSearch": "ابحث عن منتج…",
     "addProductLoading": "جاري تحميل المنتجات…",
@@ -3530,6 +3607,8 @@
     "itemsSaveSuccess": "تم حفظ الأصناف",
     "itemsSaveError": "تعذّر حفظ الأصناف",
     "removeItem": "حذف الصنف",
+    "qtyDecrease": "إنقاص الكمية",
+    "qtyIncrease": "زيادة الكمية",
     "addProduct": "إضافة منتج",
     "addProductSearch": "ابحث عن منتج…",
     "addProductLoading": "جاري تحميل المنتجات…",
@@ -3554,6 +3633,10 @@
   },
   "menuActivityLog": {
     "title": "سجل النشاط",
+    "eyebrow": "التتبع",
+    "breadcrumbs": {
+      "dashboard": "لوحة التحكم"
+    },
     "subtitle": "يتتبع إنشاء وتعديل وحذف التصنيفات والمنتجات والموظفين والطاولات والإعلانات والإعدادات.",
     "searchPlaceholder": "ابحث بالاسم أو الإجراء…",
     "empty": "لا يوجد نشاط بعد.",
@@ -3721,6 +3804,7 @@
     "demoDataBanner": "بيانات تجريبية للعرض — ستُستبدل تلقائياً عند ربط الـ Backend."
   },
   "adminFollowUps": {
+    "eyebrow": "المبيعات",
     "title": "متابعة العملاء",
     "subtitle": "قائمة اتصال، تسجيل نتائج المكالمات، ومتابعة مواعيد الـ follow-up لعملاء ENSmenu.",
     "backToAdmin": "العودة للوحة الأدمن",
@@ -3729,6 +3813,8 @@
     "queueTitle": "قائمة الاتصال",
     "queueSearchPlaceholder": "بحث بالاسم أو رقم الهاتف…",
     "queueNoResults": "لا توجد نتائج مطابقة للبحث.",
+    "queueEmpty": "لا يوجد عملاء بحاجة إلى اتصال",
+    "queueEmptyDescription": "يظهر العملاء هنا عند حلول موعد المتابعة.",
     "logCallTitle": "تسجيل مكالمة",
     "logCall": "تسجيل مكالمة",
     "viewCalls": "سجل المكالمات",
@@ -3820,6 +3906,7 @@
       "actions": "إجراءات"
     },
     "report": {
+      "title": "نشاط المكالمات",
       "callsToday": "مكالمات اليوم",
       "callsWeek": "مكالمات الأسبوع",
       "overdue": "متابعات متأخرة",
@@ -3859,6 +3946,7 @@
     }
   },
   "adminPayments": {
+    "eyebrow": "الفوترة",
     "title": "تاريخ اشتراكات Pro",
     "subtitle": "سجل كامل لاشتراكات Pro — التواريخ، الحالة، ومصدر التفعيل (دفع إلكتروني أو من الأدمن).",
     "backToAdmin": "العودة للأدمن",
@@ -3942,6 +4030,7 @@
     "amountFree": "—"
   },
   "adminAnalytics": {
+    "eyebrow": "التحليلات",
     "title": "تحليلات المنصة",
     "subtitle": "نظرة شاملة على أداء ensmenu",
     "back": "رجوع",
@@ -3997,6 +4086,7 @@
     "demoDataBanner": "بيانات تجريبية للعرض — ستُستبدل تلقائياً عند ربط الـ Backend."
   },
   "adminBroadcast": {
+    "eyebrow": "التواصل",
     "title": "رسائل العملاء",
     "subtitle": "أرسل بريداً إلكترونياً لكل العملاء أو لمجموعة محددة أو لعملاء تختارهم يدوياً.",
     "backToAdmin": "العودة للوحة الأدمن",
@@ -4119,6 +4209,13 @@
       "title": "تفاصيل المستخدم",
       "subtitle": "عرض معلومات المستخدم التفصيلية",
       "back": "رجوع",
+      "tabs": {
+        "label": "أقسام ملف العميل",
+        "overview": "نظرة عامة",
+        "menus": "المنيوهات",
+        "commerce": "الطلبات والفواتير",
+        "relationship": "المتابعة"
+      },
       "analytics": {
         "title": "تحليلات المستخدم",
         "menusCount": "عدد المنيوهات",
@@ -4410,6 +4507,7 @@
     }
   },
   "adminAds": {
+    "eyebrow": "الإعلانات",
     "title": "إدارة الإعلانات",
     "subtitle": "عرض وإدارة الإعلانات المعروضة للمستخدمين المجانيين",
     "back": "رجوع",
@@ -4421,6 +4519,10 @@
     "addNewAd": "إضافة إعلان جديد",
     "advertisement": "إعلان",
     "advertisements": "إعلانات",
+    "filterAll": "الكل",
+    "columns": {
+      "status": "الحالة"
+    },
     "noAds": "لا توجد إعلانات بعد",
     "noAdsTitle": "لا توجد إعلانات",
     "noAdsDescription": "ابدأ بإنشاء إعلانك الأول لعرضه للمستخدمين المجانيين",
@@ -4515,6 +4617,7 @@
     }
   },
   "adminActivityLog": {
+    "eyebrow": "التدقيق",
     "title": "سجل نشاط المشرفين",
     "subtitle": "تتبع من رقّى من، ومن حذف من، وتعديلات المشرفين والمستخدمين",
     "back": "العودة للمشرفين",
@@ -4554,11 +4657,15 @@
     }
   },
   "adminAppVersion": {
+    "eyebrow": "الإصدارات",
     "title": "إصدار التطبيق",
     "subtitle": "عرض آخر إصدار وإضافة إصدار جديد للتطبيق",
     "back": "رجوع",
     "currentVersion": "الإصدار الحالي",
     "addNew": "إضافة إصدار جديد",
+    "groupRelease": "الإصدار",
+    "groupNotes": "ملاحظات الإصدار",
+    "forceUpdateHint": "يمنع استخدام التطبيق حتى يثبّت العميل هذا الإصدار.",
     "noVersion": "لا يوجد إصدار مسجّل بعد",
     "loadError": "فشل تحميل إعدادات الإصدار",
     "saveSuccess": "تم إضافة الإصدار الجديد بنجاح",
@@ -4579,6 +4686,7 @@
     }
   },
   "adminPlans": {
+    "eyebrow": "التسعير",
     "title": "إدارة الخطط",
     "subtitle": "عرض وتعديل خطط الاشتراك",
     "back": "رجوع",
@@ -4605,6 +4713,10 @@
     },
     "editModal": {
       "title": "تعديل الخطة",
+      "groupPricing": "الأسعار",
+      "groupLimits": "الحدود",
+      "groupFlags": "الإتاحة",
+      "groupCapabilities": "ما تفتحه الخطة",
       "name": "الاسم",
       "priceMonthly": "السعر الشهري (جنيه)",
       "priceYearly": "السعر السنوي (جنيه)",
@@ -4658,6 +4770,9 @@
     "emptyMenuTitle": "المنيو الخاص بيك فاضي — ابدأ في دقائق",
     "emptyMenuDescription": "ارفع صورة المنيو الخاص بيك الورقي وسنحولها لقائمة منظمة",
     "backToOverview": "رجوع للوحة التحكم",
+    "breadcrumbs": {
+      "dashboard": "لوحة التحكم"
+    },
     "stepUpload": "رفع الصورة",
     "stepProcessing": "التحليل",
     "stepReview": "المراجعة",
@@ -4677,6 +4792,7 @@
     "tip1": "صورة واضحة بإضاءة جيدة",
     "tip2": "تجنب الظلال والانعكاسات",
     "tip3": "التقط الصورة من الأعلى إن أمكن",
+    "tipsTitle": "نصائح التصوير",
     "startAnalysis": "ابدأ التحليل",
     "skipOnboarding": "تخطي الآن",
     "processingTitle": "جاري تحليل المنيو...",
@@ -4691,6 +4807,11 @@
     "statCategories": "{count} فئات",
     "statItems": "{count} أصناف",
     "statExpandedItems": "{count} صنف للحفظ",
+    "statLabelCategories": "الفئات",
+    "statLabelItems": "الأصناف",
+    "statLabelToSave": "للحفظ",
+    "statLabelDuplicates": "مكرر",
+    "statLabelPriceConflicts": "تعارض الأسعار",
     "statMissingPrices": "{count} أصناف بدون سعر",
     "statMissingNames": "{count} منتاجاتبدون اسم",
     "statWarnings": "{count} تحذيرات",
@@ -4698,6 +4819,7 @@
     "missingNameBlock": "{count} منتاجاتبدون اسم عربي أو إنجليزي — أكمل الأسماء قبل المتابعة",
     "missingPriceBlockHint": "اضغط هنا للانتقال إلى المنتج الذي فيه مشكلة",
     "missingNameBlockHint": "اضغط هنا للانتقال إلى المنتج الذي فيه مشكلة",
+    "goToIssue": "الانتقال إلى المشكلة",
     "blockingHint": "أكمل الحقول المطلوبة قبل المتابعة",
     "parseErrorsNotice": "تعذّر قراءة {count} منتاجاتمن الاستجابة",
     "itemsInCategory": "{count} صنف",
@@ -4707,6 +4829,9 @@
     "nameEn": "الاسم (إنجليزي)",
     "descriptionAr": "الوصف (عربي)",
     "descriptionEn": "الوصف (إنجليزي)",
+    "itemDescriptions": "الأوصاف",
+    "itemMenuLabel": "إجراءات الصنف",
+    "categoryMenuLabel": "إجراءات الفئة",
     "price": "السعر",
     "variantLabel": "الحجم / النوع",
     "addItem": "إضافة صنف",
@@ -4791,7 +4916,10 @@
     "freeLimitReachedDescription": "لقد انتهيت من الباقة المجانية، يرجى الاشتراك للاستمرار في استخدام ميزة الاستيراد.",
     "freePlanLimitTitle": "حد الباقة المجانية",
     "freePlanLimitDescription": "الباقة المجانية تسمح بحد أقصى {max} منتج لكل منيو. لديك حالياً {current} منتج.",
-    "freePlanLimitImport": "هذا الاستيراد سيضيف {import} منتج (الإجمالي {total}).",
+    "freePlanLimitLedgerCurrent": "المنتجات الحالية",
+    "freePlanLimitLedgerImport": "المضاف في هذا الاستيراد",
+    "freePlanLimitLedgerTotal": "الإجمالي بعد الاستيراد",
+    "freePlanLimitLedgerMax": "حد الباقة المجانية",
     "freePlanLimitExceeded": "تجاوزت الحد — احذف بعض الأصناف من المراجعة أو رقّي إلى Pro.",
     "freePlanLimitUpgrade": "ترقية إلى Pro",
     "freePlanLimitContinue": "متابعة للتأكيد",
@@ -4805,6 +4933,7 @@
     "savePartialDetail": "تم حفظ بعض الأصناف وفشل البعض الآخر — راجع التقرير",
     "saveFailDetail": "تعذّر إكمال الحفظ — راجع الأسباب أدناه",
     "saveAllSkippedTitle": "كل الأصناف موجودة مسبقاً",
+    "reportTitle": "تقرير الاستيراد",
     "reportCategoriesAdded": "فئات مضافة",
     "reportCategoriesReused": "فئات مستخدمة (موجودة)",
     "reportItemsAdded": "أصناف مضافة",
@@ -4950,8 +5079,17 @@
   },
   "settingsDesignPage": {
     "title": "تصميم المنيو",
+    "eyebrow": "التصميم",
     "subtitle": "اختر القالب المناسب لطريقة عرض منيو مطعمك، يمكنك تغييره في أي وقت.",
     "onboardingComplete": "رائع! اكتملت جولة إعداد قائمتك. قائمتك جاهزة للمشاركة.",
+    "breadcrumbs": {
+      "dashboard": "لوحة التحكم",
+      "settings": "الإعدادات"
+    },
+    "gallery": {
+      "eyebrow": "القوالب",
+      "title": "اختر قالبًا"
+    },
     "badges": {
       "activeNow": "مفعل حاليًا",
       "currentTemplate": "القالب المستخدم",
@@ -4969,7 +5107,9 @@
       "buttonUpgrade": "ترقية للـ Pro",
       "preview": "معاينة",
       "customize": "تخصيص",
-      "templateNotActive": "هذا القالب غير مفعل. يرجى تفعيله لتخصيصه."
+      "templateNotActive": "هذا القالب غير مفعل. يرجى تفعيله لتخصيصه.",
+      "noMenuSelected": "لا توجد قائمة محددة.",
+      "activateFailed": "تعذّر تفعيل القالب. حاول مرة أخرى."
     },
     "tips": {
       "title": "نصائح مفيدة",
@@ -4983,6 +5123,7 @@
     "title": "تخصيص قالب {name}",
     "description": "قم بضبط ألوان هذا القالب والنصوص الرئيسية ليعكس منيو الرقمي هوية مطعمك البصرية بدقة.",
     "descriptionColorsOnly": "قم بضبط ألوان هذا القالب ليعكس منيو الرقمي هوية مطعمك البصرية.",
+    "noMenuSelected": "لا توجد قائمة محددة لحفظ التخصيص عليها.",
     "notEditable": {
       "title": "لا يمكن تخصيص هذا القالب",
       "description": "يمكنك الرجوع لاختيار قالب آخر يدعم خيارات تخصيص متقدمة من صفحة التصميم."
@@ -5010,7 +5151,8 @@
         "description": "حدد اللون الأساسي ولون التأكيد، وسيتم استخدامهما في التدرجات وأزرار الدعوة لاتخاذ إجراء والمنتجات المهمة.",
         "primaryLabel": "اللون الأساسي",
         "accentLabel": "لون التأكيد",
-        "pickerLabel": "استخدم أداة اختيار الألوان لاختيار الدرجة المناسبة بدقة."
+        "pickerLabel": "استخدم أداة اختيار الألوان لاختيار الدرجة المناسبة بدقة.",
+        "openPicker": "افتح أداة اختيار الألوان لـ {label}"
       },
       "texts": {
         "pill": "النصوص",
@@ -5046,6 +5188,17 @@
   "settingsMediaPage": {
     "title": "إعدادات الميديا",
     "badge": "الوسائط والاتصال",
+    "description": "روابط التواصل وبيانات الاتصال والواي فاي ومواعيد العمل التي تظهر في المنيو العام.",
+    "breadcrumbs": {
+      "label": "إعدادات الميديا",
+      "settings": "الإعدادات"
+    },
+    "sections": {
+      "social": "التواصل الاجتماعي",
+      "contact": "بيانات الاتصال",
+      "wifi": "واي فاي",
+      "hours": "المواعيد"
+    },
     "socialLinks": {
       "title": "روابط التواصل الاجتماعي",
       "facebook": "فيسبوك",
@@ -5075,6 +5228,9 @@
     "businessHours": {
       "title": "مواعيد العمل",
       "to": "إلى",
+      "day": "اليوم",
+      "open": "الفتح",
+      "close": "الإغلاق",
       "closed": "مغلق",
       "note": "حدد مواعيد عملك لزبائنك. فعّل «مغلق» إذا كان المتجر مغلقاً في هذا اليوم.",
       "days": {
@@ -5099,6 +5255,9 @@
   "settingsGoogleReviewsPage": {
     "title": "تقييمات جوجل",
     "badge": "تقييمات جوجل",
+    "breadcrumbs": {
+      "settings": "الإعدادات"
+    },
     "description": "أضف رابط صفحة التقييم على Google وتحكم في ظهور زر التقييم في المنيو. الزبون يكتب التقييم على Google وليس داخل ENSmenu.",
     "enabled": "إظهار زر التقييم في المنيو",
     "enabledOn": "مفعّل",
@@ -5171,7 +5330,10 @@
     "deniedDescription": "الإشعارات محظورة في متصفحك. يرجى تعديل إعدادات المتصفح للسماح بها.",
     "openSettings": "افتح إعدادات المتصفح",
     "tryAgain": "حاول مرة أخرى",
-    "dismiss": "إغلاق"
+    "dismiss": "إغلاق",
+    "statusOff": "غير مفعّلة",
+    "statusOn": "مفعّلة",
+    "statusBlocked": "محظورة"
   },
   "roles": {
     "admin": "مدير",
@@ -5284,6 +5446,8 @@
     "dangerZone": "منطقة الخطر",
     "deleteThisMenu": "حذف هذه القائمة",
     "saveChanges": "حفظ التغييرات",
+    "unsavedChanges": "لديك تغييرات غير محفوظة",
+    "noMenuSelected": "لا توجد قائمة محددة.",
     "namePlaceholder": "The Palm Cafe",
     "descriptionPlaceholder": "Fresh pasta, grilled burgers, pizzas & signature drinks...",
     "chatbotEnabled": "المساعد الذكي",
@@ -5338,6 +5502,7 @@
     "close": "إغلاق البحث"
   },
   "adminKnowledge": {
+    "eyebrow": "المحتوى",
     "title": "إدارة المعرفة",
     "subtitle": "إنشاء وإدارة مدخلات معلومات البحث",
     "back": "رجوع",
@@ -5382,6 +5547,7 @@
     }
   },
   "adminPromo": {
+    "eyebrow": "التواصل",
     "title": "البانر الترويجي",
     "subtitle": "إدارة البانر الترويجي الظاهر للمستخدمين",
     "back": "رجوع",
@@ -5395,6 +5561,9 @@
     "textPlaceholderAr": "أدخل النص الترويجي بالعربية...",
     "textPlaceholderEn": "Enter promotional text in English...",
     "jsonPreview": "معاينة البيانات المُرسَلة",
+    "previewTitle": "الشكل النهائي",
+    "previewEmpty": "لا يوجد ما يُعرض بعد — اكتب نص البانر بالأسفل.",
+    "previewHiddenNote": "محفوظ، لكنه مخفي عن العملاء لأن البانر متوقف.",
     "enableLabel": "تفعيل البانر",
     "enableDescription": "إظهار أو إخفاء البانر الترويجي لجميع المستخدمين",
     "save": "حفظ التغييرات",
@@ -5817,6 +5986,20 @@
   "settingsDeliveryPage": {
     "title": "إعدادات التوصيل",
     "badge": "التوصيل",
+    "description": "فعّل التوصيل، واختر مكان استلام الطلبات، وحدد المناطق التي توصّل إليها وأسعارها.",
+    "loading": "جارٍ تحميل إعدادات التوصيل...",
+    "proBadge": "Pro",
+    "breadcrumbs": {
+      "label": "إعدادات التوصيل",
+      "settings": "الإعدادات"
+    },
+    "sections": {
+      "status": "الحالة",
+      "channel": "قناة الاستلام",
+      "zoneMethod": "طريقة المناطق",
+      "zones": "المناطق",
+      "location": "الموقع"
+    },
     "savedSuccess": "تم حفظ إعدادات التوصيل",
     "linkedReadOnlyTitle": "تُدار من المنيو الأساسي",
     "linkedReadOnlyDescription": "هذا المنيو تابع للدلفري. عدّل إعدادات التوصيل من المنيو الأساسي فقط.",
@@ -5827,7 +6010,9 @@
       "subtitle": "تفعيل أو تعطيل طلبات التوصيل لهذا المنيو",
       "label": "التوصيل مفعّل",
       "enabledHint": "يمكن للعملاء إرسال طلبات التوصيل",
-      "disabledHint": "التوصيل معطّل حالياً"
+      "disabledHint": "التوصيل معطّل حالياً",
+      "badgeOn": "مباشر",
+      "badgeOff": "متوقف"
     },
     "contactNumbers": {
       "title": "استلام الطلبات على",
@@ -5842,7 +6027,8 @@
       "whatsappOrdersOnHint": "استلام الطلبات على الواتساب مع إرسال نسخة إلى لوحة التحكم",
       "whatsappOrdersOffHint": "استلام وإدارة جميع الطلبات مباشرة عبر لوحة التحكم فقط",
       "whatsappDashboardOnlyHint": "الواتساب متوقف — الطلبات الجديدة تظهر في صفحة طلبات الدلفري",
-      "phonePlaceholder": "مثال: 01012345678+"
+      "phonePlaceholder": "مثال: 01012345678+",
+      "phoneRequired": "رقم الواتساب مطلوب لاستقبال الطلبات على الواتساب"
     },
     "deliveryMode": {
       "title": "طريقة تحديد مناطق التوصيل",
@@ -5905,6 +6091,11 @@
       "searchPlaceholder": "ابحث عن مدينة أو محافظة...",
       "searching": "جارٍ البحث...",
       "noResults": "لا توجد نتائج — جرّب كلمة بحث مختلفة",
+      "regionRequired": "اختر المنطقة من نتائج البحث حتى نتمكن من حفظ إحداثياتها",
+      "required": "مطلوب",
+      "priceInvalid": "أدخل سعراً أكبر من صفر",
+      "addSuccess": "تمت إضافة منطقة التوصيل",
+      "updateSuccess": "تم تحديث منطقة التوصيل",
       "nameAr": "الاسم بالعربية",
       "nameArPlaceholder": "مثال: القاهرة",
       "nameEn": "الاسم بالإنجليزية",
@@ -6049,6 +6240,7 @@
     }
   },
   "adminDomainTransfers": {
+    "eyebrow": "البنية التحتية",
     "title": "طلبات نقل الدومين",
     "description": "إدارة طلبات العملاء لنقل وربط الدومينات.",
     "refresh": "تحديث",
@@ -6057,6 +6249,7 @@
     "colStatus": "الحالة",
     "colDate": "التاريخ",
     "colActions": "إجراءات",
+    "filterAll": "الكل",
     "view": "عرض",
     "detailTitle": "تفاصيل الطلب",
     "email": "البريد",
@@ -6103,6 +6296,7 @@
     }
   },
   "adminMetadata": {
+    "eyebrow": "تحسين محركات البحث",
     "title": "إدارة الميتاداتا",
     "subtitle": "إدارة عناوين ووصف وكلمات مفتاحية صفحات الموقع لتحسين محركات البحث",
     "back": "رجوع",
@@ -6133,6 +6327,7 @@
       "editTitle": "تعديل الميتاداتا",
       "createTitle": "إضافة ميتاداتا جديدة",
       "pageName": "اسم الصفحة",
+      "localeGroup": "المحتوى",
       "title": "العنوان",
       "description": "الوصف",
       "keywords": "الكلمات المفتاحية",

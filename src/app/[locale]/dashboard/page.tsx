@@ -17,7 +17,7 @@ import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import { pushFirstMenuCreatedEvent } from "@/shared/gtmEvents";
 import { toast } from "react-toastify";
 import { Menu, MenusResponse } from "@/types/Menu";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useAppSelector } from "@/store/hooks";
 import { shouldShowAiImportOnboarding } from "@/lib/aiImportOnboarding";
 import { normalizeMenuFromApi } from "@/lib/normalizeMenuFromApi";
 import { Subscription, SubscriptionResponse } from "@/types/Subscription";
@@ -38,8 +38,15 @@ import {
   LoadingBlock,
   Modal,
   PageHeader,
+  PageShell,
+  StatCard,
+  StatGrid,
   buttonClasses,
 } from "@/components/ui";
+import AttentionQueue, {
+  type AttentionItem,
+} from "@/components/Dashboard/AttentionQueue";
+import { usePendingOrders } from "@/components/Dashboard/PendingOrdersProvider";
 import MenusMobileList from "@/components/Dashboard/mobile/MenusMobileList";
 import MenuDashboardCard from "@/components/Dashboard/MenuDashboardCard";
 import MenuDeliveryGroupPanel from "@/components/Dashboard/MenuDeliveryGroupPanel";
@@ -79,9 +86,10 @@ function DashboardRootLoader() {
 
 function OwnerMenusPage() {
   const t = useTranslations("Menus");
+  const tDash = useTranslations("Dashboard");
   const locale = useLocale();
   const router = useRouter();
-  const dispatch = useAppDispatch();
+  const { unseenTableCount, unseenDeliveryCount } = usePendingOrders();
   const authData = useAppSelector((state) => state.auth.data);
   const [menus, setMenus] = useState<Menu[]>([]);
   const [loading, setLoading] = useState(true);
@@ -291,6 +299,43 @@ function OwnerMenusPage() {
     [menus],
   );
 
+  const totalItems = useMemo(
+    () => menus.reduce((sum, menu) => sum + (menu.itemsCount ?? 0), 0),
+    [menus],
+  );
+
+  /* A live menu with nothing on it is the one state here that costs the merchant
+     money while they are not looking at this page, so it earns a queue row. */
+  const emptyLiveMenus = useMemo(
+    () => menus.filter((menu) => menu.isActive && !menu.itemsCount).length,
+    [menus],
+  );
+
+  const attention: AttentionItem[] = [
+    {
+      id: "unseenOrders",
+      label: tDash("attentionUnseenOrders"),
+      value: unseenTableCount,
+      href: "/dashboard/orders",
+      tone: "danger",
+    },
+    {
+      id: "unseenDelivery",
+      label: tDash("attentionUnseenDelivery"),
+      value: unseenDeliveryCount,
+      href: "/dashboard/delivery-orders",
+      tone: "danger",
+    },
+    {
+      id: "emptyMenus",
+      label: tDash("attentionEmptyMenus"),
+      value: emptyLiveMenus,
+      href: "/dashboard",
+      tone: "warning",
+      hint: tDash("attentionEmptyMenusHint"),
+    },
+  ];
+
   const firstManageMenuId = useMemo(() => {
     for (const group of menuDisplayGroups) {
       if (group.type === "group") return group.menus[0]?.id ?? null;
@@ -495,7 +540,6 @@ function OwnerMenusPage() {
             t={t}
             subscription={subscription}
             currentCount={menus.length}
-            locale={locale}
             upgradeMenuRef={getMenuDashboardRef(menus[0])}
             onClose={() => setShowLimitModal(false)}
           />
@@ -514,33 +558,76 @@ function OwnerMenusPage() {
 
   // Menus List
   return (
-    <>
-      <PageTitleWithHelp className="menus-page-header mb-5 sm:mb-8">
-        <PageHeader
-          title={t("title")}
-          description={t("subtitle")}
-          actions={
-            <>
-              {showCreateGroupButton && (
+    <PageShell
+      kind="wide"
+      header={
+        <PageTitleWithHelp className="menus-page-header">
+          <PageHeader
+            title={t("title")}
+            description={t("subtitle")}
+            actions={
+              <>
+                {showCreateGroupButton && (
+                  <Button
+                    variant="secondary"
+                    onClick={handleCreateGroupClick}
+                    startIcon={<IoGitNetworkOutline className="size-4.5" />}
+                  >
+                    {t("createGroup")}
+                  </Button>
+                )}
                 <Button
-                  variant="secondary"
-                  onClick={handleCreateGroupClick}
-                  startIcon={<IoGitNetworkOutline className="size-4.5" />}
+                  id="onboarding-create-menu"
+                  onClick={handleCreateClick}
+                  startIcon={<IoAddCircleOutline className="size-4.5" />}
                 >
-                  {t("createGroup")}
+                  {t("createMenu")}
                 </Button>
-              )}
-              <Button
-                id="onboarding-create-menu"
-                onClick={handleCreateClick}
-                startIcon={<IoAddCircleOutline className="size-4.5" />}
-              >
-                {t("createMenu")}
-              </Button>
-            </>
-          }
+              </>
+            }
+          />
+        </PageTitleWithHelp>
+      }
+    >
+      {/* The account's state before its inventory. This page was a grid of menu
+          cards with no answer to "is anything waiting for me" — which is the
+          question an operator opens it with in the morning. */}
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] xl:items-start">
+        <StatGrid columns={2}>
+          <StatCard
+            label={tDash("myMenus")}
+            value={`${menus.length}/${getEffectiveMaxMenus(subscription)}`}
+            hint={tDash("kpiActiveMenus", {
+              count: menus.filter((m) => m.isActive).length,
+            })}
+          />
+          <StatCard
+            label={tDash("orders")}
+            value={String(unseenTableCount)}
+            hint={tDash("kpiUnseenHint")}
+            href="/dashboard/orders"
+          />
+          <StatCard
+            label={tDash("deliveryOrders")}
+            value={String(unseenDeliveryCount)}
+            hint={tDash("kpiUnseenHint")}
+            href="/dashboard/delivery-orders"
+          />
+          <StatCard
+            label={tDash("kpiItems")}
+            value={String(totalItems)}
+            hint={tDash("kpiItemsHint")}
+          />
+        </StatGrid>
+
+        <AttentionQueue
+          title={tDash("attentionTitle")}
+          description={tDash("attentionVenueDescription")}
+          items={attention}
+          allClearTitle={tDash("attentionAllClear")}
+          allClearHint={tDash("attentionAllClearVenueHint")}
         />
-      </PageTitleWithHelp>
+      </div>
 
       <MenusMobileList
         menus={menus}
@@ -591,7 +678,6 @@ function OwnerMenusPage() {
                         ? "onboarding-manage-menu"
                         : undefined
                     }
-                    isNested
                     labels={cardLabels}
                     onToggleActive={handleToggleActive}
                     onDelete={setDeleteTarget}
@@ -699,7 +785,6 @@ function OwnerMenusPage() {
           t={t}
           subscription={subscription}
           currentCount={menus.length}
-          locale={locale}
           upgradeMenuRef={getMenuDashboardRef(menus[0])}
           onClose={() => setShowLimitModal(false)}
         />
@@ -752,10 +837,8 @@ function OwnerMenusPage() {
           <p className="text-sm leading-relaxed text-fg-muted">
             {t("switchMenuLimitMessage")}
           </p>
-          <div className="mt-4 rounded-lg border border-line bg-surface-2 px-4 py-3">
-            <p className="text-xs font-medium uppercase tracking-wide text-fg-subtle">
-              {t("selectedMenu")}
-            </p>
+          <div className="mt-4 rounded-xl border border-brand-line bg-brand-soft px-4 py-3">
+            <p className="ui-label text-fg-muted">{t("selectedMenu")}</p>
             <p className="mt-0.5 font-semibold text-fg">
               {getMenuName(switchMenuTarget)}
             </p>
@@ -801,7 +884,7 @@ function OwnerMenusPage() {
           </div>
         </ConfirmDialog>
       )}
-    </>
+    </PageShell>
   );
 }
 // ─── Limit Reached Modal ────────────────────────────────────────────
@@ -809,14 +892,12 @@ function LimitReachedModal({
   t,
   subscription,
   currentCount,
-  locale,
   upgradeMenuRef,
   onClose,
 }: {
   t: ReturnType<typeof useTranslations<"Menus">>;
   subscription: Subscription | null;
   currentCount: number;
-  locale: string;
   upgradeMenuRef?: string;
   onClose: () => void;
 }) {

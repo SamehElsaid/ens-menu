@@ -19,21 +19,20 @@ import { cn } from "@/lib/cn";
  * must not inherit.
  */
 
+/**
+ * `s-field` carries every state (see `styles/public.css`): a brand border and a
+ * soft brand halo on focus, the critical colour when invalid. Saying it once,
+ * on the border the eye is already looking at, is what stops a form from
+ * looking like a diagram of its own states.
+ */
 const controlBase =
-  "w-full rounded-site-control border bg-site-bg text-site-ink " +
+  "s-field w-full rounded-site-control border border-site-line-strong bg-site-bg text-site-ink " +
   "placeholder:text-site-muted " +
-  "transition-[border-color,box-shadow,background-color] duration-150 ease-out " +
   "disabled:cursor-not-allowed disabled:bg-site-tint disabled:text-site-muted";
 
 /* 16px minimum on the input itself: anything smaller makes iOS Safari zoom the
    viewport on focus, which on a sign-in form reads as the page breaking. */
 const controlSize = "h-12 px-3.5 text-[16px] sm:text-site-sm";
-
-function stateRing(invalid?: boolean) {
-  return invalid
-    ? "border-site-critical focus:border-site-critical focus:ring-2 focus:ring-site-critical/25"
-    : "border-site-line-strong focus:border-site-brand focus:ring-2 focus:ring-site-brand/20";
-}
 
 /* -------------------------------------------------------------------------- */
 
@@ -57,11 +56,11 @@ export function Field({
   children: ReactNode;
 }) {
   return (
-    <div className={cn("flex flex-col gap-1.5", className)}>
+    <div className={cn("flex flex-col gap-2", className)}>
       {label ? (
         <label
           htmlFor={htmlFor}
-          className="flex items-baseline justify-between gap-2 text-site-sm font-medium text-site-ink"
+          className="s-ticket flex items-baseline justify-between gap-2 text-site-ink"
         >
           <span>
             {label}
@@ -72,9 +71,7 @@ export function Field({
             ) : null}
           </span>
           {!required && optionalLabel ? (
-            <span className="text-site-xs font-normal text-site-muted">
-              {optionalLabel}
-            </span>
+            <span className="text-site-muted">{optionalLabel}</span>
           ) : null}
         </label>
       ) : null}
@@ -82,7 +79,7 @@ export function Field({
       {error ? (
         <p
           role="alert"
-          className="flex items-start gap-1.5 text-site-xs font-medium text-site-critical"
+          className="s-field-note flex items-start gap-1.5 text-site-xs font-medium text-site-critical"
         >
           <FiAlertCircle className="mt-0.5 size-3.5 shrink-0" aria-hidden />
           <span>{error}</span>
@@ -122,7 +119,6 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         className={cn(
           controlBase,
           controlSize,
-          stateRing(invalid),
           startIcon ? "ps-11" : null,
           endSlot ? "pe-12" : null,
           className,
@@ -155,13 +151,18 @@ export const PasswordInput = forwardRef<
           onClick={() => setVisible((v) => !v)}
           aria-label={visible ? hideLabel : showLabel}
           aria-pressed={visible}
-          className="flex size-9 items-center justify-center rounded-site-sm text-site-muted transition-colors hover:bg-site-tint hover:text-site-ink"
+          className="s-swap size-9 rounded-site-sm text-site-muted transition-colors duration-(--dur-tint) ease-(--ease-settle) hover:bg-site-tint hover:text-site-ink"
         >
-          {visible ? (
-            <FiEyeOff className="size-4" aria-hidden />
-          ) : (
-            <FiEye className="size-4" aria-hidden />
-          )}
+          {/* Both glyphs stacked, one faded out. The icon is the control's state,
+              so it crossfades rather than being replaced. */}
+          <FiEyeOff
+            className={cn("size-4", visible ? "opacity-100" : "opacity-0")}
+            aria-hidden
+          />
+          <FiEye
+            className={cn("size-4", visible ? "opacity-0" : "opacity-100")}
+            aria-hidden
+          />
         </button>
       }
       {...props}
@@ -181,7 +182,6 @@ export const Textarea = forwardRef<
       className={cn(
         controlBase,
         "px-3.5 py-3 text-[16px] leading-relaxed sm:text-site-sm",
-        stateRing(invalid),
         "resize-y",
         className,
       )}
@@ -202,7 +202,6 @@ export const Select = forwardRef<
         className={cn(
           controlBase,
           controlSize,
-          stateRing(invalid),
           "cursor-pointer appearance-none pe-10",
           className,
         )}
@@ -241,12 +240,12 @@ export const Checkbox = forwardRef<
           ref={ref}
           id={inputId}
           type="checkbox"
-          className="peer size-5 shrink-0 cursor-pointer appearance-none rounded-[6px] border border-site-line-strong bg-site-bg transition-colors checked:border-site-brand checked:bg-site-brand"
+          className="peer size-5 shrink-0 cursor-pointer appearance-none rounded-site-sm border border-site-line-strong bg-site-bg transition-colors checked:border-site-action checked:bg-site-action"
           {...props}
         />
         <FiCheck
           aria-hidden
-          className="pointer-events-none absolute start-0.5 size-4 text-white opacity-0 transition-opacity peer-checked:opacity-100"
+          className="pointer-events-none absolute start-0.5 size-4 text-site-action-fg opacity-0 transition-opacity peer-checked:opacity-100"
         />
       </span>
       <label
@@ -273,14 +272,17 @@ export function Alert({
   return (
     <div
       role={tone === "critical" ? "alert" : "status"}
+      /* A tinted panel, no leading bar: the fields it sits above state
+         themselves with colour on the border, and a second bar-and-tint grammar
+         next to them would read as a different component library. */
       className={cn(
-        "flex items-start gap-2.5 rounded-site-control px-3.5 py-3 text-site-sm",
+        "flex items-start gap-2.5 rounded-site-control border px-3.5 py-3 text-site-sm",
         tone === "critical" &&
-          "bg-site-critical-tint text-site-critical ring-1 ring-site-critical/20 ring-inset",
+          "border-site-critical/25 bg-site-critical-tint text-site-critical",
         tone === "positive" &&
-          "bg-site-positive-tint text-site-positive ring-1 ring-site-positive/20 ring-inset",
+          "border-site-positive/25 bg-site-positive-tint text-site-positive",
         tone === "info" &&
-          "bg-site-brand-tint text-site-brand-deep ring-1 ring-site-brand-line ring-inset",
+          "border-site-brand-line bg-site-brand-tint text-site-brand-deep",
         className,
       )}
     >

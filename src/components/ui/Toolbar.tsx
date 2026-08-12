@@ -52,8 +52,8 @@ export function SearchInput({
         placeholder={placeholder}
         aria-label={label}
         autoFocus={autoFocus}
-        startIcon={<FiSearch className="size-3.5" />}
-        className={draft ? "pe-8" : undefined}
+        startIcon={<FiSearch className="size-4" />}
+        className={draft ? "pe-9" : undefined}
       />
       {draft ? (
         <button
@@ -63,7 +63,7 @@ export function SearchInput({
             onChange("");
           }}
           aria-label={clearLabel}
-          className="absolute end-0.5 flex size-7 items-center justify-center rounded-md text-fg-subtle transition-colors hover:bg-surface-2 hover:text-fg"
+          className="absolute end-1 flex size-8 items-center justify-center rounded-md text-fg-subtle transition-colors hover:bg-surface-2 hover:text-fg"
         >
           <FiX className="size-3.5" />
         </button>
@@ -77,35 +77,43 @@ export function SearchInput({
  *
  * Search takes the available width, filters wrap beneath it on narrow screens,
  * and actions stay pinned to the trailing edge.
+ *
+ * `surface` makes the toolbar its own panel. Call sites used to wrap it in a
+ * `Card` to get that, which nested a padded surface inside a padded surface and
+ * left the filters sitting further from the collection than from the heading.
  */
 export function Toolbar({
   search,
   filters,
   actions,
+  surface = false,
   className,
 }: {
   search?: ReactNode;
   filters?: ReactNode;
   actions?: ReactNode;
+  surface?: boolean;
   className?: string;
 }) {
   return (
     <div
       className={cn(
-        "flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between",
+        "flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between",
+        surface &&
+          "rounded-xl border border-line bg-surface p-2.5 shadow-xs sm:p-3",
         className,
       )}
     >
       <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center">
-        {search ? <div className="w-full sm:max-w-64">{search}</div> : null}
+        {search ? <div className="w-full sm:max-w-72">{search}</div> : null}
         {filters ? (
-          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             {filters}
           </div>
         ) : null}
       </div>
       {actions ? (
-        <div className="flex shrink-0 items-center gap-1.5">{actions}</div>
+        <div className="flex shrink-0 items-center gap-2">{actions}</div>
       ) : null}
     </div>
   );
@@ -136,8 +144,8 @@ export function SelectionBar({
     <div
       role="status"
       className={cn(
-        "flex flex-wrap items-center justify-between gap-2 rounded-lg border border-brand-line bg-brand-soft px-2.5 py-1.5",
-        "motion-safe:animate-[ui-pop-in_140ms_ease-out]",
+        "flex flex-wrap items-center justify-between gap-2 rounded-xl border border-brand-line bg-brand-soft px-3 py-2",
+        "motion-safe:animate-[ui-pop-in_var(--dur-pop)_var(--ease-settle)]",
         className,
       )}
     >

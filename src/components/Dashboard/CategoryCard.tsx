@@ -8,7 +8,7 @@ import {
   IoTrashOutline,
   IoImageOutline,
 } from "react-icons/io5";
-import { Badge, Button, Card } from "@/components/ui";
+import { Button, Card, CardFooter } from "@/components/ui";
 
 interface CategoryCardProps {
   category: Category;
@@ -38,7 +38,7 @@ export default function CategoryCard({
       interactive
       className="flex h-full flex-col overflow-hidden"
     >
-      <div className="dashboard-card-media relative aspect-[4/3] overflow-hidden bg-surface-2">
+      <div className="dashboard-card-media relative aspect-4/3 overflow-hidden border-b border-line bg-surface-2">
         {imageUrl ? (
           <div className="absolute inset-0">
             <LoadImage
@@ -59,24 +59,35 @@ export default function CategoryCard({
             </span>
           </div>
         )}
-
-        <div className="absolute end-3 top-3 z-10">
-          <Badge tone={active ? "success" : "warning"} variant="solid" dot>
-            {active ? t("active") : t("inactive")}
-          </Badge>
-        </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 p-4">
+      <div className="flex flex-1 flex-col p-3 sm:p-4">
+        {/* State on a ticket row rather than floated over the photograph — see
+            `ItemCard`: a grid is scanned down a column, and the column has to be
+            at the same height in every card. */}
+        <span className="ui-label inline-flex items-center gap-1.5 text-fg-muted">
+          <span
+            aria-hidden
+            className={
+              active
+                ? "size-1.5 rounded-full bg-success"
+                : "size-1.5 rounded-full bg-warning"
+            }
+          />
+          {active ? t("active") : t("inactive")}
+        </span>
+
         <h3
-          className="truncate text-sm font-semibold capitalize text-fg"
+          className="mt-2.5 truncate text-sm font-semibold text-fg capitalize"
           dir={isRTL ? "rtl" : "ltr"}
           title={name}
         >
           {name}
         </h3>
 
-        <div className="mt-auto grid grid-cols-2 gap-2 border-t border-line pt-3">
+        <div className="flex-1" />
+
+        <CardFooter>
           <Button
             variant="secondary"
             size="sm"
@@ -89,13 +100,14 @@ export default function CategoryCard({
           <Button
             variant="dangerGhost"
             size="sm"
-            fullWidth
+            iconOnly
             onClick={() => onDelete(category)}
-            startIcon={<IoTrashOutline />}
+            aria-label={t("delete")}
+            title={t("delete")}
           >
-            {t("delete")}
+            <IoTrashOutline />
           </Button>
-        </div>
+        </CardFooter>
       </div>
     </Card>
   );

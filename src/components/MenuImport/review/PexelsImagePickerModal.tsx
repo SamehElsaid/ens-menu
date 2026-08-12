@@ -9,6 +9,7 @@ import { IoCloudUploadOutline, IoSearchOutline } from "react-icons/io5";
 import { cn } from "@/lib/cn";
 import {
   Button,
+  EmptyState,
   Input,
   LoadingBlock,
   Modal,
@@ -211,11 +212,17 @@ export default function PexelsImagePickerModal({
         ) : showNoResults ? (
           <NoResultsState title={t("pexelsNoResults")} />
         ) : photos.length === 0 ? (
-          <p className="flex min-h-[220px] items-center justify-center text-center text-[13px] text-fg-muted">
-            {t("pexelsSearchPlaceholder")}
-          </p>
+          <EmptyState
+            size="sm"
+            icon={<IoSearchOutline />}
+            title={t("pexelsSearchPlaceholder")}
+            className="min-h-[220px] justify-center"
+          />
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          /* The credit used to be light type on a gradient ramp laid over the
+             photograph. A divided caption under the image says the same thing
+             without dimming the one part of the tile being chosen. */
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {photos.map((photo) => {
               const isSelecting = selectingId === photo.id;
               return (
@@ -225,35 +232,35 @@ export default function PexelsImagePickerModal({
                   disabled={isUploading || selectingId !== null}
                   onClick={() => void handleSelect(photo)}
                   className={cn(
-                    "group relative aspect-square overflow-hidden rounded-xl border border-line bg-surface-2",
-                    "transition-colors duration-150 hover:border-brand",
+                    "group flex flex-col overflow-hidden rounded-lg border border-line bg-surface text-start",
+                    "transition-[border-color] duration-(--dur-fast) ease-(--ease-settle) hover:border-fg-subtle",
                     "disabled:cursor-not-allowed disabled:opacity-60",
                     focusRing,
                   )}
                 >
-                  <LoadImage
-                    src={photo.src.medium}
-                    alt={photo.alt || photo.photographer}
-                    width={PEXELS_THUMB_WIDTH}
-                    height={PEXELS_THUMB_HEIGHT}
-                    cover
-                    disableLazy
-                    className="h-full w-full object-cover transition-transform group-hover:scale-105 motion-reduce:transition-none"
-                    wrapperClassName="!block h-full w-full"
-                  />
-                  <span className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/70 to-transparent px-2 py-2 text-start">
-                    <span className="line-clamp-1 text-[10px] font-medium text-white">
-                      {photo.photographer}
-                    </span>
-                  </span>
-                  {isSelecting && (
-                    <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/50 px-2">
-                      <Spinner size="md" className="text-white" />
-                      <span className="text-center text-[9px] font-medium text-white">
-                        {t("pexelsSelectingImage")}
+                  <span className="relative block aspect-square w-full overflow-hidden bg-surface-2">
+                    <LoadImage
+                      src={photo.src.medium}
+                      alt={photo.alt || photo.photographer}
+                      width={PEXELS_THUMB_WIDTH}
+                      height={PEXELS_THUMB_HEIGHT}
+                      cover
+                      disableLazy
+                      className="h-full w-full object-cover"
+                      wrapperClassName="!block h-full w-full"
+                    />
+                    {isSelecting && (
+                      <span className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-surface/85 px-2">
+                        <Spinner size="md" className="text-fg-muted" />
+                        <span className="text-center text-[11px] font-medium text-fg">
+                          {t("pexelsSelectingImage")}
+                        </span>
                       </span>
-                    </span>
-                  )}
+                    )}
+                  </span>
+                  <span className="ui-label block truncate border-t border-line px-1.5 py-1">
+                    {photo.photographer}
+                  </span>
                 </button>
               );
             })}

@@ -6,8 +6,12 @@ import { useSearchParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
 import { HiOutlineArrowRight } from "react-icons/hi";
-import LinkTo from "@/components/Global/LinkTo";
-import { ConfirmDialog } from "@/components/ui";
+import {
+  Badge,
+  ConfirmDialog,
+  PageShell,
+  SectionHeader,
+} from "@/components/ui";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import { performAuthLogout } from "@/shared/authLogout";
 import { resolveAuthMeSession } from "@/shared/resolveAuthMeSession";
@@ -532,37 +536,33 @@ export default function SubscriptionPlansSection({
           onCancel={() => setPhoneGateOpen(false)}
         />
       )}
-      <div className="min-h-[calc(100vh-120px)]">
-        {backLink && (
-          <div className={isRTL ? "text-right mb-4" : "text-left mb-4"}>
-            <LinkTo
-              href={backLink}
-              className="inline-flex items-center gap-2 text-sm font-medium text-fg-muted hover:text-primary dark:hover:text-primary transition-colors"
-            >
-              <HiOutlineArrowRight
-                className={`text-lg ${isRTL ? "order-2 rotate-180" : ""}`}
-              />
-              {backLinkText}
-            </LinkTo>
-          </div>
-        )}
-
-        <header
-          className={
-            isRTL ? "text-right space-y-1 mb-8" : "text-left space-y-1 mb-8"
-          }
-        >
-          <PageTitleWithHelp>
-            <h1 className="text-2xl md:text-3xl font-bold text-fg">
-              {t("subscriptionPageTitle")}
-            </h1>
-          </PageTitleWithHelp>
-          <p className="text-sm text-fg-muted">
-            {t("subscriptionPageDescription")}
-          </p>
-        </header>
-
-        <div className="mb-8 grid gap-6 lg:grid-cols-2 lg:items-start">
+      <PageShell
+        kind="wide"
+        header={
+          <PageTitleWithHelp
+            eyebrow={t("planPro")}
+            title={t("subscriptionPageTitle")}
+            description={t("subscriptionPageDescription")}
+            breadcrumbs={
+              backLink
+                ? [
+                    { label: backLinkText, href: backLink },
+                    { label: t("subscriptionPageTitle") },
+                  ]
+                : undefined
+            }
+            breadcrumbsLabel={t("subscriptionPageTitle")}
+            meta={
+              currentPlanNameResolved ? (
+                <Badge tone="accent" dot size="md">
+                  {currentPlanNameResolved}
+                </Badge>
+              ) : null
+            }
+          />
+        }
+      >
+        <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
           <CurrentPlanSummary
             subscriptionInfo={subscriptionInfo}
             loading={subscriptionInfoLoading}
@@ -596,28 +596,29 @@ export default function SubscriptionPlansSection({
           />
         </div>
 
+        {/* No card around the comparison: the plan columns are themselves the
+            panels, and wrapping three ruled cards in a fourth just adds a
+            frame the reader has to look past. */}
         <section
           id="onboarding-subscription-plans"
-          className="rounded-lg border border-line bg-surface shadow-sm p-5 md:p-8"
+          className="flex flex-col gap-4"
         >
-          <div className={`mb-6 ${isRTL ? "text-right" : "text-left"}`}>
-            <h2 className="text-lg font-bold text-fg">
-              {t("comparePlansTitle")}
-            </h2>
-            <p className="mt-1 text-sm text-fg-muted">
-              {t("comparePlansDescription")}
-            </p>
-          </div>
+          <SectionHeader
+            ruled
+            eyebrow={t("comparePlansTitle")}
+            title={t("comparePlansTitle")}
+            description={t("comparePlansDescription")}
+          />
 
           {plansLoading ? (
-            <div className="grid gap-6 md:grid-cols-3 md:items-stretch">
+            <div className="grid gap-3 md:grid-cols-3 md:items-stretch">
               {[1, 2, 3].map((i) => (
                 <SubscriptionPlanCardSkeleton key={i} />
               ))}
             </div>
           ) : (
             <div
-              className={`grid gap-6 md:gap-8 md:grid-cols-3 md:items-stretch ${isRTL ? "md:grid-flow-dense" : ""}`}
+              className={`grid gap-3 md:grid-cols-3 md:items-stretch ${isRTL ? "md:grid-flow-dense" : ""}`}
             >
               {plans
                 .filter(
@@ -774,7 +775,7 @@ export default function SubscriptionPlansSection({
           )}
         </section>
 
-        <SubscriptionPaymentMethods className="mt-6" />
+        <SubscriptionPaymentMethods />
 
         <ConfirmDialog
           open={downgradeModalOpen}
@@ -794,7 +795,7 @@ export default function SubscriptionPlansSection({
             />
           }
         />
-      </div>
+      </PageShell>
     </>
   );
 }

@@ -1,11 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import ViewTime from "@/shared/ViewTime";
 import {
   deliveryGovernorateLabel,
-  orderStatusTone,
   resolveEntryDeliveryFee,
   resolveEntryTime,
   resolveListEntryStatus,
@@ -13,10 +12,13 @@ import {
 import type { CallEntry, OrderActionResult } from "@/lib/tableOrders";
 import OrderActionButtons from "./OrderActionButtons";
 import OrderChargesLines from "./OrderChargesLines";
+import { OrderStatusBadge } from "./orderStatusBadge";
 import { useAppSelector } from "@/store/hooks";
 import { resolveOrderCharges } from "@/lib/menuOrderCharges";
-import { IoEllipseSharp, IoEyeOutline } from "react-icons/io5";
+import { IoEyeOutline } from "react-icons/io5";
 import { MdOutlineDeliveryDining } from "react-icons/md";
+import { cn } from "@/lib/cn";
+import { Badge, Button, Card } from "@/components/ui";
 
 interface DeliveryOrderMobileCardProps {
   entry: CallEntry;
@@ -26,8 +28,20 @@ interface DeliveryOrderMobileCardProps {
   menuId: string;
   /** Shown on account-level lists to tell orders from different menus apart. */
   menuLabel?: string;
+  /** A socket update just changed this order; its border says so for 1.2s. */
+  justChanged?: boolean;
 }
 
+/**
+ * One delivery order.
+ *
+ * Read as a record rather than a summary card: a header carrying the order
+ * number as the figure it is, a divided list of the fields someone actually
+ * calls the customer about, the money block, and the actions behind a divider
+ * at the foot. A pending order takes the active `Card` treatment — brand
+ * border, wash and inline edge, the one thing that says "this one is still
+ * live" — so a screen of twelve cards can be triaged down the inline start.
+ */
 export default function DeliveryOrderMobileCard({
   entry,
   currency,
@@ -35,12 +49,12 @@ export default function DeliveryOrderMobileCard({
   onActionComplete,
   menuId,
   menuLabel,
+  justChanged = false,
 }: DeliveryOrderMobileCardProps) {
   const t = useTranslations("deliveryOrders");
   const locale = useLocale();
   const menu = useAppSelector((s) => s.menuData.menu);
   const status = resolveListEntryStatus(entry);
-  const tone = orderStatusTone(status);
   const time = resolveEntryTime(entry.actionDetails);
   const zoneLabel = deliveryGovernorateLabel(entry, locale);
   const charges = useMemo(
@@ -59,92 +73,113 @@ export default function DeliveryOrderMobileCard({
     [entry, menu],
   );
 
+  const rows: { id: string; label: string; value: ReactNode }[] = [];
+  const customerName = entry.customerName?.trim();
+  const customerPhone = entry.customerPhone?.trim();
+  const customerAddress = entry.customerAddress?.trim();
+  if (customerName) {
+    rows.push({ id: "customer", label: t("colCustomer"), value: customerName });
+  }
+  if (customerPhone) {
+    rows.push({
+      id: "phone",
+      label: t("colPhone"),
+      value: (
+        <span dir="ltr" className="tabular-nums">
+          {customerPhone}
+        </span>
+      ),
+    });
+  }
+  if (zoneLabel) {
+    rows.push({ id: "zone", label: t("colZone"), value: zoneLabel });
+  }
+  if (customerAddress) {
+    rows.push({
+      id: "address",
+      label: t("colAddress"),
+      value: <span className="line-clamp-2">{customerAddress}</span>,
+    });
+  }
+  rows.push({
+    id: "items",
+    label: t("colItems"),
+    value: (
+      <span className="ui-figure text-fg" lang="en">
+        {entry.items?.length ?? 0}
+      </span>
+    ),
+  });
+
   return (
-    <article className="dashboard-order-card flex h-full flex-col overflow-hidden rounded-lg border border-emerald-200/70 bg-white shadow-[0_2px_16px_rgba(16,185,129,0.08)] dark:border-emerald-800/40 dark:shadow-[0_2px_20px_rgba(0,0,0,0.3)]">
-      <div className="bg-linear-to-r from-emerald-600/10 via-teal-500/5 to-transparent px-4 py-3 dark:from-emerald-900/30">
+    <Card
+      as="article"
+      padded="none"
+      active={status === "pending"}
+      className={cn(
+        "flex h-full flex-col overflow-hidden",
+        justChanged && "ui-flash",
+      )}
+    >
+      <header className="border-b border-line px-3.5 py-3">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm ring-1 ring-emerald-200/80 dark:ring-emerald-700/50">
-              <MdOutlineDeliveryDining className="text-xl text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-fg">
-                {t("colOrderId")} #{entry.orderId}
-              </p>
-              {zoneLabel && (
-                <p className="text-xs text-fg-muted truncate">
-                  {t("colZone")}: {zoneLabel}
-                </p>
-              )}
-            </div>
+          <div className="min-w-0">
+            <p className="ui-label flex items-center gap-1.5">
+              <MdOutlineDeliveryDining className="size-3.5" aria-hidden />
+              {t("colOrderId")}
+            </p>
+            <p className="ui-figure mt-0.5 text-base text-fg" lang="en">
+              #{entry.orderId}
+            </p>
           </div>
-          <span
-            className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${tone.pill}`}
-          >
-            <IoEllipseSharp className={`text-[5px] ${tone.dot}`} aria-hidden />
-            {t(`orderStatus.${status}` as never)}
-          </span>
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            <OrderStatusBadge
+              status={status}
+              label={t(`orderStatus.${status}` as never)}
+            />
+            {time ? (
+              <time className="ui-label">
+                <ViewTime data={time} />
+              </time>
+            ) : null}
+          </div>
         </div>
         {menuLabel ? (
-          <p className="mt-2 inline-flex max-w-full truncate rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200">
+          <Badge tone="neutral" className="mt-2 max-w-full truncate">
             {menuLabel}
-          </p>
+          </Badge>
         ) : null}
+      </header>
+
+      <dl className="divide-y divide-line border-b border-line">
+        {rows.map((row) => (
+          <div
+            key={row.id}
+            className="flex items-baseline justify-between gap-3 px-3.5 py-1.5"
+          >
+            <dt className="ui-label shrink-0">{row.label}</dt>
+            <dd className="min-w-0 text-end text-[13px] text-fg">
+              {row.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+
+      <div className="border-b border-line bg-surface-2/40 px-3.5 py-2.5">
+        <OrderChargesLines
+          charges={charges}
+          currency={currency}
+          labels={{
+            subtotal: t("detailsSubtotal"),
+            tax: t("detailsTax"),
+            service: t("detailsService"),
+            deliveryFee: t("detailsDeliveryFee"),
+            total: t("detailsTotal"),
+          }}
+        />
       </div>
 
-      <div className="space-y-2 px-4 py-3">
-        {entry.customerName?.trim() && (
-          <p className="text-sm text-fg-muted">
-            <span className="text-fg-subtle">{t("colCustomer")}: </span>
-            {entry.customerName.trim()}
-          </p>
-        )}
-        {entry.customerPhone?.trim() && (
-          <p className="text-sm text-fg-muted">
-            <span className="text-fg-subtle">{t("colPhone")}: </span>
-            <span dir="ltr">{entry.customerPhone.trim()}</span>
-          </p>
-        )}
-        {entry.customerAddress?.trim() && (
-          <p className="text-sm text-fg-muted line-clamp-2">
-            <span className="text-fg-subtle">{t("colAddress")}: </span>
-            {entry.customerAddress.trim()}
-          </p>
-        )}
-        {/* {entry.orderNotes?.trim() && (
-          <p className="text-sm text-fg-muted line-clamp-2">
-            <span className="text-fg-subtle">
-              {t("colNotes")}:{" "}
-            </span>
-            {entry.orderNotes.trim()}
-          </p>
-        )} */}
-        <p className="text-sm text-fg-muted">
-          <span className="text-fg-subtle">{t("colItems")}: </span>
-          {entry.items?.length ?? 0}
-        </p>
-        <div className="space-y-2">
-          <OrderChargesLines
-            charges={charges}
-            currency={currency}
-            labels={{
-              subtotal: t("detailsSubtotal"),
-              tax: t("detailsTax"),
-              service: t("detailsService"),
-              deliveryFee: t("detailsDeliveryFee"),
-              total: t("detailsTotal"),
-            }}
-            accent="emerald"
-          />
-          {time && (
-            <time className="block text-end text-xs text-fg-muted">
-              <ViewTime data={time} />
-            </time>
-          )}
-        </div>
-      </div>
-
-      <div className="flex flex-1 flex-col gap-2 border-t border-line px-4 py-3 dark:border-line/80">
+      <div className="mt-auto flex flex-col gap-1.5 px-3.5 py-3">
         <OrderActionButtons
           menuId={menuId}
           entry={entry}
@@ -154,15 +189,16 @@ export default function DeliveryOrderMobileCard({
           translationNs="deliveryOrders"
           variant="delivery"
         />
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="sm"
+          fullWidth
           onClick={() => onView(entry.id)}
-          className="mt-auto inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 dark:border-emerald-700/50 dark:bg-emerald-950/30 dark:text-emerald-300 dark:hover:bg-emerald-900/40"
+          startIcon={<IoEyeOutline className="text-base" />}
         >
-          <IoEyeOutline className="text-base" />
           {t("view")}
-        </button>
+        </Button>
       </div>
-    </article>
+    </Card>
   );
 }

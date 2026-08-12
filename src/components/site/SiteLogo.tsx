@@ -10,6 +10,11 @@ import { cn } from "@/lib/cn";
  * keeps the two brand commitments — the QR glyph and the ENSMENU wordmark —
  * and drops the gradient fill and the spin, neither of which survives at
  * marketing scale.
+ *
+ * In the "Pass" direction the glyph is a square ink chip rather than a rounded
+ * brand-coloured tile: the mark has to read as something stamped onto paper,
+ * and the accent is reserved for state. The hover is a colour change, not a
+ * rotation — nothing on this site tilts.
  */
 export function SiteLogo({
   onInk,
@@ -36,18 +41,18 @@ export function SiteLogo({
       <span
         aria-hidden
         className={cn(
-          "flex size-9 items-center justify-center rounded-[10px] transition-transform duration-200 group-hover:-rotate-6",
+          "flex size-9 items-center justify-center rounded-site-sm transition-colors duration-(--dur-settle)",
           onInk
-            ? "bg-white/10 text-white ring-1 ring-white/15 ring-inset"
-            : "bg-site-brand text-white shadow-site-brand",
+            ? "bg-site-on-ink text-site-ink-bg group-hover:bg-site-brand-bright"
+            : "bg-site-ink text-site-ground group-hover:bg-site-brand",
         )}
       >
         <BsQrCode size={19} />
       </span>
       <span
         className={cn(
-          "font-site-display text-[1.0625rem] font-extrabold tracking-[-0.03em]",
-          onInk ? "text-white" : "text-site-ink",
+          "font-site-display text-[1.0625rem] font-bold tracking-[-0.04em] uppercase",
+          onInk ? "text-site-on-ink" : "text-site-ink",
         )}
       >
         ENSMENU

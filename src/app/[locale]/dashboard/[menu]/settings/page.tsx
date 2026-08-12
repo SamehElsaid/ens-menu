@@ -14,6 +14,7 @@ import {
   CardHeader,
   Field,
   Input,
+  PageShell,
   Spinner,
   Switch,
   Textarea,
@@ -389,442 +390,448 @@ export default function SettingsPage() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-      <PageTitleWithHelp
-        className="mb-3"
-        title={tSettings("generalSettings")}
-        description={
-          locale === "ar"
-            ? "اسم القائمة ووصفها وشعارها والضرائب وحالة النشر."
-            : "Name, description, logo, charges and publish state for this menu."
-        }
-      />
-
-      <Card as="section" id="onboarding-settings-general">
-        <CardHeader
-          title={tSettings("generalSettings")}
-          description={
-            locale === "ar"
-              ? "قم بمراجعة معلومات قائمتك الأساسية من الاسم والوصف."
-              : "Review the basic information of your menu like name and description."
-          }
-        />
-
-        <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-          <Controller
-            name="name"
-            control={control}
-            render={({ field }) => (
-              <Field
-                label={tMenusCreate("nameEn")}
-                required
-                error={errors.name?.message}
-              >
-                <Input
-                  type="text"
-                  value={field.value}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  placeholder={tSettings("namePlaceholder")}
-                />
-              </Field>
-            )}
-          />
-
-          <Controller
-            name="nameAr"
-            control={control}
-            render={({ field }) => (
-              <Field
-                label={tMenusCreate("nameAr")}
-                required
-                error={errors.nameAr?.message}
-              >
-                <Input
-                  type="text"
-                  value={field.value}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  placeholder="قائمة مطعمي"
-                />
-              </Field>
-            )}
-          />
-        </div>
-
-        <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-          <Controller
-            name="description"
-            control={control}
-            render={({ field }) => (
-              <Field label={tMenusCreate("descriptionEn")}>
-                <Textarea
-                  rows={3}
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  placeholder={tSettings("descriptionPlaceholder")}
-                />
-              </Field>
-            )}
-          />
-
-          <Controller
-            name="descriptionAr"
-            control={control}
-            render={({ field }) => (
-              <Field label={tMenusCreate("descriptionAr")}>
-                <Textarea
-                  rows={3}
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  placeholder="اكتب وصف القائمة بالعربية..."
-                />
-              </Field>
-            )}
-          />
-        </div>
-      </Card>
-
-      <div
-        id="onboarding-settings-branding"
-        className="grid grid-cols-1 gap-3 lg:grid-cols-3"
-      >
-        <Card as="section">
-          <CardHeader
-            title={tMenusCreate("logo")}
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <PageShell
+        kind="detail"
+        header={
+          <PageTitleWithHelp
+            title={tSettings("generalSettings")}
             description={
               locale === "ar"
-                ? "قم بتحديث شعار قائمتك الذي يظهر في الواجهة."
-                : "Update the logo for your menu as shown in the UI."
+                ? "اسم القائمة ووصفها وشعارها والضرائب وحالة النشر."
+                : "Name, description, logo, charges and publish state for this menu."
             }
           />
-
-          <div className="mt-3 flex flex-col items-center gap-3">
-            <div className="relative">
-              <div className="flex size-24 items-center justify-center overflow-hidden rounded-lg border border-dashed border-line-strong bg-surface-2">
-                {logoPreview || initialLogo ? (
-                  <ImageLoad
-                    width={100}
-                    height={100}
-                    src={logoPreview ?? initialLogo ?? ""}
-                    alt="Logo preview"
-                    className="w-full h-full object-contain"
-                  />
-                ) : (
-                  <span className="text-xs text-fg-subtle">
-                    {tSettings("noLogo")}
-                  </span>
-                )}
-              </div>
-              {(logoPreview || initialLogo) && (
+        }
+        /*
+          The commit bar rides the floor of the viewport once something changes,
+          so a long settings page never hides its own save action below the
+          fold. It is absent entirely while the form is pristine.
+        */
+        footerSticky={dirty}
+        footer={
+          dirty ? (
+            <div
+              id="onboarding-settings-save"
+              className="flex flex-wrap items-center justify-between gap-2"
+              role="status"
+            >
+              <p className="text-xs text-fg-muted">
+                {tSettings("unsavedChanges")}
+              </p>
+              <div className="flex items-center gap-1.5">
                 <Button
                   type="button"
-                  variant="danger"
-                  size="sm"
-                  iconOnly
-                  onClick={handleRemoveLogo}
-                  className="absolute -top-2 -end-2 size-7 rounded-full!"
-                  aria-label={tCommon("remove")}
+                  variant="ghost"
+                  onClick={handleDiscard}
+                  disabled={isSubmitting}
                 >
-                  <IoCloseOutline className="text-sm" />
+                  {tCommon("cancel")}
                 </Button>
-              )}
+                <Button type="submit" loading={isSubmitting}>
+                  {tSettings("saveChanges")}
+                </Button>
+              </div>
             </div>
-
-            <div className="flex w-full flex-col items-center gap-1.5">
-              <input
-                ref={logoInputRef}
-                type="file"
-                accept=".png,.ico,.jpg,.jpeg,image/png,image/x-icon,image/vnd.microsoft.icon,image/jpeg"
-                onChange={handleLogoChange}
-                className="sr-only"
-              />
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => logoInputRef.current?.click()}
-                startIcon={<IoCloudUploadOutline className="size-3.5" />}
-              >
-                {tMenusCreate("logoUpload")}
-              </Button>
-              <p className="text-center text-xs text-fg-subtle">
-                {tMenusCreate("logoHint")}
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        <Card as="section" className="lg:col-span-2">
+          ) : undefined
+        }
+      >
+        <Card as="section" id="onboarding-settings-general">
           <CardHeader
-            title={tMenusCreate("currency")}
+            title={tSettings("generalSettings")}
             description={
               locale === "ar"
-                ? "العملة المستخدمة في جميع أسعار قائمتك."
-                : "Currency used for all prices in your menu."
+                ? "قم بمراجعة معلومات قائمتك الأساسية من الاسم والوصف."
+                : "Review the basic information of your menu like name and description."
             }
           />
 
-          <div className="mt-3">
-            <Field
-              label={tMenusCreate("currencyLabel")}
-              error={errors.currency?.message}
-              hint={
-                locale === "ar"
-                  ? "لا يمكن تعديل العملة من هذه الصفحة. قم بإنشاء قائمة جديدة إذا كنت بحاجة لتغيير العملة."
-                  : "Currency is read-only here. Create a new menu if you need to change it."
-              }
-            >
-              <Controller
-                name="currency"
-                control={control}
-                render={({ field }) => (
-                  <CurrencySelector
+          <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+            <Controller
+              name="name"
+              control={control}
+              render={({ field }) => (
+                <Field
+                  label={tMenusCreate("nameEn")}
+                  required
+                  error={errors.name?.message}
+                >
+                  <Input
+                    type="text"
                     value={field.value}
                     onChange={field.onChange}
-                    showArabOnly={locale === "ar"}
+                    onBlur={field.onBlur}
+                    placeholder={tSettings("namePlaceholder")}
+                  />
+                </Field>
+              )}
+            />
+
+            <Controller
+              name="nameAr"
+              control={control}
+              render={({ field }) => (
+                <Field
+                  label={tMenusCreate("nameAr")}
+                  required
+                  error={errors.nameAr?.message}
+                >
+                  <Input
+                    type="text"
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    placeholder="قائمة مطعمي"
+                  />
+                </Field>
+              )}
+            />
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+            <Controller
+              name="description"
+              control={control}
+              render={({ field }) => (
+                <Field label={tMenusCreate("descriptionEn")}>
+                  <Textarea
+                    rows={3}
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    placeholder={tSettings("descriptionPlaceholder")}
+                  />
+                </Field>
+              )}
+            />
+
+            <Controller
+              name="descriptionAr"
+              control={control}
+              render={({ field }) => (
+                <Field label={tMenusCreate("descriptionAr")}>
+                  <Textarea
+                    rows={3}
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    placeholder="اكتب وصف القائمة بالعربية..."
+                  />
+                </Field>
+              )}
+            />
+          </div>
+        </Card>
+
+        <div
+          id="onboarding-settings-branding"
+          className="grid grid-cols-1 gap-3 lg:grid-cols-3"
+        >
+          <Card as="section">
+            <CardHeader
+              title={tMenusCreate("logo")}
+              description={
+                locale === "ar"
+                  ? "قم بتحديث شعار قائمتك الذي يظهر في الواجهة."
+                  : "Update the logo for your menu as shown in the UI."
+              }
+            />
+
+            <div className="mt-3 flex flex-col items-center gap-3">
+              <div className="relative">
+                <div className="flex size-24 items-center justify-center overflow-hidden rounded-lg border border-dashed border-line-strong bg-surface-2">
+                  {logoPreview || initialLogo ? (
+                    <ImageLoad
+                      width={100}
+                      height={100}
+                      src={logoPreview ?? initialLogo ?? ""}
+                      alt="Logo preview"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <span className="text-xs text-fg-subtle">
+                      {tSettings("noLogo")}
+                    </span>
+                  )}
+                </div>
+                {(logoPreview || initialLogo) && (
+                  <Button
+                    type="button"
+                    variant="danger"
+                    size="sm"
+                    iconOnly
+                    onClick={handleRemoveLogo}
+                    className="absolute -top-2 -end-2 size-7 rounded-full!"
+                    aria-label={tCommon("remove")}
+                  >
+                    <IoCloseOutline className="text-sm" />
+                  </Button>
+                )}
+              </div>
+
+              <div className="flex w-full flex-col items-center gap-1.5">
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept=".png,.ico,.jpg,.jpeg,image/png,image/x-icon,image/vnd.microsoft.icon,image/jpeg"
+                  onChange={handleLogoChange}
+                  className="sr-only"
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => logoInputRef.current?.click()}
+                  startIcon={<IoCloudUploadOutline className="size-3.5" />}
+                >
+                  {tMenusCreate("logoUpload")}
+                </Button>
+                <p className="text-center text-xs text-fg-subtle">
+                  {tMenusCreate("logoHint")}
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <Card as="section" className="lg:col-span-2">
+            <CardHeader
+              title={tMenusCreate("currency")}
+              description={
+                locale === "ar"
+                  ? "العملة المستخدمة في جميع أسعار قائمتك."
+                  : "Currency used for all prices in your menu."
+              }
+            />
+
+            <div className="mt-3">
+              <Field
+                label={tMenusCreate("currencyLabel")}
+                error={errors.currency?.message}
+                hint={
+                  locale === "ar"
+                    ? "لا يمكن تعديل العملة من هذه الصفحة. قم بإنشاء قائمة جديدة إذا كنت بحاجة لتغيير العملة."
+                    : "Currency is read-only here. Create a new menu if you need to change it."
+                }
+              >
+                <Controller
+                  name="currency"
+                  control={control}
+                  render={({ field }) => (
+                    <CurrencySelector
+                      value={field.value}
+                      onChange={field.onChange}
+                      showArabOnly={locale === "ar"}
+                    />
+                  )}
+                />
+              </Field>
+            </div>
+          </Card>
+        </div>
+
+        <Card as="section" id="onboarding-settings-chatbot">
+          <SettingRow
+            label={tSettings("chatbotEnabled")}
+            description={tSettings("chatbotEnabledDescription")}
+          >
+            <Controller
+              name="chatbotEnabled"
+              control={control}
+              render={({ field }) => (
+                <>
+                  <span className="text-xs text-fg-muted">
+                    {field.value
+                      ? tSettings("chatbotEnabledOn")
+                      : tSettings("chatbotEnabledOff")}
+                  </span>
+                  <Switch
+                    checked={field.value}
+                    onChange={(e) => field.onChange(e.target.checked)}
+                    aria-label={tSettings("chatbotEnabled")}
+                  />
+                </>
+              )}
+            />
+          </SettingRow>
+        </Card>
+
+        <Card as="section" id="onboarding-settings-tax-service">
+          <CardHeader
+            title={tSettings("taxServiceTitle")}
+            description={tSettings("taxServiceDescription")}
+          />
+
+          <div className="mt-3 space-y-2.5">
+            <SettingRow
+              label={tSettings("taxEnabled")}
+              description={tSettings("taxEnabledDescription")}
+            >
+              <span className="text-xs text-fg-muted">
+                {taxEnabledWatch
+                  ? tSettings("enabledOn")
+                  : tSettings("enabledOff")}
+              </span>
+              <Controller
+                name="taxEnabled"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    checked={field.value}
+                    onChange={(e) => field.onChange(e.target.checked)}
+                    aria-label={tSettings("taxEnabled")}
                   />
                 )}
               />
-            </Field>
+            </SettingRow>
+            {taxEnabledWatch && (
+              <Controller
+                name="taxPercent"
+                control={control}
+                render={({ field }) => (
+                  <Field
+                    label={tSettings("taxPercent")}
+                    error={errors.taxPercent?.message}
+                    className="ps-1"
+                  >
+                    <Input
+                      type="number"
+                      value={
+                        field.value === null || field.value === undefined
+                          ? ""
+                          : String(field.value)
+                      }
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        field.onChange(raw === "" ? null : Number(raw));
+                      }}
+                      placeholder={tSettings("taxPercentPlaceholder")}
+                    />
+                  </Field>
+                )}
+              />
+            )}
+
+            <SettingRow
+              label={tSettings("serviceEnabled")}
+              description={tSettings("serviceEnabledDescription")}
+            >
+              <span className="text-xs text-fg-muted">
+                {serviceEnabledWatch
+                  ? tSettings("enabledOn")
+                  : tSettings("enabledOff")}
+              </span>
+              <Controller
+                name="serviceEnabled"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    checked={field.value}
+                    onChange={(e) => field.onChange(e.target.checked)}
+                    aria-label={tSettings("serviceEnabled")}
+                  />
+                )}
+              />
+            </SettingRow>
+            {serviceEnabledWatch && (
+              <Controller
+                name="servicePercent"
+                control={control}
+                render={({ field }) => (
+                  <Field
+                    label={tSettings("servicePercent")}
+                    error={errors.servicePercent?.message}
+                    className="ps-1"
+                  >
+                    <Input
+                      type="number"
+                      value={
+                        field.value === null || field.value === undefined
+                          ? ""
+                          : String(field.value)
+                      }
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        field.onChange(raw === "" ? null : Number(raw));
+                      }}
+                      placeholder={tSettings("servicePercentPlaceholder")}
+                    />
+                  </Field>
+                )}
+              />
+            )}
           </div>
         </Card>
-      </div>
 
-      <Card as="section" id="onboarding-settings-chatbot">
-        <SettingRow
-          label={tSettings("chatbotEnabled")}
-          description={tSettings("chatbotEnabledDescription")}
-        >
-          <Controller
-            name="chatbotEnabled"
-            control={control}
-            render={({ field }) => (
-              <>
-                <span className="text-xs text-fg-muted">
-                  {field.value
-                    ? tSettings("chatbotEnabledOn")
-                    : tSettings("chatbotEnabledOff")}
-                </span>
-                <Switch
-                  checked={field.value}
-                  onChange={(e) => field.onChange(e.target.checked)}
-                  aria-label={tSettings("chatbotEnabled")}
-                />
-              </>
-            )}
-          />
-        </SettingRow>
-      </Card>
-
-      <Card as="section" id="onboarding-settings-tax-service">
-        <CardHeader
-          title={tSettings("taxServiceTitle")}
-          description={tSettings("taxServiceDescription")}
-        />
-
-        <div className="mt-3 space-y-2.5">
-          <SettingRow
-            label={tSettings("taxEnabled")}
-            description={tSettings("taxEnabledDescription")}
-          >
-            <span className="text-xs text-fg-muted">
-              {taxEnabledWatch
-                ? tSettings("enabledOn")
-                : tSettings("enabledOff")}
-            </span>
-            <Controller
-              name="taxEnabled"
-              control={control}
-              render={({ field }) => (
-                <Switch
-                  checked={field.value}
-                  onChange={(e) => field.onChange(e.target.checked)}
-                  aria-label={tSettings("taxEnabled")}
-                />
-              )}
-            />
-          </SettingRow>
-          {taxEnabledWatch && (
-            <Controller
-              name="taxPercent"
-              control={control}
-              render={({ field }) => (
-                <Field
-                  label={tSettings("taxPercent")}
-                  error={errors.taxPercent?.message}
-                  className="ps-1"
-                >
-                  <Input
-                    type="number"
-                    value={
-                      field.value === null || field.value === undefined
-                        ? ""
-                        : String(field.value)
-                    }
-                    onChange={(e) => {
-                      const raw = e.target.value;
-                      field.onChange(raw === "" ? null : Number(raw));
-                    }}
-                    placeholder={tSettings("taxPercentPlaceholder")}
-                  />
-                </Field>
-              )}
-            />
-          )}
-
-          <SettingRow
-            label={tSettings("serviceEnabled")}
-            description={tSettings("serviceEnabledDescription")}
-          >
-            <span className="text-xs text-fg-muted">
-              {serviceEnabledWatch
-                ? tSettings("enabledOn")
-                : tSettings("enabledOff")}
-            </span>
-            <Controller
-              name="serviceEnabled"
-              control={control}
-              render={({ field }) => (
-                <Switch
-                  checked={field.value}
-                  onChange={(e) => field.onChange(e.target.checked)}
-                  aria-label={tSettings("serviceEnabled")}
-                />
-              )}
-            />
-          </SettingRow>
-          {serviceEnabledWatch && (
-            <Controller
-              name="servicePercent"
-              control={control}
-              render={({ field }) => (
-                <Field
-                  label={tSettings("servicePercent")}
-                  error={errors.servicePercent?.message}
-                  className="ps-1"
-                >
-                  <Input
-                    type="number"
-                    value={
-                      field.value === null || field.value === undefined
-                        ? ""
-                        : String(field.value)
-                    }
-                    onChange={(e) => {
-                      const raw = e.target.value;
-                      field.onChange(raw === "" ? null : Number(raw));
-                    }}
-                    placeholder={tSettings("servicePercentPlaceholder")}
-                  />
-                </Field>
-              )}
-            />
-          )}
-        </div>
-      </Card>
-
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-        <Card as="section" id="onboarding-settings-status">
-          <CardHeader
-            title={tSettings("menuStatus")}
-            description={
-              locale === "ar"
-                ? "عرض ما إذا كانت القائمة مفعلة أو متوقفة."
-                : "See whether this menu is active or paused."
-            }
-          />
-
-          <div className="mt-3">
-            <SettingRow
-              label={tSettings("currentStatus")}
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <Card as="section" id="onboarding-settings-status">
+            <CardHeader
+              title={tSettings("menuStatus")}
               description={
                 locale === "ar"
-                  ? "قم بتفعيل أو إيقاف القائمة من هنا."
-                  : "Activate or pause this menu from here."
+                  ? "عرض ما إذا كانت القائمة مفعلة أو متوقفة."
+                  : "See whether this menu is active or paused."
               }
-            >
-              <Badge tone={localIsActive ? "success" : "danger"} dot>
-                {localIsActive ? tMenuCard("active") : tMenuCard("inactive")}
-              </Badge>
+            />
+
+            <div className="mt-3">
+              <SettingRow
+                label={tSettings("currentStatus")}
+                description={
+                  locale === "ar"
+                    ? "قم بتفعيل أو إيقاف القائمة من هنا."
+                    : "Activate or pause this menu from here."
+                }
+              >
+                <Badge tone={localIsActive ? "success" : "danger"} dot>
+                  {localIsActive ? tMenuCard("active") : tMenuCard("inactive")}
+                </Badge>
+                <Button
+                  type="button"
+                  variant={localIsActive ? "dangerGhost" : "secondary"}
+                  size="sm"
+                  onClick={handleToggleStatus}
+                  disabled={togglingStatus}
+                  loading={togglingStatus}
+                >
+                  {localIsActive ? tMenuCard("pause") : tMenuCard("play")}
+                </Button>
+              </SettingRow>
+            </div>
+          </Card>
+
+          <Card as="section" className="border-danger-line">
+            <CardHeader
+              title={tSettings("dangerZone")}
+              description={
+                locale === "ar"
+                  ? "لحذف القائمة اكتب اسمها في النافذة المنبثقة للتأكيد."
+                  : "To delete this menu, type its name in the confirmation dialog."
+              }
+            />
+
+            <div className="mt-3">
               <Button
                 type="button"
-                variant={localIsActive ? "dangerGhost" : "secondary"}
+                variant="dangerGhost"
                 size="sm"
-                onClick={handleToggleStatus}
-                disabled={togglingStatus}
-                loading={togglingStatus}
+                onClick={() => setIsDeleteModalOpen(true)}
               >
-                {localIsActive ? tMenuCard("pause") : tMenuCard("play")}
+                {tSettings("deleteThisMenu")}
               </Button>
-            </SettingRow>
-          </div>
-        </Card>
-
-        <Card as="section" className="border-danger-line">
-          <CardHeader
-            title={tSettings("dangerZone")}
-            description={
-              locale === "ar"
-                ? "لحذف القائمة اكتب اسمها في النافذة المنبثقة للتأكيد."
-                : "To delete this menu, type its name in the confirmation dialog."
-            }
-          />
-
-          <div className="mt-3">
-            <Button
-              type="button"
-              variant="dangerGhost"
-              size="sm"
-              onClick={() => setIsDeleteModalOpen(true)}
-            >
-              {tSettings("deleteThisMenu")}
-            </Button>
-          </div>
-        </Card>
-      </div>
-
-      {/*
-        The save bar rides the bottom of the viewport once something changes,
-        so a long settings page never hides its own commit action below the
-        fold. It is absent entirely while the form is pristine.
-      */}
-      {dirty ? (
-        <div
-          id="onboarding-settings-save"
-          className="sticky bottom-3 z-20 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line bg-raised/95 px-3 py-2 shadow-md backdrop-blur-sm motion-safe:animate-[ui-pop-in_140ms_cubic-bezier(0.16,1,0.3,1)]"
-          role="status"
-        >
-          <p className="text-xs text-fg-muted">
-            {locale === "ar" ? "لديك تغييرات غير محفوظة" : "Unsaved changes"}
-          </p>
-          <div className="flex items-center gap-1.5">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={handleDiscard}
-              disabled={isSubmitting}
-            >
-              {tCommon("cancel")}
-            </Button>
-            <Button type="submit" loading={isSubmitting}>
-              {tSettings("saveChanges")}
-            </Button>
-          </div>
+            </div>
+          </Card>
         </div>
-      ) : null}
 
-      {isDeleteModalOpen && (
-        <DeleteMenuConfirm
-          menuId={String(menuId)}
-          menuTitle={locale === "ar" ? menu.nameAr : menu.nameEn}
-          onClose={() => setIsDeleteModalOpen(false)}
-          onDeleted={() => {
-            router.push(`/dashboard`);
-          }}
-        />
-      )}
+        {isDeleteModalOpen && (
+          <DeleteMenuConfirm
+            menuId={String(menuId)}
+            menuTitle={locale === "ar" ? menu.nameAr : menu.nameEn}
+            onClose={() => setIsDeleteModalOpen(false)}
+            onDeleted={() => {
+              router.push(`/dashboard`);
+            }}
+          />
+        )}
+      </PageShell>
     </form>
   );
 }

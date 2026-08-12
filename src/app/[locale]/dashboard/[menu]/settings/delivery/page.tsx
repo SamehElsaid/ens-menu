@@ -22,7 +22,26 @@ import {
   axiosDelete,
 } from "@/shared/axiosCall";
 import CustomInput from "@/components/Custom/CustomInput";
-import { Button, Field, Input, Spinner, Switch } from "@/components/ui";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  CardDivider,
+  CardFooter,
+  CardHeader,
+  ChoiceCard,
+  EmptyState,
+  Field,
+  FieldError,
+  Input,
+  LoadingBlock,
+  PageShell,
+  SectionHeader,
+  Spinner,
+  Switch,
+} from "@/components/ui";
+import { cn } from "@/lib/cn";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import DeleteEntityConfirmModal from "@/components/Dashboard/DeleteEntityConfirmModal";
 import BranchLocationPicker, {
@@ -117,6 +136,25 @@ const EMPTY_BRANCH_FORM: BranchFormState = {
   deliveryPricePerKm: "",
   maxDeliveryRadiusKm: "10",
 };
+
+/** Section title with a neutral glyph — the icon names the region, it does not
+ *  colour-code it. */
+function SectionTitle({
+  icon,
+  children,
+}: {
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span className="text-fg-subtle" aria-hidden>
+        {icon}
+      </span>
+      {children}
+    </span>
+  );
+}
 
 export default function DeliverySettingsPage() {
   const locale = useLocale();
@@ -489,7 +527,7 @@ export default function DeliverySettingsPage() {
         );
         if (res.status) {
           await fetchGovernorates(true);
-          toast.success(isRTL ? "تم تحديث المحافظة" : "Governorate updated");
+          toast.success(t("governorates.updateSuccess"));
           resetForm();
         }
       } else {
@@ -500,7 +538,7 @@ export default function DeliverySettingsPage() {
         );
         if (res.status) {
           await fetchGovernorates(true);
-          toast.success(isRTL ? "تمت إضافة المحافظة" : "Governorate added");
+          toast.success(t("governorates.addSuccess"));
           resetForm();
         }
       }
@@ -530,400 +568,282 @@ export default function DeliverySettingsPage() {
   };
 
   if (isLoadingSettings) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[40vh] gap-3">
-        <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-        <p className="text-sm text-fg-muted">
-          {isRTL ? "جاري التحميل..." : "Loading..."}
-        </p>
-      </div>
-    );
+    return <LoadingBlock label={t("loading")} className="min-h-[40vh]" />;
   }
 
+  const addZoneButton = (
+    <Button
+      type="button"
+      size="sm"
+      startIcon={<IoAddOutline className="size-4" />}
+      onClick={handleAddGov}
+    >
+      {t("governorates.addBtn")}
+    </Button>
+  );
+
   return (
-    <div className="min-h-[calc(100vh-160px)]">
-      <header
-        className={`${isRTL ? "text-right" : "text-left"} space-y-1 mb-8`}
-      >
-        <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 dark:bg-primary/20 text-primary px-3 py-1.5 text-xs font-semibold">
-          <MdOutlineDeliveryDining className="text-sm" />
-          <span>{t("badge")}</span>
+    <PageShell
+      kind="detail"
+      header={
+        <PageTitleWithHelp
+          eyebrow={t("badge")}
+          title={t("title")}
+          description={t("description")}
+          breadcrumbs={[
+            {
+              label: t("breadcrumbs.settings"),
+              href: menuDashboardPath(menu, "settings"),
+            },
+            { label: t("title") },
+          ]}
+          breadcrumbsLabel={t("breadcrumbs.label")}
+          meta={
+            <Badge tone={settings.deliveryOn ? "accent" : "neutral"} dot>
+              {settings.deliveryOn
+                ? t("deliveryStatus.badgeOn")
+                : t("deliveryStatus.badgeOff")}
+            </Badge>
+          }
+        />
+      }
+      /* Nine sections of zones, fees and branch rules: the save button belongs
+         on the floor of the viewport, not a thousand pixels above the field
+         being edited. */
+      footerSticky
+      footer={
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            onClick={handleSaveSettings}
+            loading={isSavingSettings}
+            disabled={isSaveDisabled}
+            startIcon={<FiSave className="size-3.5" />}
+          >
+            {t("buttons.save")}
+          </Button>
         </div>
-        <PageTitleWithHelp className="my-4">
-          <h1 className="text-2xl md:text-3xl font-bold text-fg">
-            {t("title")}
-          </h1>
-        </PageTitleWithHelp>
-      </header>
+      }
+    >
+      <Card as="section" id="onboarding-delivery-toggle">
+        <SectionHeader
+          ruled
+          eyebrow={t("sections.status")}
+          title={
+            <SectionTitle icon={<MdOutlineDeliveryDining className="size-4" />}>
+              {t("deliveryStatus.title")}
+            </SectionTitle>
+          }
+          description={t("deliveryStatus.subtitle")}
+        />
 
-      <div className="space-y-6">
-        {/* ── Section 1: Delivery Toggle ── */}
-        <section
-          id="onboarding-delivery-toggle"
-          className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6"
-        >
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
-                <MdOutlineDeliveryDining className="text-lg text-primary" />
-              </div>
-              <div>
-                <h2 className="text-base font-semibold text-fg">
-                  {t("deliveryStatus.title")}
-                </h2>
-                <p className="text-xs text-fg-muted mt-0.5">
-                  {t("deliveryStatus.subtitle")}
-                </p>
-              </div>
-            </div>
+        <div className="mt-3.5">
+          <Switch
+            align="between"
+            label={t("deliveryStatus.label")}
+            hint={
+              settings.deliveryOn
+                ? t("deliveryStatus.enabledHint")
+                : t("deliveryStatus.disabledHint")
+            }
+            checked={settings.deliveryOn}
+            onChange={(e) =>
+              setSettings((s) => ({ ...s, deliveryOn: e.target.checked }))
+            }
+          />
+        </div>
+      </Card>
 
-            {/* Toggle switch */}
-            <Switch
-              checked={settings.deliveryOn}
-              onChange={(e) =>
-                setSettings((s) => ({ ...s, deliveryOn: e.target.checked }))
+      {deliveryDisabled ? (
+        <Alert tone="warning">{t("disabledHint")}</Alert>
+      ) : null}
+
+      <div
+        className={cn(
+          "flex min-w-0 flex-col gap-4 transition-opacity duration-(--dur-overlay) ease-(--ease-settle)",
+          deliveryDisabled && "pointer-events-none opacity-40 select-none",
+        )}
+      >
+        <Card as="section" id="onboarding-delivery-phones">
+          <SectionHeader
+            ruled
+            eyebrow={t("sections.channel")}
+            title={
+              <SectionTitle icon={<IoReceiptOutline className="size-4" />}>
+                {t("contactNumbers.title")}
+              </SectionTitle>
+            }
+            description={t("contactNumbers.subtitle")}
+          />
+
+          <div className="mt-3.5 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+            <ChoiceCard
+              name="delivery-contact-mode"
+              value="dashboard"
+              icon={<MdOutlineDashboard />}
+              label={t("contactNumbers.dashboardOption")}
+              description={t("contactNumbers.whatsappOrdersOffHint")}
+              checked={!settings.deliveryWhatsAppOn}
+              disabled={deliveryDisabled}
+              onChange={() =>
+                setSettings((s) => ({ ...s, deliveryWhatsAppOn: false }))
               }
-              aria-label={t("deliveryStatus.title")}
+            />
+            <ChoiceCard
+              name="delivery-contact-mode"
+              value="whatsapp"
+              icon={<FaWhatsapp />}
+              label={t("contactNumbers.whatsappOption")}
+              description={t("contactNumbers.whatsappOrdersOnHint")}
+              checked={settings.deliveryWhatsAppOn}
+              disabled={deliveryDisabled}
+              onChange={() =>
+                setSettings((s) => ({ ...s, deliveryWhatsAppOn: true }))
+              }
             />
           </div>
 
-          <div className="mt-3">
-            <span
-              className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full transition-colors ${
-                settings.deliveryOn
-                  ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
-                  : "bg-slate-100 text-slate-500  dark:text-fg-subtle"
-              }`}
-            >
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  settings.deliveryOn ? "bg-emerald-500" : "bg-slate-400"
-                }`}
-              />
-              {settings.deliveryOn
-                ? t("deliveryStatus.enabledHint")
-                : t("deliveryStatus.disabledHint")}
-            </span>
-          </div>
-        </section>
+          <CardDivider />
 
-        {/* Disabled hint */}
-        {deliveryDisabled && (
-          <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20">
-            <span className="text-amber-500 text-base">⚠</span>
-            <p className="text-sm text-amber-700 dark:text-amber-300">
-              {t("disabledHint")}
-            </p>
-          </div>
-        )}
-
-        {/* ── Sections 2 & 3: disabled when delivery is off ── */}
-        <div
-          className={`space-y-6 transition-opacity duration-200 ${
-            deliveryDisabled ? "opacity-40 pointer-events-none select-none" : ""
-          }`}
-        >
-          {/* ── Section 2: Contact Numbers ── */}
-          <section
-            id="onboarding-delivery-phones"
-            className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6 space-y-4"
-          >
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center">
-                <IoReceiptOutline className="text-lg text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <h2 className="text-base font-semibold text-fg">
-                  {t("contactNumbers.title")}
-                </h2>
-                <p className="text-xs text-fg-muted mt-0.5">
-                  {t("contactNumbers.subtitle")}
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Option 1: Dashboard */}
-              <button
-                type="button"
-                onClick={() =>
-                  setSettings((s) => ({
-                    ...s,
-                    deliveryWhatsAppOn: false,
-                  }))
-                }
-                disabled={deliveryDisabled}
-                className={`relative flex items-start gap-4 p-4 rounded-lg border text-start transition-all duration-200 ${
-                  !settings.deliveryWhatsAppOn
-                    ? "border-primary bg-primary/5 dark:bg-primary/10 ring-1 ring-primary"
-                    : "border-line bg-transparent hover:bg-surface-2"
-                } ${deliveryDisabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
-              >
-                <div
-                  className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                    !settings.deliveryWhatsAppOn
-                      ? "bg-primary/20 text-primary"
-                      : "bg-surface-2 text-fg-subtle"
-                  }`}
-                >
-                  <MdOutlineDashboard className="text-xl" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-fg">
-                    {t("contactNumbers.dashboardOption")}
-                  </p>
-                  <p className="text-xs text-fg-muted mt-1 leading-normal">
-                    {t("contactNumbers.whatsappOrdersOffHint")}
-                  </p>
-                </div>
-
-                {/* Radio indicator */}
-                <div className="flex items-center justify-center h-5 w-5 rounded-full border border-line-strong shrink-0 mt-0.5">
-                  {!settings.deliveryWhatsAppOn && (
-                    <div className="h-2.5 w-2.5 rounded-full bg-primary" />
-                  )}
-                </div>
-              </button>
-
-              {/* Option 2: WhatsApp */}
-              <button
-                type="button"
-                onClick={() =>
-                  setSettings((s) => ({
-                    ...s,
-                    deliveryWhatsAppOn: true,
-                  }))
-                }
-                disabled={deliveryDisabled}
-                className={`relative flex items-start gap-4 p-4 rounded-lg border text-start transition-all duration-200 ${
-                  settings.deliveryWhatsAppOn
-                    ? "border-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10 ring-1 ring-emerald-500"
-                    : "border-line bg-transparent hover:bg-surface-2"
-                } ${deliveryDisabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
-              >
-                <div
-                  className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                    settings.deliveryWhatsAppOn
-                      ? "bg-emerald-50/20 text-emerald-600 dark:text-emerald-400"
-                      : "bg-surface-2 text-fg-subtle"
-                  }`}
-                >
-                  <FaWhatsapp className="text-xl" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-fg">
-                    {t("contactNumbers.whatsappOption")}
-                  </p>
-                  <p className="text-xs text-fg-muted mt-1 leading-normal">
-                    {t("contactNumbers.whatsappOrdersOnHint")}
-                  </p>
-                </div>
-
-                {/* Radio indicator */}
-                <div className="flex items-center justify-center h-5 w-5 rounded-full border border-line-strong shrink-0 mt-0.5">
-                  {settings.deliveryWhatsAppOn && (
-                    <div className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-                  )}
-                </div>
-              </button>
-            </div>
-
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div
-                className={`space-y-1.5 transition-opacity ${
-                  settings.deliveryWhatsAppOn ? "" : "opacity-50"
-                }`}
-              >
-                <label className="flex items-center gap-1.5 text-sm font-medium text-[#25D366]">
-                  <FaWhatsapp className="text-base" />
-                  {t("contactNumbers.whatsapp")}
-                  {settings.deliveryWhatsAppOn ? (
-                    <span className="text-red-500">*</span>
-                  ) : null}
-                </label>
-                <CustomInput
-                  type="tel"
-                  value={settings.phoneNumber || undefined}
-                  onChange={(val) =>
-                    setSettings((s) => ({
-                      ...s,
-                      phoneNumber: (val as unknown as string | undefined) ?? "",
-                    }))
-                  }
-                  placeholder={t("contactNumbers.phonePlaceholder")}
-                  disabled={deliveryDisabled || !settings.deliveryWhatsAppOn}
-                />
-                {settingsTouched &&
+          <div className="sm:max-w-sm">
+            <Field
+              label={t("contactNumbers.whatsapp")}
+              required={settings.deliveryWhatsAppOn}
+              disabled={deliveryDisabled || !settings.deliveryWhatsAppOn}
+              error={
+                settingsTouched &&
                 settings.deliveryWhatsAppOn &&
-                !settings.phoneNumber?.trim() ? (
-                  <p className="text-xs text-red-500 mt-1">
-                    {isRTL
-                      ? "رقم الواتساب مطلوب"
-                      : "WhatsApp number is required"}
-                  </p>
-                ) : settings.deliveryWhatsAppOn ? (
-                  <p className="flex items-center gap-1 text-xs text-[#25D366]/80 dark:text-[#25D366]/70 mt-1">
-                    <FaWhatsapp className="shrink-0" />
-                    {t("contactNumbers.whatsappHint")}
-                  </p>
-                ) : (
-                  <p className="text-xs text-fg-muted mt-1">
-                    {t("contactNumbers.whatsappDashboardOnlyHint")}
-                  </p>
-                )}
-              </div>
-            </div>
-          </section>
-
-          {/* ── Section 3: Delivery zone method ── */}
-          <section
-            id="onboarding-delivery-mode"
-            className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6 space-y-4"
-          >
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-violet-500/10 dark:bg-violet-500/20 flex items-center justify-center">
-                <IoLocationOutline className="text-lg text-violet-600 dark:text-violet-400" />
-              </div>
-              <div>
-                <h2 className="text-base font-semibold text-fg">
-                  {t("deliveryMode.title")}
-                </h2>
-                <p className="text-xs text-fg-muted mt-0.5">
-                  {t("deliveryMode.subtitle")}
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <button
-                type="button"
-                onClick={() => handleDeliveryModeChange("governorates")}
-                disabled={deliveryDisabled || isSavingDeliveryMode}
-                className={`relative flex items-start gap-4 p-4 rounded-lg border text-start transition-all duration-200 ${
-                  !isDistanceMode
-                    ? "border-primary bg-primary/5 dark:bg-primary/10 ring-1 ring-primary"
-                    : "border-line bg-transparent hover:bg-surface-2"
-                } ${deliveryDisabled || isSavingDeliveryMode ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
-              >
-                <div
-                  className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                    !isDistanceMode
-                      ? "bg-primary/20 text-primary"
-                      : "bg-surface-2 text-fg-subtle"
-                  }`}
-                >
-                  <IoLocationOutline className="text-xl" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-fg">
-                    {t("deliveryMode.governoratesOption")}
-                  </p>
-                  <p className="text-xs text-fg-muted mt-1 leading-normal">
-                    {t("deliveryMode.governoratesHint")}
-                  </p>
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400 mt-2">
-                    {t("deliveryMode.governoratesIncluded")}
-                  </p>
-                </div>
-                <div className="flex items-center justify-center h-5 w-5 rounded-full border border-line-strong shrink-0 mt-0.5">
-                  {!isDistanceMode && (
-                    <div className="h-2.5 w-2.5 rounded-full bg-primary" />
-                  )}
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleDeliveryModeChange("distance")}
-                disabled={deliveryDisabled || isSavingDeliveryMode}
-                className={`relative flex items-start gap-4 p-4 rounded-lg border text-start transition-all duration-200 ${
-                  isDistanceMode
-                    ? "border-amber-500 bg-amber-500/5 dark:bg-amber-500/10 ring-1 ring-amber-500"
-                    : "border-line bg-transparent hover:bg-surface-2"
-                } ${deliveryDisabled || isSavingDeliveryMode ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
-              >
-                <div
-                  className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                    isDistanceMode
-                      ? "bg-amber-50/20 text-amber-600 dark:text-amber-400"
-                      : "bg-surface-2 text-fg-subtle"
-                  }`}
-                >
-                  <FaCrown className="text-xl" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-sm font-bold text-fg">
-                      {t("deliveryMode.distanceOption")}
-                    </p>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700 dark:bg-amber-500/20 dark:text-amber-300">
-                      <FaCrown className="text-[9px]" />
-                      Pro
-                    </span>
-                  </div>
-                  <p className="text-xs text-fg-muted mt-1 leading-normal">
-                    {t("deliveryMode.distanceHint")}
-                  </p>
-                </div>
-                <div className="flex items-center justify-center h-5 w-5 rounded-full border border-line-strong shrink-0 mt-0.5">
-                  {isDistanceMode && (
-                    <div className="h-2.5 w-2.5 rounded-full bg-amber-500" />
-                  )}
-                </div>
-              </button>
-            </div>
-          </section>
-
-          {/* ── Section 4: Governorates ── */}
-          {!isDistanceMode && (
-            <section
-              id="onboarding-delivery-governorates"
-              className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6 space-y-4"
+                !settings.phoneNumber?.trim()
+                  ? t("contactNumbers.phoneRequired")
+                  : undefined
+              }
+              hint={
+                settings.deliveryWhatsAppOn
+                  ? t("contactNumbers.whatsappHint")
+                  : t("contactNumbers.whatsappDashboardOnlyHint")
+              }
+              className={settings.deliveryWhatsAppOn ? undefined : "opacity-60"}
             >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center">
-                    <IoLocationOutline className="text-lg text-amber-600 dark:text-amber-400" />
-                  </div>
-                  <div>
-                    <h2 className="text-base font-semibold text-fg">
-                      {t("governorates.title")}
-                    </h2>
-                    <p className="text-xs text-fg-muted mt-0.5">
-                      {t("governorates.subtitle")}
-                    </p>
-                  </div>
-                </div>
-                {!showForm && (
-                  <Button
-                    type="button"
-                    size="sm"
-                    startIcon={<IoAddOutline className="text-base" />}
-                    className="shrink-0"
-                    onClick={handleAddGov}
-                  >
-                    {t("governorates.addBtn")}
-                  </Button>
-                )}
-              </div>
+              <CustomInput
+                type="tel"
+                value={settings.phoneNumber || undefined}
+                onChange={(val) =>
+                  setSettings((s) => ({
+                    ...s,
+                    phoneNumber: (val as unknown as string | undefined) ?? "",
+                  }))
+                }
+                placeholder={t("contactNumbers.phonePlaceholder")}
+                disabled={deliveryDisabled || !settings.deliveryWhatsAppOn}
+              />
+            </Field>
+          </div>
+        </Card>
 
-              {/* ── Add / Edit Form ── */}
-              {showForm && (
-                <div className="rounded-lg border border-primary/20 bg-primary/5 dark:bg-primary/10 dark:border-primary/30 p-4 space-y-4">
-                  <h3 className="text-sm font-semibold text-fg">
-                    {editingId !== null
+        <Card as="section" id="onboarding-delivery-mode">
+          <SectionHeader
+            ruled
+            eyebrow={t("sections.zoneMethod")}
+            title={
+              <SectionTitle icon={<IoLocationOutline className="size-4" />}>
+                {t("deliveryMode.title")}
+              </SectionTitle>
+            }
+            description={t("deliveryMode.subtitle")}
+          />
+
+          <div className="mt-3.5 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+            <ChoiceCard
+              name="delivery-zone-mode"
+              value="governorates"
+              icon={<IoLocationOutline />}
+              label={
+                <span className="flex flex-wrap items-center gap-1.5">
+                  {t("deliveryMode.governoratesOption")}
+                  <Badge tone="neutral">
+                    {t("deliveryMode.governoratesIncluded")}
+                  </Badge>
+                </span>
+              }
+              description={t("deliveryMode.governoratesHint")}
+              checked={!isDistanceMode}
+              disabled={deliveryDisabled || isSavingDeliveryMode}
+              onChange={() => void handleDeliveryModeChange("governorates")}
+            />
+            <ChoiceCard
+              name="delivery-zone-mode"
+              value="distance"
+              icon={<FaCrown />}
+              label={
+                <span className="flex flex-wrap items-center gap-1.5">
+                  {t("deliveryMode.distanceOption")}
+                  <Badge tone="accent" icon={<FaCrown className="size-2.5" />}>
+                    {t("proBadge")}
+                  </Badge>
+                </span>
+              }
+              description={t("deliveryMode.distanceHint")}
+              checked={isDistanceMode}
+              disabled={deliveryDisabled || isSavingDeliveryMode}
+              onChange={() => void handleDeliveryModeChange("distance")}
+            />
+          </div>
+        </Card>
+
+        {!isDistanceMode ? (
+          <Card as="section" id="onboarding-delivery-governorates">
+            <SectionHeader
+              ruled
+              eyebrow={t("sections.zones")}
+              title={
+                <SectionTitle icon={<IoLocationOutline className="size-4" />}>
+                  {t("governorates.title")}
+                </SectionTitle>
+              }
+              description={t("governorates.subtitle")}
+              actions={
+                <>
+                  {governorates.length > 0 ? (
+                    <Badge tone="neutral" className="tabular-nums">
+                      {governorates.length}
+                    </Badge>
+                  ) : null}
+                  {!showForm ? addZoneButton : null}
+                </>
+              }
+            />
+
+            {showForm ? (
+              <Card variant="ghost" className="mt-3.5">
+                <CardHeader
+                  title={
+                    editingId !== null
                       ? t("governorates.editTitle")
-                      : t("governorates.addTitle")}
-                  </h3>
+                      : t("governorates.addTitle")
+                  }
+                />
 
-                  {/* Google / Nominatim search */}
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-fg-muted">
-                      {t("governorates.searchLabel")}{" "}
-                      <span className="text-red-500">*</span>
-                    </label>
+                <div className="mt-3 flex flex-col gap-3">
+                  <Field
+                    label={t("governorates.searchLabel")}
+                    required
+                    htmlFor="gov-region-search"
+                    error={
+                      govFormTouched && !govForm.lat.trim()
+                        ? t("governorates.regionRequired")
+                        : undefined
+                    }
+                    hint={
+                      !isSearching &&
+                      searchQuery.trim() &&
+                      searchResults.length === 0
+                        ? t("governorates.noResults")
+                        : undefined
+                    }
+                  >
                     <div className="relative">
-                      <input
+                      <Input
+                        id="gov-region-search"
                         type="text"
                         value={searchQuery}
                         onChange={(e) => handleSearch(e.target.value)}
@@ -931,333 +851,269 @@ export default function DeliverySettingsPage() {
                           setTimeout(() => setSearchResults([]), 200)
                         }
                         placeholder={t("governorates.searchPlaceholder")}
-                        className={`w-full py-3.5 ps-10 pe-4 outline-none rounded-lg border focus:ring-2   dark:placeholder:text-fg-subtle text-sm ${
-                          govFormTouched && !govForm.lat.trim()
-                            ? "border-red-500 focus:border-red-500 focus:ring-red-500/20 dark:border-red-500"
-                            : "border-accent-purple/20 focus:border-accent-purple focus:ring-accent-purple/20  dark:focus:border-accent-purple"
-                        }`}
+                        startIcon={
+                          isSearching ? (
+                            <Spinner size="xs" />
+                          ) : (
+                            <IoSearchOutline className="size-4" />
+                          )
+                        }
                       />
-                      <div className="absolute start-3 top-1/2 -translate-y-1/2 text-fg-subtle">
-                        {isSearching ? (
-                          <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                        ) : (
-                          <IoSearchOutline className="text-lg" />
-                        )}
-                      </div>
 
-                      {/* Results dropdown */}
-                      {searchResults.length > 0 && (
-                        <div className="absolute z-20 top-full mt-1 w-full bg-raised rounded-lg border border-line shadow-lg overflow-hidden">
+                      {/* The one place this page is allowed a shadow: the
+                          results list genuinely floats above the form. */}
+                      {searchResults.length > 0 ? (
+                        <ul className="absolute top-full z-20 mt-1 w-full overflow-hidden rounded-lg border border-line bg-raised shadow-lg">
                           {searchResults.map((r) => (
-                            <button
+                            <li
                               key={r.place_id}
-                              type="button"
-                              onMouseDown={() => handleSelectResult(r)}
-                              className="w-full text-start px-4 py-2.5 text-sm text-fg-muted hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors border-b border-slate-50 dark:border-line last:border-0 truncate"
+                              className="border-b border-line last:border-0"
                             >
-                              {r.display_name}
-                            </button>
+                              <button
+                                type="button"
+                                onMouseDown={() => handleSelectResult(r)}
+                                className="block w-full truncate px-3 py-2 text-start text-[13px] text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
+                              >
+                                {r.display_name}
+                              </button>
+                            </li>
                           ))}
-                        </div>
-                      )}
+                        </ul>
+                      ) : null}
+                    </div>
+                  </Field>
 
-                      {/* No results */}
-                      {!isSearching &&
-                        searchQuery.trim() &&
-                        searchResults.length === 0 && (
-                          <p className="absolute top-full mt-1 start-0 text-xs text-fg-subtle px-1">
-                            {t("governorates.noResults")}
-                          </p>
-                        )}
-                    </div>
-                    {govFormTouched && !govForm.lat.trim() && (
-                      <p className="text-xs text-red-500">
-                        {isRTL
-                          ? "يرجى اختيار المنطقة من نتائج البحث"
-                          : "Please select a region from the search results"}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <Field
-                        label={t("governorates.nameAr")}
-                        required
-                        error={
-                          govFormTouched && !govForm.nameAr.trim()
-                            ? isRTL
-                              ? "مطلوب"
-                              : "Required"
-                            : undefined
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <Field
+                      label={t("governorates.nameAr")}
+                      required
+                      error={
+                        govFormTouched && !govForm.nameAr.trim()
+                          ? t("governorates.required")
+                          : undefined
+                      }
+                    >
+                      <Input
+                        type="text"
+                        value={govForm.nameAr}
+                        onChange={(e) =>
+                          setGovForm((f) => ({
+                            ...f,
+                            nameAr: e.target.value,
+                          }))
                         }
-                      >
-                        <Input
-                          type="text"
-                          value={govForm.nameAr}
-                          onChange={(e) =>
-                            setGovForm((f) => ({
-                              ...f,
-                              nameAr: e.target.value,
-                            }))
-                          }
-                          placeholder={t("governorates.nameArPlaceholder")}
-                        />
-                      </Field>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Field
-                        label={t("governorates.nameEn")}
-                        required
-                        error={
-                          govFormTouched && !govForm.nameEn.trim()
-                            ? isRTL
-                              ? "مطلوب"
-                              : "Required"
-                            : undefined
+                        placeholder={t("governorates.nameArPlaceholder")}
+                      />
+                    </Field>
+                    <Field
+                      label={t("governorates.nameEn")}
+                      required
+                      error={
+                        govFormTouched && !govForm.nameEn.trim()
+                          ? t("governorates.required")
+                          : undefined
+                      }
+                    >
+                      <Input
+                        type="text"
+                        value={govForm.nameEn}
+                        onChange={(e) =>
+                          setGovForm((f) => ({
+                            ...f,
+                            nameEn: e.target.value,
+                          }))
                         }
-                      >
-                        <Input
-                          type="text"
-                          value={govForm.nameEn}
-                          onChange={(e) =>
-                            setGovForm((f) => ({
-                              ...f,
-                              nameEn: e.target.value,
-                            }))
-                          }
-                          placeholder={t("governorates.nameEnPlaceholder")}
-                        />
-                      </Field>
-                    </div>
-                    {/* lat & lan: hidden visually, tracked in state and sent to API */}
+                        placeholder={t("governorates.nameEnPlaceholder")}
+                      />
+                    </Field>
+                    {/* lat & lan come from the region search, never typed. */}
                     <input type="hidden" value={govForm.lat} readOnly />
                     <input type="hidden" value={govForm.lan} readOnly />
-                    <div className="space-y-1.5 sm:col-span-2">
-                      <Field
-                        label={t("governorates.price")}
-                        required
-                        error={
-                          govFormTouched &&
-                          (!govForm.price || parseFloat(govForm.price) <= 0)
-                            ? isRTL
-                              ? "أدخل سعر أكبر من صفر"
-                              : "Enter a price greater than 0"
-                            : undefined
-                        }
-                      >
-                        <Input
-                          type="number"
-                          value={govForm.price}
-                          onChange={(e) =>
-                            setGovForm((f) => ({
-                              ...f,
-                              price: e.target.value,
-                            }))
-                          }
-                          placeholder={t("governorates.pricePlaceholder")}
-                        />
-                      </Field>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-end gap-3 pt-1">
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={resetForm}
-                    >
-                      {t("governorates.cancel")}
-                    </Button>
-                    <Button
-                      onClick={handleSaveGov}
-                      loading={isSavingGov}
-                      disabled={
-                        isSavingGov || (govFormTouched && !isGovFormValid)
+                    <Field
+                      label={t("governorates.price")}
+                      required
+                      error={
+                        govFormTouched &&
+                        (!govForm.price || parseFloat(govForm.price) <= 0)
+                          ? t("governorates.priceInvalid")
+                          : undefined
                       }
-                      className="w-auto! min-w-[130px]"
-                      startIcon={<IoSaveOutline className="text-base" />}
                     >
-                      {t("governorates.saveGov")}
-                    </Button>
+                      <Input
+                        type="number"
+                        className="tabular-nums"
+                        value={govForm.price}
+                        onChange={(e) =>
+                          setGovForm((f) => ({
+                            ...f,
+                            price: e.target.value,
+                          }))
+                        }
+                        placeholder={t("governorates.pricePlaceholder")}
+                      />
+                    </Field>
                   </div>
                 </div>
-              )}
 
-              {/* ── Governorates list ── */}
-              {isLoadingGovs ? (
-                <div className="flex items-center justify-center py-10">
-                  <Spinner size="lg" />
-                </div>
-              ) : governorates.length === 0 && !showForm ? (
-                <div className="flex flex-col items-center justify-center py-10 gap-2 text-fg-subtle">
-                  <IoLocationOutline className="text-4xl" />
-                  <p className="text-sm font-medium">
-                    {t("governorates.empty")}
-                  </p>
-                  <p className="text-xs text-center">
-                    {t("governorates.emptyHint")}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {governorates.map((gov) => (
-                    <div
-                      key={gov.id}
-                      className="flex items-center justify-between gap-3 p-3 rounded-lg bg-surface-3 border border-line"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="h-9 w-9 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center shrink-0">
-                          <IoLocationOutline className="text-amber-600 dark:text-amber-400" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold text-fg truncate">
-                            {isRTL ? gov.nameAr : gov.nameEn}
-                          </p>
-                          <p className="text-xs text-fg-muted truncate">
-                            {isRTL ? gov.nameEn : gov.nameAr}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-sm font-bold text-primary tabular-nums">
-                          {gov.price}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => handleEditGov(gov)}
-                          className="p-1.5 rounded-lg text-fg-subtle hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
-                          aria-label={t("governorates.editTitle")}
-                        >
-                          <IoPencilOutline className="text-base" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setGovToDelete(gov)}
-                          disabled={deletingId === gov.id}
-                          className="p-1.5 rounded-lg text-fg-subtle hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors disabled:opacity-50"
-                          aria-label={t("governorates.deleteBtn")}
-                        >
-                          {deletingId === gov.id ? (
-                            <div className="w-4 h-4 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" />
-                          ) : (
-                            <IoTrashOutline className="text-base" />
-                          )}
-                        </button>
-                      </div>
+                <CardFooter className="justify-end">
+                  <Button type="button" variant="ghost" onClick={resetForm}>
+                    {t("governorates.cancel")}
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={handleSaveGov}
+                    loading={isSavingGov}
+                    disabled={govFormTouched && !isGovFormValid}
+                    startIcon={<IoSaveOutline className="size-3.5" />}
+                  >
+                    {t("governorates.saveGov")}
+                  </Button>
+                </CardFooter>
+              </Card>
+            ) : null}
+
+            {isLoadingGovs ? (
+              <LoadingBlock label={t("loading")} size="md" className="mt-2" />
+            ) : governorates.length > 0 ? (
+              <ul className="mt-3.5 divide-y divide-line overflow-hidden rounded-lg border border-line">
+                {governorates.map((gov) => (
+                  <li
+                    key={gov.id}
+                    className="flex items-center gap-3 px-3 py-2"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[13px] font-medium text-fg">
+                        {isRTL ? gov.nameAr : gov.nameEn}
+                      </p>
+                      <p className="truncate text-xs text-fg-muted">
+                        {isRTL ? gov.nameEn : gov.nameAr}
+                      </p>
                     </div>
-                  ))}
-                </div>
-              )}
-            </section>
-          )}
+                    <span className="ui-figure shrink-0 text-sm text-fg">
+                      {gov.price}
+                    </span>
+                    <div className="flex shrink-0 items-center gap-0.5">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        iconOnly
+                        onClick={() => handleEditGov(gov)}
+                        aria-label={t("governorates.editTitle")}
+                      >
+                        <IoPencilOutline className="size-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="dangerGhost"
+                        size="sm"
+                        iconOnly
+                        loading={deletingId === gov.id}
+                        onClick={() => setGovToDelete(gov)}
+                        aria-label={t("governorates.deleteBtn")}
+                      >
+                        <IoTrashOutline className="size-4" />
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : !showForm ? (
+              <EmptyState
+                size="sm"
+                className="mt-3.5"
+                icon={<IoLocationOutline />}
+                title={t("governorates.empty")}
+                description={t("governorates.emptyHint")}
+                action={addZoneButton}
+              />
+            ) : null}
+          </Card>
+        ) : null}
 
-          {/* ── Section 4: Branch location (distance mode) ── */}
-          {isDistanceMode && (
-            <section
-              id="onboarding-delivery-branches"
-              className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6 space-y-4"
-            >
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center">
-                  <IoLocationOutline className="text-lg text-amber-600 dark:text-amber-400" />
-                </div>
-                <div>
-                  <h2 className="text-base font-semibold text-fg">
-                    {t("branches.title")}
-                  </h2>
-                  <p className="text-xs text-fg-muted mt-0.5">
-                    {t("branches.subtitle")}
-                  </p>
+        {isDistanceMode ? (
+          <Card as="section" id="onboarding-delivery-branches">
+            <SectionHeader
+              ruled
+              eyebrow={t("sections.location")}
+              title={
+                <SectionTitle icon={<IoLocationOutline className="size-4" />}>
+                  {t("branches.title")}
+                </SectionTitle>
+              }
+              description={t("branches.subtitle")}
+            />
+
+            {isLoadingBranch ? (
+              <LoadingBlock label={t("loading")} size="md" />
+            ) : (
+              <div className="mt-3.5 flex flex-col gap-3.5">
+                <BranchLocationPicker
+                  latitude={branchForm.latitude}
+                  longitude={branchForm.longitude}
+                  onLocationChange={(lat, lng) =>
+                    setBranchForm((f) => ({
+                      ...f,
+                      latitude: String(lat),
+                      longitude: String(lng),
+                    }))
+                  }
+                  searchLabel={t("branches.searchLabel")}
+                  searchPlaceholder={t("branches.searchPlaceholder")}
+                  mapHint={t("branches.mapHint")}
+                />
+                {branchFormTouched && !branchForm.latitude ? (
+                  <FieldError>{t("branches.locationRequired")}</FieldError>
+                ) : null}
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <Field label={t("branches.basePrice")} required>
+                    <Input
+                      type="number"
+                      className="tabular-nums"
+                      value={branchForm.deliveryBasePrice}
+                      onChange={(e) =>
+                        setBranchForm((f) => ({
+                          ...f,
+                          deliveryBasePrice: e.target.value,
+                        }))
+                      }
+                      placeholder={t("branches.basePricePlaceholder")}
+                    />
+                  </Field>
+                  <Field label={t("branches.pricePerKm")} required>
+                    <Input
+                      type="number"
+                      className="tabular-nums"
+                      value={branchForm.deliveryPricePerKm}
+                      onChange={(e) =>
+                        setBranchForm((f) => ({
+                          ...f,
+                          deliveryPricePerKm: e.target.value,
+                        }))
+                      }
+                      placeholder={t("branches.pricePerKmPlaceholder")}
+                    />
+                  </Field>
+                  <Field label={t("branches.maxRadius")} required>
+                    <Input
+                      type="number"
+                      className="tabular-nums"
+                      value={branchForm.maxDeliveryRadiusKm}
+                      onChange={(e) =>
+                        setBranchForm((f) => ({
+                          ...f,
+                          maxDeliveryRadiusKm: e.target.value,
+                        }))
+                      }
+                      placeholder={t("branches.maxRadiusPlaceholder")}
+                    />
+                  </Field>
                 </div>
               </div>
-
-              {isLoadingBranch ? (
-                <div className="flex items-center justify-center py-10">
-                  <Spinner size="lg" />
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <BranchLocationPicker
-                    latitude={branchForm.latitude}
-                    longitude={branchForm.longitude}
-                    onLocationChange={(lat, lng) =>
-                      setBranchForm((f) => ({
-                        ...f,
-                        latitude: String(lat),
-                        longitude: String(lng),
-                      }))
-                    }
-                    searchLabel={t("branches.searchLabel")}
-                    searchPlaceholder={t("branches.searchPlaceholder")}
-                    mapHint={t("branches.mapHint")}
-                  />
-                  {branchFormTouched && !branchForm.latitude && (
-                    <p className="text-xs text-red-500">
-                      {t("branches.locationRequired")}
-                    </p>
-                  )}
-
-                  <div className="grid sm:grid-cols-3 gap-3">
-                    <Field label={t("branches.basePrice")} required>
-                      <Input
-                        type="number"
-                        value={branchForm.deliveryBasePrice}
-                        onChange={(e) =>
-                          setBranchForm((f) => ({
-                            ...f,
-                            deliveryBasePrice: e.target.value,
-                          }))
-                        }
-                        placeholder={t("branches.basePricePlaceholder")}
-                      />
-                    </Field>
-                    <Field label={t("branches.pricePerKm")} required>
-                      <Input
-                        type="number"
-                        value={branchForm.deliveryPricePerKm}
-                        onChange={(e) =>
-                          setBranchForm((f) => ({
-                            ...f,
-                            deliveryPricePerKm: e.target.value,
-                          }))
-                        }
-                        placeholder={t("branches.pricePerKmPlaceholder")}
-                      />
-                    </Field>
-                    <Field label={t("branches.maxRadius")} required>
-                      <Input
-                        type="number"
-                        value={branchForm.maxDeliveryRadiusKm}
-                        onChange={(e) =>
-                          setBranchForm((f) => ({
-                            ...f,
-                            maxDeliveryRadiusKm: e.target.value,
-                          }))
-                        }
-                        placeholder={t("branches.maxRadiusPlaceholder")}
-                      />
-                    </Field>
-                  </div>
-                </div>
-              )}
-            </section>
-          )}
-        </div>
-
-        {/* ── Save settings footer ── */}
-        <div className="flex flex-wrap justify-end gap-3 pt-2 pb-6">
-          <Button
-            onClick={handleSaveSettings}
-            loading={isSavingSettings}
-            disabled={isSaveDisabled}
-            size="lg"
-            className="w-auto! min-w-[160px]"
-            startIcon={<FiSave className="text-base" />}
-          >
-            {t("buttons.save")}
-          </Button>
-        </div>
+            )}
+          </Card>
+        ) : null}
       </div>
 
       {govToDelete && (
@@ -1290,6 +1146,6 @@ export default function DeliverySettingsPage() {
         subscriptionHref={subscriptionHref}
         featureKey="deliveryDistance"
       />
-    </div>
+    </PageShell>
   );
 }

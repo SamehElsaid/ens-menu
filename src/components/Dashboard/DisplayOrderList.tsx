@@ -17,15 +17,43 @@ import {
   IoImageOutline,
   IoMenuOutline,
   IoRestaurantOutline,
-  IoStar,
 } from "react-icons/io5";
 import LoadImage from "@/components/ImageLoad";
+import { cn } from "@/lib/cn";
 import { formatMenuPrice } from "@/lib/formatMenuPrice";
+import {
+  Badge,
+  Button,
+  Card,
+  CountBadge,
+  SectionHeader,
+  focusRing,
+} from "@/components/ui";
 
 /** Virtual category id for “All products” (same as public catalog). */
 export const DISPLAY_ORDER_ALL_CATEGORY_ID = 0;
 
 const DRAG_THRESHOLD_PX = 6;
+
+/**
+ * A draggable category chip.
+ *
+ * Selection is an ink fill rather than a tinted outline, because a strip of
+ * fifteen chips with pale-purple borders has no findable current item. The
+ * chips are square-cornered and unshadowed like everything else in the
+ * product, and they do not lift on hover — a row you are about to drag should
+ * not already be moving.
+ */
+const chipBase = cn(
+  "relative inline-flex min-h-11 items-center gap-2 rounded-lg border px-2 py-1.5 text-[13px] font-medium sm:min-h-9",
+  "transition-[background-color,border-color,color] duration-(--dur-fast) ease-(--ease-settle)",
+  focusRing,
+);
+const chipActive = "border-brand bg-brand text-on-brand";
+const chipRest =
+  "border-line-control bg-surface text-fg hover:border-fg-subtle hover:bg-surface-2";
+const chipThumb =
+  "relative flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-sm";
 
 export type DisplayOrderRow = {
   id: number;
@@ -283,34 +311,26 @@ export function DisplayOrderCategoryStrip({
   };
 
   return (
-    <div className="rounded-lg border border-line/80 bg-slate-50/70 p-4 shadow-sm">
-      <p className="mb-3 text-sm text-fg-muted">{t("categoriesStripHint")}</p>
+    <Card padded="md">
+      <SectionHeader
+        ruled
+        eyebrow={t("allCategories")}
+        title={t("categoriesStripHint")}
+      />
       <div
-        className="flex flex-wrap gap-2.5 sm:gap-3"
+        className="mt-3 flex flex-wrap gap-1.5"
         dir={isRTL ? "rtl" : "ltr"}
       >
         <button
           type="button"
           onClick={() => onSelect(DISPLAY_ORDER_ALL_CATEGORY_ID)}
-          className={`inline-flex min-h-11 items-center gap-2.5 rounded-full border bg-white pe-4 ps-1.5 py-1.5 text-sm font-bold shadow-[0_1px_4px_rgba(15,23,42,0.06)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35  ${
-            allActive
-              ? "border-primary text-primary shadow-[0_2px_10px_rgba(124,58,237,0.18)]"
-              : "border-line/90 text-fg hover:-translate-y-0.5 hover:border-primary/30  "
-          }`}
+          className={cn(chipBase, allActive ? chipActive : chipRest)}
           aria-pressed={allActive}
         >
-          <span
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
-              allActive
-                ? "bg-brand text-on-brand"
-                : "bg-primary/10 text-primary"
-            }`}
-          >
-            <IoGridOutline className="text-lg" aria-hidden />
+          <span className={cn(chipThumb, "bg-surface-3 text-fg-subtle")}>
+            <IoGridOutline className="size-4" aria-hidden />
           </span>
-          <span className="max-w-48 truncate tracking-wide">
-            {t("allCategories")}
-          </span>
+          <span className="max-w-40 truncate">{t("allCategories")}</span>
         </button>
 
         {rows.map((row, index) => {
@@ -327,16 +347,31 @@ export function DisplayOrderCategoryStrip({
               data-display-order-cat={row.id}
               onPointerDown={(e) => onPointerDown(e, index, row)}
               onDragStart={(e) => e.preventDefault()}
-              className={`group relative inline-flex min-h-11 touch-none select-none items-center gap-2.5 rounded-full border pe-4 ps-1.5 py-1.5 text-sm font-bold shadow-[0_1px_4px_rgba(15,23,42,0.06)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 ${
+              className={cn(
+                chipBase,
+                "touch-none select-none",
                 isDragging
-                  ? "border-dashed border-primary/45 bg-primary/5 opacity-35 shadow-none"
+                  ? "border-dashed border-line-strong bg-surface-2 opacity-40"
                   : active
-                    ? "border-primary bg-white text-primary shadow-[0_2px_10px_rgba(124,58,237,0.18)] "
-                    : "border-line/90 bg-white text-fg hover:-translate-y-0.5 hover:border-primary/30   "
-              } ${disabled ? "pointer-events-none" : "cursor-grab active:cursor-grabbing"}`}
+                    ? chipActive
+                    : chipRest,
+                disabled
+                  ? "pointer-events-none"
+                  : "cursor-grab active:cursor-grabbing",
+              )}
               aria-pressed={active}
             >
-              <span className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 ring-2 ring-white dark:ring-slate-800">
+              {/* The position number sits inside the chip as a mono ticket
+                  rather than as a floating counter bubble: on a strip being
+                  dragged into order, the order is the point. */}
+              <span
+                lang="en"
+                aria-hidden
+                className="ui-label w-4 shrink-0 text-center text-fg-subtle"
+              >
+                {index + 1}
+              </span>
+              <span className={cn(chipThumb, "bg-surface-3")}>
                 {!isDragging && row.imageUrl ? (
                   <LoadImage
                     src={row.imageUrl}
@@ -350,15 +385,12 @@ export function DisplayOrderCategoryStrip({
                   />
                 ) : !isDragging ? (
                   <IoRestaurantOutline
-                    className="text-base text-primary"
+                    className="size-4 text-fg-subtle"
                     aria-hidden
                   />
                 ) : null}
-                <span className="absolute -bottom-1 -end-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-white shadow-sm">
-                  {index + 1}
-                </span>
               </span>
-              <span className="max-w-48 truncate tracking-wide">
+              <span className="max-w-40 truncate">
                 {isDragging ? t("dropPlaceholder") : row.label}
               </span>
             </button>
@@ -369,16 +401,15 @@ export function DisplayOrderCategoryStrip({
       {ghost && typeof document !== "undefined"
         ? createPortal(
             <div
-              className="pointer-events-none fixed z-200 inline-flex min-h-11 items-center gap-2.5 rounded-full border-2 border-primary bg-white pe-4 ps-1.5 py-1.5 text-sm font-bold text-primary shadow-[0_18px_40px_-12px_rgba(15,23,42,0.45)] ring-4 ring-primary/25"
+              className="pointer-events-none fixed z-200 inline-flex items-center gap-2 rounded-lg border border-brand bg-surface px-2 py-1.5 text-[13px] font-medium text-fg shadow-lg"
               style={{
                 left: ghost.x,
                 top: ghost.y,
                 width: ghost.width,
                 minWidth: ghost.width,
-                transform: "rotate(-2deg) scale(1.05)",
               }}
             >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 ring-2 ring-primary/20">
+              <span className={cn(chipThumb, "bg-surface-3")}>
                 {ghost.imageUrl ? (
                   <LoadImage
                     src={ghost.imageUrl}
@@ -391,17 +422,18 @@ export function DisplayOrderCategoryStrip({
                     wrapperClassName="!block h-full w-full"
                   />
                 ) : (
-                  <IoRestaurantOutline className="text-base text-primary" />
+                  <IoRestaurantOutline
+                    className="size-4 text-fg-subtle"
+                    aria-hidden
+                  />
                 )}
               </span>
-              <span className="max-w-48 truncate tracking-wide">
-                {ghost.label}
-              </span>
+              <span className="max-w-40 truncate">{ghost.label}</span>
             </div>,
             document.body,
           )
         : null}
-    </div>
+    </Card>
   );
 }
 
@@ -455,36 +487,39 @@ function ProductCardFace({
             <IoImageOutline className="text-3xl" aria-hidden />
           </div>
         )}
-        {available ? (
-          <span className="absolute start-2 top-2 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-white">
-            <IoStar className="text-[10px]" aria-hidden />
-            {t("availableNow")}
+        {/* The position is the one fact this screen exists to change, so it is
+            a stamped mono figure on the image rather than a small pill. */}
+        <span
+          lang="en"
+          className="ui-figure absolute start-0 top-0 bg-brand px-1.5 py-0.5 text-[11px] text-on-brand"
+        >
+          {String(index + 1).padStart(2, "0")}
+        </span>
+        {!available ? (
+          <span className="absolute end-1.5 top-1.5">
+            <Badge tone="neutral" variant="solid">
+              {t("unavailable")}
+            </Badge>
           </span>
         ) : null}
-        <span className="absolute bottom-2 start-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-bold text-white">
-          #{index + 1}
-        </span>
       </div>
 
       <div
-        className="flex min-w-0 flex-1 flex-col p-3 sm:p-4"
+        className="flex min-w-0 flex-1 flex-col p-3"
         dir={isRTL ? "rtl" : "ltr"}
       >
         {!hideChrome ? (
-          <div className="mb-1 flex items-center gap-1 text-fg-subtle">
-            <IoMenuOutline className="text-lg" aria-hidden />
-            <span className="text-[10px] font-semibold uppercase tracking-wide">
-              {t("dragHandle")}
-            </span>
+          <div className="mb-1.5 flex items-center gap-1 text-fg-subtle">
+            <IoMenuOutline className="size-4" aria-hidden />
+            <span className="ui-label">{t("dragHandle")}</span>
           </div>
         ) : null}
         {row.categoryLabel ? (
-          <span className="mb-1 inline-flex w-fit items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
-            <IoStar className="text-[10px]" aria-hidden />
+          <p className="ui-label mb-1 truncate text-fg-muted">
             {row.categoryLabel}
-          </span>
+          </p>
         ) : null}
-        <h3 className="line-clamp-2 text-base font-black text-fg">
+        <h3 className="line-clamp-2 text-[13px] leading-snug font-semibold text-fg">
           {row.label}
         </h3>
         {row.description ? (
@@ -493,33 +528,35 @@ function ProductCardFace({
           </p>
         ) : null}
         <div className="mt-auto flex items-center justify-between gap-2 pt-3">
-          <span className="text-sm font-bold text-fg">
+          <span className="ui-figure text-[15px] text-fg" lang="en">
             {typeof row.price === "number"
               ? formatMenuPrice(row.price, currency, locale)
               : "—"}
           </span>
           {!hideChrome ? (
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
+            <div className="flex items-center gap-0.5">
+              <Button
+                variant="ghost"
+                size="sm"
+                iconOnly
                 disabled={disabled || !canMoveEarlier}
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={onMoveEarlier}
-                className="rounded-full border border-line p-1.5 text-fg-subtle transition hover:border-primary/40 hover:text-primary disabled:opacity-30"
                 aria-label={t("moveUp")}
               >
-                <PrevIcon className="text-base" />
-              </button>
-              <button
-                type="button"
+                <PrevIcon aria-hidden />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                iconOnly
                 disabled={disabled || !canMoveLater}
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={onMoveLater}
-                className="rounded-full border border-line p-1.5 text-fg-subtle transition hover:border-primary/40 hover:text-primary disabled:opacity-30"
                 aria-label={t("moveDown")}
               >
-                <NextIcon className="text-base" />
-              </button>
+                <NextIcon aria-hidden />
+              </Button>
             </div>
           ) : null}
         </div>
@@ -777,22 +814,20 @@ export function DisplayOrderProductGrid({
 
   return (
     <>
-      <div className="space-y-8">
+      <div className="flex flex-col gap-6">
         {groups.map((group) => (
-          <section key={group.categoryId} className="space-y-4">
+          <section key={group.categoryId} className="flex flex-col gap-3">
             {groupByCategory && group.label ? (
-              <div className="flex items-center gap-3">
-                <h3 className="text-lg font-black text-primary sm:text-xl">
-                  {group.label}
-                </h3>
-                <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
-                  {t("categoryItemsCount", { count: group.items.length })}
-                </span>
-                <div className="h-px flex-1 bg-primary/15" />
-              </div>
+              <SectionHeader
+                ruled
+                title={group.label}
+                actions={
+                  <CountBadge count={group.items.length} tone="neutral" />
+                }
+              />
             ) : null}
 
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3">
               {group.items.map((row, index) => {
                 const isDragging = draggingId === row.id;
                 const categoryId = row.categoryId ?? group.categoryId;
@@ -810,18 +845,26 @@ export function DisplayOrderProductGrid({
                       onPointerDown(e, index, row, categoryId)
                     }
                     onDragStart={(e) => e.preventDefault()}
-                    className={`group relative flex min-h-44 touch-none select-none overflow-hidden rounded-[1.75rem] border bg-white shadow-sm transition-[box-shadow,opacity,border-color,transform] duration-150  ${
+                    className={cn(
+                      "relative flex min-h-36 touch-none select-none overflow-hidden rounded-xl border bg-surface",
+                      "transition-[border-color,opacity] duration-(--dur-fast) ease-(--ease-settle)",
                       isDragging
-                        ? "scale-[0.98] border-dashed border-primary/50 bg-primary/5 opacity-35 shadow-none dark:bg-primary/10"
-                        : "border-primary/10 hover:shadow-md dark:border-line"
-                    } ${disabled ? "pointer-events-none opacity-60" : "cursor-grab active:cursor-grabbing"}`}
+                        ? "border-dashed border-line-strong bg-surface-2 opacity-40"
+                        : "border-line hover:border-line-strong",
+                      disabled
+                        ? "pointer-events-none opacity-60"
+                        : "cursor-grab active:cursor-grabbing",
+                    )}
                   >
                     {isDragging ? (
-                      <div className="flex w-full flex-col items-center justify-center gap-2 p-6 text-center">
-                        <span className="rounded-full border border-dashed border-primary/40 px-3 py-1 text-xs font-bold text-primary/80">
-                          #{index + 1}
+                      <div className="flex w-full flex-col items-center justify-center gap-1.5 p-6 text-center">
+                        <span
+                          lang="en"
+                          className="ui-figure text-[15px] text-fg-subtle"
+                        >
+                          {String(index + 1).padStart(2, "0")}
                         </span>
-                        <span className="text-sm font-semibold text-primary/70">
+                        <span className="ui-label text-fg-muted">
                           {t("dropPlaceholder")}
                         </span>
                       </div>
@@ -853,13 +896,12 @@ export function DisplayOrderProductGrid({
       {ghost && typeof document !== "undefined"
         ? createPortal(
             <div
-              className="pointer-events-none fixed z-200 flex overflow-hidden rounded-[1.75rem] border-2 border-primary bg-white shadow-[0_24px_60px_-16px_rgba(15,23,42,0.45)] ring-4 ring-primary/30"
+              className="pointer-events-none fixed z-200 flex overflow-hidden rounded-xl border border-brand bg-surface shadow-lg"
               style={{
                 left: ghost.x,
                 top: ghost.y,
                 width: ghost.width,
                 height: ghost.height,
-                transform: "rotate(2deg) scale(1.04)",
               }}
             >
               <ProductCardFace

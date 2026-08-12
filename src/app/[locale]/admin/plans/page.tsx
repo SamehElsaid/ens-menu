@@ -2,20 +2,26 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useRouter } from "@/i18n/navigation";
-import { ColDef } from "ag-grid-community";
-import { IoArrowBack, IoCreateOutline } from "react-icons/io5";
-import CardDashBoard from "@/components/Card/CardDashBoard";
-import DataTable from "@/components/Custom/DataTable";
+import { IoCreateOutline } from "react-icons/io5";
 import PlanCapabilitiesFields from "@/components/Admin/PlanCapabilitiesFields";
 import {
+  Badge,
   Button,
+  Card,
+  Checkbox,
+  DataTable,
+  EmptyState,
+  Field,
+  Fieldset,
+  Input,
   LoadingBlock,
   Modal,
   PageHeader,
+  PageShell,
   SectionHeader,
-  buttonClasses,
+  type DataColumn,
 } from "@/components/ui";
+import { useDataTableLabels } from "@/hooks/useDataTableLabels";
 import { axiosGet, axiosPatch } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import {
@@ -82,8 +88,9 @@ function formatEgp(value: unknown): string {
 export default function PlansPage() {
   const locale = useLocale();
   const t = useTranslations("adminPlans");
-  const router = useRouter();
-  const isRTL = locale === "ar";
+  const tCommon = useTranslations("common");
+  const tAdmin = useTranslations("adminDashboard");
+  const tableLabels = useDataTableLabels();
 
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
@@ -239,153 +246,190 @@ export default function PlansPage() {
     }
   }, [customCaps, locale, t, fetchCustomDisplay]);
 
-  const columnDefs = useMemo<ColDef<Plan>[]>(
+  const columns = useMemo<DataColumn<Plan>[]>(
     () => [
       {
-        field: "name",
-        headerName: t("columns.name"),
-        flex: 1,
-        minWidth: 100,
+        id: "name",
+        header: t("columns.name"),
+        primary: true,
+        cell: (plan) => (
+          <span className="flex flex-wrap items-center gap-1.5">
+            <span className="font-medium text-fg">{plan.name}</span>
+            <Badge tone={plan.isActive ? "success" : "neutral"} dot>
+              {plan.isActive ? t("active") : t("inactive")}
+            </Badge>
+          </span>
+        ),
       },
       {
-        field: "priceMonthly",
-        headerName: t("columns.priceMonthly"),
-        width: 130,
-        valueFormatter: (params) => formatEgp(params.value),
+        id: "priceMonthly",
+        header: t("columns.priceMonthly"),
+        numeric: true,
+        align: "end",
+        cell: (plan) => (
+          <span className="ui-figure text-[12px]" lang="en">
+            {formatEgp(plan.priceMonthly)}
+          </span>
+        ),
       },
       {
-        field: "priceYearly",
-        headerName: t("columns.priceYearly"),
-        width: 130,
-        valueFormatter: (params) => formatEgp(params.value),
+        id: "priceYearly",
+        header: t("columns.priceYearly"),
+        numeric: true,
+        align: "end",
+        cell: (plan) => (
+          <span className="ui-figure text-[12px]" lang="en">
+            {formatEgp(plan.priceYearly)}
+          </span>
+        ),
       },
       {
-        field: "extraMenuPrice",
-        headerName: t("columns.extraMenuPrice"),
-        width: 140,
-        valueFormatter: (params) => {
-          if (!isProPlanName(String(params.data?.name ?? ""))) return "—";
-          return formatEgp(params.value);
-        },
+        id: "extraMenuPrice",
+        header: t("columns.extraMenuPrice"),
+        numeric: true,
+        align: "end",
+        hideOnMobile: true,
+        cell: (plan) => (
+          <span className="ui-figure text-[12px]" lang="en">
+            {isProPlanName(plan.name) ? formatEgp(plan.extraMenuPrice) : "—"}
+          </span>
+        ),
       },
       {
-        field: "maxMenus",
-        headerName: t("columns.maxMenus"),
-        width: 110,
+        id: "maxMenus",
+        header: t("columns.maxMenus"),
+        numeric: true,
+        align: "end",
+        cell: (plan) => (
+          <span className="ui-figure text-[12px]" lang="en">
+            {plan.maxMenus}
+          </span>
+        ),
       },
       {
-        field: "maxProductsPerMenu",
-        headerName: t("columns.maxProducts"),
-        width: 120,
-        valueFormatter: (params) =>
-          params.value === -1 ? "∞" : String(params.value ?? "—"),
+        id: "maxProducts",
+        header: t("columns.maxProducts"),
+        numeric: true,
+        align: "end",
+        cell: (plan) => (
+          <span className="ui-figure text-[12px]" lang="en">
+            {plan.maxProductsPerMenu === -1
+              ? "∞"
+              : (plan.maxProductsPerMenu ?? "—")}
+          </span>
+        ),
       },
       {
-        field: "hasAds",
-        headerName: t("columns.hasAds"),
-        width: 100,
-        cellRenderer: (params: { value: boolean }) =>
-          params.value ? t("yes") : t("no"),
+        id: "hasAds",
+        header: t("columns.hasAds"),
+        hideOnMobile: true,
+        cell: (plan) => (
+          <span className="text-fg-muted">
+            {plan.hasAds ? t("yes") : t("no")}
+          </span>
+        ),
       },
       {
-        field: "isActive",
-        headerName: t("columns.isActive"),
-        width: 100,
-        cellRenderer: (params: { value: boolean }) =>
-          params.value ? t("active") : t("inactive"),
+        id: "allowCustomDomain",
+        header: t("columns.allowFullDesignControl"),
+        hideOnMobile: true,
+        cell: (plan) => (
+          <span className="text-fg-muted">
+            {plan.allowCustomDomain ? t("yes") : t("no")}
+          </span>
+        ),
       },
       {
-        field: "allowCustomDomain",
-        headerName: t("columns.allowFullDesignControl"),
-        width: 140,
-        cellRenderer: (params: { value: boolean }) =>
-          params.value ? t("yes") : t("no"),
-      },
-      {
-        field: "activeSubscriptions",
-        headerName: t("columns.activeSubscriptions"),
-        width: 130,
-      },
-      {
-        headerName: t("columns.actions"),
-        width: 100,
-        cellRenderer: (params: { data: Plan }) =>
-          params.data ? (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                openEdit(params.data);
-              }}
-              className={buttonClasses({
-                variant: "subtle",
-                size: "sm",
-                className: "gap-1.5",
-              })}
-            >
-              <IoCreateOutline className="text-base" />
-              {t("edit")}
-            </button>
-          ) : null,
+        id: "activeSubscriptions",
+        header: t("columns.activeSubscriptions"),
+        numeric: true,
+        align: "end",
+        cell: (plan) => (
+          <span className="ui-figure text-[12px]" lang="en">
+            {plan.activeSubscriptions ?? 0}
+          </span>
+        ),
       },
     ],
-    [t, openEdit],
+    [t],
   );
 
   const editingPro = editModal.plan != null && isProPlanName(String(form.name));
 
+  /**
+   * The plan matrix is the page. It stays one ruled table so two plans can be
+   * compared across a row instead of across two cards.
+   */
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title={t("title")}
-        description={t("subtitle")}
-        actions={
-          <Button
-            variant="secondary"
-            startIcon={<IoArrowBack className="rtl:rotate-180" />}
-            onClick={() => router.back()}
-          >
-            {t("back")}
-          </Button>
-        }
-      />
-
-      <CardDashBoard>
-        <DataTable<Plan>
-          rowData={plans}
-          columnDefs={columnDefs}
-          loading={loading}
-          locale={locale}
-          showRowNumbers={true}
-          pagination={false}
+    <PageShell
+      kind="table"
+      header={
+        <PageHeader
+          eyebrow={t("eyebrow")}
+          title={t("title")}
+          description={t("subtitle")}
+          breadcrumbs={[
+            { label: tAdmin("title"), href: "/admin" },
+            { label: t("title") },
+          ]}
+          breadcrumbsLabel={tCommon("breadcrumb")}
         />
-      </CardDashBoard>
-
-      <CardDashBoard>
-        <div className={`space-y-4 ${isRTL ? "text-right" : "text-left"}`}>
-          <SectionHeader
-            title={t("customDisplay.title")}
-            description={t("customDisplay.subtitle")}
-          />
-          {customLoading ? (
-            <LoadingBlock label={t("customDisplay.loading")} />
-          ) : (
-            <>
-              <PlanCapabilitiesFields
-                idPrefix="custom"
-                value={customCaps}
-                onChange={setCustomCaps}
-                t={t}
-              />
-              <div className="flex justify-end">
-                <Button onClick={handleSaveCustom} loading={customSaving}>
-                  {t("customDisplay.save")}
-                </Button>
-              </div>
-            </>
-          )}
-        </div>
-      </CardDashBoard>
+      }
+      aside={
+        /* The custom-plan copy is a different job from setting plan prices, so
+           it sits in the page's secondary region rather than as a third peer
+           block competing with the matrix for first read. */
+        <Card>
+          <div className="flex flex-col gap-4">
+            <SectionHeader
+              title={t("customDisplay.title")}
+              description={t("customDisplay.subtitle")}
+              ruled
+            />
+            {customLoading ? (
+              <LoadingBlock label={t("customDisplay.loading")} />
+            ) : (
+              <>
+                <PlanCapabilitiesFields
+                  idPrefix="custom"
+                  value={customCaps}
+                  onChange={setCustomCaps}
+                  t={t}
+                />
+                <div className="flex justify-end border-t border-line pt-4">
+                  <Button onClick={handleSaveCustom} loading={customSaving}>
+                    {t("customDisplay.save")}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </Card>
+      }
+    >
+      <DataTable<Plan>
+        columns={columns}
+        rows={plans}
+        getRowKey={(plan) => String(plan.id)}
+        caption={t("title")}
+        loading={loading}
+        skeletonRows={3}
+        tableId="admin-plans"
+        stickyHeader
+        columnControl
+        labels={tableLabels}
+        empty={<EmptyState title={t("error")} size="sm" />}
+        rowActions={(plan) => (
+          <Button
+            variant="subtle"
+            size="sm"
+            startIcon={<IoCreateOutline />}
+            onClick={() => openEdit(plan)}
+          >
+            {t("edit")}
+          </Button>
+        )}
+      />
 
       <Modal
         open={editModal.isOpen && editModal.plan != null}
@@ -408,162 +452,127 @@ export default function PlansPage() {
           </>
         }
       >
-        <div className="space-y-4">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-fg-muted">
-              {t("editModal.name")}
-            </label>
-            <input
+        {/* Grouped rather than a single column of eleven controls: identity,
+            then money, then limits, then what the plan unlocks. */}
+        <div className="flex flex-col gap-5">
+          <Field label={t("editModal.name")}>
+            <Input
               type="text"
               value={String(form.name)}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              className="w-full rounded-lg border border-line-strong bg-surface px-4 py-2.5 text-fg"
               dir={locale === "ar" ? "rtl" : "ltr"}
             />
-          </div>
+          </Field>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label className="block text-sm font-medium text-fg-muted mb-1">
-                {t("editModal.priceMonthly")}
-              </label>
-              <input
-                type="number"
-                min={0}
-                step={0.01}
-                value={Number(form.priceMonthly)}
-                onChange={(e) =>
-                  setForm((f) => ({
-                    ...f,
-                    priceMonthly: e.target.value ? Number(e.target.value) : 0,
-                  }))
-                }
-                className="w-full px-4 py-2.5 border border-line rounded-lg bg-raised text-fg"
-              />
+          <Fieldset legend={t("editModal.groupPricing")}>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Field label={t("editModal.priceMonthly")}>
+                <Input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={Number(form.priceMonthly)}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      priceMonthly: e.target.value ? Number(e.target.value) : 0,
+                    }))
+                  }
+                />
+              </Field>
+              <Field label={t("editModal.priceYearly")}>
+                <Input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={Number(form.priceYearly)}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      priceYearly: e.target.value ? Number(e.target.value) : 0,
+                    }))
+                  }
+                />
+              </Field>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-fg-muted mb-1">
-                {t("editModal.priceYearly")}
-              </label>
-              <input
-                type="number"
-                min={0}
-                step={0.01}
-                value={Number(form.priceYearly)}
-                onChange={(e) =>
-                  setForm((f) => ({
-                    ...f,
-                    priceYearly: e.target.value ? Number(e.target.value) : 0,
-                  }))
-                }
-                className="w-full px-4 py-2.5 border border-line rounded-lg bg-raised text-fg"
-              />
+
+            {editingPro && (
+              <Field
+                label={t("editModal.extraMenuPrice")}
+                hint={t("editModal.extraMenuPriceHint")}
+              >
+                <Input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={Number(form.extraMenuPrice)}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      extraMenuPrice: e.target.value
+                        ? Number(e.target.value)
+                        : 0,
+                    }))
+                  }
+                />
+              </Field>
+            )}
+          </Fieldset>
+
+          <Fieldset legend={t("editModal.groupLimits")}>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Field label={t("editModal.maxMenus")}>
+                <Input
+                  type="number"
+                  min={0}
+                  value={Number(form.maxMenus)}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      maxMenus: e.target.value ? Number(e.target.value) : 0,
+                    }))
+                  }
+                />
+              </Field>
+              <Field
+                label={t("editModal.maxProducts")}
+                hint={t("editModal.maxProductsHint")}
+              >
+                <Input
+                  type="number"
+                  min={-1}
+                  value={Number(form.maxProducts)}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      maxProducts: e.target.value ? Number(e.target.value) : 0,
+                    }))
+                  }
+                />
+              </Field>
             </div>
-          </div>
+          </Fieldset>
 
-          {editingPro && (
-            <div>
-              <label className="block text-sm font-medium text-fg-muted mb-1">
-                {t("editModal.extraMenuPrice")}
-              </label>
-              <input
-                type="number"
-                min={0}
-                step={0.01}
-                value={Number(form.extraMenuPrice)}
-                onChange={(e) =>
-                  setForm((f) => ({
-                    ...f,
-                    extraMenuPrice: e.target.value ? Number(e.target.value) : 0,
-                  }))
-                }
-                className="w-full px-4 py-2.5 border border-line rounded-lg bg-raised text-fg"
-              />
-              <p className="text-xs text-fg-subtle mt-1">
-                {t("editModal.extraMenuPriceHint")}
-              </p>
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-medium text-fg-muted mb-1">
-              {t("editModal.maxMenus")}
-            </label>
-            <input
-              type="number"
-              min={0}
-              value={Number(form.maxMenus)}
-              onChange={(e) =>
-                setForm((f) => ({
-                  ...f,
-                  maxMenus: e.target.value ? Number(e.target.value) : 0,
-                }))
-              }
-              className="w-full px-4 py-2.5 border border-line rounded-lg bg-raised text-fg"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-fg-muted mb-1">
-              {t("editModal.maxProducts")}
-            </label>
-            <input
-              type="number"
-              min={-1}
-              value={Number(form.maxProducts)}
-              onChange={(e) =>
-                setForm((f) => ({
-                  ...f,
-                  maxProducts: e.target.value ? Number(e.target.value) : 0,
-                }))
-              }
-              className="w-full px-4 py-2.5 border border-line rounded-lg bg-raised text-fg"
-            />
-            <p className="text-xs text-fg-subtle mt-1">
-              {t("editModal.maxProductsHint")}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
+          <Fieldset legend={t("editModal.groupFlags")}>
+            <Checkbox
               id="hasAds"
+              label={t("editModal.hasAds")}
               checked={Boolean(form.hasAds)}
               onChange={(e) =>
                 setForm((f) => ({ ...f, hasAds: e.target.checked }))
               }
-              className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
             />
-            <label
-              htmlFor="hasAds"
-              className="text-sm font-medium text-fg-muted"
-            >
-              {t("editModal.hasAds")}
-            </label>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
+            <Checkbox
               id="isActive"
+              label={t("editModal.isActive")}
               checked={Boolean(form.isActive)}
               onChange={(e) =>
                 setForm((f) => ({ ...f, isActive: e.target.checked }))
               }
-              className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
             />
-            <label
-              htmlFor="isActive"
-              className="text-sm font-medium text-fg-muted"
-            >
-              {t("editModal.isActive")}
-            </label>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
+            <Checkbox
               id="allowFullDesignControl"
+              label={t("editModal.allowFullDesignControl")}
               checked={Boolean(form.allowFullDesignControl)}
               onChange={(e) =>
                 setForm((f) => ({
@@ -571,24 +580,19 @@ export default function PlansPage() {
                   allowFullDesignControl: e.target.checked,
                 }))
               }
-              className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
             />
-            <label
-              htmlFor="allowFullDesignControl"
-              className="text-sm font-medium text-fg-muted"
-            >
-              {t("editModal.allowFullDesignControl")}
-            </label>
-          </div>
+          </Fieldset>
 
-          <PlanCapabilitiesFields
-            idPrefix="plan"
-            value={caps}
-            onChange={setCaps}
-            t={t}
-          />
+          <Fieldset legend={t("editModal.groupCapabilities")}>
+            <PlanCapabilitiesFields
+              idPrefix="plan"
+              value={caps}
+              onChange={setCaps}
+              t={t}
+            />
+          </Fieldset>
         </div>
       </Modal>
-    </div>
+    </PageShell>
   );
 }

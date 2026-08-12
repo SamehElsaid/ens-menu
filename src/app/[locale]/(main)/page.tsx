@@ -6,6 +6,7 @@ import { getSiteOrigin } from "@/lib/sitemap/data";
 import { fetchHomepageFeaturedLogosServer } from "@/lib/homepageFeaturedLogos";
 import Hero from "@/components/site/home/Hero";
 import LogoStrip from "@/components/site/home/LogoStrip";
+import HomeMotion from "@/components/site/home/HomeMotion";
 import {
   Features,
   HomeFaq,
@@ -76,6 +77,7 @@ async function Page({ params }: Props) {
   return (
     <>
       <HashScroll />
+      <HomeMotion />
       <JsonLd data={buildWebApplicationJsonLd()} />
       <Hero locale={locale} />
       <LogoStrip initialLogos={featuredLogos} />
@@ -84,7 +86,7 @@ async function Page({ params }: Props) {
       <Showcase />
       <Plans />
       <HomeFaq />
-      <CtaBand />
+      <CtaBand homeMotion />
     </>
   );
 }

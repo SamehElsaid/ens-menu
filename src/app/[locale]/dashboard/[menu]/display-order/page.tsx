@@ -16,8 +16,15 @@ import {
   toCategoryScopedPayload,
   type DisplayOrderRow,
 } from "@/components/Dashboard/DisplayOrderList";
-import LinkTo from "@/components/Global/LinkTo";
-import { Button, buttonClasses } from "@/components/ui";
+import { IoGridOutline, IoImageOutline } from "react-icons/io5";
+import {
+  Badge,
+  Button,
+  EmptyState,
+  LoadingBlock,
+  PageShell,
+  SectionHeader,
+} from "@/components/ui";
 import type { Category, Item } from "@/types/Menu";
 
 function bySortOrderThenId<T extends { id: number; sortOrder?: number }>(
@@ -248,49 +255,50 @@ export default function DisplayOrderPage() {
   ]);
 
   return (
-    <>
-      <PageTitleWithHelp
-        className="mb-8"
-        title={t("title")}
-        description={t("subtitle")}
-        actions={
-          <>
-            <LinkTo
-              href={`/dashboard/${menuId}`}
-              className={buttonClasses({ variant: "secondary" })}
-            >
-              {tStaff("backToOverview")}
-            </LinkTo>
-            <Button
-              type="button"
-              onClick={handleSave}
-              disabled={!isDirty || saving || loading}
-              loading={saving}
-            >
-              {saving ? t("saving") : t("save")}
-            </Button>
-          </>
-        }
-      />
-
-      {isDirty ? (
-        <p className="mb-4 text-sm font-medium text-amber-600 dark:text-amber-400">
-          {t("unsavedChanges")}
-        </p>
-      ) : null}
-
+    <PageShell
+      kind="wide"
+      header={
+        <PageTitleWithHelp
+          title={t("title")}
+          description={t("subtitle")}
+          breadcrumbs={[
+            { label: tStaff("backToOverview"), href: `/dashboard/${menuId}` },
+            { label: t("title") },
+          ]}
+          breadcrumbsLabel={t("title")}
+        />
+      }
+      /* Save is pinned to the floor rather than sitting in the header: the item
+         grid pages in as you scroll, so dragging a product into place used to
+         leave the only Save button several screens above the change. */
+      footerSticky
+      footer={
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          {isDirty ? (
+            <Badge tone="warning" dot size="md">
+              {t("unsavedChanges")}
+            </Badge>
+          ) : null}
+          <Button
+            type="button"
+            onClick={handleSave}
+            disabled={!isDirty || saving || loading}
+            loading={saving}
+          >
+            {saving ? t("saving") : t("save")}
+          </Button>
+        </div>
+      }
+    >
       {loading ? (
-        <div className="rounded-lg border border-line bg-white px-6 py-16 text-center text-slate-500 dark:text-fg-subtle">
-          {t("loading")}
-        </div>
+        <LoadingBlock label={t("loading")} />
       ) : categoryRows.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
-          <p className="text-lg font-semibold text-fg">
-            {t("emptyCategories")}
-          </p>
-        </div>
+        <EmptyState
+          icon={<IoGridOutline aria-hidden />}
+          title={t("emptyCategories")}
+        />
       ) : (
-        <div className="space-y-6">
+        <div className="flex flex-col gap-4">
           <DisplayOrderCategoryStrip
             rows={categoryRows}
             locale={locale}
@@ -300,29 +308,19 @@ export default function DisplayOrderPage() {
             onReorder={setCategoryRows}
           />
 
-          {!showingAll && selectedCategoryLabel ? (
-            <div className="flex items-end justify-between gap-3">
-              <div>
-                <h2 className="text-xl font-black text-primary">
-                  {selectedCategoryLabel}
-                </h2>
-                <p className="text-sm text-fg-muted">
-                  {t("productsInCategory")}
-                </p>
-              </div>
-            </div>
-          ) : showingAll ? (
-            <p className="text-sm text-fg-muted">{t("allGroupedHint")}</p>
-          ) : null}
+          <SectionHeader
+            ruled
+            eyebrow={showingAll ? t("allCategories") : selectedCategoryLabel}
+            title={showingAll ? t("allGroupedHint") : t("productsInCategory")}
+          />
 
           {itemsInitialLoading ? (
-            <div className="rounded-lg border border-line bg-white px-6 py-16 text-center text-slate-500 dark:text-fg-subtle">
-              {t("loading")}
-            </div>
+            <LoadingBlock label={t("loading")} />
           ) : itemRows.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-16 text-center">
-              <p className="text-lg font-semibold text-fg">{t("emptyItems")}</p>
-            </div>
+            <EmptyState
+              icon={<IoImageOutline aria-hidden />}
+              title={t("emptyItems")}
+            />
           ) : (
             <>
               <DisplayOrderProductGrid
@@ -340,24 +338,18 @@ export default function DisplayOrderPage() {
                 className="flex h-12 items-center justify-center"
                 aria-hidden={!itemsHasMore && !itemsLoadingMore}
               >
-                {itemsLoadingMore ? (
-                  <span className="text-sm text-fg-muted">
-                    {t("loadingMore")}
-                  </span>
-                ) : itemsHasMore ? (
-                  <span className="text-sm text-fg-subtle">
-                    {t("scrollForMore")}
-                  </span>
-                ) : (
-                  <span className="text-sm text-fg-subtle">
-                    {t("endOfList")}
-                  </span>
-                )}
+                <span className="ui-label text-fg-subtle">
+                  {itemsLoadingMore
+                    ? t("loadingMore")
+                    : itemsHasMore
+                      ? t("scrollForMore")
+                      : t("endOfList")}
+                </span>
               </div>
             </>
           )}
         </div>
       )}
-    </>
+    </PageShell>
   );
 }

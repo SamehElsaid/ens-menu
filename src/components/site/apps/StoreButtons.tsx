@@ -1,5 +1,8 @@
+﻿"use client";
+
 import { FaApple, FaGooglePlay } from "react-icons/fa";
 import { cn } from "@/lib/cn";
+import { Magnetic } from "@/motion/Magnetic";
 
 /**
  * Store badges for the two app landings.
@@ -16,19 +19,22 @@ export function GooglePlayButton({
   href,
   kicker,
   className,
+  magnetic = false,
 }: {
   href: string;
   kicker: string;
   className?: string;
+  /** Call site 3 of 3 — staff app landing only. Owner app must leave this off. */
+  magnetic?: boolean;
 }) {
-  return (
+  const button = (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
         badge,
-        "bg-site-ink text-white transition-[transform,background-color] duration-150 hover:bg-site-ink/88 motion-safe:hover:-translate-y-px dark:bg-white dark:text-site-bg-ink dark:hover:bg-white/90",
+        "bg-site-ink text-white transition-[transform,background-color] duration-(--dur-settle) ease-(--ease-settle) hover:bg-site-ink/88 motion-safe:hover:-translate-y-px dark:bg-white dark:text-site-bg-ink dark:hover:bg-white/90",
         className,
       )}
     >
@@ -39,6 +45,8 @@ export function GooglePlayButton({
       </span>
     </a>
   );
+
+  return magnetic ? <Magnetic>{button}</Magnetic> : button;
 }
 
 export function AppStoreSoon({

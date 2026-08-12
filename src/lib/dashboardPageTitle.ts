@@ -1,4 +1,8 @@
-import { navSections, type NavItem } from "@/components/Dashboard/data";
+import {
+  accountNavSections,
+  venueNavSections,
+  type NavItem,
+} from "@/components/Dashboard/data";
 
 export type DashboardTitleRef = {
   namespace: string;
@@ -12,18 +16,29 @@ const NESTED_PATH_TITLES: Record<string, DashboardTitleRef> = {
   import: { namespace: "MenuImport", key: "pageTitle" },
 };
 
-/** /dashboard/:segment when segment is not a menu slug */
+/**
+ * `/dashboard/:segment` where the segment is an account route, not a menu ref.
+ *
+ * Derived from the account nav rather than hand-listed: the old map contained
+ * only `advertisements`, so `/dashboard/orders` and `/dashboard/staff` both
+ * reported their title as "Overview".
+ */
 const TOP_LEVEL_DASHBOARD_SEGMENTS: Record<string, DashboardTitleRef> = {
   advertisements: { namespace: "Dashboard", key: "Advertisements" },
+  ...Object.fromEntries(
+    accountNavSections
+      .flatMap((section) => section.items)
+      .filter((item) => item.link)
+      .map((item) => [
+        item.link as string,
+        { namespace: "Dashboard", key: item.label },
+      ]),
+  ),
 };
 
 function buildSegmentLabelMap(): Record<string, string> {
   const map: Record<string, string> = {};
-  const items: NavItem[] = [];
-
-  for (const section of navSections) {
-    items.push(...section.items);
-  }
+  const items: NavItem[] = venueNavSections.flatMap((section) => section.items);
 
   for (const item of items) {
     if (item.link === undefined) continue;

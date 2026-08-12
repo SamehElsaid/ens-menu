@@ -14,47 +14,40 @@ import {
   IoPersonOutline,
   IoTimeOutline,
 } from "react-icons/io5";
-import { Badge, EmptyState, Skeleton } from "@/components/ui";
+import { Badge, EmptyState, Skeleton, SkeletonRegion } from "@/components/ui";
 
 interface RecentActivityListProps {
   entries: MenuAuditLogEntry[];
   loading: boolean;
   menuSlugOrId: string;
-  isRTL: boolean;
 }
 
-function ActivityRowSkeleton() {
-  return (
-    <div className="flex items-center justify-between gap-4 rounded-lg bg-surface-2 p-3">
-      <div className="flex flex-1 items-center gap-3">
-        <Skeleton className="size-8 shrink-0 rounded-lg" />
-        <div className="min-w-0 flex-1 space-y-2">
-          <Skeleton className="h-4 max-w-[220px]" />
-          <Skeleton className="h-3 w-28" />
-        </div>
-      </div>
-      <Skeleton className="h-4 w-20" />
-    </div>
-  );
-}
+/* The ledger runs to the edges of the card it sits in, so its rules line up
+   with the card's own header rule instead of floating inside the padding. */
+const ledger = "-mx-3 divide-y divide-line border-y border-line sm:-mx-4";
+const row =
+  "grid gap-x-4 gap-y-1 px-3 py-2 sm:grid-cols-[8rem_minmax(0,1fr)] sm:px-4";
 
 export default function RecentActivityList({
   entries,
   loading,
   menuSlugOrId,
-  isRTL: _isRTL,
 }: RecentActivityListProps) {
   const t = useTranslations("menuOverview");
 
   if (loading) {
     return (
-      <ul className="space-y-2" aria-busy="true">
+      <SkeletonRegion label={t("latestActivity")} className={ledger}>
         {[1, 2, 3, 4, 5].map((i) => (
-          <li key={i}>
-            <ActivityRowSkeleton />
-          </li>
+          <div key={i} className={row}>
+            <Skeleton className="h-3 w-20" rounded="sm" />
+            <div className="flex flex-col gap-1.5">
+              <Skeleton className="h-3.5 w-2/3" rounded="sm" />
+              <Skeleton className="h-3 w-24" rounded="sm" />
+            </div>
+          </div>
         ))}
-      </ul>
+      </SkeletonRegion>
     );
   }
 
@@ -70,65 +63,61 @@ export default function RecentActivityList({
   }
 
   return (
-    <ul className="space-y-2">
-      {entries.map((entry) => {
-        const visual = getAuditVisual(entry.actionType, entry.entityType);
-        const Icon = visual.icon;
-        const title = resolveAuditTitle(entry);
-        const category = resolveAuditCategory(entry);
+    <>
+      <ol className={ledger}>
+        {entries.map((entry) => {
+          const visual = getAuditVisual(entry.actionType, entry.entityType);
+          const Icon = visual.icon;
+          const title = resolveAuditTitle(entry);
+          const category = resolveAuditCategory(entry);
+          const actor = entry.userName?.trim();
 
-        return (
-          <li
-            key={entry.id}
-            className="flex items-center justify-between gap-4 rounded-lg border border-transparent bg-surface-2/80 p-3 transition-colors duration-150 hover:border-line hover:bg-surface-2"
-          >
-            <div className="flex min-w-0 flex-1 items-start gap-3 text-start">
-              <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-surface text-brand shadow-xs ring-1 ring-line">
-                <Icon className="text-base" aria-hidden />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-fg">
-                  {title}
-                </p>
-                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-fg-muted">
-                  <Badge tone="neutral" size="sm">
-                    {t(`activityCategories.${category}` as never)}
-                  </Badge>
-                  {entry.userName?.trim() ? (
-                    <span className="inline-flex items-center gap-1">
-                      <IoPersonOutline className="shrink-0" aria-hidden />
-                      {entry.userName.trim()}
-                    </span>
-                  ) : null}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex shrink-0 items-center gap-3">
-              <span className="text-xs text-fg-muted md:text-sm">
+          return (
+            <li key={entry.id} className={row}>
+              <time className="ui-label pt-px">
                 {entry.isUndated ? (
                   t("legacyDate")
                 ) : (
                   <ViewTime data={entry.createdAt} />
                 )}
-              </span>
-            </div>
-          </li>
-        );
-      })}
+              </time>
 
-      <li className="pt-2">
-        <LinkTo
-          href={`/dashboard/${menuSlugOrId}/history`}
-          className="inline-flex items-center gap-1 rounded-sm text-sm font-medium text-brand transition-colors hover:text-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-        >
-          {t("viewAllActivity")}
-          <IoChevronForwardOutline
-            className="shrink-0 text-sm rtl:rotate-180"
-            aria-hidden
-          />
-        </LinkTo>
-      </li>
-    </ul>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                  <p className="flex min-w-0 items-start gap-2 text-[13px] font-semibold text-fg">
+                    <Icon
+                      className="mt-0.5 size-3.5 shrink-0 text-fg-subtle"
+                      aria-hidden
+                    />
+                    <span className="truncate">{title}</span>
+                  </p>
+                  <Badge tone="neutral">
+                    {t(`activityCategories.${category}` as never)}
+                  </Badge>
+                </div>
+
+                {actor ? (
+                  <p className="mt-1 inline-flex items-center gap-1 text-xs text-fg-subtle">
+                    <IoPersonOutline className="shrink-0" aria-hidden />
+                    {actor}
+                  </p>
+                ) : null}
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+
+      <LinkTo
+        href={`/dashboard/${menuSlugOrId}/history`}
+        className="mt-3 inline-flex items-center gap-1 rounded-sm text-[13px] font-medium text-brand transition-colors hover:text-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      >
+        {t("viewAllActivity")}
+        <IoChevronForwardOutline
+          className="shrink-0 text-sm rtl:rotate-180"
+          aria-hidden
+        />
+      </LinkTo>
+    </>
   );
 }

@@ -62,12 +62,12 @@ export function Tabs({
           );
 
           const classes = cn(
-            "relative inline-flex items-center gap-1.5 whitespace-nowrap px-2.5 py-2 text-[13px] font-medium row-settle",
-            "after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:transition-colors",
+            "relative inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-2.5 text-[13px] row-settle",
+            "after:absolute after:inset-x-1 after:-bottom-px after:h-0.5 after:rounded-full after:transition-colors",
             focusRing,
             active
-              ? "text-fg after:bg-brand"
-              : "text-fg-muted after:bg-transparent hover:text-fg",
+              ? "font-semibold text-brand-soft-fg after:bg-brand"
+              : "font-medium text-fg-muted after:bg-transparent hover:text-fg",
             item.disabled && "pointer-events-none opacity-50",
           );
 
@@ -115,6 +115,7 @@ export function SegmentedControl<T extends string>({
   onChange,
   label,
   size = "md",
+  disabled = false,
   className,
 }: {
   options: { value: T; label: ReactNode; count?: number }[];
@@ -122,14 +123,18 @@ export function SegmentedControl<T extends string>({
   onChange: (value: T) => void;
   label: string;
   size?: "sm" | "md";
+  /** Dims and inerts the whole group — for a filter whose data is in flight. */
+  disabled?: boolean;
   className?: string;
 }) {
   return (
     <div
       role="radiogroup"
       aria-label={label}
+      aria-disabled={disabled || undefined}
       className={cn(
-        "inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-lg bg-surface-2 p-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        "inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-lg border border-line bg-surface-2 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        disabled && "pointer-events-none opacity-60",
         className,
       )}
     >
@@ -141,14 +146,19 @@ export function SegmentedControl<T extends string>({
             type="button"
             role="radio"
             aria-checked={active}
+            disabled={disabled}
             onClick={() => onChange(option.value)}
             className={cn(
-              "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[4px] font-medium row-settle",
-              size === "sm" ? "px-2 py-0.5 text-xs" : "px-2.5 py-1 text-[13px]",
+              "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md row-settle",
+              size === "sm" ? "px-2.5 py-1 text-xs" : "px-3 py-1.5 text-[13px]",
               focusRing,
+              // A raised neutral pill rather than a brand fill: a page can carry
+              // several of these filter rows, and painting every selected
+              // segment purple is the "purple everywhere" failure the direction
+              // refuses. The brand is spent on the page's actions instead.
               active
-                ? "bg-surface text-fg shadow-xs"
-                : "text-fg-muted hover:text-fg",
+                ? "bg-surface font-semibold text-fg shadow-sm"
+                : "font-medium text-fg-muted hover:text-fg",
             )}
           >
             {option.label}

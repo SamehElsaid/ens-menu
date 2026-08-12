@@ -1,15 +1,23 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useId } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
-import { IoArrowBack } from "react-icons/io5";
 import { axiosGet, axiosPost, axiosPatch } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
-import CardDashBoard from "@/components/Card/CardDashBoard";
 import Editor from "@/components/Custom/Editor";
-import { Button, PageHeader, Skeleton, SkeletonRegion } from "@/components/ui";
+import {
+  Button,
+  Card,
+  Field,
+  Input,
+  Label,
+  PageHeader,
+  PageShell,
+  Skeleton,
+  SkeletonRegion,
+} from "@/components/ui";
 
 const defaultForm = {
   titleAr: "",
@@ -38,6 +46,8 @@ export default function KnowledgeManagementAddPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isRTL = locale === "ar";
+  const bodyEnLabelId = useId();
+  const bodyArLabelId = useId();
 
   const editId = searchParams.get("id");
   const isEditMode = !!editId;
@@ -130,137 +140,146 @@ export default function KnowledgeManagementAddPage() {
     }
   }, [form, isEditMode, editId, locale, t, router]);
 
+  const heading = isEditMode ? t("editTitle") : t("addTitle");
+
+  const header = (
+    <PageHeader
+      title={heading}
+      description={t("subtitle")}
+      breadcrumbs={[
+        { label: t("title"), href: "/admin/knowledge-management" },
+        { label: heading },
+      ]}
+      breadcrumbsLabel={tCommon("breadcrumb")}
+    />
+  );
+
   if (fetchingItem) {
     return (
-      <div className="space-y-6 pb-10">
+      <PageShell kind="form" header={header}>
         <SkeletonRegion label={tCommon("loading")}>
-          <Skeleton className="h-10 w-48 rounded-lg" />
-          <Skeleton className="mt-4 h-8 w-72" />
-          <CardDashBoard>
-            <div className="space-y-5">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Skeleton className="h-10 rounded-lg" />
-                <Skeleton className="h-10 rounded-lg" />
-              </div>
-              <Skeleton className="h-[400px] rounded-lg" />
-              <Skeleton className="h-[400px] rounded-lg" />
+          <Card padded="lg">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Skeleton className="h-14" />
+              <Skeleton className="h-14" />
             </div>
-          </CardDashBoard>
+            <div className="mt-5 flex flex-col gap-5">
+              <Skeleton className="h-100" rounded="lg" />
+              <Skeleton className="h-100" rounded="lg" />
+            </div>
+          </Card>
         </SkeletonRegion>
-      </div>
+      </PageShell>
     );
   }
 
+  /**
+   * A single authoring column.
+   *
+   * The entry is one record in two languages, so the form is ordered by field
+   * rather than by locale: the two titles sit side by side on one rule, then
+   * each body gets its own ruled section. Constraining the column keeps the
+   * title inputs at a readable measure instead of stretching them to the width
+   * of the editor below them.
+   */
   return (
-    <div className="space-y-6 pb-10">
-      <PageHeader
-        title={isEditMode ? t("editTitle") : t("addTitle")}
-        description={t("subtitle")}
-        actions={
+    <PageShell
+      kind="form"
+      header={header}
+      footerSticky
+      footer={
+        /* Two rich-text editors make this page metres long; the save button used
+           to live at the bottom of all of it. Reversed in DOM order so the
+           primary action is the first thing a thumb reaches when the row
+           stacks. */
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button
             variant="secondary"
-            startIcon={<IoArrowBack className="rtl:rotate-180" />}
             onClick={() => router.back()}
+            disabled={saving}
+            fullWidth
+            className="sm:w-auto"
           >
-            {t("back")}
+            {t("actions.cancel")}
           </Button>
-        }
-      />
-
-      {/* Form */}
-      <CardDashBoard>
-        <div className="space-y-5" dir={isRTL ? "rtl" : "ltr"}>
-          {/* Titles row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-fg-muted mb-1.5">
-                {t("titleEn")} <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={form.titleEn}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, titleEn: e.target.value }))
-                }
-                placeholder={t("titleEnPlaceholder")}
-                dir="ltr"
-                className="w-full px-4 py-2.5 rounded-lg border border-line bg-surface-2 text-fg placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400 transition"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-fg-muted mb-1.5">
-                {t("titleAr")} <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={form.titleAr}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, titleAr: e.target.value }))
-                }
-                placeholder={t("titleArPlaceholder")}
-                dir="rtl"
-                className="w-full px-4 py-2.5 rounded-lg border border-line bg-surface-2 text-fg placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400 transition"
-              />
-            </div>
-          </div>
-
-          {/* Description EN */}
-          <div>
-            <label className="block text-sm font-semibold text-fg-muted mb-1.5">
-              {t("descriptionEn")} <span className="text-red-500">*</span>
-            </label>
-            <Editor
-              initialTemplateName={form.descriptionEn}
-              setValue={handleSetValue}
-              trigger={handleTrigger}
-              type={"description_en"}
-              setShowDescription={() => {}}
-              to={"description_ar"}
-              refresh={refreshKey}
-              loadingSave={editorLoading}
-              setLoadingSave={setEditorLoading}
-            />
-          </div>
-
-          {/* Description AR */}
-          <div>
-            <label className="block text-sm font-semibold text-fg-muted mb-1.5">
-              {t("descriptionAr")} <span className="text-red-500">*</span>
-            </label>
-            <Editor
-              initialTemplateName={form.descriptionAr}
-              setValue={handleSetValue}
-              trigger={handleTrigger}
-              type={"description_ar"}
-              setShowDescription={() => {}}
-              to={"description_en"}
-              refresh={refreshKey}
-              loadingSave={editorLoading}
-              setLoadingSave={setEditorLoading}
-            />
-          </div>
-
-          {/* Actions */}
-          <div
-            className={`flex items-center gap-3 pt-2 ${isRTL ? "flex-row-reverse" : "justify-end"}`}
+          <Button
+            onClick={handleSave}
+            loading={saving}
+            disabled={editorLoading}
+            fullWidth
+            className="sm:w-auto"
           >
-            <Button
-              variant="secondary"
-              onClick={() => router.back()}
-              disabled={saving}
-            >
-              {t("actions.cancel")}
-            </Button>
-            <Button
-              onClick={handleSave}
-              loading={saving}
-              disabled={editorLoading}
-            >
-              {isEditMode ? t("actions.save") : t("actions.create")}
-            </Button>
-          </div>
+            {isEditMode ? t("actions.save") : t("actions.create")}
+          </Button>
         </div>
-      </CardDashBoard>
-    </div>
+      }
+    >
+      <Card padded="lg" dir={isRTL ? "rtl" : "ltr"}>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label={t("titleEn")} required>
+            <Input
+              value={form.titleEn}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, titleEn: e.target.value }))
+              }
+              placeholder={t("titleEnPlaceholder")}
+              dir="ltr"
+            />
+          </Field>
+          <Field label={t("titleAr")} required>
+            <Input
+              value={form.titleAr}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, titleAr: e.target.value }))
+              }
+              placeholder={t("titleArPlaceholder")}
+              dir="rtl"
+            />
+          </Field>
+        </div>
+
+        <section
+          role="group"
+          aria-labelledby={bodyEnLabelId}
+          className="mt-5 border-t border-line pt-5"
+        >
+          <Label id={bodyEnLabelId} required className="mb-1.5">
+            {t("descriptionEn")}
+          </Label>
+          <Editor
+            initialTemplateName={form.descriptionEn}
+            setValue={handleSetValue}
+            trigger={handleTrigger}
+            type={"description_en"}
+            setShowDescription={() => {}}
+            to={"description_ar"}
+            refresh={refreshKey}
+            loadingSave={editorLoading}
+            setLoadingSave={setEditorLoading}
+          />
+        </section>
+
+        <section
+          role="group"
+          aria-labelledby={bodyArLabelId}
+          className="mt-5 border-t border-line pt-5"
+        >
+          <Label id={bodyArLabelId} required className="mb-1.5">
+            {t("descriptionAr")}
+          </Label>
+          <Editor
+            initialTemplateName={form.descriptionAr}
+            setValue={handleSetValue}
+            trigger={handleTrigger}
+            type={"description_ar"}
+            setShowDescription={() => {}}
+            to={"description_en"}
+            refresh={refreshKey}
+            loadingSave={editorLoading}
+            setLoadingSave={setEditorLoading}
+          />
+        </section>
+      </Card>
+    </PageShell>
   );
 }

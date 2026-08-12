@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaSpinner } from "react-icons/fa";
 import { FiArrowUpLeft } from "react-icons/fi";
+import { cn } from "@/lib/cn";
+import { focusRing, Spinner } from "@/components/ui";
 
 type Props = {
   suggestions: string[];
@@ -41,9 +42,7 @@ export default function ChatSuggestions({
       key={messageKey ?? uniqueSuggestions.join("|")}
       className="mt-2 flex flex-col gap-2 ps-0 sm:mt-3 sm:gap-2.5 sm:ps-11"
     >
-      <p className="text-start text-[10px] font-medium text-slate-400 sm:text-[11px] dark:text-slate-500">
-        اقتراحات من لينا ✨
-      </p>
+      <p className="ui-label text-start">اقتراحات من لينا</p>
 
       <div className="flex flex-wrap gap-2 sm:gap-2.5">
         {uniqueSuggestions.map((suggestion) => {
@@ -55,18 +54,20 @@ export default function ChatSuggestions({
               type="button"
               disabled={!!sending}
               onClick={() => handleSelect(suggestion)}
-              className={`group inline-flex max-w-full items-center gap-1.5 rounded-full border px-3 py-2 text-start text-[11px] font-semibold shadow-sm transition-all duration-200 sm:px-3.5 sm:text-xs ${
+              className={cn(
+                "row-settle inline-flex max-w-full items-center gap-1.5 rounded-md border px-3 py-2 text-start text-[11px] font-semibold sm:px-3.5 sm:text-xs",
+                focusRing,
                 isSending
-                  ? "cursor-wait border-accent-purple/50 bg-purple-50 text-accent-purple dark:border-purple-500/50 dark:bg-purple-500/15 dark:text-purple-300"
-                  : "cursor-pointer border-accent-purple/25 bg-white text-slate-600 hover:scale-[1.04] hover:border-accent-purple/60 hover:bg-purple-50/90 hover:text-accent-purple hover:shadow-md hover:shadow-purple-500/10 active:scale-[0.97] dark:border-purple-500/25 dark:bg-slate-800/70 dark:text-slate-300 dark:hover:border-purple-500/50 dark:hover:bg-purple-500/10 dark:hover:text-purple-300"
-              }`}
+                  ? "cursor-wait border-brand-line bg-brand-soft text-brand-soft-fg"
+                  : "cursor-pointer border-line bg-surface text-fg-muted hover:border-brand-line hover:bg-brand-soft hover:text-brand-soft-fg",
+              )}
             >
               {isSending ? (
-                <FaSpinner className="size-3 animate-spin text-accent-purple dark:text-purple-400" />
+                <Spinner size="sm" />
               ) : (
                 <FiArrowUpLeft
                   size={12}
-                  className="shrink-0 -rotate-45 text-accent-purple/50 transition-transform group-hover:text-accent-purple rtl:rotate-90 dark:group-hover:text-purple-400"
+                  className="shrink-0 -rotate-45 text-fg-subtle rtl:rotate-90"
                 />
               )}
               <span className="truncate">{suggestion}</span>

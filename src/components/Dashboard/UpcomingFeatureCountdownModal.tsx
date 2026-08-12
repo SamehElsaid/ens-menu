@@ -31,13 +31,11 @@ type UpcomingFeatureCountdownModalProps = {
 
 function CountdownUnit({ label, value }: { label: string; value: number }) {
   return (
-    <div className="flex min-w-[4.5rem] flex-1 flex-col items-center rounded-lg bg-surface-2 px-3 py-3">
-      <span className="text-2xl font-semibold tabular-nums text-fg">
+    <div className="flex min-w-[4.5rem] flex-1 flex-col items-center rounded-xl border border-brand-line bg-brand-soft px-3 py-3.5">
+      <span className="ui-figure text-2xl text-brand-soft-fg">
         {String(value).padStart(2, "0")}
       </span>
-      <span className="mt-1 text-[11px] font-medium uppercase tracking-wide text-fg-muted">
-        {label}
-      </span>
+      <span className="ui-label mt-1 text-fg-muted">{label}</span>
     </div>
   );
 }

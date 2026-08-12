@@ -3,29 +3,33 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import type { ColDef, ICellRendererParams } from "ag-grid-community";
 import {
-  IoArrowBack,
   IoCallOutline,
   IoListOutline,
   IoRefreshOutline,
 } from "react-icons/io5";
-import CardDashBoard from "@/components/Card/CardDashBoard";
-import DataTable from "@/components/Custom/DataTable";
 import LogFollowUpCallModal from "@/components/Admin/LogFollowUpCallModal";
 import UserFollowUpCallsModal from "@/components/Admin/UserFollowUpCallsModal";
 import PhoneDisplay from "@/components/Global/PhoneDisplay";
 import { DemoDataBanner } from "@/components/Admin/AdminAnalyticsWidgets";
 import FollowUpTeamPerformance from "@/components/Admin/FollowUpTeamPerformance";
 import {
+  Badge,
   Button,
+  DataTable,
+  EmptyState,
   NoResultsState,
   PageHeader,
+  PageShell,
   SearchInput,
   SectionHeader,
   SegmentedControl,
-  buttonClasses,
+  StatCard,
+  StatGrid,
+  Toolbar,
+  type DataColumn,
 } from "@/components/ui";
+import { useDataTableLabels } from "@/hooks/useDataTableLabels";
 import {
   createFollowUpCall,
   fetchFollowUpQueue,
@@ -73,6 +77,8 @@ export default function AdminFollowUpsPage() {
   const locale = useLocale();
   const t = useTranslations("adminFollowUps");
   const tCommon = useTranslations("common");
+  const tAdmin = useTranslations("adminDashboard");
+  const tableLabels = useDataTableLabels();
   const router = useRouter();
   const textDir = locale === "ar" ? "rtl" : "ltr";
 
@@ -133,120 +139,103 @@ export default function AdminFollowUpsPage() {
     }
   };
 
-  const mutedTextClass = "text-fg-muted";
   const dashClass = "text-fg-subtle";
 
-  const columnDefs = useMemo<ColDef<FollowUpQueueUser>[]>(
+  const columns = useMemo<DataColumn<FollowUpQueueUser>[]>(
     () => [
       {
-        headerName: t("columns.name"),
-        field: "name",
-        flex: 1,
-        minWidth: 140,
-        cellRenderer: (params: ICellRendererParams<FollowUpQueueUser>) => {
-          const row = params.data;
-          if (!row) return null;
-          return (
-            <button
-              type="button"
-              className="font-medium text-primary hover:underline text-start"
-              onClick={() => router.push(`/admin/users/${row.id}`)}
-            >
-              {row.name}
-            </button>
-          );
-        },
+        id: "name",
+        header: t("columns.name"),
+        primary: true,
+        sortValue: (row) => row.name,
+        cell: (row) => (
+          <button
+            type="button"
+            className="text-start font-medium text-fg hover:underline"
+            onClick={() => router.push(`/admin/users/${row.id}`)}
+          >
+            {row.name}
+          </button>
+        ),
       },
       {
-        headerName: t("columns.phone"),
-        field: "phoneNumber",
-        width: 140,
-        cellRenderer: (params: ICellRendererParams<FollowUpQueueUser>) => {
-          const phone = params.data?.phoneNumber;
-          if (!phone) return <span className={dashClass}>—</span>;
-          return (
+        id: "phone",
+        header: t("columns.phone"),
+        cell: (row) =>
+          row.phoneNumber ? (
             <PhoneDisplay
-              value={phone}
-              className="text-primary hover:underline"
+              value={row.phoneNumber}
+              className="font-mono text-[12px] text-fg-muted hover:underline"
               copyOnClick
               title={t("copyPhone")}
               onCopied={() => toast.success(t("phoneCopied"))}
               onCopyFailed={() => toast.error(t("copyFailed"))}
             />
-          );
-        },
+          ) : (
+            <span className={dashClass}>—</span>
+          ),
       },
       {
-        headerName: t("columns.plan"),
-        field: "planName",
-        width: 100,
+        id: "plan",
+        header: t("columns.plan"),
+        sortValue: (row) => row.planName,
+        cell: (row) => (
+          <span className="text-fg-muted">{row.planName ?? "—"}</span>
+        ),
       },
       {
-        headerName: t("columns.menus"),
-        field: "menusCount",
-        width: 80,
+        id: "menus",
+        header: t("columns.menus"),
+        numeric: true,
+        align: "end",
+        sortValue: (row) => row.menusCount ?? 0,
+        cell: (row) => (
+          <span className="ui-figure text-[12px]" lang="en">
+            {row.menusCount ?? 0}
+          </span>
+        ),
       },
       {
-        headerName: t("columns.lastCall"),
-        width: 150,
-        cellRenderer: (params: ICellRendererParams<FollowUpQueueUser>) => {
-          const call = params.data?.lastCall;
-          if (!call) return <span className={dashClass}>—</span>;
-          return (
-            <span className="text-sm text-fg-muted">
-              {formatFollowUpDateTime(call.calledAt, locale).slice(0, 12)}
+        id: "lastCall",
+        header: t("columns.lastCall"),
+        numeric: true,
+        hideOnMobile: true,
+        sortValue: (row) =>
+          row.lastCall ? new Date(row.lastCall.calledAt) : null,
+        cell: (row) =>
+          row.lastCall ? (
+            <span className="ui-figure text-[12px] text-fg-muted" lang="en">
+              {formatFollowUpDateTime(row.lastCall.calledAt, locale).slice(
+                0,
+                12,
+              )}
             </span>
-          );
-        },
+          ) : (
+            <span className={dashClass}>—</span>
+          ),
       },
       {
-        headerName: t("columns.nextFollowUp"),
-        field: "nextFollowUpAt",
-        width: 120,
-        cellRenderer: (params: ICellRendererParams<FollowUpQueueUser>) => {
-          const date = params.data?.nextFollowUpAt;
+        id: "nextFollowUp",
+        header: t("columns.nextFollowUp"),
+        numeric: true,
+        sortValue: (row) =>
+          row.nextFollowUpAt ? new Date(row.nextFollowUpAt) : null,
+        cell: (row) => {
+          const date = row.nextFollowUpAt;
           if (!date) return <span className={dashClass}>—</span>;
           const overdue = new Date(date).getTime() < Date.now();
-          return (
-            <span
-              className={
-                overdue
-                  ? "text-red-600 dark:text-red-400 font-medium"
-                  : "text-fg-muted"
-              }
-            >
+          // An overdue date is the one thing on this row worth interrupting for,
+          // so it is a badge rather than a differently coloured date.
+          return overdue ? (
+            <Badge tone="danger" dot>
+              <span className="ui-figure" lang="en">
+                {date}
+              </span>
+            </Badge>
+          ) : (
+            <span className="ui-figure text-[12px] text-fg-muted" lang="en">
               {date}
             </span>
-          );
-        },
-      },
-      {
-        headerName: t("columns.actions"),
-        width: 220,
-        sortable: false,
-        pinned: locale === "ar" ? "left" : "right",
-        cellRenderer: (params: ICellRendererParams<FollowUpQueueUser>) => {
-          const row = params.data;
-          if (!row) return null;
-          return (
-            <div className="flex flex-wrap items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => setCallsTarget(row)}
-                className={buttonClasses({ variant: "secondary", size: "sm" })}
-              >
-                <IoListOutline />
-                {t("viewCalls")}
-              </button>
-              <button
-                type="button"
-                onClick={() => setLogTarget(row)}
-                className={buttonClasses({ variant: "subtle", size: "sm" })}
-              >
-                <IoCallOutline />
-                {t("logCall")}
-              </button>
-            </div>
           );
         },
       },
@@ -255,125 +244,175 @@ export default function AdminFollowUpsPage() {
   );
 
   return (
-    <div className="space-y-6 py-5 animate-fadeIn text-fg" dir={textDir}>
-      <PageHeader
-        title={t("title")}
-        description={t("subtitle")}
-        actions={
-          <>
-            <Button
-              variant="ghost"
-              size="sm"
-              startIcon={<IoArrowBack className="rtl:rotate-180" />}
-              onClick={() => router.push("/admin")}
-            >
-              {t("backToAdmin")}
-            </Button>
-            <Button
-              variant="secondary"
-              startIcon={<IoRefreshOutline />}
-              onClick={() => void load()}
-            >
-              {t("refresh")}
-            </Button>
-          </>
-        }
-      />
-
-      {isDemo && <DemoDataBanner message={t("demoDataBanner")} dir={textDir} />}
-
-      {report && (
+    <PageShell
+      kind="table"
+      header={
         <>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 flex-1 min-w-[280px]">
-              <CardDashBoard>
-                <p className={`text-xs ${mutedTextClass} mb-1`}>
-                  {t("report.callsToday")}
-                </p>
-                <p className="text-2xl font-bold tabular-nums text-fg">
-                  {report.callsToday}
-                </p>
-              </CardDashBoard>
-              <CardDashBoard>
-                <p className={`text-xs ${mutedTextClass} mb-1`}>
-                  {t("report.callsWeek")}
-                </p>
-                <p className="text-2xl font-bold tabular-nums text-fg">
-                  {report.callsThisWeek}
-                </p>
-              </CardDashBoard>
-              <CardDashBoard>
-                <p className={`text-xs ${mutedTextClass} mb-1`}>
-                  {t("report.overdue")}
-                </p>
-                <p className="text-2xl font-bold tabular-nums text-red-600 dark:text-red-400">
-                  {report.overdueCount}
-                </p>
-              </CardDashBoard>
-              <CardDashBoard>
-                <p className={`text-xs ${mutedTextClass} mb-1`}>
-                  {t("report.answeredRate")}
-                </p>
-                <p className="text-2xl font-bold tabular-nums text-fg">
-                  {report.answeredRate}%
-                </p>
-              </CardDashBoard>
-            </div>
+          <PageHeader
+            eyebrow={t("eyebrow")}
+            title={t("title")}
+            description={t("subtitle")}
+            breadcrumbs={[
+              { label: tAdmin("title"), href: "/admin" },
+              { label: t("title") },
+            ]}
+            breadcrumbsLabel={tCommon("breadcrumb")}
+            actions={
+              <Button
+                variant="secondary"
+                startIcon={<IoRefreshOutline />}
+                onClick={() => void load()}
+              >
+                {t("refresh")}
+              </Button>
+            }
+          />
+
+          {isDemo && (
+            <DemoDataBanner message={t("demoDataBanner")} dir={textDir} />
+          )}
+        </>
+      }
+    >
+      {/* Two regions, not one template: how the team is doing, then who to ring
+          next. The period switch belongs to the first region only, so it sits in
+          that section's own header rather than in a page-level filter bar that
+          would appear to govern the queue below it as well. */}
+      {loading || report ? (
+        <section className="flex flex-col gap-3">
+          <SectionHeader
+            title={t("report.title")}
+            ruled
+            actions={
+              <SegmentedControl
+                label={t("report.title")}
+                value={reportPeriod}
+                onChange={setReportPeriod}
+                size="sm"
+                disabled={loading}
+                options={(["7d", "30d"] as const).map((p) => ({
+                  value: p,
+                  label: t(`teamReport.period.${p}`),
+                }))}
+              />
+            }
+          />
+
+          <StatGrid columns={4} ruled>
+            <StatCard
+              label={t("report.callsToday")}
+              loading={loading}
+              value={<span lang="en">{report?.callsToday ?? 0}</span>}
+            />
+            <StatCard
+              label={t("report.callsWeek")}
+              loading={loading}
+              value={<span lang="en">{report?.callsThisWeek ?? 0}</span>}
+            />
+            <StatCard
+              label={t("report.overdue")}
+              loading={loading}
+              value={<span lang="en">{report?.overdueCount ?? 0}</span>}
+              hint={
+                (report?.overdueCount ?? 0) > 0 ? (
+                  <Badge tone="danger" dot>
+                    {t("segments.overdue")}
+                  </Badge>
+                ) : undefined
+              }
+            />
+            <StatCard
+              label={t("report.answeredRate")}
+              loading={loading}
+              value={<span lang="en">{report?.answeredRate ?? 0}%</span>}
+            />
+          </StatGrid>
+
+          {report ? (
+            <FollowUpTeamPerformance
+              report={report}
+              dir={textDir}
+              onAgentClick={(adminName) => setAgentTarget(adminName)}
+            />
+          ) : null}
+        </section>
+      ) : null}
+
+      <section className="flex flex-col gap-3">
+        <SectionHeader title={t("queueTitle")} ruled />
+        <Toolbar
+          search={
+            <SearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder={t("queueSearchPlaceholder")}
+              label={t("queueSearchPlaceholder")}
+            />
+          }
+          filters={
             <SegmentedControl
-              label={t("title")}
-              value={reportPeriod}
-              onChange={setReportPeriod}
+              label={t("queueTitle")}
+              value={segment}
+              onChange={setSegment}
               size="sm"
-              options={(["7d", "30d"] as const).map((p) => ({
-                value: p,
-                label: t(`teamReport.period.${p}`),
+              options={SEGMENTS.map((s) => ({
+                value: s,
+                label: t(`segments.${s}`),
               }))}
             />
-          </div>
-
-          <FollowUpTeamPerformance
-            report={report}
-            dir={textDir}
-            onAgentClick={(adminName) => setAgentTarget(adminName)}
-          />
-        </>
-      )}
-
-      <SegmentedControl
-        label={t("queueTitle")}
-        value={segment}
-        onChange={setSegment}
-        options={SEGMENTS.map((s) => ({
-          value: s,
-          label: t(`segments.${s}`),
-        }))}
-      />
-
-      <CardDashBoard>
-        <SectionHeader title={t("queueTitle")} className="mb-4" />
-        <SearchInput
-          value={searchQuery}
-          onChange={setSearchQuery}
-          placeholder={t("queueSearchPlaceholder")}
-          label={t("queueSearchPlaceholder")}
-          className="mb-4"
+          }
         />
-        {!loading && searchQuery.trim() && filteredQueue.length === 0 ? (
-          <NoResultsState
-            title={t("queueNoResults")}
-            onClear={() => setSearchQuery("")}
-            clearLabel={tCommon("clearSearch")}
-          />
-        ) : (
-          <DataTable<FollowUpQueueUser>
-            rowData={filteredQueue}
-            columnDefs={columnDefs}
-            loading={loading}
-            locale={locale}
-            showRowNumbers
-          />
-        )}
-      </CardDashBoard>
+        <DataTable<FollowUpQueueUser>
+          columns={columns}
+          rows={filteredQueue}
+          getRowKey={(row) => String(row.id)}
+          caption={t("queueTitle")}
+          loading={loading}
+          defaultSortColumnId="nextFollowUp"
+          sortLocale={locale}
+          tableId="admin-follow-ups"
+          stickyHeader
+          densityControl
+          labels={tableLabels}
+          empty={
+            /* An empty queue is good news — nobody is overdue — and saying "no
+               results match your search" for it was both wrong and alarming. */
+            searchQuery.trim() ? (
+              <NoResultsState
+                title={t("queueNoResults")}
+                onClear={() => setSearchQuery("")}
+                clearLabel={tCommon("clearSearch")}
+              />
+            ) : (
+              <EmptyState
+                title={t("queueEmpty")}
+                description={t("queueEmptyDescription")}
+                size="sm"
+              />
+            )
+          }
+          rowActions={(row) => (
+            <span className="flex flex-wrap items-center gap-1.5">
+              <Button
+                variant="secondary"
+                size="sm"
+                startIcon={<IoListOutline />}
+                onClick={() => setCallsTarget(row)}
+              >
+                {t("viewCalls")}
+              </Button>
+              <Button
+                variant="subtle"
+                size="sm"
+                startIcon={<IoCallOutline />}
+                onClick={() => setLogTarget(row)}
+              >
+                {t("logCall")}
+              </Button>
+            </span>
+          )}
+        />
+      </section>
 
       {callsTarget && (
         <UserFollowUpCallsModal
@@ -411,6 +450,6 @@ export default function AdminFollowUpsPage() {
           submitting={submitting}
         />
       )}
-    </div>
+    </PageShell>
   );
 }

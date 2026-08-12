@@ -20,6 +20,7 @@ import {
   useProfileGateStatus,
 } from "@/components/Dashboard/RequirePhone";
 import { DashboardTitleProvider } from "@/components/Dashboard/DashboardTitleProvider";
+import { LoadingBlock } from "@/components/ui";
 import UpcomingFeaturesAnnouncement from "@/components/Dashboard/UpcomingFeaturesAnnouncement";
 import { PendingOrdersProvider } from "@/components/Dashboard/PendingOrdersProvider";
 import { usePathname } from "@/i18n/navigation";
@@ -28,6 +29,7 @@ import {
   menuMatchesRouteKey,
   normalizeMenuFromApi,
 } from "@/lib/normalizeMenuFromApi";
+import { ACCOUNT_SEGMENTS } from "@/lib/consoleNav";
 
 interface MenusResponse {
   menu: Menu;
@@ -45,13 +47,17 @@ interface MenusResponse {
 /**
  * Segments directly under `/dashboard` that are *not* a menu id. Without them
  * the layout would try to load `/menus/orders` and bounce to /unauthorized.
+ *
+ * Derived from the account nav so a new account route cannot be added without
+ * this set learning about it. `advertisements` and `domain-transfer` are legacy
+ * account stubs kept for old links; `domain-transfer` in particular was missing
+ * here, so visiting it fetched a menu named "domain-transfer".
  */
 const TOP_LEVEL_SEGMENTS = new Set([
+  ...ACCOUNT_SEGMENTS,
   "subscription",
   "advertisements",
-  "orders",
-  "delivery-orders",
-  "staff",
+  "domain-transfer",
 ]);
 
 function isMenuRouteSegment(segment: string | null): segment is string {
@@ -151,9 +157,7 @@ export default function DashboardClientLayout({
     hasMenu ? (
       children
     ) : (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
-        <div className="w-11 h-11 border-[3px] border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
+      <LoadingBlock className="min-h-[50vh]" />
     )
   ) : (
     children

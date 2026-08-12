@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { axiosPost } from "@/shared/axiosCall";
 import { _resizeImage } from "@/shared/_shared";
 import SunEditor from "suneditor-react";
+import { Skeleton, Spinner } from "@/components/ui";
 
 interface ImageUploadResult {
   result: Array<{ url: string; name: string; size: number }>;
@@ -45,17 +46,18 @@ const Editor = ({
   }, [refresh]);
 
   if (loading) {
-    return (
-      <div className="w-full h-[400px] rounded-[10px] animate-pulse bg-gray-200" />
-    );
+    return <Skeleton className="h-100 w-full rounded-lg" />;
   }
 
   return (
     <div className="relative">
       {isLoading && (
-        <div className="absolute bg-violet-500 px-2 py-1 bottom-0 end-0 z-10 flex items-center justify-center backdrop-blur-[2px]">
-          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm text-white ms-2">{t("saving")}</span>
+        <div
+          className="absolute bottom-0 end-0 z-10 flex items-center gap-1.5 border-s border-t border-line bg-surface-2 px-2 py-1"
+          role="status"
+        >
+          <Spinner size="xs" />
+          <span className="ui-label">{t("saving")}</span>
         </div>
       )}
 

@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import type { ColDef, ICellRendererParams } from "ag-grid-community";
-import { IoArrowBack, IoRefreshOutline } from "react-icons/io5";
+import { IoRefreshOutline } from "react-icons/io5";
 import {
   FaCheckCircle,
   FaClock,
@@ -14,17 +13,26 @@ import {
   FaUserShield,
   FaWallet,
 } from "react-icons/fa";
-import CardDashBoard from "@/components/Card/CardDashBoard";
-import DataTable from "@/components/Custom/DataTable";
 import { DemoDataBanner } from "@/components/Admin/AdminAnalyticsWidgets";
 import {
+  Badge,
   Button,
+  DataTable,
+  EmptyState,
+  NoResultsState,
   PageHeader,
+  PageShell,
+  Pagination,
   SearchInput,
-  SectionHeader,
   SegmentedControl,
+  Select,
+  StatCard,
+  StatGrid,
   Toolbar,
+  type DataColumn,
+  type StatusTone,
 } from "@/components/ui";
+import { useDataTableLabels } from "@/hooks/useDataTableLabels";
 import {
   fetchAdminPayments,
   formatPaymentAmount,
@@ -65,44 +73,36 @@ const STATUS_FILTERS: AdminPaymentStatusFilter[] = [
 
 const PERIODS: AdminPaymentsPeriod[] = ["7d", "30d", "90d", "all"];
 
-function sourceTone(source: AdminSubscriptionSource): string {
-  return source === "paid"
-    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
-    : "bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300";
-}
+/* Money moved through a gateway and money granted by an operator are different
+   kinds of fact, so they are held apart by tone as well as by word. */
+const SOURCE_TONE: Record<AdminSubscriptionSource, StatusTone> = {
+  paid: "success",
+  admin: "info",
+};
 
-function subscriptionStatusTone(status: AdminSubscriptionRecordStatus): string {
-  switch (status) {
-    case "active":
-      return "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300";
-    case "expired":
-      return "bg-slate-100 text-slate-700 dark:bg-slate-500/20 ";
-    case "cancelled":
-      return "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300";
-    default:
-      return "bg-slate-100 text-fg-muted";
-  }
-}
+const SUBSCRIPTION_STATUS_TONE: Record<
+  AdminSubscriptionRecordStatus,
+  StatusTone
+> = {
+  active: "success",
+  expired: "neutral",
+  cancelled: "danger",
+};
 
-function statusTone(status: AdminPaymentStatus): string {
-  switch (status) {
-    case "success":
-      return "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300";
-    case "pending":
-      return "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300";
-    case "failed":
-    case "cancelled":
-      return "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300";
-    case "refunded":
-      return "bg-slate-100 text-slate-700 dark:bg-slate-500/20 ";
-    default:
-      return "bg-slate-100 text-fg-muted";
-  }
-}
+const PAYMENT_STATUS_TONE: Record<AdminPaymentStatus, StatusTone> = {
+  success: "success",
+  pending: "warning",
+  failed: "danger",
+  cancelled: "danger",
+  refunded: "neutral",
+};
 
 export default function AdminPaymentsPage() {
   const locale = useLocale();
   const t = useTranslations("adminPayments");
+  const tCommon = useTranslations("common");
+  const tAdmin = useTranslations("adminDashboard");
+  const tableLabels = useDataTableLabels();
   const router = useRouter();
   const textDir = locale === "ar" ? "rtl" : "ltr";
 
@@ -167,306 +167,223 @@ export default function AdminPaymentsPage() {
     setPage(1);
   };
 
-  const columnDefs = useMemo<ColDef<AdminPaymentTransaction>[]>(
+  const columns = useMemo<DataColumn<AdminPaymentTransaction>[]>(
     () => [
       {
-        headerName: t("columns.customer"),
-        flex: 1,
-        minWidth: 160,
-        cellRenderer: (
-          params: ICellRendererParams<AdminPaymentTransaction>,
-        ) => {
-          const row = params.data;
-          if (!row) return null;
-          return (
-            <button
-              type="button"
-              className="text-start"
-              onClick={() => router.push(`/admin/users/${row.userId}`)}
-            >
-              <span className="block font-medium text-primary hover:underline">
-                {row.userName}
-              </span>
-              <span className="block text-xs text-fg-muted truncate max-w-[200px]">
-                {row.userEmail}
-              </span>
-            </button>
-          );
-        },
-      },
-      {
-        headerName: t("columns.plan"),
-        field: "planName",
-        width: 80,
-      },
-      {
-        headerName: t("columns.subscriptionSource"),
-        field: "subscriptionSource",
-        width: 130,
-        cellRenderer: (
-          params: ICellRendererParams<AdminPaymentTransaction>,
-        ) => {
-          const source = params.value as AdminSubscriptionSource;
-          return (
-            <span
-              className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${sourceTone(source)}`}
-            >
-              {t(`source.${source}`)}
+        id: "customer",
+        header: t("columns.customer"),
+        primary: true,
+        cell: (row) => (
+          <button
+            type="button"
+            className="min-w-0 text-start"
+            onClick={() => router.push(`/admin/users/${row.userId}`)}
+          >
+            <span className="block font-medium text-fg hover:underline">
+              {row.userName}
             </span>
-          );
-        },
-      },
-      {
-        headerName: t("columns.subscriptionStatus"),
-        field: "subscriptionStatus",
-        width: 110,
-        cellRenderer: (
-          params: ICellRendererParams<AdminPaymentTransaction>,
-        ) => {
-          const subStatus = params.value as
-            AdminSubscriptionRecordStatus | undefined;
-          if (!subStatus) return <span className="text-fg-subtle">—</span>;
-          return (
-            <span
-              className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${subscriptionStatusTone(subStatus)}`}
-            >
-              {t(`subscriptionStatus.${subStatus}`)}
+            <span className="block max-w-[200px] truncate font-mono text-[11px] text-fg-muted">
+              {row.userEmail}
             </span>
-          );
-        },
+          </button>
+        ),
       },
       {
-        headerName: t("columns.billing"),
-        field: "billingCycle",
-        width: 100,
-        cellRenderer: (params: ICellRendererParams<AdminPaymentTransaction>) =>
-          t(`billing.${params.value as string}`),
+        id: "plan",
+        header: t("columns.plan"),
+        cell: (row) => <span className="text-fg-muted">{row.planName}</span>,
       },
       {
-        headerName: t("columns.amount"),
-        field: "amount",
-        width: 120,
-        cellRenderer: (
-          params: ICellRendererParams<AdminPaymentTransaction>,
-        ) => {
-          const row = params.data;
-          if (!row) return null;
-          if (row.subscriptionSource === "admin" || row.amount <= 0) {
-            return (
-              <span className="text-fg-subtle tabular-nums">
-                {t("amountFree")}
-              </span>
-            );
-          }
-          return (
-            <span className="font-semibold tabular-nums">
+        id: "source",
+        header: t("columns.subscriptionSource"),
+        cell: (row) => (
+          <Badge tone={SOURCE_TONE[row.subscriptionSource] ?? "neutral"} dot>
+            {t(`source.${row.subscriptionSource}`)}
+          </Badge>
+        ),
+      },
+      {
+        id: "subscriptionStatus",
+        header: t("columns.subscriptionStatus"),
+        cell: (row) =>
+          row.subscriptionStatus ? (
+            <Badge
+              tone={SUBSCRIPTION_STATUS_TONE[row.subscriptionStatus] ?? "neutral"}
+              dot
+            >
+              {t(`subscriptionStatus.${row.subscriptionStatus}`)}
+            </Badge>
+          ) : (
+            <span className="text-fg-subtle">—</span>
+          ),
+      },
+      {
+        id: "billing",
+        header: t("columns.billing"),
+        hideOnMobile: true,
+        cell: (row) => (
+          <span className="text-fg-muted">{t(`billing.${row.billingCycle}`)}</span>
+        ),
+      },
+      {
+        id: "amount",
+        header: t("columns.amount"),
+        numeric: true,
+        align: "end",
+        cell: (row) =>
+          row.subscriptionSource === "admin" || row.amount <= 0 ? (
+            <span className="ui-figure text-[12px] text-fg-subtle">
+              {t("amountFree")}
+            </span>
+          ) : (
+            <span className="ui-figure text-[12px] text-fg" lang="en">
               {formatPaymentAmount(row.amount, row.currency)}
             </span>
-          );
-        },
+          ),
       },
       {
-        headerName: t("columns.status"),
-        field: "status",
-        width: 110,
-        cellRenderer: (
-          params: ICellRendererParams<AdminPaymentTransaction>,
-        ) => {
-          const status = params.value as AdminPaymentStatus;
-          return (
-            <span
-              className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${statusTone(status)}`}
-            >
-              {t(`status.${status}`)}
-            </span>
-          );
-        },
+        id: "status",
+        header: t("columns.status"),
+        cell: (row) => (
+          <Badge tone={PAYMENT_STATUS_TONE[row.status] ?? "neutral"} dot>
+            {t(`status.${row.status}`)}
+          </Badge>
+        ),
       },
       {
-        headerName: t("columns.gateway"),
-        field: "gateway",
-        width: 100,
-        hide: true,
+        id: "startDate",
+        header: t("columns.startDate"),
+        numeric: true,
+        align: "end",
+        hideOnMobile: true,
+        cell: (row) => (
+          <span className="ui-figure text-[12px] text-fg-muted" lang="en">
+            {formatPaymentDate(row.subscriptionStartAt ?? row.createdAt, locale)}
+          </span>
+        ),
       },
       {
-        headerName: t("columns.startDate"),
-        field: "subscriptionStartAt",
-        width: 140,
-        cellRenderer: (
-          params: ICellRendererParams<AdminPaymentTransaction>,
-        ) => {
-          const row = params.data;
-          const value =
-            row?.subscriptionStartAt ?? row?.createdAt ?? params.value;
-          return formatPaymentDate(value as string, locale);
-        },
+        id: "endDate",
+        header: t("columns.endDate"),
+        numeric: true,
+        align: "end",
+        hideOnMobile: true,
+        cell: (row) => (
+          <span className="ui-figure text-[12px] text-fg-muted" lang="en">
+            {formatPaymentDate(row.subscriptionEndAt, locale)}
+          </span>
+        ),
       },
       {
-        headerName: t("columns.endDate"),
-        field: "subscriptionEndAt",
-        width: 140,
-        cellRenderer: (params: ICellRendererParams<AdminPaymentTransaction>) =>
-          formatPaymentDate(params.value as string | null, locale),
-      },
-      {
-        headerName: t("columns.date"),
-        field: "paidAt",
-        width: 140,
-        cellRenderer: (
-          params: ICellRendererParams<AdminPaymentTransaction>,
-        ) => {
-          const row = params.data;
-          const value = row?.paidAt ?? row?.createdAt;
-          return formatPaymentDate(value as string, locale);
-        },
+        id: "paidAt",
+        header: t("columns.date"),
+        numeric: true,
+        align: "end",
+        cell: (row) => (
+          <span className="ui-figure text-[12px] text-fg-muted" lang="en">
+            {formatPaymentDate(row.paidAt ?? row.createdAt, locale)}
+          </span>
+        ),
       },
     ],
     [locale, router, t],
   );
 
-  const statCards = statistics
-    ? [
-        {
-          id: "proActive",
-          label: t("stats.proActive"),
-          value: (statistics.proActiveCount ?? 0).toLocaleString(),
-          icon: FaUserShield,
-          color: "primary",
-        },
-        {
-          id: "paidActive",
-          label: t("stats.paidViaGateway"),
-          value: (statistics.paidActiveCount ?? 0).toLocaleString(),
-          icon: FaCheckCircle,
-          color: "green",
-        },
-        {
-          id: "adminGranted",
-          label: t("stats.adminGranted"),
-          value: (statistics.adminGrantedCount ?? 0).toLocaleString(),
-          icon: FaUserCog,
-          color: "violet",
-        },
-        {
-          id: "revenue",
-          label: t("stats.totalRevenue"),
-          value: formatPaymentAmount(
-            statistics.totalRevenue,
-            statistics.currency,
-          ),
-          icon: FaWallet,
-          color: "emerald",
-        },
-        {
-          id: "month",
-          label: t("stats.revenueThisMonth"),
-          value: formatPaymentAmount(
-            statistics.revenueThisMonth,
-            statistics.currency,
-          ),
-          icon: FaCreditCard,
-          color: "primary",
-        },
-        {
-          id: "pending",
-          label: t("stats.pending"),
-          value: statistics.pendingCount.toLocaleString(),
-          icon: FaClock,
-          color: "amber",
-        },
-        {
-          id: "failed",
-          label: t("stats.failed"),
-          value: statistics.failedCount.toLocaleString(),
-          icon: FaTimesCircle,
-          color: "red",
-        },
-      ]
-    : [];
-
-  const colorMap: Record<string, { bg: string; text: string; border: string }> =
+  /* The seven metrics are a fixed set, so the row is described up front and each
+     card carries `loading` until its figure arrives. Building the array from
+     `statistics` meant the strip did not exist on first paint and then shoved
+     the filter form and the table down the page when it did. */
+  const statCards = [
     {
-      emerald: {
-        bg: "bg-emerald-50 dark:bg-emerald-500/10",
-        text: "text-emerald-600 dark:text-emerald-400",
-        border: "border-emerald-200 dark:border-emerald-500/20",
-      },
-      primary: {
-        bg: "bg-primary/10 dark:bg-primary/20",
-        text: "text-primary",
-        border: "border-primary/20",
-      },
-      green: {
-        bg: "bg-green-50 dark:bg-green-500/10",
-        text: "text-green-600 dark:text-green-400",
-        border: "border-green-200 dark:border-green-500/20",
-      },
-      amber: {
-        bg: "bg-amber-50 dark:bg-amber-500/10",
-        text: "text-amber-600 dark:text-amber-400",
-        border: "border-amber-200 dark:border-amber-500/20",
-      },
-      red: {
-        bg: "bg-red-50 dark:bg-red-500/10",
-        text: "text-red-600 dark:text-red-400",
-        border: "border-red-200 dark:border-red-500/20",
-      },
-      violet: {
-        bg: "bg-violet-50 dark:bg-violet-500/10",
-        text: "text-violet-600 dark:text-violet-400",
-        border: "border-violet-200 dark:border-violet-500/20",
-      },
-    };
+      id: "proActive",
+      label: t("stats.proActive"),
+      value: (statistics?.proActiveCount ?? 0).toLocaleString(),
+      icon: <FaUserShield />,
+    },
+    {
+      id: "paidActive",
+      label: t("stats.paidViaGateway"),
+      value: (statistics?.paidActiveCount ?? 0).toLocaleString(),
+      icon: <FaCheckCircle />,
+    },
+    {
+      id: "adminGranted",
+      label: t("stats.adminGranted"),
+      value: (statistics?.adminGrantedCount ?? 0).toLocaleString(),
+      icon: <FaUserCog />,
+    },
+    {
+      id: "revenue",
+      label: t("stats.totalRevenue"),
+      value: formatPaymentAmount(
+        statistics?.totalRevenue ?? 0,
+        statistics?.currency ?? "EGP",
+      ),
+      icon: <FaWallet />,
+    },
+    {
+      id: "month",
+      label: t("stats.revenueThisMonth"),
+      value: formatPaymentAmount(
+        statistics?.revenueThisMonth ?? 0,
+        statistics?.currency ?? "EGP",
+      ),
+      icon: <FaCreditCard />,
+    },
+    {
+      id: "pending",
+      label: t("stats.pending"),
+      value: (statistics?.pendingCount ?? 0).toLocaleString(),
+      icon: <FaClock />,
+    },
+    {
+      id: "failed",
+      label: t("stats.failed"),
+      value: (statistics?.failedCount ?? 0).toLocaleString(),
+      icon: <FaTimesCircle />,
+    },
+  ];
 
   return (
-    <div className="space-y-6 py-5 animate-fadeIn" dir={textDir}>
-      <PageHeader
-        title={t("title")}
-        description={t("subtitle")}
-        actions={
-          <Button
-            variant="secondary"
-            startIcon={<IoArrowBack className="rtl:rotate-180" />}
-            onClick={() => router.push("/admin")}
-          >
-            {t("backToAdmin")}
-          </Button>
-        }
-      />
+    <PageShell
+      kind="table"
+      header={
+        <>
+          {/* The back button is gone: the breadcrumb already says where this
+              sits, and a duplicate control in the primary action slot spends
+              the most valuable spot on the page on going backwards. */}
+          <PageHeader
+            eyebrow={t("eyebrow")}
+            title={t("title")}
+            description={t("subtitle")}
+            breadcrumbs={[
+              { label: tAdmin("title"), href: "/admin" },
+              { label: t("title") },
+            ]}
+            breadcrumbsLabel={tCommon("breadcrumb")}
+          />
 
-      {isDemo && <DemoDataBanner message={t("demoDataBanner")} dir={textDir} />}
+          {isDemo && (
+            <DemoDataBanner message={t("demoDataBanner")} dir={textDir} />
+          )}
 
-      {statCards.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-4">
-          {statCards.map((card) => {
-            const Icon = card.icon;
-            const colors = colorMap[card.color] ?? colorMap.primary;
-            return (
-              <CardDashBoard
+          <StatGrid columns={4} ruled>
+            {statCards.map((card) => (
+              <StatCard
                 key={card.id}
-                borderColor={colors.border}
-                className="p-5"
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 ${colors.bg}`}
-                  >
-                    <Icon className={`text-lg ${colors.text}`} />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs text-fg-muted mb-1">{card.label}</p>
-                    <p className="text-lg font-bold text-fg tabular-nums truncate">
-                      {card.value}
-                    </p>
-                  </div>
-                </div>
-              </CardDashBoard>
-            );
-          })}
-        </div>
-      )}
-
-      <CardDashBoard className="p-4">
+                label={card.label}
+                value={<span lang="en">{card.value}</span>}
+                icon={card.icon}
+                loading={loading && !statistics}
+              />
+            ))}
+            {/* Seven metrics leave a hole in the last row of an edge-shared
+                grid, and the hole would show the rule colour, not a panel. */}
+            <div className="bg-surface" aria-hidden />
+          </StatGrid>
+        </>
+      }
+      toolbar={
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -482,6 +399,77 @@ export default function AdminPaymentsPage() {
                 label={t("search")}
                 debounceMs={0}
               />
+            }
+            filters={
+              <>
+                <Select
+                  inputSize="sm"
+                  aria-label={t("filters.source")}
+                  value={sourceFilter}
+                  onChange={(event) => {
+                    setSourceFilter(
+                      event.target.value as AdminSubscriptionSourceFilter,
+                    );
+                    setPage(1);
+                  }}
+                  wrapperClassName="w-auto"
+                >
+                  {SOURCE_FILTERS.map((source) => (
+                    <option key={source} value={source}>
+                      {t(`source.${source}`)}
+                    </option>
+                  ))}
+                </Select>
+                <Select
+                  inputSize="sm"
+                  aria-label={t("filters.subscriptionStatus")}
+                  value={subscriptionStatusFilter}
+                  onChange={(event) => {
+                    setSubscriptionStatusFilter(
+                      event.target.value as AdminSubscriptionStatusFilter,
+                    );
+                    setPage(1);
+                  }}
+                  wrapperClassName="w-auto"
+                >
+                  {SUBSCRIPTION_STATUS_FILTERS.map((subStatus) => (
+                    <option key={subStatus} value={subStatus}>
+                      {t(`subscriptionStatus.${subStatus}`)}
+                    </option>
+                  ))}
+                </Select>
+                <Select
+                  inputSize="sm"
+                  aria-label={t("filters.status")}
+                  value={statusFilter}
+                  onChange={(event) => {
+                    setStatusFilter(
+                      event.target.value as AdminPaymentStatusFilter,
+                    );
+                    setPage(1);
+                  }}
+                  wrapperClassName="w-auto"
+                >
+                  {STATUS_FILTERS.map((status) => (
+                    <option key={status} value={status}>
+                      {t(`filters.${status}`)}
+                    </option>
+                  ))}
+                </Select>
+                <SegmentedControl<AdminPaymentsPeriod>
+                  label={t("filters.period")}
+                  value={period}
+                  onChange={(next) => {
+                    setPeriod(next);
+                    setPage(1);
+                  }}
+                  size="sm"
+                  options={PERIODS.map((p) => ({
+                    value: p,
+                    label: t(`period.${p}`),
+                  }))}
+                />
+              </>
             }
             actions={
               <>
@@ -500,81 +488,49 @@ export default function AdminPaymentsPage() {
             }
           />
         </form>
-      </CardDashBoard>
-
-      <CardDashBoard className="space-y-4 p-4">
-        <SectionHeader title={t("filters.source")} />
-        <SegmentedControl
-          label={t("filters.source")}
-          value={sourceFilter}
-          onChange={(source) => {
-            setSourceFilter(source);
-            setPage(1);
-          }}
-          size="sm"
-          options={SOURCE_FILTERS.map((source) => ({
-            value: source,
-            label: t(`source.${source}`),
-          }))}
-        />
-        <SectionHeader title={t("filters.subscriptionStatus")} />
-        <SegmentedControl
-          label={t("filters.subscriptionStatus")}
-          value={subscriptionStatusFilter}
-          onChange={(subStatus) => {
-            setSubscriptionStatusFilter(subStatus);
-            setPage(1);
-          }}
-          size="sm"
-          options={SUBSCRIPTION_STATUS_FILTERS.map((subStatus) => ({
-            value: subStatus,
-            label: t(`subscriptionStatus.${subStatus}`),
-          }))}
-        />
-        <SectionHeader title={t("filters.status")} />
-        <SegmentedControl
-          label={t("filters.status")}
-          value={statusFilter}
-          onChange={(status) => {
-            setStatusFilter(status);
-            setPage(1);
-          }}
-          size="sm"
-          options={STATUS_FILTERS.map((status) => ({
-            value: status,
-            label: t(`filters.${status}`),
-          }))}
-        />
-        <SectionHeader title={t("filters.period")} />
-        <SegmentedControl
-          label={t("filters.period")}
-          value={period}
-          onChange={(p) => {
-            setPeriod(p);
-            setPage(1);
-          }}
-          size="sm"
-          options={PERIODS.map((p) => ({
-            value: p,
-            label: t(`period.${p}`),
-          }))}
-        />
-      </CardDashBoard>
-
-      <CardDashBoard className="p-4">
-        <DataTable
-          rowData={transactions}
-          columnDefs={columnDefs}
-          loading={loading}
+      }
+      footer={
+        <Pagination
           page={page}
           totalPages={totalPages}
           onPageChange={setPage}
-          pagination
-          paginationPageSize={10}
-          locale={locale}
-          height={520}
+          disabled={loading}
+          labels={{
+            region: tCommon("pagination"),
+            previous: tCommon("previousPage"),
+            next: tCommon("nextPage"),
+            page: (n) => tCommon("goToPage", { page: n }),
+          }}
         />
-      </CardDashBoard>
-    </div>
+      }
+    >
+      {/* Ten columns is past what any screen shows at once, so the operator gets
+          the column and density controls rather than a horizontal scrollbar as
+          the only answer. */}
+      <DataTable<AdminPaymentTransaction>
+        columns={columns}
+        rows={transactions}
+        getRowKey={(row, index) => String(row.id ?? index)}
+        caption={t("title")}
+        loading={loading}
+        skeletonRows={10}
+        tableId="admin-payments"
+        stickyHeader
+        columnControl
+        densityControl
+        labels={tableLabels}
+        empty={
+          searchQuery ? (
+            <NoResultsState
+              title={tCommon("noResultsTitle")}
+              onClear={handleReset}
+              clearLabel={t("reset")}
+            />
+          ) : (
+            <EmptyState title={tCommon("noResultsTitle")} size="sm" />
+          )
+        }
+      />
+    </PageShell>
   );
 }

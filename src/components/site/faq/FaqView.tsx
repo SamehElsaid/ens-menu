@@ -3,11 +3,13 @@ import { FiMail } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
 import {
   Accordion,
-  Card,
+  Col,
   Container,
-  Eyebrow,
+  Grid,
+  PageHeader,
   Section,
   SiteAnchorButton,
+  Ticket,
   type FaqItem,
 } from "@/components/site";
 import JsonLd from "@/components/Global/JsonLd";
@@ -19,10 +21,15 @@ import {
 /**
  * FAQ.
  *
- * The answers are the page, so they get the full reading measure and nothing
- * competes with them. Everything is in the HTML whether or not an item is open
- * — `<details>` keeps collapsed content in the document — which is also what
- * makes the FAQPage structured data below honest.
+ * The answers are the page, so they get the reading measure on eight columns
+ * and nothing competes with them. The remaining four hold the escape hatch —
+ * "still stuck, talk to a person" — pinned while the questions scroll, because
+ * the moment a visitor gives up on the list is the moment they need it, and at
+ * the bottom of a long accordion that block has already scrolled past.
+ *
+ * Everything is in the HTML whether or not an item is open — `<details>` keeps
+ * collapsed content in the document — which is also what makes the FAQPage
+ * structured data below honest.
  */
 
 export default async function FaqView() {
@@ -45,53 +52,69 @@ export default async function FaqView() {
     <>
       <JsonLd data={faqJsonLd} />
 
-      <Section
-        size="lg"
-        className="isolate -mt-(--s-header-h) pt-[calc(var(--s-header-h)+4rem)] pb-0"
-      >
-        <div aria-hidden className="s-aurora" />
-        <Container width="narrow">
-          <Eyebrow>{tSite("eyebrow")}</Eyebrow>
-          <h1 className="mt-5 text-site-h1">{t("title")}</h1>
-          <p className="mt-6 max-w-2xl text-site-lead text-site-fg">
-            {t("description")}
-          </p>
-        </Container>
-      </Section>
+      <PageHeader
+        ticket={tSite("eyebrow")}
+        title={t("title")}
+        lead={t("description")}
+        meta={[{ label: tSite("eyebrow"), value: String(items.length) }]}
+      />
 
       <Section>
-        <Container width="narrow">
-          <div className="s-reveal">
-            <Accordion items={items} />
-          </div>
+        <Container>
+          <Grid className="gap-y-12">
+            <Col span={8}>
+              {/* One reveal for the whole block rather than one per question.
+                  The list is data-driven, so a stagger would mean the last
+                  question is still arriving while the reader is already inside
+                  the first answer.
 
-          <Card className="s-reveal mt-14 flex flex-col items-start gap-6 p-8 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-site-h4 font-semibold text-site-ink">
-                {tContact("titleBefore")} {tContact("titleHighlight")}
-              </h2>
-              <p className="mt-1.5 text-site-sm text-site-fg">
-                {tContact("supportNote")}
-              </p>
-            </div>
-            <div className="flex shrink-0 flex-wrap gap-3">
-              <SiteAnchorButton
-                href={ENSMENU_WHATSAPP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <FaWhatsapp className="size-4" aria-hidden />
-                {tContact("actions.whatsapp")}
-              </SiteAnchorButton>
-              <SiteAnchorButton
-                href={`mailto:${ENSMENU_SUPPORT_EMAIL}`}
-                variant="secondary"
-              >
-                <FiMail className="size-4" aria-hidden />
-                {tContact("actions.email")}
-              </SiteAnchorButton>
-            </div>
-          </Card>
+                  `name` makes the group exclusive, which is what turns the
+                  disclosure into this page's signature: opening a question
+                  collapses the previous one, both heights animating at once, and
+                  the page visibly settles to exactly one answer. The platform
+                  does it — genuinely simultaneous, interruptible and free. */}
+              <div className="s-reveal">
+                <Accordion items={items} name="faq" />
+              </div>
+            </Col>
+
+            <Col
+              span={3}
+              start={10}
+              className="self-start lg:sticky lg:top-[calc(var(--s-header-h)+3rem)]"
+            >
+              <div className="s-reveal rounded-site-card border border-site-line bg-site-bg p-6 shadow-site-sm">
+                <Ticket className="text-site-brand-text">
+                  {tContact("eyebrow")}
+                </Ticket>
+                <h2 className="mt-4 text-site-h3">
+                  {tContact("titleBefore")} {tContact("titleHighlight")}
+                </h2>
+                <p className="mt-3 text-site-sm text-site-fg">
+                  {tContact("supportNote")}
+                </p>
+                <div className="mt-6 flex flex-col gap-2.5">
+                  <SiteAnchorButton
+                    href={ENSMENU_WHATSAPP_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    block
+                  >
+                    <FaWhatsapp className="size-4" aria-hidden />
+                    {tContact("actions.whatsapp")}
+                  </SiteAnchorButton>
+                  <SiteAnchorButton
+                    href={`mailto:${ENSMENU_SUPPORT_EMAIL}`}
+                    variant="secondary"
+                    block
+                  >
+                    <FiMail className="size-4" aria-hidden />
+                    {tContact("actions.email")}
+                  </SiteAnchorButton>
+                </div>
+              </div>
+            </Col>
+          </Grid>
         </Container>
       </Section>
     </>

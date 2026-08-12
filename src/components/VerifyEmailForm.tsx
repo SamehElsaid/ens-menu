@@ -33,7 +33,9 @@ const TONE: Record<StatusVariant, string> = {
 
 function StatusIcon({ variant }: { variant: StatusVariant }) {
   const shell = cn(
-    "flex size-16 items-center justify-center rounded-site-lg ring-1 ring-inset",
+    /* `s-status-mark` is the same class the payment callback's glyph carries, so
+       the success tick settles here exactly as it does there. */
+    "s-status-mark flex size-16 items-center justify-center rounded-site-lg ring-1 ring-inset",
     TONE[variant],
   );
 
@@ -59,6 +61,11 @@ function StatusIcon({ variant }: { variant: StatusVariant }) {
 /**
  * One panel for all three verification outcomes. The result arrives after the
  * page has settled, so it is announced politely rather than interrupting.
+ *
+ * The phase treatment is deliberately the same set of classes `/payment/callback`
+ * uses (`data-phase` + `s-status-*`): these are the product's two "the system is
+ * confirming something for you" screens, and they must behave identically or
+ * neither reads as a convention.
  */
 function VerifyStatusPanel({
   variant,
@@ -72,11 +79,19 @@ function VerifyStatusPanel({
   children?: ReactNode;
 }) {
   return (
-    <div role="status" aria-live="polite" className="text-center">
-      <div className="flex flex-col items-center gap-6">
+    <div
+      role="status"
+      aria-live="polite"
+      data-phase={variant}
+      className="text-center"
+    >
+      <div className="s-status-enter flex flex-col items-center gap-6">
         <StatusIcon variant={variant} />
 
-        <div>
+        {/* Keyed on the phase, so the verdict crossfades in over the line that
+            said "checking". Opacity only: the sentence is what changed, and
+            moving it would make it harder to read at the moment it matters. */}
+        <div key={variant} className="s-phase-swap">
           <h1 className="text-site-h3">{title}</h1>
           <p className="mt-2.5 text-site-body text-site-fg">
             {description}
@@ -87,7 +102,7 @@ function VerifyStatusPanel({
         </div>
 
         {children ? (
-          <div className="flex w-full flex-col items-stretch gap-3">
+          <div className="s-status-actions flex w-full flex-col items-stretch gap-3">
             {children}
           </div>
         ) : null}

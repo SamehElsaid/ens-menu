@@ -84,7 +84,7 @@ export default function RoleCard({
       </div>
 
       <div className="mt-3">
-        <p className="mb-1.5 text-[11px] font-medium uppercase tracking-[0.04em] text-fg-subtle">
+        <p className="ui-label mb-1.5">
           {t("permissionsLabel")} ({role.permissions.length})
         </p>
         {role.permissions.length === 0 ? (

@@ -6,13 +6,18 @@ import {
   forwardRef,
   useCallback,
   useEffect,
+  useId,
   useImperativeHandle,
   useRef,
   useState,
+  type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { FiCheck, FiShield, FiX } from "react-icons/fi";
+import { FiCheck, FiRotateCcw, FiShield, FiX } from "react-icons/fi";
 import { cn } from "@/lib/cn";
+import { SiteButton, SiteSpinner } from "@/components/site/Button";
+import { Alert } from "@/components/site/Form";
+import { Badge, Card, Ticket } from "@/components/site/primitives";
 
 const RECAPTCHA_SITE_KEY = "6LfZunYsAAAAAChMIIbG-lhkDy6uMnAgm9cfZnrN";
 const RECAPTCHA_WIDTH = 304;
@@ -55,6 +60,48 @@ function useBodyScrollLock(locked: boolean) {
   }, [locked]);
 }
 
+/**
+ * The status stamp on the stub's header rule.
+ *
+ * Four states, and none of them is a hue on its own (DESIGN.md §3): each one
+ * carries a glyph and a word, so the stamp still reads in greyscale and for
+ * anyone who cannot separate the brand purple from the positive green.
+ */
+function StatusStamp({
+  state,
+  label,
+}: {
+  state: "pending" | "checking" | "passed" | "failed";
+  label: string;
+}) {
+  const glyph: ReactNode =
+    state === "passed" ? (
+      <FiCheck className="size-3.5 shrink-0" aria-hidden />
+    ) : state === "failed" ? (
+      <FiX className="size-3.5 shrink-0" aria-hidden />
+    ) : state === "checking" ? (
+      <SiteSpinner />
+    ) : (
+      <FiShield className="size-3.5 shrink-0" aria-hidden />
+    );
+
+  return (
+    <Badge
+      tone={
+        state === "passed"
+          ? "positive"
+          : state === "failed"
+            ? "critical"
+            : "neutral"
+      }
+      className="shrink-0"
+    >
+      {glyph}
+      {label}
+    </Badge>
+  );
+}
+
 const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
   function CustomRecaptcha(
     { onVerifiedChange, className = "", mode = "inline", silent = false },
@@ -66,6 +113,10 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
     const widgetWrapRef = useRef<HTMLDivElement>(null);
     const rejectTimeoutRef = useRef<number | null>(null);
     const pendingResolveRef = useRef<((value: boolean) => void) | null>(null);
+    const panelRef = useRef<HTMLDivElement>(null);
+    const returnFocusRef = useRef<HTMLElement | null>(null);
+    const headingId = useId();
+    const descriptionId = useId();
 
     const [status, setStatus] = useState<RecaptchaStatus>("boot");
     const [loading, setLoading] = useState(false);
@@ -167,10 +218,25 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
       if (mode === "on-demand") resolvePending(false);
     }, [clearRejectTimeout, mode, onVerifiedChange, resolvePending]);
 
+    /** Hands the challenge back after a failure, without waiting out the
+     *  auto-reset. The affordance is a real button so it is reachable by keyboard
+     *  and announced, rather than the previous "tap the card anywhere" hint. */
+    const handleRetry = useCallback(() => {
+      clearRejectTimeout();
+      recaptchaRef.current?.reset();
+      setStatus("idle");
+      setLoading(false);
+      onVerifiedChange(false);
+    }, [clearRejectTimeout, onVerifiedChange]);
+
     const openModal = useCallback(() => {
       if (status !== "verified") {
         setStatus("boot");
       }
+      returnFocusRef.current =
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null;
       setModalOpen(true);
       requestAnimationFrame(() => setModalVisible(true));
     }, [status]);
@@ -218,6 +284,26 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
       return () => window.removeEventListener("keydown", onKeyDown);
     }, [closeModal, modalOpen, mode, resolvePending, status]);
 
+    /* Focus moves into the panel on open and back to whatever opened it on
+       close, so a keyboard submit does not leave focus stranded on a control
+       behind the overlay.
+
+       There is deliberately no focus trap and no `aria-modal`: when the checkbox
+       needs a picture challenge, Google renders it in its own overlay appended to
+       `document.body`, outside this node. Trapping focus here — or telling a
+       screen reader that everything outside this node is inert — would lock the
+       user out of the challenge they have to solve. Escape and the close button
+       are the ways out. */
+    useEffect(() => {
+      if (!modalOpen || mode !== "on-demand") return;
+
+      panelRef.current?.focus({ preventScroll: true });
+
+      return () => {
+        returnFocusRef.current?.focus({ preventScroll: true });
+      };
+    }, [modalOpen, mode]);
+
     useEffect(() => {
       const node = widgetWrapRef.current;
       if (!node) return;
@@ -240,7 +326,40 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
     const isVerified = status === "verified";
     const isRejected = status === "rejected";
     const isBoot = status === "boot";
+    const isBusy = isBoot || loading;
 
+    const stampState = isVerified
+      ? "passed"
+      : isRejected
+        ? "failed"
+        : isBusy
+          ? "checking"
+          : "pending";
+
+    const stampLabel = isVerified
+      ? t("auth.recaptchaStatusPassed")
+      : isRejected
+        ? t("auth.recaptchaStatusFailed")
+        : isBusy
+          ? t("auth.recaptchaStatusChecking")
+          : t("auth.recaptchaStatusPending");
+
+    /* The live sentence. Empty while rejected, because the critical-tone `Alert`
+       below the challenge carries that state and owns its own announcement — two
+       live regions saying the same thing read it twice. */
+    const liveSentence = isRejected
+      ? ""
+      : isVerified
+        ? t("auth.recaptchaVerifiedHint")
+        : isBoot
+          ? t("auth.recaptchaBoot")
+          : loading
+            ? t("auth.recaptchaVerifyingHint")
+            : t("auth.recaptchaHint");
+
+    /** Google's own checkbox, kept as the focal element of the stub. It scales
+     *  down rather than clipping, because the widget has a fixed 304px width and
+     *  the auth panel is narrower than that on a small phone. */
     const widget = (
       <div
         ref={widgetWrapRef}
@@ -267,6 +386,63 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
       </div>
     );
 
+    /** The challenge, sunk into a soft well with the boot/verifying state laid
+     *  over it. A well rather than a bare row: the widget is third-party chrome
+     *  in its own typeface, and the inset is what says where the app stops. */
+    const challengeWell = (
+      <div
+        className="relative rounded-site-card border border-site-line bg-site-tint p-3"
+        onPointerDown={() => {
+          if (status === "idle") setLoading(true);
+        }}
+      >
+        {widget}
+        {isBusy ? (
+          <div className="absolute inset-0 z-1 flex flex-col items-center justify-center gap-2.5 bg-site-bg/95 px-4">
+            <SiteSpinner className="text-site-brand" />
+            <p className="s-ticket text-center text-site-muted">
+              {isBoot ? t("auth.recaptchaBoot") : t("auth.recaptchaVerifying")}
+            </p>
+          </div>
+        ) : null}
+      </div>
+    );
+
+    const failureAlert = isRejected ? (
+      <Alert tone="critical" className="mt-3">
+        {t("auth.recaptchaRejectedHint")}
+      </Alert>
+    ) : null;
+
+    const retryButton = isRejected ? (
+      <SiteButton variant="secondary" size="md" onClick={handleRetry}>
+        <FiRotateCcw className="size-4" aria-hidden />
+        {t("auth.recaptchaRetry")}
+      </SiteButton>
+    ) : null;
+
+    /** The stub's header rule: what this block is, and where it stands. */
+    const stubHeader = (
+      <div className="flex items-center justify-between gap-3 border-b border-site-line px-3.5 py-2.5">
+        <Ticket>{t("auth.recaptchaTicketLabel")}</Ticket>
+        <StatusStamp state={stampState} label={stampLabel} />
+      </div>
+    );
+
+    /** The stub's foot: the state in a sentence, announced, plus the recovery. */
+    const stubFooter = (
+      <div className="flex items-center justify-between gap-3 border-t border-site-line bg-site-tint px-3.5 py-2.5">
+        <p
+          role="status"
+          aria-live="polite"
+          className="min-w-0 text-site-xs text-site-fg"
+        >
+          {liveSentence}
+        </p>
+        {retryButton}
+      </div>
+    );
+
     if (isDev) {
       return null;
     }
@@ -277,36 +453,56 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
           className={cn(silent ? "sr-only" : "w-full", className)}
           aria-hidden={silent}
         >
-          {!silent &&
-            (isVerified ? (
-              <div className="register-recaptcha-trust register-recaptcha-trust--verified inline-flex items-center gap-2 rounded-lg border border-emerald-200/70 bg-emerald-50/80 px-3 py-2 text-[12px] font-medium text-emerald-700 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-300">
-                <FiCheck size={14} strokeWidth={2.5} aria-hidden />
-                {t("auth.recaptchaVerifiedHint")}
+          {/* The stub before the challenge exists: a quiet tinted card saying a
+              check is pending, so the form does not spring a modal on submit
+              with no warning. */}
+          {!silent ? (
+            <Card tone="tint" className="px-3.5 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <Ticket>{t("auth.recaptchaTicketLabel")}</Ticket>
+                <StatusStamp
+                  state={isVerified ? "passed" : "pending"}
+                  label={
+                    isVerified
+                      ? t("auth.recaptchaStatusPassed")
+                      : t("auth.recaptchaStatusPending")
+                  }
+                />
               </div>
-            ) : (
-              <p className="register-recaptcha-trust inline-flex items-center gap-2 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
-                <FiShield size={13} strokeWidth={2} aria-hidden />
-                {t("auth.recaptchaOnSubmit")}
+              <p
+                role="status"
+                aria-live="polite"
+                className="mt-2 text-site-xs text-site-fg"
+              >
+                {isVerified
+                  ? t("auth.recaptchaVerifiedHint")
+                  : t("auth.recaptchaOnSubmit")}
               </p>
-            ))}
+            </Card>
+          ) : null}
 
           {mounted &&
             modalOpen &&
             createPortal(
+              /* `public-world` on the portal root: the `--s-*` tokens are scoped
+                 to that class and this subtree hangs off `document.body`, outside
+                 the shell that carries it. `bg-transparent` cancels the ground
+                 colour the class also sets, which would otherwise paint the whole
+                 viewport in the public page ground. */
               <div
                 className={cn(
-                  "recaptcha-modal fixed inset-0 z-[250] flex items-center justify-center p-4",
+                  "recaptcha-modal public-world fixed inset-0 z-[250] flex items-center justify-center bg-transparent p-4",
                   modalVisible
                     ? "recaptcha-modal--visible"
                     : "recaptcha-modal--hidden",
                 )}
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="recaptcha-modal-title"
               >
+                {/* The scrim is keyed to the deep *ground* rather than to
+                    `--s-ink`, which inverts to near-white in dark mode and would
+                    put a bright wash over a dark page. */}
                 <button
                   type="button"
-                  className="recaptcha-modal__backdrop absolute inset-0 bg-slate-950/55 backdrop-blur-[3px]"
+                  className="recaptcha-modal__backdrop absolute inset-0 bg-site-ink-bg/70"
                   aria-label={t("auth.recaptchaModalClose")}
                   onClick={() => {
                     closeModal();
@@ -314,55 +510,48 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
                   }}
                 />
 
-                <div className="recaptcha-modal__panel relative z-1 w-full max-w-[min(360px,calc(100vw-2rem))] rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_24px_64px_-20px_rgba(15,23,42,0.35)] dark:border-slate-700/60 dark:bg-slate-900">
-                  <button
-                    type="button"
-                    className="absolute end-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-                    aria-label={t("auth.recaptchaModalClose")}
-                    onClick={() => {
-                      closeModal();
-                      resolvePending(false);
-                    }}
-                  >
-                    <FiX size={18} />
-                  </button>
+                <div
+                  ref={panelRef}
+                  tabIndex={-1}
+                  role="dialog"
+                  aria-labelledby={headingId}
+                  aria-describedby={descriptionId}
+                  className="recaptcha-modal__panel relative z-1 w-full max-w-[min(24rem,calc(100vw-2rem))] rounded-site-card border border-site-line-strong bg-site-bg shadow-site-lg"
+                >
+                  <div className="flex items-center justify-between gap-2 border-b border-site-line px-3.5 py-2.5">
+                    <Ticket>{t("auth.recaptchaTicketLabel")}</Ticket>
+                    <div className="flex items-center gap-2">
+                      <StatusStamp state={stampState} label={stampLabel} />
+                      <button
+                        type="button"
+                        className="flex size-11 shrink-0 items-center justify-center rounded-full border border-site-line text-site-muted transition-colors hover:border-site-brand-line hover:bg-site-brand-tint hover:text-site-brand-text sm:size-9"
+                        aria-label={t("auth.recaptchaModalClose")}
+                        onClick={() => {
+                          closeModal();
+                          resolvePending(false);
+                        }}
+                      >
+                        <FiX className="size-4" aria-hidden />
+                      </button>
+                    </div>
+                  </div>
 
-                  <div className="pe-8 text-start">
-                    <p
-                      id="recaptcha-modal-title"
-                      className="text-[15px] font-semibold text-slate-900 dark:text-white"
-                    >
+                  <div className="px-3.5 py-4 text-start sm:px-5">
+                    <h2 id={headingId} className="text-site-h4 text-site-ink">
                       {t("auth.recaptchaModalTitle")}
-                    </p>
-                    <p className="mt-1 text-[12px] leading-relaxed text-slate-500 dark:text-slate-400">
+                    </h2>
+                    <p
+                      id={descriptionId}
+                      className="mt-1.5 text-site-sm text-site-fg"
+                    >
                       {t("auth.recaptchaModalSubtitle")}
                     </p>
+
+                    <div className="mt-4">{challengeWell}</div>
+                    {failureAlert}
                   </div>
 
-                  <div
-                    className="relative mt-4 flex justify-center rounded-xl border border-slate-100 bg-slate-50/80 p-3 dark:border-slate-800 dark:bg-slate-950/50"
-                    onPointerDown={() => {
-                      if (status === "idle") setLoading(true);
-                    }}
-                  >
-                    {widget}
-                    {(isBoot || loading) && (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2.5 rounded-xl bg-white/95 backdrop-blur-[2px] dark:bg-slate-950/92">
-                        <span className="recaptcha-modal__loader rounded-full border-[3px] border-purple-200 border-t-purple-600 dark:border-purple-900 dark:border-t-purple-400" />
-                        <p className="px-4 text-center text-[13px] font-semibold text-purple-700 dark:text-purple-300">
-                          {isBoot
-                            ? t("auth.recaptchaBoot")
-                            : t("auth.recaptchaVerifying")}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {isRejected && (
-                    <p className="mt-3 text-center text-[12px] font-medium text-red-600 dark:text-red-400">
-                      {t("auth.recaptchaRejectedHint")}
-                    </p>
-                  )}
+                  {stubFooter}
                 </div>
               </div>,
               document.body,
@@ -371,98 +560,20 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
       );
     }
 
-    const title = isVerified
-      ? t("auth.recaptchaVerified")
-      : isRejected
-        ? t("auth.recaptchaRejected")
-        : loading
-          ? t("auth.recaptchaVerifying")
-          : t("auth.recaptchaLabel");
-
-    const hint = isVerified
-      ? t("auth.recaptchaVerifiedHint")
-      : isRejected
-        ? t("auth.recaptchaRejectedHint")
-        : loading
-          ? t("auth.recaptchaVerifyingHint")
-          : t("auth.recaptchaHint");
-
+    /* Inline mode: the same stub, with the challenge in the body instead of
+       behind a modal. The previous version painted a fake checkbox row and hid
+       the real widget under it as a full-bleed overlay, which meant the control
+       the user pointed at was not the control that was labelled. The widget is
+       now the focal element of the block and states its own name. */
     return (
-      <div className={cn("w-full", className)}>
-        <div
-          className={cn(
-            "relative w-full rounded-xl border transition-all duration-300",
-            !isVerified && "min-h-[5.5rem] overflow-hidden",
-            isVerified && "overflow-hidden",
-            isVerified
-              ? "border-emerald-400/70 bg-emerald-50/80 dark:border-emerald-500/30 dark:bg-emerald-950/20"
-              : isRejected
-                ? "border-red-300/80 bg-red-50/80 dark:border-red-500/30 dark:bg-red-950/20"
-                : "border-slate-200/80 bg-white/80 hover:border-purple-200/80 dark:border-slate-700 dark:bg-slate-900/50 dark:hover:border-purple-500/25",
-            status === "idle" &&
-              !isVerified &&
-              "cursor-pointer active:scale-[0.995]",
-          )}
-        >
-          <div className="pointer-events-none relative z-[1] flex items-center gap-3 px-3.5 py-3 select-none">
-            <div
-              className={cn(
-                "flex h-7 w-7 shrink-0 items-center justify-center rounded-md border transition-all duration-300",
-                isVerified
-                  ? "border-emerald-500 bg-emerald-500 text-white"
-                  : isRejected
-                    ? "border-red-500 bg-red-500 text-white"
-                    : "border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-800",
-              )}
-            >
-              {isVerified ? (
-                <FiCheck size={14} strokeWidth={2.5} />
-              ) : (
-                <span className="h-2.5 w-2.5 rounded-sm bg-slate-200 dark:bg-slate-600" />
-              )}
-            </div>
-
-            <div className="min-w-0 flex-1 text-start">
-              <p className="text-[13px] font-semibold text-slate-800 dark:text-slate-100">
-                {title}
-              </p>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                {hint}
-              </p>
-            </div>
-
-            <FiShield
-              size={16}
-              className={cn(
-                "shrink-0",
-                isVerified
-                  ? "text-emerald-600 dark:text-emerald-400"
-                  : "text-purple-500 dark:text-purple-400",
-              )}
-              aria-hidden
-            />
-          </div>
-
-          {!isVerified && (
-            <div
-              className={cn(
-                "absolute inset-0 z-10 overflow-hidden",
-                isRejected ? "pointer-events-none" : "cursor-pointer",
-              )}
-              onPointerDown={() => {
-                if (status === "idle") setLoading(true);
-              }}
-              aria-hidden
-            >
-              <div className="flex h-full w-full items-center justify-center px-2">
-                <div className="pointer-events-auto w-full max-w-[304px]">
-                  {widget}
-                </div>
-              </div>
-            </div>
-          )}
+      <Card className={cn("w-full", className)}>
+        {stubHeader}
+        <div className="px-3 py-3.5 sm:px-3.5">
+          {challengeWell}
+          {failureAlert}
         </div>
-      </div>
+        {stubFooter}
+      </Card>
     );
   },
 );

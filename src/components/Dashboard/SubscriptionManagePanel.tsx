@@ -9,9 +9,18 @@ import {
   HiOutlineRefresh,
   HiOutlineSparkles,
 } from "react-icons/hi";
-import { IoTicketOutline, IoWarningOutline } from "react-icons/io5";
+import { IoTicketOutline, IoRemoveOutline, IoAddOutline } from "react-icons/io5";
 import { axiosPost } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
+import {
+  Alert,
+  Button,
+  Card,
+  Input,
+  SectionHeader,
+  SegmentedControl,
+} from "@/components/ui";
+import { cn } from "@/lib/cn";
 import {
   formatPhoneForPaymentGateway,
   formatEgpPrice,
@@ -86,7 +95,6 @@ function getProPlanPrice(
 
 export default function SubscriptionManagePanel({
   locale,
-  isRTL,
   subscription,
   menusUsed,
   proPlan,
@@ -304,295 +312,280 @@ export default function SubscriptionManagePanel({
   const periodLabel =
     proBillingChoice === "yearly" ? t("yearly") : t("monthly");
 
+  const summaryLines: { key: string; label: string; amount: number }[] = [];
+  if ((canRenewPro || canUpgradeToPro) && proPlanPrice > 0) {
+    summaryLines.push({
+      key: "plan",
+      label: `${canRenewPro ? t("summaryRenewPro") : t("summaryUpgradePro")} (${periodLabel})`,
+      amount: proPlanPrice,
+    });
+  }
+  if (canRenewPro && renewExtraMenusCount > 0) {
+    summaryLines.push({
+      key: "extra-renewal",
+      label: t("summaryExtraMenusRenewal", {
+        count: String(renewExtraMenusCount),
+      }),
+      amount: extraMenusRenewalAmount,
+    });
+  }
+  if (isProUser && !canRenewPro && purchaseQty > 0) {
+    summaryLines.push({
+      key: "extra-purchase",
+      label: t("summaryExtraMenusPurchase", { count: String(purchaseQty) }),
+      amount: extraMenusPurchaseTotal,
+    });
+  }
+
+  const discountAmount =
+    hasDiscountVoucher && (voucherValidation?.discountAmount ?? 0) > 0
+      ? (voucherValidation?.discountAmount ?? 0)
+      : 0;
+
+  const showSummary =
+    (canRenewPro || canUpgradeToPro || (isProUser && !canRenewPro)) &&
+    !hasDurationVoucher;
+
+  /* Quantity is a single control, not three: the buttons share edges with the
+     field so the group reads as one object and cannot be mistaken for two
+     unrelated actions flanking an input. */
+  const stepperEdge =
+    "flex size-9 shrink-0 items-center justify-center border-line-control text-fg " +
+    "transition-colors duration-(--dur-fast) hover:bg-surface-2 disabled:pointer-events-none disabled:opacity-45 sm:size-8";
+
   return (
-    <section
-      className={`rounded-lg border border-line/90 bg-white shadow-sm dark:border-line/80  ${className}`}
+    <Card
+      as="section"
+      padded="none"
+      className={cn("flex min-w-0 flex-col", className)}
       aria-labelledby="subscription-manage-heading"
     >
-      <div className="border-b border-line px-5 py-4 dark:border-line md:px-6">
-        <div
-          className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse text-right" : "text-left"}`}
-        >
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
-            <HiOutlineCreditCard className="h-5 w-5" />
-          </span>
-          <div>
+      <div className="border-b border-line px-3 py-3 sm:px-4">
+        <p className="ui-label mb-1">{t("orderSummaryTitle")}</p>
+        <div className="flex items-start gap-2">
+          <HiOutlineCreditCard
+            className="mt-0.5 size-4 shrink-0 text-fg-subtle"
+            aria-hidden
+          />
+          <div className="min-w-0">
             <h2
               id="subscription-manage-heading"
-              className="text-lg font-bold text-fg"
+              className="text-sm font-semibold tracking-[-0.02em] text-fg"
             >
               {t("managePanelTitle")}
             </h2>
-            <p className="text-sm text-fg-muted">
+            <p className="mt-1 text-xs leading-relaxed text-fg-muted">
               {t("managePanelDescription")}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="space-y-5 p-5 md:p-6">
-        {canRenewPro && subscription && (
-          <p
-            className={`rounded-lg border border-primary/15 bg-primary/5 px-3 py-2.5 text-sm text-fg-muted ${isRTL ? "text-right" : "text-left"}`}
-          >
+      <div className="flex min-w-0 flex-col gap-4 p-3 sm:p-4">
+        {canRenewPro && subscription ? (
+          <Alert tone="info">
             {t("renewKeepsRemainingDays", {
               days: String(getSubscriptionDaysRemaining(subscription)),
             })}
-          </p>
-        )}
+          </Alert>
+        ) : null}
 
-        {showBilling && (
-          <div>
-            <p
-              className={`mb-2 text-xs font-semibold uppercase tracking-wide text-fg-muted ${isRTL ? "text-right" : "text-left"}`}
-            >
-              {t("selectBillingCycle")}
-            </p>
-            <div
-              className={`inline-flex w-full rounded-lg border border-line bg-slate-50 p-1  dark:bg-slate-950 ${isRTL ? "flex-row-reverse" : ""}`}
-              role="group"
-              aria-label={t("selectBillingCycle")}
-            >
-              {(["monthly", "yearly"] as const).map((cycle) => (
+        {showBilling ? (
+          <div className="min-w-0">
+            <p className="ui-label mb-1.5">{t("selectBillingCycle")}</p>
+            <SegmentedControl
+              label={t("selectBillingCycle")}
+              value={proBillingChoice}
+              onChange={onProBillingChange}
+              options={[
+                { value: "monthly", label: t("monthly") },
+                { value: "yearly", label: t("yearly") },
+              ]}
+              className="w-full [&>button]:flex-1 [&>button]:justify-center"
+            />
+          </div>
+        ) : null}
+
+        {showExtraMenus ? (
+          <div className="flex min-w-0 flex-col gap-2.5 border-t border-line pt-3.5">
+            <SectionHeader
+              title={
+                canRenewPro
+                  ? t("renewExtraMenusTitle")
+                  : t("purchaseExtraMenusSectionTitle")
+              }
+              description={
+                canRenewPro
+                  ? t("renewExtraMenusDescription", {
+                      current: String(subscription?.extraMenus ?? 0),
+                      base: String(baseMax),
+                      price: String(monthlyPrice),
+                      period: periodLabel,
+                    })
+                  : t("purchaseExtraMenusSectionDesc", {
+                      used:
+                        menusUsed != null
+                          ? String(menusUsed)
+                          : String(effectiveMax),
+                      max: String(effectiveMax),
+                      price: String(monthlyPrice),
+                    })
+              }
+            />
+
+            {showShortPeriodWarning ? (
+              <Alert tone="warning">
+                {tMenus("extraMenusShortPeriodWarning", {
+                  days: String(daysRemaining),
+                  price: String(monthlyPrice),
+                })}
+              </Alert>
+            ) : null}
+
+            <div className="flex items-center gap-3">
+              <div className="flex items-stretch rounded-lg border border-line-control bg-surface">
                 <button
-                  key={cycle}
                   type="button"
-                  disabled={isBusy}
-                  onClick={() => onProBillingChange(cycle)}
-                  className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${
-                    proBillingChoice === cycle
-                      ? "bg-brand text-on-brand shadow-sm"
-                      : "text-fg-muted hover:bg-white  dark:hover:bg-slate-800"
-                  }`}
-                >
-                  {cycle === "monthly" ? t("monthly") : t("yearly")}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {showExtraMenus && (
-          <div className="rounded-lg border border-line/80 bg-slate-50/80 p-4 dark:border-line/80 dark:bg-slate-950/50">
-            <p
-              className={`mb-1 text-sm font-semibold text-fg ${isRTL ? "text-right" : "text-left"}`}
-            >
-              {canRenewPro
-                ? t("renewExtraMenusTitle")
-                : t("purchaseExtraMenusSectionTitle")}
-            </p>
-            <p
-              className={`mb-4 text-xs text-fg-muted ${isRTL ? "text-right" : "text-left"}`}
-            >
-              {canRenewPro
-                ? t("renewExtraMenusDescription", {
-                    current: String(subscription?.extraMenus ?? 0),
-                    base: String(baseMax),
-                    price: String(monthlyPrice),
-                    period: periodLabel,
-                  })
-                : t("purchaseExtraMenusSectionDesc", {
-                    used:
-                      menusUsed != null
-                        ? String(menusUsed)
-                        : String(effectiveMax),
-                    max: String(effectiveMax),
-                    price: String(monthlyPrice),
-                  })}
-            </p>
-
-            {showShortPeriodWarning && (
-              <div
-                role="alert"
-                className={`mb-4 flex gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2.5 dark:border-amber-700 dark:bg-amber-950/40 ${isRTL ? "flex-row-reverse text-right" : "text-left"}`}
-              >
-                <IoWarningOutline className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
-                <p className="text-xs font-medium text-amber-900 dark:text-amber-100">
-                  {tMenus("extraMenusShortPeriodWarning", {
-                    days: String(daysRemaining),
-                    price: String(monthlyPrice),
-                  })}
-                </p>
-              </div>
-            )}
-
-            <div
-              className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}
-            >
-              <button
-                type="button"
-                disabled={isBusy || extraMenusValue <= extraMenusMin}
-                onClick={() =>
-                  setExtraMenusValue(
-                    Math.max(extraMenusMin, extraMenusValue - 1),
-                  )
-                }
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-lg font-bold disabled:opacity-40"
-                aria-label={t("renewExtraMenusDecrease")}
-              >
-                −
-              </button>
-              <input
-                type="number"
-                min={extraMenusMin}
-                max={50}
-                value={extraMenusValue}
-                disabled={isBusy}
-                onChange={(e) => {
-                  const v = parseInt(e.target.value, 10);
-                  if (Number.isFinite(v) && v >= extraMenusMin && v <= 50) {
-                    setExtraMenusValue(v);
+                  disabled={isBusy || extraMenusValue <= extraMenusMin}
+                  onClick={() =>
+                    setExtraMenusValue(
+                      Math.max(extraMenusMin, extraMenusValue - 1),
+                    )
                   }
-                }}
-                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-center text-lg font-semibold disabled:opacity-60"
-                aria-label={t("renewExtraMenusQuantityLabel")}
-              />
-              <button
-                type="button"
-                disabled={isBusy || extraMenusValue >= 50}
-                onClick={() =>
-                  setExtraMenusValue(Math.min(50, extraMenusValue + 1))
-                }
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-lg font-bold disabled:opacity-40"
-                aria-label={t("renewExtraMenusIncrease")}
-              >
-                +
-              </button>
-            </div>
-
-            <p
-              className={`mt-3 text-xs text-fg-muted ${isRTL ? "text-right" : "text-left"}`}
-            >
-              {t("renewExtraMenusTotalMenus", {
-                total: String(baseMax + extraMenusValue),
-              })}
-            </p>
-          </div>
-        )}
-
-        <SubscriptionVoucherSection
-          locale={locale}
-          isRTL={isRTL}
-          billingCycle={proBillingChoice}
-          onBillingChange={onProBillingChange}
-          showBillingChoice={false}
-          showBillingHint={false}
-          isProUser={isProUser}
-          canUpgradeToPro={canUpgradeToPro}
-          currencyLabel={currencyLabel}
-          appliedCode={appliedVoucherCode}
-          validation={voucherValidation}
-          onApplied={onVoucherApplied}
-          onRedeemDuration={undefined}
-          redeemLoading={voucherRedeemLoading}
-          disabled={isBusy}
-          embedded
-          suppressDurationRedeem
-        />
-
-        {(canRenewPro || canUpgradeToPro || (isProUser && !canRenewPro)) &&
-          !hasDurationVoucher && (
-            <div className="rounded-lg border border-line/80 bg-slate-50/80 p-4 dark:border-line/80 dark:bg-slate-950/50">
-              <p
-                className={`mb-3 text-xs font-semibold uppercase tracking-wide text-fg-muted ${isRTL ? "text-right" : "text-left"}`}
-              >
-                {t("orderSummaryTitle")}
-              </p>
-              <ul className="space-y-2">
-                {(canRenewPro || canUpgradeToPro) && proPlanPrice > 0 && (
-                  <li
-                    className={`flex items-center justify-between text-sm ${isRTL ? "flex-row-reverse" : ""}`}
-                  >
-                    <span className="text-fg-muted">
-                      {canRenewPro
-                        ? t("summaryRenewPro")
-                        : t("summaryUpgradePro")}{" "}
-                      ({periodLabel})
-                    </span>
-                    <span className="font-semibold tabular-nums text-fg">
-                      {formatEgpPrice(proPlanPrice)} {currencyLabel}
-                    </span>
-                  </li>
-                )}
-                {canRenewPro && renewExtraMenusCount > 0 && (
-                  <li
-                    className={`flex items-center justify-between text-sm ${isRTL ? "flex-row-reverse" : ""}`}
-                  >
-                    <span className="text-fg-muted">
-                      {t("summaryExtraMenusRenewal", {
-                        count: String(renewExtraMenusCount),
-                      })}
-                    </span>
-                    <span className="font-semibold tabular-nums text-fg">
-                      {formatEgpPrice(extraMenusRenewalAmount)} {currencyLabel}
-                    </span>
-                  </li>
-                )}
-                {isProUser && !canRenewPro && purchaseQty > 0 && (
-                  <li
-                    className={`flex items-center justify-between text-sm ${isRTL ? "flex-row-reverse" : ""}`}
-                  >
-                    <span className="text-fg-muted">
-                      {t("summaryExtraMenusPurchase", {
-                        count: String(purchaseQty),
-                      })}
-                    </span>
-                    <span className="font-semibold tabular-nums text-fg">
-                      {formatEgpPrice(extraMenusPurchaseTotal)} {currencyLabel}
-                    </span>
-                  </li>
-                )}
-                {hasDiscountVoucher &&
-                  voucherValidation?.discountAmount != null &&
-                  voucherValidation.discountAmount > 0 && (
-                    <li
-                      className={`flex items-center justify-between text-sm text-emerald-600 dark:text-emerald-400 ${isRTL ? "flex-row-reverse" : ""}`}
-                    >
-                      <span>{t("summaryDiscount")}</span>
-                      <span className="font-semibold tabular-nums">
-                        −{formatEgpPrice(voucherValidation.discountAmount)}{" "}
-                        {currencyLabel}
-                      </span>
-                    </li>
-                  )}
-              </ul>
-              <div
-                className={`mt-4 flex items-center justify-between border-t border-line pt-3 dark:border-line ${isRTL ? "flex-row-reverse" : ""}`}
-              >
-                <span className="text-sm font-semibold text-fg-muted">
-                  {t("orderSummaryTotal")}
-                </span>
-                <span className="text-xl font-black tabular-nums text-primary">
-                  {formatEgpPrice(orderTotal)} {currencyLabel}
-                </span>
+                  className={cn(stepperEdge, "rounded-s-lg border-e")}
+                  aria-label={t("renewExtraMenusDecrease")}
+                >
+                  <IoRemoveOutline className="size-4" aria-hidden />
+                </button>
+                <Input
+                  type="number"
+                  min={extraMenusMin}
+                  max={50}
+                  value={extraMenusValue}
+                  disabled={isBusy}
+                  onChange={(e) => {
+                    const v = parseInt(e.target.value, 10);
+                    if (Number.isFinite(v) && v >= extraMenusMin && v <= 50) {
+                      setExtraMenusValue(v);
+                    }
+                  }}
+                  className="ui-figure w-16 rounded-none border-0 text-center text-base"
+                  aria-label={t("renewExtraMenusQuantityLabel")}
+                />
+                <button
+                  type="button"
+                  disabled={isBusy || extraMenusValue >= 50}
+                  onClick={() =>
+                    setExtraMenusValue(Math.min(50, extraMenusValue + 1))
+                  }
+                  className={cn(stepperEdge, "rounded-e-lg border-s")}
+                  aria-label={t("renewExtraMenusIncrease")}
+                >
+                  <IoAddOutline className="size-4" aria-hidden />
+                </button>
               </div>
-            </div>
-          )}
 
-        {primaryAction && (
-          <button
+              <p className="min-w-0 text-xs leading-relaxed text-fg-muted">
+                {t("renewExtraMenusTotalMenus", {
+                  total: String(baseMax + extraMenusValue),
+                })}
+              </p>
+            </div>
+          </div>
+        ) : null}
+
+        <div className="border-t border-line pt-3.5">
+          <SubscriptionVoucherSection
+            locale={locale}
+            billingCycle={proBillingChoice}
+            onBillingChange={onProBillingChange}
+            showBillingChoice={false}
+            showBillingHint={false}
+            isProUser={isProUser}
+            canUpgradeToPro={canUpgradeToPro}
+            currencyLabel={currencyLabel}
+            appliedCode={appliedVoucherCode}
+            validation={voucherValidation}
+            onApplied={onVoucherApplied}
+            onRedeemDuration={undefined}
+            redeemLoading={voucherRedeemLoading}
+            disabled={isBusy}
+            embedded
+            suppressDurationRedeem
+          />
+        </div>
+      </div>
+
+      {/* The bill is a ledger, and the total is the largest figure on the
+          panel — on a checkout the number being agreed to should be the thing
+          the eye lands on, not the button that agrees to it. */}
+      {showSummary ? (
+        <div className="border-t border-line bg-surface-2/40">
+          <p className="ui-label px-3 pt-2.5 sm:px-4">
+            {t("orderSummaryTitle")}
+          </p>
+          <ul className="mt-1.5 divide-y divide-line border-y border-line">
+            {summaryLines.map((line) => (
+              <li
+                key={line.key}
+                className="flex items-baseline justify-between gap-3 px-3 py-2 sm:px-4"
+              >
+                <span className="min-w-0 text-[13px] text-fg-muted">
+                  {line.label}
+                </span>
+                <span className="ui-figure shrink-0 text-[13px] text-fg">
+                  {formatEgpPrice(line.amount)} {currencyLabel}
+                </span>
+              </li>
+            ))}
+            {discountAmount > 0 ? (
+              <li className="flex items-baseline justify-between gap-3 px-3 py-2 sm:px-4">
+                <span className="min-w-0 text-[13px] text-success">
+                  {t("summaryDiscount")}
+                </span>
+                <span className="ui-figure shrink-0 text-[13px] text-success">
+                  −{formatEgpPrice(discountAmount)} {currencyLabel}
+                </span>
+              </li>
+            ) : null}
+          </ul>
+          <div className="flex items-baseline justify-between gap-3 px-3 py-2.5 sm:px-4">
+            <span className="ui-label">{t("orderSummaryTotal")}</span>
+            <span className="ui-figure text-xl leading-none font-semibold text-fg">
+              {formatEgpPrice(orderTotal)}{" "}
+              <span className="text-xs font-normal text-fg-muted">
+                {currencyLabel}
+              </span>
+            </span>
+          </div>
+        </div>
+      ) : null}
+
+      {primaryAction ? (
+        <div className="flex flex-col gap-2 border-t border-line p-3 sm:p-4">
+          <Button
             type="button"
+            size="lg"
+            fullWidth
             onClick={primaryAction.onClick}
             disabled={primaryAction.disabled}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-4 text-base font-bold text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+            loading={isBusy}
+            startIcon={<primaryAction.icon className="size-4" />}
           >
-            <primaryAction.icon className="h-5 w-5 shrink-0" />
             {isBusy && !voucherRedeemLoading
               ? t("paying")
               : voucherRedeemLoading
                 ? t("voucherRedeeming")
                 : primaryAction.label}
-          </button>
-        )}
+          </Button>
 
-        {canUpgradeToPro && !canRenewPro && !isProUser && (
-          <p
-            className={`text-center text-xs text-fg-muted ${isRTL ? "text-right" : "text-left"}`}
-          >
-            {t("managePanelUpgradeHint")}
-          </p>
-        )}
-      </div>
-    </section>
+          {canUpgradeToPro && !canRenewPro && !isProUser ? (
+            <p className="text-xs leading-relaxed text-fg-subtle">
+              {t("managePanelUpgradeHint")}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+    </Card>
   );
 }

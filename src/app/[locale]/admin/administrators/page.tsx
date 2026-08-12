@@ -2,22 +2,25 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useRouter } from "@/i18n/navigation";
-import { ColDef } from "ag-grid-community";
-import { IoArrowBack, IoAddOutline } from "react-icons/io5";
-import { FaUserShield, FaClock, FaHistory } from "react-icons/fa";
-import CardDashBoard from "@/components/Card/CardDashBoard";
-import DataTable from "@/components/Custom/DataTable";
-import { axiosGet, axiosDelete } from "@/shared/axiosCall";
+import { IoAddOutline } from "react-icons/io5";
+import { FaHistory } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { useAppSelector } from "@/store/hooks";
 import { FiAlertTriangle } from "react-icons/fi";
+import { axiosGet, axiosDelete } from "@/shared/axiosCall";
+import { useAppSelector } from "@/store/hooks";
 import {
+  Badge,
   Button,
   ButtonLink,
   ConfirmDialog,
+  DataTable,
+  EmptyState,
   PageHeader,
-  Spinner,
+  PageShell,
+  Pagination,
+  StatCard,
+  StatGrid,
+  type DataColumn,
 } from "@/components/ui";
 import AddAdministratorModal from "@/components/Dashboard/AddAdministratorModal";
 import EditAdministratorPermissionsModal from "@/components/Admin/EditAdministratorPermissionsModal";
@@ -55,8 +58,8 @@ interface AdminsResponse {
 export default function AdministratorsPage() {
   const locale = useLocale();
   const t = useTranslations("adminAdministrators");
-  const router = useRouter();
-  const isRTL = locale === "ar";
+  const tCommon = useTranslations("common");
+  const tAdmin = useTranslations("adminDashboard");
 
   const currentUser = useAppSelector((state) => state.auth.data) as unknown as {
     user?: { email?: string };
@@ -69,7 +72,6 @@ export default function AdministratorsPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [totalItems, setTotalItems] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [stats, setStats] = useState({
@@ -182,221 +184,234 @@ export default function AdministratorsPage() {
     [locale],
   );
 
-  const columnDefs: ColDef<Administrator>[] = useMemo(
+  const columns = useMemo<DataColumn<Administrator>[]>(
     () => [
       {
-        headerName: t("columns.name"),
-        field: "name",
-        flex: 1,
-        minWidth: 200,
-        cellRenderer: (params: { data: Administrator }) => {
-          const admin = params.data;
-          if (!admin) return null;
-          const isCurrentUser = admin.email === currentUserEmail;
-          return (
-            <div
-              className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
-            >
-              <span className="font-medium text-fg">{admin.name}</span>
-              {isCurrentUser && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                  {t("you")}
-                </span>
-              )}
-            </div>
-          );
-        },
+        id: "index",
+        header: "#",
+        hideOnMobile: true,
+        numeric: true,
+        headerClassName: "w-px",
+        cell: (row) => (
+          <span className="ui-figure text-fg-subtle" lang="en">
+            {String(
+              (page - 1) * itemsPerPage +
+                admins.findIndex((a) => a.id === row.id) +
+                1,
+            ).padStart(2, "0")}
+          </span>
+        ),
       },
       {
-        headerName: t("columns.email"),
-        field: "email",
-        flex: 1,
-        minWidth: 250,
+        id: "name",
+        header: t("columns.name"),
+        primary: true,
+        cell: (row) => (
+          <span className="flex flex-wrap items-center gap-1.5">
+            <span className="font-medium text-fg">{row.name}</span>
+            {row.email === currentUserEmail ? (
+              <Badge tone="brand" dot>
+                {t("you")}
+              </Badge>
+            ) : null}
+          </span>
+        ),
       },
       {
-        headerName: t("columns.dateAdded"),
-        field: "createdAt",
-        width: 150,
-        cellRenderer: (params: { data: Administrator }) => {
-          const admin = params.data;
-          if (!admin) return null;
-          return (
-            <span className="text-fg-muted">{formatDate(admin.createdAt)}</span>
-          );
-        },
+        id: "email",
+        header: t("columns.email"),
+        cell: (row) => (
+          <span className="truncate font-mono text-[12px] text-fg-muted" dir="ltr">
+            {row.email}
+          </span>
+        ),
       },
       {
-        headerName: t("columns.lastLogin"),
-        field: "lastLoginAt",
-        width: 150,
-        cellRenderer: (params: { data: Administrator }) => {
-          const admin = params.data;
-          if (!admin) return null;
-          return (
-            <span className="text-fg-muted">
-              {admin.lastLoginAt ? formatDate(admin.lastLoginAt) : "—"}
-            </span>
-          );
-        },
+        id: "createdAt",
+        header: t("columns.dateAdded"),
+        numeric: true,
+        cell: (row) => (
+          <span className="ui-figure text-[12px] text-fg-muted" lang="en">
+            {formatDate(row.createdAt) || "—"}
+          </span>
+        ),
       },
       {
-        headerName: t("columns.permissions"),
-        width: 130,
-        cellRenderer: (params: { data: Administrator }) => {
-          const admin = params.data;
-          if (!admin) return null;
-          const stored = getAdminPermissionsByEmail(admin.email);
-          const label =
-            !stored || stored.length >= ADMIN_PERMISSION_KEYS.length
-              ? t("permissions.fullAccess")
-              : t("permissions.limited", { count: stored.length });
-          return (
-            <span className="text-xs font-medium text-fg-muted">{label}</span>
-          );
-        },
+        id: "lastLoginAt",
+        header: t("columns.lastLogin"),
+        numeric: true,
+        cell: (row) => (
+          <span className="ui-figure text-[12px] text-fg-muted" lang="en">
+            {row.lastLoginAt ? formatDate(row.lastLoginAt) : "—"}
+          </span>
+        ),
       },
       {
-        headerName: t("columns.actions"),
-        width: 180,
-        cellRenderer: (params: { data: Administrator }) => {
-          const admin = params.data;
-          if (!admin) return null;
-          const isCurrentUser = admin.email === currentUserEmail;
-          const isLoading = loadingAdminId === admin.id;
-
+        id: "permissions",
+        header: t("columns.permissions"),
+        cell: (row) => {
+          const stored = getAdminPermissionsByEmail(row.email);
+          const isFull =
+            !stored || stored.length >= ADMIN_PERMISSION_KEYS.length;
           return (
-            <div
-              className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
-            >
-              {canManageAdmins && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setPermissionsModal({ open: true, admin })}
-                >
-                  {t("actions.permissions")}
-                </Button>
-              )}
-              {!isCurrentUser && canManageAdmins && (
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => setDeleteModal({ isOpen: true, admin })}
-                  disabled={isLoading}
-                  loading={isLoading}
-                >
-                  {t("actions.delete")}
-                </Button>
-              )}
-            </div>
+            <Badge tone={isFull ? "brand" : "neutral"} dot>
+              {isFull
+                ? t("permissions.fullAccess")
+                : t("permissions.limited", { count: stored?.length ?? 0 })}
+            </Badge>
           );
         },
       },
     ],
-    [t, isRTL, currentUserEmail, loadingAdminId, formatDate, canManageAdmins],
+    [t, currentUserEmail, formatDate, page, itemsPerPage, admins],
   );
 
+  const rangeFrom = totalItems === 0 ? 0 : (page - 1) * itemsPerPage + 1;
+  const rangeTo = Math.min(page * itemsPerPage, totalItems || admins.length);
+
+  /**
+   * The roster as an instrument panel.
+   *
+   * The two figures lead as an edge-sharing rail, the actions that used to
+   * float in their own centred row moved into the page header where the
+   * page's verbs belong, and the roster itself is one ruled table that
+   * becomes a labelled card per administrator below `md`.
+   */
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title={t("title")}
-        description={t("subtitle")}
-        actions={
-          <Button
-            variant="secondary"
-            startIcon={<IoArrowBack className="rtl:rotate-180" />}
-            onClick={() => router.back()}
-          >
-            {t("back")}
-          </Button>
+    <PageShell
+      kind="detail"
+      header={
+        <>
+          <PageHeader
+            title={t("title")}
+            description={t("subtitle")}
+            breadcrumbs={[
+              { label: tAdmin("title"), href: "/admin" },
+              { label: t("title") },
+            ]}
+            breadcrumbsLabel={tCommon("breadcrumb")}
+            actions={
+              canManageAdmins ? (
+                <>
+                  <ButtonLink
+                    href="/admin/administrators/log"
+                    variant="secondary"
+                    startIcon={<FaHistory />}
+                  >
+                    {t("viewActivityLog")}
+                  </ButtonLink>
+                  <Button
+                    startIcon={<IoAddOutline />}
+                    onClick={() => setShowAddModal(true)}
+                  >
+                    {t("addNewAdmin")}
+                  </Button>
+                </>
+              ) : null
+            }
+          />
+
+          <StatGrid columns={2} ruled>
+            <StatCard
+              label={t("totalAdmins")}
+              value={
+                <span lang="en">{stats.total.toLocaleString("en-US")}</span>
+              }
+              loading={loading}
+            />
+            <StatCard
+              label={t("lastLogin")}
+              value={
+                <span lang="en">
+                  {stats.lastLogin ? formatDate(stats.lastLogin) : "—"}
+                </span>
+              }
+              loading={loading}
+            />
+          </StatGrid>
+        </>
+      }
+      footer={
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          disabled={loading}
+          summary={
+            totalItems > 0
+              ? tCommon("paginationInfo", {
+                  from: rangeFrom,
+                  to: rangeTo,
+                  total: totalItems,
+                })
+              : undefined
+          }
+          labels={{
+            region: tCommon("pagination"),
+            previous: tCommon("previousPage"),
+            next: tCommon("nextPage"),
+            page: (n) => tCommon("goToPage", { page: n }),
+          }}
+        />
+      }
+    >
+      {/* A six-column roster of a handful of people does not need the full
+          ledger width, so this page takes the narrower detail measure — the
+          alternative was six columns stretched across 1900px. */}
+      <DataTable<Administrator>
+        columns={columns}
+        rows={admins}
+        getRowKey={(row) => String(row.id)}
+        caption={t("title")}
+        loading={loading}
+        skeletonRows={itemsPerPage}
+        empty={
+          <EmptyState
+            title={tCommon("noResultsTitle")}
+            size="sm"
+            action={
+              canManageAdmins ? (
+                <Button
+                  size="sm"
+                  startIcon={<IoAddOutline />}
+                  onClick={() => setShowAddModal(true)}
+                >
+                  {t("addNewAdmin")}
+                </Button>
+              ) : undefined
+            }
+          />
+        }
+        rowActions={
+          canManageAdmins
+            ? (row) => (
+                <span className="flex items-center gap-1.5">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() =>
+                      setPermissionsModal({ open: true, admin: row })
+                    }
+                  >
+                    {t("actions.permissions")}
+                  </Button>
+                  {row.email !== currentUserEmail ? (
+                    <Button
+                      variant="dangerGhost"
+                      size="sm"
+                      onClick={() => setDeleteModal({ isOpen: true, admin: row })}
+                      disabled={loadingAdminId === row.id}
+                      loading={loadingAdminId === row.id}
+                    >
+                      {t("actions.delete")}
+                    </Button>
+                  ) : null}
+                </span>
+              )
+            : undefined
         }
       />
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <CardDashBoard
-          borderColor="border-blue-200 dark:border-blue-500/20"
-          hover={true}
-        >
-          <div className="flex items-center gap-4">
-            <div className="flex size-14 items-center justify-center rounded-lg bg-info-soft">
-              <FaUserShield className="text-xl text-info-fg" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-fg-muted mb-1">
-                {t("totalAdmins")}
-              </p>
-              <p className="text-3xl font-bold text-fg transition-all duration-300">
-                {loading ? <Spinner size="md" /> : stats.total.toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </CardDashBoard>
-
-        <CardDashBoard
-          borderColor="border-purple-200 dark:border-purple-500/20"
-          hover={true}
-        >
-          <div className="flex items-center gap-4">
-            <div className="flex size-14 items-center justify-center rounded-lg bg-brand-soft">
-              <FaClock className="text-xl text-brand-soft-fg" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-fg-muted mb-1">
-                {t("lastLogin")}
-              </p>
-              <p className="text-lg font-semibold text-fg transition-all duration-300">
-                {loading ? (
-                  <Spinner size="sm" />
-                ) : stats.lastLogin ? (
-                  formatDate(stats.lastLogin)
-                ) : (
-                  "—"
-                )}
-              </p>
-            </div>
-          </div>
-        </CardDashBoard>
-      </div>
-
-      {/* Add New Administrator Button */}
-      {canManageAdmins && (
-        <div
-          className={`flex flex-wrap items-center gap-3 ${isRTL ? "justify-start" : "justify-end"}`}
-        >
-          <ButtonLink
-            href="/admin/administrators/log"
-            variant="secondary"
-            startIcon={<FaHistory />}
-          >
-            {t("viewActivityLog")}
-          </ButtonLink>
-          <Button
-            startIcon={<IoAddOutline />}
-            onClick={() => setShowAddModal(true)}
-          >
-            {t("addNewAdmin")}
-          </Button>
-        </div>
-      )}
-
-      {/* Administrators Table */}
-      <CardDashBoard>
-        <DataTable<Administrator>
-          rowData={admins}
-          columnDefs={columnDefs}
-          loading={loading}
-          locale={locale}
-          showRowNumbers={true}
-          pagination={true}
-          page={page}
-          totalPages={totalPages}
-          paginationPageSize={itemsPerPage}
-          onPageChange={handlePageChange}
-        />
-      </CardDashBoard>
-
-      {/* Add Administrator Modal */}
       {showAddModal && (
         <AddAdministratorModal
           onClose={() => setShowAddModal(false)}
@@ -404,7 +419,6 @@ export default function AdministratorsPage() {
         />
       )}
 
-      {/* Delete Confirmation Modal */}
       <ConfirmDialog
         open={deleteModal.isOpen}
         onClose={() => setDeleteModal({ isOpen: false, admin: null })}
@@ -426,6 +440,6 @@ export default function AdministratorsPage() {
         isCurrentUser={permissionsModal.admin?.email === currentUserEmail}
         onClose={() => setPermissionsModal({ open: false, admin: null })}
       />
-    </div>
+    </PageShell>
   );
 }

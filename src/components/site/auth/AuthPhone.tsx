@@ -2,13 +2,7 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import {
-  FiBell,
-  FiCheck,
-  FiLock,
-  FiMail,
-  FiSearch,
-} from "react-icons/fi";
+import { FiBell, FiCheck, FiLock, FiMail, FiSearch } from "react-icons/fi";
 import {
   mockDemoProductImages,
   mockDemoProductPrices,
@@ -17,11 +11,7 @@ import {
 import { cn } from "@/lib/cn";
 
 export type AuthPhoneVariant =
-  | "login"
-  | "register"
-  | "reset"
-  | "staff"
-  | "verify";
+  "login" | "register" | "reset" | "staff" | "verify";
 
 const MENU_ITEMS: MockDemoProductId[] = [
   "grilledChicken",
@@ -85,7 +75,7 @@ function RegisterScreen() {
             className={cn(
               "shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold",
               i === 0
-                ? "bg-site-brand text-white"
+                ? "bg-site-brand text-site-bg-ink"
                 : "bg-site-tint text-site-muted",
             )}
           >
@@ -117,7 +107,7 @@ function RegisterScreen() {
             </div>
             <span
               aria-hidden
-              className="flex size-7 shrink-0 items-center justify-center rounded-full bg-site-brand text-[15px] leading-none font-bold text-white"
+              className="flex size-7 shrink-0 items-center justify-center rounded-full bg-site-brand text-[15px] leading-none font-bold text-site-bg-ink"
             >
               +
             </span>
@@ -150,7 +140,7 @@ function LoginScreen() {
       </p>
 
       <div className="mt-4 flex items-center gap-2 rounded-2xl border border-site-brand-line bg-site-brand-tint px-3 py-2.5">
-        <span className="flex size-8 items-center justify-center rounded-full bg-site-brand text-[12px] font-bold text-white">
+        <span className="ui-figure flex size-8 items-center justify-center rounded-full bg-site-brand text-[12px] font-bold text-site-bg-ink">
           3
         </span>
         <span className="text-start text-[11px] font-semibold text-site-brand-deep">
@@ -201,7 +191,10 @@ function ResetScreen() {
       </p>
       <div className="mt-5 flex w-full items-center gap-2 rounded-xl border border-site-line bg-site-tint px-3 py-2.5 text-start">
         <FiMail className="size-4 shrink-0 text-site-brand" aria-hidden />
-        <span className="truncate text-[11px] font-medium text-site-ink" dir="ltr">
+        <span
+          className="truncate text-[11px] font-medium text-site-ink"
+          dir="ltr"
+        >
           {t("email")}
         </span>
       </div>

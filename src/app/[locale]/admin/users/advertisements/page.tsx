@@ -1,16 +1,37 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { IoArrowBack, IoAddOutline, IoMegaphoneOutline } from "react-icons/io5";
-import { FaSpinner, FaEye, FaTrash, FaEdit, FaBan } from "react-icons/fa";
-import CardDashBoard from "@/components/Card/CardDashBoard";
-import { axiosGet, axiosDelete, axiosPatch } from "@/shared/axiosCall";
+import { IoAddOutline, IoMegaphoneOutline } from "react-icons/io5";
+import {
+  FaEye,
+  FaTrash,
+  FaEdit,
+  FaBan,
+  FaExternalLinkAlt,
+} from "react-icons/fa";
 import { toast } from "react-toastify";
 import { FiAlertTriangle } from "react-icons/fi";
-import { ConfirmDialog, Button, PageHeader } from "@/components/ui";
+import { axiosGet, axiosDelete, axiosPatch } from "@/shared/axiosCall";
 import LoadImage from "@/components/ImageLoad";
+import {
+  Badge,
+  Button,
+  ConfirmDialog,
+  DataTable,
+  EmptyState,
+  NoResultsState,
+  PageHeader,
+  PageShell,
+  SearchInput,
+  SegmentedControl,
+  StatCard,
+  StatGrid,
+  Toolbar,
+  type DataColumn,
+} from "@/components/ui";
+import { useDataTableLabels } from "@/hooks/useDataTableLabels";
 
 interface Advertisement {
   id: number;
@@ -40,10 +61,15 @@ interface AdsResponse {
   };
 }
 
+type StatusFilter = "all" | "active" | "inactive";
+
 export default function AdminAdvertisementsPage() {
   const locale = useLocale();
   const t = useTranslations("adminAds");
+  const tCommon = useTranslations("common");
+  const tAdmin = useTranslations("adminDashboard");
   const router = useRouter();
+  const tableLabels = useDataTableLabels();
   const isRTL = locale === "ar";
 
   const [ads, setAds] = useState<Advertisement[]>([]);
@@ -53,6 +79,8 @@ export default function AdminAdvertisementsPage() {
     totalActive: 0,
     totalClicks: 0,
   });
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
     ad: Advertisement | null;
@@ -173,239 +201,320 @@ export default function AdminAdvertisementsPage() {
     [locale, t, fetchAds],
   );
 
-  const getTitle = (ad: Advertisement) => {
-    return isRTL && ad.titleAr ? ad.titleAr : ad.title || "";
-  };
+  const getTitle = useCallback(
+    (ad: Advertisement) => (isRTL && ad.titleAr ? ad.titleAr : ad.title || ""),
+    [isRTL],
+  );
 
-  const getContent = (ad: Advertisement) => {
-    return isRTL && ad.contentAr ? ad.contentAr : ad.content || "";
-  };
+  const getContent = useCallback(
+    (ad: Advertisement) =>
+      isRTL && ad.contentAr ? ad.contentAr : ad.content || "",
+    [isRTL],
+  );
 
+  const visibleAds = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return ads.filter((ad) => {
+      const isActive = ad.isActive ?? false;
+      if (statusFilter === "active" && !isActive) return false;
+      if (statusFilter === "inactive" && isActive) return false;
+      if (!q) return true;
+      return (
+        getTitle(ad).toLowerCase().includes(q) ||
+        getContent(ad).toLowerCase().includes(q)
+      );
+    });
+  }, [ads, query, statusFilter, getTitle, getContent]);
+
+  const columns = useMemo<DataColumn<Advertisement>[]>(
+    () => [
+      {
+        id: "ad",
+        header: t("advertisement"),
+        primary: true,
+        sortValue: (ad) => getTitle(ad),
+        cell: (ad) => (
+          <span className="flex items-start gap-2.5">
+            <span
+              className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-surface-2 text-fg-subtle"
+              aria-hidden
+            >
+              {ad.imageUrl ? (
+                <LoadImage
+                  src={ad.imageUrl}
+                  alt=""
+                  className="size-10 object-cover"
+                  width={40}
+                  height={40}
+                  cover
+                />
+              ) : (
+                <IoMegaphoneOutline />
+              )}
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate font-medium text-fg">
+                {getTitle(ad) || "—"}
+              </span>
+              <span className="mt-0.5 block truncate text-[11px] text-fg-subtle">
+                {getContent(ad).split("\n").filter(Boolean).join(" · ") || "—"}
+              </span>
+            </span>
+          </span>
+        ),
+      },
+      {
+        id: "status",
+        header: t("columns.status"),
+        cell: (ad) => {
+          const isActive = ad.isActive ?? false;
+          return (
+            <Badge tone={isActive ? "success" : "neutral"} dot>
+              {isActive ? t("status.active") : t("status.inactive")}
+            </Badge>
+          );
+        },
+      },
+      {
+        id: "views",
+        header: t("views"),
+        align: "end",
+        numeric: true,
+        sortValue: (ad) => ad.impressionCount || 0,
+        cell: (ad) => (
+          <span className="ui-figure text-[13px]" lang="en">
+            {(ad.impressionCount || 0).toLocaleString("en-US")}
+          </span>
+        ),
+      },
+      {
+        id: "clicks",
+        header: t("clicks"),
+        align: "end",
+        numeric: true,
+        sortValue: (ad) => ad.clickCount || 0,
+        cell: (ad) => (
+          <span className="ui-figure text-[13px]" lang="en">
+            {(ad.clickCount || 0).toLocaleString("en-US")}
+          </span>
+        ),
+      },
+      {
+        id: "link",
+        header: t("hasLink"),
+        hideOnMobile: true,
+        cell: (ad) =>
+          ad.linkUrl ? (
+            <a
+              href={ad.linkUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex max-w-40 items-center gap-1 truncate font-mono text-[12px] text-brand hover:underline"
+              dir="ltr"
+            >
+              <FaExternalLinkAlt className="size-2.5 shrink-0" aria-hidden />
+              <span className="truncate">{ad.linkUrl}</span>
+            </a>
+          ) : (
+            <span className="text-fg-subtle">—</span>
+          ),
+      },
+    ],
+    [t, getTitle, getContent],
+  );
+
+  /**
+   * The ad roster as one ruled ledger.
+   *
+   * Every ad used to be a full-width card with its own image, paragraph and row
+   * of five coloured buttons, so a list of ten was ten screens of chrome and
+   * the numbers that decide whether an ad is working were buried in a sentence.
+   * As a table the impressions and clicks line up in tabular columns, status is
+   * one badge, and the destructive verbs sit in a single trailing action group.
+   */
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title={t("title")}
-        description={t("subtitle")}
-        actions={
-          <Button
-            variant="secondary"
-            startIcon={<IoArrowBack className="rtl:rotate-180" />}
-            onClick={() => router.back()}
-          >
-            {t("back")}
-          </Button>
+    <PageShell
+      kind="table"
+      header={
+        <>
+          <PageHeader
+            title={t("title")}
+            description={t("subtitle")}
+            breadcrumbs={[
+              { label: tAdmin("title"), href: "/admin" },
+              { label: t("title") },
+            ]}
+            breadcrumbsLabel={tCommon("breadcrumb")}
+            actions={
+              <Button
+                startIcon={<IoAddOutline />}
+                onClick={() => router.push("/admin/users/advertisements/new")}
+              >
+                {t("addNewAd")}
+              </Button>
+            }
+          />
+
+          <StatGrid columns={3} ruled>
+            <StatCard
+              label={t("totalAds")}
+              value={
+                <span lang="en">{stats.total.toLocaleString("en-US")}</span>
+              }
+              loading={loading}
+            />
+            <StatCard
+              label={t("activeAds")}
+              value={
+                <span lang="en">
+                  {stats.totalActive.toLocaleString("en-US")}
+                </span>
+              }
+              loading={loading}
+            />
+            <StatCard
+              label={t("totalClicks")}
+              value={
+                <span lang="en">
+                  {stats.totalClicks.toLocaleString("en-US")}
+                </span>
+              }
+              loading={loading}
+            />
+          </StatGrid>
+        </>
+      }
+      toolbar={
+        <Toolbar
+          search={
+            <SearchInput
+              value={query}
+              onChange={setQuery}
+              placeholder={tCommon("search")}
+              label={tCommon("search")}
+              clearLabel={tCommon("clearSearch")}
+            />
+          }
+          filters={
+            <SegmentedControl<StatusFilter>
+              label={t("columns.status")}
+              value={statusFilter}
+              onChange={setStatusFilter}
+              options={[
+                { value: "all", label: t("filterAll"), count: ads.length },
+                {
+                  value: "active",
+                  label: t("status.active"),
+                  count: ads.filter((ad) => ad.isActive).length,
+                },
+                {
+                  value: "inactive",
+                  label: t("status.inactive"),
+                  count: ads.filter((ad) => !ad.isActive).length,
+                },
+              ]}
+            />
+          }
+        />
+      }
+    >
+      <DataTable<Advertisement>
+        columns={columns}
+        rows={visibleAds}
+        getRowKey={(ad) => String(ad.id)}
+        caption={t("title")}
+        loading={loading}
+        tableId="admin-user-advertisements"
+        stickyHeader
+        densityControl
+        columnControl
+        labels={tableLabels}
+        empty={
+          query.trim() || statusFilter !== "all" ? (
+            <NoResultsState
+              title={tCommon("noResultsTitle")}
+              description={tCommon("noResultsDescription")}
+              onClear={() => {
+                setQuery("");
+                setStatusFilter("all");
+              }}
+              clearLabel={tCommon("clearFilters")}
+            />
+          ) : (
+            <EmptyState
+              icon={<IoMegaphoneOutline />}
+              title={t("noAdsTitle")}
+              description={t("noAdsDescription")}
+              action={
+                <Button
+                  startIcon={<IoAddOutline />}
+                  onClick={() => router.push("/admin/users/advertisements/new")}
+                >
+                  {t("addNewAd")}
+                </Button>
+              }
+            />
+          )
         }
+        rowActions={(ad) => {
+          const isLoading = loadingAdId === ad.id;
+          const isActive = ad.isActive ?? false;
+          return (
+            <span className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                iconOnly
+                aria-label={t("actions.edit")}
+                title={t("actions.edit")}
+                disabled={isLoading}
+                onClick={() =>
+                  router.push(`/admin/users/advertisements/${ad.id}`)
+                }
+              >
+                <FaEdit />
+              </Button>
+              {isActive ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  iconOnly
+                  aria-label={t("actions.deactivate")}
+                  title={t("actions.deactivate")}
+                  disabled={isLoading}
+                  onClick={() => setDeactivateModal({ isOpen: true, ad })}
+                >
+                  <FaBan />
+                </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  iconOnly
+                  aria-label={t("actions.activate")}
+                  title={t("actions.activate")}
+                  loading={isLoading}
+                  onClick={() => handleActivate(ad.id)}
+                >
+                  <FaEye />
+                </Button>
+              )}
+              <Button
+                variant="dangerGhost"
+                size="sm"
+                iconOnly
+                aria-label={t("actions.delete")}
+                title={t("actions.delete")}
+                disabled={isLoading}
+                onClick={() => setDeleteModal({ isOpen: true, ad })}
+              >
+                <FaTrash />
+              </Button>
+            </span>
+          );
+        }}
       />
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <CardDashBoard borderColor="border-blue-200 dark:border-blue-500/20">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center">
-              <IoMegaphoneOutline className="text-blue-600 dark:text-blue-400 text-xl" />
-            </div>
-            <div>
-              <p className="text-sm text-fg-muted mb-1">{t("totalAds")}</p>
-              <p className="text-2xl font-bold text-fg">{stats.total}</p>
-            </div>
-          </div>
-        </CardDashBoard>
-
-        <CardDashBoard borderColor="border-green-200 dark:border-green-500/20">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-green-50 dark:bg-green-500/10 flex items-center justify-center">
-              <FaEye className="text-green-600 dark:text-green-400 text-xl" />
-            </div>
-            <div>
-              <p className="text-sm text-fg-muted mb-1">{t("activeAds")}</p>
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                {stats.totalActive}
-              </p>
-            </div>
-          </div>
-        </CardDashBoard>
-
-        <CardDashBoard borderColor="border-purple-200 dark:border-purple-500/20">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-purple-50 dark:bg-purple-500/10 flex items-center justify-center">
-              <FaEye className="text-purple-600 dark:text-purple-400 text-xl" />
-            </div>
-            <div>
-              <p className="text-sm text-fg-muted mb-1">{t("totalClicks")}</p>
-              <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                {stats.totalClicks}
-              </p>
-            </div>
-          </div>
-        </CardDashBoard>
-      </div>
-
-      {/* Add New Advertisement Button */}
-      <div className={`flex ${isRTL ? "justify-start" : "justify-end"}`}>
-        <button
-          onClick={() => router.push("/admin/users/advertisements/new")}
-          className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors"
-        >
-          <IoAddOutline className="text-lg" />
-          <span>{t("addNewAd")}</span>
-        </button>
-      </div>
-
-      {/* Advertisements List */}
-      {loading ? (
-        <CardDashBoard>
-          <div className="flex items-center justify-center py-12">
-            <FaSpinner className="animate-spin text-2xl text-fg-subtle" />
-          </div>
-        </CardDashBoard>
-      ) : ads.length === 0 ? (
-        <CardDashBoard>
-          <div className="text-center py-12">
-            <p className="text-fg-muted">{t("noAds")}</p>
-          </div>
-        </CardDashBoard>
-      ) : (
-        <div className="space-y-4">
-          {ads.map((ad) => {
-            const isLoading = loadingAdId === ad.id;
-            const isActive = ad.isActive ?? false;
-
-            return (
-              <CardDashBoard key={ad.id}>
-                <div
-                  className={`flex gap-6 ${isRTL ? "flex-row-reverse" : ""}`}
-                >
-                  {/* Image */}
-                  <div className="shrink-0">
-                    <div className="w-32 h-32 rounded-lg bg-surface-2 overflow-hidden">
-                      {ad.imageUrl ? (
-                        <LoadImage
-                          src={ad.imageUrl}
-                          alt={getTitle(ad)}
-                          className="w-full h-full object-cover"
-                          width={128}
-                          height={128}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-fg-subtle">
-                          <IoMegaphoneOutline className="text-4xl" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    {/* Status Badge */}
-                    <div
-                      className={`mb-2 ${isRTL ? "text-left" : "text-right"}`}
-                    >
-                      <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                          isActive
-                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                            : "bg-slate-100 text-slate-800  dark:text-fg-subtle"
-                        }`}
-                      >
-                        {isActive ? t("status.active") : t("status.inactive")}
-                      </span>
-                    </div>
-
-                    {/* Title */}
-                    <h3 className="text-xl font-bold text-fg mb-2">
-                      {getTitle(ad)}
-                    </h3>
-
-                    {/* Description */}
-                    <div className="text-fg-muted mb-3 space-y-1">
-                      {getContent(ad)
-                        .split("\n")
-                        .filter((line) => line.trim())
-                        .map((line, idx) => (
-                          <p key={idx}>{line}</p>
-                        ))}
-                    </div>
-
-                    {/* Metrics */}
-                    <div className="text-sm text-fg-muted mb-4">
-                      {t("metrics", {
-                        clicks: ad.clickCount || 0,
-                        views: ad.impressionCount || 0,
-                      })}
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div
-                      className={`flex items-center gap-2 flex-wrap ${isRTL ? "flex-row-reverse" : ""}`}
-                    >
-                      <button
-                        onClick={() =>
-                          router.push(`/admin/users/advertisements/${ad.id}`)
-                        }
-                        disabled={isLoading}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-colors flex items-center gap-2"
-                      >
-                        <FaEdit className="text-xs" />
-                        {t("actions.edit")}
-                      </button>
-
-                      {isActive ? (
-                        <button
-                          onClick={() =>
-                            setDeactivateModal({ isOpen: true, ad })
-                          }
-                          disabled={isLoading}
-                          className="px-4 py-2 bg-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-colors flex items-center gap-2"
-                        >
-                          <FaBan className="text-xs" />
-                          {t("actions.deactivate")}
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleActivate(ad.id)}
-                          disabled={isLoading}
-                          className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-colors flex items-center gap-2"
-                        >
-                          {isLoading ? (
-                            <FaSpinner className="animate-spin text-xs" />
-                          ) : (
-                            <>
-                              <FaEye className="text-xs" />
-                              {t("actions.activate")}
-                            </>
-                          )}
-                        </button>
-                      )}
-
-                      <button
-                        onClick={() => setDeleteModal({ isOpen: true, ad })}
-                        disabled={isLoading}
-                        className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-colors flex items-center gap-2"
-                      >
-                        <FaTrash className="text-xs" />
-                        {t("actions.delete")}
-                      </button>
-
-                      {ad.linkUrl && (
-                        <button
-                          onClick={() => window.open(ad.linkUrl, "_blank")}
-                          disabled={isLoading}
-                          className="px-4 py-2 bg-slate-600 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-colors flex items-center gap-2"
-                        >
-                          <FaEye className="text-xs" />
-                          {t("actions.viewLink")}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </CardDashBoard>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
       <ConfirmDialog
         open={deleteModal.isOpen}
         onClose={() => setDeleteModal({ isOpen: false, ad: null })}
@@ -417,11 +526,10 @@ export default function AdminAdvertisementsPage() {
         confirmLabel={t("actions.delete")}
         cancelLabel={t("actions.cancel")}
         loading={loadingAdId === deleteModal.ad?.id}
-        tone="brand"
+        tone="danger"
         icon={<FiAlertTriangle />}
       />
 
-      {/* Deactivate Confirmation Modal */}
       <ConfirmDialog
         open={deactivateModal.isOpen}
         onClose={() => setDeactivateModal({ isOpen: false, ad: null })}
@@ -436,6 +544,6 @@ export default function AdminAdvertisementsPage() {
         tone="brand"
         icon={<FiAlertTriangle />}
       />
-    </div>
+    </PageShell>
   );
 }

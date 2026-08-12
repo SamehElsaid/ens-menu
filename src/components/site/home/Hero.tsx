@@ -1,16 +1,20 @@
+"use client";
+
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { FiArrowLeft, FiArrowRight, FiCheck, FiZap } from "react-icons/fi";
+import { FiArrowLeft, FiArrowRight, FiCheck } from "react-icons/fi";
+import { Magnetic } from "@/motion/Magnetic";
 import { SiteButtonLink } from "../Button";
+import { Col, Container, Grid, Pill } from "../primitives";
 import PhoneMenu from "./PhoneMenu";
+import PrismSlot from "./PrismSlot";
 
 /**
- * First viewport.
+ * First viewport — the cinematic opening of the home motion story.
  *
- * The composition is the argument: the paper menu the owner already has, and
- * the live phone menu it becomes, in one frame. Nothing here claims a result —
- * it shows the before and the after and puts the primary action directly under
- * the headline, where the reading order lands.
+ * GSAP (`HomeMotion`) owns the entrance and the pinned paper→phone scrub on
+ * capable desktops. Data attributes below are the choreography hooks; CSS
+ * `s-enter*` remains as the no-JS / reduced-motion progressive path.
  */
 export function Hero({ locale }: { locale: string }) {
   const t = useTranslations("site.hero");
@@ -20,87 +24,139 @@ export function Hero({ locale }: { locale: string }) {
   return (
     <section
       id="hero"
-      className="relative isolate -mt-[var(--s-header-h)] overflow-hidden pt-[calc(var(--s-header-h)+3rem)] pb-16 sm:pb-20 lg:pt-[calc(var(--s-header-h)+5rem)] lg:pb-28"
+      data-home-section="hero"
+      className="relative isolate -mt-(--s-header-h) overflow-hidden bg-site-ground"
     >
       <div aria-hidden className="s-aurora" />
+      <PrismSlot locale={locale} />
 
-      <div className="mx-auto grid w-full max-w-[var(--s-max)] items-center gap-14 px-[var(--s-gutter)] lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-10">
-        <div className="max-w-2xl text-center lg:text-start">
-          <span className="inline-flex items-center gap-2 rounded-full border border-site-brand-line bg-site-brand-tint px-3.5 py-1.5 text-site-xs font-semibold text-site-brand-deep">
-            <FiZap className="size-3.5" aria-hidden />
-            {t("eyebrow")}
-          </span>
-
-          <h1 className="mt-6 text-site-display">
-            {t("titleLead")}{" "}
-            <span className="relative whitespace-nowrap text-site-brand">
-              {t("titleAccent")}
-            </span>
-          </h1>
-
-          <p className="mx-auto mt-6 max-w-xl text-site-lead text-site-fg lg:mx-0">
-            {t("lead")}
-          </p>
-
-          <div className="mt-9 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center lg:justify-start">
-            <SiteButtonLink href="/auth/register" size="lg">
-              {t("primaryCta")}
-              <Arrow className="size-4" aria-hidden />
-            </SiteButtonLink>
-            <SiteButtonLink
-              href="/#how-it-works"
-              variant="secondary"
-              size="lg"
-              prefetch={false}
-            >
-              {t("secondaryCta")}
-            </SiteButtonLink>
-          </div>
-
-          <ul className="mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-site-xs text-site-muted lg:justify-start">
-            {["freePlan", "noGuestApp", "bilingual"].map((key) => (
-              <li key={key} className="inline-flex items-center gap-1.5">
-                <FiCheck
-                  className="size-3.5 shrink-0 text-site-positive"
-                  aria-hidden
-                />
-                {t(`assurances.${key}`)}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Before and after in one frame: the paper the owner already has,
-            beside the menu it becomes. The paper is dropped below `sm` — at
-            that width it can only sit under the phone, where it reads as a
-            rendering fault rather than an argument. */}
-        {/* Fixed width from `sm` up, not `max-w`: the grid track is `auto`, so a
-            percentage width would collapse to the phone and swallow the paper. */}
-        <div className="relative mx-auto w-full max-w-[19rem] sm:w-[29.5rem] sm:max-w-none">
-          <figure className="absolute start-0 top-1/2 z-0 hidden w-[12rem] -translate-y-1/2 -rotate-6 overflow-hidden rounded-site-card border border-site-line bg-white shadow-site sm:block">
-            <Image
-              src="/images/demo/paper-menu.jpg"
-              alt={t("paperAlt")}
-              width={520}
-              height={720}
-              sizes="12rem"
-              className="h-auto w-full object-cover"
-            />
-            <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-site-ink-bg/95 via-site-ink-bg/70 to-transparent px-2.5 pt-8 pb-2 text-[10px] font-semibold text-white">
-              {t("beforeLabel")}
-            </figcaption>
-          </figure>
-
-          <div className="relative z-10 flex justify-center sm:justify-end">
-            <div className="relative">
-              <PhoneMenu priority className="w-[17.5rem] sm:w-[19rem]" />
-              <span className="absolute -top-3 start-1/2 z-20 -translate-x-1/2 rounded-full bg-site-positive px-3 py-1 text-[11px] font-semibold whitespace-nowrap text-white shadow-site">
-                {t("afterLabel")}
-              </span>
+      <Container className="pt-[calc(var(--s-header-h)+2.5rem)] pb-0 lg:pt-[calc(var(--s-header-h)+4.5rem)]">
+        <Grid className="items-center gap-y-14">
+          <Col span={7}>
+            <div data-home="eyebrow" className="s-enter-soft w-fit">
+              <Pill>{t("eyebrow")}</Pill>
             </div>
-          </div>
-        </div>
-      </div>
+
+            {/* Title starts invisible under HomeMotion; without JS the CSS
+                fallback keeps it painted for LCP (see public.css). */}
+            <h1
+              data-home="title"
+              className="s-home-title mt-6 text-site-display"
+            >
+              {t("titleLead")}{" "}
+              <span
+                data-home="title-accent"
+                className="s-grad-text whitespace-nowrap"
+              >
+                {t("titleAccent")}
+              </span>
+            </h1>
+
+            <p
+              data-home="lead"
+              className="s-enter s-enter-d1 mt-7 max-w-xl text-site-lead text-site-fg"
+            >
+              {t("lead")}
+            </p>
+
+            <div
+              data-home="ctas"
+              className="s-enter s-enter-d1 mt-9 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center"
+            >
+              <Magnetic>
+                <SiteButtonLink href="/auth/register" size="lg">
+                  {t("primaryCta")}
+                  <Arrow className="s-cta-arrow size-4" aria-hidden />
+                </SiteButtonLink>
+              </Magnetic>
+              <SiteButtonLink
+                href="/#how-it-works"
+                variant="secondary"
+                size="lg"
+                prefetch={false}
+              >
+                {t("secondaryCta")}
+              </SiteButtonLink>
+            </div>
+          </Col>
+
+          <Col span={5}>
+            <div
+              data-home="proof"
+              className="s-enter-still s-enter-d2 relative mx-auto w-full max-w-[19rem] sm:w-[30rem] sm:max-w-none lg:w-full"
+            >
+              <div
+                data-home="paper"
+                className="absolute start-0 top-1/2 hidden w-[12.5rem] -translate-y-1/2 sm:block lg:w-[10.5rem]"
+              >
+                <figure className="overflow-hidden rounded-site-card border border-site-line bg-site-bg shadow-site">
+                  <Image
+                    src="/images/demo/paper-menu.jpg"
+                    alt={t("paperAlt")}
+                    width={520}
+                    height={720}
+                    sizes="12.5rem"
+                    className="aspect-3/4 w-full object-cover"
+                  />
+                  <figcaption className="s-ticket border-t border-site-line px-3 py-2 text-site-muted">
+                    {t("beforeLabel")}
+                  </figcaption>
+                </figure>
+
+                <span
+                  data-home="badge"
+                  aria-hidden
+                  className="s-enter-badge s-enter-d3 absolute top-1/2 -me-4 end-0 z-20 flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-site-brand text-white shadow-site-brand"
+                >
+                  <Arrow className="size-4" />
+                </span>
+              </div>
+
+              <div
+                data-home="phone"
+                className="relative z-10 flex flex-col items-center sm:items-end"
+                style={{ transformStyle: "preserve-3d" }}
+              >
+                <span
+                  data-home="after-label"
+                  className="s-ticket s-enter-soft s-enter-d2 mb-3 flex items-center gap-2 text-site-brand-text"
+                >
+                  <span
+                    aria-hidden
+                    className="size-1.5 rounded-full bg-site-brand"
+                  />
+                  {t("afterLabel")}
+                </span>
+                <PhoneMenu
+                  priority
+                  className="w-[17.5rem] sm:w-[19rem] lg:w-[17.5rem]"
+                />
+              </div>
+            </div>
+          </Col>
+        </Grid>
+
+        <ul className="s-stagger mt-14 grid gap-3 sm:grid-cols-3">
+          {(["freePlan", "noGuestApp", "bilingual"] as const).map((key) => (
+            <li
+              key={key}
+              data-home="assurance"
+              className="s-reveal-soft s-depth-card flex items-center gap-3 rounded-site-card border border-site-line bg-site-bg/80 px-4 py-3.5 text-site-sm font-medium text-site-fg shadow-site-sm backdrop-blur-sm"
+            >
+              <span
+                aria-hidden
+                className="flex size-6 shrink-0 items-center justify-center rounded-full bg-site-brand-tint text-site-brand-text"
+              >
+                <FiCheck className="size-3.5" />
+              </span>
+              {t(`assurances.${key}`)}
+            </li>
+          ))}
+        </ul>
+      </Container>
+
+      {/* Continuity seam into LogoStrip — the light's residue. */}
+      <div aria-hidden className="s-home-seam" />
     </section>
   );
 }

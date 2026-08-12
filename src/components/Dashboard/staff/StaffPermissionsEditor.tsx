@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { useTranslations } from "next-intl";
 import {
   expandWithDependencies,
@@ -10,6 +11,8 @@ import {
   IoLockClosedOutline,
   IoInformationCircleOutline,
 } from "react-icons/io5";
+import { Alert, Button, Checkbox, LoadingBlock } from "@/components/ui";
+import { cn } from "@/lib/cn";
 
 const GROUP_LABEL_KEYS: Record<string, string> = {
   orders: "groups.orders",
@@ -28,6 +31,16 @@ interface StaffPermissionsEditorProps {
   disabled?: boolean;
 }
 
+/**
+ * The permission set for a role, as a checklist ledger.
+ *
+ * Forty permissions in bordered two-column tiles read as forty separate
+ * decisions; one rounded panel with a sans header per group reads as a form
+ * you work down. A selected row is marked with the purple inline edge rather
+ * than a tinted fill — the same signal `Card`'s `active` prop draws, hand-rolled
+ * here because these rows share edges with their neighbours instead of being
+ * panels of their own.
+ */
 export default function StaffPermissionsEditor({
   value,
   onChange,
@@ -36,6 +49,7 @@ export default function StaffPermissionsEditor({
   const t = useTranslations("StaffPermissions");
   const tRoot = useTranslations();
   const { catalog, loading, byGroup, groups } = useStaffPermissionsCatalog();
+  const headingId = useId();
 
   const selected = new Set(value);
   const locked = lockedDependencyKeys(value, catalog);
@@ -62,111 +76,110 @@ export default function StaffPermissionsEditor({
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <span
-          className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"
-          aria-hidden
-        />
-      </div>
-    );
+    return <LoadingBlock size="md" className="min-h-24" />;
   }
 
   if (!catalog) {
-    return (
-      <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950/30 dark:text-red-300">
-        {t("loadError")}
-      </p>
-    );
+    return <Alert tone="danger">{t("loadError")}</Alert>;
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 text-xs text-fg-muted">
+    <div className="flex flex-col gap-2.5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="flex min-w-0 items-start gap-1.5 text-xs leading-relaxed text-fg-muted">
           <IoInformationCircleOutline
-            className="shrink-0 text-sm"
+            className="mt-px shrink-0 text-sm"
             aria-hidden
           />
           <span>{t("dependencyHint")}</span>
-        </div>
-        <div className="flex shrink-0 gap-2 text-xs">
-          <button
-            type="button"
+        </p>
+        <div className="flex shrink-0 items-center gap-1">
+          <Button
+            variant="ghost"
+            size="xs"
             disabled={disabled}
             onClick={selectAll}
-            className="font-medium text-primary hover:underline disabled:opacity-50"
           >
             {t("selectAll")}
-          </button>
-          <span className="text-slate-300 dark:text-fg-muted">|</span>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="ghost"
+            size="xs"
             disabled={disabled}
             onClick={clearAll}
-            className="font-medium text-fg-subtle hover:underline disabled:opacity-50 dark:text-fg-subtle"
           >
             {t("clearAll")}
-          </button>
+          </Button>
         </div>
       </div>
 
-      <div className="space-y-4 max-h-[46vh] overflow-y-auto pe-1">
+      <div className="max-h-[46vh] overflow-y-auto rounded-lg border border-line bg-surface">
         {groups.map((group) => {
           const perms = byGroup[group] ?? [];
           if (perms.length === 0) return null;
           const groupLabelKey = GROUP_LABEL_KEYS[group];
+          const groupHeadingId = `${headingId}-${group}`;
           return (
-            <fieldset key={group} className="rounded-lg border border-line/70">
-              <legend className="mx-3 px-1.5 text-xs font-semibold uppercase tracking-wide text-fg-muted">
+            <section
+              key={group}
+              role="group"
+              aria-labelledby={groupHeadingId}
+              className="border-b border-line last:border-b-0"
+            >
+              {/* Sticky so the group a row belongs to is still named after
+                  scrolling forty rows inside a 46vh well. */}
+              <h4
+                id={groupHeadingId}
+                className="ui-label sticky top-0 z-10 border-b border-line bg-surface-2 px-3 py-1.5"
+              >
                 {groupLabelKey ? t(groupLabelKey) : group}
-              </legend>
-              <div className="grid grid-cols-1 gap-1.5 p-3 sm:grid-cols-2">
+              </h4>
+              <ul className="divide-y divide-line">
                 {perms.map((perm) => {
                   const isChecked = selected.has(perm.key);
                   const isLocked = isChecked && locked.has(perm.key);
                   return (
-                    <label
+                    <li
                       key={perm.key}
-                      className={`group flex items-start gap-2.5 rounded-lg border px-3 py-2 text-sm transition-colors ${
-                        isChecked
-                          ? "border-primary/40 bg-primary/5 dark:border-primary/40 dark:bg-primary/10"
-                          : "border-line hover:bg-slate-50  dark:hover:bg-slate-800/50"
-                      } ${
-                        disabled || isLocked
-                          ? "cursor-not-allowed opacity-80"
-                          : "cursor-pointer"
-                      }`}
+                      className={cn(
+                        "relative px-3 py-2",
+                        isChecked &&
+                          "before:absolute before:inset-y-0 before:start-0 before:w-0.5 before:bg-accent before:content-['']",
+                        (disabled || isLocked) && "opacity-80",
+                      )}
                       title={isLocked ? t("lockedByDependency") : undefined}
                     >
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={isChecked}
                         disabled={disabled || isLocked}
                         onChange={() => toggle(perm.key)}
-                        className="mt-0.5 rounded border-slate-300 text-primary focus:ring-primary/30 disabled:opacity-60"
+                        label={
+                          <span className="flex items-center gap-1.5">
+                            {tRoot(
+                              perm.labelKey as Parameters<typeof tRoot>[0],
+                            )}
+                            {isLocked ? (
+                              <>
+                                <IoLockClosedOutline
+                                  className="shrink-0 text-[11px] text-fg-subtle"
+                                  aria-hidden
+                                />
+                                <span className="sr-only">
+                                  {t("lockedByDependency")}
+                                </span>
+                              </>
+                            ) : null}
+                          </span>
+                        }
+                        hint={tRoot(
+                          perm.descriptionKey as Parameters<typeof tRoot>[0],
+                        )}
                       />
-                      <span className="min-w-0 flex-1">
-                        <span className="flex items-center gap-1.5 font-medium text-fg">
-                          {tRoot(perm.labelKey as Parameters<typeof tRoot>[0])}
-                          {isLocked && (
-                            <IoLockClosedOutline
-                              className="shrink-0 text-[11px] text-fg-subtle"
-                              aria-hidden
-                            />
-                          )}
-                        </span>
-                        <span className="mt-0.5 block text-xs leading-snug text-fg-muted">
-                          {tRoot(
-                            perm.descriptionKey as Parameters<typeof tRoot>[0],
-                          )}
-                        </span>
-                      </span>
-                    </label>
+                    </li>
                   );
                 })}
-              </div>
-            </fieldset>
+              </ul>
+            </section>
           );
         })}
       </div>

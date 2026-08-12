@@ -2,35 +2,24 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import LinkTo from "@/components/Global/LinkTo";
-import { usePathname } from "@/i18n/navigation";
 import { localizeHref } from "@/i18n/routing";
 import { useState, useEffect } from "react";
-import {
-  FaUserAlt,
-  FaUsers,
-  FaChartLine,
-  FaCreditCard,
-  FaBan,
-  FaDollarSign,
-} from "react-icons/fa";
-import {
-  IoCalendarOutline,
-  IoDocumentTextOutline,
-  IoMegaphoneOutline,
-  IoPersonOutline,
-  IoStatsChart,
-  IoPricetagOutline,
-  IoTicketOutline,
-} from "react-icons/io5";
+import { FaUserAlt, FaCreditCard, FaDollarSign } from "react-icons/fa";
+import { IoCalendarOutline, IoStatsChart } from "react-icons/io5";
 import {
   Card,
   EmptyState,
   PageHeader,
+  PageShell,
   SectionHeader,
+  Skeleton,
+  SkeletonRegion,
   StatCard,
   StatGrid,
-  Tabs,
 } from "@/components/ui";
+import AttentionQueue, {
+  type AttentionItem,
+} from "@/components/Dashboard/AttentionQueue";
 import {
   AdminBarChart,
   AdminMonthGrid,
@@ -65,7 +54,8 @@ interface AdminStatsResponse {
 export default function AdminPage() {
   const locale = useLocale();
   const t = useTranslations("adminDashboard");
-  const pathname = usePathname();
+  const tCommon = useTranslations("common");
+  const tDash = useTranslations("Dashboard");
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<AdminStatsResponse["stats"] | null>(null);
   const [charts, setCharts] = useState<AdminStatsResponse["charts"] | null>(
@@ -105,215 +95,151 @@ export default function AdminPage() {
     fetchData();
   }, [locale]);
 
-  const navigationTabs = [
+  /**
+   * The four figures that decide whether today is normal.
+   *
+   * Revenue is one of them. It used to sit in a second row below users, active
+   * accounts, paid plans and a count of administrators — so the most important
+   * number on a commercial back office ranked below how many admins exist.
+   */
+  const kpiCards = [
     {
-      id: "users",
-      label: t("users"),
-      icon: FaUserAlt,
-      href: "/admin/users",
-      permission: "users" as AdminPermissionKey,
-    },
-    {
-      id: "plans",
-      label: t("plans"),
-      icon: IoDocumentTextOutline,
-      href: "/admin/plans",
-      permission: "plans" as AdminPermissionKey,
-    },
-    {
-      id: "payments",
-      label: t("payments"),
-      icon: FaCreditCard,
+      id: "monthlyRevenue",
+      title: t("monthlyRevenue"),
+      value: formatMenuPrice(stats?.monthlyRevenue ?? 0, "EGP", locale),
+      label: t("revenueLabel"),
+      icon: FaDollarSign,
       href: "/admin/payments",
       permission: "payments" as AdminPermissionKey,
     },
     {
-      id: "advertisements",
-      label: t("advertisements"),
-      icon: IoMegaphoneOutline,
-      href: "/admin/advertisements",
-      permission: "advertisements" as AdminPermissionKey,
-    },
-    {
-      id: "admins",
-      label: t("admins"),
-      icon: IoPersonOutline,
-      href: "/admin/administrators",
-      permission: "administrators" as AdminPermissionKey,
-    },
-    {
-      id: "promo",
-      label: t("promo"),
-      icon: IoPricetagOutline,
-      href: "/admin/promo",
-      permission: "promo" as AdminPermissionKey,
-    },
-    {
-      id: "vouchers",
-      label: t("vouchers"),
-      icon: IoTicketOutline,
-      href: "/admin/vouchers",
-      permission: "promo" as AdminPermissionKey,
-    },
-    {
-      id: "analytics",
-      label: t("analytics"),
-      icon: IoStatsChart,
-      href: "/admin/analytics",
-      permission: "analytics" as AdminPermissionKey,
-    },
-  ].filter((tab) => canSee(tab.permission));
-
-  const kpiCards = [
-    {
-      id: "totalUsers",
-      title: t("totalUsers"),
-      value: stats?.totalUsers ?? 0,
-      label: t("usersLabel"),
-      icon: FaUserAlt,
-      href: "/admin/users",
-      permission: "users" as AdminPermissionKey,
-    },
-    {
-      id: "activeAccounts",
-      title: t("activeAccounts"),
-      value: stats?.activeAccounts ?? 0,
-      label: t("activeAccountsLabel"),
-      icon: IoCalendarOutline,
-      href: "/admin/users?filter=active",
-      permission: "users" as AdminPermissionKey,
-    },
-    {
       id: "paidPlans",
       title: t("paidPlans"),
-      value: stats?.paidPlans ?? 0,
+      value: String(stats?.paidPlans ?? 0),
       label: t("paidPlansLabel"),
       icon: FaCreditCard,
       href: "/admin/plans",
       permission: "plans" as AdminPermissionKey,
     },
     {
-      id: "admins",
-      title: t("adminsCount"),
-      value: adminsCount,
-      label: t("adminsLabel"),
-      icon: FaUsers,
-      href: "/admin/administrators",
-      permission: "administrators" as AdminPermissionKey,
-    },
-  ].filter((card) => canSee(card.permission));
-
-  const secondRowCards = [
-    {
-      id: "trialUsers",
-      title: t("trialUsers"),
-      value: stats?.trialUsers ?? 0,
-      label: t("trialUsersLabel"),
-      icon: FaChartLine,
-      href: "/admin/users?filter=trial",
+      id: "activeAccounts",
+      title: t("activeAccounts"),
+      value: String(stats?.activeAccounts ?? 0),
+      label: t("activeAccountsLabel"),
+      icon: IoCalendarOutline,
+      href: "/admin/users?filter=active",
       permission: "users" as AdminPermissionKey,
     },
     {
-      id: "monthlyRevenue",
-      title: t("monthlyRevenue"),
-      value: stats?.monthlyRevenue ?? 0,
-      label: t("revenueLabel"),
-      icon: FaDollarSign,
-      href: "/admin/plans",
-      permission: "plans" as AdminPermissionKey,
+      id: "totalUsers",
+      title: t("totalUsers"),
+      value: String(stats?.totalUsers ?? 0),
+      label: t("usersLabel"),
+      icon: FaUserAlt,
+      href: "/admin/users",
+      permission: "users" as AdminPermissionKey,
     },
+  ].filter((card) => canSee(card.permission));
+
+  /**
+   * Accounts in a state somebody has to act on.
+   *
+   * These were four indistinguishable tiles among twelve. As a queue they read
+   * as work: a suspended account is not a statistic, it is a conversation
+   * somebody owes a customer.
+   */
+  const attention: AttentionItem[] = [
     {
-      id: "suspendedAccounts",
-      title: t("suspendedAccounts"),
-      value: stats?.suspendedAccounts ?? 0,
-      label: t("suspendedLabel"),
-      icon: FaBan,
+      id: "suspended",
+      label: t("suspendedAccounts"),
+      value: canSee("users") ? (stats?.suspendedAccounts ?? 0) : 0,
       href: "/admin/users?filter=suspended",
-      permission: "users" as AdminPermissionKey,
+      tone: "danger",
+      hint: t("suspendedLabel"),
     },
-  ].filter((card) => canSee(card.permission));
+    {
+      id: "trial",
+      label: t("trialUsers"),
+      value: canSee("users") ? (stats?.trialUsers ?? 0) : 0,
+      href: "/admin/users?filter=trial",
+      tone: "warning",
+      hint: t("trialUsersLabel"),
+    },
+    {
+      id: "noMenu",
+      label: t("usersWithoutMenu"),
+      value: canSee("users") ? (analytics?.summary?.usersWithoutMenu ?? 0) : 0,
+      href: "/admin/users?filter=no-menu",
+      tone: "warning",
+    },
+    {
+      id: "inactive",
+      label: t("inactiveUsers30d"),
+      value: canSee("users") ? (analytics?.summary?.inactiveUsers30d ?? 0) : 0,
+      href: "/admin/users?filter=inactive",
+      tone: "info",
+    },
+  ];
 
-  const isActiveTab = (href: string) => {
-    return pathname === href || pathname.startsWith(href + "/");
-  };
-
-  const activeTabId =
-    navigationTabs.find((tab) => isActiveTab(tab.href))?.id ?? "";
-
-  const formatValue = (value: number | string, type?: string) => {
-    if (typeof value === "string") return value;
-    if (type === "revenue") {
-      return formatMenuPrice(value, "EGP", locale);
-    }
-    return value.toString();
-  };
-
-  const platformCards = analytics?.summary
-    ? [
-        {
-          id: "menuViews",
-          title: t("totalMenuViews"),
-          value: analytics.summary.totalMenuViews,
-          href: "/admin/analytics",
-          permission: "analytics" as AdminPermissionKey,
-        },
-        {
-          id: "conversion",
-          title: t("conversionRate"),
-          value: `${analytics.summary.conversionRate}%`,
-          href: "/admin/analytics",
-          permission: "analytics" as AdminPermissionKey,
-        },
-        {
-          id: "noMenu",
-          title: t("usersWithoutMenu"),
-          value: analytics.summary.usersWithoutMenu,
-          href: "/admin/users?filter=no-menu",
-          permission: "users" as AdminPermissionKey,
-        },
-        {
-          id: "inactive30",
-          title: t("inactiveUsers30d"),
-          value: analytics.summary.inactiveUsers30d,
-          href: "/admin/users?filter=inactive",
-          permission: "users" as AdminPermissionKey,
-        },
-        {
-          id: "freeBannerClicks",
-          title: t("freeBannerClicks"),
-          value: analytics.freeBannerMetrics?.totalClicks ?? 0,
-          href: "/admin/analytics",
-          permission: "analytics" as AdminPermissionKey,
-        },
-      ].filter((card) => canSee(card.permission))
-    : [];
+  /* Which platform cards exist depends only on the reader's grants, so the row
+     is built before the numbers arrive and each card carries `loading` instead.
+     Deriving the row from `analytics` meant it did not exist at all on first
+     paint, then appeared and shoved the charts card down the page. */
+  const platformCards = (
+    [
+      {
+        id: "menuViews",
+        title: t("totalMenuViews"),
+        value: analytics?.summary?.totalMenuViews,
+        href: "/admin/analytics",
+        permission: "analytics" as AdminPermissionKey,
+      },
+      {
+        id: "conversion",
+        title: t("conversionRate"),
+        value: analytics?.summary
+          ? `${analytics.summary.conversionRate}%`
+          : undefined,
+        href: "/admin/analytics",
+        permission: "analytics" as AdminPermissionKey,
+      },
+      {
+        id: "freeBannerClicks",
+        title: t("freeBannerClicks"),
+        value: analytics?.summary
+          ? (analytics.freeBannerMetrics?.totalClicks ?? 0)
+          : undefined,
+        href: "/admin/analytics",
+        permission: "analytics" as AdminPermissionKey,
+      },
+      {
+        id: "admins",
+        title: t("adminsCount"),
+        value: adminsCount,
+        href: "/admin/administrators",
+        permission: "administrators" as AdminPermissionKey,
+      },
+    ] as const
+  ).filter((card) => canSee(card.permission));
 
   const revenuePoints = analytics?.revenueOverTime?.length
     ? analytics.revenueOverTime
     : (charts?.revenueGrowth ?? []);
 
   return (
-    <div className="space-y-5 py-5" dir={textDir}>
-      {analytics?._isDemoData && (
-        <DemoDataBanner message={t("demoDataBanner")} dir={textDir} />
-      )}
-
-      <PageHeader title={t("title")} description={t("subtitle")} />
-
-      <Tabs
-        items={navigationTabs.map((tab) => {
-          const Icon = tab.icon;
-          return {
-            id: tab.id,
-            label: tab.label,
-            icon: <Icon />,
-            href: localizeHref(tab.href, locale),
-          };
-        })}
-        activeId={activeTabId}
-        label={t("title")}
-      />
-
+    <PageShell
+      kind="wide"
+      header={
+        <>
+          {analytics?._isDemoData && (
+            <DemoDataBanner message={t("demoDataBanner")} dir={textDir} />
+          )}
+          <PageHeader title={t("title")} description={t("subtitle")} />
+        </>
+      }
+    >
+      {/* The tab strip that used to sit here listed eight destinations already
+          present in the rail, and went stale the moment a permission changed. */}
       <StatGrid columns={4}>
         {kpiCards.map((card) => {
           const Icon = card.icon;
@@ -321,7 +247,7 @@ export default function AdminPage() {
             <StatCard
               key={card.id}
               label={card.title}
-              value={formatValue(card.value)}
+              value={card.value}
               hint={card.label}
               icon={<Icon />}
               loading={isLoading}
@@ -331,45 +257,11 @@ export default function AdminPage() {
         })}
       </StatGrid>
 
-      <StatGrid columns={3}>
-        {secondRowCards.map((card) => {
-          const Icon = card.icon;
-          const displayValue =
-            card.id === "monthlyRevenue"
-              ? formatValue(card.value, "revenue")
-              : formatValue(card.value);
-          return (
-            <StatCard
-              key={card.id}
-              label={card.title}
-              value={displayValue}
-              hint={card.label}
-              icon={<Icon />}
-              loading={isLoading}
-              href={localizeHref(card.href, locale)}
-            />
-          );
-        })}
-      </StatGrid>
-
-      {platformCards.length > 0 && (
-        <StatGrid columns={4}>
-          {platformCards.map((card) => (
-            <StatCard
-              key={card.id}
-              label={card.title}
-              value={
-                typeof card.value === "number"
-                  ? card.value.toLocaleString()
-                  : card.value
-              }
-              href={localizeHref(card.href, locale)}
-            />
-          ))}
-        </StatGrid>
-      )}
-
-      <Card padded="lg" className="space-y-6">
+      {/* Growth takes two thirds and the queue one. The chart is the thing you
+          study; the queue is the thing you act on, and it stays beside the chart
+          rather than below it so neither has to be scrolled to. */}
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] xl:items-start">
+        <Card padded="lg" className="space-y-6">
         <SectionHeader
           title={t("detailedStatistics")}
           description={t("viewDetailedAnalytics")}
@@ -383,11 +275,24 @@ export default function AdminPage() {
           }
         />
 
-        {charts &&
-        (charts.usersGrowth.length > 0 ||
-          charts.plansDistribution.length > 0 ||
-          revenuePoints.length > 0 ||
-          (analytics?.viewsOverTime?.length ?? 0) > 0) ? (
+        {/* While the request is in flight this said "graphs coming soon", which
+            is a claim about the product rather than about the load — and it was
+            replaced by four charts a moment later. A skeleton says the same
+            thing honestly and reserves roughly the height the charts take. */}
+        {isLoading ? (
+          <SkeletonRegion label={tCommon("loading")} className="space-y-8">
+            {[0, 1].map((row) => (
+              <div key={row}>
+                <Skeleton className="mb-4 h-4 w-40" />
+                <Skeleton className="h-40 w-full rounded-xl" />
+              </div>
+            ))}
+          </SkeletonRegion>
+        ) : charts &&
+          (charts.usersGrowth.length > 0 ||
+            charts.plansDistribution.length > 0 ||
+            revenuePoints.length > 0 ||
+            (analytics?.viewsOverTime?.length ?? 0) > 0) ? (
           <div className="space-y-8">
             {charts.usersGrowth.length > 0 && (
               <div>
@@ -456,7 +361,37 @@ export default function AdminPage() {
             }
           />
         )}
-      </Card>
-    </div>
+        </Card>
+
+        <AttentionQueue
+          title={tDash("attentionTitle")}
+          description={tDash("attentionAdminDescription")}
+          items={attention}
+          loading={isLoading}
+          allClearTitle={tDash("attentionAllClear")}
+          allClearHint={tDash("attentionAllClearAdminHint")}
+        />
+      </div>
+
+      {/* Secondary readings. Quieter than the KPI band on purpose: they are
+          context for the numbers above, not decisions of their own. */}
+      {platformCards.length > 0 && (
+        <StatGrid columns={4}>
+          {platformCards.map((card) => (
+            <StatCard
+              key={card.id}
+              label={card.title}
+              loading={isLoading}
+              value={
+                typeof card.value === "number"
+                  ? card.value.toLocaleString()
+                  : (card.value ?? "—")
+              }
+              href={localizeHref(card.href, locale)}
+            />
+          ))}
+        </StatGrid>
+      )}
+    </PageShell>
   );
 }

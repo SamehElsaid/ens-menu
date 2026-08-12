@@ -24,7 +24,9 @@ export default function MobileFloatingAddButton({
       startIcon={<IoAdd className="size-5" />}
       className={cn(
         "dashboard-mobile-fab fixed z-40 end-4 bottom-[calc(1.25rem+env(safe-area-inset-bottom))] md:hidden",
-        "rounded-lg shadow-md",
+        /* The one shadow allowed here: a FAB genuinely floats over the list
+           rather than resting in it. */
+        "shadow-lg",
       )}
     >
       {label}

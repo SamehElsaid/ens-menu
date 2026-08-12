@@ -5,26 +5,30 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useParams, useSearchParams } from "next/navigation";
 import { IoArrowBack } from "react-icons/io5";
-import { FaBan, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FaBan } from "react-icons/fa";
 import { FiAlertTriangle } from "react-icons/fi";
 import {
   Badge,
   Button,
   Card,
   ConfirmDialog,
+  CountBadge,
   ErrorState,
   Field,
   Input,
   LoadingBlock,
   Modal,
+  PageColumns,
   PageHeader,
+  PageShell,
   SectionHeader,
   Select,
   StatCard,
   StatGrid,
+  Tabs,
   Textarea,
 } from "@/components/ui";
-import type { StatusTone } from "@/components/ui";
+import type { StatusTone, TabItem } from "@/components/ui";
 import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
 import { safeAdminUsersListReturnPath } from "@/lib/adminUsersListUrl";
 import { toast } from "react-toastify";
@@ -108,6 +112,15 @@ interface Menu {
   createdAt: string;
 }
 
+/**
+ * The record was one 14-section scroll: subscription, usage, follow-ups, the
+ * profile, account actions, menus, orders, addresses, notes, vouchers, activity
+ * and support, all mounted at once. These are four different jobs, so they are
+ * four views — and only the visible one mounts, which also stops the page from
+ * firing a dozen requests to answer one question.
+ */
+type CustomerTab = "overview" | "menus" | "commerce" | "relationship";
+
 interface UserDetailsResponse {
   user: User;
   menus: Menu[];
@@ -122,6 +135,8 @@ export default function UserDetailsPage() {
   const tAccount = useTranslations("adminUsers.userDetails.accountActions");
   const tCustomer = useTranslations("adminUsers.userDetails.customerSections");
   const tCommon = useTranslations("common");
+  const tAdmin = useTranslations("adminDashboard");
+  const tUsers = useTranslations("adminUsers");
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
@@ -130,7 +145,6 @@ export default function UserDetailsPage() {
     typeof params.userId === "string"
       ? params.userId
       : ((params.userId as string[])?.[0] ?? "");
-  const isRTL = locale === "ar";
 
   const [userData, setUserData] = useState<UserDetailsResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -173,6 +187,7 @@ export default function UserDetailsPage() {
   const [softDeleteLoading, setSoftDeleteLoading] = useState(false);
   const [resetLinkLoading, setResetLinkLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<UserOrder | null>(null);
+  const [activeTab, setActiveTab] = useState<CustomerTab>("overview");
 
   const fetchUserDetails = useCallback(async () => {
     try {
@@ -531,7 +546,7 @@ export default function UserDetailsPage() {
     } finally {
       setPlansLoading(false);
     }
-  }, [locale, userData?.user?.planName]);
+  }, [locale, userData?.user?.planName, t]);
 
   const handleChangeSubscription = useCallback(async () => {
     if (!subscriptionForm.planId) {
@@ -625,8 +640,80 @@ export default function UserDetailsPage() {
     }
   }, [userId, locale, t, fetchUserDetails]);
 
+  const tabItems: TabItem[] = [
+    { id: "overview", label: t("tabs.overview") },
+    {
+      id: "menus",
+      label: t("tabs.menus"),
+      badge: userData?.menus?.length ? (
+        <CountBadge count={userData.menus.length} tone="neutral" />
+      ) : undefined,
+    },
+    { id: "commerce", label: t("tabs.commerce") },
+    { id: "relationship", label: t("tabs.relationship") },
+  ];
+
+  /**
+   * The record's identity, not its data, so it is built before the loading gate
+   * and stays put while the record is fetched. The title is the person — the
+   * page used to be titled "User details" for every customer, which made two
+   * open tabs indistinguishable.
+   */
+  const header = (
+    <PageHeader
+      eyebrow={tUsers("title")}
+      title={userData?.user?.name?.trim() || t("title")}
+      description={userData?.user?.email}
+      breadcrumbs={[
+        { label: tAdmin("title"), href: "/admin" },
+        { label: tUsers("title"), href: "/admin/users" },
+        { label: userData?.user?.name?.trim() || t("title") },
+      ]}
+      breadcrumbsLabel={tCommon("breadcrumb")}
+      meta={
+        userData?.user ? (
+          <>
+            <Badge tone={getAccountStatusTone(userData.user.accountStatus)} dot>
+              {getAccountStatusLabel(userData.user.accountStatus)}
+            </Badge>
+            <Badge
+              tone={
+                userData.user.planName?.toLowerCase() === "free" ||
+                !userData.user.planName
+                  ? "brand"
+                  : "info"
+              }
+            >
+              {userData.user.planName || t("free")}
+            </Badge>
+          </>
+        ) : undefined
+      }
+      actions={
+        <>
+          <Button
+            variant="secondary"
+            startIcon={<IoArrowBack />}
+            onClick={() => router.push(listReturnPath)}
+          >
+            {t("back")}
+          </Button>
+          {userData?.user ? (
+            <Button onClick={openSubscriptionModal}>
+              {t("subscriptionInfo.changeSubscription")}
+            </Button>
+          ) : null}
+        </>
+      }
+    />
+  );
+
   if (loading) {
-    return <LoadingBlock label={t("loading")} className="min-h-[400px]" />;
+    return (
+      <PageShell kind="wide" header={header}>
+        <LoadingBlock label={t("loading")} className="min-h-[400px]" />
+      </PageShell>
+    );
   }
 
   if (!userData || !userData.user) {
@@ -663,173 +750,372 @@ export default function UserDetailsPage() {
     String(subscription.status ?? user.subscriptionStatus).toLowerCase() ===
       "active" && Boolean(user.subscriptionId ?? activeSubscription?.id);
 
-  const textDir = isRTL ? "rtl" : "ltr";
-  return (
-    <div className="space-y-6 pb-8 text-fg" dir={textDir}>
-      <PageHeader
-        title={t("title")}
-        description={t("subtitle")}
-        actions={
+  /**
+   * Commercial state of the account — the plan, its dates and the seat limit —
+   * kept as the first thing the operator sees, because that is what a support
+   * call about this customer is almost always about.
+   */
+  const subscriptionCard = (
+    <Card padded="lg" className="space-y-6">
+      <SectionHeader title={t("subscriptionInfo.title")} />
+      <dl className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div>
+          <dt className="mb-1 text-[13px] text-fg-muted">
+            {t("subscriptionInfo.currentPlan")}
+          </dt>
+          <dd className="text-[15px] font-semibold text-fg">
+            {subscription.planName || t("free")}
+          </dd>
+        </div>
+        <div>
+          <dt className="mb-1 text-[13px] text-fg-muted">
+            {t("subscriptionInfo.paymentType")}
+          </dt>
+          <dd className="text-[15px] font-semibold text-fg">
+            {getBillingCycleLabel(subscription.billingCycle)}
+          </dd>
+        </div>
+        <div>
+          <dt className="mb-1 text-[13px] text-fg-muted">
+            {t("subscriptionInfo.startDate")}
+          </dt>
+          <dd className="text-[15px] font-semibold text-fg">
+            {formatDate(subscription.startDate)}
+          </dd>
+        </div>
+        <div>
+          <dt className="mb-1 text-[13px] text-fg-muted">
+            {t("subscriptionInfo.endDate")}
+          </dt>
+          <dd className="text-[15px] font-semibold text-fg">
+            {formatDate(subscription.endDate)}
+          </dd>
+        </div>
+        <div>
+          <dt className="mb-1 text-[13px] text-fg-muted">
+            {t("subscriptionInfo.menuLimit")}
+          </dt>
+          <dd className="text-[15px] font-semibold text-fg">
+            {t("subscriptionInfo.menuLimitValue", {
+              total: String(effectiveMenuLimit),
+              base: String(planBaseMenus),
+              extra: String(currentExtraMenus),
+            })}
+          </dd>
+        </div>
+      </dl>
+
+      {hasActiveSubscription && (
+        <Card variant="ghost" padded="md" className="space-y-3">
+          <SectionHeader
+            title={t("subscriptionInfo.extraMenusTitle")}
+            description={t("subscriptionInfo.extraMenusHint", {
+              base: String(planBaseMenus),
+            })}
+          />
+          <div className="flex flex-wrap items-end gap-3">
+            <Field
+              label={t("subscriptionInfo.extraMenusCount")}
+              htmlFor="admin-extra-menus"
+              className="w-full max-w-40"
+            >
+              <Input
+                id="admin-extra-menus"
+                type="number"
+                min={0}
+                max={100}
+                value={extraMenusInput}
+                onChange={(e) => setExtraMenusInput(e.target.value)}
+                disabled={extraMenusSaving}
+              />
+            </Field>
+            <p className="pb-2.5 text-[13px] text-fg-muted">
+              {t("subscriptionInfo.extraMenusPreview", {
+                total: String(
+                  planBaseMenus + (parseInt(extraMenusInput, 10) || 0),
+                ),
+              })}
+            </p>
+            <Button
+              onClick={() => void handleSaveExtraMenus()}
+              loading={extraMenusSaving}
+              className="mb-px"
+            >
+              {extraMenusSaving
+                ? t("subscriptionInfo.saving")
+                : t("subscriptionInfo.extraMenusSave")}
+            </Button>
+          </div>
+        </Card>
+      )}
+    </Card>
+  );
+
+  /**
+   * Usage, as the answer to "is this account actually being used?". The expiry
+   * card is the only one allowed a tone, and only inside a week of lapsing.
+   */
+  const usageCard = userAnalytics ? (
+    <Card padded="lg" className="space-y-6">
+      <SectionHeader title={t("analytics.title")} />
+      <StatGrid columns={4}>
+        <StatCard
+          label={t("analytics.menusCount")}
+          value={userAnalytics.menusCount}
+        />
+        <StatCard
+          label={t("analytics.activeMenus")}
+          value={userAnalytics.activeMenus}
+        />
+        <StatCard
+          label={t("analytics.totalItems")}
+          value={userAnalytics.totalItems}
+        />
+        <StatCard
+          label={t("analytics.activeItems")}
+          value={userAnalytics.activeItems}
+        />
+        <StatCard
+          label={t("analytics.daysSinceLogin")}
+          value={userAnalytics.daysSinceLogin ?? t("analytics.neverLoggedIn")}
+        />
+        {userAnalytics.daysUntilExpiry !== null &&
+          userAnalytics.daysUntilExpiry <= 7 && (
+            <StatCard
+              className="col-span-2 border-danger-line bg-danger-soft"
+              label={t("analytics.expiringSoon")}
+              value={t("analytics.daysUntilExpiry", {
+                days: userAnalytics.daysUntilExpiry,
+              })}
+            />
+          )}
+      </StatGrid>
+    </Card>
+  ) : null;
+
+  /**
+   * Who this account is. It sits in the side column as a single stack of
+   * label/value pairs: it is reference material an operator glances at while
+   * working in the main column, not something they read top to bottom.
+   */
+  const identityCard = (
+    <Card padded="lg" className="space-y-4">
+      <SectionHeader title={t("basicInfo.title")} />
+      <dl className="divide-y divide-line">
+        <div className="flex items-baseline justify-between gap-3 pb-2.5">
+          <dt className="text-[13px] text-fg-muted">
+            {t("basicInfo.restaurantName")}
+          </dt>
+          <dd className="text-[13px] font-semibold text-fg">
+            {user.restaurantName?.trim() || "—"}
+          </dd>
+        </div>
+        <div className="flex items-baseline justify-between gap-3 py-2.5">
+          <dt className="text-[13px] text-fg-muted">
+            {t("basicInfo.emailStatus")}
+          </dt>
+          <dd>
+            <Badge tone={user.isEmailVerified ? "success" : "warning"} dot>
+              {user.isEmailVerified ? t("verified") : t("unverified")}
+            </Badge>
+          </dd>
+        </div>
+        <div className="flex items-baseline justify-between gap-3 py-2.5">
+          <dt className="text-[13px] text-fg-muted">
+            {t("basicInfo.phoneNumber")}
+          </dt>
+          <dd className="text-[13px] font-semibold text-fg">
+            {user.phoneNumber ? <PhoneDisplay value={user.phoneNumber} /> : "—"}
+          </dd>
+        </div>
+        <div className="flex items-baseline justify-between gap-3 py-2.5">
+          <dt className="text-[13px] text-fg-muted">
+            {t("basicInfo.registrationDate")}
+          </dt>
+          <dd className="text-[13px] font-semibold text-fg">
+            {formatDate(user.createdAt)}
+          </dd>
+        </div>
+        <div className="flex items-baseline justify-between gap-3 py-2.5">
+          <dt className="text-[13px] text-fg-muted">
+            {t("basicInfo.lastLogin")}
+          </dt>
+          <dd className="text-[13px] font-semibold text-fg">
+            {formatDate(user.lastLoginAt)}
+          </dd>
+        </div>
+        <div className="flex items-baseline justify-between gap-3 pt-2.5">
+          <dt className="text-[13px] text-fg-muted">
+            {tCustomer("lastActivity")}
+          </dt>
+          <dd className="text-[13px] font-semibold text-fg">
+            {formatDate(user.lastLoginAt ?? user.updatedAt ?? null)}
+          </dd>
+        </div>
+      </dl>
+    </Card>
+  );
+
+  /**
+   * Account actions, ordered by how reversible they are: profile and password
+   * first, suspension and deletion last and visually separated. They used to be
+   * one wrapped row of seven equally-weighted buttons, where "soft delete" sat
+   * next to "edit profile".
+   */
+  const accountActionsCard = (
+    <Card padded="lg" className="space-y-4">
+      <SectionHeader title={tAccount("title")} />
+
+      {user.isSuspended && user.suspendedReason ? (
+        <p className="text-[13px] text-danger">
+          {tAccount("suspendedReasonLabel")}: {user.suspendedReason}
+        </p>
+      ) : null}
+      {user.isBlocked && user.blockedReason ? (
+        <p className="text-[13px] text-warning">
+          {tCustomer("block.reasonLabel")}: {user.blockedReason}
+        </p>
+      ) : null}
+
+      <div className="flex flex-col gap-2">
+        <Button variant="secondary" onClick={openEditProfile} fullWidth>
+          {tCustomer("profile.edit")}
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={() => setPasswordModalOpen(true)}
+          fullWidth
+        >
+          {tAccount("changePassword")}
+        </Button>
+        <Button
+          variant="ghost"
+          onClick={handleSendResetLink}
+          loading={resetLinkLoading}
+          fullWidth
+        >
+          {resetLinkLoading
+            ? tCustomer("resetLink.sending")
+            : tCustomer("resetLink.send")}
+        </Button>
+      </div>
+
+      <div className="flex flex-col gap-2 border-t border-line pt-4">
+        {user.isSuspended ? (
+          <Button
+            onClick={() => setReactivateConfirmOpen(true)}
+            disabled={accountActionLoading}
+            fullWidth
+          >
+            {tAccount("reactivate")}
+          </Button>
+        ) : (
+          <Button
+            variant="dangerGhost"
+            onClick={() => setSuspendModalOpen(true)}
+            fullWidth
+          >
+            {tAccount("suspend")}
+          </Button>
+        )}
+        <Button
+          variant="dangerGhost"
+          onClick={() => setBlockModalOpen(true)}
+          fullWidth
+        >
+          {user.isBlocked
+            ? tCustomer("block.unblock")
+            : tCustomer("block.block")}
+        </Button>
+        {user.deletedAt ? (
           <Button
             variant="secondary"
-            startIcon={<IoArrowBack />}
-            onClick={() => router.push(listReturnPath)}
+            onClick={handleRestoreUser}
+            disabled={accountActionLoading}
+            fullWidth
           >
-            {t("back")}
+            {tCustomer("restore.action")}
           </Button>
-        }
-      />
-
-      <Card padded="lg" className="space-y-6">
-        <SectionHeader
-          title={t("subscriptionInfo.title")}
-          actions={
-            <Button onClick={openSubscriptionModal}>
-              {t("subscriptionInfo.changeSubscription")}
-            </Button>
-          }
-        />
-        <dl className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div>
-            <dt className="mb-1 text-[13px] text-fg-muted">
-              {t("subscriptionInfo.currentPlan")}
-            </dt>
-            <dd className="text-[15px] font-semibold text-fg">
-              {subscription.planName || t("free")}
-            </dd>
-          </div>
-          <div>
-            <dt className="mb-1 text-[13px] text-fg-muted">
-              {t("subscriptionInfo.paymentType")}
-            </dt>
-            <dd className="text-[15px] font-semibold text-fg">
-              {getBillingCycleLabel(subscription.billingCycle)}
-            </dd>
-          </div>
-          <div>
-            <dt className="mb-1 text-[13px] text-fg-muted">
-              {t("subscriptionInfo.startDate")}
-            </dt>
-            <dd className="text-[15px] font-semibold text-fg">
-              {formatDate(subscription.startDate)}
-            </dd>
-          </div>
-          <div>
-            <dt className="mb-1 text-[13px] text-fg-muted">
-              {t("subscriptionInfo.endDate")}
-            </dt>
-            <dd className="text-[15px] font-semibold text-fg">
-              {formatDate(subscription.endDate)}
-            </dd>
-          </div>
-          <div>
-            <dt className="mb-1 text-[13px] text-fg-muted">
-              {t("subscriptionInfo.menuLimit")}
-            </dt>
-            <dd className="text-[15px] font-semibold text-fg">
-              {t("subscriptionInfo.menuLimitValue", {
-                total: String(effectiveMenuLimit),
-                base: String(planBaseMenus),
-                extra: String(currentExtraMenus),
-              })}
-            </dd>
-          </div>
-        </dl>
-
-        {hasActiveSubscription && (
-          <Card variant="ghost" padded="md" className="space-y-3">
-            <SectionHeader
-              title={t("subscriptionInfo.extraMenusTitle")}
-              description={t("subscriptionInfo.extraMenusHint", {
-                base: String(planBaseMenus),
-              })}
-            />
-            <div className="flex flex-wrap items-end gap-3">
-              <Field
-                label={t("subscriptionInfo.extraMenusCount")}
-                htmlFor="admin-extra-menus"
-                className="w-full max-w-[160px]"
-              >
-                <Input
-                  id="admin-extra-menus"
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={extraMenusInput}
-                  onChange={(e) => setExtraMenusInput(e.target.value)}
-                  disabled={extraMenusSaving}
-                />
-              </Field>
-              <p className="pb-2.5 text-[13px] text-fg-muted">
-                {t("subscriptionInfo.extraMenusPreview", {
-                  total: String(
-                    planBaseMenus + (parseInt(extraMenusInput, 10) || 0),
-                  ),
-                })}
-              </p>
-              <Button
-                onClick={() => void handleSaveExtraMenus()}
-                loading={extraMenusSaving}
-                className="mb-px"
-              >
-                {extraMenusSaving
-                  ? t("subscriptionInfo.saving")
-                  : t("subscriptionInfo.extraMenusSave")}
-              </Button>
-            </div>
-          </Card>
+        ) : (
+          <Button
+            variant="dangerGhost"
+            onClick={() => setSoftDeleteConfirmOpen(true)}
+            fullWidth
+          >
+            {tCustomer("softDelete.action")}
+          </Button>
         )}
-      </Card>
+      </div>
+    </Card>
+  );
 
-      {userAnalytics && (
-        <Card padded="lg" className="space-y-6">
-          <SectionHeader title={t("analytics.title")} />
-          <StatGrid columns={4}>
-            <StatCard
-              label={t("analytics.menusCount")}
-              value={userAnalytics.menusCount}
-            />
-            <StatCard
-              label={t("analytics.activeMenus")}
-              value={userAnalytics.activeMenus}
-            />
-            <StatCard
-              label={t("analytics.totalItems")}
-              value={userAnalytics.totalItems}
-            />
-            <StatCard
-              label={t("analytics.activeItems")}
-              value={userAnalytics.activeItems}
-            />
-            <StatCard
-              label={t("analytics.daysSinceLogin")}
-              value={
-                userAnalytics.daysSinceLogin ?? t("analytics.neverLoggedIn")
-              }
-            />
-            {userAnalytics.daysUntilExpiry !== null &&
-              userAnalytics.daysUntilExpiry <= 7 && (
-                <StatCard
-                  className="col-span-2 border-danger-line bg-danger-soft"
-                  label={t("analytics.expiringSoon")}
-                  value={t("analytics.daysUntilExpiry", {
-                    days: userAnalytics.daysUntilExpiry,
-                  })}
-                />
-              )}
-          </StatGrid>
-        </Card>
-      )}
+  return (
+    <PageShell
+      kind="wide"
+      header={header}
+      toolbar={
+        <Tabs
+          items={tabItems}
+          activeId={activeTab}
+          onChange={(id) => setActiveTab(id as CustomerTab)}
+          label={t("tabs.label")}
+          className="border-b-0!"
+        />
+      }
+    >
+      {activeTab === "overview" ? (
+        <PageColumns
+          side={
+            <>
+              {identityCard}
+              {accountActionsCard}
+            </>
+          }
+        >
+          {subscriptionCard}
+          {usageCard}
+        </PageColumns>
+      ) : null}
 
-      {user && (
-        <Card padded="lg">
-          <UserFollowUpTimeline
-            userId={user.id}
-            userName={user.name}
-            phoneNumber={user.phoneNumber}
+      {activeTab === "menus" ? (
+        <AdminUserMenusSection
+          userId={userId}
+          menus={menus}
+          featuredOnHomepage={userData.featuredOnHomepage}
+          onMenusChange={(updatedMenus) =>
+            setUserData((prev) =>
+              prev ? { ...prev, menus: updatedMenus } : prev,
+            )
+          }
+          onRefresh={fetchUserDetails}
+        />
+      ) : null}
+
+      {activeTab === "commerce" ? (
+        <>
+          <CustomerOrdersSection
+            userId={Number(userId)}
+            onSelectOrder={setSelectedOrder}
           />
-        </Card>
-      )}
+          <CustomerVouchersSection userId={Number(userId)} />
+          <CustomerAddressesSection userId={Number(userId)} />
+        </>
+      ) : null}
+
+      {activeTab === "relationship" ? (
+        <>
+          <Card padded="lg">
+            <UserFollowUpTimeline
+              userId={user.id}
+              userName={user.name}
+              phoneNumber={user.phoneNumber}
+            />
+          </Card>
+          <CustomerNotesSection userId={Number(userId)} />
+          <CustomerSupportSection userId={Number(userId)} />
+          <CustomerActivitySection userId={Number(userId)} />
+        </>
+      ) : null}
 
       <Modal
         open={subscriptionModalOpen}
@@ -966,166 +1252,6 @@ export default function UserDetailsPage() {
         />
       )}
 
-      <Card padded="lg" className="space-y-6">
-        <SectionHeader title={t("basicInfo.title")} />
-        <dl className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div>
-            <dt className="mb-1 text-[13px] text-fg-muted">
-              {t("basicInfo.name")}
-            </dt>
-            <dd className="text-[15px] font-semibold text-fg">{user.name}</dd>
-          </div>
-          <div>
-            <dt className="mb-1 text-[13px] text-fg-muted">
-              {t("basicInfo.restaurantName")}
-            </dt>
-            <dd className="text-[15px] font-semibold text-fg">
-              {user.restaurantName?.trim() || "—"}
-            </dd>
-          </div>
-          <div>
-            <dt className="mb-1 text-[13px] text-fg-muted">
-              {t("basicInfo.plan")}
-            </dt>
-            <dd>
-              <Badge
-                tone={
-                  user.planName?.toLowerCase() === "free" || !user.planName
-                    ? "brand"
-                    : "info"
-                }
-              >
-                {user.planName || t("free")}
-              </Badge>
-            </dd>
-          </div>
-          <div>
-            <dt className="mb-1 text-[13px] text-fg-muted">
-              {t("basicInfo.emailStatus")}
-            </dt>
-            <dd>
-              <Badge tone="warning">{t("unverified")}</Badge>
-            </dd>
-          </div>
-          <div>
-            <dt className="mb-1 text-[13px] text-fg-muted">
-              {t("basicInfo.email")}
-            </dt>
-            <dd className="text-[15px] font-semibold text-fg">{user.email}</dd>
-          </div>
-          <div>
-            <dt className="mb-1 text-[13px] text-fg-muted">
-              {t("basicInfo.status")}
-            </dt>
-            <dd>
-              <Badge tone={getAccountStatusTone(user.accountStatus)} dot>
-                {getAccountStatusLabel(user.accountStatus)}
-              </Badge>
-            </dd>
-          </div>
-          <div>
-            <dt className="mb-1 text-[13px] text-fg-muted">
-              {tCustomer("lastActivity")}
-            </dt>
-            <dd className="text-[15px] font-semibold text-fg">
-              {formatDate(user.lastLoginAt ?? user.updatedAt ?? null)}
-            </dd>
-          </div>
-          <div>
-            <dt className="mb-1 text-[13px] text-fg-muted">
-              {t("basicInfo.phoneNumber")}
-            </dt>
-            <dd className="text-[15px] font-semibold text-fg">
-              {user.phoneNumber ? (
-                <PhoneDisplay value={user.phoneNumber} />
-              ) : (
-                "-"
-              )}
-            </dd>
-          </div>
-          <div>
-            <dt className="mb-1 text-[13px] text-fg-muted">
-              {t("basicInfo.registrationDate")}
-            </dt>
-            <dd className="text-[15px] font-semibold text-fg">
-              {formatDate(user.createdAt)}
-            </dd>
-          </div>
-          <div>
-            <dt className="mb-1 text-[13px] text-fg-muted">
-              {t("basicInfo.lastLogin")}
-            </dt>
-            <dd className="text-[15px] font-semibold text-fg">
-              {formatDate(user.lastLoginAt)}
-            </dd>
-          </div>
-        </dl>
-      </Card>
-
-      <Card padded="lg" className="space-y-4">
-        <SectionHeader title={tAccount("title")} />
-        {user.isSuspended && user.suspendedReason && (
-          <p className="text-[13px] text-danger">
-            {tAccount("suspendedReasonLabel")}: {user.suspendedReason}
-          </p>
-        )}
-        {user.isBlocked && user.blockedReason && (
-          <p className="text-[13px] text-warning">
-            {tCustomer("block.reasonLabel")}: {user.blockedReason}
-          </p>
-        )}
-        <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" onClick={openEditProfile}>
-            {tCustomer("profile.edit")}
-          </Button>
-          <Button onClick={() => setPasswordModalOpen(true)}>
-            {tAccount("changePassword")}
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={handleSendResetLink}
-            loading={resetLinkLoading}
-          >
-            {resetLinkLoading
-              ? tCustomer("resetLink.sending")
-              : tCustomer("resetLink.send")}
-          </Button>
-          {user.isSuspended ? (
-            <Button
-              onClick={() => setReactivateConfirmOpen(true)}
-              disabled={accountActionLoading}
-            >
-              {tAccount("reactivate")}
-            </Button>
-          ) : (
-            <Button variant="danger" onClick={() => setSuspendModalOpen(true)}>
-              {tAccount("suspend")}
-            </Button>
-          )}
-          <Button variant="secondary" onClick={() => setBlockModalOpen(true)}>
-            {user.isBlocked
-              ? tCustomer("block.unblock")
-              : tCustomer("block.block")}
-          </Button>
-          {user.deletedAt ? (
-            <Button
-              variant="secondary"
-              onClick={handleRestoreUser}
-              disabled={accountActionLoading}
-            >
-              {tCustomer("restore.action")}
-            </Button>
-          ) : (
-            <Button
-              variant="dangerGhost"
-              onClick={() => setSoftDeleteConfirmOpen(true)}
-            >
-              {tCustomer("softDelete.action")}
-            </Button>
-          )}
-        </div>
-      </Card>
-
       <Modal
         open={passwordModalOpen}
         onClose={() => setPasswordModalOpen(false)}
@@ -1224,52 +1350,6 @@ export default function UserDetailsPage() {
         tone="brand"
         icon={<FiAlertTriangle />}
       />
-
-      <section className="space-y-4">
-        <SectionHeader title={t("statistics.title")} />
-        <StatGrid columns={3}>
-          <StatCard
-            label={t("statistics.subscriptionType")}
-            value={user.planName || t("free")}
-          />
-          <StatCard
-            label={t("statistics.emailVerification")}
-            value={user.isEmailVerified ? t("verified") : t("unverified")}
-            icon={
-              user.isEmailVerified ? (
-                <FaCheckCircle className="text-success" />
-              ) : (
-                <FaTimesCircle className="text-danger" />
-              )
-            }
-          />
-          <StatCard
-            label={t("statistics.numberOfLists")}
-            value={menus.length}
-          />
-        </StatGrid>
-      </section>
-
-      <AdminUserMenusSection
-        userId={userId}
-        menus={menus}
-        featuredOnHomepage={userData.featuredOnHomepage}
-        onMenusChange={(updatedMenus) =>
-          setUserData((prev) =>
-            prev ? { ...prev, menus: updatedMenus } : prev,
-          )
-        }
-        onRefresh={fetchUserDetails}
-      />
-      <CustomerOrdersSection
-        userId={Number(userId)}
-        onSelectOrder={setSelectedOrder}
-      />
-      <CustomerAddressesSection userId={Number(userId)} />
-      <CustomerNotesSection userId={Number(userId)} />
-      <CustomerVouchersSection userId={Number(userId)} />
-      <CustomerActivitySection userId={Number(userId)} />
-      <CustomerSupportSection userId={Number(userId)} />
 
       <Modal
         open={editProfileOpen}
@@ -1436,6 +1516,6 @@ export default function UserDetailsPage() {
           </div>
         </dl>
       </Modal>
-    </div>
+    </PageShell>
   );
 }

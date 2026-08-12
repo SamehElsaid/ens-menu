@@ -10,8 +10,14 @@ import StaffCardGrid from "@/components/Dashboard/staff/StaffCardGrid";
 import RoleCardGrid from "@/components/Dashboard/staff/RoleCardGrid";
 import AddRoleModal from "@/components/Dashboard/staff/AddRoleModal";
 import DeleteRoleConfirm from "@/components/Dashboard/staff/DeleteRoleConfirm";
-import LinkTo from "@/components/Global/LinkTo";
-import { Button, buttonClasses } from "@/components/ui";
+import {
+  Button,
+  ButtonLink,
+  CountBadge,
+  EmptyState,
+  PageShell,
+  Tabs,
+} from "@/components/ui";
 import { MenuStaff, MenuStaffRole } from "@/types/Menu";
 import { useAccountStaffRoles } from "@/hooks/useAccountStaffRoles";
 import {
@@ -173,56 +179,35 @@ export default function AccountStaffPage() {
 
   if (isFreePlan) {
     return (
-      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4 text-center md:min-h-[60vh] md:gap-4">
-        <PageTitleWithHelp
-          className="justify-center"
-          title={t("proOnlyTitle")}
-          description={t("proOnlyDescription")}
-        />
-        <LinkTo
-          href="/dashboard/subscription"
-          className={buttonClasses({
-            variant: "primary",
-            className: "mt-2 md:mt-4",
-          })}
-        >
-          {t("upgradeShort")}
-        </LinkTo>
-      </div>
+      <EmptyState
+        icon={<IoPeopleOutline aria-hidden />}
+        title={t("proOnlyTitle")}
+        description={t("proOnlyDescription")}
+        action={
+          <ButtonLink href="/dashboard/subscription">
+            {t("upgradeShort")}
+          </ButtonLink>
+        }
+      />
     );
   }
 
   return (
-    <>
-      <div className="dashboard-staff-header mb-5 min-w-0 md:mb-6">
+    <PageShell
+      kind="wide"
+      header={
         <PageTitleWithHelp
+          className="dashboard-staff-header"
           title={t("title")}
           description={
             activeTab === "staff" ? t("subtitle") : tRoles("subtitle")
-          }
-          meta={
-            activeTab === "staff" && !loading && staffList.length > 0 ? (
-              <span className="text-xs font-medium text-fg-subtle">
-                {t("totalStaffLabel")}:{" "}
-                <span className="font-bold tabular-nums text-fg-muted">
-                  {staffList.length}
-                </span>
-              </span>
-            ) : activeTab === "roles" && !rolesLoading && roles.length > 0 ? (
-              <span className="text-xs font-medium text-fg-subtle">
-                {tRoles("totalRolesLabel")}:{" "}
-                <span className="font-bold tabular-nums text-fg-muted">
-                  {roles.length}
-                </span>
-              </span>
-            ) : undefined
           }
           actions={
             activeTab === "staff" ? (
               <Button
                 type="button"
                 onClick={openAddModal}
-                startIcon={<IoAddCircleOutline className="size-4.5" />}
+                startIcon={<IoAddCircleOutline aria-hidden />}
               >
                 {t("addStaff")}
               </Button>
@@ -230,48 +215,54 @@ export default function AccountStaffPage() {
               <Button
                 type="button"
                 onClick={openAddRoleModal}
-                startIcon={<IoAddCircleOutline className="size-4.5" />}
+                startIcon={<IoAddCircleOutline aria-hidden />}
               >
                 {tRoles("addRole")}
               </Button>
             )
           }
         />
-
-        <div className="mt-5 flex gap-1 border-b border-line/80" role="tablist">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "staff"}
-            onClick={() => setActiveTab("staff")}
-            className={`-mb-px inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors ${
-              activeTab === "staff"
-                ? "border-primary text-primary"
-                : "border-transparent text-fg-subtle hover:text-fg-muted dark:hover:text-slate-200"
-            }`}
-          >
-            <IoPeopleOutline className="text-base" aria-hidden />
-            {t("tabStaff")}
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "roles"}
-            onClick={() => setActiveTab("roles")}
-            className={`-mb-px inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors ${
-              activeTab === "roles"
-                ? "border-primary text-primary"
-                : "border-transparent text-fg-subtle hover:text-fg-muted dark:hover:text-slate-200"
-            }`}
-          >
-            <IoShieldCheckmarkOutline className="text-base" aria-hidden />
-            {t("tabRoles")}
-          </button>
-        </div>
-      </div>
-
+      }
+      /* The count belongs on the tab it describes, not beside the page title:
+         one number that changes meaning when you switch tabs is worse than two
+         numbers that each stay put. */
+      toolbar={
+        <Tabs
+          className="border-b-0!"
+          label={t("title")}
+          activeId={activeTab}
+          onChange={(id) => setActiveTab(id as "staff" | "roles")}
+          items={[
+            {
+              id: "staff",
+              label: t("tabStaff"),
+              icon: <IoPeopleOutline aria-hidden />,
+              badge:
+                !loading && staffList.length > 0 ? (
+                  <CountBadge
+                    count={staffList.length}
+                    tone={activeTab === "staff" ? "brand" : "neutral"}
+                  />
+                ) : undefined,
+            },
+            {
+              id: "roles",
+              label: t("tabRoles"),
+              icon: <IoShieldCheckmarkOutline aria-hidden />,
+              badge:
+                !rolesLoading && roles.length > 0 ? (
+                  <CountBadge
+                    count={roles.length}
+                    tone={activeTab === "roles" ? "brand" : "neutral"}
+                  />
+                ) : undefined,
+            },
+          ]}
+        />
+      }
+    >
       {activeTab === "staff" ? (
-        <div className="dashboard-staff-page min-w-0 pb-6">
+        <div className="dashboard-staff-page min-w-0">
           <StaffCardGrid
             staffList={staffList}
             loading={loading}
@@ -285,7 +276,7 @@ export default function AccountStaffPage() {
           />
         </div>
       ) : (
-        <div className="min-w-0 pb-6">
+        <div className="min-w-0">
           <RoleCardGrid
             roles={roles}
             loading={rolesLoading}
@@ -331,6 +322,6 @@ export default function AccountStaffPage() {
           onDeleted={onRolesChanged}
         />
       )}
-    </>
+    </PageShell>
   );
 }

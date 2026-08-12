@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { FiCheck } from "react-icons/fi";
 import { cn } from "@/lib/cn";
 import { focusRing } from "./styles";
 import { getFocusable } from "./useDialog";
@@ -115,8 +116,8 @@ export function Menu({
           aria-label={label}
           aria-labelledby={triggerId}
           className={cn(
-            "absolute top-[calc(100%+4px)] z-50 min-w-48 overflow-hidden rounded-lg border border-line bg-raised p-1 shadow-lg",
-            "motion-safe:animate-[ui-pop-in_140ms_cubic-bezier(0.16,1,0.3,1)]",
+            "absolute top-[calc(100%+6px)] z-50 min-w-48 overflow-hidden rounded-xl border border-line bg-raised p-1.5 shadow-lg",
+            "motion-safe:animate-[ui-pop-in_var(--dur-pop)_var(--ease-enter)]",
             align === "start"
               ? "start-0 origin-top-left"
               : "end-0 origin-top-right",
@@ -132,9 +133,60 @@ export function Menu({
 }
 
 const itemBase = cn(
-  "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-start text-[13px] font-medium row-settle",
+  "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-start text-[13px] font-medium row-settle",
   focusRing,
 );
+
+/**
+ * The row recipe on its own.
+ *
+ * `MenuItem` covers a button and an internal link. Some rows cannot be either:
+ * an entry that opens in a new tab needs `target`/`rel`, and an entry that has
+ * to go through the app's locale-aware link wrapper needs that component. Those
+ * render their own element and take the recipe from here, so a menu stays one
+ * consistent set of rows instead of two that drift.
+ */
+export function menuItemClasses({
+  tone = "default",
+  disabled = false,
+  className,
+}: {
+  tone?: "default" | "danger";
+  disabled?: boolean;
+  className?: string;
+} = {}) {
+  return cn(
+    itemBase,
+    tone === "danger"
+      ? "text-danger hover:bg-danger-soft"
+      : "text-fg hover:bg-surface-2",
+    disabled && "pointer-events-none opacity-50",
+    className,
+  );
+}
+
+/** The inner layout of a row: dimmed leading glyph, then a truncating label. */
+export function MenuItemBody({
+  icon,
+  children,
+}: {
+  icon?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <>
+      {icon ? (
+        <span
+          className="shrink-0 text-[15px] text-current opacity-65"
+          aria-hidden
+        >
+          {icon}
+        </span>
+      ) : null}
+      <span className="min-w-0 flex-1 truncate">{children}</span>
+    </>
+  );
+}
 
 export function MenuItem({
   children,
@@ -153,28 +205,8 @@ export function MenuItem({
   disabled?: boolean;
   className?: string;
 }) {
-  const classes = cn(
-    itemBase,
-    tone === "danger"
-      ? "text-danger hover:bg-danger-soft"
-      : "text-fg hover:bg-surface-2",
-    disabled && "pointer-events-none opacity-50",
-    className,
-  );
-
-  const content = (
-    <>
-      {icon ? (
-        <span
-          className="shrink-0 text-[15px] text-current opacity-65"
-          aria-hidden
-        >
-          {icon}
-        </span>
-      ) : null}
-      <span className="min-w-0 flex-1 truncate">{children}</span>
-    </>
-  );
+  const classes = menuItemClasses({ tone, disabled, className });
+  const content = <MenuItemBody icon={icon}>{children}</MenuItemBody>;
 
   if (href) {
     return (
@@ -197,13 +229,59 @@ export function MenuItem({
   );
 }
 
+/**
+ * A row that reports state rather than performing navigation.
+ *
+ * `menuitemcheckbox` rows deliberately keep the panel open: a column-visibility
+ * list is used a few columns at a time, and closing after each toggle turns one
+ * decision into four round trips. `menuitemradio` rows close, because choosing
+ * one of a set is a single decision.
+ */
+export function MenuItemToggle({
+  children,
+  checked,
+  onToggle,
+  multiple = true,
+}: {
+  children: ReactNode;
+  checked: boolean;
+  onToggle: () => void;
+  /** `false` renders a radio row, which closes the menu when chosen. */
+  multiple?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      role={multiple ? "menuitemcheckbox" : "menuitemradio"}
+      aria-checked={checked}
+      onClick={(event) => {
+        if (multiple) event.stopPropagation();
+        onToggle();
+      }}
+      className={menuItemClasses()}
+    >
+      <span
+        aria-hidden
+        className={cn(
+          "flex size-4 shrink-0 items-center justify-center border",
+          multiple ? "rounded-[4px]" : "rounded-full",
+          checked ? "border-brand bg-brand text-on-brand" : "border-line-control",
+        )}
+      >
+        {checked ? <FiCheck className="size-3" /> : null}
+      </span>
+      <span className="min-w-0 flex-1 truncate">{children}</span>
+    </button>
+  );
+}
+
 export function MenuSeparator() {
   return <hr className="my-1 border-line" aria-hidden />;
 }
 
 export function MenuLabel({ children }: { children: ReactNode }) {
   return (
-    <p className="px-2 pb-0.5 pt-1.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-fg-subtle">
+    <p className="px-2.5 pb-1 pt-2 text-[11px] font-semibold text-fg-subtle">
       {children}
     </p>
   );

@@ -3,8 +3,11 @@ export function importRefDomId(refId: string): string {
 }
 
 export function focusFirstMissingField(container: HTMLElement): void {
+  // Keyed off `aria-invalid` rather than the field's classes: the review rows
+  // mark incomplete values there anyway, and a selector written against
+  // styling silently stops matching the next time the styling changes.
   const missing = container.querySelector<HTMLElement>(
-    "input.border-amber-400, textarea.border-amber-400",
+    'input[aria-invalid="true"], textarea[aria-invalid="true"]',
   );
   if (missing) {
     missing.focus({ preventScroll: true });
@@ -27,19 +30,15 @@ export function scrollToImportRef(
       el.scrollIntoView({ behavior: "smooth", block: "center" });
       if (options?.focusMissing) focusFirstMissingField(el);
 
-      el.classList.add(
+      const highlight = [
         "ring-2",
-        "ring-primary",
+        "ring-accent",
         "ring-offset-2",
-        "rounded-2xl",
-      );
+        "rounded-lg",
+      ];
+      el.classList.add(...highlight);
       window.setTimeout(() => {
-        el.classList.remove(
-          "ring-2",
-          "ring-primary",
-          "ring-offset-2",
-          "rounded-2xl",
-        );
+        el.classList.remove(...highlight);
       }, 2000);
     }, 80);
   });

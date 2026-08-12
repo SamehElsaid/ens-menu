@@ -15,7 +15,7 @@ import {
   IoTrashOutline,
   IoCameraOutline,
 } from "react-icons/io5";
-import { Badge, Button, Card } from "@/components/ui";
+import { Button, Card, CardFooter } from "@/components/ui";
 
 interface ItemCardProps {
   item: Item;
@@ -62,7 +62,7 @@ export default function ItemCard({
       interactive
       className="flex h-full flex-col overflow-hidden"
     >
-      <div className="dashboard-card-media relative aspect-4/3 overflow-hidden bg-surface-2">
+      <div className="dashboard-card-media relative aspect-4/3 overflow-hidden border-b border-line bg-surface-2">
         {imageUrl ? (
           <div className="absolute inset-0">
             <LoadImage
@@ -79,68 +79,92 @@ export default function ItemCard({
           <button
             type="button"
             onClick={() => onEdit(item)}
-            className="flex h-full w-full flex-col items-center justify-center gap-2 text-fg-subtle transition-colors hover:text-brand"
+            className="flex h-full w-full flex-col items-center justify-center gap-2 text-fg-subtle transition-colors hover:text-fg"
           >
             <IoCameraOutline className="text-3xl" aria-hidden />
             <span className="text-xs font-medium">{t("addImage")}</span>
           </button>
         )}
 
-        <div className="absolute end-3 top-3 z-10 flex flex-col items-end gap-1.5">
-          <Badge tone={available ? "success" : "warning"} variant="solid" dot>
-            {available ? t("available") : t("unavailable")}
-          </Badge>
-          {hasDiscount && item.discountPercent != null && (
-            <Badge tone="danger" variant="solid">
-              -{item.discountPercent}%
-            </Badge>
-          )}
-        </div>
+        {/* Only the discount stays on the photograph, because it is a fact
+            about the price rather than about the row, and it is corner-anchored
+            rather than floated so it reads as a stamp on the plate. */}
+        {hasDiscount && item.discountPercent != null ? (
+          <span className="absolute start-0 top-0 z-10 bg-danger px-1.5 py-0.5 font-mono text-[11px] font-semibold text-on-status tabular-nums">
+            -{item.discountPercent}%
+          </span>
+        ) : null}
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 p-4">
-        <div className="min-w-0">
-          <h3
-            className="truncate text-sm font-semibold text-fg"
-            dir={isRTL ? "rtl" : "ltr"}
-            title={name}
-          >
-            {name}
-          </h3>
-          {categoryName && (
-            <p
-              className="mt-0.5 truncate text-[13px] text-fg-muted"
+      <div className="flex flex-1 flex-col p-3 sm:p-4">
+        {/* Availability moved off the image and onto a ticket row. A grid of
+            twelve dishes is scanned down a column, and a badge floating over
+            photographs of different brightness lands at a different height and
+            a different contrast in every card. */}
+        <div className="flex items-center justify-between gap-2">
+          <span className="ui-label inline-flex shrink-0 items-center gap-1.5 text-fg-muted">
+            <span
+              aria-hidden
+              className={
+                available
+                  ? "size-1.5 rounded-full bg-success"
+                  : "size-1.5 rounded-full bg-warning"
+              }
+            />
+            {available ? t("available") : t("unavailable")}
+          </span>
+          {categoryName ? (
+            <span
+              className="ui-label min-w-0 truncate text-fg-subtle"
               dir={isRTL ? "rtl" : "ltr"}
+              title={categoryName}
             >
               {categoryName}
-            </p>
-          )}
+            </span>
+          ) : null}
         </div>
 
-        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-          <span className="text-base font-semibold tabular-nums text-fg">
+        <h3
+          className="mt-2.5 truncate text-sm font-semibold text-fg"
+          dir={isRTL ? "rtl" : "ltr"}
+          title={name}
+        >
+          {name}
+        </h3>
+
+        <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          <span className="ui-figure text-[17px] text-fg" data-numeric>
             {hasMultipleSizes
               ? `${locale === "ar" ? "من " : "From "}${priceLabel}`
               : priceLabel}
           </span>
           {originalPriceLabel && (
-            <span className="text-[13px] tabular-nums text-fg-subtle line-through">
+            <span className="font-mono text-[12px] tabular-nums text-fg-subtle line-through">
               {originalPriceLabel}
             </span>
           )}
-          {hasMultipleSizes ? (
-            <span className="text-[13px] text-fg-muted">
-              {t("sizesCount", { count: sizes.length })}
-            </span>
-          ) : null}
-          {hasAddOns ? (
-            <span className="text-[13px] text-fg-muted">
-              {t("addOnsCount", { count: variants.length })}
-            </span>
-          ) : null}
         </div>
 
-        <div className="mt-auto grid grid-cols-2 gap-2 border-t border-line pt-3">
+        {hasMultipleSizes || hasAddOns ? (
+          <div className="mt-2.5 flex flex-wrap gap-1">
+            {hasMultipleSizes ? (
+              <span className="ui-label rounded-sm border border-line px-1.5 py-px text-fg-muted">
+                {t("sizesCount", { count: sizes.length })}
+              </span>
+            ) : null}
+            {hasAddOns ? (
+              <span className="ui-label rounded-sm border border-line px-1.5 py-px text-fg-muted">
+                {t("addOnsCount", { count: variants.length })}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+
+        <div className="flex-1" />
+
+        {/* Edit is the action; delete is the exception. Two equal full-width
+            buttons made destroying a dish as inviting as editing one. */}
+        <CardFooter>
           <Button
             variant="secondary"
             size="sm"
@@ -153,13 +177,14 @@ export default function ItemCard({
           <Button
             variant="dangerGhost"
             size="sm"
-            fullWidth
+            iconOnly
             onClick={() => onDelete(item)}
-            startIcon={<IoTrashOutline />}
+            aria-label={t("delete")}
+            title={t("delete")}
           >
-            {t("delete")}
+            <IoTrashOutline />
           </Button>
-        </div>
+        </CardFooter>
       </div>
     </Card>
   );

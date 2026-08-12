@@ -2,31 +2,34 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { MenuStaff } from "@/types/Menu";
+import { Card, Skeleton } from "@/components/ui";
 import StaffCard from "./StaffCard";
 import StaffEmptyState from "./StaffEmptyState";
 import MobileListPagination from "@/components/Dashboard/mobile/MobileListPagination";
 
 const PAGE_SIZE = 12;
 
+/** Mirrors `StaffCard`'s real geometry — avatar tile, two text lines, chip row,
+ *  ruled action footer — so the list does not reflow when data lands. */
 function StaffCardSkeleton() {
   return (
-    <div
-      className="overflow-hidden rounded-lg border border-line bg-white"
-      aria-hidden
-    >
-      <div className="dashboard-mobile-shimmer h-28 bg-primary/5 dark:bg-primary/10" />
-      <div className="space-y-3 px-4 pb-4 -mt-2">
-        <div className="rounded-lg border border-line p-3 dark:border-line">
-          <div className="dashboard-mobile-shimmer mx-auto h-6 w-2/3 rounded-md bg-surface-3" />
-          <div className="dashboard-mobile-shimmer mt-2.5 h-9 w-full rounded-lg bg-surface-3" />
+    <Card aria-hidden>
+      <div className="flex items-start gap-3">
+        <Skeleton className="size-11 shrink-0" rounded="lg" />
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+          <Skeleton className="h-3.5 w-2/3" />
+          <Skeleton className="h-3 w-full" />
         </div>
-        <div className="flex gap-2 border-t border-line pt-3 dark:border-line">
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-3" />
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-3" />
-        </div>
-        <div className="dashboard-mobile-shimmer h-10 w-full rounded-lg bg-surface-3" />
       </div>
-    </div>
+      <div className="mt-3 mb-4 flex flex-wrap gap-1.5">
+        <Skeleton className="h-4 w-20" rounded="full" />
+        <Skeleton className="h-4 w-16" rounded="full" />
+      </div>
+      <div className="grid grid-cols-2 gap-2 border-t border-line pt-3">
+        <Skeleton className="h-8" rounded="lg" />
+        <Skeleton className="h-8" rounded="lg" />
+      </div>
+    </Card>
   );
 }
 

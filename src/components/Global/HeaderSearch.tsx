@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { createPortal } from "react-dom";
-import { IoSearchOutline, IoCloseOutline } from "react-icons/io5";
-import { FaSpinner } from "react-icons/fa";
+import { useState, useEffect, useCallback } from "react";
+import {
+  IoSearchOutline,
+  IoChevronForward,
+  IoCloseOutline,
+} from "react-icons/io5";
 import { useLocale, useTranslations } from "next-intl";
 import { axiosGet } from "@/shared/axiosCall";
 import LinkTo from "@/components/Global/LinkTo";
+import { Button, Modal, Spinner } from "@/components/ui";
 
 interface SearchResult {
   id: number;
@@ -25,6 +28,18 @@ interface SearchResponse {
   };
 }
 
+/**
+ * Knowledge-base search from the header.
+ *
+ * The overlay is now the `Modal` primitive rather than a hand-rolled portal.
+ * DESIGN.md §12 gives dialogs to `Modal` and `Sheet` alone because they own
+ * focus trapping, scroll locking, Escape and focus restoration — this one had
+ * the scroll lock and Escape but no trap and no focus return, so tabbing left
+ * the open palette and landed behind the backdrop.
+ *
+ * Results are a ruled list, not a set of rows each restating the search icon:
+ * the row's job is to show the article title and where it goes.
+ */
 export default function HeaderSearch() {
   const locale = useLocale();
   const t = useTranslations("headerSearch");
@@ -36,13 +51,6 @@ export default function HeaderSearch() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const close = useCallback(() => {
     setIsOpen(false);
@@ -51,33 +59,6 @@ export default function HeaderSearch() {
     setResults([]);
     setHasSearched(false);
   }, []);
-
-  const open = () => {
-    setIsOpen(true);
-    setTimeout(() => inputRef.current?.focus(), 50);
-  };
-
-  // Prevent body scroll when popup is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
-
-  // Close on Escape key
-  useEffect(() => {
-    if (!isOpen) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [isOpen, close]);
 
   // Debounce query
   useEffect(() => {
@@ -120,9 +101,6 @@ export default function HeaderSearch() {
   const getTitle = (item: SearchResult) =>
     isRTL && item.titleAr ? item.titleAr : item.titleEn;
 
-  const getSubtitle = (item: SearchResult) =>
-    isRTL ? item.titleEn : item.titleAr;
-
   const toSlug = (title: string, id: number): string => {
     const base = title
       .toLowerCase()
@@ -133,91 +111,82 @@ export default function HeaderSearch() {
     return base ? `${base}-${id}` : `${id}`;
   };
 
-  const popup =
-    isOpen && mounted
-      ? createPortal(
-          <div
-            className="fixed inset-0 z-[9999] flex items-start justify-center bg-black/50 backdrop-blur-sm pt-20 px-4"
-            onMouseDown={(e) => {
-              if (e.target === e.currentTarget) close();
-            }}
-          >
-            <div className="w-full max-w-xl bg-raised rounded-lg shadow-2xl overflow-hidden animate-[fadeInDown_0.2s_ease-out]">
-              {/* Search input row */}
-              <div
-                className={`flex items-center gap-3 px-4 py-3 border-b border-line`}
-              >
-                <IoSearchOutline
-                  className="shrink-0 text-purple-500"
-                  size={20}
-                />
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder={t("placeholder")}
-                  className="flex-1 bg-transparent text-sm text-fg placeholder-slate-400 focus:outline-none"
-                />
-                <button
-                  onClick={close}
-                  aria-label={t("close")}
-                  className="shrink-0 p-1 rounded-full text-fg-subtle hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
-                >
-                  <IoCloseOutline size={20} />
-                </button>
-              </div>
-
-              {/* Results body */}
-              {loading ? (
-                <div className="flex items-center justify-center gap-2 py-10 text-sm text-fg-muted">
-                  <FaSpinner className="animate-spin" />
-                  <span>{t("loading")}</span>
-                </div>
-              ) : hasSearched && results.length === 0 ? (
-                <p className="py-10 text-center text-sm text-fg-muted">
-                  {t("noResults")}
-                </p>
-              ) : results.length > 0 ? (
-                <ul className="max-h-80 overflow-y-auto py-2">
-                  {results.map((item) => (
-                    <li key={item.id}>
-                      <LinkTo
-                        href={`knowledge-base/${toSlug(item.titleEn, item.id)}`}
-                        onClick={close}
-                        className={`flex items-start gap-3 px-5 py-3 hover:bg-purple-50 dark:hover:bg-purple-500/10 transition-colors`}
-                      >
-                        <IoSearchOutline
-                          className="mt-0.5 shrink-0 text-purple-400"
-                          size={16}
-                        />
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold text-fg line-clamp-1">
-                            {getTitle(item)}
-                          </p>
-                        </div>
-                      </LinkTo>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-            </div>
-          </div>,
-          document.body,
-        )
-      : null;
-
   return (
     <>
-      <button
-        onClick={open}
+      <Button
+        variant="ghost"
+        size="sm"
+        iconOnly
+        onClick={() => setIsOpen(true)}
         aria-label={t("label")}
-        className="p-2 rounded-full text-fg-muted hover:bg-purple-50 dark:hover:bg-purple-500/20 transition-colors"
       >
-        <IoSearchOutline size={20} />
-      </button>
+        <IoSearchOutline className="size-4" aria-hidden />
+      </Button>
 
-      {popup}
+      <Modal
+        open={isOpen}
+        onClose={close}
+        size="md"
+        bare
+        showClose={false}
+        closeLabel={t("close")}
+      >
+        <div className="flex items-center gap-2.5 border-b border-line px-3 py-2.5">
+          <IoSearchOutline
+            className="size-4 shrink-0 text-fg-subtle"
+            aria-hidden
+          />
+          <input
+            data-autofocus
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t("placeholder")}
+            aria-label={t("label")}
+            className="min-w-0 flex-1 bg-transparent text-sm text-fg outline-none placeholder:text-fg-subtle"
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            iconOnly
+            onClick={close}
+            aria-label={t("close")}
+          >
+            <IoCloseOutline className="size-4.5" aria-hidden />
+          </Button>
+        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center gap-2 py-10 text-[13px] text-fg-muted">
+            <Spinner size="sm" />
+            <span>{t("loading")}</span>
+          </div>
+        ) : hasSearched && results.length === 0 ? (
+          <p className="py-10 text-center text-[13px] text-fg-muted">
+            {t("noResults")}
+          </p>
+        ) : results.length > 0 ? (
+          <ul className="max-h-80 overflow-y-auto">
+            {results.map((item) => (
+              <li key={item.id} className="border-b border-line last:border-b-0">
+                <LinkTo
+                  href={`knowledge-base/${toSlug(item.titleEn, item.id)}`}
+                  onClick={close}
+                  className="flex items-center gap-3 px-4 py-2.5 row-settle hover:bg-surface-2"
+                >
+                  <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-fg">
+                    {getTitle(item)}
+                  </span>
+                  <IoChevronForward
+                    className="size-3.5 shrink-0 text-fg-subtle rtl:rotate-180"
+                    aria-hidden
+                  />
+                </LinkTo>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </Modal>
     </>
   );
 }

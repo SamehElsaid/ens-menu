@@ -10,6 +10,7 @@ import { useMenusActivitySocket } from "@/hooks/useMenuActivitySocket";
 import type { OrderStatusFilter } from "@/components/Dashboard/orders/OrdersFilters";
 import {
   applyLocalEntryStatusUpdate,
+  collectChangedOrderIds,
   countPendingOrders,
   mergeOrderEntries,
   type CallEntry,
@@ -22,6 +23,12 @@ import {
 } from "@/lib/tableOrders";
 
 const PAGE_SIZE = 12;
+
+/** Just past the 1200ms border flash, so the class is gone by the time a second
+    update on the same ticket needs to restart it. */
+const FLASH_MS = 1300;
+
+const NO_CHANGES: ReadonlySet<string> = new Set();
 
 export type DashboardOrdersChannel = "table" | "delivery";
 
@@ -111,6 +118,35 @@ export function useDashboardOrdersPage(channel: DashboardOrdersChannel) {
     }
   }, [filterSignature]);
 
+  /* The visible list, readable without making `fetchOrders` depend on it —
+     otherwise every arriving order would rebuild the fetcher and re-run the
+     effect that calls it. */
+  const entriesRef = useRef<CallEntry[]>([]);
+  useEffect(() => {
+    entriesRef.current = entries;
+  }, [entries]);
+
+  const [changedIds, setChangedIds] =
+    useState<ReadonlySet<string>>(NO_CHANGES);
+  const flashTimer = useRef<number | null>(null);
+
+  useEffect(
+    () => () => {
+      if (flashTimer.current !== null) window.clearTimeout(flashTimer.current);
+    },
+    [],
+  );
+
+  const flashChanged = useCallback((ids: Set<string>) => {
+    if (ids.size === 0) return;
+    if (flashTimer.current !== null) window.clearTimeout(flashTimer.current);
+    setChangedIds(ids);
+    flashTimer.current = window.setTimeout(() => {
+      flashTimer.current = null;
+      setChangedIds(NO_CHANGES);
+    }, FLASH_MS);
+  }, []);
+
   const fetchOrders = useCallback(
     async (silent = false) => {
       try {
@@ -136,6 +172,7 @@ export function useDashboardOrdersPage(channel: DashboardOrdersChannel) {
         if (result.status && result.data) {
           const p = result.data;
           const fresh = p.entries ?? p.calls ?? [];
+          if (silent) flashChanged(collectChangedOrderIds(entriesRef.current, fresh));
           setEntries((prev) =>
             silent ? mergeOrderEntries(prev, fresh) : fresh,
           );
@@ -158,6 +195,7 @@ export function useDashboardOrdersPage(channel: DashboardOrdersChannel) {
       statusFilter,
       menuFilter,
       channel,
+      flashChanged,
     ],
   );
 
@@ -293,6 +331,8 @@ export function useDashboardOrdersPage(channel: DashboardOrdersChannel) {
     modalMenuId,
     isFreePlan,
     entries,
+    /** Ids a socket update just changed, for the 1.2s border flash. */
+    changedIds,
     loading,
     page,
     setPage,

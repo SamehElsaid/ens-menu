@@ -16,7 +16,13 @@ export {
   type ButtonLinkProps,
   type ButtonVariant,
 } from "./Button";
-export { Card, CardDivider, CardHeader, type CardProps } from "./Card";
+export {
+  Card,
+  CardDivider,
+  CardFooter,
+  CardHeader,
+  type CardProps,
+} from "./Card";
 export { Checkbox, ChoiceCard, Radio } from "./Checkbox";
 export {
   EmptyState,
@@ -43,7 +49,16 @@ export {
   type InputProps,
   type TextareaProps,
 } from "./Input";
-export { Menu, MenuItem, MenuLabel, MenuSeparator, type MenuAlign } from "./Menu";
+export {
+  Menu,
+  MenuItem,
+  MenuItemBody,
+  MenuItemToggle,
+  MenuLabel,
+  MenuSeparator,
+  menuItemClasses,
+  type MenuAlign,
+} from "./Menu";
 export {
   ConfirmDialog,
   Modal,
@@ -58,6 +73,12 @@ export {
   type Crumb,
   type PageHeaderProps,
 } from "./PageHeader";
+export {
+  PageColumns,
+  PageShell,
+  type PageKind,
+  type PageShellProps,
+} from "./PageShell";
 export { Pagination, type PaginationProps } from "./Pagination";
 export { Select, type SelectProps } from "./Select";
 export { Sheet, type SheetSide } from "./Sheet";
@@ -73,19 +94,31 @@ export {
   Th,
   Tr,
   type DataColumn,
+  type DataTableLabels,
   type DataTableProps,
+  type SortableValue,
+  type SortDirection,
+  type TableDensity,
 } from "./Table";
 export { SegmentedControl, Tabs, type TabItem } from "./Tabs";
 export { Tooltip } from "./Tooltip";
+export type { TooltipSide } from "./Tooltip";
 export { SearchInput, SelectionBar, Toolbar } from "./Toolbar";
 export {
   controlHeight,
+  controlPadding,
   controlRadius,
+  controlSquare,
   controlText,
+  focusField,
   focusRing,
   focusRingInset,
+  interactive,
+  liftable,
+  settle,
   statusTone,
   surface,
+  surfaceFlat,
   surfaceRaised,
   surfaceSunken,
   text,

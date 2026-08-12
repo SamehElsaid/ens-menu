@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, type ReactNode } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { ImportDraft, ImportError } from "@/types/menuImport";
 import type { SaveBlockingError } from "@/types/menuImport";
@@ -15,50 +15,20 @@ import {
 } from "@/lib/menuImport/duplicateMatch";
 import { expandItemForSave } from "@/lib/menuImport/draftSaveUtils";
 import { scrollToImportRef } from "@/lib/menuImport/importRefDomId";
-import { IoAddCircleOutline, IoWarningOutline } from "react-icons/io5";
-import { cn } from "@/lib/cn";
+import {
+  IoAddCircleOutline,
+  IoCopyOutline,
+  IoWarningOutline,
+} from "react-icons/io5";
 import {
   Alert,
-  Badge,
   Button,
+  EmptyState,
   SectionHeader,
   Spinner,
-  focusRing,
-  type StatusTone,
+  StatCard,
+  StatGrid,
 } from "@/components/ui";
-
-/** Clickable summary pill that jumps to the next entry in a problem group. */
-function StatPill({
-  tone = "neutral",
-  title,
-  onClick,
-  children,
-}: {
-  tone?: StatusTone;
-  title: string;
-  onClick: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      className={cn(
-        "rounded-full transition-opacity hover:opacity-80",
-        focusRing,
-      )}
-    >
-      <Badge
-        tone={tone}
-        size="md"
-        icon={tone === "warning" ? <IoWarningOutline aria-hidden /> : undefined}
-      >
-        {children}
-      </Badge>
-    </button>
-  );
-}
 
 interface ReviewStepProps {
   draft: ImportDraft;
@@ -117,6 +87,17 @@ interface ReviewStepProps {
   ) => void;
 }
 
+/**
+ * The parse, as a ledger.
+ *
+ * This is the screen the whole feature is for, and it used to be a run of
+ * floating cards separated by ground, with the counts set as small pills in the
+ * header. Two changes carry the rethink. The counts are figures in an
+ * instrument rail, because "how many items did it find" is the first question
+ * anyone asks. And every category is now a section of one bordered panel
+ * divided by hairlines, so forty parsed dishes read as a single list with one
+ * margin to scan down instead of a stack of separate objects.
+ */
 export default function ReviewStep({
   draft,
   parseErrors,
@@ -229,84 +210,60 @@ export default function ReviewStep({
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <SectionHeader
+        eyebrow={t("stepReview")}
         title={t("reviewTitle")}
         description={t("reviewDescription")}
-        actions={
-          <div className="flex flex-wrap gap-2">
-            <StatPill
-              title={t("statClickHint")}
-              onClick={() => scrollToRefGroup(categoryRefIds, "categories")}
-            >
-              {t("statCategories", { count: draft.stats.categoryCount })}
-            </StatPill>
-            <StatPill
-              title={t("statClickHint")}
-              onClick={() => scrollToRefGroup(itemRefIds, "items")}
-            >
-              {t("statItems", { count: draft.stats.itemCount })}
-            </StatPill>
-            <StatPill
-              title={t("statClickHint")}
-              onClick={() =>
-                scrollToRefGroup(expandedItemRefIds, "expandedItems")
-              }
-            >
-              {t("statExpandedItems", {
-                count: draft.stats.expandedItemCount,
-              })}
-            </StatPill>
-            {dupStats.exactDuplicates > 0 && (
-              <StatPill
-                title={t("statClickHint")}
-                onClick={() =>
-                  scrollToRefGroup(exactDuplicateRefIds, "exactDuplicates")
-                }
-              >
-                {t("statDuplicates", { count: dupStats.exactDuplicates })}
-              </StatPill>
-            )}
-            {dupStats.priceConflicts > 0 && (
-              <StatPill
-                tone="warning"
-                title={t("statClickHint")}
-                onClick={() =>
-                  scrollToRefGroup(priceConflictRefIds, "priceConflicts")
-                }
-              >
-                {t("statPriceConflicts", { count: dupStats.priceConflicts })}
-              </StatPill>
-            )}
-            {blockingPriceErrors.length > 0 && (
-              <StatPill
-                tone="warning"
-                title={t("missingPriceBlockHint")}
-                onClick={() =>
-                  scrollToRefGroup(missingPriceRefIds, "missingPrices", {
-                    focusMissing: true,
-                  })
-                }
-              >
-                {t("statMissingPrices", { count: blockingPriceErrors.length })}
-              </StatPill>
-            )}
-            {blockingNameErrors.length > 0 && (
-              <StatPill
-                tone="warning"
-                title={t("missingNameBlockHint")}
-                onClick={() =>
-                  scrollToRefGroup(missingNameRefIds, "missingNames", {
-                    focusMissing: true,
-                  })
-                }
-              >
-                {t("statMissingNames", { count: blockingNameErrors.length })}
-              </StatPill>
-            )}
-          </div>
-        }
+        ruled
       />
+
+      {/* The counts are the first thing read on this screen, so they are
+          figures in an instrument rail rather than pills in the header. Each
+          one still jumps to the next entry in its group. */}
+      <div>
+        <StatGrid columns={4}>
+          <StatCard
+            label={t("statLabelCategories")}
+            value={draft.stats.categoryCount}
+            onClick={() => scrollToRefGroup(categoryRefIds, "categories")}
+          />
+          <StatCard
+            label={t("statLabelItems")}
+            value={draft.stats.itemCount}
+            onClick={() => scrollToRefGroup(itemRefIds, "items")}
+          />
+          <StatCard
+            label={t("statLabelToSave")}
+            value={draft.stats.expandedItemCount}
+            onClick={() =>
+              scrollToRefGroup(expandedItemRefIds, "expandedItems")
+            }
+          />
+          {dupStats.exactDuplicates > 0 ? (
+            <StatCard
+              label={t("statLabelDuplicates")}
+              value={dupStats.exactDuplicates}
+              icon={<IoCopyOutline />}
+              hint={t("duplicateExactSkip")}
+              onClick={() =>
+                scrollToRefGroup(exactDuplicateRefIds, "exactDuplicates")
+              }
+            />
+          ) : null}
+          {dupStats.priceConflicts > 0 ? (
+            <StatCard
+              label={t("statLabelPriceConflicts")}
+              value={dupStats.priceConflicts}
+              icon={<IoWarningOutline />}
+              onClick={() =>
+                scrollToRefGroup(priceConflictRefIds, "priceConflicts")
+              }
+            />
+          ) : null}
+        </StatGrid>
+        <p className="ui-label mt-1.5">{t("statClickHint")}</p>
+      </div>
 
       {duplicatesLoading && (
         <Alert tone="neutral" icon={<Spinner size="sm" />}>
@@ -335,8 +292,9 @@ export default function ReviewStep({
                       focusMissing: true,
                     })
                   }
+                  title={t("missingPriceBlockHint")}
                 >
-                  {t("missingPriceBlockHint")}
+                  {t("goToIssue")}
                 </Button>
               }
             />
@@ -356,8 +314,9 @@ export default function ReviewStep({
                       focusMissing: true,
                     })
                   }
+                  title={t("missingNameBlockHint")}
                 >
-                  {t("missingNameBlockHint")}
+                  {t("goToIssue")}
                 </Button>
               }
             />
@@ -378,8 +337,9 @@ export default function ReviewStep({
                       "unresolvedConflictsBlock",
                     )
                   }
+                  title={t("statClickHint")}
                 >
-                  {t("statClickHint")}
+                  {t("goToIssue")}
                 </Button>
               }
             />
@@ -393,70 +353,91 @@ export default function ReviewStep({
         </Alert>
       )}
 
-      <div className="flex flex-col gap-3">
-        {draft.categories.map((category) => (
-          <ReviewCategoryBlock
-            key={category.id}
-            category={category}
-            currency={draft.currency}
-            locale={locale}
-            scrollTargetRefId={scrollTargetRefId}
-            onUpdateCategory={(patch) => onUpdateCategory(category.id, patch)}
-            onUpdateItem={(itemId, patch) =>
-              onUpdateItem(category.id, itemId, patch)
-            }
-            onUpdateVariant={(itemId, variantId, patch) =>
-              onUpdateVariant(category.id, itemId, variantId, patch)
-            }
-            onDeleteItem={(itemId) => onDeleteItem(category.id, itemId)}
-            onDeleteCategory={() => onDeleteCategory(category.id)}
-            onAddItem={() => onAddItem(category.id)}
-            onAddVariant={(itemId) => onAddVariant(category.id, itemId)}
-            onRemoveVariant={(itemId, variantId) =>
-              onRemoveVariant(category.id, itemId, variantId)
-            }
-            onItemImage={(itemId, url) => onItemImage(category.id, itemId, url)}
-            onResolveDuplicate={(itemId, resolution, variantId) =>
-              onResolveDuplicate(category.id, itemId, resolution, variantId)
-            }
-          />
-        ))}
+      {/* One panel, hairline-divided. Categories share edges with each other
+          instead of floating on ground, which is what turns a long parse into
+          something that can be read down a single margin. */}
+      {/* Not `overflow-hidden`: the row overflow menus open inside this panel
+          and would be clipped by it. */}
+      <div className="rounded-xl border border-line bg-surface">
+        {draft.categories.length === 0 ? (
+          <div className="p-3 sm:p-4">
+            <EmptyState size="sm" title={t("emptyCategory")} />
+          </div>
+        ) : (
+          <div className="divide-y divide-line">
+            {draft.categories.map((category, index) => (
+              <ReviewCategoryBlock
+                key={category.id}
+                index={index}
+                category={category}
+                currency={draft.currency}
+                locale={locale}
+                scrollTargetRefId={scrollTargetRefId}
+                onUpdateCategory={(patch) =>
+                  onUpdateCategory(category.id, patch)
+                }
+                onUpdateItem={(itemId, patch) =>
+                  onUpdateItem(category.id, itemId, patch)
+                }
+                onUpdateVariant={(itemId, variantId, patch) =>
+                  onUpdateVariant(category.id, itemId, variantId, patch)
+                }
+                onDeleteItem={(itemId) => onDeleteItem(category.id, itemId)}
+                onDeleteCategory={() => onDeleteCategory(category.id)}
+                onAddItem={() => onAddItem(category.id)}
+                onAddVariant={(itemId) => onAddVariant(category.id, itemId)}
+                onRemoveVariant={(itemId, variantId) =>
+                  onRemoveVariant(category.id, itemId, variantId)
+                }
+                onItemImage={(itemId, url) =>
+                  onItemImage(category.id, itemId, url)
+                }
+                onResolveDuplicate={(itemId, resolution, variantId) =>
+                  onResolveDuplicate(category.id, itemId, resolution, variantId)
+                }
+              />
+            ))}
+          </div>
+        )}
+
+        <div className="rounded-b-xl border-t border-line bg-surface-2/40 px-3 py-2 sm:px-4">
+          <Button
+            variant="link"
+            size="sm"
+            onClick={onAddCategory}
+            disabled={isSaving}
+            startIcon={<IoAddCircleOutline className="text-base" />}
+          >
+            {t("addCategory")}
+          </Button>
+        </div>
       </div>
 
-      <div>
-        <Button
-          variant="secondary"
-          onClick={onAddCategory}
-          disabled={isSaving}
-          startIcon={<IoAddCircleOutline className="text-lg" />}
-          className="border-dashed"
-        >
-          {t("addCategory")}
-        </Button>
-      </div>
-
-      <div className="flex flex-col items-stretch justify-between gap-4 border-t border-line pt-4 sm:flex-row sm:items-end">
-        <div className="flex max-w-md flex-col items-stretch gap-2">
+      <div className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+        <p className="max-w-md text-xs leading-relaxed text-fg-muted">
+          {t("reuploadHint")}
+        </p>
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center">
           <Button
             variant="secondary"
             onClick={onNewUpload}
             disabled={isSaving}
-            className="w-full sm:w-auto"
+            fullWidth
+            className="sm:w-auto"
           >
             {t("newUpload")}
           </Button>
-          <p className="px-0.5 text-xs leading-relaxed text-fg-muted sm:text-[13px]">
-            {t("reuploadHint")}
-          </p>
+          <Button
+            size="lg"
+            disabled={!canProceedToConfirm || isSaving}
+            onClick={onOpenConfirm}
+            title={!canProceedToConfirm ? t("blockingHint") : undefined}
+            fullWidth
+            className="sm:w-auto"
+          >
+            {t("proceedToConfirm")}
+          </Button>
         </div>
-        <Button
-          size="lg"
-          disabled={!canProceedToConfirm || isSaving}
-          onClick={onOpenConfirm}
-          title={!canProceedToConfirm ? t("blockingHint") : undefined}
-        >
-          {t("proceedToConfirm")}
-        </Button>
       </div>
 
       {confirmOpen && (

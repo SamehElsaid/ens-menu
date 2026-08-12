@@ -12,7 +12,7 @@ import AdsCardGrid from "@/components/Dashboard/advertisements/AdsCardGrid";
 import AdsEmptyState from "@/components/Dashboard/advertisements/AdsEmptyState";
 import { canAddMenuAd } from "@/lib/adPlanLimits";
 import LinkTo from "@/components/Global/LinkTo";
-import { Button } from "@/components/ui";
+import { Alert, Badge, Button, PageShell } from "@/components/ui";
 import { DemoDataBanner } from "@/components/Admin/AdminAnalyticsWidgets";
 import { fetchMenuAnalytics } from "@/lib/fetchMenuAnalytics";
 import { Advertisement } from "@/types/Menu";
@@ -218,45 +218,58 @@ export default function AdvertisementsPage() {
   const showEmpty = !loading && ads.length === 0;
 
   return (
-    <>
-      {maxAdsPerMenu >= 0 && (
-        <div
-          className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-100"
+    <PageShell
+      kind="wide"
+      header={
+        <PageTitleWithHelp
+          id="onboarding-advertisements-header"
+          className="dashboard-ads-header"
           dir={textDir}
-        >
-          {t("freePlanLimitBanner", { max: maxAdsPerMenu })}
-          {!canAddAd && (
-            <>
-              {" "}
+          title={t("title")}
+          description={t("description")}
+          meta={
+            maxAdsPerMenu >= 0 ? (
+              <Badge tone={canAddAd ? "neutral" : "warning"} size="md">
+                <span lang="en">
+                  {totalAds}/{maxAdsPerMenu}
+                </span>
+              </Badge>
+            ) : null
+          }
+          actions={
+            <Button
+              id="onboarding-advertisements-actions"
+              type="button"
+              onClick={handleAddClick}
+              disabled={!canAddAd}
+              title={!canAddAd ? t("freePlanLimitReached") : undefined}
+              startIcon={<IoAddCircleOutline aria-hidden />}
+            >
+              {t("addButton")}
+            </Button>
+          }
+        />
+      }
+    >
+      {/* The plan ceiling only needs to interrupt once the ceiling is reached;
+          below it the count in the header already states the position. */}
+      {maxAdsPerMenu >= 0 && !canAddAd && (
+        <div dir={textDir}>
+          <Alert
+            tone="warning"
+            action={
               <LinkTo
                 href={`/dashboard/${menuId}/subscription`}
-                className="font-semibold underline underline-offset-2"
+                className="text-[13px] font-medium underline underline-offset-2"
               >
                 {tMenus("upgradePlan")}
               </LinkTo>
-            </>
-          )}
+            }
+          >
+            {t("freePlanLimitBanner", { max: maxAdsPerMenu })}
+          </Alert>
         </div>
       )}
-      <PageTitleWithHelp
-        id="onboarding-advertisements-header"
-        className="dashboard-ads-header mb-4 md:mb-6"
-        dir={textDir}
-        title={t("title")}
-        description={t("description")}
-        actions={
-          <Button
-            id="onboarding-advertisements-actions"
-            type="button"
-            onClick={handleAddClick}
-            disabled={!canAddAd}
-            title={!canAddAd ? t("freePlanLimitReached") : undefined}
-            startIcon={<IoAddCircleOutline className="size-4.5" />}
-          >
-            {t("addButton")}
-          </Button>
-        }
-      />
 
       {adAnalyticsDemo && (
         <DemoDataBanner message={t("demoDataBanner")} dir={textDir} />
@@ -270,7 +283,7 @@ export default function AdvertisementsPage() {
             <AdsStatsSection items={adSummaryMetrics} dir={textDir} />
           )}
 
-          <div className="dashboard-ads-page min-w-0 mt-4 md:mt-6">
+          <div className="dashboard-ads-page min-w-0">
             <AdsCardGrid
               ads={ads}
               loading={loading}
@@ -306,6 +319,6 @@ export default function AdvertisementsPage() {
           onDeleted={refreshList}
         />
       )}
-    </>
+    </PageShell>
   );
 }

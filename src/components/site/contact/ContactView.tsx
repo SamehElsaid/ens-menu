@@ -1,13 +1,16 @@
-import { getTranslations } from "next-intl/server";
+﻿import { getTranslations } from "next-intl/server";
 import { FiExternalLink, FiMail, FiMapPin, FiPhone } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
 import {
   Badge,
-  Card,
+  Col,
   Container,
-  Eyebrow,
+  Grid,
+  PageHeader,
   Section,
+  SectionHeading,
   SiteAnchorButton,
+  Ticket,
 } from "@/components/site";
 import {
   ENSMENU_MAP_EMBED_URL,
@@ -26,17 +29,22 @@ import type { ContactInfo } from "@/types/types";
  * Contact.
  *
  * One question decides this page: how does a venue owner reach a person right
- * now? So the three live channels come first at full size, the rest of the
- * numbers follow as a plain list, and the map is last — it is the only thing
- * here nobody is in a hurry to find.
+ * now? So the two fastest channels are actions in the page head — before any
+ * scrolling — the three live channels follow as a rail, the rest of the numbers
+ * are a ledger, and the map is last. It is the only thing here nobody is in a
+ * hurry to find.
+ *
+ * The three channels are three cards, and the recommended one is stated with
+ * the brand: a filled medallion, a brand border and one step up the elevation
+ * ladder. Nothing floats a "recommended" ribbon over a corner, because that is
+ * the one treatment that cannot survive a forced-colours pass.
  *
  * A server component. The old page was a client component holding two `useMemo`
  * calls over static data.
  */
 
-function ChannelCard({
-  eyebrow,
-  title,
+function Channel({
+  label,
   value,
   note,
   href,
@@ -45,9 +53,8 @@ function ChannelCard({
   action,
   featured,
 }: {
-  eyebrow: string;
-  title: string;
-  value?: string;
+  label: string;
+  value: string;
   note?: string;
   href: string;
   external?: boolean;
@@ -56,31 +63,41 @@ function ChannelCard({
   featured?: boolean;
 }) {
   return (
-    <Card
-      interactive
-      className={
+    <div
+      className={`s-reveal s-lift s-press relative flex flex-col rounded-site-card border p-7 ${
         featured
-          ? "s-reveal flex flex-col border-site-brand-line p-7 shadow-site"
-          : "s-reveal flex flex-col p-7"
-      }
+          ? "border-site-brand bg-site-bg shadow-site-lg"
+          : "border-site-line bg-site-bg shadow-site-sm"
+      }`}
     >
-      <div className="flex-1">
-        <span className="flex size-11 items-center justify-center rounded-site-control bg-site-brand-tint text-site-brand">
-          <Icon className="size-5" aria-hidden />
+      <div className="flex items-center justify-between gap-4">
+        {/* The recommended channel says so with a lit medallion rather than a
+            floating "best" pill: it is the same signal the rest of the site
+            uses for "this one", and it survives forced colours. */}
+        <span
+          className={`s-press-mark flex size-11 items-center justify-center rounded-site-control border ${
+            featured
+              ? "border-transparent bg-site-brand text-white shadow-site-brand"
+              : "border-site-brand-line bg-site-brand-tint text-site-brand-text"
+          }`}
+        >
+          <Icon className="size-5" />
         </span>
-        <p className="mt-6 text-site-xs font-semibold tracking-[0.08em] text-site-muted uppercase">
-          {eyebrow}
-        </p>
-        <h2 className="mt-2 text-site-h4 font-semibold break-words text-site-ink">
-          {title}
-        </h2>
-        {value ? (
-          <p className="mt-1 text-site-sm text-site-fg" dir="ltr">
-            {value}
-          </p>
-        ) : null}
-        {note ? <p className="mt-3 text-site-sm text-site-fg">{note}</p> : null}
+        <Ticket>{label}</Ticket>
       </div>
+
+      <p
+        className="mt-6 font-site-mono text-site-h4 font-semibold wrap-break-word text-site-ink"
+        dir="ltr"
+      >
+        {value}
+      </p>
+      {note ? (
+        <p className="mt-3 flex-1 text-site-sm text-site-fg">{note}</p>
+      ) : (
+        <div className="flex-1" />
+      )}
+
       <SiteAnchorButton
         href={href}
         {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
@@ -90,32 +107,35 @@ function ChannelCard({
       >
         {action}
       </SiteAnchorButton>
-    </Card>
+    </div>
   );
 }
 
 function PhoneRow({
   info,
+  index,
   label,
   callLabel,
   whatsappLabel,
 }: {
   info: ContactInfo;
+  index: number;
   label: string;
   callLabel: string;
   whatsappLabel: string;
 }) {
   return (
-    <li className="flex flex-wrap items-center justify-between gap-4 border-b border-site-line py-4 last:border-0">
-      <div className="flex min-w-0 items-center gap-3">
-        <info.icon
-          className="size-[18px] shrink-0 text-site-muted"
-          aria-hidden
-        />
+    /* `row-settle`, not `s-lift`: a phone list is scanned rather than read, and
+       lifting the row would move the number the visitor is about to dial. */
+    <li className="s-reveal-soft row-settle flex flex-wrap items-center justify-between gap-4 rounded-site-card border border-site-line bg-site-bg px-5 py-4 shadow-site-sm hover:bg-site-ground">
+      <div className="flex min-w-0 items-baseline gap-4">
+        <span className="s-ticket text-site-brand-text">
+          {String(index + 1).padStart(2, "0")}
+        </span>
         <div className="min-w-0">
-          <p className="text-site-xs text-site-muted">{label}</p>
+          <p className="s-ticket text-site-muted">{label}</p>
           <p
-            className="text-site-body font-semibold text-site-ink"
+            className="mt-1 font-site-mono text-site-body font-semibold text-site-ink"
             dir={info.dir ?? "ltr"}
           >
             {info.value}
@@ -165,37 +185,53 @@ export default async function ContactView() {
 
   return (
     <>
-      {/* ----------------------------------------------------------------- Hero */}
-      <Section
-        size="lg"
-        className="isolate -mt-(--s-header-h) pt-[calc(var(--s-header-h)+4rem)] pb-0"
+      <PageHeader
+        ticket={t("eyebrow")}
+        title={`${t("titleBefore")} ${t("titleHighlight")}`}
+        lead={t("description")}
+        meta={[
+          { label: t("whatsappLabel"), value: ENSMENU_WHATSAPP_DISPLAY },
+          { label: t("labels.email"), value: ENSMENU_SUPPORT_EMAIL },
+          ...(salesPhone
+            ? [{ label: t("phoneTags.sales"), value: salesPhone.value }]
+            : []),
+        ]}
+        actions={
+          <>
+            <SiteAnchorButton
+              href={ENSMENU_WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              size="lg"
+            >
+              <FaWhatsapp className="size-4" aria-hidden />
+              {t("actions.whatsapp")}
+            </SiteAnchorButton>
+            <SiteAnchorButton
+              href={`mailto:${ENSMENU_SUPPORT_EMAIL}`}
+              variant="secondary"
+              size="lg"
+            >
+              <FiMail className="size-4" aria-hidden />
+              {t("actions.email")}
+            </SiteAnchorButton>
+          </>
+        }
       >
-        <div aria-hidden className="s-aurora" />
-        <Container>
-          <div className="max-w-2xl">
-            <Eyebrow>{t("eyebrow")}</Eyebrow>
-            <h1 className="mt-5 text-site-h1">
-              {t("titleBefore")} {t("titleHighlight")}
-            </h1>
-            <p className="mt-6 text-site-lead text-site-fg">
-              {t("description")}
-            </p>
-            <p className="mt-3 text-site-sm text-site-muted">
-              {t("supportNote")}
-            </p>
-          </div>
-        </Container>
-      </Section>
+        <p className="s-ticket s-enter-soft s-enter-d3 s-enter-rule mt-10 border-t border-site-line pt-5 text-site-muted">
+          {t("supportNote")}
+        </p>
+      </PageHeader>
 
-      {/* ------------------------------------------------------------- Channels */}
+      {/* --------------------------------------------------------- 01 Channels */}
       <Section>
         <Container>
-          <div className="s-stagger grid gap-5 md:grid-cols-3">
-            <ChannelCard
+          <Ticket index={1}>{t("channelsTitle")}</Ticket>
+          <div className="s-stagger s-stagger-editorial mt-8 grid gap-4 md:grid-cols-3">
+            <Channel
               featured
               icon={FaWhatsapp}
-              eyebrow={t("whatsappLabel")}
-              title={t("whatsappCta")}
+              label={t("whatsappLabel")}
               value={ENSMENU_WHATSAPP_DISPLAY}
               note={t("whatsappDescription")}
               href={ENSMENU_WHATSAPP_URL}
@@ -203,18 +239,18 @@ export default async function ContactView() {
               action={t("actions.whatsapp")}
             />
             {salesPhone ? (
-              <ChannelCard
+              <Channel
                 icon={FiPhone}
-                eyebrow={t("phoneTags.sales")}
-                title={salesPhone.value}
+                label={t("phoneTags.sales")}
+                value={salesPhone.value}
                 href={salesPhone.href ?? "#"}
                 action={t("actions.call")}
               />
             ) : null}
-            <ChannelCard
+            <Channel
               icon={FiMail}
-              eyebrow={t("labels.email")}
-              title={ENSMENU_SUPPORT_EMAIL}
+              label={t("labels.email")}
+              value={ENSMENU_SUPPORT_EMAIL}
               href={`mailto:${ENSMENU_SUPPORT_EMAIL}`}
               action={t("actions.email")}
             />
@@ -222,17 +258,45 @@ export default async function ContactView() {
         </Container>
       </Section>
 
-      {/* ------------------------------------------------ All numbers + location */}
+      {/* -------------------------------------------------- 02 Numbers + social */}
       <Section tone="tint">
         <Container>
-          <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-14">
-            <div>
-              <h2 className="text-site-h3">{t("detailsTitle")}</h2>
-              <ul className="mt-6">
-                {phones.map((info) => (
+          <Grid className="gap-y-12">
+            <Col
+              span={4}
+              className="self-start lg:sticky lg:top-[calc(var(--s-header-h)+3rem)]"
+            >
+              <SectionHeading
+                index={2}
+                eyebrow={t("detailsTitle")}
+                title={t("numbersTitle")}
+              />
+              {lina ? (
+                <div className="mt-8 rounded-site-card border border-site-line bg-site-bg p-5 shadow-site-sm">
+                  <div className="flex items-center gap-3">
+                    <FaWhatsapp
+                      className="size-5 shrink-0 text-site-brand-text"
+                      aria-hidden
+                    />
+                    <p className="flex flex-wrap items-center gap-2 text-site-sm font-semibold text-site-ink">
+                      {t("linaWhatsapp.name")}
+                      <Badge tone="neutral">{t("linaWhatsapp.badge")}</Badge>
+                    </p>
+                  </div>
+                  <p className="mt-3 text-site-sm text-site-muted">
+                    {t("linaWhatsapp.subtitle")}
+                  </p>
+                </div>
+              ) : null}
+            </Col>
+
+            <Col span={7} start={6}>
+              <ul className="s-stagger s-stagger-tight flex flex-col gap-3">
+                {phones.map((info, index) => (
                   <PhoneRow
                     key={info.value}
                     info={info}
+                    index={index}
                     label={phoneLabel(info)}
                     callLabel={t("actions.call")}
                     whatsappLabel={t("actions.whatsapp")}
@@ -240,73 +304,79 @@ export default async function ContactView() {
                 ))}
               </ul>
 
-              {lina ? (
-                <div className="mt-6 flex items-center gap-3 rounded-site-card border border-site-line bg-site-bg p-4">
-                  <FaWhatsapp
-                    className="size-5 shrink-0 text-site-muted"
-                    aria-hidden
-                  />
-                  <div className="min-w-0">
-                    <p className="flex flex-wrap items-center gap-2 text-site-sm font-semibold text-site-ink">
-                      {t("linaWhatsapp.name")}
-                      <Badge tone="neutral">{t("linaWhatsapp.badge")}</Badge>
-                    </p>
-                    <p className="mt-0.5 text-site-sm text-site-muted">
-                      {t("linaWhatsapp.subtitle")}
-                    </p>
-                  </div>
-                </div>
-              ) : null}
-
-              <h2 className="mt-12 text-site-h3">{t("socialTitle")}</h2>
-              <ul className="mt-5 flex flex-wrap gap-2.5">
+              <h3 className="s-ticket mt-12 text-site-muted">
+                {t("socialTitle")}
+              </h3>
+              {/* The same round plates the footer uses, so the social row is
+                  recognisably one element of the system rather than a different
+                  shape on every page. */}
+              <ul className="s-stagger s-stagger-tight mt-4 flex flex-wrap gap-2">
                 {socials.map((social) => (
-                  <li key={social.name}>
+                  <li key={social.name} className="s-reveal-soft">
                     <a
                       href={social.href}
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={social.name}
-                      className="flex size-11 items-center justify-center rounded-site-control border border-site-line bg-site-bg text-site-fg transition-colors duration-150 hover:border-site-brand-line hover:bg-site-brand-tint hover:text-site-brand"
+                      className="flex size-12 items-center justify-center rounded-full border border-site-line bg-site-bg text-site-fg transition-[background-color,border-color,color,transform] duration-(--dur-tint) ease-(--ease-settle) hover:border-transparent hover:bg-site-brand hover:text-white motion-safe:active:scale-[0.94]"
                     >
                       <social.icon className="size-[18px]" aria-hidden />
                     </a>
                   </li>
                 ))}
               </ul>
-            </div>
+            </Col>
+          </Grid>
+        </Container>
+      </Section>
 
-            <div>
-              <h2 className="text-site-h3">{t("labels.location")}</h2>
-              <p className="mt-3 flex items-start gap-2.5 text-site-body text-site-fg">
+      {/* --------------------------------------------------------- 03 Location */}
+      <Section>
+        <Container>
+          <Grid className="gap-y-10">
+            <Col span={4} className="s-reveal">
+              <SectionHeading index={3} title={t("labels.location")} />
+              <p className="mt-6 flex items-start gap-2.5 text-site-body text-site-fg">
                 <FiMapPin
                   className="mt-1 size-[18px] shrink-0 text-site-muted"
                   aria-hidden
                 />
                 {tFooter("location")}
               </p>
-              <div className="mt-6 overflow-hidden rounded-site-card border border-site-line">
-                <iframe
-                  src={ENSMENU_MAP_EMBED_URL}
-                  title={t("labels.location")}
-                  className="block h-72 w-full border-0"
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  allowFullScreen
-                />
-              </div>
               <SiteAnchorButton
                 href={ENSMENU_MAP_EXTERNAL_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 variant="secondary"
-                className="mt-4"
+                className="mt-7"
               >
                 <FiExternalLink className="size-4" aria-hidden />
                 {t("actions.openInGoogleMaps")}
               </SiteAnchorButton>
-            </div>
-          </div>
+            </Col>
+
+            <Col span={8} start={5}>
+              {/* The card deliberately does not reveal, and this is the most
+                  important negative decision on the page: animating opacity on
+                  an ancestor of a cross-origin iframe makes the browser
+                  composite the whole embedded document every frame of the
+                  animation. The caption is a sibling of the iframe rather than
+                  its ancestor, so it can reveal on its own. */}
+              <div className="overflow-hidden rounded-site-card border border-site-line bg-site-bg shadow-site-sm">
+                <p className="s-reveal-soft s-ticket border-b border-site-line px-5 py-3 text-site-muted">
+                  {t("labels.location")}
+                </p>
+                <iframe
+                  src={ENSMENU_MAP_EMBED_URL}
+                  title={t("labels.location")}
+                  className="block h-80 w-full border-0"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  allowFullScreen
+                />
+              </div>
+            </Col>
+          </Grid>
         </Container>
       </Section>
     </>

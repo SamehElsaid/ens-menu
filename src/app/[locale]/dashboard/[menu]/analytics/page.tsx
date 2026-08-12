@@ -6,11 +6,10 @@ import { useLocale, useTranslations } from "next-intl";
 import { useAppSelector } from "@/store/hooks";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import MenuProAnalytics from "@/components/Dashboard/MenuProAnalytics";
-import LinkTo from "@/components/Global/LinkTo";
+import { Badge, PageShell } from "@/components/ui";
 import { isFreePlanUser } from "@/lib/subscription";
 import { useMenuAnalyticsInsights } from "@/hooks/useMenuAnalyticsInsights";
 import type { MenuAnalyticsPeriod } from "@/types/MenuAnalytics";
-import { IoArrowBack } from "react-icons/io5";
 
 export default function MenuAnalyticsPage() {
   const locale = useLocale();
@@ -41,6 +40,7 @@ export default function MenuAnalyticsPage() {
     });
 
   const displayTotalViews = analytics?.summary.totalViews ?? menu?.views ?? 0;
+  const menuName = (locale === "ar" ? menu?.nameAr : menu?.nameEn)?.trim() ?? "";
 
   const activeItemsRate = useMemo(() => {
     if (!menu || (menu.itemsCount ?? 0) <= 0) return 0;
@@ -48,29 +48,34 @@ export default function MenuAnalyticsPage() {
   }, [menu]);
 
   return (
-    <div className="space-y-6 pb-10 animate-fadeIn" dir={textDir}>
-      <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div>
-          <LinkTo
-            href={`/dashboard/${menuSlugOrId}`}
-            className="inline-flex items-center gap-1.5 text-sm text-fg-muted hover:text-primary mb-3 transition-colors"
-          >
-            <IoArrowBack
-              className={`text-base ${locale === "ar" ? "rotate-180" : ""}`}
-            />
-            {t("backToOverview")}
-          </LinkTo>
-          <PageTitleWithHelp>
-            <h1 className="text-2xl md:text-3xl font-bold text-fg">
-              {t("title")}
-            </h1>
-          </PageTitleWithHelp>
-          <p className="text-fg-muted text-sm mt-1">
-            {isFreePlan ? t("freeSubtitle") : t("subtitle")}
-          </p>
-        </div>
-      </header>
-
+    <PageShell
+      kind="wide"
+      /* Breadcrumbs rather than a back link: this page is three levels deep
+         (account → menu → analytics) and a single arrow cannot say where the
+         reader is, only that they can leave. */
+      header={
+        <PageTitleWithHelp
+          dir={textDir}
+          title={t("title")}
+          description={isFreePlan ? t("freeSubtitle") : t("subtitle")}
+          breadcrumbs={[
+            {
+              label: menuName || t("backToOverview"),
+              href: `/dashboard/${menuSlugOrId}`,
+            },
+            { label: t("title") },
+          ]}
+          breadcrumbsLabel={t("title")}
+          meta={
+            isFreePlan ? (
+              <Badge tone="neutral" dot>
+                {t("upgradeToPro")}
+              </Badge>
+            ) : null
+          }
+        />
+      }
+    >
       <MenuProAnalytics
         variant="full"
         analytics={analytics}
@@ -86,6 +91,6 @@ export default function MenuAnalyticsPage() {
         totalOrders={totalOrders}
         topOrderedDisplay={topOrderedDisplay}
       />
-    </div>
+    </PageShell>
   );
 }

@@ -1,9 +1,19 @@
 @import "tailwindcss";
 @import "../../styles/google-places-rtl.css";
 @import "../../styles/public.css";
-@import "@fontsource-variable/readex-pro";
-/* Display face for the public site only; the product never sets it. */
-@import "@fontsource-variable/alexandria";
+
+/* --------------------------------------------------------------------------
+   Type stack — see DESIGN.md §4.
+
+   Cairo carries both Latin and Arabic, so one face covers both locales.
+   JetBrains Mono carries figures only. Cairo's `@font-face` blocks are
+   `unicode-range`-scoped, so a Latin page only ever fetches the Latin file.
+   -------------------------------------------------------------------------- */
+@import "@fontsource/cairo/400.css";
+@import "@fontsource/cairo/500.css";
+@import "@fontsource/cairo/600.css";
+@import "@fontsource/cairo/700.css";
+@import "@fontsource-variable/jetbrains-mono";
 
 html {
   scroll-behavior: smooth;
@@ -116,110 +126,181 @@ body {
       theme rather than something each component re-declares.
    2. `@theme inline` maps them onto Tailwind utilities (`bg-surface`,
       `text-fg-muted`, `border-line`, `bg-brand`, …).
-   Brand, neutral and radius scales are remapped here on purpose: it keeps the
-   pre-existing `bg-primary` / `bg-purple-600` / `bg-violet-600` / `gray-*`
-   call sites resolving to one coherent system.
+   Tailwind's own `gray-*`, `purple-*` and `violet-*` scales are remapped onto
+   this system as a safety net. No product code writes them any more, but a
+   stray `bg-purple-600` — from a template record, or from a future edit — lands
+   inside the palette instead of introducing a second, colder purple.
+   The exception is `TemplateBuilder/panels/StylePickers.tsx`: its thumbnails are
+   wireframe diagrams, not chrome, and are exempt by DESIGN.md §14.
    ========================================================================== */
 
 :root {
-  --font-ui:
-    "Readex Pro Variable", "Readex Pro", ui-sans-serif, system-ui, sans-serif;
-  /* Kept as an alias: pre-existing rules still reference --font-cairo. */
-  --font-cairo: var(--font-ui);
+  --font-cairo: "Cairo";
+  --font-latin: var(--font-cairo);
+  --font-arabic: var(--font-cairo);
+  --font-ui: var(--font-cairo), ui-sans-serif, system-ui, sans-serif;
+  /* Figures only — see DESIGN.md §4. Mono is no longer the label voice. */
+  --font-figure:
+    "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, SFMono-Regular,
+    Menlo, Consolas, monospace;
+  /* Kept as an alias: pre-existing rules still reference this name. */
+  --font-ticket: var(--font-figure);
 
-  /* --- Neutrals: true graphite. Cooler and flatter than the slate ramp this
-         replaced, so the accent is the only colour on a working screen. --- */
-  --n-50: #f7f7f8;
-  --n-100: #efeff1;
-  --n-200: #e3e3e7;
-  --n-300: #cacad1;
-  --n-400: #9b9ba5;
-  --n-500: #74747f;
-  --n-600: #57575f;
-  --n-700: #414147;
-  --n-800: #2a2a2f;
-  --n-900: #1a1a1d;
-  --n-950: #0c0c0e;
+  /* --- Neutrals.
+         Same hue as the brand (301.53°) at chroma 0.006–0.016. Perceptually
+         grey, but grey that belongs to this brand: beside `#9035E8` they read
+         neutral, and beside a true neutral they read very slightly violet.
+         That trace is what stops the interface splitting into "the purple
+         parts" and "the grey parts". --- */
+  --n-50: #fbf9fe;
+  --n-100: #f5f3f9;
+  --n-200: #e9e6ee;
+  --n-300: #d4d1da;
+  --n-400: #a4a1aa;
+  --n-500: #817e87;
+  --n-600: #66636c;
+  --n-700: #4f4d54;
+  --n-800: #36343b;
+  --n-900: #232127;
+  --n-950: #131017;
 
-  /* --- Brand ramp (indigo). Spent on decisions only: the primary action, the
-         active nav row, the selected state. Never on decoration. --- */
-  --brand-50: #eff0fe;
-  --brand-100: #e1e3fd;
-  --brand-200: #c7cafb;
-  --brand-300: #a3a6f7;
-  --brand-400: #8480f2;
-  --brand-500: #6c63ea;
-  --brand-600: #5a4ce0;
-  --brand-700: #4a3cc4;
-  --brand-800: #3d33a0;
-  --brand-900: #342e7e;
-  --brand-950: #201c4d;
+  /* --- Brand ramp.
+         Derived in OKLCH from `#9035E8` with the hue locked at 301.53° and
+         chroma following a bell that peaks at the anchor. `#9035E8` *is* step
+         500 — not an approximation of it — and it carries white at 5.44:1, so
+         the primary button is the literal brand hex rather than a darkened
+         stand-in. --- */
+  --brand-50: #f7f3ff;
+  --brand-100: #efe6ff;
+  --brand-200: #e0cfff;
+  --brand-300: #cdaeff;
+  --brand-400: #b57cff;
+  --brand-500: #9035e8;
+  --brand-600: #7f22d2;
+  --brand-700: #6905b3;
+  --brand-800: #540091;
+  --brand-900: #410073;
+  --brand-950: #270048;
 
-  --primary: var(--brand-600);
+  /* --- Gradient partners. Derived by swinging hue at constant lightness from
+         the anchor, so a gradient changes temperature without changing how
+         bright the surface is. Budget: one gradient moment per page. --- */
+  --brand-violet: #7046f9;
+  --brand-magenta: #bb0bb5;
+  --grad-brand: linear-gradient(135deg, #9035e8 0%, #7046f9 100%);
+  --grad-vivid: linear-gradient(135deg, #9035e8 0%, #bb0bb5 100%);
+  --grad-deep: linear-gradient(160deg, #410073 0%, #270048 100%);
+
+  --primary: var(--brand-500);
   --secondary: var(--brand-600);
-  --accent-purple: var(--brand-600);
-  --royal-purple: var(--brand-950);
-  --deep-indigo: var(--brand-900);
+  --accent-purple: var(--brand-500);
+  --royal-purple: var(--brand-800);
+  --deep-indigo: var(--brand-700);
   --glow-purple: var(--brand-400);
-  --soft-purple: var(--brand-50);
+  --soft-purple: var(--brand-100);
   --accent: var(--brand-600);
+  --accent-strong: var(--brand-700);
+  --accent-soft: var(--brand-50);
+  --accent-line: var(--brand-200);
   --text-primary: var(--n-900);
-  --background: #ffffff;
-  --foreground: var(--n-900);
+  --background: #f8f7fb;
+  --foreground: #221f27;
   color-scheme: light;
 
-  /* --- Semantic surfaces --- */
-  --app-bg: #f7f7f8;
+  /* --- Semantic surfaces. A card and the page it sits on are never the same
+         colour, and elevation — not a border — is what says which is which. --- */
+  --app-bg: #f8f7fb;
   --surface: #ffffff;
-  --surface-2: #f2f2f4;
-  --surface-3: #e8e8ec;
+  --surface-2: #f3f1f8;
+  --surface-3: #e9e6ef;
   --surface-raised: #ffffff;
-  --overlay: rgb(12 12 14 / 0.4);
+  --overlay: rgb(24 16 38 / 0.55);
 
-  /* --- Semantic lines --- */
-  --line: #e6e6ea;
-  --line-strong: #d4d4da;
+  /* --- Semantic lines. A faint tinted rule that defines an edge without
+         drawing the structure by itself; the shadow ladder does that. --- */
+  --line: #e5e1eb;
+  --line-strong: #d1cdd8;
+  /* The edge of something you can type in or click, which is a different job
+     from separating two blocks of text: for a field or an unfilled control the
+     border *is* the component, so WCAG 1.4.11 asks it to clear 3:1 against the
+     surface behind it. Hairline rules keep `--line`. */
+  --line-control: #89868f;
 
-  /* --- Semantic text --- */
-  --fg: #17171a;
-  --fg-muted: #64646e;
-  --fg-subtle: #92929c;
+  /* --- Semantic text.
+         Three steps, and all three are real text colours: `--fg-subtle` is the
+         quietest one the product is allowed to set, so it still clears 4.5:1 on
+         every surface in the ladder rather than only on white. --- */
+  --fg: #221f27;
+  --fg-muted: #64616a;
+  --fg-subtle: #6d6a72;
   --fg-on-brand: #ffffff;
+  --fg-on-accent: #ffffff;
+  /* Type on a filled status swatch. White here, ink in dark mode, because the
+     status fills inverse their lightness between themes. */
+  --fg-on-status: #ffffff;
 
-  /* --- Brand semantics --- */
-  --brand: var(--brand-600);
-  --brand-hover: var(--brand-700);
-  --brand-active: var(--brand-800);
+  /* --- Brand semantics.
+         Solid brand is the action, soft brand is the highlight, and both are
+         the same hue — so a selected row and a primary button read as the same
+         light source at two intensities rather than as two ideas. --- */
+  --brand: var(--brand-500);
+  --brand-hover: var(--brand-600);
+  --brand-active: var(--brand-700);
   --brand-soft: var(--brand-50);
   --brand-soft-hover: var(--brand-100);
   --brand-soft-fg: var(--brand-700);
   --brand-line: var(--brand-200);
 
-  /* --- Status semantics --- */
-  --success: #0d9268;
-  --success-soft: #e8f6f0;
-  --success-fg: #07684a;
-  --success-line: #b5e2d1;
+  /* --- Status semantics.
+         Four families at one lightness and chroma discipline, hue-separated
+         from the brand and from each other. Info is the closest at 49°, which
+         is why it never appears without its icon. --- */
+  --success: #008652;
+  --success-soft: #e0f8e9;
+  --success-fg: #00663e;
+  --success-line: #ade5c3;
 
-  --warning: #b8720c;
-  --warning-soft: #fdf3e4;
-  --warning-fg: #8f5709;
-  --warning-line: #f2d7a3;
+  --warning: #996300;
+  --warning-soft: #ffeeda;
+  --warning-fg: #764b00;
+  --warning-line: #f5cfa0;
 
-  --danger: #d33b3b;
-  --danger-hover: #b32626;
-  --danger-soft: #fdeded;
-  --danger-fg: #b32626;
-  --danger-line: #f5c6c6;
+  --danger: #c92838;
+  --danger-hover: #a20022;
+  --danger-soft: #ffeceb;
+  --danger-fg: #a20022;
+  --danger-line: #ffc5c2;
 
-  --info: #0b72c4;
-  --info-soft: #eaf3fc;
-  --info-fg: #0a5a9c;
-  --info-line: #b9d9f5;
+  --info: #0070ce;
+  --info-soft: #e8f2ff;
+  --info-fg: #00559f;
+  --info-line: #b9d9ff;
 
-  /* --- Focus --- */
-  --ring: var(--brand-600);
-  --ring-offset: #ffffff;
+  /* --- Focus. The brand, because focus is a place the light lands. --- */
+  --ring: var(--brand-500);
+  --ring-soft: rgb(144 53 232 / 0.15);
+  --ring-offset: var(--surface);
+
+  /* --- Elevation ladder — DESIGN.md §5.
+         Composed in the brand hue rather than in black, so shadows warm the
+         neutrals instead of dirtying them. `--e-brand` is the light source
+         casting colour: spent on the primary button and on the one featured
+         card per page, and on nothing else. --- */
+  --e-2xs: 0 1px 1px 0 rgb(35 20 60 / 0.04);
+  --e-xs: 0 1px 2px 0 rgb(35 20 60 / 0.05), 0 0 0 1px rgb(35 20 60 / 0.03);
+  --e-sm: 0 1px 2px 0 rgb(35 20 60 / 0.06), 0 2px 6px -1px rgb(35 20 60 / 0.06);
+  --e-md:
+    0 2px 4px -1px rgb(35 20 60 / 0.06), 0 8px 20px -6px rgb(35 20 60 / 0.12);
+  --e-lg:
+    0 4px 8px -2px rgb(35 20 60 / 0.07), 0 18px 36px -12px rgb(35 20 60 / 0.18);
+  --e-xl:
+    0 8px 16px -4px rgb(35 20 60 / 0.08), 0 28px 52px -16px rgb(35 20 60 / 0.22);
+  --e-2xl:
+    0 12px 24px -8px rgb(35 20 60 / 0.1), 0 44px 80px -24px rgb(35 20 60 / 0.3);
+  --e-brand:
+    0 1px 2px 0 rgb(70 12 130 / 0.24), 0 6px 16px -4px rgb(144 53 232 / 0.34);
+  --e-brand-lg:
+    0 2px 4px 0 rgb(70 12 130 / 0.2), 0 14px 32px -8px rgb(144 53 232 / 0.42);
 
   /* --- Density. Compact is the product default: this is read every day by
          the person running the venue, not by a first-time visitor. Controls
@@ -227,59 +308,173 @@ body {
   --page-gutter: 1rem;
   --page-gap: 1rem;
   --stack-gap: 0.75rem;
+
+  /* --- Console shell — CONSOLE-REDESIGN.md §2, §4.
+         `--rail-w` is the one value the collapse animates. The rail reads it as
+         its width and the content column reads it as its inline-start padding,
+         so toggling the rail is a single custom-property change rather than two
+         components trying to stay in step with each other.
+         `--console-header-h` is what sticky toolbars and sticky table headers
+         offset themselves by; hard-coding 3rem in each of them is how a header
+         height change turns into a day of chasing overlaps. --- */
+  --rail-w: 16.5rem;
+  --rail-w-collapsed: 3.75rem;
+  --console-header-h: 3rem;
+
+  /* Content measure by page kind. A ten-column ledger and a six-field form do
+     not want the same measure, and one 1400px value for both is why the forms
+     currently read as a wall. */
+  --measure-table: 100%;
+  --measure-wide: 100rem;
+  --measure-detail: 75rem;
+  --measure-form: 55rem;
+
+  /* --- Motion — MOTION-BLUEPRINT.md §3.
+         These are the durations and easings that were already hardcoded across
+         both apps, promoted to tokens so they stop drifting apart. Nothing here
+         is a new value; call sites migrate onto them as they are touched.
+
+         The ceiling is deliberate: nothing a user waits on exceeds
+         `--dur-overlay`, and anything longer than `--dur-reveal` must be
+         scroll-linked, so the user owns the clock. There is no `--dur-slow`. --- */
+  --dur-0: 0ms;
+  --dur-tint: 90ms;
+  --dur-fast: 120ms;
+  --dur-pop: 140ms;
+  --dur-settle: 150ms;
+  --dur-rail: 160ms;
+  --dur-lift: 180ms;
+  --dur-overlay: 220ms;
+  --dur-sheet: 260ms;
+  --dur-reveal: 520ms;
+  --dur-story: 900ms;
+
+  /* Exits get their own curve rather than the entrance reversed. A dismissal
+     should leave immediately and decelerate into nothing; reusing one curve for
+     both is the most common reason a UI feels sticky on close. */
+  --ease-settle: ease-out;
+  --ease-lift: cubic-bezier(0.2, 0, 0, 1);
+  --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-rail: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Mandatory for anything scroll-linked. An eased scrub makes the page feel
+     like it is fighting the finger. */
+  --ease-scrub: linear;
+
+  /* The cap is the load-bearing number: the last child of a staggered group
+     must never start more than 280ms after the first. */
+  --stagger-tight: 35ms;
+  --stagger-standard: 60ms;
+  --stagger-editorial: 90ms;
+  --stagger-cap: 280ms;
 }
 
+/* Cairo covers Arabic and Latin in one face, so the stack does not need to
+   reorder under RTL. The selectors stay so a future split can land here. */
+:where([lang="ar"], [dir="rtl"]) {
+  --font-ui: var(--font-cairo), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   Dark theme — DESIGN.md §13.
+
+   Not an inversion. Grounds are deep neutrals carrying the brand hue, and
+   elevation is expressed by surfaces getting *lighter* — the opposite of the
+   light theme, and the reason a straight inversion fails here.
+   -------------------------------------------------------------------------- */
 .dark {
-  --background: #0c0c0e;
-  --foreground: #ededef;
+  --background: #121016;
+  --foreground: #f4f2f8;
   color-scheme: dark;
 
-  --app-bg: #0c0c0e;
-  --surface: #151518;
-  --surface-2: #1c1c20;
-  --surface-3: #24242a;
-  --surface-raised: #1a1a1e;
-  --overlay: rgb(0 0 0 / 0.66);
+  --app-bg: #121016;
+  --surface: #1c1921;
+  --surface-2: #26232c;
+  --surface-3: #322e39;
+  --surface-raised: #221f28;
+  --overlay: rgb(8 4 14 / 0.72);
 
-  --line: #26262b;
-  --line-strong: #34343b;
+  --line: #34303b;
+  --line-strong: #4a4552;
+  --line-control: #7a7583;
 
-  --fg: #ededef;
-  --fg-muted: #9a9aa4;
-  --fg-subtle: #6d6d77;
+  --fg: #f4f2f8;
+  --fg-muted: #aca9b1;
+  --fg-subtle: #8d8b91;
   --fg-on-brand: #ffffff;
+  /* Ink, not white: `--accent` lightens in dark mode (see below), so anything
+     filled with it has to carry dark type to stay readable. */
+  --fg-on-accent: #1a0f2e;
+  --fg-on-status: #121016;
 
-  --brand: var(--brand-500);
-  --brand-hover: var(--brand-400);
-  --brand-active: var(--brand-300);
-  --brand-soft: rgb(108 99 234 / 0.16);
-  --brand-soft-hover: rgb(108 99 234 / 0.24);
-  --brand-soft-fg: #a3a6f7;
-  --brand-line: rgb(108 99 234 / 0.34);
+  /* The fill lifts one lightness step from the anchor: still unmistakably the
+     brand, but it holds white type at 4.85:1 and separates from the page
+     ground at 3.9:1, neither of which `#9035E8` manages on a dark ground.
+     Hover and press then deepen, exactly as they do in the light theme — the
+     obvious dark-mode move of lightening them instead would push the white
+     label under 4.5:1 at the moment the button is being used. */
+  --brand: #9741f0;
+  --brand-hover: #8a2ce6;
+  --brand-active: #7c1fd0;
+  /* Tints become translucency rather than paint, so a selected row reads
+     correctly on the page and inside a raised menu without two tokens. */
+  --brand-soft: rgb(144 53 232 / 0.16);
+  --brand-soft-hover: rgb(144 53 232 / 0.24);
+  --brand-soft-fg: #bf92ff;
+  --brand-line: rgb(144 53 232 / 0.38);
 
-  --success: #17b98a;
-  --success-soft: rgb(23 185 138 / 0.14);
-  --success-fg: #6fe0be;
-  --success-line: rgb(23 185 138 / 0.3);
+  /* Purple text lightens: saturated mid purple on a dark ground vibrates. */
+  --accent: #bf92ff;
+  --accent-strong: #cdaeff;
+  --accent-soft: rgb(144 53 232 / 0.16);
+  --accent-line: rgb(144 53 232 / 0.38);
 
-  --warning: #e3941a;
-  --warning-soft: rgb(227 148 26 / 0.14);
-  --warning-fg: #f5c471;
-  --warning-line: rgb(227 148 26 / 0.3);
+  --grad-brand: linear-gradient(135deg, #7f22d2 0%, #5b34d6 100%);
+  --grad-vivid: linear-gradient(135deg, #7f22d2 0%, #8f0a8b 100%);
+  --grad-deep: linear-gradient(160deg, #241041 0%, #14071f 100%);
 
-  --danger: #e85a5a;
-  --danger-hover: #f07a7a;
-  --danger-soft: rgb(232 90 90 / 0.14);
-  --danger-fg: #f4a3a3;
-  --danger-line: rgb(232 90 90 / 0.32);
+  --success: #40c987;
+  --success-soft: rgb(64 201 135 / 0.15);
+  --success-fg: #73e0a5;
+  --success-line: rgb(64 201 135 / 0.32);
 
-  --info: #3d9fe0;
-  --info-soft: rgb(61 159 224 / 0.14);
-  --info-fg: #8dc9f0;
-  --info-line: rgb(61 159 224 / 0.3);
+  --warning: #e89911;
+  --warning-soft: rgb(232 153 17 / 0.15);
+  --warning-fg: #fcb658;
+  --warning-line: rgb(232 153 17 / 0.32);
 
-  --ring: var(--brand-400);
-  --ring-offset: #0c0c0e;
+  --danger: #ff807f;
+  --danger-hover: #ff9997;
+  --danger-soft: rgb(255 128 127 / 0.15);
+  --danger-fg: #ffaca9;
+  --danger-line: rgb(255 128 127 / 0.34);
+
+  --info: #6bb0ff;
+  --info-soft: rgb(107 176 255 / 0.15);
+  --info-fg: #9ccaff;
+  --info-line: rgb(107 176 255 / 0.32);
+
+  --ring: #a655f8;
+  --ring-soft: rgb(166 85 248 / 0.24);
+  --ring-offset: #121016;
+
+  /* Deeper and more opaque: on a near-black ground a shadow tuned for white
+     paper is invisible, and the brand tint reads as mud rather than as glow.
+     Depth carries the whole ladder here; only `--e-brand` keeps its colour,
+     because a purple button should still throw light in either theme. */
+  --e-2xs: 0 1px 1px 0 rgb(0 0 0 / 0.3);
+  --e-xs: 0 1px 2px 0 rgb(0 0 0 / 0.36), 0 0 0 1px rgb(255 255 255 / 0.03);
+  --e-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4), 0 2px 6px -1px rgb(0 0 0 / 0.36);
+  --e-md: 0 2px 4px -1px rgb(0 0 0 / 0.4), 0 8px 20px -6px rgb(0 0 0 / 0.5);
+  --e-lg: 0 4px 8px -2px rgb(0 0 0 / 0.44), 0 18px 36px -12px rgb(0 0 0 / 0.6);
+  --e-xl:
+    0 8px 16px -4px rgb(0 0 0 / 0.48), 0 28px 52px -16px rgb(0 0 0 / 0.66);
+  --e-2xl:
+    0 12px 24px -8px rgb(0 0 0 / 0.5), 0 44px 80px -24px rgb(0 0 0 / 0.76);
+  --e-brand:
+    0 1px 2px 0 rgb(0 0 0 / 0.4), 0 6px 18px -4px rgb(144 53 232 / 0.46);
+  --e-brand-lg:
+    0 2px 4px 0 rgb(0 0 0 / 0.4), 0 16px 36px -8px rgb(144 53 232 / 0.55);
 }
 
 @media (min-width: 640px) {
@@ -297,9 +492,14 @@ button {
   --color-primary: var(--primary);
   --color-secondary: var(--primary);
   --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-line: var(--accent-line);
   --color-text-primary: var(--text-primary);
   --font-sans: var(--font-ui);
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  /* `font-mono` is the figure face. It exists to keep digits in a column from
+     jittering — it is no longer the voice of labels, eyebrows or headers. */
+  --font-mono: var(--font-figure);
 
   /* Type scale. `sm` is the product's body size — 13px, not 14px — because a
      dense working screen is read at arm's length on a laptop. */
@@ -324,10 +524,13 @@ button {
   --color-overlay: var(--overlay);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
+  --color-line-control: var(--line-control);
   --color-fg: var(--fg);
   --color-fg-muted: var(--fg-muted);
   --color-fg-subtle: var(--fg-subtle);
   --color-on-brand: var(--fg-on-brand);
+  --color-on-accent: var(--fg-on-accent);
+  --color-on-status: var(--fg-on-status);
 
   /* Semantic brand + status */
   --color-brand: var(--brand);
@@ -355,6 +558,20 @@ button {
   --color-info-fg: var(--info-fg);
   --color-info-line: var(--info-line);
   --color-ring: var(--ring);
+
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+  --color-brand-950: var(--brand-950);
+  --color-brand-violet: var(--brand-violet);
+  --color-brand-magenta: var(--brand-magenta);
 
   /* Purple + violet resolve to the one brand ramp so the pre-existing
      `purple-*`, `violet-*` and `primary` call sites agree. */
@@ -407,28 +624,28 @@ button {
   --color-slate-900: var(--n-900);
   --color-slate-950: var(--n-950);
 
-  /* Radii: a working tool, not a consumer app. Cards land at 8px, controls at
-     6px, and only pills and avatars are round. */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.3125rem;
-  --radius-lg: 0.375rem;
-  --radius-xl: 0.5rem;
-  --radius-2xl: 0.75rem;
-  --radius-3xl: 1rem;
+  /* Radii — DESIGN.md §5. Soft enough to feel considered, tight enough not to
+     feel like a toy. Pills survive for badges, avatars and switch tracks. */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.125rem;
+  --radius-3xl: 1.5rem;
 
-  /* Elevation is spent on things that float. Resting surfaces are declared
-     with a hairline instead, so a scrolling page stays flat. */
-  --shadow-2xs: 0 1px 1px rgb(12 12 14 / 0.04);
-  --shadow-xs: 0 1px 2px rgb(12 12 14 / 0.05);
-  --shadow-sm: 0 1px 2px rgb(12 12 14 / 0.05), 0 1px 3px rgb(12 12 14 / 0.04);
-  --shadow-md:
-    0 2px 4px rgb(12 12 14 / 0.04), 0 4px 10px -2px rgb(12 12 14 / 0.07);
-  --shadow-lg:
-    0 4px 8px -2px rgb(12 12 14 / 0.06), 0 10px 22px -6px rgb(12 12 14 / 0.1);
-  --shadow-xl:
-    0 8px 16px -4px rgb(12 12 14 / 0.07), 0 20px 40px -12px rgb(12 12 14 / 0.14);
-  --shadow-2xl:
-    0 12px 24px -6px rgb(12 12 14 / 0.08), 0 32px 64px -16px rgb(12 12 14 / 0.2);
+  /* Elevation is a real ladder again, and it is what communicates grouping
+     before colour does. Mapped through `--e-*` rather than written out, so the
+     dark theme can deepen every stop — a shadow tuned for a white page is
+     invisible on a near-black one. */
+  --shadow-2xs: var(--e-2xs);
+  --shadow-xs: var(--e-xs);
+  --shadow-sm: var(--e-sm);
+  --shadow-md: var(--e-md);
+  --shadow-lg: var(--e-lg);
+  --shadow-xl: var(--e-xl);
+  --shadow-2xl: var(--e-2xl);
+  --shadow-brand: var(--e-brand);
+  --shadow-brand-lg: var(--e-brand-lg);
 
   /* ======================================================================
      Public site scale.
@@ -441,10 +658,13 @@ button {
      elevation without touching the product's.
      ====================================================================== */
 
-  --font-site-display:
-    "Alexandria Variable", "Alexandria", "Readex Pro Variable", ui-sans-serif,
-    system-ui, sans-serif;
+  --font-site-display: var(--font-ui);
+  --font-site-mono: var(--font-ticket);
 
+  /* `site-ground` is the page; `site-bg` is a panel sitting on it. Both exist
+     because the previous system used one token for both, which made a card and
+     its page the same colour the moment the ground stopped being white. */
+  --color-site-ground: var(--s-ground);
   --color-site-bg: var(--s-bg);
   --color-site-tint: var(--s-bg-tint);
   --color-site-warm-bg: var(--s-bg-warm);
@@ -463,6 +683,11 @@ button {
   --color-site-brand-bright: var(--s-brand-bright);
   --color-site-brand-tint: var(--s-brand-tint);
   --color-site-brand-line: var(--s-brand-line);
+  /* The text-safe end of the ramp: links and small type on the ground. */
+  --color-site-brand-text: var(--s-brand-text);
+  --color-site-action: var(--s-action);
+  --color-site-action-hover: var(--s-action-hover);
+  --color-site-action-fg: var(--s-action-fg);
   --color-site-warm: var(--s-warm);
   --color-site-warm-bright: var(--s-warm-bright);
   --color-site-warm-tint: var(--s-warm-tint);
@@ -494,6 +719,8 @@ button {
   --text-site-sm--line-height: 1.55;
   --text-site-xs: var(--s-tiny);
   --text-site-xs--line-height: 1.5;
+  --text-site-ticket: var(--s-ticket);
+  --text-site-ticket--line-height: 1.4;
 
   --radius-site-sm: var(--s-r-sm);
   --radius-site-control: var(--s-r-control);
@@ -631,8 +858,8 @@ button {
   }
 
   .dark ::selection {
-    background-color: rgb(139 92 246 / 0.35);
-    color: #f5f3ff;
+    background-color: rgb(144 53 232 / 0.42);
+    color: #f7f3ff;
   }
 
   ::placeholder {
@@ -660,6 +887,113 @@ button {
   font-feature-settings: "tnum" 1;
 }
 
+/* ==========================================================================
+   The label — the product's half of DESIGN.md §4.
+
+   Section eyebrows, table column headers and stat captions carry this. Under
+   the previous direction it was uppercase tracked monospace, and that single
+   decision is what made every screen read as a ticket rail. It is now sans,
+   sentence case and quiet, so a label stops competing with the data it labels.
+
+   Still a class rather than a utility string at each call site, because the
+   Arabic exception has to live in exactly one place.
+   ========================================================================== */
+
+/* In the components layer, not unlayered: an unlayered rule outranks every
+   Tailwind utility regardless of source order, so `ui-label text-fg-subtle`
+   silently rendered as `--fg-muted` and the second class did nothing. From here
+   the class is the default and a utility beside it still wins. */
+@layer components {
+  .ui-label {
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    font-weight: 550;
+    line-height: 1.45;
+    letter-spacing: 0.01em;
+    color: var(--fg-muted);
+  }
+
+  [dir="rtl"] .ui-label {
+    letter-spacing: 0;
+    line-height: 1.6;
+  }
+}
+
+/* The eyebrow. One per section, above a heading — the only place a label is
+   allowed to carry the brand. */
+.ui-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  background: var(--brand-soft);
+  color: var(--brand-soft-fg);
+  padding-block: 0.25rem;
+  padding-inline: 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+/* The figure. Any number that is the point of its own row, and every digit in
+   a column. This is the only surviving use of the mono face. */
+.ui-figure {
+  font-family: var(--font-figure);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   The field — DESIGN.md §10.
+
+   The previous direction expressed focus twice: a ring *and* a 2px rule on the
+   control's inline-start edge. Two signals for one state is noise, so there is
+   now one treatment — a brand border plus a soft brand halo, which is the
+   classic premium-SaaS focus and reads instantly as "the keyboard is here".
+
+   Written in CSS rather than as Tailwind utilities because whether a
+   `border-brand` utility beats a `border-line-strong` one depends on their
+   order in the generated stylesheet, not on the order in the class attribute.
+   ========================================================================== */
+
+.ui-field {
+  border: 1px solid var(--line-control);
+  background: var(--surface);
+  transition:
+    border-color 150ms ease-out,
+    box-shadow 150ms ease-out,
+    background-color 150ms ease-out;
+}
+
+.ui-field:hover:not(:disabled):not([aria-invalid]):not([data-disabled]) {
+  border-color: var(--fg-subtle);
+}
+
+.ui-field:focus,
+.ui-field:focus-within {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--ring-soft);
+  outline: none;
+}
+
+.ui-field[aria-invalid] {
+  border-color: var(--danger);
+}
+
+.ui-field[aria-invalid]:focus,
+.ui-field[aria-invalid]:focus-within {
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--danger) 18%, transparent);
+}
+
+.ui-field:disabled,
+.ui-field[data-disabled] {
+  border-color: var(--line);
+  background: var(--surface-2);
+  cursor: not-allowed;
+}
+
 /* Toasts follow the product's palette in both themes. The container is mounted
    with the `light` theme, so pointing its light-theme variables at the semantic
    tokens is what makes a toast legible after the theme is switched. */
@@ -672,8 +1006,8 @@ button {
   --toastify-color-error: var(--danger);
   --toastify-color-info: var(--info);
   --toastify-font-family: var(--font-ui);
-  --toastify-toast-shadow: var(--shadow-lg);
-  --toastify-toast-bd-radius: 0.5rem;
+  --toastify-toast-shadow: var(--e-lg);
+  --toastify-toast-bd-radius: 0.875rem;
 }
 
 .Toastify__toast {
@@ -682,18 +1016,45 @@ button {
 }
 
 /* A hairline of light along the top edge of a solid fill. Without it a filled
-   button is a coloured rectangle; with it the fill reads as a surface. */
+   button is a coloured rectangle; with it the fill reads as a surface catching
+   light — which is the whole premise of the direction. */
 @utility shadow-inset-highlight {
   box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 0.14),
-    0 1px 2px rgb(12 12 14 / 0.08);
+    inset 0 1px 0 0 rgb(255 255 255 / 0.18),
+    var(--e-sm);
+}
+
+/* The lift — DESIGN.md §5. The one signature interaction: an interactive
+   surface raises a step and travels 2px, with no scale and no colour flash.
+   Dense working lists use a tint change instead, because rows that move under
+   the pointer are hard to click. */
+@utility surface-lift {
+  transition:
+    box-shadow 180ms cubic-bezier(0.2, 0, 0, 1),
+    transform 180ms cubic-bezier(0.2, 0, 0, 1),
+    border-color 180ms ease-out;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .surface-lift:hover,
+  .surface-lift:focus-within {
+    box-shadow: var(--e-lg);
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .surface-lift:hover,
+  .surface-lift:focus-within {
+    box-shadow: var(--e-lg);
+  }
 }
 
 /* Rows in a scrolling list settle instantly. */
 @utility row-settle {
   transition:
-    background-color 90ms ease-out,
-    color 90ms ease-out;
+    background-color var(--dur-tint) var(--ease-settle),
+    color var(--dur-tint) var(--ease-settle);
 }
 
 .container {
@@ -719,7 +1080,7 @@ button {
   }
 
   .mobile-card {
-    @apply rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 dark:border-slate-800 dark:bg-slate-950;
+    @apply rounded-xl border border-line bg-surface p-4 shadow-xs sm:p-5;
   }
 }
 
@@ -745,36 +1106,48 @@ button {
   }
 }
 
-@keyframes logo-spin {
-  0% {
-    transform: rotate(0deg) scale(1);
+/* --------------------------------------------------------------------------
+   `.s-scan` — one light sweep across a surface, then stillness.
+
+   Replaces the former `heroQrScan` keyframe, which animated `top` and so ran a
+   layout on every frame. The band is a full-size pseudo-element instead of a
+   thin absolutely-positioned line, which is what lets it travel the whole box
+   on `transform` alone: at `inset: 0` the pseudo is exactly its parent's height,
+   so `translateY(-100%)` parks it just above and `100%` just below.
+
+   Deliberately not a loop. A QR code that pulses forever reads as "scanning,
+   please wait"; one pass reads as "this is the thing you scan". Global rather
+   than `.public-world`-scoped because the console's QR card uses it too.
+   -------------------------------------------------------------------------- */
+@keyframes s-scan-sweep {
+  from {
+    transform: translateY(-100%);
   }
-  25% {
-    transform: rotate(45deg) scale(1.05);
-  }
-  50% {
-    transform: rotate(90deg) scale(1.1);
-  }
-  75% {
-    transform: rotate(45deg) scale(1.05);
-  }
-  100% {
-    transform: rotate(0deg) scale(1);
+  to {
+    transform: translateY(100%);
   }
 }
 
-.animate-logo-spin {
-  animation: logo-spin 5s ease-in-out infinite;
+.s-scan {
+  position: relative;
+  isolation: isolate;
 }
 
-/** Laser line over QR preview (HeroSection phone mock) */
-@keyframes heroQrScan {
-  0%,
-  100% {
-    top: 0;
-  }
-  50% {
-    top: calc(100% - 0.25rem);
+@media (prefers-reduced-motion: no-preference) {
+  .s-scan::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(
+      to bottom,
+      transparent 42%,
+      color-mix(in oklab, var(--brand-500) 34%, transparent) 50%,
+      transparent 58%
+    );
+    animation: s-scan-sweep 700ms var(--ease-scrub) 240ms 1 both;
   }
 }
 
@@ -810,17 +1183,204 @@ body {
   animation: fadeIn 0.3s ease-in-out;
 }
 
-.glass-effect {
-  /* From https://css.glass */
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+/* A safety net rather than a per-call-site `motion-safe:` prefix. These two
+   animation utilities are applied in enough places that one of them will
+   always be missed; neutralising them here means a reduced-motion preference
+   is honoured even by a call site that forgot. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fadeIn,
+  .animate-pulse,
+  .animate-\[fadeInDown_0\.2s_ease-out\] {
+    animation: none;
+  }
 }
+
+/* The name is literal again: a translucent surface with a saturating blur, so
+   whatever sits behind it tints the panel instead of being hidden by it. */
+.glass-effect {
+  background: color-mix(in oklab, var(--surface) 78%, transparent);
+  backdrop-filter: blur(16px) saturate(1.6);
+  -webkit-backdrop-filter: blur(16px) saturate(1.6);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--line);
+  box-shadow: var(--e-sm);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .glass-effect {
+    background: var(--surface);
+  }
+}
+/* --------------------------------------------------------------------------
+   Console motion — MOTION-BLUEPRINT.md §10.12.
+
+   Five utilities, no JavaScript, and nothing here runs on load. The console is
+   a tool people use for whole shifts, so every one of these is triggered by
+   something the operator or the server did, and every one of them is a colour
+   or an opacity — never a position. A card that moves under a finger already
+   on its way to tapping it is a bug wearing an animation's clothes.
+   -------------------------------------------------------------------------- */
+
+/* `.ui-flash` — "this one just changed", said with a border.
+
+   Applied to the order cards a socket update actually altered. The keyframe
+   declares only its start, so the implicit end state is whatever border colour
+   the element already had: one utility works on any card without knowing its
+   palette, and with no fill mode the border is genuinely back under the
+   stylesheet's control when the flash ends.
+
+   Kept under reduced motion. Nothing moves, and it is the answer to a question
+   the operator actually asked — which of these forty cards changed? */
+@keyframes ui-flash-line {
+  from {
+    border-color: var(--brand-line);
+  }
+}
+
+.ui-flash {
+  animation: ui-flash-line 1200ms var(--ease-settle);
+}
+
+/* The same statement for a dense row, where the border belongs to the cells and
+   a tint is the readable signal anyway — `DESIGN.md` §5: a working list changes
+   colour rather than moving, because rows that shift under the pointer are hard
+   to click. Decays into the row's own background, so no fill mode again. */
+@keyframes ui-flash-fill {
+  from {
+    background-color: var(--brand-soft);
+  }
+}
+
+.ui-flash-row {
+  animation: ui-flash-fill 1200ms var(--ease-settle);
+}
+
+/* `.ui-tally` — the commit, made visible.
+
+   The import wizard's receipt writes its counts out in DOM order rather than
+   presenting them all at once, which is the one place in the console where a
+   stagger earns its keep: this list is the answer to "did it work", it is read
+   twice, and it appears exactly once per import.
+
+   The blueprint put this cascade on the review ledger's category borders
+   instead. That turned out to be unbuildable as specified — the ledger is
+   unmounted the moment `saveResult` lands, and the save overlay covers it until
+   then, so the cascade would have had to hold a confirmed result off the screen
+   for a second and a half to be seen at all. Delaying a working screen to play
+   an animation is the exact trade §10.12 forbids, so the beat moved to the
+   receipt, where it is free.
+
+   Capped at the eighth row: past 280ms the last item in a stagger is answering
+   a question nobody is still asking. */
+@keyframes ui-tally-row {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ui-tally > * {
+    animation: ui-tally-row var(--dur-settle) var(--ease-lift) both;
+  }
+
+  .ui-tally > *:nth-child(2) {
+    animation-delay: var(--stagger-tight);
+  }
+  .ui-tally > *:nth-child(3) {
+    animation-delay: calc(var(--stagger-tight) * 2);
+  }
+  .ui-tally > *:nth-child(4) {
+    animation-delay: calc(var(--stagger-tight) * 3);
+  }
+  .ui-tally > *:nth-child(5) {
+    animation-delay: calc(var(--stagger-tight) * 4);
+  }
+  .ui-tally > *:nth-child(6) {
+    animation-delay: calc(var(--stagger-tight) * 5);
+  }
+  .ui-tally > *:nth-child(7) {
+    animation-delay: calc(var(--stagger-tight) * 6);
+  }
+  .ui-tally > *:nth-child(n + 8) {
+    animation-delay: var(--stagger-cap);
+  }
+}
+
+/* `.ui-swap` — two glyphs in one slot, one of them showing.
+
+   The product-surface twin of `.s-swap`. Used by the import stepper, where a
+   completed step's ordinal becomes a checkmark: both are always present and
+   stacked, so the cell cannot change width and the change is a crossfade rather
+   than a substitution. */
+.ui-swap {
+  display: grid;
+  place-items: center;
+}
+
+.ui-swap > * {
+  grid-area: 1 / 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ui-swap > * {
+    transition: opacity var(--dur-settle) var(--ease-settle);
+  }
+}
+
+/* `.ui-step-live` — the stepper's underscore draws rather than appears.
+
+   The marker under the live cell grows from the inline start, which is the
+   direction the flow reads in, so the strip explains the advance instead of
+   just recording it. Mirrored under RTL: a marker that grows away from the
+   start edge reads as a retreat. */
+@keyframes ui-underline-draw {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ui-step-live::after {
+    transform-origin: left center;
+    animation: ui-underline-draw var(--dur-settle) var(--ease-lift) both;
+  }
+
+  :dir(rtl) .ui-step-live::after {
+    transform-origin: right center;
+  }
+}
+
+/* `.ui-enter-page` — the one console entrance.
+
+   Replaces `animate-fadeIn` on the import wizard, the single console route that
+   is a flow rather than a screen. Tokenised, transform-based, and deliberately
+   not applied to the other 29 routes: an entrance on a screen an operator opens
+   forty times a shift is forty delays. */
+@keyframes ui-enter-page {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ui-enter-page {
+    animation: ui-enter-page var(--dur-reveal) var(--ease-lift) both;
+  }
+}
+
+/* Conditional form sections — delivery zones, branch rows, advertisement
+   scheduling. `react-collapse` measures the height in JS but the transition is
+   ours, so it moves onto the sheet token with everything else that opens. */
 .ReactCollapse--collapse {
-  transition: height 300ms;
+  transition: height var(--dur-sheet) var(--ease-lift);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ReactCollapse--collapse {
+    transition: none;
+  }
 }
 
 .dir-ltr {
@@ -841,7 +1401,7 @@ body {
 .phoneNumber {
   direction: ltr;
   unicode-bidi: isolate;
-  @apply flex h-10 items-center rounded-lg border border-line-strong bg-surface ps-3 transition-colors duration-150;
+  @apply flex h-10 items-center rounded-lg border border-line-strong bg-surface ps-3 transition-colors duration-(--dur-settle);
 }
 .phoneNumber input {
   @apply h-full bg-transparent text-sm text-fg placeholder:text-fg-subtle;
@@ -854,8 +1414,7 @@ body {
 }
 .phoneNumber:has(input:focus) {
   @apply border-brand;
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--ring-soft);
 }
 .phoneNumber.error {
   @apply border-danger!;
@@ -895,15 +1454,14 @@ textarea {
 
 /* --- react-select: default `select` prefix --- */
 .select__control {
-  @apply min-h-10! rounded-lg! border! border-line-strong! bg-surface! shadow-none! ps-3 transition-colors duration-150;
+  @apply min-h-10! rounded-lg! border! border-line-strong! bg-surface! shadow-none! ps-3 transition-colors duration-(--dur-settle);
 }
 .select__control:hover {
   @apply border-fg-subtle!;
 }
 .select__control--is-focused {
-  @apply border-brand! shadow-none!;
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
+  @apply border-brand!;
+  box-shadow: 0 0 0 3px var(--ring-soft) !important;
 }
 .select__control.error {
   @apply border-danger!;
@@ -954,15 +1512,14 @@ textarea {
 
 /* --- react-select: `filter-select` prefix (list toolbars) --- */
 .filter-select__control {
-  @apply h-10! min-h-10! rounded-lg! border! border-line-strong! bg-surface! shadow-none! transition-colors duration-150;
+  @apply h-10! min-h-10! rounded-lg! border! border-line-strong! bg-surface! shadow-none! transition-colors duration-(--dur-settle);
 }
 .filter-select__control:hover {
   @apply border-fg-subtle!;
 }
 .filter-select__control--is-focused {
-  @apply border-brand! shadow-none!;
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
+  @apply border-brand!;
+  box-shadow: 0 0 0 3px var(--ring-soft) !important;
 }
 .filter-select__single-value,
 .filter-select__input-container {
@@ -1159,17 +1716,17 @@ textarea {
 }
 
 .glass-effect-search {
-  background: rgba(255, 255, 255, 0);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(11.6px);
-  -webkit-backdrop-filter: blur(11.6px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: color-mix(in oklab, var(--surface-raised) 88%, transparent);
+  backdrop-filter: blur(20px) saturate(1.6);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  border: 1px solid var(--line);
+  box-shadow: var(--e-xl);
 }
 .select__multi-value {
-  @apply !bg-primary/5 !border !border-primary/20 rounded-md duration-200;
+  @apply rounded-sm! border! border-line! bg-surface-2! duration-(--dur-settle);
 }
 .select__multi-value__remove:hover {
-  @apply !bg-red-200;
+  @apply bg-danger-soft! text-danger!;
 }
 
 /* Datepicker: popper stacking and the time-only column, kept on tokens. */
@@ -1197,17 +1754,28 @@ textarea {
   @apply w-full!;
 }
 
+/* A soft brand field behind the auth panel: two low-opacity radial washes that
+   never touch the type. Static — a drifting blob is main-thread paint work for
+   decoration nobody looks at. */
 .blob {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background-image: linear-gradient(180deg, var(--primary), #e4f8f7);
-  opacity: 1;
-  filter: blur(12px);
-  animation: blob-bounce 2s infinite ease;
+  inset: -20%;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      42% 46% at 22% 18%,
+      color-mix(in oklab, var(--brand-500) 26%, transparent) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      38% 44% at 82% 76%,
+      color-mix(in oklab, var(--brand-violet) 22%, transparent) 0%,
+      transparent 70%
+    );
+  filter: blur(48px);
+  opacity: 0.7;
+  animation: none;
 }
 
 @keyframes blob-bounce {
@@ -1299,14 +1867,6 @@ textarea {
   }
 }
 
-.pricing-billing-toggle button {
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease,
-    box-shadow 0.3s ease,
-    transform 0.2s ease;
-}
-
 /* From Uiverse.io by milley69 */
 .loading svg polyline {
   fill: none;
@@ -1362,12 +1922,12 @@ textarea {
 @keyframes live-restaurant-step-num-pulse {
   0%,
   100% {
-    box-shadow: 0 2px 8px -2px rgb(124 58 237 / 0.32);
+    box-shadow: 0 0 0 0 var(--accent-soft);
     transform: scale(1);
   }
   50% {
-    box-shadow: 0 3px 12px -2px rgb(124 58 237 / 0.42);
-    transform: scale(1.06);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+    transform: scale(1.04);
   }
 }
 
@@ -1538,14 +2098,12 @@ body.recaptcha-modal-open {
   gap: 0.375rem;
   padding: 0.3125rem 0.625rem;
   border-radius: 9999px;
-  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
-  color: #fff;
+  background: var(--brand);
+  color: var(--fg-on-brand);
   font-size: 0.6875rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.01em;
-  box-shadow:
-    0 4px 14px rgb(124 58 237 / 0.45),
-    0 0 0 1px rgb(255 255 255 / 0.12) inset;
+  box-shadow: var(--shadow-sm);
   pointer-events: none;
   inset-inline-end: 0.5rem;
   top: 50%;
@@ -1556,8 +2114,8 @@ body.recaptcha-modal-open {
   width: 0.875rem;
   height: 0.875rem;
   flex-shrink: 0;
-  border: 2px solid rgb(255 255 255 / 0.35);
-  border-top-color: #fff;
+  border: 2px solid color-mix(in oklab, var(--fg-on-brand) 35%, transparent);
+  border-top-color: var(--fg-on-brand);
   border-radius: 50%;
   animation: recaptcha-spin 0.65s linear infinite;
 }
@@ -1568,39 +2126,28 @@ body.recaptcha-modal-open {
   gap: 0.5rem;
   margin-top: 0.375rem;
   padding: 0.375rem 0.625rem;
-  border-radius: 0.5rem;
-  background: rgb(124 58 237 / 0.08);
-  border: 1px solid rgb(124 58 237 / 0.22);
-  color: #6d28d9;
+  border-radius: var(--radius-lg);
+  background: var(--brand-soft);
+  border: 1px solid var(--brand-line);
+  color: var(--brand-soft-fg);
   font-size: 0.75rem;
   font-weight: 600;
-}
-
-.dark .field-loading-hint {
-  background: rgb(124 58 237 / 0.15);
-  border-color: rgb(139 92 246 / 0.35);
-  color: #c4b5fd;
 }
 
 .field-loading-hint__spinner {
   width: 1rem;
   height: 1rem;
   flex-shrink: 0;
-  border: 2.5px solid rgb(124 58 237 / 0.25);
-  border-top-color: #7c3aed;
+  border: 2.5px solid var(--brand-line);
+  border-top-color: var(--accent);
   border-radius: 50%;
   animation: recaptcha-spin 0.65s linear infinite;
 }
 
-.dark .field-loading-hint__spinner {
-  border-color: rgb(196 181 253 / 0.25);
-  border-top-color: #c4b5fd;
-}
-
 .phoneNumber--checking,
 .register-field-input--checking {
-  border-color: rgb(124 58 237 / 0.55) !important;
-  box-shadow: 0 0 0 3px rgb(124 58 237 / 0.18) !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px var(--accent-soft) !important;
 }
 
 .recaptcha-modal__loader {
@@ -1635,41 +2182,13 @@ body.recaptcha-modal-open {
 
 .dashboard-item-card {
   content-visibility: auto;
-  contain-intrinsic-size: auto 108px;
+  /* Body row plus the action strip below its rule — keep this in step with
+     `ItemMobileCard`, or the scrollbar mis-estimates a long list. */
+  contain-intrinsic-size: auto 148px;
 }
 
 .dashboard-item-thumb {
   touch-action: manipulation;
-}
-
-.dashboard-mobile-shimmer {
-  animation: dashboard-mobile-shimmer 1.4s ease-in-out infinite;
-  background: linear-gradient(
-    90deg,
-    rgb(241 245 249 / 0.4) 0%,
-    rgb(226 232 240 / 0.9) 50%,
-    rgb(241 245 249 / 0.4) 100%
-  );
-  background-size: 200% 100%;
-}
-
-.dark .dashboard-mobile-shimmer {
-  background: linear-gradient(
-    90deg,
-    rgb(30 41 59 / 0.35) 0%,
-    rgb(51 65 85 / 0.75) 50%,
-    rgb(30 41 59 / 0.35) 100%
-  );
-  background-size: 200% 100%;
-}
-
-@keyframes dashboard-mobile-shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
 }
 
 .dashboard-mobile-upload {
@@ -1694,8 +2213,7 @@ body.recaptcha-modal-open {
 
 @media (prefers-reduced-motion: reduce) {
   .dashboard-mobile-card,
-  .dashboard-mobile-fab,
-  .dashboard-mobile-shimmer {
+  .dashboard-mobile-fab {
     animation: none;
     transition: none;
   }
@@ -1840,6 +2358,90 @@ body.recaptcha-modal-open {
   .dashboard-header__logo {
     max-height: none;
   }
+}
+
+/* ==========================================================================
+   Console shell — CONSOLE-REDESIGN.md §2, §4
+   ========================================================================== */
+
+/**
+ * The rail's collapsed state is a data attribute on the shell root, not a class
+ * on the rail, because the content column has to respond to it too. Both read
+ * `--rail-w`, so there is exactly one number to change and no chance of the
+ * inset drifting out of step with the rail — which is the bug the old
+ * hard-coded `lg:ps-[240px]` was one edit away from at all times.
+ */
+.console-shell[data-rail="collapsed"] {
+  --rail-w: var(--rail-w-collapsed);
+}
+
+.console-rail {
+  width: var(--rail-w);
+}
+
+.console-main {
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .console-main {
+    padding-inline-start: var(--rail-w);
+  }
+}
+
+/* Collapsing is a layout change — there is no transform that can reflow a rail.
+   It is confined to an explicit, once-per-intent toggle at 160ms, and the
+   property is animated on the two elements that must move rather than on a
+   wrapper that would drag every descendant into the transition. */
+@media (prefers-reduced-motion: no-preference) {
+  .console-rail,
+  .console-main {
+    transition:
+      width var(--dur-rail) var(--ease-rail),
+      padding-inline-start var(--dur-rail) var(--ease-rail);
+  }
+}
+
+/* Sticky rows inside the content column. A toolbar sits directly under the
+   header; a table's own header sits under the toolbar when both are present. */
+.console-toolbar-sticky {
+  position: sticky;
+  top: var(--console-header-h);
+  z-index: 20;
+}
+
+.console-table-sticky-head th {
+  position: sticky;
+  top: var(--console-header-h);
+  z-index: 10;
+}
+
+.console-toolbar-sticky ~ * .console-table-sticky-head th,
+.console-has-toolbar .console-table-sticky-head th {
+  top: calc(var(--console-header-h) + var(--console-toolbar-h, 3.25rem));
+}
+
+/* Compact density. Set on the table so `Td`/`Th` need no context and hand-built
+   tables get the same behaviour from the same attribute. */
+table[data-density="compact"] :is(th, td) {
+  padding-block: 0.3125rem;
+}
+
+/**
+ * Skip link. Hidden until focused, then it lands on top of the header rather
+ * than pushing it down — a skip link that reflows the page on focus is worse
+ * than none, because the target moves as it appears.
+ */
+.console-skip-link {
+  position: fixed;
+  top: 0.5rem;
+  inset-inline-start: 0.5rem;
+  z-index: 100;
+  transform: translateY(-200%);
+}
+
+.console-skip-link:focus-visible {
+  transform: translateY(0);
 }
 
 .menus-page-header {

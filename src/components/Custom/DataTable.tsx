@@ -16,10 +16,7 @@ import {
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import Loader from "../Global/Loader";
-import { IoChevronBack, IoChevronForward } from "react-icons/io5";
-
-const IconPaginationPrev = IoChevronBack;
-const IconPaginationNext = IoChevronForward;
+import { Pagination } from "@/components/ui";
 
 // Register AG Grid modules
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -637,61 +634,19 @@ export default function DataTable<T extends object>({
         </div>
 
         {isServerPagination && pagination && totalPages > 0 && (
-          <div
-            className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border border-line border-t-0 bg-slate-50/80 text-fg-muted rounded-b-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.1)]"
-            dir={isRTL ? "rtl" : "ltr"}
-          >
-            <div className="flex items-center gap-2 text-sm">
-              <span className="font-medium">
-                {t("page")} {page} {t("pageOf")} {totalPages}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              {totalPages !== 1 && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => onPageChange?.(1)}
-                    disabled={page <= 1}
-                    className="inline-flex items-center justify-center w-10 h-10 rounded-lg border border-line-strong bg-raised text-fg-muted hover:bg-slate-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
-                    aria-label={t("first")}
-                  >
-                    <IconPaginationPrev className="text-xl rtl:rotate-180" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onPageChange?.(page - 1)}
-                    disabled={page <= 1}
-                    className="inline-flex items-center justify-center w-10 h-10 rounded-lg border border-line-strong bg-raised text-fg-muted hover:bg-slate-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
-                    aria-label={t("prev")}
-                  >
-                    <IconPaginationPrev className="text-xl rtl:rotate-180" />
-                  </button>
-                  <span className="inline-flex items-center justify-center min-w-10 h-10 px-2 rounded-lg bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary font-semibold text-sm border border-primary/20">
-                    {page}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => onPageChange?.(page + 1)}
-                    disabled={page >= totalPages}
-                    className="inline-flex items-center justify-center w-10 h-10 rounded-lg border border-line-strong bg-raised text-fg-muted hover:bg-slate-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
-                    aria-label={t("next")}
-                  >
-                    <IconPaginationNext className="text-xl rtl:rotate-180" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onPageChange?.(totalPages)}
-                    disabled={page >= totalPages}
-                    className="inline-flex items-center justify-center w-10 h-10 rounded-lg border border-line-strong bg-raised text-fg-muted hover:bg-slate-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
-                    aria-label={t("last")}
-                  >
-                    <IconPaginationNext className="text-xl rtl:rotate-180" />
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={(next) => onPageChange?.(next)}
+            summary={`${t("page")} ${page} ${t("pageOf")} ${totalPages}`}
+            labels={{
+              region: t("page"),
+              previous: t("prev"),
+              next: t("next"),
+              page: (n) => `${t("page")} ${n}`,
+            }}
+            className="border border-t-0 border-line bg-surface-2/40 px-3 py-2.5 sm:px-4"
+          />
         )}
       </div>
     </div>

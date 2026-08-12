@@ -59,8 +59,9 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
         type="checkbox"
         role="switch"
         className={cn(
-          "peer cursor-pointer appearance-none rounded-full bg-line-strong transition-colors duration-150",
-          "checked:bg-brand disabled:cursor-not-allowed disabled:opacity-50",
+          "peer cursor-pointer appearance-none rounded-full bg-line-strong transition-[background-color,box-shadow] duration-(--dur-settle)",
+          "checked:bg-brand checked:shadow-[0_1px_4px_0_rgb(144_53_232/0.4)]",
+          "disabled:cursor-not-allowed disabled:opacity-50",
           track[switchSize],
           focusRing,
           className,
@@ -69,7 +70,7 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
       />
       <span
         className={cn(
-          "pointer-events-none absolute start-0.5 rounded-full bg-white shadow-xs transition-transform duration-150",
+          "pointer-events-none absolute start-0.5 rounded-full bg-white shadow-sm transition-transform duration-(--dur-settle)",
           "motion-reduce:transition-none",
           thumb[switchSize],
         )}

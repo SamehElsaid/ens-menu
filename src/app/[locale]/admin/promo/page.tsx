@@ -2,23 +2,24 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "@/i18n/navigation";
-import { IoArrowBack, IoMegaphoneOutline } from "react-icons/io5";
+import { IoMegaphoneOutline } from "react-icons/io5";
 import { FaSave } from "react-icons/fa";
-import CardDashBoard from "@/components/Card/CardDashBoard";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import {
   Badge,
   Button,
+  Card,
   Field,
   LoadingBlock,
   PageHeader,
+  PageShell,
   SectionHeader,
   Skeleton,
   Switch,
   Textarea,
 } from "@/components/ui";
+import { cn } from "@/lib/cn";
 
 interface PromoTextLocalized {
   ar: string;
@@ -50,7 +51,8 @@ function parsePromoText(raw: string): PromoTextLocalized {
 export default function AdminPromoPage() {
   const locale = useLocale();
   const t = useTranslations("adminPromo");
-  const router = useRouter();
+  const tCommon = useTranslations("common");
+  const tAdmin = useTranslations("adminDashboard");
   const isRTL = locale === "ar";
 
   const [loading, setLoading] = useState(true);
@@ -114,75 +116,86 @@ export default function AdminPromoPage() {
     }
   };
 
-  return (
-    <div className="space-y-6 pb-10">
-      <PageHeader
-        title={t("title")}
-        description={t("subtitle")}
-        actions={
-          <Button
-            variant="secondary"
-            startIcon={<IoArrowBack className="rtl:rotate-180" />}
-            onClick={() => router.back()}
-          >
-            {t("back")}
-          </Button>
-        }
-      />
+  const previewText = (isRTL ? textAr : textEn) || (isRTL ? textEn : textAr);
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <CardDashBoard hover>
-          <div className="flex items-center gap-4">
-            <div
-              className={`flex size-14 items-center justify-center rounded-lg ${
-                promoEnabled
-                  ? "bg-success-soft text-success-fg"
-                  : "bg-surface-2 text-fg-subtle"
-              }`}
-            >
-              <IoMegaphoneOutline className="text-2xl" aria-hidden />
-            </div>
-            <div className="flex-1">
-              <p className="mb-1 text-sm font-medium text-fg-muted">
-                {t("statusLabel")}
-              </p>
-              <Badge tone={promoEnabled ? "success" : "neutral"} size="md">
+  return (
+    <PageShell
+      kind="form"
+      header={
+        <>
+          <PageHeader
+            eyebrow={t("eyebrow")}
+            title={t("title")}
+            description={t("subtitle")}
+            breadcrumbs={[
+              { label: tAdmin("title"), href: "/admin" },
+              { label: t("title") },
+            ]}
+            breadcrumbsLabel={tCommon("breadcrumb")}
+          />
+
+          {/* This was two metric cards restating the form's own two fields —
+              "status" and "current text" — as if they were measurements. A
+              banner editor's useful non-form content is the banner, so the
+              cards are replaced by the thing itself. */}
+          <section aria-label={t("previewTitle")} className="flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-2">
+              <p className="ui-label text-fg-muted">{t("previewTitle")}</p>
+              <Badge tone={promoEnabled ? "success" : "neutral"} dot>
                 {promoEnabled ? t("statusActive") : t("statusInactive")}
               </Badge>
             </div>
-          </div>
-        </CardDashBoard>
-
-        <CardDashBoard hover>
-          <div className="flex items-center gap-4">
-            <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-info-soft text-info-fg">
-              <IoMegaphoneOutline className="text-2xl" aria-hidden />
-            </div>
-            <div className="min-w-0 flex-1 space-y-1">
-              <p className="text-sm font-medium text-fg-muted">
-                {t("currentText")}
-              </p>
-              {loading ? (
-                <Skeleton className="h-4 w-3/4" />
-              ) : (
-                <p
-                  className="whitespace-pre-wrap text-sm font-semibold text-fg"
-                  dir={isRTL ? "rtl" : "ltr"}
-                >
-                  {(isRTL ? textAr : textEn) || "—"}
+            {loading ? (
+              <Skeleton className="h-12" rounded="lg" />
+            ) : (
+              <div
+                className={cn(
+                  "flex items-center gap-2.5 rounded-xl border px-3.5 py-3",
+                  promoEnabled
+                    ? "border-brand-line bg-brand-soft"
+                    : "border-line bg-surface-2",
+                )}
+                dir={isRTL ? "rtl" : "ltr"}
+              >
+                <IoMegaphoneOutline
+                  className="size-4.5 shrink-0 text-brand"
+                  aria-hidden
+                />
+                <p className="min-w-0 text-[13px] font-medium text-fg">
+                  {previewText || (
+                    <span className="font-normal text-fg-subtle">
+                      {t("previewEmpty")}
+                    </span>
+                  )}
                 </p>
-              )}
-            </div>
-          </div>
-        </CardDashBoard>
-      </div>
-
-      <CardDashBoard>
+              </div>
+            )}
+            {!loading && previewText && !promoEnabled ? (
+              <p className="text-xs text-fg-subtle">{t("previewHiddenNote")}</p>
+            ) : null}
+          </section>
+        </>
+      }
+      footerSticky
+      footer={
+        <div className="flex justify-end">
+          <Button
+            onClick={handleSave}
+            loading={saving}
+            disabled={loading}
+            startIcon={<FaSave />}
+          >
+            {saving ? t("saving") : t("save")}
+          </Button>
+        </div>
+      }
+    >
+      <Card padded="lg">
         {loading ? (
           <LoadingBlock label={t("formTitle")} />
         ) : (
           <div className="space-y-6">
-            <SectionHeader title={t("formTitle")} />
+            <SectionHeader title={t("formTitle")} ruled />
 
             <Field
               label={
@@ -234,19 +247,9 @@ export default function AdminPromoPage() {
                 hint={t("enableDescription")}
               />
             </div>
-
-            <div className="flex justify-end">
-              <Button
-                onClick={handleSave}
-                loading={saving}
-                startIcon={<FaSave />}
-              >
-                {saving ? t("saving") : t("save")}
-              </Button>
-            </div>
           </div>
         )}
-      </CardDashBoard>
-    </div>
+      </Card>
+    </PageShell>
   );
 }

@@ -679,7 +679,7 @@ export default function AddItemModal({
               </h3>
               <div
                 className={cn(
-                  "relative rounded-lg border border-dashed transition-colors duration-150",
+                  "relative rounded-lg border border-dashed transition-colors duration-(--dur-settle)",
                   isDragOver
                     ? "border-brand bg-brand-soft"
                     : "border-line-strong bg-surface-2",
@@ -885,7 +885,7 @@ export default function AddItemModal({
                   type="button"
                   onClick={() => handlePriceModeChange("single")}
                   className={cn(
-                    "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-150",
+                    "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-(--dur-settle)",
                     focusRing,
                     priceMode === "single"
                       ? "bg-surface text-fg shadow-xs"
@@ -898,7 +898,7 @@ export default function AddItemModal({
                   type="button"
                   onClick={() => handlePriceModeChange("multiple")}
                   className={cn(
-                    "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-150",
+                    "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-(--dur-settle)",
                     focusRing,
                     priceMode === "multiple"
                       ? "bg-surface text-fg shadow-xs"
@@ -1172,7 +1172,7 @@ export default function AddItemModal({
                       aria-pressed={field.value === true}
                       onClick={() => field.onChange(true)}
                       className={cn(
-                        "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-150",
+                        "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-(--dur-settle)",
                         focusRing,
                         field.value === true
                           ? "bg-surface text-fg shadow-xs"
@@ -1195,7 +1195,7 @@ export default function AddItemModal({
                       aria-pressed={field.value === false}
                       onClick={() => field.onChange(false)}
                       className={cn(
-                        "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-150",
+                        "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors duration-(--dur-settle)",
                         focusRing,
                         field.value === false
                           ? "bg-surface text-fg shadow-xs"

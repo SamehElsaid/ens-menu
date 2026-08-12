@@ -1,9 +1,5 @@
 export type OrderStatus =
-  | "pending"
-  | "confirmed"
-  | "cancelled"
-  | "prepared"
-  | "delivered";
+  "pending" | "confirmed" | "cancelled" | "prepared" | "delivered";
 
 export type OrderActionType =
   | "TABLE_CALL_CONFIRMED"
@@ -259,6 +255,43 @@ export function mergeOrderEntries(
   return newOnes.length > 0 ? [...newOnes, ...updated] : updated;
 }
 
+/**
+ * Which visible tickets a silent refetch actually changed.
+ *
+ * The socket says "something happened on this menu", not "order 41 moved to
+ * prepared", so the list is refetched and the two versions compared here. On a
+ * live orders screen the question is *which of these forty cards just changed*,
+ * and a card cannot answer it by moving — a ticket that shifts under a thumb
+ * already travelling towards its Accept button is a misfire. The ids returned
+ * here get a decaying border tint instead.
+ *
+ * A brand-new order is not included: it arrives at the top of the list, which is
+ * a bigger signal than any highlight, and it comes with a sound.
+ */
+export function collectChangedOrderIds(
+  prev: CallEntry[],
+  fresh: CallEntry[],
+): Set<string> {
+  const changed = new Set<string>();
+  if (prev.length === 0) return changed;
+
+  const signature = (entry: CallEntry) =>
+    [
+      resolveListEntryStatus(entry),
+      entry.pendingGuestAddition === true ? "g" : "",
+      entry.pendingBillRequest === true ? "b" : "",
+      entry.items?.length ?? 0,
+      entry.totalPrice ?? "",
+    ].join("|");
+
+  const prevById = new Map(prev.map((e) => [e.id, e]));
+  for (const entry of fresh) {
+    const before = prevById.get(entry.id);
+    if (before && signature(before) !== signature(entry)) changed.add(entry.id);
+  }
+  return changed;
+}
+
 export type OrderActionResult = {
   entryId: string;
   status: OrderStatus;
@@ -434,37 +467,4 @@ export function deliveryGovernorateLabel(
     "";
   if (locale === "ar") return ar || en || null;
   return en || ar || null;
-}
-
-export function orderStatusTone(status: OrderStatus): {
-  pill: string;
-  dot: string;
-} {
-  switch (status) {
-    case "confirmed":
-      return {
-        pill: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
-        dot: "text-green-500",
-      };
-    case "prepared":
-      return {
-        pill: "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300",
-        dot: "text-sky-500",
-      };
-    case "delivered":
-      return {
-        pill: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300",
-        dot: "text-violet-500",
-      };
-    case "cancelled":
-      return {
-        pill: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
-        dot: "text-red-500",
-      };
-    default:
-      return {
-        pill: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
-        dot: "text-amber-500",
-      };
-  }
 }

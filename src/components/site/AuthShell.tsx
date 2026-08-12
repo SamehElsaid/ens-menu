@@ -3,10 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { FiCheck } from "react-icons/fi";
 import SiteLogo from "./SiteLogo";
 import { SiteLanguageToggle, SiteThemeToggle } from "./SiteToggles";
-import {
-  AuthPhone,
-  type AuthPhoneVariant,
-} from "./auth/AuthPhone";
+import { AuthPhone, type AuthPhoneVariant } from "./auth/AuthPhone";
 
 /**
  * The chrome every public auth screen sits in.
@@ -20,6 +17,11 @@ import {
  * `aside` is the reassurance panel on the inline end. It only appears from
  * `lg` up, where there is width to spare; below that the form is the whole
  * screen.
+ *
+ * The form sits in a bounded panel — header band, body, footer band — on a
+ * lightly lit ground, rather than as free-standing text and inputs. A bounded
+ * panel tells the visitor how much form there is, which on a five-field sign-up
+ * is the difference between filling it in and abandoning it.
  */
 export async function AuthShell({
   title,
@@ -40,13 +42,9 @@ export async function AuthShell({
   const t = await getTranslations("site.auth");
 
   return (
-    <div className="public-world min-h-dvh bg-site-bg lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(24rem,32rem)]">
-      <div className="relative flex min-h-dvh flex-col px-(--s-gutter) py-6">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-[radial-gradient(ellipse_60%_100%_at_50%_-20%,var(--s-brand-tint),transparent_70%)]"
-        />
-
+    <div className="public-world min-h-dvh bg-site-ground lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(24rem,32rem)]">
+      <div className="relative isolate flex min-h-dvh flex-col px-(--s-gutter) py-6">
+        <div aria-hidden className="s-aurora" />
         <header className="flex items-center justify-between gap-3">
           <SiteLogo label={t("backToHome")} />
           <div className="flex items-center gap-1">
@@ -66,22 +64,31 @@ export async function AuthShell({
                 : "mx-auto w-full max-w-[25rem]"
             }
           >
-            {title ? (
-              <div className="mb-8">
-                <h1 className="text-site-h2">{title}</h1>
-                {description ? (
-                  <p className="mt-2.5 text-site-body text-site-fg">
-                    {description}
-                  </p>
-                ) : null}
-              </div>
-            ) : null}
+            <div className="overflow-hidden rounded-site-lg border border-site-line bg-site-bg shadow-site-lg">
+              {title ? (
+                <div className="border-b border-site-line px-5 py-5 sm:px-7 sm:py-6">
+                  <h1 className="text-site-h3">{title}</h1>
+                  {description ? (
+                    <p className="mt-2 text-site-sm text-site-fg">
+                      {description}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
 
-            {children}
+              {/* The one thing on this screen that differs between the five
+                  routes, and so the one thing that resolves rather than being
+                  simply present. See `.s-auth-body`. */}
+              <div className="s-auth-body px-5 py-6 sm:px-7">{children}</div>
 
-            {footer ? (
-              <div className="mt-8 text-site-sm text-site-muted">{footer}</div>
-            ) : null}
+              {/* The way out lives in its own band. Inside the body it competed
+                  with the submit button for the same glance. */}
+              {footer ? (
+                <div className="border-t border-site-line bg-site-tint px-5 py-4 text-site-sm text-site-muted sm:px-7">
+                  {footer}
+                </div>
+              ) : null}
+            </div>
           </div>
         </main>
       </div>
@@ -89,8 +96,8 @@ export async function AuthShell({
       {aside === undefined ? null : (
         /* Sticky + viewport height: the form column can scroll on its own;
            this panel stays put instead of riding down the page with it. */
-        <aside className="s-on-ink relative hidden h-dvh overflow-y-auto bg-site-ink-bg lg:sticky lg:top-0 lg:flex lg:flex-col">
-          <div aria-hidden className="s-grid-lines opacity-70" />
+        <aside className="s-on-ink s-grad-deep relative hidden h-dvh overflow-y-auto lg:sticky lg:top-0 lg:flex lg:flex-col">
+          <div aria-hidden className="s-bloom" />
           {aside}
         </aside>
       )}
@@ -115,21 +122,24 @@ export async function AuthAside({
   visual: AuthPhoneVariant;
 }) {
   return (
-    <div className="relative flex flex-1 flex-col items-center justify-center gap-8 px-12 py-10 text-center xl:px-16">
-      <div className="flex max-w-sm flex-col items-center">
+    /* Start-aligned, one point per line, each marked rather than ruled: on a
+       deep panel a stack of hairlines reads as a table of contents, while a
+       small lit medallion per point reads as a claim being confirmed. */
+    <div className="relative flex flex-1 flex-col justify-center gap-10 px-10 py-12 xl:px-14">
+      <div className="max-w-sm">
         <h2 className="text-site-h3">{title}</h2>
-        {/* `inline-flex` + `items-start`: the list is only as wide as its
-            longest line, then the parent centres that block as a unit. */}
-        <ul className="mt-7 inline-flex flex-col items-start gap-3.5 text-start">
+        <ul className="mt-7 flex flex-col gap-4">
           {points.map((point) => (
             <li
               key={point}
               className="flex items-start gap-3 text-site-sm text-site-on-ink-body"
             >
-              <FiCheck
-                className="mt-0.5 size-4 shrink-0 text-site-brand-bright"
+              <span
                 aria-hidden
-              />
+                className="mt-px flex size-5 shrink-0 items-center justify-center rounded-full bg-white/12 text-site-brand-bright"
+              >
+                <FiCheck className="size-3" />
+              </span>
               <span>{point}</span>
             </li>
           ))}

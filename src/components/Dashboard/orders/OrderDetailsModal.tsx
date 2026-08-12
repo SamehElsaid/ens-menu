@@ -6,24 +6,12 @@ import { useReactToPrint } from "react-to-print";
 import { toast } from "react-toastify";
 import ViewTime from "@/shared/ViewTime";
 import {
-  IoCalendarOutline,
-  IoCallOutline,
-  IoChatboxOutline,
-  IoCheckmarkCircle,
-  IoCloseCircle,
-  IoCloseOutline,
-  IoEllipseSharp,
-  IoHomeOutline,
-  IoListOutline,
-  IoLocationOutline,
-  IoPrintOutline,
-  IoPersonOutline,
-  IoReceiptOutline,
-  IoTimeOutline,
-  IoRemoveOutline,
   IoAddOutline,
-  IoTrashOutline,
   IoCreateOutline,
+  IoPersonOutline,
+  IoPrintOutline,
+  IoRemoveOutline,
+  IoTrashOutline,
 } from "react-icons/io5";
 import {
   actionActorName,
@@ -47,17 +35,33 @@ import { patchTableOrderItems } from "@/lib/tableOrderActions";
 import OrderActionButtons from "./OrderActionButtons";
 import OrderAddItemPicker from "./OrderAddItemPicker";
 import OrderChargesLines from "./OrderChargesLines";
+import {
+  OrderStatusBadge,
+  orderStatusIcon,
+  orderStatusTone,
+} from "./orderStatusBadge";
 import { useAppSelector } from "@/store/hooks";
 import { isFreePlanUser } from "@/lib/subscription";
 import { useAuthorization } from "@/hooks/useAuthorization";
 import {
+  Alert,
   Badge,
   Button,
+  CountBadge,
   Modal,
   Skeleton,
   SkeletonRegion,
+  statusTone,
 } from "@/components/ui";
+import { cn } from "@/lib/cn";
 
+/**
+ * The printed ticket.
+ *
+ * Styling stays inline and monochrome: `react-to-print` renders this subtree
+ * outside the app's token cascade, and a receipt is read on thermal or office
+ * paper where the product's hues either cost ink or vanish entirely.
+ */
 function PrintableReceipt({
   orderId,
   title,
@@ -105,10 +109,7 @@ function PrintableReceipt({
   };
   ref: React.Ref<HTMLDivElement>;
 }) {
-  const isRtl = locale === "ar";
-  const dir = isRtl ? "rtl" : "ltr";
-  const alignEnd = isRtl ? "left" : "right";
-  const alignStart = isRtl ? "right" : "left";
+  const dir = locale === "ar" ? "rtl" : "ltr";
 
   const infoRows: { label: string; value: string | null | undefined }[] = [
     { label: labels.customer, value: customerDisplay },
@@ -131,7 +132,7 @@ function PrintableReceipt({
       style={{
         fontFamily: "system-ui, -apple-system, Arial, sans-serif",
         fontSize: 13,
-        color: "#1e293b",
+        color: "#111111",
         padding: 24,
         direction: dir,
       }}
@@ -139,7 +140,7 @@ function PrintableReceipt({
       <h1 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>
         {title}
       </h1>
-      <p style={{ color: "#64748b", fontSize: 12, marginBottom: 20 }}>
+      <p style={{ color: "#555555", fontSize: 12, marginBottom: 20 }}>
         #{orderId ?? ""}
       </p>
 
@@ -151,10 +152,10 @@ function PrintableReceipt({
               <tr key={i}>
                 <td
                   style={{
-                    color: "#6b7280",
+                    color: "#555555",
                     padding: "4px 8px",
                     whiteSpace: "nowrap",
-                    textAlign: alignStart,
+                    textAlign: "start",
                   }}
                 >
                   {r.label}
@@ -163,7 +164,7 @@ function PrintableReceipt({
                   style={{
                     padding: "4px 8px",
                     fontWeight: 600,
-                    textAlign: alignStart,
+                    textAlign: "start",
                   }}
                 >
                   {r.value}
@@ -176,22 +177,22 @@ function PrintableReceipt({
       <hr
         style={{
           border: "none",
-          borderTop: "1px dashed #cbd5e1",
+          borderTop: "1px dashed #999999",
           margin: "16px 0",
         }}
       />
 
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
-          <tr style={{ background: "#f1f5f9" }}>
+          <tr style={{ background: "#f2f2f2" }}>
             <th
               style={{
                 padding: 8,
                 fontSize: 11,
                 textTransform: "uppercase",
-                letterSpacing: "0.05em",
-                color: "#64748b",
-                textAlign: alignStart,
+                letterSpacing: "0.08em",
+                color: "#555555",
+                textAlign: "start",
                 fontWeight: 600,
               }}
             >
@@ -202,8 +203,8 @@ function PrintableReceipt({
                 padding: 8,
                 fontSize: 11,
                 textTransform: "uppercase",
-                letterSpacing: "0.05em",
-                color: "#64748b",
+                letterSpacing: "0.08em",
+                color: "#555555",
                 textAlign: "center",
                 fontWeight: 600,
               }}
@@ -215,9 +216,9 @@ function PrintableReceipt({
                 padding: 8,
                 fontSize: 11,
                 textTransform: "uppercase",
-                letterSpacing: "0.05em",
-                color: "#64748b",
-                textAlign: alignEnd,
+                letterSpacing: "0.08em",
+                color: "#555555",
+                textAlign: "end",
                 fontWeight: 600,
               }}
             >
@@ -227,13 +228,13 @@ function PrintableReceipt({
         </thead>
         <tbody>
           {items.map((item, idx) => (
-            <tr key={idx} style={{ borderBottom: "1px solid #f1f5f9" }}>
-              <td style={{ padding: 8, textAlign: alignStart }}>
+            <tr key={idx} style={{ borderBottom: "1px solid #dddddd" }}>
+              <td style={{ padding: 8, textAlign: "start" }}>
                 <span style={{ fontWeight: 500 }}>{item.name}</span>
                 {(item.size || item.variant) && (
                   <>
                     <br />
-                    <small style={{ color: "#6d28d9" }}>
+                    <small style={{ color: "#555555" }}>
                       {[
                         callItemOptionLabel(item.size, locale, "size"),
                         callItemOptionLabel(item.variant, locale, "variant"),
@@ -247,21 +248,20 @@ function PrintableReceipt({
               <td style={{ padding: 8, textAlign: "center" }}>
                 ×{item.quantity}
               </td>
-              <td style={{ padding: 8, textAlign: alignEnd, fontWeight: 600 }}>
+              <td style={{ padding: 8, textAlign: "end", fontWeight: 600 }}>
                 {item.total != null ? `${item.total} ${currency}` : "—"}
               </td>
             </tr>
           ))}
 
           {variant === "delivery" && deliveryFee != null && deliveryFee > 0 && (
-            <tr style={{ background: "#ecfdf5" }}>
+            <tr>
               <td
                 colSpan={2}
                 style={{
                   padding: 8,
                   fontWeight: 600,
-                  color: "#065f46",
-                  textAlign: alignStart,
+                  textAlign: "start",
                 }}
               >
                 {labels.deliveryFee}
@@ -270,8 +270,7 @@ function PrintableReceipt({
                 style={{
                   padding: 8,
                   fontWeight: 700,
-                  color: "#065f46",
-                  textAlign: alignEnd,
+                  textAlign: "end",
                 }}
               >
                 {deliveryFee} {currency}
@@ -279,15 +278,15 @@ function PrintableReceipt({
             </tr>
           )}
 
-          <tr style={{ background: "#f5f3ff" }}>
+          <tr>
             <td
               colSpan={2}
               style={{
                 padding: "10px 8px",
+                borderTop: "2px solid #111111",
                 fontWeight: 700,
                 fontSize: 15,
-                color: "#4c1d95",
-                textAlign: alignStart,
+                textAlign: "start",
               }}
             >
               {labels.total}
@@ -295,10 +294,10 @@ function PrintableReceipt({
             <td
               style={{
                 padding: "10px 8px",
+                borderTop: "2px solid #111111",
                 fontWeight: 700,
                 fontSize: 15,
-                color: "#4c1d95",
-                textAlign: alignEnd,
+                textAlign: "end",
               }}
             >
               {totalPrice} {currency}
@@ -310,58 +309,124 @@ function PrintableReceipt({
   );
 }
 
-function StatusIcon({ status }: { status: string }) {
-  if (status === "confirmed" || status === "delivered")
-    return <IoCheckmarkCircle className="text-green-500 text-lg shrink-0" />;
-  if (status === "cancelled")
-    return <IoCloseCircle className="text-red-500 text-lg shrink-0" />;
-  if (status === "prepared")
-    return <IoCheckmarkCircle className="text-sky-500 text-lg shrink-0" />;
-  return <IoEllipseSharp className="text-amber-500 text-[10px] shrink-0" />;
-}
-
-function ModalSkeleton() {
+function ModalSkeleton({ label }: { label: string }) {
   return (
-    <SkeletonRegion label="Loading order" className="space-y-4 p-2">
-      <Skeleton className="h-4 w-1/3" rounded="md" />
-      <Skeleton className="h-4 w-1/2" rounded="md" />
-      <Skeleton className="h-4 w-2/5" rounded="md" />
-      <div className="mt-6 space-y-3">
+    <SkeletonRegion label={label} className="space-y-4 px-4 py-4 sm:px-5">
+      <Skeleton className="h-3 w-1/3" />
+      <Skeleton className="h-3 w-1/2" />
+      <Skeleton className="h-3 w-2/5" />
+      <div className="mt-6 space-y-2">
         {[1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-10 w-full" rounded="lg" />
+          <Skeleton key={i} className="h-9 w-full" rounded="lg" />
         ))}
       </div>
     </SkeletonRegion>
   );
 }
 
-function ActionDot({ status }: { status: string }) {
-  const lc = status.toLowerCase();
-  if (lc === "confirmed" || lc === "delivered")
-    return (
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/40 ring-4 ring-white dark:ring-slate-900">
-        <IoCheckmarkCircle className="text-green-500 text-lg" />
-      </span>
-    );
-  if (lc === "cancelled")
-    return (
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/40 ring-4 ring-white dark:ring-slate-900">
-        <IoCloseCircle className="text-red-500 text-lg" />
-      </span>
-    );
-  if (lc === "prepared")
-    return (
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sky-100 dark:bg-sky-900/40 ring-4 ring-white dark:ring-slate-900">
-        <IoCheckmarkCircle className="text-sky-500 text-lg" />
-      </span>
-    );
+/**
+ * A ruled block of the ticket.
+ *
+ * Sections share edges with their neighbours instead of each sitting in its
+ * own panel: the dialog is already the surface, and nesting cards inside it
+ * would be a second elevation doing the first one's job.
+ */
+function TicketSection({
+  title,
+  actions,
+  children,
+  className,
+}: {
+  title: React.ReactNode;
+  actions?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40 ring-4 ring-white dark:ring-slate-900">
-      <IoTimeOutline className="text-amber-500 text-base" />
-    </span>
+    <section
+      className={cn("border-b border-line px-4 py-4 sm:px-5", className)}
+    >
+      <div className="mb-2.5 flex items-center justify-between gap-2">
+        <h3 className="flex items-center gap-1.5 text-[13px] font-semibold tracking-[-0.02em] text-fg">
+          {title}
+        </h3>
+        {actions}
+      </div>
+      {children}
+    </section>
   );
 }
 
+function TicketRow({
+  label,
+  value,
+  href,
+  block = false,
+  emptyLabel,
+}: {
+  label: string;
+  value: React.ReactNode | null | undefined;
+  href?: string;
+  /** Stacks the value under the label — for addresses and free text. */
+  block?: boolean;
+  emptyLabel?: string;
+}) {
+  const hasValue =
+    value != null && (typeof value !== "string" || value.trim() !== "");
+
+  const body = !hasValue ? (
+    <span className="text-fg-subtle">{emptyLabel ?? "—"}</span>
+  ) : href ? (
+    <a
+      href={href}
+      dir="ltr"
+      className="rounded underline-offset-2 transition-colors hover:text-accent hover:underline"
+    >
+      {value}
+    </a>
+  ) : (
+    value
+  );
+
+  return (
+    <div
+      className={cn(
+        "px-3 py-2",
+        block
+          ? "flex flex-col gap-0.5"
+          : "flex items-baseline justify-between gap-3",
+      )}
+    >
+      <dt className="ui-label shrink-0">{label}</dt>
+      <dd
+        className={cn(
+          "min-w-0 text-[13px] text-fg",
+          block ? "leading-relaxed whitespace-pre-wrap" : "truncate text-end",
+        )}
+      >
+        {body}
+      </dd>
+    </div>
+  );
+}
+
+function TicketRows({ children }: { children: React.ReactNode }) {
+  return (
+    <dl className="divide-y divide-line overflow-hidden rounded-lg border border-line">
+      {children}
+    </dl>
+  );
+}
+
+/**
+ * The order's history.
+ *
+ * The markers used to be four saturated discs ringed in white, which made the
+ * timeline the loudest region of a dialog whose point is the order. They are
+ * now hairline-ruled tiles carrying the same glyph as the status badge, so the
+ * column reads as a rail and the tone is a second signal rather than the only
+ * one.
+ */
 function ActionsTimeline({
   actions,
   locale,
@@ -374,7 +439,7 @@ function ActionsTimeline({
   order?: EntryOrder | null;
 }) {
   return (
-    <ol className="relative space-y-0">
+    <ol className="flex flex-col">
       {actions.map((act, idx) => {
         const isLast = idx === actions.length - 1;
         const actorName = actionActorName(act, order);
@@ -386,227 +451,57 @@ function ActionsTimeline({
             ? (act.summaryAr ?? act.summaryEn ?? null)
             : (act.summaryEn ?? act.summaryAr ?? null);
         const lc = act.status?.toLowerCase() ?? "";
-        const pillCls =
-          lc === "confirmed" || lc === "delivered"
-            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-            : lc === "cancelled"
-              ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
-              : lc === "prepared"
-                ? "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300"
-                : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300";
+        const tone = orderStatusTone(lc);
 
         return (
           <li key={idx} className="flex gap-3">
             <div className="flex flex-col items-center">
-              <ActionDot status={act.status ?? ""} />
-              {!isLast && (
-                <div className="mt-1 flex-1 w-px min-h-6 bg-surface-3" />
-              )}
+              <span
+                className={cn(
+                  "flex size-6 shrink-0 items-center justify-center rounded-md border text-[13px]",
+                  statusTone[tone].soft,
+                )}
+                aria-hidden
+              >
+                {orderStatusIcon(lc)}
+              </span>
+              {!isLast ? (
+                <span className="min-h-6 w-px flex-1 bg-line" aria-hidden />
+              ) : null}
             </div>
 
-            <div className={`flex-1 min-w-0 ${isLast ? "pb-0" : "pb-4"}`}>
+            <div className={cn("min-w-0 flex-1", isLast ? "pb-0" : "pb-4")}>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm font-semibold text-fg">
+                <span className="text-[13px] font-semibold text-fg">
                   {orderActionLabel(act.action ?? "", locale)}
                 </span>
-                <span
-                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${pillCls}`}
-                >
-                  {t(`orderStatus.${lc}` as never)}
-                </span>
+                {lc ? (
+                  <Badge tone={tone}>{t(`orderStatus.${lc}` as never)}</Badge>
+                ) : null}
               </div>
 
-              {actorName && (
-                <p className="mt-0.5 text-xs text-fg-muted flex items-center gap-1">
-                  <IoPersonOutline className="shrink-0" />
-                  <span className="text-fg-subtle">{actorLabel}:</span>
+              {actorName ? (
+                <p className="mt-0.5 flex items-center gap-1 text-xs text-fg-muted">
+                  <IoPersonOutline className="shrink-0" aria-hidden />
+                  <span className="ui-label">{actorLabel}</span>
                   {actorName}
                 </p>
-              )}
+              ) : null}
 
-              <time className="mt-1 block text-[11px] text-fg-subtle tabular-nums">
+              <time className="ui-label mt-1 block">
                 {act.time ? <ViewTime data={act.time} /> : "—"}
               </time>
 
-              {summary && (
-                <p className="mt-1.5 text-xs text-fg-muted leading-relaxed bg-surface-2 rounded-lg px-3 py-2">
+              {summary ? (
+                <p className="mt-1.5 rounded-lg bg-surface-2 px-2.5 py-1.5 text-xs leading-relaxed text-fg-muted">
                   {summary}
                 </p>
-              )}
+              ) : null}
             </div>
           </li>
         );
       })}
     </ol>
-  );
-}
-
-function DetailRow({
-  icon,
-  label,
-  value,
-  href,
-  multiline = false,
-  emptyLabel,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: React.ReactNode | null | undefined;
-  href?: string;
-  multiline?: boolean;
-  emptyLabel?: string;
-}) {
-  const hasValue =
-    value != null && (typeof value !== "string" || value.trim() !== "");
-
-  return (
-    <div
-      className={`flex gap-3 rounded-lg border border-line bg-white px-3.5 py-3 dark:border-line/80  ${
-        multiline ? "items-start" : "items-center"
-      }`}
-    >
-      <span
-        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-lg  ${
-          multiline ? "mt-0.5" : ""
-        }`}
-      >
-        {icon}
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-fg-subtle">
-          {label}
-        </p>
-        {hasValue ? (
-          href ? (
-            <a
-              href={href}
-              className="mt-0.5 block text-sm font-semibold text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-300"
-              dir="ltr"
-            >
-              {value}
-            </a>
-          ) : (
-            <p
-              className={`mt-0.5 text-sm font-semibold text-fg ${
-                multiline ? "whitespace-pre-wrap leading-relaxed" : "truncate"
-              }`}
-            >
-              {value}
-            </p>
-          )
-        ) : (
-          <p className="mt-0.5 text-sm text-fg-subtle">{emptyLabel ?? "—"}</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function OrderCustomerSection({
-  variant,
-  t,
-  customerDisplay,
-  phoneDisplay,
-  zoneLabel,
-  addressDisplay,
-  notesDisplay,
-  tableNumber,
-  deliveryFee,
-  currency,
-  when,
-}: {
-  variant: "table" | "delivery";
-  t: ReturnType<typeof useTranslations<"tableOrders" | "deliveryOrders">>;
-  customerDisplay: string | null;
-  phoneDisplay: string | null;
-  zoneLabel: string | null;
-  addressDisplay: string | null;
-  notesDisplay: string | null;
-  tableNumber?: string | null;
-  deliveryFee?: number | null;
-  currency: string;
-  when: React.ReactNode;
-}) {
-  const phoneHref = phoneDisplay
-    ? `tel:${phoneDisplay.replace(/[^\d+]/g, "")}`
-    : undefined;
-  const sectionTitle =
-    variant === "delivery" ? t("deliveryDetailsTitle") : t("orderDetailsTitle");
-
-  return (
-    <section className="px-5 py-4 border-b border-line space-y-3">
-      <h4 className="text-sm font-bold text-fg">{sectionTitle}</h4>
-
-      <div className="grid gap-2.5 sm:grid-cols-2">
-        <DetailRow
-          icon={<IoPersonOutline className="text-brand" />}
-          label={t("detailsCustomer")}
-          value={customerDisplay}
-          emptyLabel={t("notProvided")}
-        />
-        <DetailRow
-          icon={<IoCallOutline className="text-emerald-500" />}
-          label={t("detailsPhone")}
-          value={phoneDisplay}
-          href={phoneHref}
-          emptyLabel={t("notProvided")}
-        />
-        {variant === "delivery" ? (
-          <DetailRow
-            icon={<IoLocationOutline className="text-emerald-500" />}
-            label={t("detailsZone")}
-            value={zoneLabel}
-            emptyLabel={t("notProvided")}
-          />
-        ) : (
-          tableNumber &&
-          String(tableNumber).trim() !== "" && (
-            <DetailRow
-              icon={<IoReceiptOutline className="text-brand" />}
-              label={t("detailsTable")}
-              value={tableNumber}
-            />
-          )
-        )}
-        <DetailRow
-          icon={<IoCalendarOutline className="text-brand" />}
-          label={t("detailsWhen")}
-          value={when}
-        />
-      </div>
-
-      {variant === "delivery" && (
-        <DetailRow
-          icon={<IoHomeOutline className="text-sky-500" />}
-          label={t("detailsAddress")}
-          value={addressDisplay}
-          multiline
-          emptyLabel={t("notProvided")}
-        />
-      )}
-
-      <DetailRow
-        icon={<IoChatboxOutline className="text-sky-500" />}
-        label={t("detailsNotes")}
-        value={notesDisplay}
-        multiline
-        emptyLabel={t("noNotes")}
-      />
-
-      {variant === "delivery" && deliveryFee != null && deliveryFee > 0 && (
-        <div className="flex items-center justify-between rounded-lg border border-emerald-200/70 bg-emerald-50/80 px-3.5 py-3 dark:border-emerald-800/40 dark:bg-emerald-950/20">
-          <span className="text-sm font-medium text-emerald-800 dark:text-emerald-200">
-            {t("detailsDeliveryFee")}
-          </span>
-          <span className="text-base font-bold text-emerald-900 dark:text-emerald-100 tabular-nums">
-            {deliveryFee}
-            {currency && (
-              <span className="ms-1 text-xs font-semibold">{currency}</span>
-            )}
-          </span>
-        </div>
-      )}
-    </section>
   );
 }
 
@@ -802,19 +697,12 @@ export default function OrderDetailsModal({
     order?.customerAddress?.trim() || entry?.customerAddress?.trim() || null;
   const notesDisplay =
     order?.orderNotes?.trim() || entry?.orderNotes?.trim() || null;
-  const whenDisplay = <ViewTime data={lastAction?.time ?? actions[0]?.time} />;
-
-  const statusToneMap: Record<
-    string,
-    "success" | "info" | "brand" | "danger" | "warning"
-  > = {
-    confirmed: "success",
-    prepared: "info",
-    delivered: "brand",
-    cancelled: "danger",
-    pending: "warning",
-  };
-  const statusTone = statusToneMap[status] ?? "warning";
+  const tableNumber = order?.tableNumber;
+  const phoneHref = phoneDisplay
+    ? `tel:${phoneDisplay.replace(/[^\d+]/g, "")}`
+    : undefined;
+  const billRequested =
+    entry?.pendingBillRequest === true || order?.pendingBillRequest === true;
 
   const printRef = useRef<HTMLDivElement>(null);
   const handlePrint = useReactToPrint({
@@ -822,6 +710,10 @@ export default function OrderDetailsModal({
     documentTitle: () =>
       [`#${entry?.orderId ?? ""}`, customerDisplay].filter(Boolean).join(" - "),
   });
+
+  const itemColumns = editingItems
+    ? "grid-cols-[1fr_auto_auto_auto]"
+    : "grid-cols-[1fr_auto_auto]";
 
   return (
     <>
@@ -832,18 +724,23 @@ export default function OrderDetailsModal({
         description={
           entry ? (
             <span className="flex flex-wrap items-center gap-2">
-              <span>
-                {t("colOrderId")}{" "}
-                <span className="font-semibold text-fg">#{entry.orderId}</span>
+              <span className="ui-label">{t("colOrderId")}</span>
+              <span className="ui-figure text-[15px] text-fg" lang="en">
+                #{entry.orderId}
               </span>
-              <Badge tone={statusTone} icon={<StatusIcon status={status} />}>
-                {t(`orderStatus.${status}` as never)}
-              </Badge>
+              <span role="status" aria-live="polite">
+                <OrderStatusBadge
+                  status={status}
+                  label={t(`orderStatus.${status}` as never)}
+                />
+              </span>
             </span>
           ) : undefined
         }
-        size="md"
+        size="lg"
+        bare
         dismissible={!savingItems}
+        closeLabel={t("close")}
         footer={
           <>
             {entry && menuId && onActionComplete && !loading && (
@@ -882,58 +779,87 @@ export default function OrderDetailsModal({
           </>
         }
       >
-        {summary && (
-          <p className="mb-3 text-xs leading-relaxed text-fg-muted">
-            {summary}
-          </p>
-        )}
-        {(entry?.pendingBillRequest === true ||
-          order?.pendingBillRequest === true) && (
-          <Badge tone="danger" className="mb-3">
-            {t("billRequestBadge")}
-          </Badge>
-        )}
+        {summary || billRequested ? (
+          <div className="flex flex-col gap-2 border-b border-line px-4 py-3 sm:px-5">
+            {billRequested ? (
+              <Alert tone="danger">{t("billRequestBadge")}</Alert>
+            ) : null}
+            {summary ? (
+              <p className="text-xs leading-relaxed text-fg-muted">{summary}</p>
+            ) : null}
+          </div>
+        ) : null}
 
         {loading ? (
-          <ModalSkeleton />
+          <ModalSkeleton label={t("loading")} />
         ) : entry ? (
           <>
-            <OrderCustomerSection
-              variant={variant}
-              t={t}
-              customerDisplay={customerDisplay}
-              phoneDisplay={phoneDisplay}
-              zoneLabel={zoneLabel}
-              addressDisplay={addressDisplay}
-              notesDisplay={notesDisplay}
-              tableNumber={order?.tableNumber}
-              deliveryFee={deliveryFee}
-              currency={currency}
-              when={whenDisplay}
-            />
-
-            {waiterDisplay && (
-              <div className="px-5 py-3 border-b border-line">
-                <DetailRow
-                  icon={<IoPersonOutline className="text-brand" />}
-                  label={t("colWaiter")}
-                  value={waiterDisplay}
+            <TicketSection
+              title={
+                variant === "delivery"
+                  ? t("deliveryDetailsTitle")
+                  : t("orderDetailsTitle")
+              }
+            >
+              <TicketRows>
+                <TicketRow
+                  label={t("detailsCustomer")}
+                  value={customerDisplay}
+                  emptyLabel={t("notProvided")}
                 />
-              </div>
-            )}
+                <TicketRow
+                  label={t("detailsPhone")}
+                  value={phoneDisplay}
+                  href={phoneHref}
+                  emptyLabel={t("notProvided")}
+                />
+                {variant === "delivery" ? (
+                  <TicketRow
+                    label={t("detailsZone")}
+                    value={zoneLabel}
+                    emptyLabel={t("notProvided")}
+                  />
+                ) : tableNumber && String(tableNumber).trim() !== "" ? (
+                  <TicketRow label={t("detailsTable")} value={tableNumber} />
+                ) : null}
+                <TicketRow
+                  label={t("detailsWhen")}
+                  value={
+                    <ViewTime data={lastAction?.time ?? actions[0]?.time} />
+                  }
+                />
+                {waiterDisplay ? (
+                  <TicketRow label={t("colWaiter")} value={waiterDisplay} />
+                ) : null}
+                {variant === "delivery" ? (
+                  <TicketRow
+                    label={t("detailsAddress")}
+                    value={addressDisplay}
+                    block
+                    emptyLabel={t("notProvided")}
+                  />
+                ) : null}
+                <TicketRow
+                  label={t("detailsNotes")}
+                  value={notesDisplay}
+                  block
+                  emptyLabel={t("noNotes")}
+                />
+              </TicketRows>
+            </TicketSection>
 
-            <div className="px-5 py-4">
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <h4 className="text-sm font-semibold text-fg flex items-center gap-2">
-                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-brand-soft text-brand-soft-fg text-[10px] font-bold">
-                    {displayItems.length}
-                  </span>
+            <TicketSection
+              title={
+                <>
                   {t("itemsTitle")}
-                </h4>
-                {canEditItems && menuId && (
+                  <CountBadge count={displayItems.length} />
+                </>
+              }
+              actions={
+                canEditItems && menuId ? (
                   <Button
                     type="button"
-                    variant="subtle"
+                    variant="secondary"
                     size="sm"
                     onClick={() => {
                       if (editingItems) {
@@ -947,9 +873,9 @@ export default function OrderDetailsModal({
                   >
                     {editingItems ? t("editItemsCancel") : t("editItems")}
                   </Button>
-                )}
-              </div>
-
+                ) : undefined
+              }
+            >
               {editingItems && menuId && (
                 <OrderAddItemPicker
                   menuId={menuId}
@@ -971,125 +897,150 @@ export default function OrderDetailsModal({
               )}
 
               {displayItems.length === 0 ? (
-                <p className="text-sm text-fg-muted py-4 text-center">
+                <p className="rounded-lg border border-dashed border-line-strong bg-surface-2/40 px-3 py-6 text-center text-[13px] text-fg-muted">
                   {t("itemsEmpty")}
                 </p>
               ) : (
                 <>
-                  <div
-                    className={`grid gap-x-4 px-3 py-2 rounded-t-xl bg-surface-2 text-[11px] font-semibold uppercase tracking-wide text-fg-muted ${editingItems ? "grid-cols-[1fr_auto_auto_auto]" : "grid-cols-[1fr_auto_auto]"}`}
-                  >
-                    <span>{t("colItemName")}</span>
-                    <span className="text-center">{t("colQty")}</span>
-                    <span className="text-end">{t("colTotal")}</span>
-                    {editingItems && <span />}
-                  </div>
+                  {/* One ruled ledger: header, lines and money share a single
+                      frame so the total reads as the foot of the list rather
+                      than as a separate panel. */}
+                  <div className="overflow-hidden rounded-lg border border-line">
+                    <div
+                      className={cn(
+                        "grid gap-x-3 border-b border-line bg-surface-2 px-3 py-1.5",
+                        itemColumns,
+                      )}
+                    >
+                      <span className="ui-label">{t("colItemName")}</span>
+                      <span className="ui-label text-center">
+                        {t("colQty")}
+                      </span>
+                      <span className="ui-label text-end">{t("colTotal")}</span>
+                      {editingItems ? <span /> : null}
+                    </div>
 
-                  <div className="divide-y divide-line border-x border-b border-line rounded-b-xl overflow-hidden">
-                    {displayItems.map((item, idx) => (
-                      <div
-                        key={`${item.menuItemId}-${idx}`}
-                        className={`grid gap-x-4 px-3 py-3 text-sm items-center odd:bg-white even:bg-slate-50/60 dark:odd:bg-slate-900 dark:even:bg-slate-800/40 ${editingItems ? "grid-cols-[1fr_auto_auto_auto]" : "grid-cols-[1fr_auto_auto]"}`}
-                      >
-                        <div className="min-w-0">
-                          <p className="font-medium text-fg truncate">
-                            {item.name}
-                          </p>
-                          {(item.size || item.variant) && (
-                            <p className="text-[11px] text-fg-muted mt-0.5 truncate">
-                              {[
-                                callItemOptionLabel(item.size, locale, "size"),
-                                callItemOptionLabel(
-                                  item.variant,
-                                  locale,
-                                  "variant",
-                                ),
-                              ]
-                                .filter(Boolean)
-                                .join(" · ")}
-                            </p>
+                    <div className="divide-y divide-line">
+                      {displayItems.map((item, idx) => (
+                        <div
+                          key={`${item.menuItemId}-${idx}`}
+                          className={cn(
+                            "grid items-center gap-x-3 px-3 py-2",
+                            itemColumns,
                           )}
-                          {!editingItems && item.price != null && (
-                            <p className="text-[11px] text-fg-subtle mt-0.5">
-                              {item.price}
-                              {currency && (
-                                <span className="ms-0.5">{currency}</span>
-                              )}{" "}
-                              × {item.quantity}
+                        >
+                          <div className="min-w-0">
+                            <p className="truncate text-[13px] font-medium text-fg">
+                              {item.name}
                             </p>
+                            {(item.size || item.variant) && (
+                              <p className="mt-0.5 truncate text-xs text-fg-muted">
+                                {[
+                                  callItemOptionLabel(
+                                    item.size,
+                                    locale,
+                                    "size",
+                                  ),
+                                  callItemOptionLabel(
+                                    item.variant,
+                                    locale,
+                                    "variant",
+                                  ),
+                                ]
+                                  .filter(Boolean)
+                                  .join(" · ")}
+                              </p>
+                            )}
+                            {!editingItems && item.price != null && (
+                              <p className="ui-label mt-0.5" lang="en">
+                                {item.price}
+                                {currency ? (
+                                  <span className="ms-0.5">{currency}</span>
+                                ) : null}{" "}
+                                × {item.quantity}
+                              </p>
+                            )}
+                          </div>
+                          {editingItems ? (
+                            <div className="flex items-center justify-center gap-1">
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                size="xs"
+                                iconOnly
+                                onClick={() => adjustDraftQty(idx, -1)}
+                                aria-label={t("qtyDecrease")}
+                              >
+                                <IoRemoveOutline />
+                              </Button>
+                              <span
+                                className="ui-figure min-w-6 text-center text-[13px] text-fg"
+                                lang="en"
+                              >
+                                {item.quantity}
+                              </span>
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                size="xs"
+                                iconOnly
+                                onClick={() => adjustDraftQty(idx, 1)}
+                                aria-label={t("qtyIncrease")}
+                              >
+                                <IoAddOutline />
+                              </Button>
+                            </div>
+                          ) : (
+                            <span
+                              className="ui-figure min-w-8 text-center text-[13px] text-fg-muted"
+                              lang="en"
+                            >
+                              ×{item.quantity}
+                            </span>
+                          )}
+                          <span
+                            className="ui-figure text-end text-[13px] text-fg"
+                            lang="en"
+                          >
+                            {item.total}
+                            {currency ? (
+                              <span className="ms-1 text-[10px] font-medium text-fg-muted">
+                                {currency}
+                              </span>
+                            ) : null}
+                          </span>
+                          {editingItems && (
+                            <Button
+                              type="button"
+                              variant="dangerGhost"
+                              size="sm"
+                              iconOnly
+                              onClick={() => removeDraftItem(idx)}
+                              aria-label={t("removeItem")}
+                            >
+                              <IoTrashOutline />
+                            </Button>
                           )}
                         </div>
-                        {editingItems ? (
-                          <div className="flex items-center justify-center gap-1">
-                            <Button
-                              type="button"
-                              variant="secondary"
-                              size="xs"
-                              iconOnly
-                              onClick={() => adjustDraftQty(idx, -1)}
-                              aria-label="-"
-                            >
-                              <IoRemoveOutline />
-                            </Button>
-                            <span className="min-w-6 text-center text-xs font-semibold">
-                              {item.quantity}
-                            </span>
-                            <Button
-                              type="button"
-                              variant="secondary"
-                              size="xs"
-                              iconOnly
-                              onClick={() => adjustDraftQty(idx, 1)}
-                              aria-label="+"
-                            >
-                              <IoAddOutline />
-                            </Button>
-                          </div>
-                        ) : (
-                          <span className="text-center min-w-8 px-2 py-0.5 rounded-md bg-surface-3 text-xs font-semibold text-fg-muted">
-                            ×{item.quantity}
-                          </span>
-                        )}
-                        <span className="text-end font-semibold text-fg tabular-nums">
-                          {item.total}
-                          {currency && (
-                            <span className="ms-1 text-xs font-normal text-fg-muted">
-                              {currency}
-                            </span>
-                          )}
-                        </span>
-                        {editingItems && (
-                          <Button
-                            type="button"
-                            variant="dangerGhost"
-                            size="sm"
-                            iconOnly
-                            onClick={() => removeDraftItem(idx)}
-                            aria-label={t("removeItem")}
-                          >
-                            <IoTrashOutline />
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
 
-                  <div className="mt-3 px-4 py-3 rounded-lg border border-line bg-surface-2">
-                    <OrderChargesLines
-                      charges={charges}
-                      currency={currency}
-                      labels={{
-                        subtotal: t("detailsSubtotal"),
-                        tax: t("detailsTax"),
-                        service: t("detailsService"),
-                        deliveryFee:
-                          variant === "delivery"
-                            ? t("detailsDeliveryFee" as never)
-                            : undefined,
-                        total: t("detailsTotal"),
-                      }}
-                      accent="brand"
-                    />
+                    <div className="border-t border-line bg-surface-2 px-3 py-2.5">
+                      <OrderChargesLines
+                        charges={charges}
+                        currency={currency}
+                        labels={{
+                          subtotal: t("detailsSubtotal"),
+                          tax: t("detailsTax"),
+                          service: t("detailsService"),
+                          deliveryFee:
+                            variant === "delivery"
+                              ? t("detailsDeliveryFee" as never)
+                              : undefined,
+                          total: t("detailsTotal"),
+                        }}
+                      />
+                    </div>
                   </div>
 
                   {editingItems && (
@@ -1106,22 +1057,18 @@ export default function OrderDetailsModal({
                   )}
                 </>
               )}
-            </div>
+            </TicketSection>
 
-            {entry.actions && entry.actions.length > 0 && (
-              <div className="px-5 pb-5 border-t border-line pt-4">
-                <h4 className="mb-3 text-sm font-semibold text-fg flex items-center gap-2">
-                  <IoListOutline className="text-brand text-base" />
-                  {t("actionsTitle")}
-                </h4>
+            {entry.actions && entry.actions.length > 0 ? (
+              <TicketSection title={t("actionsTitle")} className="border-b-0">
                 <ActionsTimeline
                   actions={entry.actions}
                   locale={locale}
                   t={t}
                   order={order}
                 />
-              </div>
-            )}
+              </TicketSection>
+            ) : null}
           </>
         ) : null}
       </Modal>

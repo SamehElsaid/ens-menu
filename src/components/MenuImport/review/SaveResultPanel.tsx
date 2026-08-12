@@ -51,46 +51,18 @@ function isRetryableFailure(result: SaveMenuImportResponse): boolean {
   return true;
 }
 
-function ReportRow({
-  label,
-  value,
-  tone = "default",
-}: {
-  label: string;
-  value: number;
-  tone?: "default" | "success" | "brand" | "muted" | "danger";
-}) {
-  return (
-    <li
-      className={cn(
-        "flex justify-between gap-3 border-b border-line px-4 py-2.5 last:border-b-0",
-        tone === "danger" && "bg-danger-soft",
-      )}
-    >
-      <span
-        className={cn(
-          "text-[13px]",
-          tone === "danger" ? "text-danger-fg" : "text-fg-muted",
-        )}
-      >
-        {label}
-      </span>
-      <span
-        className={cn(
-          "text-[13px] font-semibold tabular-nums",
-          tone === "success" && "text-success",
-          tone === "brand" && "text-brand",
-          tone === "muted" && "text-fg-muted",
-          tone === "danger" && "text-danger",
-          tone === "default" && "text-fg",
-        )}
-      >
-        {value}
-      </span>
-    </li>
-  );
-}
+type ReportTone = "default" | "success" | "brand" | "muted" | "danger";
 
+/**
+ * The receipt.
+ *
+ * What came back from a save is a report, so it is drawn as one: a tone-filled
+ * header that says how it went, the counts as a divided list of figures, the
+ * failures as rows underneath, and the ways onward in a strip at the foot. The
+ * previous version scattered those four things across three floating cards and
+ * a centred icon medallion, which made the numbers — the only part anyone reads
+ * twice — the quietest thing on the screen.
+ */
 export default function SaveResultPanel({
   result,
   menuId,
@@ -107,11 +79,11 @@ export default function SaveResultPanel({
       ? IoWarningOutline
       : IoAlertCircleOutline;
 
-  const iconWell = ok
-    ? "bg-success-soft text-success-fg"
+  const headerTone = ok
+    ? "border-success-line bg-success-soft text-success-fg"
     : partial
-      ? "bg-warning-soft text-warning-fg"
-      : "bg-danger-soft text-danger-fg";
+      ? "border-warning-line bg-warning-soft text-warning-fg"
+      : "border-danger-line bg-danger-soft text-danger-fg";
 
   const allSkipped =
     ok &&
@@ -125,20 +97,69 @@ export default function SaveResultPanel({
 
   const canRetry = isRetryableFailure(result) && !!onRetrySave;
 
+  const reportRows: {
+    key: string;
+    label: string;
+    value: number;
+    tone: ReportTone;
+  }[] = [
+    {
+      key: "categories-added",
+      label: t("reportCategoriesAdded"),
+      value: summary.categoriesAdded,
+      tone: "default",
+    },
+    {
+      key: "categories-reused",
+      label: t("reportCategoriesReused"),
+      value: summary.categoriesReused,
+      tone: "default",
+    },
+    {
+      key: "items-added",
+      label: t("reportItemsAdded"),
+      value: summary.itemsAdded,
+      tone: "success",
+    },
+    {
+      key: "items-updated",
+      label: t("reportItemsUpdated"),
+      value: summary.itemsUpdated,
+      tone: "brand",
+    },
+    {
+      key: "items-skipped",
+      label: t("reportItemsSkipped"),
+      value: summary.itemsSkippedDuplicate,
+      tone: "muted",
+    },
+  ];
+
+  if (summary.itemsFailed > 0) {
+    reportRows.push({
+      key: "items-failed",
+      label: t("reportItemsFailed"),
+      value: summary.itemsFailed,
+      tone: "danger",
+    });
+  }
+
   return (
-    <div className="mx-auto flex max-w-lg flex-col gap-6 py-8">
-      <div className="flex flex-col items-center gap-4 text-center">
+    <Card padded="none" className="mx-auto max-w-xl overflow-hidden text-start">
+      <div
+        className={cn(
+          "flex items-start gap-2.5 border-b px-3 py-3 sm:px-4",
+          headerTone,
+        )}
+      >
         <span
-          className={cn(
-            "flex size-14 items-center justify-center rounded-full text-3xl",
-            iconWell,
-          )}
+          className="mt-px flex size-7 shrink-0 items-center justify-center rounded-sm bg-surface/60 text-base"
           aria-hidden
         >
           <Icon />
         </span>
-        <div>
-          <h2 className="text-lg font-semibold tracking-[-0.011em] text-fg">
+        <div className="min-w-0">
+          <h2 className="text-sm font-semibold tracking-[-0.02em]">
             {ok
               ? allSkipped
                 ? t("saveAllSkippedTitle")
@@ -147,7 +168,7 @@ export default function SaveResultPanel({
                 ? t("savePartialTitle")
                 : t("saveFailTitle")}
           </h2>
-          <p className="mt-1.5 text-[13px] leading-relaxed text-fg-muted">
+          <p className="mt-1 text-xs leading-relaxed text-current/85">
             {ok && !allSkipped
               ? t("saveSuccessDetail", {
                   categories:
@@ -161,51 +182,53 @@ export default function SaveResultPanel({
         </div>
       </div>
 
-      <Card padded="none" className="overflow-hidden text-start">
-        <ul>
-          <ReportRow
-            label={t("reportCategoriesAdded")}
-            value={summary.categoriesAdded}
-          />
-          <ReportRow
-            label={t("reportCategoriesReused")}
-            value={summary.categoriesReused}
-          />
-          <ReportRow
-            label={t("reportItemsAdded")}
-            value={summary.itemsAdded}
-            tone="success"
-          />
-          <ReportRow
-            label={t("reportItemsUpdated")}
-            value={summary.itemsUpdated}
-            tone="brand"
-          />
-          <ReportRow
-            label={t("reportItemsSkipped")}
-            value={summary.itemsSkippedDuplicate}
-            tone="muted"
-          />
-          {summary.itemsFailed > 0 && (
-            <ReportRow
-              label={t("reportItemsFailed")}
-              value={summary.itemsFailed}
-              tone="danger"
-            />
-          )}
+      <div className="px-3 py-2.5 sm:px-4">
+        <p className="ui-label">{t("reportTitle")}</p>
+        {/* The counts are written out in order rather than appearing at once —
+            35ms apart, capped at 280ms. It is the one stagger in the console,
+            and it is here because this list is the answer to "did it work". */}
+        <ul className="ui-tally mt-1.5 divide-y divide-line border-y border-line">
+          {reportRows.map((row) => (
+            <li
+              key={row.key}
+              className="flex items-baseline justify-between gap-3 py-2"
+            >
+              <span
+                className={cn(
+                  "min-w-0 text-[13px]",
+                  row.tone === "danger" ? "text-danger-fg" : "text-fg-muted",
+                )}
+              >
+                {row.label}
+              </span>
+              <span
+                dir="ltr"
+                className={cn(
+                  "ui-figure shrink-0 text-[13px]",
+                  row.tone === "success" && "text-success",
+                  row.tone === "brand" && "text-brand",
+                  row.tone === "muted" && "text-fg-muted",
+                  row.tone === "danger" && "text-danger",
+                  row.tone === "default" && "text-fg",
+                )}
+              >
+                {row.value}
+              </span>
+            </li>
+          ))}
         </ul>
-      </Card>
+      </div>
 
       {errors.length > 0 && (
-        <Card padded="none" className="overflow-hidden text-start">
-          <p className="border-b border-line bg-surface-2 px-4 py-2 text-[13px] font-medium text-fg">
+        <div className="border-t border-line">
+          <p className="ui-label px-3 pt-2.5 sm:px-4">
             {t("saveErrorsTitle", { count: errors.length })}
           </p>
-          <ul className="max-h-48 overflow-auto">
+          <ul className="mt-1.5 max-h-48 divide-y divide-line overflow-auto border-t border-line">
             {errors.slice(0, 20).map((err, i) => (
               <li
                 key={`${err.refId ?? i}`}
-                className="border-b border-line px-4 py-2 text-xs text-fg-muted last:border-b-0"
+                className="px-3 py-1.5 text-xs text-fg-muted sm:px-4"
               >
                 <span className="font-medium text-fg">
                   {err.nameAr || err.nameEn || err.type}
@@ -215,41 +238,59 @@ export default function SaveResultPanel({
               </li>
             ))}
           </ul>
-        </Card>
+        </div>
       )}
 
       {ok && (
-        <Card variant="ghost" className="text-start">
-          <div className="flex items-start gap-3">
-            <span
-              className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-lg text-brand-soft-fg"
-              aria-hidden
+        <div className="flex items-start gap-2.5 border-t border-line bg-surface-2/40 px-3 py-3 sm:px-4">
+          <span
+            className="mt-px flex size-7 shrink-0 items-center justify-center rounded-sm border border-line bg-surface text-base text-fg-muted"
+            aria-hidden
+          >
+            <IoImageOutline />
+          </span>
+          <div className="min-w-0">
+            <p className="text-[13px] font-semibold text-fg">
+              {t("saveNextStepImagesTitle")}
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-fg-muted">
+              {t("saveNextStepImagesBody")}
+            </p>
+            <LinkTo
+              href={`/dashboard/${menuId}/items`}
+              className={buttonClasses({
+                variant: "link",
+                size: "sm",
+                className: "mt-1.5",
+              })}
             >
-              <IoImageOutline />
-            </span>
-            <div>
-              <p className="text-[15px] font-semibold text-fg">
-                {t("saveNextStepImagesTitle")}
-              </p>
-              <p className="mt-1 text-[13px] leading-relaxed text-fg-muted">
-                {t("saveNextStepImagesBody")}
-              </p>
-              <LinkTo
-                href={`/dashboard/${menuId}/items`}
-                className={buttonClasses({
-                  variant: "link",
-                  size: "sm",
-                  className: "mt-3",
-                })}
-              >
-                {t("saveNextStepImagesCta")}
-              </LinkTo>
-            </div>
+              {t("saveNextStepImagesCta")}
+            </LinkTo>
           </div>
-        </Card>
+        </div>
       )}
 
-      <div className="flex flex-col justify-center gap-3 sm:flex-row">
+      <div className="flex flex-col-reverse gap-2 border-t border-line px-3 py-3 sm:flex-row sm:justify-end sm:px-4">
+        <Button variant="secondary" onClick={onNewUpload}>
+          {t("newUpload")}
+        </Button>
+        {!ok && !hasBulkImportLimit && (
+          <LinkTo
+            href={`/dashboard/${menuId}/items`}
+            className={buttonClasses({ variant: "secondary" })}
+          >
+            {t("goToItems")}
+          </LinkTo>
+        )}
+        {canRetry && (
+          <Button
+            onClick={onRetrySave}
+            loading={isRetrying}
+            startIcon={<IoRefreshOutline className="text-base" />}
+          >
+            {isRetrying ? t("saving") : t("retryAnalysis")}
+          </Button>
+        )}
         {hasBulkImportLimit && (
           <LinkTo
             href={`/dashboard/${menuId}/subscription`}
@@ -257,15 +298,6 @@ export default function SaveResultPanel({
           >
             {t("freePlanLimitUpgrade")}
           </LinkTo>
-        )}
-        {canRetry && (
-          <Button
-            onClick={onRetrySave}
-            loading={isRetrying}
-            startIcon={<IoRefreshOutline className="text-lg" />}
-          >
-            {isRetrying ? t("saving") : t("retryAnalysis")}
-          </Button>
         )}
         {ok && (
           <LinkTo
@@ -275,18 +307,7 @@ export default function SaveResultPanel({
             {t("goToItems")}
           </LinkTo>
         )}
-        {!ok && !hasBulkImportLimit && (
-          <LinkTo
-            href={`/dashboard/${menuId}/items`}
-            className={buttonClasses({ variant: "secondary" })}
-          >
-            {t("goToItems")}
-          </LinkTo>
-        )}
-        <Button variant="secondary" onClick={onNewUpload}>
-          {t("newUpload")}
-        </Button>
       </div>
-    </div>
+    </Card>
   );
 }

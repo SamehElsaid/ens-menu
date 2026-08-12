@@ -7,7 +7,14 @@ import {
   IoLocateOutline,
   IoSearchOutline,
 } from "react-icons/io5";
-import { Button } from "@/components/ui";
+import {
+  Alert,
+  Button,
+  Field,
+  FieldError,
+  Input,
+  Spinner,
+} from "@/components/ui";
 import { loadGoogleMaps } from "@/lib/loadGoogleMaps";
 
 const DEFAULT_LAT = 29.9602;
@@ -55,6 +62,7 @@ export default function BranchLocationPicker({
 }: BranchLocationPickerProps) {
   const locale = useLocale();
   const t = useTranslations("settingsDeliveryPage.branches");
+  const tPage = useTranslations("settingsDeliveryPage");
   const isRTL = locale === "ar";
 
   const mapRef = useRef<HTMLDivElement>(null);
@@ -283,87 +291,89 @@ export default function BranchLocationPicker({
 
   if (disabled) {
     return (
-      <div className="rounded-lg border border-line bg-surface-2 h-56 flex items-center justify-center text-sm text-fg-subtle">
+      <div className="flex h-56 items-center justify-center rounded-lg border border-line bg-surface-2 px-4 text-center text-[13px] text-fg-subtle">
         {mapHint}
       </div>
     );
   }
 
   if (loadError) {
-    return (
-      <div className="rounded-lg border border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 p-4 text-sm text-red-600 dark:text-red-300">
-        {mapHint}
-      </div>
-    );
+    return <Alert tone="danger">{mapHint}</Alert>;
   }
 
   return (
-    <div className="space-y-3" dir={isRTL ? "rtl" : "ltr"}>
-      <div className="space-y-1.5">
-        <label className="text-sm font-medium text-fg-muted">
-          {searchLabel}
-        </label>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <div className="relative flex-1 min-w-0">
-            <input
+    <div className="flex flex-col gap-3" dir={isRTL ? "rtl" : "ltr"}>
+      <div className="flex flex-col gap-1.5">
+        <Field label={searchLabel}>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Input
               ref={searchRef}
               type="text"
               dir={isRTL ? "rtl" : "ltr"}
               placeholder={searchPlaceholder}
               onKeyDown={handleSearchKeyDown}
-              className="w-full py-3.5 ps-10 pe-4 outline-none rounded-lg border border-accent-purple/20 focus:border-accent-purple focus:ring-2 focus:ring-accent-purple/20 dark:placeholder:text-slate-400 dark:focus:border-accent-purple text-sm text-start"
+              startIcon={<IoSearchOutline className="size-4" />}
+              wrapperClassName="min-w-0 flex-1"
             />
-            <div className="absolute start-3 top-1/2 -translate-y-1/2 text-fg-subtle">
-              <IoSearchOutline className="text-lg" />
+            <div className="flex shrink-0 gap-2">
+              {/* Both labels collapse below `sm`, so the icon is on its own —
+                  hence the always-present `aria-label`. */}
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleCurrentLocation}
+                loading={isLocating}
+                disabled={isLoading}
+                aria-label={t("currentLocationBtn")}
+                title={t("currentLocationBtn")}
+                startIcon={<IoLocateOutline className="size-4" />}
+              >
+                <span className="hidden sm:inline">
+                  {t("currentLocationBtn")}
+                </span>
+              </Button>
+              <Button
+                type="button"
+                loading={isGeocoding}
+                disabled={isLoading}
+                aria-label={t("goToAreaBtn")}
+                title={t("goToAreaBtn")}
+                startIcon={<IoSearchOutline className="size-4" />}
+                onClick={handleGoToArea}
+              >
+                <span className="hidden sm:inline">{t("goToAreaBtn")}</span>
+              </Button>
             </div>
           </div>
-          <div className="flex gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={handleCurrentLocation}
-              disabled={isLoading || isLocating}
-              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-line bg-raised px-3 py-2.5 text-sm font-medium text-fg-muted hover:bg-surface-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-            >
-              {isLocating ? (
-                <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-              ) : (
-                <IoLocateOutline className="text-lg text-primary shrink-0" />
-              )}
-              <span className="hidden sm:inline">
-                {t("currentLocationBtn")}
-              </span>
-            </button>
-            <Button
-              type="button"
-              size="sm"
-              loading={isGeocoding}
-              disabled={isLoading}
-              startIcon={<IoSearchOutline className="text-lg shrink-0" />}
-              className="whitespace-nowrap"
-              onClick={handleGoToArea}
-            >
-              <span className="hidden sm:inline">{t("goToAreaBtn")}</span>
-            </Button>
-          </div>
-        </div>
-        {locationError ? (
-          <p className="text-xs text-red-500">{locationError}</p>
-        ) : null}
+        </Field>
+        {/* Outside the `Field`: geolocation and geocoding failures are not the
+            typed value being invalid, so the control keeps a clean state. */}
+        {locationError ? <FieldError>{locationError}</FieldError> : null}
       </div>
 
-      <div className="relative rounded-lg overflow-hidden border border-line">
+      <div className="relative overflow-hidden rounded-lg border border-line">
         {isLoading && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-100/80">
-            <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+          <div
+            className="absolute inset-0 z-10 flex items-center justify-center bg-surface-2/80"
+            role="status"
+            aria-live="polite"
+          >
+            <span className="sr-only">{tPage("loading")}</span>
+            <Spinner size="lg" className="text-brand" />
           </div>
         )}
         <div ref={mapRef} className="h-56 w-full" />
         {!isLoading && (
+          /* Physical centring is correct here: the pin marks the centre of the
+             viewport, which does not move with direction. `text-danger` and the
+             drop shadow are both load-bearing — `mapHint` tells the user to look
+             for a red pin, and the shadow is what separates it from map tiles
+             nobody controls. */
           <div
-            className="pointer-events-none absolute left-1/2 top-1/2 z-[1] -translate-x-1/2 -translate-y-full"
+            className="pointer-events-none absolute left-1/2 top-1/2 z-1 -translate-x-1/2 -translate-y-full"
             aria-hidden
           >
-            <IoLocationSharp className="h-10 w-10 text-red-500 drop-shadow-md" />
+            <IoLocationSharp className="size-10 text-danger drop-shadow-md" />
           </div>
         )}
       </div>

@@ -1,7 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { IoPricetagsOutline } from "react-icons/io5";
 import { Category } from "@/types/Menu";
+import { EmptyState } from "@/components/ui";
 import CategoryMobileCard from "./CategoryMobileCard";
 import MobileCardSkeleton from "./MobileCardSkeleton";
 import MobileListPagination from "./MobileListPagination";
@@ -19,6 +21,8 @@ interface CategoriesMobileListProps {
   onDelete: (category: Category) => void;
 }
 
+/** The phone view of the category collection — one ruled panel, divided rows,
+ *  matching `ItemsMobileList`. */
 export default function CategoriesMobileList({
   categories,
   loading,
@@ -39,28 +43,35 @@ export default function CategoriesMobileList({
 
   if (categories.length === 0) {
     return (
-      <div className="dashboard-mobile-empty rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center md:hidden">
-        <p className="text-base font-semibold text-fg">{t("noCategories")}</p>
-        <p className="mt-2 text-sm text-fg-muted">
-          {t("noCategoriesDescription")}
-        </p>
+      <div className="md:hidden">
+        <EmptyState
+          icon={<IoPricetagsOutline />}
+          title={t("noCategories")}
+          description={t("noCategoriesDescription")}
+        />
       </div>
     );
   }
 
   return (
-    <div className="dashboard-mobile-list space-y-2 pb-24 md:hidden">
-      {categories.map((category) => (
-        <CategoryMobileCard
-          key={category.id}
-          category={category}
-          name={getName(category)}
-          imageUrl={getImageUrl(category)}
-          locale={locale}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
-      ))}
+    <div className="dashboard-mobile-list pb-24 md:hidden">
+      <div className="overflow-hidden rounded-xl border border-line bg-surface">
+        <ul className="divide-y divide-line">
+          {categories.map((category) => (
+            <li key={category.id}>
+              <CategoryMobileCard
+                category={category}
+                name={getName(category)}
+                imageUrl={getImageUrl(category)}
+                locale={locale}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            </li>
+          ))}
+        </ul>
+      </div>
+
       <MobileListPagination
         page={page}
         totalPages={totalPages}

@@ -32,16 +32,19 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-xl border border-dashed border-line-strong bg-surface-2/40 text-center",
-        size === "sm" ? "gap-1.5 px-4 py-6" : "gap-2 px-5 py-10",
+        "flex flex-col items-center justify-center rounded-xl border border-dashed border-line-strong bg-surface-2/50 text-center",
+        size === "sm" ? "gap-2 px-4 py-8" : "gap-2.5 px-5 py-12",
         className,
       )}
     >
       {icon ? (
         <span
           className={cn(
-            "flex items-center justify-center rounded-full bg-surface-3 text-fg-subtle",
-            size === "sm" ? "size-8 text-base" : "size-10 text-lg",
+            // A brand-tinted medallion rather than a grey one: an empty state
+            // is a place to act, and the tint is the quietest way to say so
+            // without spending a filled button on nothing.
+            "flex items-center justify-center rounded-2xl bg-brand-soft text-brand-soft-fg",
+            size === "sm" ? "size-10 text-lg" : "size-12 text-xl",
           )}
           aria-hidden
         >
@@ -51,20 +54,20 @@ export function EmptyState({
       <div className="max-w-sm">
         <p
           className={cn(
-            "font-semibold tracking-[-0.011em] text-fg",
-            size === "sm" ? "text-[13px]" : "text-sm",
+            "font-semibold tracking-[-0.015em] text-fg",
+            size === "sm" ? "text-sm" : "text-[15px]",
           )}
         >
           {title}
         </p>
         {description ? (
-          <p className="mt-1 text-xs leading-relaxed text-fg-muted">
+          <p className="mt-1.5 text-[13px] leading-relaxed text-fg-muted">
             {description}
           </p>
         ) : null}
       </div>
       {action || secondaryAction ? (
-        <div className="mt-1 flex flex-wrap items-center justify-center gap-1.5">
+        <div className="mt-1.5 flex flex-wrap items-center justify-center gap-2">
           {action}
           {secondaryAction}
         </div>

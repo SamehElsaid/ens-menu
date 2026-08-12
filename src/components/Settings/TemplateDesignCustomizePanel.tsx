@@ -3,14 +3,8 @@
 import { useMemo, useState, useCallback, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
-import {
-  FiDroplet,
-  FiType,
-  FiArrowRight,
-  FiArrowLeft,
-  FiSave,
-} from "react-icons/fi";
-import { HiOutlineSparkles } from "react-icons/hi";
+import { FiArrowLeft, FiSave } from "react-icons/fi";
+import { HiOutlineSparkles, HiOutlineColorSwatch } from "react-icons/hi";
 import LinkTo from "@/components/Global/LinkTo";
 import {
   getMenuDashboardRef,
@@ -20,10 +14,36 @@ import { useAppSelector } from "@/store/hooks";
 import { templatesInfo } from "@/modules/TemplateShow/data";
 import { toast } from "react-toastify";
 import ColorControl from "@/components/Settings/ColorControl";
-import { Button } from "@/components/ui";
+import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
+import {
+  Badge,
+  Button,
+  buttonClasses,
+  Card,
+  EmptyState,
+  Field,
+  focusRing,
+  Input,
+  SectionHeader,
+  Textarea,
+} from "@/components/ui";
+import { cn } from "@/lib/cn";
 import { axiosGet, axiosPatch } from "@/shared/axiosCall";
 import Loader from "@/components/Global/Loader";
 import { useRouter } from "@/i18n/navigation";
+
+/** Tile chrome shared by the ready palettes and the custom tile. */
+const tileBase = cn(
+  "relative flex items-center justify-between gap-3 rounded-lg p-2.5 text-start",
+  "border transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-settle)",
+  focusRing,
+);
+
+/** The selected tile takes the same purple inline edge an active `Card` uses,
+ *  so a chosen palette reads as a position rather than as a tinted fill
+ *  competing with the swatches it contains. */
+const tileActive =
+  "border-accent-line bg-surface before:absolute before:inset-y-0 before:start-0 before:w-0.5 before:rounded-s-lg before:bg-accent before:content-['']";
 
 // Simple, typed debounce helper for callbacks like (index: number, value: string) => void
 function debounce<T extends (...args: [number, string]) => void>(
@@ -124,6 +144,11 @@ export default function TemplateDesignCustomizePanel({
     return base;
   }, [template]);
 
+  /* These are the *guest-facing menu's* colours, not the app's — the same
+     exemption the third-party marks get (DESIGN.md §14.4). A restaurant that
+     wants a warm orange menu is not making a brand mistake, and forcing the
+     house purple on their published menu would be the product overruling its
+     own customer. The app chrome around this panel stays on brand. */
   const readyPalettes: ColorPalette[] = useMemo(
     () => [
       {
@@ -189,6 +214,7 @@ export default function TemplateDesignCustomizePanel({
       : (activePalette.colors[1] ?? gradientStart);
 
   const gradientSecondary = colorSlots >= 2 ? gradientEnd : gradientStart;
+  const previewGradient = `linear-gradient(135deg, ${gradientStart}, ${gradientSecondary})`;
 
   useEffect(() => {
     if (!menuApiRef) return;
@@ -251,45 +277,41 @@ export default function TemplateDesignCustomizePanel({
 
   const showHeroTexts = template?.customizeHeroTexts !== false;
 
+  const backIcon = <FiArrowLeft className="rtl:rotate-180" aria-hidden />;
+  const backControl =
+    embedded && onClose ? (
+      <Button
+        type="button"
+        variant="secondary"
+        size="sm"
+        onClick={onClose}
+        startIcon={backIcon}
+      >
+        {t("buttons.back")}
+      </Button>
+    ) : (
+      <LinkTo
+        href={designListPath}
+        className={buttonClasses({ variant: "secondary", size: "sm" })}
+      >
+        {backIcon}
+        {t("buttons.back")}
+      </LinkTo>
+    );
+
   if (!template || !template.canEdit) {
     return (
-      <div className="min-h-[50vh] flex items-center justify-center">
-        <div className={isRTL ? "text-right space-y-2" : "text-left space-y-2"}>
-          <h1 className="text-xl font-semibold text-fg">
-            {t("notEditable.title")}
-          </h1>
-          <p className="text-sm text-fg-muted max-w-md">
-            {t("notEditable.description")}
-          </p>
-          <div className={isRTL ? "flex justify-start" : "flex justify-start"}>
-            {embedded && onClose ? (
-              <button
-                type="button"
-                onClick={onClose}
-                className="inline-flex items-center gap-2 mt-3 rounded-full border border-line px-4 py-2 text-xs font-semibold text-fg-muted hover:bg-surface-2"
-              >
-                {isRTL ? (
-                  <FiArrowRight className="text-sm" />
-                ) : (
-                  <FiArrowLeft className="text-sm" />
-                )}
-                {t("buttons.back")}
-              </button>
-            ) : (
-              <LinkTo
-                href={designListPath}
-                className="inline-flex items-center gap-2 mt-3 rounded-full border border-line px-4 py-2 text-xs font-semibold text-fg-muted hover:bg-surface-2"
-              >
-                {isRTL ? (
-                  <FiArrowRight className="text-sm" />
-                ) : (
-                  <FiArrowLeft className="text-sm" />
-                )}
-                {t("buttons.back")}
-              </LinkTo>
-            )}
-          </div>
-        </div>
+      <div className="flex min-w-0 flex-col gap-4 pb-6">
+        <PageTitleWithHelp
+          eyebrow={t("badge")}
+          title={t("title", { name: displayName || "—" })}
+        />
+        <EmptyState
+          icon={<HiOutlineColorSwatch />}
+          title={t("notEditable.title")}
+          description={t("notEditable.description")}
+          action={backControl}
+        />
       </div>
     );
   }
@@ -300,11 +322,7 @@ export default function TemplateDesignCustomizePanel({
 
   const handleSave = async () => {
     if (!menuApiRef) {
-      toast.error(
-        locale === "ar"
-          ? "لا توجد قائمة محددة لحفظ التخصيص عليها."
-          : "No menu selected to save customization.",
-      );
+      toast.error(t("noMenuSelected"));
       return;
     }
 
@@ -371,287 +389,238 @@ export default function TemplateDesignCustomizePanel({
     setShowColorPicker(null);
   };
 
+  const isCustomSelected = selectedPaletteId === "custom";
+  const previewSwatches =
+    isCustomSelected && hasCustomColors
+      ? customColors
+      : activePalette.colors.slice(0, colorSlots);
+  const customTileSwatches = customColors.filter((color) => color);
+  const menuTitle = menu ? (isRTL ? menu.nameAr : menu.nameEn) : displayName;
+  const footerNote = showHeroTexts
+    ? t("preview.footerNote")
+    : t("preview.footerNoteColorsOnly");
+
   return loading ? (
-    <div className="min-h-[50vh] flex items-center justify-center">
+    <div className="flex min-h-[50vh] items-center justify-center">
       <Loader />
     </div>
   ) : (
-    <div className="min-h-[calc(100vh-160px)]">
-      {/* Page header */}
-      {embedded && onClose ? (
-        <button
-          type="button"
-          onClick={onClose}
-          className="inline-flex items-center mb-4 justify-center gap-2 rounded-full border border-line bg-raised px-4 py-2.5 text-xs md:text-sm font-medium text-fg-muted hover:bg-surface-2"
-        >
-          {isRTL ? (
-            <FiArrowRight className="text-sm" />
-          ) : (
-            <FiArrowLeft className="text-sm" />
-          )}
-          {t("buttons.back")}
-        </button>
-      ) : (
-        <LinkTo
-          href={designListPath}
-          className="inline-flex items-center mb-4 justify-center gap-2 rounded-full border border-line bg-raised px-4 py-2.5 text-xs md:text-sm font-medium text-fg-muted hover:bg-surface-2"
-        >
-          {isRTL ? (
-            <FiArrowRight className="text-sm" />
-          ) : (
-            <FiArrowLeft className="text-sm" />
-          )}
-          {t("buttons.back")}
-        </LinkTo>
-      )}
-      <header
-        className={isRTL ? "text-right space-y-1" : "text-left space-y-1"}
-      >
-        <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1 text-[11px] font-semibold">
-          <HiOutlineSparkles className="text-xs" />
-          <span>{t("badge")}</span>
-        </div>
-        <h1 className="text-2xl md:text-3xl font-bold text-fg mt-2">
-          {t("title", { name: displayName || "—" })}
-        </h1>
-        <p className="text-sm md:text-base text-fg-muted max-w-2xl mt-1">
-          {showHeroTexts ? t("description") : t("descriptionColorsOnly")}
-        </p>
-      </header>
+    <div className="flex min-w-0 flex-col gap-4 pb-6">
+      <PageTitleWithHelp
+        eyebrow={t("badge")}
+        title={t("title", { name: displayName || "—" })}
+        description={
+          showHeroTexts ? t("description") : t("descriptionColorsOnly")
+        }
+        actions={backControl}
+      />
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,320px)_minmax(0,1fr)] xl:gap-8">
-        {/* Left preview card */}
-        <aside className="order-2 lg:order-1">
-          <div className="sticky top-24">
-            <div className="rounded-[32px] bg-white/95 shadow-xl border border-line/90 dark:border-line/90 overflow-hidden backdrop-blur">
-              <div className="px-5 py-4 border-b border-line flex items-center justify-between gap-3">
-                <div className={isRTL ? "text-right" : "text-left"}>
-                  <p className="text-[11px] uppercase tracking-wide text-fg-subtle">
-                    {t("preview.livePreview")}
-                  </p>
-                  <h2 className="text-sm font-semibold text-fg mt-1">
-                    {menu ? (isRTL ? menu.nameAr : menu.nameEn) : displayName}
+      {/* The preview leads the reading order on narrow screens and sticks
+          beside the controls from `lg`, because every control on this screen is
+          only meaningful against the thing it changes. */}
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,21rem)] lg:items-start lg:gap-6">
+        <aside className="min-w-0 lg:col-start-2 lg:row-start-1">
+          <div className="lg:sticky lg:top-20">
+            <Card padded="none" className="overflow-hidden">
+              <div className="flex items-start justify-between gap-2 border-b border-line px-3 py-2.5 sm:px-4">
+                <div className="min-w-0">
+                  <p className="ui-label">{t("preview.previewMenu")}</p>
+                  <h2 className="mt-1 truncate text-sm font-semibold text-fg">
+                    {menuTitle}
                   </h2>
                 </div>
+                <Badge tone="accent" dot>
+                  {t("preview.livePreview")}
+                </Badge>
               </div>
 
-              <div className="p-5 space-y-4">
+              <div className="flex flex-col gap-3 p-3 sm:p-4">
+                {/* The template's own gradient and white type are the subject
+                    of this block, not chrome — it is a picture of the
+                    customer-facing menu, so it keeps its literal colours. */}
                 <div
-                  className="rounded-[24px] p-5 text-white shadow-inner"
-                  style={{
-                    background: `linear-gradient(135deg, ${gradientStart}, ${gradientSecondary})`,
-                  }}
+                  className="flex flex-col gap-2 rounded-lg p-4 text-start text-white"
+                  style={{ background: previewGradient }}
                 >
                   {showHeroTexts ? (
-                    <div
-                      className={
-                        isRTL ? "text-right space-y-2" : "text-left space-y-2"
-                      }
-                    >
-                      <span className="inline-flex items-center gap-1 rounded-full bg-white/15 backdrop-blur px-2.5 py-1 text-[10px] font-semibold">
-                        <HiOutlineSparkles className="text-xs" />
+                    <>
+                      <span className="inline-flex w-fit items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-semibold backdrop-blur">
+                        <HiOutlineSparkles className="text-xs" aria-hidden />
                         {isRTL ? texts.badgeTextAr : texts.badgeTextEn}
                       </span>
-                      <h3 className="text-base font-semibold leading-snug">
+                      <h3 className="text-base leading-snug font-semibold">
                         {isRTL ? texts.heroTitleAr : texts.heroTitleEn}
                       </h3>
-                      <p className="text-[11px] text-white/80 leading-relaxed">
+                      <p className="text-[11px] leading-relaxed text-white/80">
                         {isRTL ? texts.heroSubtitleAr : texts.heroSubtitleEn}
                       </p>
-                    </div>
+                    </>
                   ) : (
-                    <div
-                      className={
-                        isRTL ? "text-right space-y-2" : "text-left space-y-2"
-                      }
-                    >
-                      <span className="inline-flex items-center gap-1 rounded-full bg-white/15 backdrop-blur px-2.5 py-1 text-[10px] font-semibold">
+                    <>
+                      <span className="inline-flex w-fit items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-semibold backdrop-blur">
                         {t("preview.colorOnlyBadge")}
                       </span>
-                      <h3 className="text-base font-semibold leading-snug">
-                        {menu ? (isRTL ? menu.nameAr : menu.nameEn) : "—"}
+                      <h3 className="text-base leading-snug font-semibold">
+                        {menuTitle || "—"}
                       </h3>
-                      <p className="text-[11px] text-white/80 leading-relaxed">
+                      <p className="text-[11px] leading-relaxed text-white/80">
                         {t("preview.colorOnlyCaption")}
                       </p>
-                    </div>
+                    </>
                   )}
                 </div>
 
-                <div className="rounded-[24px] border border-line bg-slate-50/80 p-3.5 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="h-8 w-8 min-w-8 rounded-lg border border-line overflow-hidden bg-surface-2 flex items-center justify-center"
-                      style={{
-                        background: `linear-gradient(135deg, ${gradientStart}, ${gradientSecondary})`,
-                      }}
+                <div className="rounded-lg border border-line bg-surface-2 p-3">
+                  <div className="flex items-start gap-2">
+                    <span
+                      className="size-8 shrink-0 rounded-lg border border-line"
+                      style={{ background: previewGradient }}
+                      aria-hidden
                     />
-                    <div className={isRTL ? "text-right" : "text-left"}>
+                    <div className="min-w-0 text-start">
                       <p className="text-xs font-semibold text-fg">
                         {t("preview.currentColorsTitle")}
                       </p>
-                      <p className="text-[11px] text-fg-muted">
+                      <p className="mt-0.5 text-[11px] leading-relaxed text-fg-muted">
                         {t("preview.currentColorsDescription")}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    {(selectedPaletteId === "custom" && hasCustomColors
-                      ? customColors
-                      : activePalette.colors.slice(0, colorSlots)
-                    ).map((color, index) => (
-                      <div
+                  <div className="mt-2.5 flex items-center gap-2">
+                    {previewSwatches.map((color, index) => (
+                      <span
                         key={`current-color-${index}-${color}`}
-                        className="flex-1 rounded-lg h-8 border border-line flex items-center justify-between px-3 text-[11px] font-mono bg-raised"
+                        className="flex h-8 min-w-0 flex-1 items-center justify-between gap-2 rounded-lg border border-line bg-surface px-2.5 font-mono text-[11px] tabular-nums text-fg-muted"
                       >
-                        <span className="truncate text-fg-muted">{color}</span>
+                        <span className="truncate" dir="ltr">
+                          {color}
+                        </span>
                         <span
-                          className="ml-2 h-4 w-4 rounded-full border border-slate-200 dark:border-slate-500"
+                          className="size-4 shrink-0 rounded-full border border-line"
                           style={{ backgroundColor: color }}
+                          aria-hidden
                         />
-                      </div>
+                      </span>
                     ))}
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="mt-4 flex items-center justify-between gap-3 text-[11px] text-fg-muted">
-              <p className={isRTL ? "text-right" : "text-left"}>
-                {showHeroTexts
-                  ? t("preview.footerNote")
-                  : t("preview.footerNoteColorsOnly")}
+              <p className="border-t border-line bg-surface-2/40 px-3 py-2.5 text-xs leading-relaxed text-fg-muted sm:px-4">
+                {footerNote}
               </p>
-            </div>
+            </Card>
           </div>
         </aside>
 
-        {/* Right side controls */}
-        <main className="order-1 lg:order-2 space-y-5 lg:space-y-6">
-          {/* Ready colors */}
-          <section className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6 space-y-4">
-            <div className="flex items-center justify-between gap-3">
-              <div className={isRTL ? "text-right" : "text-left"}>
-                <div className="inline-flex items-center gap-2 rounded-full bg-sky-50 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300 px-3 py-1 text-[11px] font-semibold mb-1">
-                  <FiDroplet className="text-xs" />
-                  <span>{t("sections.readyColors.pill")}</span>
-                </div>
-                <h2 className="text-sm md:text-base font-semibold text-fg">
-                  {t("sections.readyColors.title")}
-                </h2>
-                <p className="text-[11px] md:text-xs text-fg-muted mt-1">
-                  {t("sections.readyColors.description")}
-                </p>
-              </div>
-            </div>
+        <div className="flex min-w-0 flex-col gap-4 lg:col-start-1 lg:row-start-1">
+          <Card padded="lg" className="flex flex-col gap-3.5">
+            <SectionHeader
+              ruled
+              eyebrow={t("sections.readyColors.pill")}
+              title={t("sections.readyColors.title")}
+              description={t("sections.readyColors.description")}
+            />
 
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-2.5 sm:grid-cols-2">
               {readyPalettes.map((palette, index) => {
                 const isActive = palette.id === selectedPaletteId;
                 return (
                   <button
                     key={palette.id + index}
                     type="button"
+                    aria-pressed={isActive}
                     onClick={() => handleSelectPalette(palette)}
-                    className={`group relative rounded-lg border text-left overflow-hidden p-3 transition-all duration-150 ${
+                    className={cn(
+                      tileBase,
                       isActive
-                        ? "border-primary ring-2 ring-primary/20 bg-primary/5 dark:bg-primary/10"
-                        : "border-line bg-slate-50/60  hover:border-primary/60 hover:bg-primary/5 dark:hover:bg-primary/10"
-                    }`}
+                        ? tileActive
+                        : "border-line bg-surface hover:border-line-strong hover:bg-surface-2/60",
+                    )}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="flex-1 space-y-1">
-                        <p className="text-[11px] font-semibold text-fg">
-                          {t(palette.labelKey)}
-                        </p>
-                        <div className="flex items-center gap-1.5">
-                          {palette.colors
-                            .slice(0, colorSlots)
-                            .map((color, idx) => (
-                              <span
-                                key={`palette-${palette.id}-${idx}-${color}`}
-                                className={`h-6 rounded-full border border-black/10 w-6`}
-                                style={{ backgroundColor: color }}
-                              />
-                            ))}
-                        </div>
-                      </div>
-                      {isActive && (
-                        <span className="text-[10px] font-semibold text-primary dark:text-primary bg-raised border border-primary/30 dark:border-primary/40 rounded-full px-2 py-0.5">
-                          {t("sections.readyColors.inUse")}
-                        </span>
-                      )}
-                    </div>
+                    <span className="flex min-w-0 flex-col gap-1.5">
+                      <span className="truncate text-[13px] font-medium text-fg">
+                        {t(palette.labelKey)}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        {palette.colors
+                          .slice(0, colorSlots)
+                          .map((color, idx) => (
+                            <span
+                              key={`palette-${palette.id}-${idx}-${color}`}
+                              className="size-6 rounded-full border border-line"
+                              style={{ backgroundColor: color }}
+                              aria-hidden
+                            />
+                          ))}
+                      </span>
+                    </span>
+                    {isActive ? (
+                      <Badge tone="accent" dot>
+                        {t("sections.readyColors.inUse")}
+                      </Badge>
+                    ) : null}
                   </button>
                 );
               })}
 
-              {/* Custom palette card */}
               <button
                 type="button"
+                aria-pressed={isCustomSelected}
                 onClick={() => setSelectedPaletteId("custom")}
-                className={`group relative rounded-lg border text-left overflow-hidden p-3 transition-all duration-150 ${
-                  selectedPaletteId === "custom"
-                    ? "border-primary ring-2 ring-primary/20 bg-primary/5 dark:bg-primary/10"
-                    : "border-dashed border-line-strong bg-slate-50/40  hover:border-primary/60 hover:bg-primary/5 dark:hover:bg-primary/10"
-                }`}
+                className={cn(
+                  tileBase,
+                  "border-dashed",
+                  isCustomSelected
+                    ? tileActive
+                    : "border-line-strong bg-surface-2/40 hover:border-fg-subtle hover:bg-surface-2",
+                )}
               >
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 space-y-1">
-                    <p className="text-[11px] font-semibold text-fg flex items-center gap-1.5">
-                      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-xs">
-                        +
-                      </span>
-                      {t("palettes.custom")}
-                    </p>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      {customColors
-                        .filter((c) => c)
-                        .map((color, index) => (
-                          <span
-                            key={`custom-preview-${color}-${index}`}
-                            className={`h-6 rounded-full border border-black/10 w-6`}
-                            style={{ backgroundColor: color }}
-                          />
-                        ))}
-                    </div>
-                    <p className="text-[11px] text-fg-muted mt-1">
+                <span className="flex min-w-0 flex-col gap-1.5">
+                  <span className="truncate text-[13px] font-medium text-fg">
+                    {t("palettes.custom")}
+                  </span>
+                  {customTileSwatches.length > 0 ? (
+                    <span className="flex items-center gap-1.5">
+                      {customTileSwatches.map((color, index) => (
+                        <span
+                          key={`custom-preview-${color}-${index}`}
+                          className="size-6 rounded-full border border-line"
+                          style={{ backgroundColor: color }}
+                          aria-hidden
+                        />
+                      ))}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-fg-muted">
                       {t("sections.customColors.pill")}
-                    </p>
-                  </div>
-                </div>
+                    </span>
+                  )}
+                </span>
+                {isCustomSelected ? (
+                  <Badge tone="accent" dot>
+                    {t("sections.readyColors.inUse")}
+                  </Badge>
+                ) : null}
               </button>
             </div>
-          </section>
+          </Card>
 
-          {/* Custom colors */}
-          {selectedPaletteId === "custom" && (
-            <section className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6 space-y-4">
-              <div className="flex items-center justify-between gap-3">
-                <div className={isRTL ? "text-right" : "text-left"}>
-                  <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 px-3 py-1 text-[11px] font-semibold mb-1">
-                    <FiDroplet className="text-xs" />
-                    <span>{t("sections.customColors.pill")}</span>
-                  </div>
-                  <h2 className="text-sm md:text-base font-semibold text-fg">
-                    {t("sections.customColors.title")}
-                  </h2>
-                  <p className="text-[11px] md:text-xs text-fg-muted mt-1">
-                    {t("sections.customColors.description")}
-                  </p>
-                </div>
-              </div>
+          {isCustomSelected && (
+            <Card padded="lg" className="flex flex-col gap-3.5">
+              <SectionHeader
+                ruled
+                eyebrow={t("sections.customColors.pill")}
+                title={t("sections.customColors.title")}
+                description={t("sections.customColors.description")}
+              />
 
-              <div
-                className={`grid gap-4 md:grid-cols-2 ${
-                  isRTL ? "text-right" : "text-left"
-                }`}
-              >
+              <div className="grid gap-3.5 sm:grid-cols-2">
                 {customColors.map((color, index) => {
                   const tooltipId = `color-${index}`;
-                  const isActive =
-                    showColorPicker === `color-picker-${tooltipId}`;
+                  const pickerId = `color-picker-${tooltipId}`;
+                  const isPickerOpen = showColorPicker === pickerId;
                   const label =
                     index === 0
                       ? t("sections.customColors.primaryLabel")
@@ -660,46 +629,44 @@ export default function TemplateDesignCustomizePanel({
                         : `${t("sections.customColors.accentLabel")} ${index}`;
 
                   return (
-                    <div key={`customColor-${index}`} className="space-y-2">
-                      <button
-                        type="button"
-                        data-tooltip-id={`color-picker-${tooltipId}`}
-                        onClick={() =>
-                          setShowColorPicker((prev) =>
-                            prev === `color-picker-${tooltipId}`
-                              ? null
-                              : `color-picker-${tooltipId}`,
-                          )
-                        }
-                        className={`w-full rounded-lg border bg-slate-50/70  p-3 flex items-center gap-3 text-left transition-colors ${
-                          isActive
-                            ? "border-primary/70 ring-2 ring-primary/20 bg-primary/5 dark:bg-primary/10"
-                            : "border-line hover:border-primary/40"
-                        }`}
-                      >
-                        <div
-                          className="h-10 w-10 rounded-lg border border-line shadow-sm"
-                          style={{ backgroundColor: color }}
-                        />
-                        <div className="flex-1 space-y-1">
-                          <p className="text-xs font-semibold text-fg">
-                            {label}
-                          </p>
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="text"
-                              value={color}
-                              onChange={(e) =>
-                                debouncedHandleCustomColorChange(
-                                  index,
-                                  e.target.value,
-                                )
-                              }
-                              className="flex-1 rounded-lg border border-line bg-raised px-2 py-1.5 text-[11px] font-mono text-fg-muted focus:outline-none focus:ring-1 focus:ring-primary/60"
-                            />
-                          </div>
+                    <div key={`customColor-${index}`} className="min-w-0">
+                      <Field label={label}>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            data-tooltip-id={pickerId}
+                            aria-label={t("sections.customColors.openPicker", {
+                              label,
+                            })}
+                            aria-expanded={isPickerOpen}
+                            onClick={() =>
+                              setShowColorPicker((prev) =>
+                                prev === pickerId ? null : pickerId,
+                              )
+                            }
+                            className={cn(
+                              "size-9 shrink-0 rounded-lg border transition-[border-color] duration-(--dur-fast) ease-(--ease-settle) sm:size-8",
+                              focusRing,
+                              isPickerOpen
+                                ? "border-accent"
+                                : "border-line-strong hover:border-fg-subtle",
+                            )}
+                            style={{ backgroundColor: color }}
+                          />
+                          <Input
+                            value={color}
+                            onChange={(e) =>
+                              debouncedHandleCustomColorChange(
+                                index,
+                                e.target.value,
+                              )
+                            }
+                            dir="ltr"
+                            spellCheck={false}
+                            className="font-mono tabular-nums"
+                          />
                         </div>
-                      </button>
+                      </Field>
 
                       <ColorControl
                         id={tooltipId}
@@ -717,124 +684,108 @@ export default function TemplateDesignCustomizePanel({
                   );
                 })}
               </div>
-            </section>
+
+              <p className="text-xs leading-relaxed text-fg-muted">
+                {t("sections.customColors.pickerLabel")}
+              </p>
+            </Card>
           )}
 
-          {/* Texts — only for templates that use hero copy on the live menu */}
           {showHeroTexts && (
-            <section className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6 space-y-4">
-              <div className="flex items-center justify-between gap-3">
-                <div className={isRTL ? "text-right" : "text-left"}>
-                  <div className="inline-flex items-center gap-2 rounded-full bg-violet-50 dark:bg-violet-500/15 text-violet-700 dark:text-violet-300 px-3 py-1 text-[11px] font-semibold mb-1">
-                    <FiType className="text-xs" />
-                    <span>{t("sections.texts.pill")}</span>
-                  </div>
-                  <h2 className="text-sm md:text-base font-semibold text-fg">
-                    {t("sections.texts.title")}
-                  </h2>
-                  <p className="text-[11px] md:text-xs text-fg-muted mt-1">
-                    {t("sections.texts.description")}
-                  </p>
-                </div>
-              </div>
+            <Card padded="lg" className="flex flex-col gap-3.5">
+              <SectionHeader
+                ruled
+                eyebrow={t("sections.texts.pill")}
+                title={t("sections.texts.title")}
+                description={t("sections.texts.description")}
+              />
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-lg border border-line bg-linear-to-br from-emerald-50 via-sky-50 to-white dark:from-slate-800/90 dark:via-slate-800/80 dark:to-slate-900/90 p-4 space-y-2">
-                  <p className="text-[11px] font-semibold text-fg">
-                    {t("sections.texts.heroTitleAr")}
-                  </p>
-                  <textarea
+              <div className="grid gap-3.5 sm:grid-cols-2">
+                <Field
+                  label={t("sections.texts.heroTitleAr")}
+                  hint={t("sections.texts.helperShortAr")}
+                >
+                  <Textarea
                     value={texts.heroTitleAr}
                     onChange={(e) =>
                       handleChangeText("heroTitleAr", e.target.value)
                     }
-                    className="w-full resize-none rounded-lg border border-line bg-white/70 px-3 py-2 text-xs text-fg placeholder:text-slate-400 dark:placeholder:text-fg-subtle focus:outline-none focus:ring-1 focus:ring-primary/60"
                     rows={2}
+                    dir="rtl"
+                    lang="ar"
                   />
-                  <p className="text-[10px] text-fg-muted">
-                    {t("sections.texts.helperShortAr")}
-                  </p>
-                </div>
+                </Field>
 
-                <div className="rounded-lg border border-line bg-linear-to-br from-sky-50 via-violet-50 to-white dark:from-slate-800/90 dark:via-slate-800/80 dark:to-slate-900/90 p-4 space-y-2">
-                  <p className="text-[11px] font-semibold text-fg">
-                    {t("sections.texts.heroTitleEn")}
-                  </p>
-                  <textarea
+                <Field
+                  label={t("sections.texts.heroTitleEn")}
+                  hint={t("sections.texts.helperShortEn")}
+                >
+                  <Textarea
                     value={texts.heroTitleEn}
                     onChange={(e) =>
                       handleChangeText("heroTitleEn", e.target.value)
                     }
-                    className="w-full resize-none rounded-lg border border-line bg-white/70 px-3 py-2 text-xs text-fg placeholder:text-slate-400 dark:placeholder:text-fg-subtle focus:outline-none focus:ring-1 focus:ring-primary/60"
                     rows={2}
+                    dir="ltr"
+                    lang="en"
                   />
-                  <p className="text-[10px] text-fg-muted">
-                    {t("sections.texts.helperShortEn")}
-                  </p>
-                </div>
+                </Field>
 
-                <div className="rounded-lg border border-line bg-linear-to-br from-emerald-50/60 via-sky-50/40 to-white dark:from-slate-800/90 dark:via-slate-800/75 dark:to-slate-900/90 p-4 space-y-2">
-                  <p className="text-[11px] font-semibold text-fg">
-                    {t("sections.texts.shortDescriptionAr")}
-                  </p>
-                  <textarea
+                <Field label={t("sections.texts.shortDescriptionAr")}>
+                  <Textarea
                     value={texts.heroSubtitleAr}
                     onChange={(e) =>
                       handleChangeText("heroSubtitleAr", e.target.value)
                     }
-                    className="w-full resize-none rounded-lg border border-line bg-white/70 px-3 py-2 text-xs text-fg placeholder:text-slate-400 dark:placeholder:text-fg-subtle focus:outline-none focus:ring-1 focus:ring-primary/60"
                     rows={3}
+                    dir="rtl"
+                    lang="ar"
                   />
-                </div>
+                </Field>
 
-                <div className="rounded-lg border border-line bg-linear-to-br from-sky-50/60 via-violet-50/40 to-white dark:from-slate-800/90 dark:via-slate-800/75 dark:to-slate-900/90 p-4 space-y-2">
-                  <p className="text-[11px] font-semibold text-fg">
-                    {t("sections.texts.shortDescriptionEn")}
-                  </p>
-                  <textarea
+                <Field label={t("sections.texts.shortDescriptionEn")}>
+                  <Textarea
                     value={texts.heroSubtitleEn}
                     onChange={(e) =>
                       handleChangeText("heroSubtitleEn", e.target.value)
                     }
-                    className="w-full resize-none rounded-lg border border-line bg-white/70 px-3 py-2 text-xs text-fg placeholder:text-slate-400 dark:placeholder:text-fg-subtle focus:outline-none focus:ring-1 focus:ring-primary/60"
                     rows={3}
+                    dir="ltr"
+                    lang="en"
                   />
-                </div>
+                </Field>
               </div>
-            </section>
+            </Card>
           )}
 
-          {/* Footer actions */}
-          <div className="justify-between gap-3 pt-2 pb-6">
-            <div className="flex flex-wrap gap-2 justify-end w-fit ms-auto mb-3">
-              <Button
-                onClick={handleReset}
-                variant="danger"
-                size="lg"
-                className="w-fit!"
-              >
-                {t("buttons.reset", { defaultMessage: "Reset" })}
-              </Button>
+          {/* Save sits last in the row and last in the DOM, so on a phone the
+              thumb lands on it before the discard. */}
+          <div className="flex flex-col gap-2 border-t border-line pt-3 sm:flex-row sm:items-center sm:justify-end">
+            <Button
+              type="button"
+              variant="dangerGhost"
+              size="lg"
+              fullWidth
+              className="sm:w-auto"
+              onClick={handleReset}
+            >
+              {t("buttons.reset")}
+            </Button>
 
-              <Button
-                onClick={handleSave}
-                loading={isSaving}
-                disabled={isSaving}
-                size="lg"
-                startIcon={<FiSave className="text-sm" />}
-                className="w-fit!"
-              >
-                {t("buttons.save")}
-              </Button>
-            </div>
-
-            <p className="text-[11px] text-fg-muted max-w-md">
-              {showHeroTexts
-                ? t("preview.footerNote")
-                : t("preview.footerNoteColorsOnly")}
-            </p>
+            <Button
+              type="button"
+              onClick={handleSave}
+              loading={isSaving}
+              disabled={isSaving}
+              size="lg"
+              fullWidth
+              className="sm:w-auto"
+              startIcon={<FiSave aria-hidden />}
+            >
+              {t("buttons.save")}
+            </Button>
           </div>
-        </main>
+        </div>
       </div>
     </div>
   );

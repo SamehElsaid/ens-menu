@@ -5,9 +5,9 @@ import LoadImage from "@/components/ImageLoad";
 import { Advertisement } from "@/types/Menu";
 import { adRowMetrics } from "@/lib/adMetrics";
 import { normalizeExternalUrl } from "@/lib/normalizeExternalUrl";
+import { Badge, Button, Card } from "@/components/ui";
 import {
   IoCreateOutline,
-  IoEllipseSharp,
   IoImageOutline,
   IoLinkOutline,
   IoPauseOutline,
@@ -26,6 +26,17 @@ interface AdCardProps {
   onToggleActive?: (ad: Advertisement) => void;
 }
 
+/**
+ * One campaign.
+ *
+ * Live is the state that matters here, so it is the only thing spending the
+ * brand accent: an active ad carries the inline brand edge and a solid badge
+ * with a status dot, a paused one is plain. The three figures used to sit in
+ * three tinted boxes, which made a paused ad with no impressions look as busy
+ * as a running one; they are now a plain figure row, and the actions live
+ * behind a divider so the card has a body and a footer rather than one
+ * undifferentiated block.
+ */
 export default function AdCard({
   ad,
   locale,
@@ -46,15 +57,28 @@ export default function AdCard({
     ? normalizeExternalUrl(ad.linkUrl.trim())
     : undefined;
 
+  const figures = [
+    {
+      id: "impressions",
+      label: t("columns.impressions"),
+      value: metrics.impressionCount.toLocaleString("en-US"),
+    },
+    {
+      id: "clicks",
+      label: t("columns.clicks"),
+      value: metrics.clickCount.toLocaleString("en-US"),
+    },
+    { id: "ctr", label: t("columns.ctr"), value: `${metrics.ctr}%` },
+  ];
+
   return (
-    <article
-      className={`group flex h-full flex-col overflow-hidden rounded-lg border bg-white shadow-sm transition-all duration-300 hover:shadow-xl  dark:shadow-slate-950/20 ${
-        isActive
-          ? "border-line/90 hover:border-primary/25 dark:border-line/80 dark:hover:border-primary/40"
-          : "border-amber-200/80 bg-slate-50/40 dark:border-amber-900/40 dark:bg-amber-950/10"
-      }`}
+    <Card
+      as="article"
+      padded="none"
+      active={isActive}
+      className="flex h-full flex-col overflow-hidden"
     >
-      <div className="dashboard-card-media relative aspect-video overflow-hidden bg-linear-to-br from-slate-100 via-slate-50 to-primary/5 dark:from-slate-800 dark:via-slate-900 dark:to-primary/10">
+      <div className="dashboard-card-media relative aspect-video overflow-hidden border-b border-line bg-surface-3">
         {imageSrc ? (
           <div className="absolute inset-0">
             <LoadImage
@@ -63,134 +87,110 @@ export default function AdCard({
               width={800}
               height={450}
               cover
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="h-full w-full object-cover"
               wrapperClassName="dashboard-card-media__fill"
             />
           </div>
         ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-2 text-fg-subtle">
-            <IoImageOutline className="text-4xl opacity-60" aria-hidden />
-            <span className="text-xs font-medium">{t("columns.image")}</span>
+          <div className="flex h-full flex-col items-center justify-center gap-1.5 text-fg-subtle">
+            <IoImageOutline className="size-7" aria-hidden />
+            <span className="ui-label">{t("columns.image")}</span>
           </div>
         )}
-        <span
-          className={`absolute start-3 top-3 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold shadow-sm ${
-            isActive
-              ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/70 dark:text-emerald-200"
-              : "bg-amber-100 text-amber-800 dark:bg-amber-900/70 dark:text-amber-200"
-          }`}
-        >
-          <IoEllipseSharp className="text-[7px]" aria-hidden />
-          {isActive ? t("active") : t("paused")}
+        <span className="absolute start-2 top-2">
+          <Badge tone={isActive ? "accent" : "neutral"} variant="solid" dot>
+            {isActive ? t("active") : t("paused")}
+          </Badge>
         </span>
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 p-4">
-        <div className="min-w-0 space-y-1">
-          <h3
-            className="truncate text-lg font-bold text-fg"
+      <div className="flex flex-1 flex-col p-3">
+        <h3
+          className="truncate text-[13px] font-semibold text-fg"
+          dir={isRTL ? "rtl" : "ltr"}
+          title={title}
+        >
+          {title || "—"}
+        </h3>
+        {contentPreview && contentPreview !== "—" ? (
+          <p
+            className="mt-1 line-clamp-2 text-xs leading-relaxed text-fg-muted"
             dir={isRTL ? "rtl" : "ltr"}
-            title={title}
           >
-            {title || "—"}
-          </h3>
-          {contentPreview && contentPreview !== "—" && (
-            <p
-              className="line-clamp-2 text-sm text-fg-muted"
-              dir={isRTL ? "rtl" : "ltr"}
-            >
-              {contentPreview}
-            </p>
-          )}
-          {link && (
-            <a
-              href={link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex max-w-full items-center gap-1 truncate text-xs font-medium text-primary hover:underline"
-              dir="ltr"
-              title={link}
-            >
-              <IoLinkOutline className="shrink-0 text-sm" aria-hidden />
-              <span className="truncate">
-                {link.length > 32 ? `${link.slice(0, 29)}...` : link}
-              </span>
-            </a>
-          )}
-        </div>
+            {contentPreview}
+          </p>
+        ) : null}
+        {link ? (
+          <a
+            href={link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-1.5 inline-flex max-w-full items-center gap-1 text-[11px] text-brand hover:underline"
+            dir="ltr"
+            title={link}
+          >
+            <IoLinkOutline className="size-3.5 shrink-0" aria-hidden />
+            <span className="truncate">{link}</span>
+          </a>
+        ) : null}
 
-        <div className="grid grid-cols-3 gap-1.5">
-          <div className="rounded-lg border border-sky-200/70 bg-sky-50/80 px-2 py-2 text-center dark:border-sky-800/40 dark:bg-sky-950/25">
-            <p className="text-[10px] font-medium text-fg-muted">
-              {t("columns.impressions")}
-            </p>
-            <p className="text-sm font-bold tabular-nums text-fg">
-              {metrics.impressionCount.toLocaleString()}
-            </p>
-          </div>
-          <div className="rounded-lg border border-amber-200/70 bg-amber-50/80 px-2 py-2 text-center dark:border-amber-800/40 dark:bg-amber-950/25">
-            <p className="text-[10px] font-medium text-fg-muted">
-              {t("columns.clicks")}
-            </p>
-            <p className="text-sm font-bold tabular-nums text-fg">
-              {metrics.clickCount.toLocaleString()}
-            </p>
-          </div>
-          <div className="rounded-lg border border-emerald-200/70 bg-emerald-50/80 px-2 py-2 text-center dark:border-emerald-800/40 dark:bg-emerald-950/25">
-            <p className="text-[10px] font-medium text-fg-muted">
-              {t("columns.ctr")}
-            </p>
-            <p className="text-sm font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
-              {metrics.ctr}%
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-auto flex flex-col gap-2 border-t border-line pt-3 dark:border-line/80">
-          {onToggleActive && (
-            <button
-              type="button"
-              onClick={() => onToggleActive(ad)}
-              disabled={isToggling}
-              title={isActive ? t("pause") : t("activate")}
-              className={`inline-flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 ${
-                isActive
-                  ? "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:border-amber-800/50 dark:bg-amber-950/30 dark:text-amber-200"
-                  : "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 dark:border-emerald-800/50 dark:bg-emerald-950/30 dark:text-emerald-200"
-              }`}
-            >
-              {isToggling ? (
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              ) : isActive ? (
-                <IoPauseOutline className="text-base" aria-hidden />
-              ) : (
-                <IoPlayOutline className="text-base" aria-hidden />
-              )}
-              {isActive ? t("pause") : t("activate")}
-            </button>
-          )}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => onEdit(ad)}
-              title={t("edit")}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-line bg-slate-50 px-3 py-2.5 text-sm font-medium text-fg-muted transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary active:scale-[0.98] dark:hover:border-primary/40 dark:hover:bg-primary/10 dark:hover:text-primary"
-            >
-              <IoCreateOutline className="text-base" aria-hidden />
-              {t("edit")}
-            </button>
-            <button
-              type="button"
-              onClick={() => onDelete(ad)}
-              title={t("delete")}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-red-200/80 bg-red-50 px-3 py-2.5 text-sm font-medium text-red-600 transition-all hover:border-red-300 hover:bg-red-100 active:scale-[0.98] dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300 dark:hover:border-red-800 dark:hover:bg-red-950/50"
-            >
-              <IoTrashOutline className="text-base" aria-hidden />
-              {t("delete")}
-            </button>
-          </div>
-        </div>
+        <dl className="mt-3 grid grid-cols-3 gap-px overflow-hidden rounded-lg border border-line bg-line">
+          {figures.map((figure) => (
+            <div key={figure.id} className="bg-surface px-2 py-1.5">
+              <dt className="ui-label truncate text-fg-subtle">
+                {figure.label}
+              </dt>
+              <dd className="ui-figure mt-0.5 text-[15px] text-fg" lang="en">
+                {figure.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
       </div>
-    </article>
+
+      {/* Not `CardFooter`: that primitive cancels the padding of a padded card,
+          and this card is unpadded so its media can bleed to the rule. */}
+      <div className="mt-auto flex flex-wrap items-center gap-1.5 border-t border-line bg-surface-2/40 px-3 py-2">
+        {onToggleActive ? (
+          <Button
+            variant={isActive ? "secondary" : "primary"}
+            size="sm"
+            onClick={() => onToggleActive(ad)}
+            loading={isToggling}
+            startIcon={
+              isActive ? (
+                <IoPauseOutline aria-hidden />
+              ) : (
+                <IoPlayOutline aria-hidden />
+              )
+            }
+          >
+            {isActive ? t("pause") : t("activate")}
+          </Button>
+        ) : null}
+        <span className="ms-auto flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            iconOnly
+            aria-label={t("edit")}
+            title={t("edit")}
+            onClick={() => onEdit(ad)}
+          >
+            <IoCreateOutline aria-hidden />
+          </Button>
+          <Button
+            variant="dangerGhost"
+            size="sm"
+            iconOnly
+            aria-label={t("delete")}
+            title={t("delete")}
+            onClick={() => onDelete(ad)}
+          >
+            <IoTrashOutline aria-hidden />
+          </Button>
+        </span>
+      </div>
+    </Card>
   );
 }

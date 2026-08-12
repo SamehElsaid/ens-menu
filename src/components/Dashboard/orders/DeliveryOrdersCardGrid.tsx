@@ -8,7 +8,18 @@ import type {
   OrderMenuBadges,
 } from "@/lib/tableOrders";
 import MobileListPagination from "@/components/Dashboard/mobile/MobileListPagination";
+import {
+  Card,
+  EmptyState,
+  NoResultsState,
+  Skeleton,
+  SkeletonRegion,
+} from "@/components/ui";
 import DeliveryOrderMobileCard from "./DeliveryOrderMobileCard";
+
+/** Shared by both branches so the grid does not reflow when the data lands. */
+const ordersGridClass =
+  "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6";
 
 interface DeliveryOrdersCardGridProps {
   entries: CallEntry[];
@@ -22,27 +33,47 @@ interface DeliveryOrdersCardGridProps {
   totalPages: number;
   onPageChange: (page: number) => void;
   isFiltered?: boolean;
+  /** Ids a socket update just changed; those cards flash their border once. */
+  changedIds?: ReadonlySet<string>;
   onView: (id: string) => void;
   onActionComplete: (result: OrderActionResult) => void;
 }
 
+/** Mirrors the ticket's own shape — header, ruled rows, action foot — so the
+ *  grid does not reflow when the orders arrive. */
 function OrderCardSkeleton() {
   return (
-    <div
-      className="overflow-hidden rounded-lg border border-emerald-200/70 bg-white dark:border-emerald-800/40"
-      aria-hidden
-    >
-      <div className="dashboard-mobile-shimmer h-16 bg-emerald-50 dark:bg-emerald-950/30" />
-      <div className="space-y-3 p-4">
-        <div className="dashboard-mobile-shimmer h-4 w-2/3 rounded-md bg-surface-3" />
-        <div className="dashboard-mobile-shimmer h-4 w-1/2 rounded-md bg-surface-3" />
-        <div className="dashboard-mobile-shimmer h-6 w-1/3 rounded-md bg-surface-3" />
-        <div className="flex gap-2 border-t border-line pt-3 dark:border-line">
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-3" />
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-3" />
+    <Card padded="none" className="overflow-hidden">
+      <div className="flex items-start justify-between gap-2 border-b border-line px-3.5 py-3">
+        <div className="min-w-0">
+          <Skeleton className="h-2.5 w-16" rounded="sm" />
+          <Skeleton className="mt-1.5 h-4 w-20" rounded="sm" />
+        </div>
+        <div className="flex flex-col items-end gap-1.5">
+          <Skeleton className="h-4 w-16" rounded="full" />
+          <Skeleton className="h-2.5 w-12" rounded="sm" />
         </div>
       </div>
-    </div>
+      <div className="divide-y divide-line border-b border-line">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div
+            key={index}
+            className="flex items-baseline justify-between gap-3 px-3.5 py-2"
+          >
+            <Skeleton className="h-2.5 w-14" rounded="sm" />
+            <Skeleton className="h-3 w-24" rounded="sm" />
+          </div>
+        ))}
+      </div>
+      <div className="border-b border-line bg-surface-2/40 px-3.5 py-2.5">
+        <Skeleton className="h-3 w-full" rounded="sm" />
+        <Skeleton className="mt-1.5 h-3.5 w-1/2" rounded="sm" />
+      </div>
+      <div className="flex flex-col gap-1.5 px-3.5 py-3">
+        <Skeleton className="h-8 w-full" rounded="sm" />
+        <Skeleton className="h-8 w-full" rounded="sm" />
+      </div>
+    </Card>
   );
 }
 
@@ -57,6 +88,7 @@ export default function DeliveryOrdersCardGrid({
   totalPages,
   onPageChange,
   isFiltered = false,
+  changedIds,
   onView,
   onActionComplete,
 }: DeliveryOrdersCardGridProps) {
@@ -64,31 +96,27 @@ export default function DeliveryOrdersCardGrid({
 
   if (loading) {
     return (
-      <div
-        id="onboarding-delivery-orders-table"
-        className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6"
-        aria-busy="true"
-        aria-label={t("loading")}
-      >
-        {Array.from({ length: 8 }).map((_, index) => (
-          <OrderCardSkeleton key={index} />
-        ))}
+      <div id="onboarding-delivery-orders-table">
+        <SkeletonRegion label={t("loading")} className={ordersGridClass}>
+          {Array.from({ length: 8 }).map((_, index) => (
+            <OrderCardSkeleton key={index} />
+          ))}
+        </SkeletonRegion>
       </div>
     );
   }
 
   if (entries.length === 0) {
     return (
-      <div
-        id="onboarding-delivery-orders-table"
-        className="rounded-lg border border-dashed border-emerald-200 bg-white px-6 py-14 text-center dark:border-emerald-800/40"
-      >
-        <MdOutlineDeliveryDining className="mx-auto mb-3 text-4xl text-emerald-400" />
-        <p className="text-sm text-fg-muted">
-          {isFiltered ? t("noSearchResults") : t("empty")}
-        </p>
-        {!isFiltered && (
-          <p className="mt-2 text-xs text-fg-muted">{t("emptyHint")}</p>
+      <div id="onboarding-delivery-orders-table">
+        {isFiltered ? (
+          <NoResultsState title={t("noSearchResults")} />
+        ) : (
+          <EmptyState
+            icon={<MdOutlineDeliveryDining />}
+            title={t("empty")}
+            description={t("emptyHint")}
+          />
         )}
       </div>
     );
@@ -96,7 +124,7 @@ export default function DeliveryOrdersCardGrid({
 
   return (
     <div id="onboarding-delivery-orders-table" className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6 items-stretch">
+      <div className={`${ordersGridClass} items-stretch`}>
         {entries.map((entry) => {
           const badge =
             entry.menuId != null ? menuBadges?.[entry.menuId] : undefined;
@@ -109,6 +137,7 @@ export default function DeliveryOrdersCardGrid({
                 menuId || (entry.menuId != null ? String(entry.menuId) : "")
               }
               menuLabel={badge?.label}
+              justChanged={changedIds?.has(entry.id) ?? false}
               onView={onView}
               onActionComplete={onActionComplete}
             />

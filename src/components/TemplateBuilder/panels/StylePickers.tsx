@@ -1,6 +1,5 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { CardStyleId } from "@/lib/template-builder/library/stylePresets";
 import {
@@ -22,6 +21,21 @@ import {
   type FooterStyleId,
   type HeaderStyleId,
 } from "@/lib/template-builder/library/stylePresets";
+import { focusRing, settle } from "@/components/ui";
+
+/* The tiles below are diagrams of a customer-facing layout, not chrome
+   (DESIGN.md §14.1), so their fills keep their literal colours. Only the frame
+   that says which one is chosen belongs to the builder. */
+const thumbRing = (active: boolean) =>
+  active ? "ring-2 ring-accent" : "ring-1 ring-line-strong";
+
+/* One row in a list-shaped picker: navbar, hero, footer. */
+const presetRow = (active: boolean) =>
+  `rounded-md border px-2 py-2 text-start text-[11px] ${settle} ${focusRing} ${
+    active
+      ? "border-accent bg-accent-soft text-fg"
+      : "border-line text-fg-muted hover:border-line-strong hover:bg-surface-2"
+  }`;
 
 function usePresetLabel() {
   const locale = useLocale();
@@ -31,7 +45,7 @@ function usePresetLabel() {
 
 /** Mini visual thumbnails for card layouts */
 function CardThumb({ id, active }: { id: CardStyleId; active: boolean }) {
-  const ring = active ? "ring-2 ring-violet-500" : "ring-1 ring-slate-600";
+  const ring = thumbRing(active);
   const base = `relative h-14 w-full overflow-hidden rounded-md bg-slate-800 ${ring}`;
 
   switch (id) {
@@ -116,7 +130,7 @@ function CategoryThumb({
   id: CategoryLayoutId;
   active: boolean;
 }) {
-  const ring = active ? "ring-2 ring-violet-500" : "ring-1 ring-slate-600";
+  const ring = thumbRing(active);
   const base = `flex h-11 items-center justify-center gap-1 rounded-md bg-slate-800 px-1.5 ${ring}`;
   switch (id) {
     case "circles":
@@ -247,7 +261,7 @@ function CategoryThumb({
 }
 
 function AdThumb({ id, active }: { id: AdStyleId; active: boolean }) {
-  const ring = active ? "ring-2 ring-violet-500" : "ring-1 ring-slate-600";
+  const ring = thumbRing(active);
   const base = `relative h-12 w-full overflow-hidden rounded-md bg-slate-600 ${ring}`;
   switch (id) {
     case "promo":
@@ -374,18 +388,18 @@ function PresetGrid<T extends string>({
             key={p.id}
             type="button"
             onClick={() => onSelect(p.id)}
-            className={`rounded-lg border p-1.5 text-left transition ${
+            className={`rounded-lg border p-1.5 text-start ${settle} ${focusRing} ${
               active
-                ? "border-violet-500 bg-violet-600/15"
-                : "border-slate-700 hover:border-slate-500"
+                ? "border-accent bg-accent-soft"
+                : "border-line hover:border-line-strong hover:bg-surface-2"
             }`}
             title={p.hint}
           >
             {renderThumb(p.id, active)}
-            <div className="mt-1.5 truncate text-[11px] font-medium text-slate-200">
+            <div className="mt-1.5 truncate text-[11px] font-medium text-fg">
               {labelOf(p)}
             </div>
-            <div className="truncate text-[9px] text-slate-500">{p.hint}</div>
+            <div className="truncate text-[9px] text-fg-subtle">{p.hint}</div>
           </button>
         );
       })}
@@ -408,9 +422,7 @@ export function CardStylePicker({
 
   return (
     <div>
-      <p className="mb-1.5 text-[10px] uppercase tracking-wide text-slate-500">
-        {t("cardShapes")}
-      </p>
+      <p className="ui-label mb-1.5">{t("cardShapes")}</p>
       <PresetGrid
         presets={CARD_STYLE_PRESETS}
         value={current}
@@ -423,7 +435,7 @@ export function CardStylePicker({
         renderThumb={(id, active) => <CardThumb id={id} active={active} />}
         labelOf={labelOf}
       />
-      <p className="mb-2 text-[10px] text-slate-500">{t("cardShapesHint")}</p>
+      <p className="mb-2 text-[10px] text-fg-subtle">{t("cardShapesHint")}</p>
     </div>
   );
 }
@@ -442,10 +454,10 @@ export function CategoryStylePicker({
   ) as CategoryLayoutId;
   return (
     <div>
-      <p className="mb-1 text-[10px] uppercase tracking-wide text-violet-400">
+      <p className="ui-label mb-1">
         {t("categoryShapes", { count: CATEGORY_LAYOUT_PRESETS.length })}
       </p>
-      <p className="mb-2 text-[10px] text-slate-500">
+      <p className="mb-2 text-[10px] text-fg-subtle">
         {t("categoryShapesHint")}
       </p>
       <PresetGrid
@@ -478,10 +490,10 @@ export function AdStylePicker({
   ) as AdStyleId;
   return (
     <div>
-      <p className="mb-1 text-[10px] uppercase tracking-wide text-violet-400">
+      <p className="ui-label mb-1">
         {t("adShapes", { count: AD_STYLE_PRESETS.length })}
       </p>
-      <p className="mb-2 text-[10px] text-slate-500">{t("adShapesHint")}</p>
+      <p className="mb-2 text-[10px] text-fg-subtle">{t("adShapesHint")}</p>
       <PresetGrid
         presets={AD_STYLE_PRESETS}
         value={current}
@@ -512,23 +524,17 @@ export function NavbarStylePicker({
   ) as NavbarStyleId;
   return (
     <div>
-      <p className="mb-1.5 text-[10px] uppercase tracking-wide text-slate-500">
-        {t("navbarStyle")}
-      </p>
+      <p className="ui-label mb-1.5">{t("navbarStyle")}</p>
       <div className="mb-2 grid grid-cols-2 gap-1.5">
         {NAVBAR_STYLE_PRESETS.map((p) => (
           <button
             key={p.id}
             type="button"
             onClick={() => onChange(p.id)}
-            className={`rounded-md border px-2 py-2 text-left text-[11px] ${
-              current === p.id
-                ? "border-violet-500 bg-violet-600/20 text-white"
-                : "border-slate-700 text-slate-300"
-            }`}
+            className={presetRow(current === p.id)}
           >
             <div className="font-medium">{labelOf(p)}</div>
-            <div className="text-[9px] text-slate-500">{p.hint}</div>
+            <div className="text-[9px] text-fg-subtle">{p.hint}</div>
           </button>
         ))}
       </div>
@@ -550,23 +556,17 @@ export function HeroStylePicker({
   ) as HeroStyleId;
   return (
     <div>
-      <p className="mb-1.5 text-[10px] uppercase tracking-wide text-slate-500">
-        {t("heroStyle")}
-      </p>
+      <p className="ui-label mb-1.5">{t("heroStyle")}</p>
       <div className="mb-2 flex flex-col gap-1.5">
         {HERO_STYLE_PRESETS.map((p) => (
           <button
             key={p.id}
             type="button"
             onClick={() => onChange(p.id)}
-            className={`rounded-md border px-2 py-2 text-left text-[11px] ${
-              current === p.id
-                ? "border-violet-500 bg-violet-600/20 text-white"
-                : "border-slate-700 text-slate-300"
-            }`}
+            className={presetRow(current === p.id)}
           >
             <div className="font-medium">{labelOf(p)}</div>
-            <div className="text-[9px] text-slate-500">{p.hint}</div>
+            <div className="text-[9px] text-fg-subtle">{p.hint}</div>
           </button>
         ))}
       </div>
@@ -588,23 +588,17 @@ export function FooterStylePicker({
   ) as FooterStyleId;
   return (
     <div>
-      <p className="mb-1.5 text-[10px] uppercase tracking-wide text-slate-500">
-        {t("footerStyle")}
-      </p>
+      <p className="ui-label mb-1.5">{t("footerStyle")}</p>
       <div className="mb-2 flex flex-col gap-1.5">
         {FOOTER_STYLE_PRESETS.map((p) => (
           <button
             key={p.id}
             type="button"
             onClick={() => onChange(p.id)}
-            className={`rounded-md border px-2 py-2 text-left text-[11px] ${
-              current === p.id
-                ? "border-violet-500 bg-violet-600/20 text-white"
-                : "border-slate-700 text-slate-300"
-            }`}
+            className={presetRow(current === p.id)}
           >
             <div className="font-medium">{labelOf(p)}</div>
-            <div className="text-[9px] text-slate-500">{p.hint}</div>
+            <div className="text-[9px] text-fg-subtle">{p.hint}</div>
           </button>
         ))}
       </div>
@@ -613,7 +607,7 @@ export function FooterStylePicker({
 }
 
 function HeaderThumb({ id, active }: { id: HeaderStyleId; active: boolean }) {
-  const ring = active ? "ring-2 ring-violet-500" : "ring-1 ring-slate-600";
+  const ring = thumbRing(active);
   const base = `relative h-16 w-full overflow-hidden rounded-md ${ring}`;
   switch (id) {
     case "floatingLogo":
@@ -709,10 +703,10 @@ export function HeaderStylePicker({
 
   return (
     <div>
-      <p className="mb-1 text-[10px] uppercase tracking-wide text-violet-400">
+      <p className="ui-label mb-1">
         {t("headerPacks", { count: HEADER_STYLE_PRESETS.length })}
       </p>
-      <p className="mb-2 text-[10px] text-slate-500">{t("headerPacksHint")}</p>
+      <p className="mb-2 text-[10px] text-fg-subtle">{t("headerPacksHint")}</p>
       <PresetGrid
         presets={HEADER_STYLE_PRESETS}
         value={current}

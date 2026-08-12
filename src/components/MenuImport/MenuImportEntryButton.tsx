@@ -4,7 +4,7 @@ import LinkTo from "@/components/Global/LinkTo";
 import { useTranslations } from "next-intl";
 import { IoSparklesOutline, IoCameraOutline } from "react-icons/io5";
 import { cn } from "@/lib/cn";
-import { Badge, buttonClasses, focusRing } from "@/components/ui";
+import { buttonClasses, focusRing } from "@/components/ui";
 
 type Variant = "primary" | "secondary" | "card";
 
@@ -28,21 +28,25 @@ export default function MenuImportEntryButton({
       <LinkTo
         href={href}
         className={cn(
-          "group flex flex-col items-start justify-between gap-4 rounded-xl border border-line bg-surface p-5",
-          "transition-[border-color,background-color] duration-150 hover:border-brand-line hover:bg-brand-soft/30",
-          "sm:flex-row sm:items-center",
+          "group flex flex-col items-start justify-between gap-3 rounded-xl border border-line bg-surface p-4",
+          "transition-[border-color,background-color] duration-(--dur-fast) ease-(--ease-settle)",
+          "hover:border-line-strong hover:bg-surface-2/50",
+          "sm:flex-row sm:items-center sm:gap-4",
           focusRing,
           className,
         )}
       >
         <div className="min-w-0 flex-1 text-start">
-          <Badge tone="brand" icon={<IoSparklesOutline aria-hidden />}>
+          {/* The kicker is a quiet sans label, not a filled pill: the plate
+              says what kind of thing it is before it says what it does. */}
+          <p className="ui-label flex items-center gap-1.5">
+            <IoSparklesOutline aria-hidden />
             {t("badge")}
-          </Badge>
-          <h3 className="mt-2 text-[15px] font-semibold tracking-[-0.011em] text-fg">
+          </p>
+          <h3 className="mt-1.5 text-sm font-semibold tracking-[-0.02em] text-fg">
             {t("emptyMenuTitle")}
           </h3>
-          <p className="mt-1 text-[13px] leading-relaxed text-fg-muted">
+          <p className="mt-1 text-xs leading-relaxed text-fg-muted">
             {t("emptyMenuDescription")}
           </p>
         </div>

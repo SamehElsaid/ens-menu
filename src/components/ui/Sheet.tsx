@@ -62,7 +62,7 @@ export function Sheet({
   return createPortal(
     <div className="fixed inset-0 z-[1000]" role="presentation">
       <div
-        className="absolute inset-0 bg-overlay backdrop-blur-[2px] motion-safe:animate-[ui-fade-in_180ms_ease-out]"
+        className="absolute inset-0 bg-overlay backdrop-blur-[2px] motion-safe:animate-[ui-fade-in_var(--dur-settle)_var(--ease-settle)]"
         onClick={onClose}
         aria-hidden
       />
@@ -78,8 +78,8 @@ export function Sheet({
         className={cn(
           "absolute flex flex-col overflow-hidden bg-raised shadow-2xl outline-none",
           isBottom
-            ? "inset-x-0 bottom-0 rounded-t-2xl motion-safe:animate-[ui-sheet-in_280ms_cubic-bezier(0.16,1,0.3,1)]"
-            : "inset-y-0 h-dvh motion-safe:animate-[ui-slide-in-inline_280ms_cubic-bezier(0.16,1,0.3,1)]",
+            ? "inset-x-0 bottom-0 rounded-t-2xl motion-safe:animate-[ui-sheet-in_var(--dur-sheet)_var(--ease-enter)]"
+            : "inset-y-0 h-dvh motion-safe:animate-[ui-slide-in-inline_var(--dur-sheet)_var(--ease-enter)]",
           side === "start" && "start-0 border-e border-line",
           side === "end" && "end-0 border-s border-line",
           sizeBySide[side][size],

@@ -14,14 +14,20 @@ import { SiteNavLink } from "./SiteNavLink";
  * Public footer.
  *
  * A server component: it is pure content, so it costs the client nothing. The
- * dark band closes the page — every public route ends on the same anchored
+ * ink band closes the page — every public route ends on the same anchored
  * surface — and the columns are grouped by what a visitor is trying to do
  * (evaluate the product, get help, check the company) rather than by which
  * team owns the page.
+ *
+ * The band is the deep violet gradient rather than a flat ink fill, lit from
+ * the top edge so the page ends on the same light source it opened with.
+ * Column headings are labels in brand-bright, which is the one place the brand
+ * appears down here — everything else is quiet type, because a footer that
+ * competes for attention is a footer that costs conversions.
  */
 
 const linkClass =
-  "inline-block text-site-sm text-site-on-ink-body transition-colors duration-150 hover:text-white";
+  "inline-block text-site-sm text-site-on-ink-body transition-colors duration-(--dur-settle) hover:text-site-on-ink";
 
 function Column({
   title,
@@ -32,13 +38,15 @@ function Column({
 }) {
   return (
     <div>
-      <h2 className="text-site-xs font-semibold tracking-[0.08em] text-white/50 uppercase">
-        {title}
-      </h2>
-      <ul className="mt-4 space-y-3">
+      <h2 className="s-ticket text-site-brand-bright">{title}</h2>
+      <ul className="mt-5 space-y-3">
         {links.map((link) => (
           <li key={link.href}>
-            <SiteNavLink href={link.href} prefetch={false} className={linkClass}>
+            <SiteNavLink
+              href={link.href}
+              prefetch={false}
+              className={linkClass}
+            >
               {link.label}
             </SiteNavLink>
           </li>
@@ -55,25 +63,34 @@ export async function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="s-on-ink relative isolate overflow-hidden bg-site-ink-bg text-site-on-ink-body">
-      <div aria-hidden className="s-grid-lines opacity-60" />
+    <footer className="s-on-ink s-grad-deep relative isolate overflow-hidden text-site-on-ink-body">
+      {/* A hairline of brand across the very top edge: the seam between the last
+          section and the footer is the one place the band needs to announce
+          itself, and a full border would just outline a dark rectangle. */}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-site-brand to-transparent opacity-70"
+      />
+      <div aria-hidden className="s-bloom opacity-55" />
 
       <div className="relative mx-auto w-full max-w-(--s-max) px-(--s-gutter) py-16 lg:py-20">
-        <div className="grid gap-12 lg:grid-cols-[1.6fr_1fr_1fr_1fr] lg:gap-8">
-          <div className="max-w-sm">
+        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr] lg:gap-10">
+          <div className="max-w-sm sm:col-span-2 lg:col-span-1">
             <SiteLogo onInk />
             <p className="mt-5 text-site-sm leading-relaxed text-site-on-ink-body">
               {t("description")}
             </p>
 
-            <ul className="mt-6 space-y-3">
+            {/* Each contact route on its own line with the glyph lit: three
+                ways to reach a person, scannable without reading. */}
+            <ul className="mt-7 flex flex-col gap-3">
               <li>
                 <a
                   href={`mailto:${ENSMENU_SUPPORT_EMAIL}`}
-                  className="group inline-flex items-center gap-2.5 text-site-sm text-site-on-ink-body transition-colors hover:text-white"
+                  className="flex items-center gap-3 text-site-sm text-site-on-ink-body transition-colors hover:text-site-on-ink"
                 >
                   <FiMail
-                    className="size-4 shrink-0 text-white/40"
+                    className="size-4 shrink-0 text-site-brand-bright"
                     aria-hidden
                   />
                   {ENSMENU_SUPPORT_EMAIL}
@@ -84,25 +101,25 @@ export async function SiteFooter() {
                   href={ENSMENU_WHATSAPP_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2.5 text-site-sm text-site-on-ink-body transition-colors hover:text-white"
+                  className="flex items-center gap-3 text-site-sm text-site-on-ink-body transition-colors hover:text-site-on-ink"
                 >
                   <FaWhatsapp
-                    className="size-4 shrink-0 text-white/40"
+                    className="size-4 shrink-0 text-site-brand-bright"
                     aria-hidden
                   />
                   <span dir="ltr">{ENSMENU_WHATSAPP_DISPLAY}</span>
                 </a>
               </li>
-              <li className="inline-flex items-center gap-2.5 text-site-sm">
+              <li className="flex items-center gap-3 text-site-sm">
                 <FiMapPin
-                  className="size-4 shrink-0 text-white/40"
+                  className="size-4 shrink-0 text-site-brand-bright"
                   aria-hidden
                 />
                 {t("location")}
               </li>
             </ul>
 
-            <ul className="mt-7 flex flex-wrap items-center gap-2">
+            <ul className="mt-8 flex flex-wrap items-center gap-2">
               {socials.map((social) => (
                 <li key={social.name}>
                   <a
@@ -110,7 +127,7 @@ export async function SiteFooter() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={social.name}
-                    className="flex size-10 items-center justify-center rounded-site-control border border-site-on-ink-line bg-site-on-ink-raise text-white/70 transition-colors duration-150 hover:border-white/25 hover:bg-white/10 hover:text-white"
+                    className="flex size-10 items-center justify-center rounded-full border border-site-on-ink-line bg-white/5 text-site-on-ink-body transition-colors duration-(--dur-settle) hover:border-transparent hover:bg-site-brand hover:text-white"
                   >
                     <social.icon className="size-[18px]" aria-hidden />
                   </a>
@@ -147,7 +164,7 @@ export async function SiteFooter() {
           />
         </div>
 
-        <div className="mt-14 flex flex-col-reverse items-start gap-4 border-t border-site-on-ink-line pt-7 text-site-xs text-white/45 sm:flex-row sm:items-center sm:justify-between">
+        <div className="s-ticket mt-16 flex flex-col-reverse items-start gap-4 border-t border-site-on-ink-line pt-7 text-site-on-ink-muted sm:flex-row sm:items-center sm:justify-between">
           <p>
             © {year} ENSMENU. {t("copyright")}
           </p>
@@ -155,7 +172,7 @@ export async function SiteFooter() {
             href="https://ens.eg"
             target="_blank"
             rel="noopener noreferrer"
-            className="transition-colors hover:text-white/80"
+            className="transition-colors hover:text-site-on-ink"
           >
             {t("supportTagline")}
           </a>

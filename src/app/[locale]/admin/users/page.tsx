@@ -4,7 +4,6 @@ import { useLocale, useTranslations } from "next-intl";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
-import { ColDef } from "ag-grid-community";
 import {
   FaBan,
   FaUserCheck,
@@ -16,17 +15,20 @@ import {
   FaUser,
   FaClipboardList,
 } from "react-icons/fa";
-import { IoArrowBack, IoRefreshOutline } from "react-icons/io5";
-import DataTable from "@/components/Custom/DataTable";
+import { IoRefreshOutline } from "react-icons/io5";
 import { FiAlertTriangle } from "react-icons/fi";
 import {
   Alert,
   Badge,
   Button,
-  Card,
   ConfirmDialog,
+  DataTable,
+  EmptyState,
   Field,
+  NoResultsState,
   PageHeader,
+  PageShell,
+  Pagination,
   SearchInput,
   SegmentedControl,
   StatCard,
@@ -34,8 +36,10 @@ import {
   Textarea,
   Toolbar,
   buttonClasses,
+  type DataColumn,
 } from "@/components/ui";
-import { cn } from "@/lib/cn";
+import { useDataTableLabels } from "@/hooks/useDataTableLabels";
+import { useRowFlash } from "@/hooks/useRowFlash";
 import {
   axiosGet,
   axiosPatch,
@@ -100,10 +104,14 @@ export default function UsersPage() {
   const t = useTranslations("adminUsers");
   const tAccount = useTranslations("adminUsers.userDetails.accountActions");
   const tCommon = useTranslations("common");
+  const tAdmin = useTranslations("adminDashboard");
+  const tableLabels = useDataTableLabels();
+  /* A refetched grid looks identical apart from one row. This tints that row
+     for 1.2s so the operator does not have to find their own edit again. */
+  const { flashedRowKeys, flashRow } = useRowFlash();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const isRTL = locale === "ar";
-  const textDir = isRTL ? "rtl" : "ltr";
+  const textDir = locale === "ar" ? "rtl" : "ltr";
 
   const initialFilter = parseAdminUsersListFilter(searchParams.get("filter"));
   const initialPage = parseAdminUsersListPage(searchParams.get("page"));
@@ -304,6 +312,7 @@ export default function UsersPage() {
 
         if (result.status) {
           toast.success(t("removeFromHomepageSuccess"));
+          flashRow(user.id);
           if (planFilter === "on-homepage" && users.length === 1 && page > 1) {
             setPage(page - 1);
           } else {
@@ -319,7 +328,7 @@ export default function UsersPage() {
         setLoadingUserId(null);
       }
     },
-    [locale, t, fetchUsers, page, searchQuery, planFilter, users.length],
+    [locale, t, fetchUsers, page, searchQuery, planFilter, users.length, flashRow],
   );
 
   const handleAddToHomepage = useCallback(
@@ -333,6 +342,7 @@ export default function UsersPage() {
 
         if (result.status) {
           toast.success(t("addToHomepageSuccess"));
+          flashRow(user.id);
           fetchUsers(page, searchQuery, planFilter);
           return;
         }
@@ -354,7 +364,7 @@ export default function UsersPage() {
         setLoadingUserId(null);
       }
     },
-    [locale, t, fetchUsers, page, searchQuery, planFilter],
+    [locale, t, fetchUsers, page, searchQuery, planFilter, flashRow],
   );
 
   const handleConfirmSuspend = useCallback(async () => {
@@ -387,6 +397,7 @@ export default function UsersPage() {
         setSuspended((prev) => prev + 1);
         setActive((prev) => Math.max(0, prev - 1));
         toast.success(t("suspendSuccess"));
+        flashRow(userIdNum);
         setSuspendModal({ isOpen: false, user: null });
         setSuspendReason("");
       } else {
@@ -398,7 +409,7 @@ export default function UsersPage() {
     } finally {
       setLoadingUserId(null);
     }
-  }, [suspendModal.user, suspendReason, t, locale]);
+  }, [suspendModal.user, suspendReason, t, locale, flashRow]);
 
   const closeSuspendModal = useCallback(() => {
     if (loadingUserId === suspendModal.user?.id) return;
@@ -435,6 +446,7 @@ export default function UsersPage() {
         setActive((prev) => prev + 1);
         setSuspended((prev) => Math.max(0, prev - 1));
         toast.success(t("activateSuccess"));
+        flashRow(userIdNum);
         setReactivateModal({ isOpen: false, user: null });
       } else {
         toast.error(t("activateError"));
@@ -445,183 +457,178 @@ export default function UsersPage() {
     } finally {
       setLoadingUserId(null);
     }
-  }, [reactivateModal.user, t, locale]);
+  }, [reactivateModal.user, t, locale, flashRow]);
 
   const closeReactivateModal = useCallback(() => {
     if (loadingUserId === reactivateModal.user?.id) return;
     setReactivateModal({ isOpen: false, user: null });
   }, [loadingUserId, reactivateModal.user?.id]);
 
-  const columnDefs: ColDef<User>[] = useMemo(
+  const columns: DataColumn<User>[] = useMemo(
     () => [
       {
-        headerName: t("columns.name"),
-        field: "name",
-        flex: 1,
-        minWidth: 150,
-        cellRenderer: (params: { data: User; value: string }) => (
+        id: "name",
+        header: t("columns.name"),
+        primary: true,
+        cell: (user) => (
           <Button
             variant="link"
             size="sm"
-            onClick={() => openUserDetails(params.data.id)}
+            onClick={() => openUserDetails(user.id)}
           >
-            {params.value}
+            {user.name}
           </Button>
         ),
       },
       {
-        headerName: t("columns.email"),
-        field: "email",
-        flex: 1,
-        minWidth: 200,
-      },
-      {
-        headerName: t("columns.plan"),
-        field: "planName",
-        width: 100,
-      },
-      {
-        headerName: t("columns.subscriptionStatus"),
-        field: "subscriptionStatus",
-        width: 120,
-        cellRenderer: (params: { value: string | undefined }) => (
-          <span className="text-xs font-medium capitalize text-fg-muted">
-            {params.value || "—"}
+        id: "email",
+        header: t("columns.email"),
+        cell: (user) => (
+          <span className="truncate font-mono text-[12px] text-fg-muted" dir="ltr">
+            {user.email}
           </span>
         ),
       },
       {
-        headerName: t("columns.menusCount"),
-        field: "menusCount",
-        width: 100,
-        cellRenderer: (params: { value: number | undefined }) => (
-          <Badge tone="info" className="tabular-nums">
-            {params.value ?? 0}
-          </Badge>
+        id: "plan",
+        header: t("columns.plan"),
+        cell: (user) => <span className="text-fg-muted">{user.planName}</span>,
+      },
+      {
+        id: "subscriptionStatus",
+        header: t("columns.subscriptionStatus"),
+        hideOnMobile: true,
+        cell: (user) => (
+          <span className="text-[12px] capitalize text-fg-muted">
+            {user.subscriptionStatus || "—"}
+          </span>
         ),
       },
       {
-        headerName: t("columns.createdAt"),
-        field: "createdAt",
-        width: 120,
-        cellRenderer: (params: { value: string | undefined }) =>
-          formatAdminDate(params.value, locale),
+        id: "menusCount",
+        header: t("columns.menusCount"),
+        numeric: true,
+        align: "end",
+        cell: (user) => (
+          <span className="ui-figure text-[12px]" lang="en">
+            {user.menusCount ?? 0}
+          </span>
+        ),
       },
       {
-        headerName: t("columns.lastLogin"),
-        field: "lastLoginAt",
-        width: 120,
-        cellRenderer: (params: { value: string | null | undefined }) =>
-          formatAdminDate(params.value, locale),
+        id: "createdAt",
+        header: t("columns.createdAt"),
+        numeric: true,
+        align: "end",
+        hideOnMobile: true,
+        cell: (user) => (
+          <span className="ui-figure text-[12px] text-fg-muted" lang="en">
+            {formatAdminDate(user.createdAt, locale)}
+          </span>
+        ),
       },
       {
-        headerName: t("columns.status"),
-        field: "isSuspended",
-        width: 120,
-        cellRenderer: (params: { value: boolean }) => {
-          const isSuspended = params.value || false;
-          const isActive = !isSuspended;
-          return (
-            <Badge tone={isActive ? "success" : "danger"} dot>
-              {isActive ? t("status.active") : t("status.suspended")}
-            </Badge>
-          );
-        },
+        id: "lastLoginAt",
+        header: t("columns.lastLogin"),
+        numeric: true,
+        align: "end",
+        hideOnMobile: true,
+        cell: (user) => (
+          <span className="ui-figure text-[12px] text-fg-muted" lang="en">
+            {formatAdminDate(user.lastLoginAt, locale)}
+          </span>
+        ),
       },
       {
-        headerName: t("columns.actions"),
-        width: 180,
-        cellRenderer: (params: { data: User }) => {
-          const user = params.data;
-          const isActive = !user.isSuspended;
-          const isLoading = loadingUserId === user.id;
-          const featured = isFeaturedOnHomepage(user);
-          const hasMenu = (user.menusCount ?? 0) > 0;
-          return (
-            <div className="flex items-center gap-1">
-              <LinkTo
-                href={`/admin/users/${user.id}`}
-                title={t("actions.view")}
-                aria-label={t("actions.view")}
-                className={buttonClasses({
-                  variant: "secondary",
-                  size: "sm",
-                  iconOnly: true,
-                })}
-              >
-                <FaEye />
-              </LinkTo>
-              {featured ? (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  iconOnly
-                  loading={isLoading}
-                  onClick={() => handleRemoveFromHomepage(user)}
-                  title={t("actions.removeFromHomepage")}
-                  aria-label={t("actions.removeFromHomepage")}
-                >
-                  <FaStar />
-                </Button>
-              ) : hasMenu ? (
-                <Button
-                  variant="subtle"
-                  size="sm"
-                  iconOnly
-                  loading={isLoading}
-                  onClick={() => handleAddToHomepage(user)}
-                  title={t("actions.addToHomepage")}
-                  aria-label={t("actions.addToHomepage")}
-                >
-                  <FaStar />
-                </Button>
-              ) : null}
-              <Button
-                variant={isActive ? "dangerGhost" : "secondary"}
-                size="sm"
-                iconOnly
-                disabled={isLoading}
-                onClick={() =>
-                  isActive
-                    ? setSuspendModal({ isOpen: true, user })
-                    : setReactivateModal({ isOpen: true, user })
-                }
-                title={
-                  isActive ? t("actions.suspend") : t("actions.reactivate")
-                }
-                aria-label={
-                  isActive ? t("actions.suspend") : t("actions.reactivate")
-                }
-              >
-                {isActive ? <FaBan /> : <FaUserCheck />}
-              </Button>
-              <Button
-                variant="dangerGhost"
-                size="sm"
-                iconOnly
-                disabled={isLoading}
-                onClick={() => setDeleteModal({ isOpen: true, user })}
-                title={t("actions.delete")}
-                aria-label={t("actions.delete")}
-              >
-                <FaTrash />
-              </Button>
-            </div>
-          );
-        },
+        id: "status",
+        header: t("columns.status"),
+        cell: (user) => (
+          <Badge tone={user.isSuspended ? "danger" : "success"} dot>
+            {user.isSuspended ? t("status.suspended") : t("status.active")}
+          </Badge>
+        ),
       },
     ],
-    [
-      t,
-      isRTL,
-      openUserDetails,
-      loadingUserId,
-      handleAddToHomepage,
-      handleRemoveFromHomepage,
-      planFilter,
-      page,
-      searchQuery,
-    ],
+    [t, locale, openUserDetails],
+  );
+
+  const renderRowActions = useCallback(
+    (user: User) => {
+      const isActive = !user.isSuspended;
+      const isLoading = loadingUserId === user.id;
+      const featured = isFeaturedOnHomepage(user);
+      const hasMenu = (user.menusCount ?? 0) > 0;
+      return (
+        <span className="flex items-center gap-1">
+          <LinkTo
+            href={`/admin/users/${user.id}`}
+            title={t("actions.view")}
+            aria-label={t("actions.view")}
+            className={buttonClasses({
+              variant: "secondary",
+              size: "sm",
+              iconOnly: true,
+            })}
+          >
+            <FaEye />
+          </LinkTo>
+          {featured ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              iconOnly
+              loading={isLoading}
+              onClick={() => handleRemoveFromHomepage(user)}
+              title={t("actions.removeFromHomepage")}
+              aria-label={t("actions.removeFromHomepage")}
+            >
+              <FaStar />
+            </Button>
+          ) : hasMenu ? (
+            <Button
+              variant="subtle"
+              size="sm"
+              iconOnly
+              loading={isLoading}
+              onClick={() => handleAddToHomepage(user)}
+              title={t("actions.addToHomepage")}
+              aria-label={t("actions.addToHomepage")}
+            >
+              <FaStar />
+            </Button>
+          ) : null}
+          <Button
+            variant={isActive ? "dangerGhost" : "secondary"}
+            size="sm"
+            iconOnly
+            disabled={isLoading}
+            onClick={() =>
+              isActive
+                ? setSuspendModal({ isOpen: true, user })
+                : setReactivateModal({ isOpen: true, user })
+            }
+            title={isActive ? t("actions.suspend") : t("actions.reactivate")}
+            aria-label={
+              isActive ? t("actions.suspend") : t("actions.reactivate")
+            }
+          >
+            {isActive ? <FaBan /> : <FaUserCheck />}
+          </Button>
+          <Button
+            variant="dangerGhost"
+            size="sm"
+            iconOnly
+            disabled={isLoading}
+            onClick={() => setDeleteModal({ isOpen: true, user })}
+            title={t("actions.delete")}
+            aria-label={t("actions.delete")}
+          >
+            <FaTrash />
+          </Button>
+        </span>
+      );
+    },
+    [t, loadingUserId, handleAddToHomepage, handleRemoveFromHomepage],
   );
 
   const statCards: {
@@ -678,116 +685,156 @@ export default function UsersPage() {
   const showingTo = Math.min(page * itemsPerPage, total);
 
   return (
-    <div className="space-y-6" dir={textDir}>
-      <PageHeader
-        title={t("title")}
-        description={t("subtitle")}
-        actions={
-          <Button
-            variant="secondary"
-            startIcon={<IoArrowBack />}
-            onClick={() => router.back()}
-          >
-            {t("back")}
-          </Button>
-        }
-      />
+    <PageShell
+      kind="table"
+      header={
+        <>
+          {/* Breadcrumbs rather than a bare back button: the trail says where
+              this page sits under the admin hub, which a single arrow cannot. */}
+          <PageHeader
+            title={t("title")}
+            description={t("subtitle")}
+            breadcrumbs={[
+              { label: tAdmin("title"), href: "/admin" },
+              { label: t("title") },
+            ]}
+            breadcrumbsLabel={tCommon("breadcrumb")}
+          />
 
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          handleSearch();
-        }}
-      >
-        <Toolbar
-          search={
-            <SearchInput
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder={t("searchPlaceholder")}
-              label={t("search")}
-              clearLabel={tCommon("clearSearch")}
-              debounceMs={0}
-            />
-          }
-          filters={
-            <SegmentedControl
-              options={filterOptions.map((filter) => ({
-                value: filter,
-                label: t(`filters.${filter}`),
-              }))}
-              value={planFilter}
-              onChange={applyFilter}
-              label={t("filters.label")}
-              size="sm"
-            />
-          }
-          actions={
-            <>
-              <Button type="submit">{t("search")}</Button>
-              {searchQuery && (
-                <Button
-                  variant="secondary"
-                  startIcon={<IoRefreshOutline />}
-                  onClick={handleReset}
-                >
-                  {t("reset")}
-                </Button>
-              )}
-            </>
-          }
-        />
-      </form>
+          {/* The band is the filter control, not decoration beside one. Each
+              tile states a population and selects it, which is why the counts
+              sit above the toolbar instead of under it: you pick the cohort,
+              then narrow it. */}
+          <StatGrid columns={4}>
+            {statCards.map((card) => {
+              const Icon = card.icon;
+              const isSelected = planFilter === card.filter;
+              const sharePct =
+                card.filter !== "all" && totalUsersCount > 0
+                  ? Math.round((card.value / totalUsersCount) * 100)
+                  : null;
 
-      <StatGrid columns={4}>
-        {statCards.map((card) => {
-          const Icon = card.icon;
-          const isSelected = planFilter === card.filter;
-          const sharePct =
-            card.filter !== "all" && totalUsersCount > 0
-              ? Math.round((card.value / totalUsersCount) * 100)
-              : null;
-
-          return (
-            <StatCard
-              key={card.filter}
-              label={card.label}
-              value={card.value.toLocaleString(locale)}
-              hint={sharePct !== null ? `${sharePct}%` : undefined}
-              icon={<Icon />}
-              loading={loading}
-              onClick={() => applyFilter(card.filter)}
-              className={cn(
-                "h-full",
-                isSelected && "border-brand bg-brand-soft/40",
-              )}
-            />
-          );
-        })}
-      </StatGrid>
-
-      <Card>
-        <DataTable<User>
-          rowData={users}
-          columnDefs={columnDefs}
-          loading={loading}
-          locale={locale}
-          showRowNumbers={true}
-          pagination={true}
-          paginationPageSize={itemsPerPage}
+              return (
+                <StatCard
+                  key={card.filter}
+                  label={card.label}
+                  value={card.value.toLocaleString(locale)}
+                  hint={sharePct !== null ? `${sharePct}%` : undefined}
+                  icon={<Icon />}
+                  loading={loading}
+                  active={isSelected}
+                  onClick={() => applyFilter(card.filter)}
+                  className="h-full"
+                />
+              );
+            })}
+          </StatGrid>
+        </>
+      }
+      toolbar={
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            handleSearch();
+          }}
+        >
+          <Toolbar
+            search={
+              <SearchInput
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder={t("searchPlaceholder")}
+                label={t("search")}
+                clearLabel={tCommon("clearSearch")}
+                debounceMs={0}
+              />
+            }
+            filters={
+              <SegmentedControl
+                options={filterOptions.map((filter) => ({
+                  value: filter,
+                  label: t(`filters.${filter}`),
+                }))}
+                value={planFilter}
+                onChange={applyFilter}
+                label={t("filters.label")}
+                size="sm"
+              />
+            }
+            actions={
+              <>
+                <Button type="submit">{t("search")}</Button>
+                {(searchQuery || planFilter !== "all") && (
+                  <Button
+                    variant="secondary"
+                    startIcon={<IoRefreshOutline />}
+                    onClick={handleReset}
+                  >
+                    {t("reset")}
+                  </Button>
+                )}
+              </>
+            }
+          />
+        </form>
+      }
+      footer={
+        <Pagination
           page={page}
           totalPages={totalPages}
           onPageChange={(nextPage) => {
             setPage(nextPage);
             syncListUrl(planFilter, nextPage, searchQuery);
           }}
+          disabled={loading}
+          summary={
+            !loading && total > 0
+              ? t("showing", { from: showingFrom, to: showingTo, total })
+              : undefined
+          }
+          labels={{
+            region: tCommon("pagination"),
+            previous: tCommon("previousPage"),
+            next: tCommon("nextPage"),
+            page: (n) => tCommon("goToPage", { page: n }),
+          }}
         />
-        {!loading && total > 0 && (
-          <p className="mt-4 text-[13px] text-fg-muted">
-            {t("showing", { from: showingFrom, to: showingTo, total })}
-          </p>
-        )}
-      </Card>
+      }
+    >
+      <DataTable<User>
+        columns={columns}
+        rows={users}
+        getRowKey={(user) => String(user.id)}
+        changedRowKeys={flashedRowKeys}
+        caption={t("title")}
+        loading={loading}
+        skeletonRows={itemsPerPage}
+        tableId="admin-users"
+        stickyHeader
+        columnControl
+        densityControl
+        labels={tableLabels}
+        empty={
+          /* "No matches" and "no accounts yet" are different facts and the
+             recovery differs too: one is cleared by dropping the filter, the
+             other cannot be cleared at all. */
+          searchQuery ? (
+            <NoResultsState
+              title={tCommon("noResultsTitle")}
+              description={tCommon("noResultsDescription")}
+              onClear={handleReset}
+              clearLabel={t("reset")}
+            />
+          ) : (
+            <EmptyState
+              title={tCommon("emptyTitle")}
+              description={tCommon("emptyDescription")}
+              size="sm"
+            />
+          )
+        }
+        rowActions={renderRowActions}
+      />
 
       <ConfirmDialog
         open={deleteModal.isOpen}
@@ -861,6 +908,6 @@ export default function UsersPage() {
           </Field>
         </div>
       </ConfirmDialog>
-    </div>
+    </PageShell>
   );
 }

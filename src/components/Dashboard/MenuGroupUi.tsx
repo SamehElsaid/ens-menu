@@ -14,7 +14,7 @@ import type { Menu } from "@/types/Menu";
 /** Selectable row chrome shared by the menu and group pickers. */
 const pickRow = (selected: boolean) =>
   cn(
-    "group flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors duration-150",
+    "group flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors duration-(--dur-settle)",
     "has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring",
     selected
       ? "border-brand bg-brand-soft"
@@ -177,10 +177,10 @@ export function MenuGroupPickItem({
         </span>
         <span
           className={cn(
-            "flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors duration-150",
+            "flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors duration-(--dur-settle)",
             selected
               ? "border-brand bg-brand text-on-brand"
-              : "border-line-strong bg-surface",
+              : "border-line-control bg-surface",
           )}
           aria-hidden
         >
@@ -276,8 +276,8 @@ export function MenuGroupGroupOption({
       </span>
       <span
         className={cn(
-          "size-5 shrink-0 rounded-full border transition-colors duration-150",
-          selected ? "border-brand bg-brand" : "border-line-strong bg-surface",
+          "size-5 shrink-0 rounded-full border transition-colors duration-(--dur-settle)",
+          selected ? "border-brand bg-brand" : "border-line-control bg-surface",
         )}
         aria-hidden
       />

@@ -18,7 +18,7 @@ import { cn } from "@/lib/cn";
 
 const iconButton =
   "flex size-10 items-center justify-center rounded-site-control text-site-fg " +
-  "transition-colors duration-150 hover:bg-site-tint hover:text-site-ink";
+  "transition-colors duration-(--dur-settle) hover:bg-site-tint hover:text-site-ink";
 
 function useDarkMode() {
   return useSyncExternalStore(

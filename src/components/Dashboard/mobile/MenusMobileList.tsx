@@ -83,7 +83,6 @@ export default function MenusMobileList({
                   menuPublicUrl={getMenuPublicUrl(menu)}
                   dashboardPath={getDashboardPath(menu)}
                   groupMeta={resolveMenuGroupMeta(menu)}
-                  isNested
                   onToggleActive={onToggleActive}
                   onDelete={onDelete}
                   onCopy={onCopy}

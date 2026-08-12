@@ -1,7 +1,7 @@
 import { FiLogOut } from "react-icons/fi";
 import LinkTo from "./Global/LinkTo";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import Cookies from "js-cookie";
 import Loader from "./Global/Loader";
 import { decryptData } from "@/shared/encryption";
@@ -18,7 +18,34 @@ import {
   resolveFcmTokenForLogout,
 } from "@/shared/syncFcmToken";
 import { publicMenuLinkUrl } from "@/lib/publicMenuUrl";
+import {
+  Menu,
+  MenuItem,
+  MenuItemBody,
+  MenuSeparator,
+  focusRing,
+  menuItemClasses,
+} from "@/components/ui";
+import { cn } from "@/lib/cn";
 
+/**
+ * Account menu in the dashboard header.
+ *
+ * Built on the `Menu` primitive, which owns the elevation, the outside-click
+ * and Escape dismissal and the arrow-key walk — this was previously a panel
+ * toggled by opacity, so it stayed in the tab order while invisible and had no
+ * keyboard route through its rows.
+ *
+ * The identity block is a header inside the panel rather than a tinted card of
+ * its own: the name is the only thing set in UI weight and the role sits under
+ * it as a quiet label, so the panel reads as one list with a heading instead of
+ * two stacked surfaces. The "online" dot is gone — it was always green and
+ * reported nothing.
+ *
+ * The two destination rows keep `LinkTo`, because it carries the locale prefix
+ * and the same-route guard the header depends on; they take the row recipe from
+ * the primitive so they are identical to the rows that do not.
+ */
 function UserDropDown() {
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -33,7 +60,6 @@ function UserDropDown() {
     };
   };
   const t = useTranslations();
-  const profileMenuRef = useRef<HTMLDivElement>(null);
   const userInitial = profile.data?.user?.email?.charAt(0).toUpperCase() ?? "U";
   const userName = profile.data?.user?.name ?? "John Doe";
   const isStaff = session?.role === "staff";
@@ -105,125 +131,98 @@ function UserDropDown() {
     router.push("/");
   };
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        profileMenuRef.current &&
-        !profileMenuRef.current.contains(event.target as Node)
-      ) {
-        setIsProfileMenuOpen(false);
-      }
-    };
+  const avatar = (box: string) =>
+    profile.data?.user?.profileImage ? (
+      <LoadImage
+        src={profile.data?.user?.profileImage as string}
+        alt=""
+        width={150}
+        height={150}
+        className={cn(box, "object-cover")}
+      />
+    ) : (
+      <span className="text-[13px] font-semibold text-brand-soft-fg">
+        {userInitial}
+      </span>
+    );
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
   return (
     <>
       {isLoggingOut && (
-        <div className="fixed end-0 top-0  h-[100dvh] bg-white z-11111111 w-screen h-screen flex items-center justify-center">
+        <div className="fixed inset-0 z-1000 flex items-center justify-center bg-app">
           <Loader />
         </div>
       )}
-      <div className="relative" ref={profileMenuRef}>
-        <button
-          type="button"
-          onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-          className=" flex uppercase items-center justify-center w-10 h-10 overflow-hidden rounded-full border border-transparent bg-purple-50 dark:bg-purple-500/20  text-sm font-medium text-purple-600 dark:text-purple-400 transition-all duration-300 hover:bg-purple-100 dark:hover:bg-purple-500/30 hover:border-purple-200 dark:hover:border-purple-500/40"
-        >
-          {profile.data?.user?.profileImage ? (
-            <LoadImage
-              src={profile.data?.user?.profileImage as string}
-              alt="Profile Image"
-              width={150}
-              height={150}
-              className="w-10 h-10 object-cover"
-            />
-          ) : (
-            userInitial
-          )}
-        </button>
 
-        <div
-          className={`absolute end-0 mt-2 w-64 rounded-2xl border border-purple-100 dark:border-purple-500/30 bg-white dark:bg-slate-800 shadow-2xl backdrop-blur-xl duration-200 z-60 ${
-            isProfileMenuOpen
-              ? "visible translate-y-0 opacity-100"
-              : "invisible -translate-y-2 opacity-0"
-          }`}
-        >
-          <div className="flex items-center gap-3 border-b border-purple-100 dark:border-purple-500/30 px-4 py-3">
-            <div className="relative">
-              <span className="flex h-12 w-12 overflow-hidden items-center justify-center rounded-full bg-purple-100 dark:bg-purple-500/20 text-base font-bold text-purple-600 dark:text-purple-400">
-                {profile.data?.user?.profileImage ? (
-                  <LoadImage
-                    src={profile.data?.user?.profileImage as string}
-                    alt="Profile Image"
-                    width={150}
-                    height={150}
-                    className="w-12 h-12 object-cover"
-                  />
-                ) : (
-                  userInitial
-                )}
-              </span>
-              <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white dark:border-slate-800 bg-emerald-500" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold text-slate-900 dark:text-white">
-                {(userName as string) ?? "John Doe"}
-              </span>
-              <span className="text-xs capitalize text-slate-500 dark:text-slate-400">
-                {(userRole as string) ?? "Admin"}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex flex-col px-2 py-2">
-            {profileMenuItems.map((item) =>
-              item.external ? (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setIsProfileMenuOpen(false)}
-                  className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 transition-all duration-200 hover:bg-purple-50 dark:hover:bg-purple-500/20 hover:text-purple-600 dark:hover:text-purple-400"
-                >
-                  <span className="text-base text-purple-500 dark:text-purple-400">
-                    {item.icon}
-                  </span>
-                  <span className="font-medium">{item.label}</span>
-                </a>
-              ) : (
-                <LinkTo
-                  key={item.label}
-                  href={item.href}
-                  onClick={() => setIsProfileMenuOpen(false)}
-                  className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 transition-all duration-200 hover:bg-purple-50 dark:hover:bg-purple-500/20 hover:text-purple-600 dark:hover:text-purple-400"
-                >
-                  <span className="text-base text-purple-500 dark:text-purple-400">
-                    {item.icon}
-                  </span>
-                  <span className="font-medium">{item.label}</span>
-                </LinkTo>
-              ),
+      <Menu
+        label={userName as string}
+        align="end"
+        open={isProfileMenuOpen}
+        onOpenChange={setIsProfileMenuOpen}
+        panelClassName="w-60"
+        trigger={(props) => (
+          <button
+            {...props}
+            type="button"
+            aria-label={userName as string}
+            className={cn(
+              "flex size-8 items-center justify-center overflow-hidden rounded-full border border-brand-line bg-brand-soft uppercase row-settle",
+              "hover:border-brand hover:bg-brand-soft-hover",
+              focusRing,
             )}
-          </div>
-
-          <div className="border-t border-purple-100 dark:border-purple-500/30 px-2 py-2">
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-start text-sm font-medium text-red-600 dark:text-red-400 transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-500/20"
-            >
-              <span className="text-base">
-                <FiLogOut />
-              </span>
-              <span>{t("userProfile.singOut")}</span>
-            </button>
-          </div>
+          >
+            {avatar("size-8")}
+          </button>
+        )}
+      >
+        <div className="flex items-center gap-2.5 px-2 pt-1 pb-2">
+          <span className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-brand-line bg-brand-soft uppercase">
+            {avatar("size-9")}
+          </span>
+          <span className="flex min-w-0 flex-col">
+            <span className="truncate text-[13px] font-semibold text-fg">
+              {(userName as string) ?? "John Doe"}
+            </span>
+            <span className="ui-label truncate">
+              {(userRole as string) ?? "Admin"}
+            </span>
+          </span>
         </div>
-      </div>
+
+        <MenuSeparator />
+
+        {profileMenuItems.map((item) =>
+          item.external ? (
+            <a
+              key={item.label}
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              role="menuitem"
+              onClick={() => setIsProfileMenuOpen(false)}
+              className={menuItemClasses()}
+            >
+              <MenuItemBody icon={item.icon}>{item.label}</MenuItemBody>
+            </a>
+          ) : (
+            <LinkTo
+              key={item.label}
+              href={item.href}
+              role="menuitem"
+              onClick={() => setIsProfileMenuOpen(false)}
+              className={menuItemClasses()}
+            >
+              <MenuItemBody icon={item.icon}>{item.label}</MenuItemBody>
+            </LinkTo>
+          ),
+        )}
+
+        <MenuSeparator />
+
+        <MenuItem tone="danger" icon={<FiLogOut />} onClick={handleLogout}>
+          {t("userProfile.singOut")}
+        </MenuItem>
+      </Menu>
     </>
   );
 }

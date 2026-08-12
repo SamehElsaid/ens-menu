@@ -2,23 +2,31 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
 import {
-  IoArrowBack,
+  IoCloseOutline,
   IoMailOutline,
   IoPeopleOutline,
   IoRefreshOutline,
   IoSearchOutline,
 } from "react-icons/io5";
-import CardDashBoard from "@/components/Card/CardDashBoard";
 import { FiAlertTriangle } from "react-icons/fi";
 import {
+  Alert,
+  Badge,
   Button,
+  Card,
+  Checkbox,
   ConfirmDialog,
+  EmptyState,
   Field,
   Input,
+  PageColumns,
   PageHeader,
+  PageShell,
+  SectionHeader,
   SegmentedControl,
+  Skeleton,
+  StatCard,
   Textarea,
 } from "@/components/ui";
 import CustomInput from "@/components/Custom/CustomInput";
@@ -74,6 +82,28 @@ const AUDIENCES: BroadcastAudience[] = [
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
 
+/**
+ * Caption for a control that owns its own labelling.
+ *
+ * A `Field` would emit a `for` pointing at a radiogroup, which is not a
+ * labelable element; the group carries its own accessible name instead, so the
+ * visible caption is a ticket label and nothing more.
+ */
+function ControlGroup({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex min-w-0 flex-col gap-1.5">
+      <p className="ui-label">{label}</p>
+      {children}
+    </div>
+  );
+}
+
 function parseTestEmails(value: string): string[] {
   const seen = new Set<string>();
   const emails: string[] = [];
@@ -92,8 +122,7 @@ export default function AdminBroadcastPage() {
   const locale = useLocale();
   const t = useTranslations("adminBroadcast");
   const tCommon = useTranslations("common");
-  const router = useRouter();
-  const textDir = locale === "ar" ? "rtl" : "ltr";
+  const tAdmin = useTranslations("adminDashboard");
   const defaultEmailLocale = locale === "ar" ? "ar" : "en";
   const defaultTemplate = getBroadcastTemplate(
     "products-no-image",
@@ -304,21 +333,83 @@ export default function AdminBroadcastPage() {
     toast.error(payload?.error || t("sendError"));
   };
 
+  const recipientsAside = (
+    <Card as="aside" padded="md" className="space-y-3">
+      <SectionHeader
+        ruled
+        eyebrow={t("audienceLabel")}
+        title={
+          <span className="inline-flex items-center gap-2">
+            <IoPeopleOutline className="text-fg-subtle" aria-hidden />
+            {t("previewTitle")}
+          </span>
+        }
+      />
+
+      <div aria-live="polite" className="space-y-3">
+        {preview || previewLoading ? (
+          <StatCard
+            label={t("recipientsCount")}
+            value={
+              <span lang="en">
+                {(preview?.count ?? 0).toLocaleString("en-US")}
+              </span>
+            }
+            loading={previewLoading}
+            hint={previewLoading ? t("previewLoading") : undefined}
+          />
+        ) : (
+          <EmptyState title={t("noRecipients")} size="sm" />
+        )}
+
+        {preview?.capped ? (
+          <Alert tone="warning">
+            {t("cappedNotice", { max: preview.maxRecipients })}
+          </Alert>
+        ) : null}
+
+        {preview && preview.sample.length > 0 ? (
+          <div>
+            <p className="ui-label border-b border-line pb-1.5">
+              {t("sampleRecipients")}
+            </p>
+            <ul className="divide-y divide-line">
+              {preview.sample.map((user) => (
+                <li key={user.id} className="py-2">
+                  <p className="truncate text-[13px] font-medium text-fg">
+                    {user.name}
+                  </p>
+                  <p className="truncate text-xs text-fg-subtle">
+                    {user.email}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </div>
+
+      <Alert tone="info" icon={<IoMailOutline />}>
+        {t("hint")}
+      </Alert>
+    </Card>
+  );
+
   return (
-    <div dir={textDir} className="admin-broadcast-page space-y-6 p-4 md:p-6">
-      <PageHeader
-        title={t("title")}
-        description={t("subtitle")}
-        actions={
-          <>
-            <Button
-              variant="ghost"
-              size="sm"
-              startIcon={<IoArrowBack className="rtl:rotate-180" />}
-              onClick={() => router.push("/admin")}
-            >
-              {t("backToAdmin")}
-            </Button>
+    <PageShell
+      kind="wide"
+      className="admin-broadcast-page"
+      header={
+        <PageHeader
+          eyebrow={t("eyebrow")}
+          title={t("title")}
+          description={t("subtitle")}
+          breadcrumbs={[
+            { label: tAdmin("title"), href: "/admin" },
+            { label: t("title") },
+          ]}
+          breadcrumbsLabel={tCommon("breadcrumb")}
+          actions={
             <Button
               variant="secondary"
               startIcon={<IoRefreshOutline />}
@@ -326,16 +417,36 @@ export default function AdminBroadcastPage() {
             >
               {t("refresh")}
             </Button>
-          </>
-        }
-      />
-
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <CardDashBoard className="space-y-5 p-5">
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-fg">
-              {t("audienceLabel")}
-            </label>
+          }
+        />
+      }
+      footerSticky
+      footer={
+        /* Sending to thousands of people is the page's one irreversible act, so
+           the button stays visible rather than sitting past a 420px preview
+           iframe and an eighteen-row textarea. */
+        <div className="flex items-center justify-end gap-3">
+          {preview ? (
+            <p className="text-xs text-fg-muted">
+              {t("recipientsCount")}:{" "}
+              <span className="ui-figure text-fg" lang="en">
+                {preview.count.toLocaleString("en-US")}
+              </span>
+            </p>
+          ) : null}
+          <Button
+            disabled={!canSend || sending}
+            loading={sending}
+            onClick={() => setConfirmOpen(true)}
+          >
+            {t("send")}
+          </Button>
+        </div>
+      }
+    >
+      <PageColumns side={recipientsAside}>
+        <Card as="section" padded="md" className="space-y-4">
+          <ControlGroup label={t("audienceLabel")}>
             <SegmentedControl
               label={t("audienceLabel")}
               value={audience}
@@ -345,10 +456,10 @@ export default function AdminBroadcastPage() {
                 label: t(`audience.${item}`),
               }))}
             />
-          </div>
+          </ControlGroup>
 
           {audience === "selected" && (
-            <div className="space-y-3 rounded-lg border border-dashed border-line p-4">
+            <div className="space-y-3 rounded-lg border border-dashed border-line-strong bg-surface-2/40 p-3">
               <CustomInput
                 type="text"
                 id="broadcast-user-search"
@@ -360,83 +471,83 @@ export default function AdminBroadcastPage() {
               />
 
               {selectedUsers.length > 0 && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {selectedUsers.map((user) => (
-                    <button
+                    <Button
                       key={user.id}
-                      type="button"
+                      variant="secondary"
+                      size="xs"
+                      endIcon={<IoCloseOutline />}
                       onClick={() => removeSelectedUser(user.id)}
-                      className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
+                      aria-label={`${t("audience.selected")}: ${user.name}`}
                     >
-                      {user.name} ×
-                    </button>
+                      {user.name}
+                    </Button>
                   ))}
                 </div>
               )}
 
-              {searchLoading ? (
-                <p className="text-sm text-fg-subtle">{t("searching")}</p>
-              ) : (
-                <div className="max-h-56 space-y-2 overflow-y-auto">
-                  {searchResults.map((user) => {
-                    const checked = selectedUsers.some(
-                      (item) => item.id === user.id,
-                    );
-                    return (
-                      <label
-                        key={user.id}
-                        className="flex cursor-pointer items-center gap-3 rounded-lg border border-line px-3 py-2"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={checked}
+              <div
+                className="max-h-56 overflow-y-auto rounded-lg border border-line bg-surface"
+                aria-busy={searchLoading || undefined}
+                aria-live="polite"
+              >
+                {searchLoading ? (
+                  <div className="flex flex-col gap-2 p-3">
+                    <span className="sr-only">{t("searching")}</span>
+                    {[0, 1, 2].map((row) => (
+                      <Skeleton key={row} className="h-8 w-full" />
+                    ))}
+                  </div>
+                ) : searchResults.length === 0 ? (
+                  <p className="px-3 py-4 text-center text-xs text-fg-muted">
+                    {t("searchUsersPlaceholder")}
+                  </p>
+                ) : (
+                  <ul className="divide-y divide-line">
+                    {searchResults.map((user) => (
+                      <li key={user.id} className="px-3 py-2">
+                        <Checkbox
+                          checked={selectedUsers.some(
+                            (item) => item.id === user.id,
+                          )}
                           onChange={() => toggleUser(user)}
+                          label={user.name}
+                          hint={user.email}
                         />
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-sm font-medium text-fg">
-                            {user.name}
-                          </span>
-                          <span className="block truncate text-xs text-fg-subtle">
-                            {user.email}
-                          </span>
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
-              )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             </div>
           )}
 
           {audience === "test" && (
-            <div className="space-y-2 rounded-lg border border-dashed border-line p-4">
-              <label
+            <div className="space-y-2 rounded-lg border border-dashed border-line-strong bg-surface-2/40 p-3">
+              <Field
+                label={t("testEmails")}
                 htmlFor="broadcast-test-emails"
-                className="block text-sm font-semibold text-fg-muted"
+                hint={t("testEmailsHint")}
               >
-                {t("testEmails")}
-              </label>
-              <p className="text-xs text-fg-muted">{t("testEmailsHint")}</p>
-              <textarea
-                id="broadcast-test-emails"
-                rows={3}
-                dir="ltr"
-                value={testEmailsInput}
-                onChange={(e) => setTestEmailsInput(e.target.value)}
-                placeholder={t("testEmailsPlaceholder")}
-                className="w-full rounded-lg border border-line bg-white px-4 py-3 font-mono text-sm text-fg outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-              />
+                <Textarea
+                  id="broadcast-test-emails"
+                  rows={3}
+                  dir="ltr"
+                  value={testEmailsInput}
+                  onChange={(e) => setTestEmailsInput(e.target.value)}
+                  placeholder={t("testEmailsPlaceholder")}
+                  className="font-mono"
+                />
+              </Field>
               {testEmails.length > 0 && (
-                <div className="flex flex-wrap gap-2">
+                <ul className="flex flex-wrap gap-1.5" dir="ltr">
                   {testEmails.map((email) => (
-                    <span
-                      key={email}
-                      className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
-                    >
-                      {email}
-                    </span>
+                    <li key={email}>
+                      <Badge tone="brand">{email}</Badge>
+                    </li>
                   ))}
-                </div>
+                </ul>
               )}
             </div>
           )}
@@ -466,11 +577,14 @@ export default function AdminBroadcastPage() {
               className="font-mono text-sm leading-relaxed"
             />
           </Field>
+
           {message.trim() ? (
-            <div className="mt-3 overflow-hidden rounded-lg border border-line">
-              <p className="border-b border-line bg-surface-2 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-fg-muted">
+            <div className="overflow-hidden rounded-lg border border-line">
+              <p className="ui-label border-b border-line bg-surface-2 px-3 py-2">
                 {t("htmlPreview")}
               </p>
+              {/* The frame renders the mail body as a client will render it, so
+                  it keeps the paper white rather than the product's bone. */}
               <iframe
                 title={t("htmlPreview")}
                 srcDoc={message.replace(
@@ -483,10 +597,7 @@ export default function AdminBroadcastPage() {
             </div>
           ) : null}
 
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-fg">
-              {t("emailLocale")}
-            </label>
+          <ControlGroup label={t("emailLocale")}>
             <SegmentedControl
               label={t("emailLocale")}
               value={emailLocale}
@@ -496,61 +607,9 @@ export default function AdminBroadcastPage() {
                 { value: "en" as const, label: t("localeEn") },
               ]}
             />
-          </div>
-
-          <Button
-            disabled={!canSend || sending}
-            loading={sending}
-            onClick={() => setConfirmOpen(true)}
-            className="w-full sm:w-auto"
-          >
-            {t("send")}
-          </Button>
-        </CardDashBoard>
-
-        <CardDashBoard className="h-fit space-y-4 p-5">
-          <div className="flex items-center gap-2 text-fg-muted">
-            <IoPeopleOutline className="text-primary" />
-            <h2 className="font-semibold">{t("previewTitle")}</h2>
-          </div>
-
-          {previewLoading ? (
-            <p className="text-sm text-fg-subtle">{t("previewLoading")}</p>
-          ) : preview ? (
-            <>
-              <p className="text-3xl font-bold text-primary">{preview.count}</p>
-              <p className="text-sm text-fg-subtle">{t("recipientsCount")}</p>
-              {preview.capped && (
-                <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
-                  {t("cappedNotice", { max: preview.maxRecipients })}
-                </p>
-              )}
-              {preview.sample.length > 0 && (
-                <div className="space-y-2 border-t border-line pt-4 dark:border-line">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-fg-subtle">
-                    {t("sampleRecipients")}
-                  </p>
-                  {preview.sample.map((user) => (
-                    <div key={user.id} className="text-sm">
-                      <p className="font-medium text-fg">{user.name}</p>
-                      <p className="truncate text-xs text-fg-subtle">
-                        {user.email}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          ) : (
-            <p className="text-sm text-fg-subtle">{t("noRecipients")}</p>
-          )}
-
-          <div className="rounded-lg bg-slate-50 p-3 text-xs text-slate-600">
-            <IoMailOutline className="mb-2 text-base text-primary" />
-            {t("hint")}
-          </div>
-        </CardDashBoard>
-      </div>
+          </ControlGroup>
+        </Card>
+      </PageColumns>
 
       <ConfirmDialog
         open={confirmOpen}
@@ -564,6 +623,6 @@ export default function AdminBroadcastPage() {
         tone="brand"
         icon={<FiAlertTriangle />}
       />
-    </div>
+    </PageShell>
   );
 }

@@ -14,7 +14,12 @@ import { enUS as enLocale } from "date-fns/locale/en-US";
 import { useLocale, useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { cn } from "@/lib/cn";
-import { focusRing } from "@/components/ui";
+import {
+  focusField,
+  focusRing,
+  settle,
+  useFieldControl,
+} from "@/components/ui";
 
 registerLocale("ar", arLocale);
 registerLocale("en", enLocale);
@@ -85,9 +90,19 @@ export default function CustomInput({
   void _color;
   void focus;
 
-  const controlId = id?.replace(" ", "-");
+  /* When this control sits inside a `Field`, take the id and description the
+     Field already generated — otherwise the Field's label points at nothing and
+     the input has no accessible name. An explicit `id` prop still wins. */
+  const field = useFieldControl() as {
+    id?: string;
+    "aria-describedby"?: string;
+  };
+  const controlId = (id ?? field.id)?.replace(" ", "-");
   const errorId = `${controlId ?? generatedId}-error`;
-  const describedBy = error ? errorId : undefined;
+  const describedBy =
+    [error ? errorId : null, field["aria-describedby"] ?? null]
+      .filter(Boolean)
+      .join(" ") || undefined;
 
   const checkingLabel = loadingLabel ?? t("auth.checkingAvailability");
 
@@ -115,13 +130,18 @@ export default function CustomInput({
 
   const isSmall = size === "small";
 
-  /** Shared control chrome, matching `@/components/ui/Input`. */
+  /* Shared control chrome, matching `@/components/ui/Input`. `focusField` is
+     imported rather than re-typed so the brand halo is identical on the
+     settings pages that still use this control and the ones that use `Input` —
+     two focus treatments on adjacent pages is the inconsistency that reads as
+     an unfinished product. */
   const controlChrome = cn(
     "w-full min-w-0 rounded-lg border bg-surface text-sm text-fg placeholder:text-fg-subtle",
-    "transition-colors duration-150 outline-none",
-    "hover:border-fg-subtle focus:border-brand",
+    settle,
+    focusField,
+    "hover:border-fg-subtle",
     "disabled:cursor-not-allowed disabled:bg-surface-2 disabled:text-fg-subtle",
-    error ? "border-danger hover:border-danger" : "border-line-strong",
+    error ? "border-danger hover:border-danger" : "border-line-control",
   );
 
   /** Decorative affix; the input keeps its own label from the caller. */
@@ -165,7 +185,7 @@ export default function CustomInput({
                     );
                   }}
                   className={cn(
-                    "flex-1 rounded-md px-4 py-2 text-[13px] font-medium transition-colors duration-150",
+                    "flex-1 rounded-md px-4 py-2 text-[13px] font-medium transition-colors duration-(--dur-settle)",
                     focusRing,
                     isSelected
                       ? "bg-brand text-on-brand"
@@ -192,7 +212,7 @@ export default function CustomInput({
               } select`}
               isSearchable={(props?.isSearchable as boolean) || false}
               name={id}
-              inputId={id}
+              inputId={controlId}
               aria-invalid={error ? true : undefined}
               aria-errormessage={describedBy}
               isClearable={true}
@@ -224,6 +244,7 @@ export default function CustomInput({
           <div>
             <div className="relative">
               <PhoneInput
+                id={controlId}
                 labels={locales[locale as keyof typeof locales]}
                 ref={phoneRef}
                 defaultCountry={"EG"}

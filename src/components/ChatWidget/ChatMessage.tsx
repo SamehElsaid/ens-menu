@@ -22,8 +22,8 @@ export default function ChatMessage({ message }: Props) {
       <div
         className={`min-w-0 max-w-[88%] px-3 py-2.5 text-start text-[13px] sm:max-w-[84%] sm:px-3.5 sm:py-3 sm:text-[13.5px] ${
           isUser
-            ? "rounded-2xl rounded-ee-md bg-linear-to-br from-accent-purple to-deep-indigo leading-relaxed text-white shadow-md shadow-purple-500/25"
-            : "rounded-2xl rounded-es-md border border-slate-100/90 bg-white leading-[1.65] text-slate-700 shadow-sm sm:leading-[1.7] dark:border-slate-700/70 dark:bg-[#161b22] dark:text-slate-200"
+            ? "rounded-lg rounded-ee-sm bg-accent leading-relaxed text-on-accent"
+            : "rounded-lg rounded-es-sm border border-line bg-surface leading-[1.65] text-fg sm:leading-[1.7]"
         }`}
       >
         {isUser ? (
@@ -40,7 +40,7 @@ export default function ChatMessage({ message }: Props) {
       </div>
 
       {isUser ? (
-        <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-accent-purple to-deep-indigo text-white shadow-md shadow-purple-500/20 sm:size-9">
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent text-on-accent sm:size-9">
           <FiUser size={14} className="sm:hidden" />
           <FiUser size={15} className="hidden sm:block" />
         </div>

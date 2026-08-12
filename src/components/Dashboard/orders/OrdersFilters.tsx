@@ -1,6 +1,14 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { FiX } from "react-icons/fi";
+import {
+  Button,
+  Field,
+  Input,
+  SegmentedControl,
+  Select,
+} from "@/components/ui";
 import type { OrderStatus } from "@/lib/tableOrders";
 
 export type OrderStatusFilter = "all" | OrderStatus;
@@ -14,8 +22,6 @@ const STATUS_OPTIONS: OrderStatusFilter[] = [
   "cancelled",
 ];
 
-type OrdersFiltersTheme = "brand" | "emerald";
-
 export interface OrdersFilterMenu {
   id: number;
   label: string;
@@ -23,7 +29,6 @@ export interface OrdersFilterMenu {
 
 interface OrdersFiltersProps {
   translationNs: "tableOrders" | "deliveryOrders";
-  theme: OrdersFiltersTheme;
   dateFrom: string;
   dateTo: string;
   statusFilter: OrderStatusFilter;
@@ -32,42 +37,28 @@ interface OrdersFiltersProps {
   onStatusFilterChange: (value: OrderStatusFilter) => void;
   onClearFilters: () => void;
   hasActiveFilters: boolean;
-  isRTL: boolean;
   /** Account-level pages only: filter the aggregate down to a single menu. */
   menus?: OrdersFilterMenu[];
   menuFilter?: string;
   onMenuFilterChange?: (value: string) => void;
 }
 
-const themeClasses: Record<
-  OrdersFiltersTheme,
-  {
-    dateInput: string;
-    statusActive: string;
-    statusIdle: string;
-    clearBtn: string;
-  }
-> = {
-  brand: {
-    dateInput: "border-line bg-surface focus:border-brand focus:ring-brand/35",
-    statusActive: "bg-brand text-on-brand shadow-sm",
-    statusIdle: "bg-surface text-fg-muted ring-1 ring-line hover:bg-brand-soft",
-    clearBtn: "text-brand hover:bg-brand-soft",
-  },
-  emerald: {
-    dateInput:
-      "border-emerald-200/90 bg-white/90 focus:border-emerald-400 focus:ring-emerald-500/35 dark:border-emerald-500/30  dark:focus:border-emerald-400 dark:focus:ring-emerald-400/25",
-    statusActive: "bg-emerald-600 text-white shadow-sm dark:bg-emerald-500",
-    statusIdle:
-      "bg-white/80 text-fg-muted ring-1 ring-emerald-200/80 hover:bg-emerald-50   dark:ring-emerald-500/25 dark:hover:bg-emerald-950/40",
-    clearBtn:
-      "text-emerald-700 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-950/40",
-  },
-};
-
+/**
+ * The orders filter row.
+ *
+ * Three changes from the version this replaces, all of them about how many
+ * decisions the row asks for at once:
+ *
+ *   * Status is a segmented control, not six pill buttons. Six options are
+ *     mutually exclusive, and pills that only differ by fill colour do not say
+ *     that — a segmented control does, in a third of the width.
+ *   * The menu filter is a select. An account with eleven menus rendered eleven
+ *     chips that wrapped over three lines and pushed the orders off-screen.
+ *   * The dates are `Field` + `Input`, so their labels are ticket labels and the
+ *     controls carry the same focus rule as every other control in the product.
+ */
 export default function OrdersFilters({
   translationNs,
-  theme,
   dateFrom,
   dateTo,
   statusFilter,
@@ -76,121 +67,88 @@ export default function OrdersFilters({
   onStatusFilterChange,
   onClearFilters,
   hasActiveFilters,
-  isRTL,
   menus,
   menuFilter = "",
   onMenuFilterChange,
 }: OrdersFiltersProps) {
   const t = useTranslations(translationNs);
-  const styles = themeClasses[theme];
   // A single menu needs no picker — the aggregate already is that menu.
   const showMenuFilter = Boolean(
     onMenuFilterChange && (menus?.length ?? 0) > 1,
   );
 
   return (
-    <div className="mt-4 space-y-4 border-t border-line pt-4">
-      {showMenuFilter && (
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-fg-muted">
-            {t("filters.menu")}
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => onMenuFilterChange?.("")}
-              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-                menuFilter === "" ? styles.statusActive : styles.statusIdle
-              }`}
-            >
-              {t("filters.menuAll")}
-            </button>
-            {menus?.map((menu) => (
-              <button
-                key={menu.id}
-                type="button"
-                onClick={() => onMenuFilterChange?.(String(menu.id))}
-                className={`max-w-[14rem] truncate rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-                  menuFilter === String(menu.id)
-                    ? styles.statusActive
-                    : styles.statusIdle
-                }`}
-              >
-                {menu.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div>
-          <label
-            htmlFor={`${translationNs}-date-from`}
-            className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-fg-muted"
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-end gap-3">
+        {showMenuFilter ? (
+          <Field
+            label={t("filters.menu")}
+            htmlFor={`${translationNs}-menu`}
+            className="w-full sm:w-56"
           >
-            {t("filters.dateFrom")}
-          </label>
-          <input
+            <Select
+              id={`${translationNs}-menu`}
+              value={menuFilter}
+              onChange={(e) => onMenuFilterChange?.(e.target.value)}
+            >
+              <option value="">{t("filters.menuAll")}</option>
+              {menus?.map((menu) => (
+                <option key={menu.id} value={String(menu.id)}>
+                  {menu.label}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        ) : null}
+
+        <Field
+          label={t("filters.dateFrom")}
+          htmlFor={`${translationNs}-date-from`}
+          className="w-38"
+        >
+          <Input
             id={`${translationNs}-date-from`}
             type="date"
             value={dateFrom}
             max={dateTo || undefined}
             onChange={(e) => onDateFromChange(e.target.value)}
-            className={`w-full rounded-lg border py-2.5 text-sm text-fg focus:outline-none focus:ring-2  ${styles.dateInput} ${isRTL ? "ps-3 pe-3" : "px-3"}`}
           />
-        </div>
-        <div>
-          <label
-            htmlFor={`${translationNs}-date-to`}
-            className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-fg-muted"
-          >
-            {t("filters.dateTo")}
-          </label>
-          <input
+        </Field>
+
+        <Field
+          label={t("filters.dateTo")}
+          htmlFor={`${translationNs}-date-to`}
+          className="w-38"
+        >
+          <Input
             id={`${translationNs}-date-to`}
             type="date"
             value={dateTo}
             min={dateFrom || undefined}
             onChange={(e) => onDateToChange(e.target.value)}
-            className={`w-full rounded-lg border py-2.5 text-sm text-fg focus:outline-none focus:ring-2  ${styles.dateInput} ${isRTL ? "ps-3 pe-3" : "px-3"}`}
           />
-        </div>
+        </Field>
+
+        {hasActiveFilters ? (
+          <Button variant="ghost" size="sm" onClick={onClearFilters}>
+            <FiX className="size-3.5" aria-hidden />
+            {t("filters.clear")}
+          </Button>
+        ) : null}
       </div>
 
-      <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-fg-muted">
-          {t("filters.status")}
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {STATUS_OPTIONS.map((status) => (
-            <button
-              key={status}
-              type="button"
-              onClick={() => onStatusFilterChange(status)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-                statusFilter === status
-                  ? styles.statusActive
-                  : styles.statusIdle
-              }`}
-            >
-              {status === "all"
-                ? t("filters.statusAll")
-                : t(`orderStatus.${status}` as never)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {hasActiveFilters && (
-        <button
-          type="button"
-          onClick={onClearFilters}
-          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${styles.clearBtn}`}
-        >
-          {t("filters.clear")}
-        </button>
-      )}
+      <SegmentedControl
+        label={t("filters.status")}
+        value={statusFilter}
+        onChange={onStatusFilterChange}
+        options={STATUS_OPTIONS.map((status) => ({
+          value: status,
+          label:
+            status === "all"
+              ? t("filters.statusAll")
+              : t(`orderStatus.${status}` as never),
+        }))}
+      />
     </div>
   );
 }

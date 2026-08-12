@@ -1,12 +1,20 @@
 /**
- * ENSMENU public site — token layer.
+ * ENSMENU public site — token layer for the "Prism" direction.
  *
  * Everything here is scoped to `.public-world`, which is applied by the public
- * shells only (`(main)/layout.tsx`, `not-found`, `unauthorized`, `payment`).
+ * shells only (`(main)/layout.tsx`, auth, not-found, unauthorized, payment).
  * The dashboard and admin never carry the class, so nothing in this file can
- * reach them. That separation is deliberate: the product is a compact 13px
- * working tool, and the marketing site is a generous surface read once by a
- * stranger. They share the name, the logo and the brand hue. Nothing else.
+ * reach them.
+ *
+ * The direction is documented in DESIGN.md. In short: one light source
+ * (`#9035E8`) spent only on actions and brand moments, faintly violet-tinted
+ * neutrals doing all the structural work, soft layered elevation, and generous
+ * whitespace instead of a drawn grid.
+ *
+ * Two ground tokens, not one:
+ *   --s-ground  the page.
+ *   --s-bg      a panel sitting on it.
+ * A card and the page it sits on must never be the same colour.
  *
  * Do not move these values into `:root` — that is the product's token layer.
  *
@@ -18,90 +26,114 @@
 
 @layer base {
   .public-world {
-    /* --- Ground. Warm-neutral rather than pure grey, so food photography and
-           the amber accent sit on it without going cold. --- */
+    /* --- Ground. Tinted white: the same 301.53° hue as the brand at almost no
+           chroma, so the page never goes cold beside a purple fill. --- */
+    --s-ground: #f8f7fb;
     --s-bg: #ffffff;
-    --s-bg-tint: #f7f6fb;
-    --s-bg-warm: #fbf9f6;
-    --s-bg-ink: #100f1c;
-    --s-bg-ink-2: #1a1830;
+    --s-bg-tint: #f3f1f8;
+    --s-bg-warm: #faf7ff;
+    --s-bg-ink: #1a0f2e;
+    --s-bg-ink-2: #241041;
 
-    /* --- Ink --- */
-    --s-ink: #12111c;
-    --s-body: #4a4858;
-    --s-muted: #78758a;
-    --s-line: #e7e5ef;
-    --s-line-strong: #d6d3e3;
+    /* --- Neutrals --- */
+    --s-ink: #1a1720;
+    --s-body: #55525d;
+    /* The quietest text on the site, so it is still held to 4.5:1 on the ground
+       and on a panel rather than being treated as decoration. */
+    --s-muted: #6d6a72;
+    --s-line: #e5e1eb;
+    --s-line-strong: #d1cdd8;
 
-    /* --- Brand. Same indigo the product uses, so one company reads across the
-           site and the dashboard, but spent at marketing intensity. --- */
-    --s-brand: #5a4ce0;
-    --s-brand-hover: #4a3cc4;
-    --s-brand-deep: #3d33a0;
-    --s-brand-bright: #7c6cf5;
-    --s-brand-tint: #efedfe;
-    --s-brand-line: #d5d0fb;
+    /* --- The light source. `--s-brand` is the anchor itself: on this ground
+           it carries white at 5.44:1, so unlike the previous direction the
+           accent *is* the action and does not need an ink stand-in. --- */
+    --s-brand: #9035e8;
+    --s-brand-hover: #7f22d2;
+    --s-brand-deep: #6905b3;
+    --s-brand-bright: #b57cff;
+    --s-brand-tint: #f7f3ff;
+    --s-brand-line: #e0cfff;
+    /* Text-safe purple for links and small type on the ground (6.86:1). */
+    --s-brand-text: #7f22d2;
 
-    /* --- Hospitality accent. The one warm note; used for highlights, ratings
-           and food-adjacent moments, never for primary actions. --- */
-    --s-warm: #e08a2b;
-    --s-warm-bright: #f2a53d;
-    --s-warm-tint: #fdf3e5;
+    /* --- Gradients. One moment per page. --- */
+    --s-grad: linear-gradient(135deg, #9035e8 0%, #7046f9 100%);
+    --s-grad-vivid: linear-gradient(135deg, #9035e8 0%, #bb0bb5 100%);
+    --s-grad-deep: linear-gradient(160deg, #2d0f57 0%, #16062b 100%);
+
+    /* --- Action --- */
+    --s-action: #9035e8;
+    --s-action-hover: #7f22d2;
+    --s-action-fg: #ffffff;
+
+    /* --- Kept as aliases: `--s-warm` was the previous hospitality note and is
+           still referenced by ratings, "coming soon" and the phone mock. --- */
+    --s-warm: #9035e8;
+    --s-warm-bright: #b57cff;
+    --s-warm-tint: #f7f3ff;
 
     /* --- On dark bands --- */
-    --s-on-ink: #ffffff;
-    --s-on-ink-body: rgb(255 255 255 / 0.68);
-    --s-on-ink-muted: rgb(255 255 255 / 0.5);
-    --s-on-ink-line: rgb(255 255 255 / 0.12);
-    --s-on-ink-raise: rgb(255 255 255 / 0.05);
+    --s-on-ink: #faf8ff;
+    --s-on-ink-body: rgb(250 248 255 / 0.72);
+    --s-on-ink-muted: rgb(250 248 255 / 0.5);
+    --s-on-ink-line: rgb(250 248 255 / 0.16);
+    --s-on-ink-raise: rgb(250 248 255 / 0.06);
 
-    /* --- Status, marketing-weight --- */
-    --s-positive: #12886a;
-    --s-positive-tint: #e6f5f0;
-    --s-critical: #cf3b3b;
-    --s-critical-tint: #fdeded;
+    /* --- Status. Hue-separated from the brand; nothing signals status by hue
+           alone anywhere on this site. --- */
+    /* Both are text colours as often as they are fills — they carry check
+       marks, inline validation and the tinted alert bands — so they are set
+       dark enough to clear 4.5:1 on their own tint, not just on the panel. */
+    --s-positive: #00754a;
+    --s-positive-tint: #e0f8e9;
+    --s-critical: #c92838;
+    --s-critical-tint: #ffeceb;
 
-    /* --- Fluid type. Marketing scale: the display size is the page's single
-           loudest element and everything else steps down from it. --- */
-    --s-display: clamp(2.5rem, 1.6rem + 3.4vw, 4rem);
-    --s-h1: clamp(2rem, 1.4rem + 2.6vw, 3.25rem);
-    --s-h2: clamp(1.75rem, 1.35rem + 1.7vw, 2.5rem);
-    --s-h3: clamp(1.25rem, 1.12rem + 0.55vw, 1.5rem);
-    --s-h4: 1.125rem;
+    /* --- Type. Hierarchy from weight and size; the display step stays large
+           so a section has one loud element rather than three medium ones. --- */
+    --s-display: clamp(2.5rem, 1.1rem + 5.6vw, 5rem);
+    --s-h1: clamp(2rem, 1.35rem + 2.8vw, 3.25rem);
+    --s-h2: clamp(1.625rem, 1.2rem + 1.9vw, 2.5rem);
+    --s-h3: clamp(1.1875rem, 1.08rem + 0.5vw, 1.4375rem);
+    --s-h4: 1.0625rem;
     --s-lead: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
-    --s-body-size: 1.0625rem;
-    --s-small: 0.9375rem;
-    --s-tiny: 0.8125rem;
+    --s-body-size: 1rem;
+    --s-small: 0.875rem;
+    --s-tiny: 0.75rem;
+    /* The label. Sans and sentence case now — see DESIGN.md §4. */
+    --s-ticket: 0.75rem;
 
-    /* --- Geometry. Softer than the product's 8px cards; a marketing surface
-           can afford the roundness. --- */
+    /* --- Geometry. One step softer than the product at card scale. --- */
     --s-r-sm: 0.5rem;
     --s-r-control: 0.625rem;
     --s-r-card: 1rem;
     --s-r-lg: 1.25rem;
     --s-r-xl: 1.75rem;
 
-    /* --- Elevation. Layered and low-opacity, Stripe-style: a shadow reads as
-           light falling on a surface, never as a grey halo. --- */
+    /* --- Elevation, composed in the brand hue so shadows warm the neutrals
+           rather than dirtying them. --- */
     --s-shadow-sm:
-      0 1px 2px rgb(18 17 28 / 0.04), 0 1px 3px rgb(18 17 28 / 0.06);
+      0 1px 2px 0 rgb(35 20 60 / 0.05), 0 0 0 1px rgb(35 20 60 / 0.03);
     --s-shadow:
-      0 2px 4px rgb(18 17 28 / 0.03), 0 6px 16px -4px rgb(18 17 28 / 0.08);
+      0 2px 4px -1px rgb(35 20 60 / 0.06), 0 10px 24px -8px rgb(35 20 60 / 0.12);
     --s-shadow-lg:
-      0 4px 8px rgb(18 17 28 / 0.04), 0 18px 40px -12px rgb(18 17 28 / 0.14);
-    --s-shadow-brand: 0 8px 28px -8px rgb(90 76 224 / 0.45);
+      0 8px 16px -4px rgb(35 20 60 / 0.08),
+      0 32px 56px -18px rgb(35 20 60 / 0.24);
+    /* The light source casting colour. Primary CTA and the one featured card. */
+    --s-shadow-brand:
+      0 2px 4px 0 rgb(70 12 130 / 0.2), 0 12px 28px -6px rgb(144 53 232 / 0.36);
 
     /* --- Rhythm --- */
-    --s-section-y: clamp(4rem, 2.8rem + 5vw, 7rem);
-    --s-section-y-lg: clamp(5rem, 3.2rem + 7vw, 9rem);
-    --s-gutter: clamp(1.25rem, 4vw, 2rem);
-    --s-max: 1200px;
-    --s-max-prose: 42rem;
-
+    --s-section-y: clamp(4.5rem, 2.8rem + 5.5vw, 7.5rem);
+    --s-section-y-lg: clamp(5.5rem, 3.2rem + 7.5vw, 10rem);
+    --s-gutter: clamp(1.25rem, 4vw, 2.5rem);
+    --s-max: 1240px;
+    --s-max-prose: 68ch;
+    --s-gap: clamp(1rem, 1.8vw, 1.75rem);
     --s-header-h: 4.5rem;
 
     color-scheme: light;
-    background-color: var(--s-bg);
+    background-color: var(--s-ground);
     color: var(--s-body);
     font-size: var(--s-body-size);
     -webkit-font-smoothing: antialiased;
@@ -109,39 +141,54 @@
   }
 
   .dark .public-world {
-    --s-bg: #0b0a12;
-    --s-bg-tint: #121020;
-    --s-bg-warm: #12101c;
-    --s-bg-ink: #08070f;
-    --s-bg-ink-2: #14121f;
+    --s-ground: #121016;
+    --s-bg: #1c1921;
+    --s-bg-tint: #26232c;
+    --s-bg-warm: #211a2e;
+    --s-bg-ink: #0c0812;
+    --s-bg-ink-2: #150e22;
 
-    --s-ink: #f6f5fb;
-    --s-body: #b3afc6;
-    --s-muted: #85819a;
-    --s-line: #241f3a;
-    --s-line-strong: #322c4d;
+    --s-ink: #f4f2f8;
+    --s-body: #aca9b1;
+    --s-muted: #8b8892;
+    --s-line: #34303b;
+    --s-line-strong: #4a4552;
 
-    --s-brand: #8577f7;
-    --s-brand-hover: #9a8dff;
-    --s-brand-deep: #6c5eee;
-    --s-brand-bright: #a396ff;
-    --s-brand-tint: #1b1733;
-    --s-brand-line: #302a55;
+    /* The fill lifts a step so it can still hold white type; text lightens
+       further, because saturated mid purple on a dark ground vibrates. */
+    --s-brand: #9741f0;
+    --s-brand-hover: #a655f8;
+    --s-brand-deep: #7f22d2;
+    --s-brand-bright: #cdaeff;
+    --s-brand-tint: rgb(144 53 232 / 0.16);
+    --s-brand-line: rgb(144 53 232 / 0.38);
+    --s-brand-text: #bf92ff;
 
-    --s-warm: #f2a53d;
-    --s-warm-bright: #ffbc5c;
-    --s-warm-tint: #2a1f10;
+    --s-grad: linear-gradient(135deg, #7f22d2 0%, #5b34d6 100%);
+    --s-grad-vivid: linear-gradient(135deg, #7f22d2 0%, #8f0a8b 100%);
+    --s-grad-deep: linear-gradient(160deg, #1c0d35 0%, #0b0416 100%);
 
-    --s-positive: #3fc79c;
-    --s-positive-tint: #10261f;
-    --s-critical: #f07070;
-    --s-critical-tint: #2a1414;
+    --s-action: #9741f0;
+    --s-action-hover: #a655f8;
+    --s-action-fg: #ffffff;
 
-    --s-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
-    --s-shadow: 0 2px 4px rgb(0 0 0 / 0.3), 0 8px 20px -6px rgb(0 0 0 / 0.5);
+    --s-warm: #bf92ff;
+    --s-warm-bright: #cdaeff;
+    --s-warm-tint: rgb(144 53 232 / 0.16);
+
+    --s-positive: #40c987;
+    --s-positive-tint: rgb(64 201 135 / 0.15);
+    --s-critical: #ff807f;
+    --s-critical-tint: rgb(255 128 127 / 0.15);
+
+    --s-shadow-sm:
+      0 1px 2px 0 rgb(0 0 0 / 0.4), 0 0 0 1px rgb(255 255 255 / 0.03);
+    --s-shadow:
+      0 2px 4px -1px rgb(0 0 0 / 0.4), 0 10px 24px -8px rgb(0 0 0 / 0.5);
     --s-shadow-lg:
-      0 4px 10px rgb(0 0 0 / 0.35), 0 24px 50px -14px rgb(0 0 0 / 0.7);
-    --s-shadow-brand: 0 8px 30px -8px rgb(108 94 238 / 0.55);
+      0 8px 16px -4px rgb(0 0 0 / 0.48), 0 32px 56px -18px rgb(0 0 0 / 0.7);
+    --s-shadow-brand:
+      0 2px 4px 0 rgb(0 0 0 / 0.4), 0 14px 32px -6px rgb(144 53 232 / 0.5);
 
     color-scheme: dark;
   }
@@ -151,35 +198,39 @@
    *
    * The phone mock shows a guest's screen, and a guest's screen is white. If
    * it followed the visitor's dark preference the mock would stop depicting
-   * the product and start depicting the website, and — worse — pale ink would
-   * land on the white shell. Re-declaring the tokens keeps every utility
-   * inside it honest without any `dark:` overrides at the call site.
+   * the product and start depicting the website.
    */
   .dark .public-world .s-daylight {
+    --s-ground: #f8f7fb;
     --s-bg: #ffffff;
-    --s-bg-tint: #f7f6fb;
-    --s-bg-warm: #fbf9f6;
-    --s-bg-ink: #100f1c;
+    --s-bg-tint: #f3f1f8;
+    --s-bg-warm: #faf7ff;
+    --s-bg-ink: #1a0f2e;
 
-    --s-ink: #12111c;
-    --s-body: #4a4858;
-    --s-muted: #78758a;
-    --s-line: #e7e5ef;
-    --s-line-strong: #d6d3e3;
+    --s-ink: #1a1720;
+    --s-body: #55525d;
+    --s-muted: #6d6a72;
+    --s-line: #e5e1eb;
+    --s-line-strong: #d1cdd8;
 
-    --s-brand: #5a4ce0;
-    --s-brand-hover: #4a3cc4;
-    --s-brand-deep: #3d33a0;
-    --s-brand-tint: #efedfe;
-    --s-brand-line: #d5d0fb;
+    --s-brand: #9035e8;
+    --s-brand-hover: #7f22d2;
+    --s-brand-deep: #6905b3;
+    --s-brand-tint: #f7f3ff;
+    --s-brand-line: #e0cfff;
+    --s-brand-text: #7f22d2;
 
-    --s-warm: #e08a2b;
-    --s-warm-tint: #fdf3e5;
+    --s-action: #9035e8;
+    --s-action-fg: #ffffff;
 
-    --s-positive: #1f9d76;
-    --s-positive-tint: #e6f7f1;
+    --s-warm: #9035e8;
+    --s-warm-tint: #f7f3ff;
 
-    --s-shadow-sm: 0 1px 2px rgb(18 17 28 / 0.05);
+    --s-positive: #00754a;
+    --s-positive-tint: #e0f8e9;
+
+    --s-shadow-sm:
+      0 1px 2px 0 rgb(35 20 60 / 0.06), 0 0 0 1px rgb(35 20 60 / 0.03);
 
     color-scheme: light;
   }
@@ -190,8 +241,15 @@
     font-family: var(--font-site-display);
     color: var(--s-ink);
     font-weight: 700;
-    letter-spacing: -0.022em;
+    letter-spacing: -0.03em;
     text-wrap: balance;
+  }
+
+  /* Cairo carries a lot of weight at 700; the smaller steps read better one
+     notch down, which is what keeps an H3 from shouting. */
+  .public-world :where(h3, h4, h5, h6) {
+    font-weight: 650;
+    letter-spacing: -0.015em;
   }
 
   /* Arabic does not take negative tracking the way Latin does; the letterforms
@@ -206,7 +264,7 @@
 
   .public-world ::selection {
     background: var(--s-brand);
-    color: #fff;
+    color: #ffffff;
   }
 
   /* Dark bands opt in by class, and everything inside them inherits light ink
@@ -214,6 +272,159 @@
   .public-world .s-on-ink,
   .public-world .s-on-ink :where(h1, h2, h3, h4, h5, h6) {
     color: var(--s-on-ink);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   The label.
+
+   Was uppercase tracked monospace, which is what made every section read as a
+   service ticket. It is now sans and sentence case, so it introduces a heading
+   instead of competing with it. See DESIGN.md §4.
+   -------------------------------------------------------------------------- */
+
+.s-ticket {
+  font-family: var(--font-site-display);
+  font-size: var(--s-ticket);
+  font-weight: 600;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.public-world:dir(rtl) .s-ticket {
+  letter-spacing: 0;
+  line-height: 1.6;
+}
+
+/* The eyebrow: a label that carries the brand, one per section. */
+.s-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4375rem;
+  border-radius: 9999px;
+  background: var(--s-brand-tint);
+  border: 1px solid var(--s-brand-line);
+  color: var(--s-brand-text);
+  padding-block: 0.3125rem;
+  padding-inline: 0.75rem;
+  font-size: var(--s-tiny);
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+.s-on-ink .s-eyebrow {
+  background: var(--s-on-ink-raise);
+  border-color: var(--s-on-ink-line);
+  color: var(--s-on-ink);
+}
+
+/* --------------------------------------------------------------------------
+   The field.
+
+   One focus treatment, not two: the previous direction stated focus with both
+   a ring and a 2px inline-start edge. A brand border plus a soft brand halo
+   says it once, and says it the way premium software says it.
+
+   Deliberately unlayered so it beats the Tailwind border utilities on the same
+   element regardless of the order they land in the stylesheet.
+   -------------------------------------------------------------------------- */
+
+.s-field {
+  border: 1px solid var(--s-line-strong);
+  transition:
+    border-color var(--dur-settle) var(--ease-settle),
+    box-shadow var(--dur-settle) var(--ease-settle);
+}
+
+.s-field:hover:not(:disabled):not([aria-invalid]) {
+  border-color: var(--s-muted);
+}
+
+.s-field:focus,
+.s-field:focus-within {
+  border-color: var(--s-brand);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--s-brand) 16%, transparent);
+  outline: none;
+}
+
+.s-field[aria-invalid],
+.s-field[aria-invalid]:focus {
+  border-color: var(--s-critical);
+}
+
+.s-field[aria-invalid]:focus,
+.s-field[aria-invalid]:focus-within {
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--s-critical) 16%, transparent);
+}
+
+.s-field:disabled {
+  border-color: var(--s-line);
+  background: var(--s-bg-tint);
+}
+
+/* --------------------------------------------------------------------------
+   The 12-column grid.
+
+   Still twelve columns, but no longer drawn. Hairline column rules down every
+   section read as an engineering drawing rather than as premium software;
+   rhythm now comes from consistent gutters and a 1240px measure.
+   -------------------------------------------------------------------------- */
+
+.s-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--s-gap);
+}
+
+/**
+ * Bento: a 12-column grid whose children declare their own span. Collapses to
+ * two columns at `md` and one below, and every cell carries its own ticket
+ * label so a cell that reflows to full width still says what it is.
+ */
+.s-bento {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: var(--s-gap);
+}
+
+@media (min-width: 640px) {
+  .s-bento {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .s-bento {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+}
+
+/* --------------------------------------------------------------------------
+   The lift — DESIGN.md §5.
+
+   The signature interaction: one elevation step and 3px of travel, with no
+   scale and no colour flash. Direction-agnostic, so it needs no mirrored rule
+   for RTL, and it degrades to the shadow alone under reduced motion.
+   -------------------------------------------------------------------------- */
+
+.s-lift {
+  transition:
+    box-shadow var(--dur-lift) var(--ease-lift),
+    transform var(--dur-lift) var(--ease-lift),
+    border-color var(--dur-lift) var(--ease-settle);
+}
+
+.s-lift:hover,
+.s-lift:focus-within {
+  box-shadow: var(--s-shadow-lg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .s-lift:hover,
+  .s-lift:focus-within {
+    transform: translateY(-3px);
   }
 }
 
@@ -227,16 +438,21 @@
 
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
+    /* The range is read through a custom property so a stagger can be expressed
+       once, on the child, and be picked up by everything that should arrive with
+       it — including pseudo-elements, which inherit custom properties but not
+       `animation-range`. That is what lets a row's rule draw on the row's own
+       beat instead of all eight rules firing on the first one's. */
     .public-world .s-reveal {
       animation: s-reveal-in linear both;
       animation-timeline: view();
-      animation-range: entry 0% cover 22%;
+      animation-range: var(--s-stagger-range, entry 0% cover 20%);
     }
 
     .public-world .s-reveal-soft {
       animation: s-reveal-soft linear both;
       animation-timeline: view();
-      animation-range: entry 0% cover 26%;
+      animation-range: var(--s-stagger-range, entry 0% cover 24%);
     }
   }
 }
@@ -245,19 +461,19 @@
  * Arabic headings need air.
  *
  * The display line-heights are set for Latin caps; Arabic hangs marks well
- * above the baseline and tails well below it, so at 1.08 the second line of a
+ * above the baseline and tails well below it, so at 0.98 the second line of a
  * hero lands on the first. Deliberately unlayered: Tailwind's size utilities
  * live in the `utilities` layer and would win from anywhere inside `base`,
  * whatever the specificity.
  */
 .public-world:dir(rtl) :is(h1, h2, h3, h4, h5, h6) {
-  line-height: 1.35;
+  line-height: 1.32;
 }
 
 @keyframes s-reveal-in {
   from {
     opacity: 0;
-    transform: translateY(24px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -268,7 +484,7 @@
 @keyframes s-reveal-soft {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.985);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -276,28 +492,1048 @@
   }
 }
 
-/* Staggered children: each step delays the range start a little further. */
+/* Staggered children: each step delays the range start a little further.
+   Extended to 8 so the Features bento (6 cells) and the logo row (8 marks) both
+   fit inside one rule set instead of the tail arriving unstaggered. The step is
+   4% throughout, which keeps the last child inside the 280ms stagger cap. */
+.public-world .s-stagger {
+  --s-stagger-step: 4%;
+}
+
+/* Below `sm` the step halves. Multi-column grids have collapsed to one column,
+   so the same eight children now occupy far more scroll distance — at the desktop
+   step the last row would still be waiting to arrive while it is already fully on
+   screen, which reads as lag rather than as sequence. */
+@media (max-width: 639px) {
+  .public-world .s-stagger {
+    --s-stagger-step: 2%;
+  }
+}
+
 .public-world .s-stagger > *:nth-child(2) {
-  animation-range: entry 4% cover 26%;
+  --s-stagger-range: entry calc(1 * var(--s-stagger-step)) cover
+    calc(20% + 1 * var(--s-stagger-step));
 }
 .public-world .s-stagger > *:nth-child(3) {
-  animation-range: entry 8% cover 30%;
+  --s-stagger-range: entry calc(2 * var(--s-stagger-step)) cover
+    calc(20% + 2 * var(--s-stagger-step));
 }
 .public-world .s-stagger > *:nth-child(4) {
-  animation-range: entry 12% cover 34%;
+  --s-stagger-range: entry calc(3 * var(--s-stagger-step)) cover
+    calc(20% + 3 * var(--s-stagger-step));
 }
 .public-world .s-stagger > *:nth-child(5) {
-  animation-range: entry 16% cover 38%;
+  --s-stagger-range: entry calc(4 * var(--s-stagger-step)) cover
+    calc(20% + 4 * var(--s-stagger-step));
 }
 .public-world .s-stagger > *:nth-child(6) {
-  animation-range: entry 20% cover 42%;
+  --s-stagger-range: entry calc(5 * var(--s-stagger-step)) cover
+    calc(20% + 5 * var(--s-stagger-step));
+}
+.public-world .s-stagger > *:nth-child(7) {
+  --s-stagger-range: entry calc(6 * var(--s-stagger-step)) cover
+    calc(20% + 6 * var(--s-stagger-step));
+}
+/* The cap. Everything from the eighth child on shares the seventh's beat rather
+   than the tail drifting past the point where a stagger stops reading as one
+   gesture (§9.1, 280ms). */
+.public-world .s-stagger > *:nth-child(n + 8) {
+  --s-stagger-range: entry calc(7 * var(--s-stagger-step)) cover
+    calc(20% + 7 * var(--s-stagger-step));
+}
+
+/* A denser variant for long single-column ledgers — nine problem rows, eight
+   spec rows — where the default step would spread the list past the cap. Used
+   alongside `s-stagger`, not instead of it. */
+.public-world .s-stagger-tight {
+  --s-stagger-step: 2.5%;
+}
+
+@media (max-width: 639px) {
+  .public-world .s-stagger-tight {
+    --s-stagger-step: 1.5%;
+  }
+}
+
+/* And a looser one for a pair or a trio of long statements, where the point is
+   that they are separate claims rather than one list. */
+.public-world .s-stagger-editorial {
+  --s-stagger-step: 7%;
+}
+
+@media (max-width: 639px) {
+  .public-world .s-stagger-editorial {
+    --s-stagger-step: 4%;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Motion presets — MOTION-BLUEPRINT.md §3.5, §3.6.
+
+   Everything here sits inside the same two guards the reveals already use, so
+   the feature test and the motion preference are inherited rather than
+   re-declared: content is visible and correct with no animation at all, and
+   motion is only ever the additive case.
+   -------------------------------------------------------------------------- */
+
+@keyframes s-draw-inline {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes s-draw-block {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes s-tick-settle {
+  from {
+    transform: scale(0.85);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* A single display line arriving from behind its own bottom edge. Deliberately
+   `clip-path` rather than a wrapper with `overflow: hidden`, so it composites
+   without adding a stacking context around the type. */
+@keyframes s-unmask-block {
+  from {
+    clip-path: inset(0 0 100% 0);
+    opacity: 0;
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    /* Rules, dividers and underlines drawing toward the reading direction.
+       `transform-origin` has no logical keywords, so the RTL case is a real
+       override rather than something the property can resolve itself. */
+    .public-world .s-reveal-line {
+      transform-origin: left center;
+      animation: s-draw-inline linear both;
+      animation-timeline: view();
+      animation-range: var(--s-stagger-range, entry 10% cover 30%);
+    }
+
+    .public-world:dir(rtl) .s-reveal-line {
+      transform-origin: right center;
+    }
+
+    /* The block-axis sibling: connectors between vertically stacked steps.
+       Direction-agnostic, so it needs no mirrored rule. Inside a stagger it
+       draws on its own step's beat, which is what makes four items read as a
+       sequence rather than as a set arriving at once. */
+    .public-world .s-reveal-line-block {
+      transform-origin: center top;
+      animation: s-draw-block linear both;
+      animation-timeline: view();
+      animation-range: var(--s-stagger-range, entry 10% cover 30%);
+    }
+
+    /* A confirmation mark settling into place as the claim it confirms arrives.
+       Deliberately CSS rather than a JS spring: a
+       spring would be marginally nicer and would cost a JavaScript library on
+       routes whose budget for one is zero. It rides the row's own stagger beat,
+       so tick and text land together. */
+    .public-world .s-tick {
+      animation: s-tick-settle linear both;
+      animation-timeline: view();
+      animation-range: var(--s-stagger-range, entry 0% cover 24%);
+    }
+
+    /* One per page. Masked type is expensive attention. */
+    .public-world .s-reveal-mask {
+      animation: s-unmask-block linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 25%;
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   On-load entrance — MOTION-BLUEPRINT.md §10.1.
+
+   Distinct from `.s-reveal`, and the distinction is real: a reveal is
+   scroll-linked, and above the fold there is no scroll to link to. A `view()`
+   timeline on an element that is already fully in view resolves to its end
+   state, which is correct but means nothing animates on arrival. These presets
+   run on a clock instead, once, on first paint.
+
+   The two families are a performance rule rather than a style choice:
+
+     `s-enter*`       fades and rises.
+     `s-enter-still*` rises only, and never touches opacity.
+
+   Anything that is or contains an LCP candidate — the display headline, a
+   `priority` image — must use the transform-only variant. Chrome does not treat
+   a fully transparent element as painted, so a 520ms fade on the largest
+   element in the viewport is 520ms added to LCP. Transforms cost nothing there:
+   the pixels are on screen from the first frame, just not yet at rest.
+   -------------------------------------------------------------------------- */
+
+@keyframes s-enter-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--s-enter-travel, 16px));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes s-enter-rise-soft {
+  from {
+    opacity: 0;
+    transform: translateY(var(--s-enter-travel, 10px));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes s-enter-settle {
+  from {
+    transform: translateY(var(--s-enter-travel, 20px));
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes s-enter-settle-tight {
+  from {
+    transform: translateY(8px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* The badge is already vertically centred by a utility, so the keyframe has to
+   carry that offset through — otherwise the animation would drop it 50% of its
+   own height on the first frame. */
+@keyframes s-enter-badge {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .public-world .s-enter {
+    animation: s-enter-rise var(--dur-reveal) var(--ease-enter) both;
+  }
+
+  .public-world .s-enter-soft {
+    animation: s-enter-rise-soft var(--dur-reveal) var(--ease-enter) both;
+  }
+
+  .public-world .s-enter-still {
+    animation: s-enter-settle var(--dur-reveal) var(--ease-enter) both;
+  }
+
+  .public-world .s-enter-badge {
+    animation: s-enter-badge var(--dur-overlay) var(--ease-enter) both;
+  }
+
+  /* The underline beneath a highlighted word, above the fold. The scroll-linked
+     `s-reveal-line` is wrong here for the reason this whole family exists: a
+     `view()` timeline on something already in view resolves straight to its end
+     state. On a clock it starts as the headline finishes settling, so the line
+     reads as drawn under type that has already come to rest — rather than
+     racing it and arriving under a word still in motion. */
+  .public-world .s-enter-line {
+    transform-origin: left center;
+    animation: s-draw-inline 420ms var(--ease-lift) 340ms both;
+  }
+
+  .public-world:dir(rtl) .s-enter-line {
+    transform-origin: right center;
+  }
+
+  /* A rule above a closing note in a header block, drawn on the block's own
+     clock. The scroll-linked `s-rule-row` is the equivalent for content further
+     down the page; both keep the border in the markup as the resting state and
+     only make it transparent where the drawn line actually runs. */
+  .public-world .s-enter-rule {
+    position: relative;
+    border-block-start-color: transparent;
+  }
+
+  .public-world .s-enter-rule::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: -1px;
+    block-size: 1px;
+    background-color: var(--s-line);
+    transform-origin: left center;
+    animation: s-draw-inline 420ms var(--ease-lift) 430ms both;
+  }
+
+  .public-world:dir(rtl) .s-enter-rule::before {
+    transform-origin: right center;
+  }
+
+  /* Reading order as a clock: argument, then action, then proof. */
+  .public-world .s-enter-d1 {
+    animation-delay: 90ms;
+  }
+
+  .public-world .s-enter-d2 {
+    animation-delay: 180ms;
+  }
+
+  /* Punctuation, not content: the one mark that should land after everything
+     it describes is already in place. */
+  .public-world .s-enter-d3 {
+    animation-delay: 300ms;
+  }
+
+  /* The ruled fact stub beside a page title. Editorial 90ms apart, because
+     these are two or three separate statements rather than one list, and they
+     start with the action rather than after it — the facts qualify the button,
+     so arriving together is the honest reading. */
+  .public-world .s-enter-meta > * {
+    animation: s-enter-rise-soft var(--dur-reveal) var(--ease-enter) 180ms both;
+  }
+  .public-world .s-enter-meta > *:nth-child(2) {
+    animation-delay: 270ms;
+  }
+  .public-world .s-enter-meta > *:nth-child(n + 3) {
+    animation-delay: 360ms;
+  }
+
+  /* A status screen gets exactly one settle, and it settles as one piece. The
+     same timing on every part is the point: staggering an error message delivers
+     the number before the explanation, which is backwards. One settle
+     distinguishes "the page loaded and this is the answer" from "the page failed
+     to load", and then the screen holds absolutely still, because the visitor is
+     annoyed and needs to read one sentence and press one button. */
+  .public-world .s-status-enter {
+    --s-enter-travel: 12px;
+    animation: s-enter-rise-soft var(--dur-reveal) var(--ease-enter) both;
+  }
+
+  /* A short row of claims arriving after the paragraph that introduces them, on
+     a page whose header is short enough that the row is inside the first
+     viewport. Standard 60ms apart: enough to read as a sequence, not enough to
+     make the fourth claim feel like an afterthought. Where the same row sits
+     genuinely below the fold — home, behind the phone mock — it uses the
+     scroll-linked `s-stagger` instead, because there the scroll is real. */
+  .public-world .s-enter-group > * {
+    animation: s-enter-rise-soft var(--dur-reveal) var(--ease-enter) 270ms both;
+  }
+  .public-world .s-enter-group > *:nth-child(2) {
+    animation-delay: 330ms;
+  }
+  .public-world .s-enter-group > *:nth-child(3) {
+    animation-delay: 390ms;
+  }
+  .public-world .s-enter-group > *:nth-child(n + 4) {
+    animation-delay: 450ms;
+  }
+
+  /* A short list assembling itself — the menu populating. Transform-only,
+     because the first row carries the priority image. Composed delays rather
+     than a base plus a multiplier, so the numbers are readable: the whole
+     group is done 105ms after it starts, well inside the stagger cap. */
+  .public-world .s-enter-rows > *:nth-child(1) {
+    animation: s-enter-settle-tight var(--dur-reveal) var(--ease-enter) 180ms
+      both;
+  }
+  .public-world .s-enter-rows > *:nth-child(2) {
+    animation: s-enter-settle-tight var(--dur-reveal) var(--ease-enter) 215ms
+      both;
+  }
+  .public-world .s-enter-rows > *:nth-child(3) {
+    animation: s-enter-settle-tight var(--dur-reveal) var(--ease-enter) 250ms
+      both;
+  }
+  .public-world .s-enter-rows > *:nth-child(4) {
+    animation: s-enter-settle-tight var(--dur-reveal) var(--ease-enter) 285ms
+      both;
+  }
+
+  /* Below `sm` the travel drops: on a 390px viewport 16–20px of movement reads
+     as a jump rather than as settling. */
+  @media (max-width: 639px) {
+    .public-world .s-enter,
+    .public-world .s-enter-soft,
+    .public-world .s-enter-still {
+      --s-enter-travel: 12px;
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   `.s-rake` — one pass of light across a surface.
+
+   The thesis made literal: light travelling over glass. A low-opacity band
+   sweeps once and never repeats, because a repeating shine reads as a loading
+   state rather than as a material.
+
+   This is the one preset that repaints rather than composites: it animates
+   `background-position` on a decorative pseudo-element. That is a deliberate,
+   bounded exception — a single pass, on one element, with no text inside it to
+   re-rasterise. Doing it with a transform would need the parent to clip, which
+   not every call site does.
+   -------------------------------------------------------------------------- */
+
+@keyframes s-rake-sweep {
+  from {
+    background-position: var(--s-rake-from, 130%) 0;
+  }
+  to {
+    background-position: var(--s-rake-to, -30%) 0;
+  }
+}
+
+.s-rake {
+  position: relative;
+  isolation: isolate;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .public-world .s-rake::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      /* Above the surface, beneath the content. `.s-rake` isolates, so a
+         negative index is contained by this element rather than escaping behind
+         its parent — which puts the light on the glass without ever passing over
+         type and taking contrast with it. */
+      z-index: -1;
+      pointer-events: none;
+      border-radius: inherit;
+      background-image: linear-gradient(
+        105deg,
+        transparent 38%,
+        color-mix(in oklab, var(--s-brand-bright) 26%, transparent) 50%,
+        transparent 62%
+      );
+      background-size: 260% 100%;
+      background-repeat: no-repeat;
+      animation: s-rake-sweep linear both;
+      animation-timeline: view();
+      animation-range: cover 20% cover 60%;
+    }
+
+    /* Sweep with the reading direction. */
+    .public-world:dir(rtl) .s-rake::after {
+      --s-rake-from: -30%;
+      --s-rake-to: 130%;
+    }
+
+    /* On an ink band the light is white, not brand — a purple sheen over a
+       purple gradient is invisible. */
+    .public-world .s-on-ink.s-rake::after,
+    .public-world .s-rake.s-grad::after {
+      background-image: linear-gradient(
+        105deg,
+        transparent 38%,
+        rgb(255 255 255 / 0.14) 50%,
+        transparent 62%
+      );
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   `.s-progress-rule` — reading progress for a long single-column document.
+
+   A `scroll()` timeline, so the rule is the scroll position rather than a
+   sampled approximation of it: no listener, no rAF, no React state, and it
+   cannot drift from the actual scroll offset. Three declarations replace what
+   would otherwise be ~28 KB of library.
+   -------------------------------------------------------------------------- */
+
+.s-progress-rule {
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.public-world:dir(rtl) .s-progress-rule {
+  transform-origin: right center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    .public-world .s-progress-rule {
+      animation: s-draw-inline linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+
+/* The block-axis form: a rule beside a sticky index, filling downward. Same
+   timeline, rotated — a vertical document deserves a vertical measure of it. */
+.s-progress-rule-block {
+  transform: scaleY(0);
+  transform-origin: center top;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    .public-world .s-progress-rule-block {
+      animation: s-draw-block linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+
+/* Reduced motion still wants to know where it is in a long legal document, so
+   the rule is shown complete rather than empty — a static, honest end state. It
+   was never the only source of anything, so conveying nothing is acceptable;
+   sitting there empty and wrong would not be. */
+@media (prefers-reduced-motion: reduce) {
+  .s-progress-rule {
+    transform: scaleX(1);
+    opacity: 0.4;
+  }
+
+  .s-progress-rule-block {
+    transform: scaleY(1);
+    opacity: 0.4;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   `.s-rule-row` — a ruled row whose rule draws as the row arrives.
+
+   A border cannot be scaled on its own, so the drawn line has to be a
+   pseudo-element. The border stays in the markup as the resting state and is
+   only made transparent inside the same two guards the animation needs, which
+   means the no-animation path is the plain ruled list it already was — nothing
+   to regress, nothing to un-hide.
+
+   Offsets on an absolutely positioned child resolve against the padding box, so
+   the negative `bottom` lands the line exactly on the border it replaces.
+   -------------------------------------------------------------------------- */
+
+.s-rule-row {
+  position: relative;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .public-world .s-rule-row {
+      border-block-end-color: transparent;
+    }
+
+    .public-world .s-rule-row::after {
+      content: "";
+      position: absolute;
+      inset-inline: 0;
+      bottom: -1px;
+      block-size: 1px;
+      background-color: var(--s-line);
+      transform-origin: left center;
+      animation: s-draw-inline linear both;
+      animation-timeline: view();
+      animation-range: var(--s-stagger-range, entry 0% cover 24%);
+    }
+
+    .public-world:dir(rtl) .s-rule-row::after {
+      transform-origin: right center;
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   `.s-panel-enter` — "this is a different document".
+
+   Two identical layouts swapping content can look like nothing happened, so the
+   incoming panel crossfades. Opacity only and 120ms: the reader asked for this
+   article and any travel would be time spent not reading it.
+
+   Desktop only, because it is only a *crossfade* where both panes stay put. Below
+   `md` the same change is a navigation between two views, and it gets the inline
+   slide instead — see the call site.
+
+   `@starting-style` rather than a keyframe: a fresh node is mounted per article,
+   so there is a real "before" state to transition from, and nothing to animate
+   out — the outgoing article is replaced, not dismissed.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  @media (min-width: 768px) {
+    .public-world .s-panel-enter {
+      opacity: 1;
+      transition: opacity var(--dur-fast) var(--ease-settle);
+    }
+
+    @starting-style {
+      .public-world .s-panel-enter {
+        opacity: 0;
+      }
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   The payment resolve — `/payment/callback`.
+
+   This screen sits between a customer's money leaving and their subscription
+   existing, so it has to keep proving it is still working, and then mark the
+   moment it succeeds. The success scale is the only celebratory motion anywhere
+   in the product surface, and it is earned: money accepted is the highest-stakes
+   state change in the application.
+
+   Failure gets nothing. No scale, no shake. A shake on a payment error adds
+   anxiety to the one screen that needs to convey a next step calmly.
+   -------------------------------------------------------------------------- */
+
+/* A step function, so this is a delay rather than an animation: the action is
+   held back 90ms so the reader takes in "succeeded" before their hand moves to
+   the button. Deliberately outside the reduced-motion guard below — waiting is
+   not movement, and the beat is the point of the interaction. */
+@keyframes s-hold {
+  from {
+    visibility: hidden;
+  }
+  to {
+    visibility: visible;
+  }
+}
+
+.public-world [data-phase="success"] .s-status-actions {
+  animation: s-hold 90ms steps(1, end) both;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .public-world [data-phase="success"] .s-status-mark {
+    animation: s-tick-settle var(--dur-settle) var(--ease-enter) both;
+  }
+
+  .public-world [data-phase="success"] .s-status-actions {
+    animation:
+      s-hold 90ms steps(1, end) both,
+      s-enter-rise-soft var(--dur-settle) var(--ease-enter) 90ms both;
+  }
+
+  /* The verdict replacing the "checking" line. Opacity only: the sentence is
+     what changed, and moving it would make it harder to read at the exact
+     moment it matters most. */
+  .public-world .s-phase-swap {
+    opacity: 1;
+    transition: opacity var(--dur-fast) var(--ease-settle);
+  }
+
+  @starting-style {
+    .public-world .s-phase-swap {
+      opacity: 0;
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   `.s-skeleton` — a loading surface on the public ground.
+
+   The product has `.ui-skeleton`, but it is drawn in product tokens; on a public
+   route that reads as a grey patch borrowed from another application. Same
+   shimmer keyframe, site palette.
+
+   A pulsing opacity would be the cheaper thing to write and the worse thing to
+   look at: pulse says "this element is idle", a shimmer travelling in the reading
+   direction says "something is on its way". It is bounded by the request, not
+   permanent, which is why it is allowed a loop at all.
+   -------------------------------------------------------------------------- */
+
+.s-skeleton {
+  background-color: var(--s-line);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklab, var(--s-bg) 65%, transparent) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .s-skeleton {
+    animation: ui-shimmer 1.6s linear infinite;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   `.s-press` / `.s-press-mark` — acknowledging a tap that leaves the page.
+
+   Pressing a contact card hands off to WhatsApp or the dialer, so there is no
+   in-page result to confirm the tap. On a slow phone that gap is the difference
+   between one conversation and a rage-tap. The medallion compresses and releases
+   while the card itself stays put, so the label never moves.
+
+   Keyed off `:has(:active)` rather than `:active`, because the pressable thing is
+   the button inside the card, not the card — and on touch `:active` on a plain
+   container is not something to rely on.
+   -------------------------------------------------------------------------- */
+
+.s-press-mark {
+  transition:
+    transform var(--dur-fast) var(--ease-lift),
+    box-shadow var(--dur-fast) var(--ease-settle);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .public-world .s-press:is(:active, :has(:active)) .s-press-mark {
+    transform: scale(0.94);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Still acknowledged, with no movement. An inset wash darkens whatever the
+     medallion's own background is — brand fill or tint — without needing a
+     variant per surface and without a filter on a painted element. */
+  .public-world .s-press:is(:active, :has(:active)) .s-press-mark {
+    box-shadow: inset 0 0 0 100px rgb(0 0 0 / 0.1);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   `.s-cta-arrow` — the arrow leans toward where it is taking you.
+
+   Two pixels, on the button's hover rather than the icon's own, so the whole
+   control is the target. The direction is authored per locale by choosing the
+   icon rather than rotating it: a rotated glyph plus a translate composes into
+   movement along the rotated axis, which sends the arrow the wrong way in
+   Arabic — the classic RTL transform bug.
+   -------------------------------------------------------------------------- */
+
+@media (hover: hover) and (pointer: fine) {
+  .s-cta-arrow {
+    transition: transform var(--dur-settle) var(--ease-lift);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .public-world .group:hover .s-cta-arrow {
+      transform: translateX(2px);
+    }
+
+    .public-world:dir(rtl) .group:hover .s-cta-arrow {
+      transform: translateX(-2px);
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   `.s-auth-body` — five auth routes reading as one panel changing its contents.
+
+   "Do I already have an account?" is a normal thing to be unsure about, and the
+   answer costs a navigation. What is wrong with that navigation is not its
+   speed, it is that the whole screen blinks — so the visitor cannot tell that
+   they are still in the same place.
+
+   What holds still is the frame: the grid, the mark, the toggles, the panel
+   border, the heading band and the lit ground are identical markup at identical
+   coordinates on all five routes, so they simply persist visually. Only the form
+   body — the part that genuinely differs — fades.
+
+   Opacity, no travel, and only on the body:
+
+   - Travel would move fields at the moment the visitor reaches for the first
+     one, and this panel's whole job is to hold still while it is filled in.
+   - Applied to the heading band instead it would fade the `h1`, which is an LCP
+     candidate on the narrow layout. The frame paints immediately; only the
+     contents resolve.
+
+   `@starting-style`, so it runs on insertion and never again. Nothing here
+   animates while the form is being used.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .public-world .s-auth-body {
+    opacity: 1;
+    transition: opacity var(--dur-overlay) var(--ease-settle);
+  }
+
+  @starting-style {
+    .public-world .s-auth-body {
+      opacity: 0;
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   `.s-field-note` — a validation message arrives rather than appearing.
+
+   Four pixels and one fade. Errors have to be *noticed and then read*, and the
+   two failure modes are opposite: appear with no transition and the message is
+   missed, appear with a shake and the text is moving at the moment the reader
+   tries to read it — which also reads as scolding.
+
+   `@starting-style` rather than a keyframe, and that is the load-bearing detail
+   on a form: react-hook-form revalidates on every keystroke, so an animation
+   that ran on render would fire continuously while someone types. A transition
+   from a starting style runs when the element is *inserted* and never again, so
+   correcting the field's text does not re-animate the message under it.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .public-world .s-field-note {
+    opacity: 1;
+    translate: 0 0;
+    transition:
+      opacity var(--dur-settle) var(--ease-enter),
+      translate var(--dur-settle) var(--ease-enter);
+  }
+
+  @starting-style {
+    .public-world .s-field-note {
+      opacity: 0;
+      translate: 0 -4px;
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   `.s-swap` — two glyphs in one slot, one of them showing.
+
+   For a control whose icon *is* its state: the password reveal toggle. Both
+   glyphs are always present and stacked, so the slot cannot change size and the
+   swap is a crossfade rather than a substitution. `--dur-fast`, because this is
+   confirming a tap that has already had its own effect on the field.
+   -------------------------------------------------------------------------- */
+
+.s-swap {
+  display: grid;
+  place-items: center;
+}
+
+.s-swap > * {
+  grid-area: 1 / 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .s-swap > * {
+    transition: opacity var(--dur-fast) var(--ease-settle);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   `.s-trail` — the phone sits on its own plane.
+
+   Sixteen pixels of lag as the hero scrolls away, which is enough to separate the
+   device from the copy beside it and not enough to read as an effect. One of the
+   two parallax uses this system sanctions; both are capped, both are CSS.
+
+   Ranged on `exit`, so the offset is zero for as long as the hero is the thing
+   being looked at and only accumulates as it leaves. Anchoring it on `cover`
+   instead would mean the phone is already displaced at first paint, which is a
+   layout that looks slightly wrong rather than a plane that reads as separate.
+
+   Desktop only: below `lg` the phone is stacked under the copy in the same
+   column, so there is no second plane for it to be on, and a 16px drift on a
+   phone is just a wobble.
+   -------------------------------------------------------------------------- */
+
+@keyframes s-trail-lag {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 16px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (min-width: 1024px) {
+  @supports (animation-timeline: view()) {
+    .public-world .s-trail {
+      animation: s-trail-lag linear both;
+      animation-timeline: view();
+      animation-range: exit 0% exit 100%;
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   `.s-step-mark` — a step's glyph takes the brand colour as the step arrives.
+
+   The ledger is an ordered sequence, and this is what marks how far down it the
+   reader has got: each step's icon warms from muted to brand as its row settles,
+   and stays there. A checklist filling in, not a highlight travelling — the
+   steps behind you are still done, so dimming them again would be a lie about
+   the reading position.
+
+   Applied to the decorative icon rather than the step number. The number is
+   content and has to hold its contrast at every point of the animation; the icon
+   is `aria-hidden` and can be treated as ink.
+
+   `color` is not a compositor property, so this is deliberately confined to four
+   glyphs of about 1em each. That is a repaint of a few hundred pixels, on rows
+   that are already being composited by their own reveal.
+   -------------------------------------------------------------------------- */
+
+@keyframes s-step-warm {
+  to {
+    color: var(--s-brand);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .public-world .s-step-mark {
+      animation: s-step-warm linear both;
+      animation-timeline: view();
+      animation-range: entry 60% cover 30%;
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   `.s-odo` — the price rolls to its new value.
+
+   This answers the actual question on a pricing page: *did the price change when
+   I flipped that, and by how much?* A figure that swaps instantly is frequently
+   not noticed at all, and a crossfade reads as a loading state. A roll reads as
+   a recalculation, which is the same reason a fuel pump rolls its digits.
+
+   Built as a drum rather than as two digits crossing: each slot holds all ten
+   glyphs in a column and is slid to show one of them. The obvious alternative —
+   unmount the old digit, mount the new one, animate both — cannot be done in
+   CSS, because there is no way to animate an element React has already removed.
+   That is what `AnimatePresence` is for, and on this route it measured 28 KB gz
+   of JavaScript (the layout-projection and drag engines arrive with it and do
+   not tree-shake) to roll four digits. A drum needs no exit animation, because
+   nothing ever leaves.
+
+   The travel is proportional to the distance between the digits, so 4 → 5 is one
+   step and 9 → 0 spins back through all ten. That is what a real drum does, and
+   at this duration a long spin reads as the figure being recomputed rather than
+   as an error.
+
+   `--s-odo` is the digit, written inline per slot. The window clips; the slot
+   itself must not, because an inline-block that clips takes its baseline from its
+   bottom edge and would lift the whole price off the currency label beside it.
+   -------------------------------------------------------------------------- */
+
+.s-odo {
+  position: relative;
+  display: inline-block;
+}
+
+.s-odo-window {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.s-odo-drum {
+  display: block;
+  transform: translateY(calc(var(--s-odo) * -10%));
+}
+
+/* Each glyph occupies exactly one slot height, which is what makes one step of
+   the drum 10% of its own height. */
+.s-odo-drum > span {
+  display: block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .s-odo-drum {
+    transition: transform var(--dur-lift) var(--ease-lift);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   `.s-seg-pill` — the selection in a segmented control travels rather than
+   teleports, so the eye follows the choice instead of re-finding it.
+
+   One element behind the buttons, sized to a single segment and slid by whole
+   segments. That only holds if every segment is the same width, which is why
+   both controls that use this are laid out on an equal-track grid — a pill
+   sized to variable-width labels is the case that forces per-element
+   measurement, and measurement is what makes this JavaScript.
+
+   `--s-seg-gap` is the grid's own gap: transform percentages resolve against
+   the pill's width, so one segment forward is its own width plus one gap.
+
+   Owned per control, not global: the count and gap come from the markup that
+   knows them.
+   -------------------------------------------------------------------------- */
+
+.s-seg-pill {
+  --s-seg-gap: 0px;
+  position: absolute;
+  z-index: 0;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: calc(
+    (100% - (var(--s-seg-count) - 1) * var(--s-seg-gap)) / var(--s-seg-count)
+  );
+  transform: translateX(calc(var(--s-seg-index) * (100% + var(--s-seg-gap))));
+}
+
+/* Authored per direction instead of relying on a logical transform, which does
+   not exist: `translateX` is physical, and in Arabic the next segment is to the
+   left of the current one. */
+.public-world:dir(rtl) .s-seg-pill {
+  transform: translateX(calc(var(--s-seg-index) * (-100% - var(--s-seg-gap))));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .s-seg-pill {
+    transition: transform var(--dur-overlay) var(--ease-lift);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   `.s-media-breathe` — the card's image pushes toward the viewer, the card
+   frame does not move. Only ever applied where the frame already clips its
+   media, so the growth is contained by something that was already there.
+   -------------------------------------------------------------------------- */
+
+@media (hover: hover) and (pointer: fine) {
+  /* No `will-change`: a permanent layer promotion on every card image in a grid
+     is exactly the kind of standing GPU cost this system refuses. */
+  .s-media-breathe {
+    transition: transform var(--dur-lift) var(--ease-lift);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .group:hover .s-media-breathe,
+    .group:focus-within .s-media-breathe {
+      transform: scale(1.03);
+    }
+  }
 }
 
 /* --------------------------------------------------------------------------
    Materials
    -------------------------------------------------------------------------- */
 
-/** Soft brand aurora behind a hero. One per page, never more. */
+/**
+ * Page ground for a hero or a status screen.
+ *
+ * Wide, low-opacity brand washes and nothing else. They are what make the top
+ * of the page feel lit rather than painted — the light source before it lands
+ * on anything. There is deliberately no drawn grid: a graticule reads as
+ * blueprint paper, and this direction is glass, not draughting (DESIGN.md §1).
+ *
+ * Static and composited: no animation, no filter on a repainting element.
+ */
 .s-aurora {
   position: absolute;
   inset: 0;
@@ -306,58 +1542,165 @@
   z-index: -1;
 }
 
-.s-aurora::before,
+.s-aurora::before {
+  content: "";
+  position: absolute;
+  inset: -30% -10% auto -10%;
+  height: 130%;
+  background:
+    radial-gradient(
+      44% 52% at 18% 8%,
+      color-mix(in oklab, var(--s-brand) 20%, transparent) 0%,
+      transparent 68%
+    ),
+    radial-gradient(
+      40% 46% at 84% 2%,
+      color-mix(in oklab, var(--brand-magenta, #bb0bb5) 14%, transparent) 0%,
+      transparent 66%
+    );
+  /* Held in a registered custom property rather than written directly, because
+     the Prism's entrance dims this wash as the real light replaces it — and a
+     pseudo-element cannot be reached by an animation library. The variable is
+     set on `.s-aurora` and inherited down. */
+  opacity: var(--s-aurora-opacity);
+}
+
+/* A single soft edge where the wash lands, so the lit area ends somewhere
+   rather than fading into an indeterminate haze. */
 .s-aurora::after {
   content: "";
   position: absolute;
-  border-radius: 9999px;
-  filter: blur(90px);
-  opacity: 0.55;
-}
-
-.s-aurora::before {
-  inset-inline-start: -10%;
-  top: -30%;
-  width: 46rem;
-  height: 46rem;
-  background: radial-gradient(
-    circle,
-    color-mix(in oklab, var(--s-brand) 38%, transparent),
-    transparent 68%
+  inset: auto 0 0 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--s-brand-line) 35%,
+    var(--s-brand-line) 65%,
+    transparent 100%
   );
+  opacity: 0.5;
 }
 
-.s-aurora::after {
-  inset-inline-end: -14%;
-  top: -12%;
-  width: 34rem;
-  height: 34rem;
-  background: radial-gradient(
-    circle,
-    color-mix(in oklab, var(--s-warm) 30%, transparent),
-    transparent 68%
-  );
+.dark .s-aurora {
+  --s-aurora-opacity: 0.5;
 }
 
-.dark .s-aurora::before,
-.dark .s-aurora::after {
-  opacity: 0.35;
+/* --------------------------------------------------------------------------
+   The Prism's canvas slot — MOTION-BLUEPRINT.md §5.2.1.
+
+   Registered rather than plain custom properties: `@property` with a `<number>`
+   syntax guarantees these compute to real numbers, which is what makes both the
+   `calc()` below and a CSS transition on them well-defined.
+
+   The two opacity inputs are kept separate on purpose. The entrance owns one and
+   the scroll position owns the other, and they are multiplied — if both wrote
+   `opacity` directly, the entrance fade and the scroll fade would overwrite each
+   other for the first second of the page's life.
+   -------------------------------------------------------------------------- */
+
+@property --s-aurora-opacity {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0.75;
 }
 
-/** Hairline grid, used behind dark bands to give them depth without noise. */
-.s-grid-lines {
+@property --s-prism-enter {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --s-prism-scroll {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
+/**
+ * Behind the content and unreachable by a pointer.
+ *
+ * `z-index: -1` inside the hero's existing `isolate` puts the canvas behind
+ * every piece of text and both call-to-action buttons, and `pointer-events:
+ * none` means it cannot intercept a tap even in principle. That placement is
+ * what allows a WebGL scene in a converting hero at all: no focus trap, no
+ * swallowed click, no scroll capture on touch, and structurally zero layout
+ * shift, since it is absolutely positioned inside a section that already
+ * reserves its own height.
+ */
+.s-prism-stage {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: calc(var(--s-prism-enter) * var(--s-prism-scroll));
+  /* Paint containment, never size containment: the box takes its size from
+     `inset: 0`, and `contain: size` would collapse it to nothing. */
+  contain: layout paint;
+}
+
+/* The mobile composition is confined to the upper band, clear of the single
+   column of text below it. */
+.s-prism-stage--corner {
+  inset: 0 0 auto 0;
+  height: 40vh;
+}
+
+/* The tiers that do not load GSAP fade in with a plain transition instead.
+   Scoped to those tiers so it can never fight the timeline. */
+.s-prism-stage--css-enter {
+  transition: --s-prism-enter 500ms var(--ease-settle);
+}
+
+/**
+ * Light for a deep panel, so it is a lit surface rather than a void.
+ *
+ * One broad highlight from the top and a cooler violet pool at the foot. Both
+ * are radial gradients on a single composited layer — the same cost as the flat
+ * fill underneath, and no drawn lines.
+ */
+.s-bloom {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--s-on-ink-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--s-on-ink-line) 1px, transparent 1px);
-  background-size: 72px 72px;
-  mask-image: radial-gradient(
-    ellipse 80% 60% at 50% 0%,
-    #000 20%,
-    transparent 75%
-  );
+  background:
+    radial-gradient(
+      70% 55% at 50% -8%,
+      color-mix(in oklab, var(--brand-300, #cdaeff) 22%, transparent) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      55% 45% at 88% 108%,
+      color-mix(in oklab, var(--brand-magenta, #bb0bb5) 18%, transparent) 0%,
+      transparent 72%
+    );
+}
+
+/** The one gradient moment. Applied to a band, a hero or a featured card. */
+.s-grad {
+  background-image: var(--s-grad);
+}
+
+.s-grad-vivid {
+  background-image: var(--s-grad-vivid);
+}
+
+.s-grad-deep {
+  background-image: var(--s-grad-deep);
+}
+
+/** Gradient text for a single word inside a display heading. */
+.s-grad-text {
+  background-image: var(--s-grad-vivid);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.dark .s-grad-text {
+  background-image: linear-gradient(135deg, #cdaeff 0%, #f090ec 100%);
 }
 
 /** Edge fade for horizontally scrolling strips (logo rows, mobile cards). */
@@ -391,8 +1734,21 @@
   animation-direction: reverse;
 }
 
+/* Slower on a phone. Fewer tiles are visible at 390px, so the same 42s reads as
+   hurried; at 60s it reads calm rather than sluggish. */
+@media (max-width: 639px) {
+  .s-marquee-track {
+    animation-duration: 60s;
+  }
+}
+
+/* Paused on hover and focus so a visitor can actually read a mark, and paused
+   off-screen and on a hidden tab via `data-paused` — this is the site's only
+   permanent animation, so it is the one that most needs to stop when nobody is
+   looking at it. The attribute is written by `useViewportPause`. */
 .s-marquee:hover .s-marquee-track,
-.s-marquee:focus-within .s-marquee-track {
+.s-marquee:focus-within .s-marquee-track,
+.s-marquee[data-paused="true"] .s-marquee-track {
   animation-play-state: paused;
 }
 
@@ -424,9 +1780,9 @@
       overflow: clip;
       opacity: 0;
       transition:
-        block-size 260ms cubic-bezier(0.2, 0, 0, 1),
-        opacity 200ms ease,
-        content-visibility 260ms allow-discrete;
+        block-size var(--dur-sheet) var(--ease-lift),
+        opacity var(--dur-lift) var(--ease-settle),
+        content-visibility var(--dur-sheet) allow-discrete;
     }
 
     .s-accordion[open]::details-content {
@@ -447,7 +1803,7 @@
 
 .public-world .kb-article :where(h1, h2) {
   font-size: var(--s-h3);
-  margin-block: 2.25rem 0.75rem;
+  margin-block: 2.5rem 0.75rem;
 }
 
 .public-world .kb-article :where(h3, h4, h5, h6) {
@@ -482,7 +1838,7 @@
 }
 
 .public-world .kb-article :where(a) {
-  color: var(--s-brand);
+  color: var(--s-brand-text);
   text-decoration: underline;
   text-underline-offset: 4px;
 }
@@ -495,7 +1851,7 @@
 .public-world .kb-article :where(blockquote) {
   margin-block-end: 1.25rem;
   padding-inline-start: 1.25rem;
-  border-inline-start: 3px solid var(--s-brand-line);
+  border-inline-start: 2px solid var(--s-brand);
   color: var(--s-muted);
 }
 
@@ -507,13 +1863,13 @@
   border-radius: var(--s-r-sm);
   background: var(--s-bg-tint);
   padding: 0.1em 0.4em;
+  font-family: var(--font-site-mono);
   font-size: 0.9em;
 }
 
-/** The product's base layer paints a focus ring in the app's accent. Inside the
-    public world it should be the public accent, and on dark bands it has to be
-    light or it disappears. Unlayered, so it wins over the `@layer base` rule
-    without an `!important`. */
+/** Focus is the brand in both worlds, because focus is a place the light
+    lands. On dark bands it flips to light or it disappears. Unlayered, so it
+    wins over the `@layer base` rule without an `!important`. */
 .public-world
   :where(
     a,
@@ -539,5 +1895,220 @@
     summary,
     [tabindex]
   ):focus-visible {
-  outline-color: #fff;
+  outline-color: var(--s-on-ink);
+}
+
+/* --------------------------------------------------------------------------
+   Presence exits without Motion (M3 / M4).
+
+   The SiteHeader mega-panel and mobile drawer used to enter with a keyframe and
+   vanish on unmount. Keeping the node mounted and driving open/closed through
+   `data-open` + `transition-behavior: allow-discrete` gives a real exit for the
+   same 0 KB that pricing's odometer already proved is the right trade against a
+   28 KB `AnimatePresence` floor. Unsupported engines fall back to today's snap,
+   which is progressive enhancement, not a regression.
+   -------------------------------------------------------------------------- */
+
+.public-world .s-presence-panel {
+  display: none;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    opacity var(--dur-pop) var(--ease-exit),
+    transform var(--dur-pop) var(--ease-exit),
+    display var(--dur-pop) allow-discrete;
+}
+
+.public-world .s-presence-panel[data-open="true"] {
+  display: flex;
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--dur-pop) var(--ease-enter),
+    transform var(--dur-pop) var(--ease-enter),
+    display var(--dur-pop) allow-discrete;
+}
+
+@starting-style {
+  .public-world .s-presence-panel[data-open="true"] {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.public-world .s-presence-scrim {
+  display: none;
+  opacity: 0;
+  transition:
+    opacity var(--dur-sheet) var(--ease-exit),
+    display var(--dur-sheet) allow-discrete;
+}
+
+.public-world .s-presence-scrim[data-open="true"] {
+  display: block;
+  opacity: 1;
+  transition:
+    opacity var(--dur-sheet) var(--ease-enter),
+    display var(--dur-sheet) allow-discrete;
+}
+
+@starting-style {
+  .public-world .s-presence-scrim[data-open="true"] {
+    opacity: 0;
+  }
+}
+
+.public-world .s-presence-drawer {
+  display: none;
+  transform: translateX(var(--ui-slide-from, -100%));
+  transition:
+    transform var(--dur-sheet) var(--ease-exit),
+    display var(--dur-sheet) allow-discrete;
+}
+
+.public-world .s-presence-drawer[data-open="true"] {
+  display: flex;
+  transform: translateX(0);
+  transition:
+    transform var(--dur-sheet) var(--ease-enter),
+    display var(--dur-sheet) allow-discrete;
+}
+
+@starting-style {
+  .public-world .s-presence-drawer[data-open="true"] {
+    transform: translateX(var(--ui-slide-from, -100%));
+  }
+}
+
+/* Desktop never shows the drawer/scrim — beat the `data-open` display rule
+   which would otherwise win on specificity over Tailwind's `lg:hidden`. */
+@media (min-width: 1024px) {
+  .public-world .s-presence-drawer,
+  .public-world .s-presence-drawer[data-open="true"],
+  .public-world .s-presence-scrim,
+  .public-world .s-presence-scrim[data-open="true"] {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-world .s-presence-panel,
+  .public-world .s-presence-panel[data-open="true"],
+  .public-world .s-presence-scrim,
+  .public-world .s-presence-scrim[data-open="true"],
+  .public-world .s-presence-drawer,
+  .public-world .s-presence-drawer[data-open="true"] {
+    transition-duration: 1ms;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Home motion director (`HomeMotion` + `data-home-motion`)
+   -------------------------------------------------------------------------- */
+
+/**
+ * Continuity seam at the foot of the hero — the light's residue into the
+ * logo strip. GSAP scales it during the pin release on desktop.
+ */
+.s-home-seam {
+  height: 1px;
+  margin-inline: var(--s-gutter);
+  transform-origin: center;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--s-brand-line) 30%,
+    var(--s-brand-line) 70%,
+    transparent 100%
+  );
+  opacity: 0.55;
+}
+
+/** Clip-safe title box for the hero entrance mask. */
+.s-home-title {
+  overflow: hidden;
+  padding-block-end: 0.08em;
+}
+
+/** Active how-it-works medallion while the step is in the reading band. */
+.s-step-live {
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--s-brand) 55%, transparent),
+    0 10px 28px -12px color-mix(in oklab, var(--s-brand) 55%, transparent);
+  background: color-mix(in oklab, var(--s-brand-tint) 88%, white);
+  border-color: var(--s-brand-line);
+}
+
+/**
+ * Depth-aware card surface for home feature/showcase cells.
+ * Transform-only hover; disabled under reduced motion.
+ */
+.s-depth-card {
+  transform-style: preserve-3d;
+  transition:
+    transform var(--dur-settle) var(--ease-settle),
+    box-shadow var(--dur-settle) var(--ease-settle);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .s-depth-card:hover {
+    transform: translateY(-3px) rotateX(1.5deg);
+    box-shadow: var(--shadow-site-lg, 0 22px 48px -28px rgb(15 23 42 / 0.28));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .s-depth-card,
+  .s-depth-card:hover {
+    transform: none;
+    transition: none;
+  }
+}
+
+/**
+ * When the GSAP director owns the page, kill competing CSS enters/reveals
+ * inside home sections so the choreography has a single clock.
+ */
+html[data-home-motion] .public-world #hero .s-enter,
+html[data-home-motion] .public-world #hero .s-enter-soft,
+html[data-home-motion] .public-world #hero .s-enter-still,
+html[data-home-motion] .public-world #hero .s-enter-badge,
+html[data-home-motion] .public-world #hero .s-enter-rows > *,
+html[data-home-motion] .public-world #hero .s-reveal-soft,
+html[data-home-motion] .public-world [data-home-section] .s-reveal,
+html[data-home-motion] .public-world [data-home-section] .s-reveal-soft,
+html[data-home-motion] .public-world [data-home-section] .s-reveal-line-block {
+  animation: none !important;
+}
+
+html[data-home-motion="desktop"] .public-world #hero [data-home="eyebrow"],
+html[data-home-motion="desktop"] .public-world #hero [data-home="lead"],
+html[data-home-motion="desktop"] .public-world #hero [data-home="ctas"],
+html[data-home-motion="desktop"] .public-world #hero [data-home="after-label"],
+html[data-home-motion="desktop"] .public-world #hero [data-home="assurance"],
+html[data-home-motion="desktop"] .public-world #hero [data-home="dish-row"],
+html[data-home-motion="mobile"] .public-world #hero [data-home="eyebrow"],
+html[data-home-motion="mobile"] .public-world #hero [data-home="lead"],
+html[data-home-motion="mobile"] .public-world #hero [data-home="ctas"],
+html[data-home-motion="mobile"] .public-world #hero [data-home="after-label"],
+html[data-home-motion="mobile"] .public-world #hero [data-home="assurance"],
+html[data-home-motion="mobile"] .public-world #hero [data-home="dish-row"] {
+  opacity: 0;
+}
+
+/* Paper is desktop-only in the entrance; leave mobile CSS alone for it. */
+html[data-home-motion="desktop"] .public-world #hero [data-home="paper"],
+html[data-home-motion="desktop"] .public-world #hero [data-home="badge"] {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-home-motion] .public-world #hero [data-home],
+  html[data-home-motion] .public-world [data-home-section] .s-reveal,
+  html[data-home-motion] .public-world [data-home-section] .s-reveal-soft {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+    filter: none !important;
+  }
 }

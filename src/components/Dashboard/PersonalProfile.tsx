@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLocale, useTranslations } from "next-intl";
@@ -13,10 +13,8 @@ import {
   HiOutlineLocationMarker,
   HiOutlineCalendar,
   HiOutlineArrowRight,
-  HiOutlineCamera,
   HiOutlineX,
 } from "react-icons/hi";
-import LinkTo from "@/components/Global/LinkTo";
 import {
   getMenuDashboardRef,
   menuDashboardPath,
@@ -25,10 +23,16 @@ import CustomInput from "@/components/Custom/CustomInput";
 import {
   Button,
   ButtonLink,
+  Card,
+  CardFooter,
   Field,
   Input,
+  PageShell,
   ReadonlyValue,
+  SectionHeader,
+  buttonClasses,
 } from "@/components/ui";
+import { cn } from "@/lib/cn";
 import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
 import { _resizeImage } from "@/shared/_shared";
 import { useAppDispatch } from "@/store/hooks";
@@ -90,10 +94,9 @@ export default function PersonalProfile({
   hideSubscriptionSection: hideSubscriptionProp,
 }: PersonalProfileProps) {
   const locale = useLocale();
-  const isRTL = locale === "ar";
   const t = useTranslations("personalProfile");
+  const tCommon = useTranslations("common");
   const tRoot = useTranslations("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const authData = useAppSelector((state) => state.auth.data) as unknown as {
     user: AuthUser;
@@ -272,8 +275,6 @@ export default function PersonalProfile({
     });
   }, []);
 
-  const triggerFileInput = () => fileInputRef.current?.click();
-
   type ProfilePayload = {
     name: string;
     phoneNumber: string;
@@ -385,343 +386,330 @@ export default function PersonalProfile({
     subscriptionInfo?.planName ?? profile?.user?.subscription?.planName ?? "";
 
   return (
-    <div className="min-h-[calc(100vh-120px)]">
-      {defaultBackLink && (
-        <div className={isRTL ? "text-right mb-4" : "text-left mb-4"}>
-          <LinkTo
-            href={defaultBackLink}
-            className="inline-flex items-center gap-2 text-sm font-medium text-fg-muted hover:text-primary dark:hover:text-primary transition-colors"
-          >
-            <HiOutlineArrowRight
-              className={`text-lg ${isRTL ? "order-2 rotate-180" : ""}`}
-            />
-            {defaultBackLinkText}
-          </LinkTo>
-        </div>
-      )}
+    /* A form measure, not the full workspace width: these are labelled fields,
+       and the page previously ran a two-column grid across an entire desktop. */
+    <PageShell
+      kind="form"
+      header={
+        <PageTitleWithHelp
+          id="onboarding-personal-header"
+          eyebrow={t("title")}
+          title={t("editPageTitle")}
+          description={t("editSubtitle")}
+          breadcrumbs={
+            defaultBackLink
+              ? [
+                  { label: defaultBackLinkText, href: defaultBackLink },
+                  { label: t("editPageTitle") },
+                ]
+              : undefined
+          }
+          breadcrumbsLabel={tCommon("breadcrumb")}
+        />
+      }
+    >
+      <Card as="section" id="onboarding-personal-info">
+        <SectionHeader ruled title={t("personalInfo")} />
 
-      <PageTitleWithHelp
-        id="onboarding-personal-header"
-        className={isRTL ? "text-right mb-8" : "text-left mb-8"}
-        title={t("editPageTitle")}
-        description={t("editSubtitle")}
-      />
+        {/* The avatar is a ruled tile, not a button: the only way to change it
+            used to be hovering the circle, which does not exist on a touch
+            screen. The upload control is now a named, focusable target that
+            also happens to accept a drop. */}
+        <div className="mt-3.5 flex flex-col gap-4 border-b border-line pb-4 sm:flex-row sm:items-start">
+          <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-line bg-surface-2 text-2xl font-semibold text-fg-muted">
+            {displayProfileImage ? (
+              // eslint-disable-next-line @next/next/no-img-element -- blob or API URL
+              <img
+                src={displayProfileImage}
+                alt=""
+                className="size-full object-cover"
+              />
+            ) : (
+              initial
+            )}
+          </div>
 
-      <div className="space-y-8">
-        <section
-          id="onboarding-personal-info"
-          className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6"
-        >
-          <h3 className="text-base font-semibold text-fg mb-5">
-            {t("personalInfo")}
-          </h3>
+          <div className="min-w-0 flex-1">
+            <p className="ui-label">{t("profilePicture")}</p>
+            <p className="mt-1 text-xs leading-relaxed text-fg-muted">
+              {t("recommendedImage")}
+            </p>
 
-          {/* Profile image with Personal Information */}
-          <div
-            className={`flex flex-wrap items-start gap-6 mb-6 pb-6 border-b border-line ${isRTL ? "flex-row-reverse" : ""}`}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept={AVATAR_ACCEPT}
-              className="hidden"
-              onChange={onFileChange}
-            />
-
-            {/* Avatar with hover overlay */}
-            <div
-              onClick={triggerFileInput}
-              onKeyDown={(e) => e.key === "Enter" && triggerFileInput()}
-              role="button"
-              tabIndex={0}
-              className="relative group shrink-0 cursor-pointer rounded-full ring-2 ring-slate-200 dark:ring-slate-600 ring-offset-2 dark:ring-offset-slate-900 transition-all duration-200 hover:ring-primary/50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            {/* The input is nested rather than linked by `htmlFor`: a label
+                whose `for` points at a descendant fires the picker twice in
+                some browsers. */}
+            <label
+              onDragOver={onDragOver}
+              onDragLeave={onDragLeave}
+              onDrop={onDrop}
+              className={cn(
+                "mt-2.5 flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed px-4 py-4 text-center",
+                "transition-[color,background-color,border-color] duration-(--dur-fast) ease-(--ease-settle)",
+                "has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring",
+                dragOver
+                  ? "border-accent-line bg-accent-soft"
+                  : "border-line-strong bg-surface-2/40 hover:border-fg-subtle",
+              )}
             >
-              <div className="h-24 w-24 rounded-full bg-linear-to-br from-amber-100 to-amber-50 dark:from-amber-900/40 dark:to-amber-950/40 flex items-center justify-center text-3xl font-bold text-amber-700 dark:text-amber-300 overflow-hidden shadow-inner">
-                {displayProfileImage ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- blob or API URL
-                  <img
-                    src={displayProfileImage}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  initial
+              <input
+                type="file"
+                accept={AVATAR_ACCEPT}
+                className="sr-only"
+                aria-label={t("uploadImage")}
+                onChange={onFileChange}
+              />
+              <HiOutlineCloudUpload
+                className={cn(
+                  "size-6",
+                  dragOver ? "text-accent" : "text-fg-subtle",
                 )}
-              </div>
-              <div className="absolute inset-0 rounded-full bg-slate-900/50 dark:bg-slate-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <HiOutlineCamera className="w-8 h-8 text-white" />
-              </div>
-            </div>
-
-            {/* Drop zone */}
-            <div className="flex-1 min-w-[220px]">
-              <p className="text-sm font-medium text-fg-muted mb-2">
-                {t("profilePicture")}
-              </p>
-              <div
-                onClick={triggerFileInput}
-                onKeyDown={(e) => e.key === "Enter" && triggerFileInput()}
-                onDragOver={onDragOver}
-                onDragLeave={onDragLeave}
-                onDrop={onDrop}
-                role="button"
-                tabIndex={0}
-                className={`relative rounded-lg border-2 border-dashed transition-all duration-200 cursor-pointer flex flex-col items-center justify-center gap-3 py-8 px-6 min-h-[140px] ${
-                  dragOver
-                    ? "border-primary bg-primary/5 dark:bg-primary/10 scale-[1.01]"
-                    : "border-line hover:border-primary/40 hover:bg-slate-50/50 dark:hover:bg-slate-800/50"
-                }`}
+                aria-hidden
+              />
+              <span className="text-[13px] font-medium text-fg">
+                {t("dragDropOrClick")}
+              </span>
+              <span className="ui-label">
+                PNG · JPG · GIF · {t("maxFileSize")}
+              </span>
+              {/* Visual affordance only — the label around it is the control. */}
+              <span
+                className={buttonClasses({ variant: "secondary", size: "sm" })}
+                aria-hidden
               >
-                <div
-                  className={`rounded-full p-3 transition-colors ${dragOver ? "bg-primary/15 dark:bg-primary/20" : "bg-surface-2"}`}
-                >
-                  <HiOutlineCloudUpload
-                    className={`w-8 h-8 ${dragOver ? "text-primary" : "text-fg-subtle"}`}
-                  />
-                </div>
-                <div className="text-center">
-                  <p className="text-sm font-medium text-fg-muted">
-                    {t("dragDropOrClick")}
-                  </p>
-                  <p className="text-xs text-fg-muted mt-0.5">
-                    PNG, JPG, GIF · {t("maxFileSize")}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    triggerFileInput();
-                  }}
-                  className="text-sm font-medium text-primary hover:text-primary/80 dark:hover:text-primary/90 transition-colors"
-                >
-                  {t("uploadImage")}
-                </button>
-              </div>
-              <p className="text-xs text-fg-muted mt-2">
-                {t("recommendedImage")}
-              </p>
+                {t("uploadImage")}
+              </span>
+            </label>
+
+            <div aria-live="polite">
               {profileImageFile && (
-                <div
-                  className={`flex flex-wrap items-center gap-2 mt-3 ${isRTL ? "flex-row-reverse" : ""}`}
-                >
-                  <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium truncate max-w-[180px]">
+                <div className="mt-2.5 flex flex-wrap items-center gap-2 rounded-lg border border-line bg-surface-2 px-2.5 py-1.5">
+                  <span
+                    className="min-w-0 flex-1 truncate text-xs font-medium text-fg"
+                    dir="ltr"
+                  >
                     {profileImageFile.name}
                   </span>
-                  <button
+                  <Button
                     type="button"
+                    variant="dangerGhost"
+                    size="xs"
                     onClick={clearProfileImage}
-                    className="inline-flex items-center gap-1 text-xs text-fg-muted hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                    startIcon={<HiOutlineX className="size-3.5" />}
                   >
-                    <HiOutlineX className="w-3.5 h-3.5" />
                     {t("remove")}
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
           </div>
+        </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label={t("fullName")} required className="sm:col-span-2">
-              <Input
-                type="text"
-                id="fullName"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={t("fullName")}
-                startIcon={<HiOutlineUser className="size-4.5" />}
-              />
-            </Field>
-            <Field label={t("email")} hint={t("emailCannotChange")}>
-              <ReadonlyValue>{profile?.email ?? ""}</ReadonlyValue>
-            </Field>
-            <Field label={t("phone")}>
-              <CustomInput
-                type="tel"
-                id="phone"
-                defaultCountry="EG"
-                value={phone || undefined}
-                onChange={(val) => setPhone((val as unknown as string) ?? "")}
-                placeholder={t("phone")}
-                icon={<HiOutlinePhone className="text-lg" />}
-              />
-            </Field>
-            <Field label={t("dateOfBirth")}>
-              <CustomInput
-                type="date"
-                id="dateOfBirth"
-                placeholder={t("dateFormatPlaceholder")}
-                value={dateOfBirth}
-                onChange={(e) => setDateOfBirth((e as unknown as Date) ?? null)}
-                icon={<HiOutlineCalendar className="text-lg" />}
-              />
-            </Field>
-            <Field label={t("country")}>
-              <Input
-                type="text"
-                id="country"
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                placeholder={t("countryPlaceholder")}
-                startIcon={<HiOutlineGlobeAlt className="size-4.5" />}
-              />
-            </Field>
-            <Field label={t("address")} className="sm:col-span-2">
-              <Input
-                type="text"
-                id="address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder={t("addressPlaceholder")}
-                startIcon={<HiOutlineLocationMarker className="size-4.5" />}
-              />
-            </Field>
-            <Field label={t("gender")}>
-              <CustomInput
-                type="select"
-                id="gender"
-                placeholder={t("chooseGender")}
-                value={gender}
-                onChange={(val) =>
-                  setGender(val as unknown as SingleValue<GenderOption>)
-                }
-                options={genderOptions}
-                icon={<HiOutlineUser className="text-lg" />}
-              />
-            </Field>
-          </div>
+        <div className="mt-4 grid gap-3.5 sm:grid-cols-2">
+          <Field
+            label={t("fullName")}
+            required
+            htmlFor="fullName"
+            className="sm:col-span-2"
+          >
+            <Input
+              type="text"
+              id="fullName"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={t("fullName")}
+              startIcon={<HiOutlineUser className="size-4.5" />}
+            />
+          </Field>
+          <Field label={t("email")} hint={t("emailCannotChange")}>
+            <ReadonlyValue>{profile?.email ?? ""}</ReadonlyValue>
+          </Field>
+          <Field label={t("phone")} htmlFor="phone">
+            <CustomInput
+              type="tel"
+              id="phone"
+              defaultCountry="EG"
+              value={phone || undefined}
+              onChange={(val) => setPhone((val as unknown as string) ?? "")}
+              placeholder={t("phone")}
+              icon={<HiOutlinePhone className="text-lg" />}
+            />
+          </Field>
+          <Field label={t("dateOfBirth")} htmlFor="dateOfBirth">
+            <CustomInput
+              type="date"
+              id="dateOfBirth"
+              placeholder={t("dateFormatPlaceholder")}
+              value={dateOfBirth}
+              onChange={(e) => setDateOfBirth((e as unknown as Date) ?? null)}
+              icon={<HiOutlineCalendar className="text-lg" />}
+            />
+          </Field>
+          <Field label={t("country")} htmlFor="country">
+            <Input
+              type="text"
+              id="country"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              placeholder={t("countryPlaceholder")}
+              startIcon={<HiOutlineGlobeAlt className="size-4.5" />}
+            />
+          </Field>
+          <Field
+            label={t("address")}
+            htmlFor="address"
+            className="sm:col-span-2"
+          >
+            <Input
+              type="text"
+              id="address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder={t("addressPlaceholder")}
+              startIcon={<HiOutlineLocationMarker className="size-4.5" />}
+            />
+          </Field>
+          <Field label={t("gender")} htmlFor="gender">
+            <CustomInput
+              type="select"
+              id="gender"
+              placeholder={t("chooseGender")}
+              value={gender}
+              onChange={(val) =>
+                setGender(val as unknown as SingleValue<GenderOption>)
+              }
+              options={genderOptions}
+              icon={<HiOutlineUser className="text-lg" />}
+            />
+          </Field>
+        </div>
+
+        <CardFooter className="justify-end">
           <Button
             type="button"
             variant="primary"
             onClick={handleSaveChanges}
-            disabled={saveLoading}
             loading={saveLoading}
-            className="mt-5"
           >
             {saveLoading ? t("saving") : t("saveChanges")}
           </Button>
-        </section>
+        </CardFooter>
+      </Card>
 
-        <section
-          id="onboarding-personal-password"
-          className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6"
-        >
-          <h3 className="text-base font-semibold text-fg mb-5">
-            {t("changePassword")}
-          </h3>
-          <form
-            onSubmit={handleSubmitPassword(onSubmitChangePassword)}
-            className="max-w-2xl"
-          >
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field
-                label={t("currentPassword")}
-                required
-                className="sm:col-span-2"
-                error={passwordErrors.currentPassword?.message}
-              >
-                <Controller
-                  control={controlPassword}
-                  name="currentPassword"
-                  render={({ field: { value, onChange } }) => (
-                    <Input
-                      type="password"
-                      id="currentPassword"
-                      value={value}
-                      onChange={(e) => onChange(e.target.value)}
-                      placeholder={t("currentPassword")}
-                      autoComplete="current-password"
-                    />
-                  )}
-                />
-              </Field>
-              <Field
-                label={t("newPassword")}
-                required
-                hint={t("atLeast8Chars")}
-                error={passwordErrors.newPassword?.message}
-              >
-                <Controller
-                  control={controlPassword}
-                  name="newPassword"
-                  render={({ field: { value, onChange } }) => (
-                    <Input
-                      type="password"
-                      id="newPassword"
-                      value={value}
-                      onChange={(e) => onChange(e.target.value)}
-                      placeholder={t("newPassword")}
-                      autoComplete="new-password"
-                    />
-                  )}
-                />
-              </Field>
-              <Field
-                label={t("confirmNewPassword")}
-                required
-                error={passwordErrors.confirmNewPassword?.message}
-              >
-                <Controller
-                  control={controlPassword}
-                  name="confirmNewPassword"
-                  render={({ field: { value, onChange } }) => (
-                    <Input
-                      type="password"
-                      id="confirmNewPassword"
-                      value={value}
-                      onChange={(e) => onChange(e.target.value)}
-                      placeholder={t("confirmNewPassword")}
-                      autoComplete="new-password"
-                    />
-                  )}
-                />
-              </Field>
-            </div>
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={changePasswordLoading}
-              loading={changePasswordLoading}
-              className="mt-5 bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700"
-            >
-              {changePasswordLoading
-                ? t("changingPassword")
-                : t("changePasswordButton")}
-            </Button>
-          </form>
-        </section>
+      <Card
+        as="form"
+        id="onboarding-personal-password"
+        onSubmit={handleSubmitPassword(onSubmitChangePassword)}
+      >
+        <SectionHeader ruled title={t("changePassword")} />
 
-        {!hideSubscriptionSection && (
-          <section
-            id="onboarding-personal-subscription"
-            className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6"
+        <div className="mt-3.5 grid max-w-2xl gap-3.5 sm:grid-cols-2">
+          <Field
+            label={t("currentPassword")}
+            required
+            htmlFor="currentPassword"
+            className="sm:col-span-2"
+            error={passwordErrors.currentPassword?.message}
           >
-            <h3 className="text-base font-semibold text-fg mb-5">
-              {t("subscription")}
-            </h3>
-            <CurrentPlanSummary
-              subscriptionInfo={subscriptionInfo}
-              loading={subscriptionInfoLoading}
-              currentPlanName={currentPlanNameResolved}
-              className="mb-5"
+            <Controller
+              control={controlPassword}
+              name="currentPassword"
+              render={({ field: { value, onChange } }) => (
+                <Input
+                  type="password"
+                  id="currentPassword"
+                  value={value}
+                  onChange={(e) => onChange(e.target.value)}
+                  placeholder={t("currentPassword")}
+                  autoComplete="current-password"
+                />
+              )}
             />
-            {menuRef && (
+          </Field>
+          <Field
+            label={t("newPassword")}
+            required
+            htmlFor="newPassword"
+            hint={t("atLeast8Chars")}
+            error={passwordErrors.newPassword?.message}
+          >
+            <Controller
+              control={controlPassword}
+              name="newPassword"
+              render={({ field: { value, onChange } }) => (
+                <Input
+                  type="password"
+                  id="newPassword"
+                  value={value}
+                  onChange={(e) => onChange(e.target.value)}
+                  placeholder={t("newPassword")}
+                  autoComplete="new-password"
+                />
+              )}
+            />
+          </Field>
+          <Field
+            label={t("confirmNewPassword")}
+            required
+            htmlFor="confirmNewPassword"
+            error={passwordErrors.confirmNewPassword?.message}
+          >
+            <Controller
+              control={controlPassword}
+              name="confirmNewPassword"
+              render={({ field: { value, onChange } }) => (
+                <Input
+                  type="password"
+                  id="confirmNewPassword"
+                  value={value}
+                  onChange={(e) => onChange(e.target.value)}
+                  placeholder={t("confirmNewPassword")}
+                  autoComplete="new-password"
+                />
+              )}
+            />
+          </Field>
+        </div>
+
+        <CardFooter className="justify-end">
+          <Button
+            type="submit"
+            variant="primary"
+            loading={changePasswordLoading}
+          >
+            {changePasswordLoading
+              ? t("changingPassword")
+              : t("changePasswordButton")}
+          </Button>
+        </CardFooter>
+      </Card>
+
+      {!hideSubscriptionSection && (
+        <Card as="section" id="onboarding-personal-subscription">
+          <SectionHeader ruled title={t("subscription")} />
+
+          <CurrentPlanSummary
+            subscriptionInfo={subscriptionInfo}
+            loading={subscriptionInfoLoading}
+            currentPlanName={currentPlanNameResolved}
+            className="mt-3.5"
+          />
+
+          {menuRef && (
+            <CardFooter className="justify-end">
               <ButtonLink
                 id="onboarding-personal-subscription-link"
                 href={menuDashboardPath(menu, "subscription")}
                 className="w-full sm:w-auto"
                 endIcon={
-                  <HiOutlineArrowRight
-                    className={`text-lg ${isRTL ? "rotate-180" : ""}`}
-                  />
+                  <HiOutlineArrowRight className="size-4 rtl:rotate-180" />
                 }
               >
                 {t("manageSubscriptionAndPricing")}
               </ButtonLink>
-            )}
-          </section>
-        )}
-      </div>
-    </div>
+            </CardFooter>
+          )}
+        </Card>
+      )}
+    </PageShell>
   );
 }

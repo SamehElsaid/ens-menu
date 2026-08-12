@@ -1,6 +1,8 @@
 import { useLocale, useTranslations } from "next-intl";
 import { IoTimeOutline } from "react-icons/io5";
 import CardDashBoard from "@/components/Card/CardDashBoard";
+import { Badge, EmptyState, SectionHeader } from "@/components/ui";
+import type { StatusTone } from "@/components/ui";
 import type { DomainTransferRequest } from "@/types/DomainTransfer";
 
 function formatDateTime(value: string, locale: string): string {
@@ -10,11 +12,8 @@ function formatDateTime(value: string, locale: string): string {
   }).format(new Date(value));
 }
 
-function historyBadgeClass(item: DomainTransferRequest): string {
-  if (item.status === "completed") {
-    return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400";
-  }
-  return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+function historyOutcomeTone(item: DomainTransferRequest): StatusTone {
+  return item.status === "completed" ? "success" : "danger";
 }
 
 function historyOutcomeKey(item: DomainTransferRequest): string {
@@ -27,6 +26,14 @@ type DomainTransferHistoryProps = {
   history: DomainTransferRequest[];
 };
 
+/**
+ * Closed requests, as a ledger.
+ *
+ * The domain is the row's identity and stays in mono — it is a machine string
+ * the reader compares character by character — and the dates sit under it as a
+ * ticket line. The outcome is a badge with a dot rather than a tinted pill, so
+ * accepted and cancelled are told apart by shape as well as hue.
+ */
 export default function DomainTransferHistory({
   history,
 }: DomainTransferHistoryProps) {
@@ -35,15 +42,21 @@ export default function DomainTransferHistory({
 
   return (
     <CardDashBoard>
-      <div className="mb-4 flex items-center gap-2">
-        <IoTimeOutline className="text-lg text-fg-subtle" />
-        <h2 className="text-base font-semibold text-fg">{t("title")}</h2>
-      </div>
+      <SectionHeader
+        ruled
+        className="mb-3"
+        title={
+          <span className="inline-flex items-center gap-2">
+            <IoTimeOutline className="shrink-0 text-fg-subtle" aria-hidden />
+            {t("title")}
+          </span>
+        }
+      />
 
       {history.length === 0 ? (
-        <p className="text-sm text-fg-muted">{t("empty")}</p>
+        <EmptyState size="sm" icon={<IoTimeOutline />} title={t("empty")} />
       ) : (
-        <ul className="divide-y divide-line">
+        <ul className="-mx-4 divide-y divide-line border-y border-line sm:-mx-5">
           {history.map((item) => {
             const resolvedAt =
               item.status === "completed" ? item.completedAt : item.cancelledAt;
@@ -51,16 +64,16 @@ export default function DomainTransferHistory({
             return (
               <li
                 key={item.id}
-                className="flex flex-wrap items-start justify-between gap-3 py-4 first:pt-0 last:pb-0"
+                className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 px-4 py-2.5 sm:px-5"
               >
                 <div className="min-w-0 flex-1">
                   <p
-                    className="truncate font-mono text-sm font-medium text-fg"
+                    className="ui-figure truncate text-[13px] text-fg"
                     dir="ltr"
                   >
                     {item.domainUrl}
                   </p>
-                  <p className="mt-1 text-xs text-fg-muted">
+                  <p className="ui-label mt-1">
                     {t("submitted", {
                       date: formatDateTime(item.createdAt, locale),
                     })}
@@ -74,11 +87,9 @@ export default function DomainTransferHistory({
                     )}
                   </p>
                 </div>
-                <span
-                  className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${historyBadgeClass(item)}`}
-                >
+                <Badge tone={historyOutcomeTone(item)} dot>
                   {t(`outcome.${historyOutcomeKey(item)}`)}
-                </span>
+                </Badge>
               </li>
             );
           })}

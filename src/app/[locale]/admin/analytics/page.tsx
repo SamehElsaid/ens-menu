@@ -2,9 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "@/i18n/navigation";
 import {
-  IoArrowBack,
   IoEyeOutline,
   IoPeopleOutline,
   IoStatsChartOutline,
@@ -15,11 +13,19 @@ import {
 import { FaChartLine, FaCreditCard } from "react-icons/fa";
 import LinkTo from "@/components/Global/LinkTo";
 import {
-  Button,
+  EmptyState,
   PageHeader,
+  PageShell,
+  SectionHeader,
   SegmentedControl,
   Skeleton,
   SkeletonRegion,
+  Table,
+  TableShell,
+  Td,
+  Th,
+  Toolbar,
+  Tr,
 } from "@/components/ui";
 import {
   AdminBarChart,
@@ -49,7 +55,7 @@ export default function AdminAnalyticsPage() {
   const locale = useLocale();
   const t = useTranslations("adminAnalytics");
   const tCommon = useTranslations("common");
-  const router = useRouter();
+  const tAdmin = useTranslations("adminDashboard");
   const textDir = locale === "ar" ? "rtl" : "ltr";
 
   const [period, setPeriod] = useState<AdminAnalyticsPeriod>("30d");
@@ -69,84 +75,60 @@ export default function AdminAnalyticsPage() {
     void load();
   }, [load]);
 
+  const num = useCallback((value: number) => value.toLocaleString("en-US"), []);
+
+  /**
+   * Twelve figures, read as three rows rather than one wall.
+   *
+   * The order is the order the platform is read in: what the menus are doing,
+   * then who the accounts are, then what needs chasing. In a four-column ruled
+   * rail each of those groups lands on its own row, so the panel has a reading
+   * order without needing three separate headings.
+   */
   const summaryMetrics = useMemo<MetricItem[]>(() => {
     const s = analytics?.summary;
     if (!s) return [];
     return [
-      {
-        id: "views",
-        label: t("totalMenuViews"),
-        value: s.totalMenuViews.toLocaleString(),
-        tone: "amber",
-      },
-      {
-        id: "today",
-        label: t("viewsToday"),
-        value: s.menuViewsToday.toLocaleString(),
-        tone: "orange",
-      },
+      { id: "views", label: t("totalMenuViews"), value: num(s.totalMenuViews) },
+      { id: "today", label: t("viewsToday"), value: num(s.menuViewsToday) },
       {
         id: "week",
         label: t("viewsThisWeek"),
-        value: s.menuViewsThisWeek.toLocaleString(),
-        tone: "sky",
+        value: num(s.menuViewsThisWeek),
       },
-      {
-        id: "orders",
-        label: t("totalOrders"),
-        value: s.totalOrders.toLocaleString(),
-        tone: "emerald",
-      },
-      {
-        id: "activeMenus",
-        label: t("activeMenus"),
-        value: s.activeMenus.toLocaleString(),
-        tone: "primary",
-      },
+      { id: "orders", label: t("totalOrders"), value: num(s.totalOrders) },
+
+      { id: "activeMenus", label: t("activeMenus"), value: num(s.activeMenus) },
       {
         id: "inactiveMenus",
         label: t("inactiveMenus"),
-        value: s.inactiveMenus.toLocaleString(),
-        tone: "slate",
+        value: num(s.inactiveMenus),
       },
-      {
-        id: "free",
-        label: t("freeUsers"),
-        value: s.freeUsers.toLocaleString(),
-        tone: "slate",
-      },
-      {
-        id: "pro",
-        label: t("proUsers"),
-        value: s.proUsers.toLocaleString(),
-        tone: "purple",
-      },
+      { id: "free", label: t("freeUsers"), value: num(s.freeUsers) },
+      { id: "pro", label: t("proUsers"), value: num(s.proUsers) },
+
       {
         id: "conversion",
         label: t("conversionRate"),
         value: `${s.conversionRate}%`,
-        tone: "emerald",
       },
       {
         id: "noMenu",
         label: t("usersWithoutMenu"),
-        value: s.usersWithoutMenu.toLocaleString(),
-        tone: "orange",
+        value: num(s.usersWithoutMenu),
       },
       {
         id: "expiring",
         label: t("expiringSubscriptions"),
-        value: s.expiringSubscriptions.toLocaleString(),
-        tone: "amber",
+        value: num(s.expiringSubscriptions),
       },
       {
         id: "inactive30",
         label: t("inactiveUsers30d"),
-        value: s.inactiveUsers30d.toLocaleString(),
-        tone: "slate",
+        value: num(s.inactiveUsers30d),
       },
     ];
-  }, [analytics?.summary, t]);
+  }, [analytics?.summary, num, t]);
 
   const adMetrics = useMemo<MetricItem[]>(() => {
     if (!analytics) return [];
@@ -159,23 +141,12 @@ export default function AdminAnalyticsPage() {
       {
         id: "impressions",
         label: t("adImpressions"),
-        value: a.totalImpressions.toLocaleString(),
-        tone: "sky",
+        value: num(a.totalImpressions),
       },
-      {
-        id: "clicks",
-        label: t("adClicks"),
-        value: a.totalClicks.toLocaleString(),
-        tone: "purple",
-      },
-      {
-        id: "ctr",
-        label: t("averageCtr"),
-        value: `${a.averageCtr}%`,
-        tone: "emerald",
-      },
+      { id: "clicks", label: t("adClicks"), value: num(a.totalClicks) },
+      { id: "ctr", label: t("averageCtr"), value: `${a.averageCtr}%` },
     ];
-  }, [analytics, t]);
+  }, [analytics, num, t]);
 
   const freeBannerMetrics = useMemo<MetricItem[]>(() => {
     if (!analytics) return [];
@@ -189,23 +160,20 @@ export default function AdminAnalyticsPage() {
       {
         id: "bannerImpressions",
         label: t("freeBannerImpressions"),
-        value: b.totalImpressions.toLocaleString(),
-        tone: "sky",
+        value: num(b.totalImpressions),
       },
       {
         id: "bannerClicks",
         label: t("freeBannerClicks"),
-        value: b.totalClicks.toLocaleString(),
-        tone: "purple",
+        value: num(b.totalClicks),
       },
       {
         id: "bannerCtr",
         label: t("freeBannerCtr"),
         value: `${b.averageCtr}%`,
-        tone: "emerald",
       },
     ];
-  }, [analytics, t]);
+  }, [analytics, num, t]);
 
   const topBannerMenus = useMemo(
     () =>
@@ -255,242 +223,279 @@ export default function AdminAnalyticsPage() {
     [analytics?.geoDistribution, t],
   );
 
+  const expiringSoon = analytics?.subscriptions?.expiringSoon ?? [];
+
+  /**
+   * The report as four acts.
+   *
+   * Every panel used to be an equal card in one long run, so the page had no
+   * reading order and the twelve platform figures sat inside a card inside the
+   * page. Now the figures lead as one edge-sharing instrument rail, and the
+   * rest is announced by ruled section headers — traffic, demand, advertising,
+   * renewals — so an operator can jump to the act they came for.
+   */
   return (
-    <div className="space-y-6 pb-8" dir={textDir}>
-      <PageHeader
-        title={t("title")}
-        description={t("subtitle")}
-        actions={
-          <Button
-            variant="secondary"
-            startIcon={<IoArrowBack className="rtl:rotate-180" />}
-            onClick={() => router.back()}
-          >
-            {t("back")}
-          </Button>
-        }
-      />
-
-      <SegmentedControl
-        label={t("title")}
-        value={period}
-        onChange={setPeriod}
-        options={PERIODS.map((p) => ({
-          value: p,
-          label: t(`period.${p}`),
-        }))}
-      />
-
-      {loading ? (
-        <SkeletonRegion label={tCommon("loading")}>
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-64 w-full rounded-lg" />
-            ))}
-          </div>
-        </SkeletonRegion>
-      ) : !analytics ? null : (
-        <>
-          {analytics._isDemoData && (
-            <DemoDataBanner message={t("demoDataBanner")} dir={textDir} />
-          )}
-
-          <AdminSectionCard
-            title={t("platformSummary")}
-            subtitle={t("platformSummaryHint")}
-            icon={
-              <IoStatsChartOutline className="text-primary text-xl shrink-0" />
-            }
-            dir={textDir}
-          >
-            <AdminMetricsGrid
-              items={summaryMetrics}
-              columns={4}
-              dir={textDir}
+    <PageShell
+      kind="wide"
+      header={
+        <PageHeader
+          title={t("title")}
+          description={t("subtitle")}
+          breadcrumbs={[
+            { label: tAdmin("title"), href: "/admin" },
+            { label: t("title") },
+          ]}
+          breadcrumbsLabel={tCommon("breadcrumb")}
+        />
+      }
+      toolbar={
+        /* The period governs every figure below it, so it stays pinned under the
+           app header — on a report this long the reader is usually deep in the
+           page when they decide 30 days was the wrong window. */
+        <Toolbar
+          filters={
+            <SegmentedControl
+              label={t("title")}
+              value={period}
+              onChange={setPeriod}
+              options={PERIODS.map((p) => ({
+                value: p,
+                label: t(`period.${p}`),
+              }))}
             />
-          </AdminSectionCard>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <AdminSectionCard
-              title={t("viewsOverTime")}
-              icon={<FaChartLine className="text-primary text-xl shrink-0" />}
-              dir={textDir}
-            >
-              <AdminBarChart
-                points={analytics.viewsOverTime}
-                locale={locale}
-                dir={textDir}
-                emptyMessage={t("noVisitData")}
-              />
-            </AdminSectionCard>
-
-            {(analytics.revenueOverTime?.length ?? 0) > 0 && (
-              <AdminSectionCard
-                title={t("revenueOverTime")}
-                icon={
-                  <FaCreditCard className="text-primary text-xl shrink-0" />
-                }
-                dir={textDir}
-              >
-                <AdminMonthGrid
-                  points={analytics.revenueOverTime ?? []}
-                  dir={textDir}
-                  formatCount={(count) => formatMenuPrice(count, "EGP", locale)}
-                />
-              </AdminSectionCard>
+          }
+        />
+      }
+    >
+      <div className="flex flex-col gap-7">
+        {loading ? (
+          <SkeletonRegion label={tCommon("loading")}>
+            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line lg:grid-cols-4">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <div key={i} className="bg-surface p-3">
+                  <Skeleton className="h-2.5 w-20" rounded="sm" />
+                  <Skeleton className="mt-2.5 h-7 w-24" />
+                </div>
+              ))}
+            </div>
+            <div className="mt-8 grid grid-cols-1 gap-3 lg:grid-cols-2">
+              {[1, 2].map((i) => (
+                <Skeleton key={i} className="h-64 w-full" rounded="lg" />
+              ))}
+            </div>
+          </SkeletonRegion>
+        ) : !analytics ? (
+          <EmptyState
+            icon={<IoStatsChartOutline />}
+            title={t("noDataTitle")}
+            description={t("noDataHint")}
+          />
+        ) : (
+          <>
+            {analytics._isDemoData && (
+              <DemoDataBanner message={t("demoDataBanner")} dir={textDir} />
             )}
 
-            <AdminSectionCard
-              title={t("topMenus")}
-              subtitle={t("topMenusHint")}
-              icon={<IoEyeOutline className="text-primary text-xl shrink-0" />}
-              dir={textDir}
-            >
-              <AdminRankedList
-                items={topMenus}
-                dir={textDir}
-                emptyMessage={t("noVisitData")}
+            <section className="flex flex-col gap-3">
+              <SectionHeader
+                ruled
+                eyebrow={t("eyebrow")}
+                title={t("platformSummary")}
+                description={t("platformSummaryHint")}
               />
-            </AdminSectionCard>
-
-            <AdminSectionCard
-              title={t("topProducts")}
-              subtitle={t("topProductsHint")}
-              icon={
-                <IoReceiptOutline className="text-primary text-xl shrink-0" />
-              }
-              dir={textDir}
-            >
-              <AdminRankedList
-                items={topProducts}
+              <AdminMetricsGrid
+                items={summaryMetrics}
+                columns={4}
                 dir={textDir}
-                emptyMessage={t("noVisitData")}
+                ruled
               />
-            </AdminSectionCard>
-          </div>
+            </section>
 
-          <AdminSectionCard
-            title={t("freeBannerPerformance")}
-            subtitle={t("freeBannerPerformanceHint")}
-            icon={<IoLinkOutline className="text-primary text-xl shrink-0" />}
-            dir={textDir}
-          >
-            <AdminMetricsGrid
-              items={freeBannerMetrics}
-              columns={3}
-              dir={textDir}
-            />
-            <div className="mt-6 pt-6 border-t border-line">
-              <p className="text-sm font-medium text-fg-muted mb-3">
-                {t("topMenusByBannerClicks")}
-              </p>
-              <AdminRankedList
-                items={topBannerMenus}
-                dir={textDir}
-                emptyMessage={t("noVisitData")}
-              />
-            </div>
-          </AdminSectionCard>
-
-          <AdminSectionCard
-            title={t("adPerformance")}
-            subtitle={t("adPerformanceHint")}
-            icon={
-              <IoStatsChartOutline className="text-primary text-xl shrink-0" />
-            }
-            dir={textDir}
-            action={
-              <LinkTo
-                href="/admin/advertisements"
-                className="text-sm font-medium text-primary hover:underline"
-              >
-                {t("viewAds")}
-              </LinkTo>
-            }
-          >
-            <AdminMetricsGrid items={adMetrics} columns={3} dir={textDir} />
-          </AdminSectionCard>
-
-          {geoItems.length > 0 && (
-            <AdminSectionCard
-              title={t("geoDistribution")}
-              icon={
-                <IoGlobeOutline className="text-primary text-xl shrink-0" />
-              }
-              dir={textDir}
-            >
-              <AdminRankedList items={geoItems} dir={textDir} />
-            </AdminSectionCard>
-          )}
-
-          {(analytics.subscriptions?.expiringSoon?.length ?? 0) > 0 && (
-            <AdminSectionCard
-              title={t("expiringSoon")}
-              subtitle={t("expiringSoonHint")}
-              icon={
-                <IoPeopleOutline className="text-primary text-xl shrink-0" />
-              }
-              dir={textDir}
-              action={
-                <LinkTo
-                  href="/admin/users"
-                  className="text-sm font-medium text-primary hover:underline"
+            <section>
+              <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                <AdminSectionCard
+                  title={t("viewsOverTime")}
+                  subtitle={t(`period.${period}`)}
+                  icon={<FaChartLine className="size-4 shrink-0" />}
+                  dir={textDir}
                 >
-                  {t("viewUsers")}
-                </LinkTo>
-              }
-            >
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-line text-fg-muted">
-                      <th
-                        className={`py-2 ${textDir === "rtl" ? "text-right" : "text-left"}`}
-                      >
-                        {t("userName")}
-                      </th>
-                      <th
-                        className={`py-2 ${textDir === "rtl" ? "text-right" : "text-left"}`}
-                      >
-                        {t("userEmail")}
-                      </th>
-                      <th
-                        className={`py-2 ${textDir === "rtl" ? "text-right" : "text-left"}`}
-                      >
-                        {t("plan")}
-                      </th>
-                      <th
-                        className={`py-2 ${textDir === "rtl" ? "text-right" : "text-left"}`}
-                      >
-                        {t("endDate")}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {analytics.subscriptions!.expiringSoon.map((row) => (
-                      <tr key={row.userId} className="border-b border-line">
-                        <td className="py-3 font-medium text-fg">
-                          <LinkTo
-                            href={`/admin/users/${row.userId}`}
-                            className="hover:text-primary"
-                          >
-                            {row.name}
-                          </LinkTo>
-                        </td>
-                        <td className="py-3 text-fg-muted">{row.email}</td>
-                        <td className="py-3">{row.planName}</td>
-                        <td className="py-3 tabular-nums">
-                          {formatAdminDate(row.endDate, locale)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                  <AdminBarChart
+                    points={analytics.viewsOverTime}
+                    locale={locale}
+                    dir={textDir}
+                    emptyMessage={t("noVisitData")}
+                  />
+                </AdminSectionCard>
+
+                {(analytics.revenueOverTime?.length ?? 0) > 0 && (
+                  <AdminSectionCard
+                    title={t("revenueOverTime")}
+                    icon={<FaCreditCard className="size-4 shrink-0" />}
+                    dir={textDir}
+                  >
+                    <AdminMonthGrid
+                      points={analytics.revenueOverTime ?? []}
+                      dir={textDir}
+                      formatCount={(count) =>
+                        formatMenuPrice(count, "EGP", locale)
+                      }
+                    />
+                  </AdminSectionCard>
+                )}
               </div>
-            </AdminSectionCard>
-          )}
-        </>
-      )}
-    </div>
+            </section>
+
+            <section>
+              <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+                <AdminSectionCard
+                  title={t("topMenus")}
+                  subtitle={t("topMenusHint")}
+                  icon={<IoEyeOutline className="size-4 shrink-0" />}
+                  dir={textDir}
+                >
+                  <AdminRankedList
+                    items={topMenus}
+                    dir={textDir}
+                    emptyMessage={t("noVisitData")}
+                  />
+                </AdminSectionCard>
+
+                <AdminSectionCard
+                  title={t("topProducts")}
+                  subtitle={t("topProductsHint")}
+                  icon={<IoReceiptOutline className="size-4 shrink-0" />}
+                  dir={textDir}
+                >
+                  <AdminRankedList
+                    items={topProducts}
+                    dir={textDir}
+                    emptyMessage={t("noVisitData")}
+                  />
+                </AdminSectionCard>
+
+                <AdminSectionCard
+                  title={t("geoDistribution")}
+                  icon={<IoGlobeOutline className="size-4 shrink-0" />}
+                  dir={textDir}
+                >
+                  <AdminRankedList
+                    items={geoItems}
+                    dir={textDir}
+                    emptyMessage={t("noVisitData")}
+                  />
+                </AdminSectionCard>
+              </div>
+            </section>
+
+            <section className="flex flex-col gap-3">
+              <SectionHeader
+                ruled
+                title={t("adPerformance")}
+                description={t("adPerformanceHint")}
+                actions={
+                  <LinkTo
+                    href="/admin/advertisements"
+                    className="text-[13px] font-medium text-accent hover:underline"
+                  >
+                    {t("viewAds")}
+                  </LinkTo>
+                }
+              />
+              <AdminMetricsGrid
+                items={adMetrics}
+                columns={3}
+                dir={textDir}
+                ruled
+              />
+
+              {/* The free banner is a second, smaller ad surface, so it sits under
+                the paid one as its own rail rather than as a separate card. */}
+              <p className="ui-label mt-2">{t("freeBannerPerformance")}</p>
+              <AdminMetricsGrid
+                items={freeBannerMetrics}
+                columns={3}
+                dir={textDir}
+                ruled
+              />
+              <AdminSectionCard
+                title={t("topMenusByBannerClicks")}
+                subtitle={t("freeBannerPerformanceHint")}
+                icon={<IoLinkOutline className="size-4 shrink-0" />}
+                dir={textDir}
+              >
+                <AdminRankedList
+                  items={topBannerMenus}
+                  dir={textDir}
+                  emptyMessage={t("noVisitData")}
+                />
+              </AdminSectionCard>
+            </section>
+
+            {expiringSoon.length > 0 && (
+              <section className="flex flex-col gap-3">
+                <SectionHeader
+                  ruled
+                  title={
+                    <span className="inline-flex items-center gap-2">
+                      <IoPeopleOutline
+                        className="size-4 shrink-0"
+                        aria-hidden
+                      />
+                      {t("expiringSoon")}
+                    </span>
+                  }
+                  description={t("expiringSoonHint")}
+                  actions={
+                    <LinkTo
+                      href="/admin/users"
+                      className="text-[13px] font-medium text-accent hover:underline"
+                    >
+                      {t("viewUsers")}
+                    </LinkTo>
+                  }
+                />
+                <TableShell>
+                  <Table caption={t("expiringSoon")}>
+                    <thead>
+                      <tr>
+                        <Th>{t("userName")}</Th>
+                        <Th>{t("userEmail")}</Th>
+                        <Th>{t("plan")}</Th>
+                        <Th align="end" numeric>
+                          {t("endDate")}
+                        </Th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {expiringSoon.map((row) => (
+                        <Tr key={row.userId}>
+                          <Td className="font-medium">
+                            <LinkTo
+                              href={`/admin/users/${row.userId}`}
+                              className="hover:underline"
+                            >
+                              {row.name}
+                            </LinkTo>
+                          </Td>
+                          <Td className="font-mono text-[12px] text-fg-muted">
+                            <span dir="ltr">{row.email}</span>
+                          </Td>
+                          <Td>{row.planName}</Td>
+                          <Td align="end" numeric className="ui-figure">
+                            <span lang="en">
+                              {formatAdminDate(row.endDate, locale)}
+                            </span>
+                          </Td>
+                        </Tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </TableShell>
+              </section>
+            )}
+          </>
+        )}
+      </div>
+    </PageShell>
   );
 }

@@ -2,10 +2,17 @@
 
 import { useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { IoReceiptOutline, IoSearchOutline } from "react-icons/io5";
+import { IoReceiptOutline } from "react-icons/io5";
 import { NotificationPermissionCard } from "@/components/Global/NotificationPermissionCard";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
-import LinkTo from "@/components/Global/LinkTo";
+import {
+  Badge,
+  ButtonLink,
+  EmptyState,
+  PageShell,
+  SearchInput,
+  Toolbar,
+} from "@/components/ui";
 import {
   useDashboardMenus,
   localizedMenuName,
@@ -20,7 +27,6 @@ import OrdersFilters from "./OrdersFilters";
 export default function AccountTableOrdersView() {
   const t = useTranslations("tableOrders");
   const locale = useLocale();
-  const isRTL = locale === "ar";
 
   const { menus: accountMenus, loading: menusLoading } = useDashboardMenus();
 
@@ -30,6 +36,7 @@ export default function AccountTableOrdersView() {
     setMenuFilter,
     modalMenuId,
     entries,
+    changedIds,
     loading,
     page,
     setPage,
@@ -86,89 +93,72 @@ export default function AccountTableOrdersView() {
 
   if (noMenuSupportsTableOrders) {
     return (
-      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4 text-center md:min-h-[60vh] md:gap-4">
-        <PageTitleWithHelp className="justify-center">
-          <h1 className="text-xl font-bold text-fg sm:text-2xl md:text-3xl">
-            {t("proOnlyTitle")}
-          </h1>
-        </PageTitleWithHelp>
-        <p className="max-w-md text-sm text-fg-subtle md:text-base dark:text-fg-subtle">
-          {t("proOnlyDescription")}
-        </p>
-        <LinkTo
-          href="/dashboard/subscription"
-          className="mt-2 inline-flex items-center justify-center gap-2 rounded-lg bg-linear-to-r from-primary to-primary/80 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] md:mt-4 md:px-8"
-        >
-          {t("upgradeShort")}
-        </LinkTo>
-      </div>
+      <EmptyState
+        icon={<IoReceiptOutline />}
+        title={t("proOnlyTitle")}
+        description={t("proOnlyDescription")}
+        action={
+          <ButtonLink href="/dashboard/subscription">
+            {t("upgradeShort")}
+          </ButtonLink>
+        }
+      />
     );
   }
 
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <PageShell
+      kind="wide"
+      /* The page states itself once, in the standard header, and the count of
+         orders still waiting is the one piece of status that belongs beside the
+         title. The previous version wrapped all of this in a bordered hero with
+         its own icon tile, which made the orders below look like a secondary
+         region of the page they are the entire point of. */
+      header={
+        <PageTitleWithHelp
+          title={t("title")}
+          description={t("subtitle")}
+          meta={
+            pendingCount > 0 ? (
+              <Badge tone="warning">
+                {t("pendingBadge", { count: pendingCount })}
+              </Badge>
+            ) : undefined
+          }
+        />
+      }
+      /* Only the search field is pinned. The date range and status row is tall
+         enough that sticking it would cost a third of the viewport on every
+         scroll, and it is set once per session rather than typed into. */
+      toolbar={
+        <Toolbar
+          search={
+            <SearchInput
+              value={searchInput}
+              onChange={setSearchInput}
+              placeholder={t("searchPlaceholder")}
+              label={t("searchPlaceholder")}
+            />
+          }
+        />
+      }
+    >
       <NotificationPermissionCard />
 
-      <header className="rounded-lg border border-line bg-surface p-6 shadow-sm md:p-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-brand text-on-brand shadow-sm">
-              <IoReceiptOutline className="text-2xl" aria-hidden />
-            </div>
-            <div>
-              <PageTitleWithHelp>
-                <h1 className="text-2xl font-bold tracking-tight text-fg md:text-3xl">
-                  {t("title")}
-                </h1>
-              </PageTitleWithHelp>
-              <p className="mt-1 max-w-xl text-sm text-fg-muted">
-                {t("subtitle")}
-              </p>
-            </div>
-          </div>
-          {pendingCount > 0 && (
-            <span className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-sm font-bold text-amber-800 ring-1 ring-amber-300/60 dark:bg-amber-900/40 dark:text-amber-200 dark:ring-amber-700/50">
-              {t("pendingBadge", { count: pendingCount })}
-            </span>
-          )}
-        </div>
-
-        <div className="relative mt-6">
-          <label htmlFor="account-orders-search" className="sr-only">
-            {t("searchPlaceholder")}
-          </label>
-          <IoSearchOutline
-            className={`pointer-events-none absolute top-1/2 h-5 w-5 -translate-y-1/2 text-brand ${isRTL ? "end-3" : "start-3"}`}
-            aria-hidden
-          />
-          <input
-            id="account-orders-search"
-            type="search"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder={t("searchPlaceholder")}
-            className={`w-full rounded-lg border border-line-strong bg-surface py-3 text-sm text-fg placeholder:text-fg-subtle focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/35 ${isRTL ? "pe-11 ps-4" : "ps-11 pe-4"}`}
-            autoComplete="off"
-          />
-        </div>
-
-        <OrdersFilters
-          translationNs="tableOrders"
-          theme="brand"
-          dateFrom={dateFrom}
-          dateTo={dateTo}
-          statusFilter={statusFilter}
-          onDateFromChange={setDateFrom}
-          onDateToChange={setDateTo}
-          onStatusFilterChange={setStatusFilter}
-          onClearFilters={clearFilters}
-          hasActiveFilters={isFiltered}
-          isRTL={isRTL}
-          menus={menuOptions}
-          menuFilter={menuFilter}
-          onMenuFilterChange={setMenuFilter}
-        />
-      </header>
+      <OrdersFilters
+        translationNs="tableOrders"
+        dateFrom={dateFrom}
+        dateTo={dateTo}
+        statusFilter={statusFilter}
+        onDateFromChange={setDateFrom}
+        onDateToChange={setDateTo}
+        onStatusFilterChange={setStatusFilter}
+        onClearFilters={clearFilters}
+        hasActiveFilters={isFiltered}
+        menus={menuOptions}
+        menuFilter={menuFilter}
+        onMenuFilterChange={setMenuFilter}
+      />
 
       <OrdersCardGrid
         entries={entries}
@@ -180,6 +170,7 @@ export default function AccountTableOrdersView() {
         totalPages={totalPages}
         onPageChange={setPage}
         isFiltered={isFiltered}
+        changedIds={changedIds}
         onView={openModal}
         onActionComplete={handleActionComplete}
       />
@@ -195,6 +186,6 @@ export default function AccountTableOrdersView() {
           onItemsUpdated={handleItemsUpdated}
         />
       )}
-    </div>
+    </PageShell>
   );
 }

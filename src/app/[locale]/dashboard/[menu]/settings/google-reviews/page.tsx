@@ -5,13 +5,25 @@ import { useLocale, useTranslations } from "next-intl";
 import { FiExternalLink, FiSave } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
 import CustomInput from "@/components/Custom/CustomInput";
-import { Button } from "@/components/ui";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Field,
+  PageColumns,
+  PageShell,
+  SectionHeader,
+  SegmentedControl,
+  Switch,
+} from "@/components/ui";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { axiosPatch } from "@/shared/axiosCall";
 import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
 import { toast } from "react-toastify";
 import type { Menu } from "@/types/Menu";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
+import { menuDashboardPath } from "@/lib/menuDashboardPath";
 import {
   DEFAULT_GOOGLE_REVIEWS_BUTTON_TEXT_AR,
   DEFAULT_GOOGLE_REVIEWS_BUTTON_TEXT_EN,
@@ -42,51 +54,44 @@ const INITIAL: FormState = {
   openInNewTab: true,
 };
 
+/**
+ * A settings row that is a switch.
+ *
+ * The state word stays beside the control rather than being implied by the
+ * track colour, because "on"/"off" is the fact the reader wants and a 36px
+ * track is a small thing to read a boolean from.
+ */
 function ToggleRow({
   label,
+  hint,
   onLabel,
   offLabel,
   checked,
   onChange,
-  isRTL,
 }: {
   label: string;
+  hint?: string;
   onLabel: string;
   offLabel: string;
   checked: boolean;
   onChange: () => void;
-  isRTL: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4">
-      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-        {label}
+    <div className="flex items-start justify-between gap-4 border-b border-line py-3 last:border-b-0">
+      <span className="flex min-w-0 flex-col gap-0.5">
+        <span className="text-[13px] leading-5 font-medium text-fg">
+          {label}
+        </span>
+        {hint ? (
+          <span className="text-xs leading-relaxed text-fg-muted">{hint}</span>
+        ) : null}
       </span>
-      <div className="flex items-center gap-3 shrink-0">
-        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+      <span className="flex shrink-0 items-center gap-2.5">
+        <span className="ui-label text-fg-subtle">
           {checked ? onLabel : offLabel}
         </span>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={checked}
-          aria-label={label}
-          onClick={onChange}
-          className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2 ${
-            checked ? "bg-primary" : "bg-slate-200 dark:bg-slate-600"
-          }`}
-        >
-          <span
-            className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${
-              checked
-                ? isRTL
-                  ? "-translate-x-5"
-                  : "translate-x-5"
-                : "translate-x-0"
-            }`}
-          />
-        </button>
-      </div>
+        <Switch checked={checked} onChange={onChange} aria-label={label} />
+      </span>
     </div>
   );
 }
@@ -199,149 +204,174 @@ export default function GoogleReviewsSettingsPage() {
     }
   };
 
-  return (
-    <div className="min-h-[calc(100vh-160px)]">
-      <header
-        className={isRTL ? "text-right space-y-1" : "text-left space-y-1 mb-8"}
-      >
-        <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 dark:bg-primary/20 text-primary px-3 py-1.5 text-xs font-semibold">
-          <FcGoogle className="text-sm" />
-          <span>{t("badge")}</span>
-        </div>
-        <PageTitleWithHelp className="my-4">
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100">
-            {t("title")}
-          </h1>
-        </PageTitleWithHelp>
-        <p className="max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-          {t("description")}
-        </p>
-      </header>
+  const urlIsValid = isValidGoogleReviewsUrl(form.url.trim());
 
-      <div className="space-y-6">
-        <section className="space-y-5 rounded-3xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800 md:p-6">
-          <ToggleRow
-            label={t("enabled")}
-            onLabel={t("enabledOn")}
-            offLabel={t("enabledOff")}
-            checked={form.enabled}
-            onChange={() =>
-              setForm((prev) => ({ ...prev, enabled: !prev.enabled }))
+  return (
+    <PageShell
+      kind="detail"
+      header={
+        <PageTitleWithHelp
+          eyebrow={t("badge")}
+          title={t("title")}
+          description={t("description")}
+          breadcrumbs={[
+            {
+              label: t("breadcrumbs.settings"),
+              href: menuDashboardPath(menu, "settings"),
+            },
+            { label: t("title") },
+          ]}
+          breadcrumbsLabel={t("title")}
+          meta={
+            <Badge tone={form.enabled ? "accent" : "neutral"} dot size="md">
+              {form.enabled ? t("enabledOn") : t("enabledOff")}
+            </Badge>
+          }
+        />
+      }
+      footerSticky
+      footer={
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            onClick={() => void handleSave()}
+            disabled={saving}
+            loading={saving}
+            startIcon={<FiSave aria-hidden />}
+          >
+            {t("buttons.save")}
+          </Button>
+        </div>
+      }
+    >
+      {/* The preview is a rail rather than the last block on the page: the whole
+          point of these five fields is the button they produce, so it stays in
+          view while they are edited. */}
+      <PageColumns
+        side={
+          <Card padded="lg">
+            <SectionHeader eyebrow={t("badge")} title={t("previewLabel")} />
+            {/* Bone well, because this is a stand-in for the customer's menu
+                page rather than part of the dashboard chrome. */}
+            <div className="mt-4 flex items-center justify-center rounded-lg border border-line bg-surface-2 px-4 py-8">
+              <span
+                className="inline-flex max-w-full items-center gap-2 rounded-lg bg-brand px-3.5 py-2 text-[13px] font-medium text-on-brand"
+                dir={isRTL ? "rtl" : "ltr"}
+              >
+                {form.showIcon ? (
+                  <FcGoogle className="size-4 shrink-0" aria-hidden />
+                ) : null}
+                <span className="truncate">{previewText}</span>
+              </span>
+            </div>
+            <dl className="mt-4 border-t border-line">
+              <div className="flex items-baseline justify-between gap-3 border-b border-line py-2">
+                <dt className="ui-label text-fg-muted">
+                  {t("position.title")}
+                </dt>
+                <dd className="text-[13px] text-fg">
+                  {t(`position.${form.position}`)}
+                </dd>
+              </div>
+              <div className="flex items-baseline justify-between gap-3 border-b border-line py-2">
+                <dt className="ui-label text-fg-muted">{t("openInNewTab")}</dt>
+                <dd className="text-[13px] text-fg">
+                  {form.openInNewTab
+                    ? t("openInNewTabOn")
+                    : t("openInNewTabOff")}
+                </dd>
+              </div>
+            </dl>
+          </Card>
+        }
+      >
+        <Card padded="lg">
+          <SectionHeader
+            ruled
+            eyebrow={t("badge")}
+            title={t("url.title")}
+            description={t("url.hint")}
+            actions={
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                disabled={!urlIsValid}
+                onClick={() => openUrl(form.url)}
+                startIcon={<FiExternalLink aria-hidden />}
+              >
+                {t("url.preview")}
+              </Button>
             }
-            isRTL={isRTL}
           />
 
-          <div className="space-y-3 border-t border-slate-100 pt-5 dark:border-slate-700">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 dark:bg-primary/20">
-                <FcGoogle className="text-xl" />
-              </div>
-              <div>
-                <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-                  {t("url.title")}
-                </h2>
-                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                  {t("url.hint")}
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                {t("url.label")}
-              </label>
-              <CustomInput
-                type="url"
-                value={form.url}
-                onChange={(e) => {
-                  const nextUrl = (e as React.ChangeEvent<HTMLInputElement>)
-                    .target.value;
-                  setForm((prev) => {
-                    const trimmed = nextUrl.trim();
-                    const shouldAutoEnable =
-                      Boolean(trimmed) && isValidGoogleReviewsUrl(trimmed);
-                    return {
-                      ...prev,
-                      url: nextUrl,
-                      // Auto-enable when a valid Google link is entered so the
-                      // public CTA actually appears after save.
-                      enabled: shouldAutoEnable ? true : prev.enabled,
-                    };
-                  });
-                }}
-                onBlur={() => {
-                  const trimmed = form.url.trim();
-                  if (!trimmed) return;
-                  const normalized = normalizeGoogleReviewsUrl(trimmed);
-                  setForm((prev) => ({
+          <Field className="mt-4" label={t("url.label")}>
+            <CustomInput
+              type="url"
+              value={form.url}
+              onChange={(e) => {
+                const nextUrl = (e as React.ChangeEvent<HTMLInputElement>)
+                  .target.value;
+                setForm((prev) => {
+                  const trimmed = nextUrl.trim();
+                  const shouldAutoEnable =
+                    Boolean(trimmed) && isValidGoogleReviewsUrl(trimmed);
+                  return {
                     ...prev,
-                    url: normalized,
-                    enabled: isValidGoogleReviewsUrl(normalized)
-                      ? true
-                      : prev.enabled,
-                  }));
-                }}
-                placeholder={t("url.placeholder")}
+                    url: nextUrl,
+                    // Auto-enable when a valid Google link is entered so the
+                    // public CTA actually appears after save.
+                    enabled: shouldAutoEnable ? true : prev.enabled,
+                  };
+                });
+              }}
+              onBlur={() => {
+                const trimmed = form.url.trim();
+                if (!trimmed) return;
+                const normalized = normalizeGoogleReviewsUrl(trimmed);
+                setForm((prev) => ({
+                  ...prev,
+                  url: normalized,
+                  enabled: isValidGoogleReviewsUrl(normalized)
+                    ? true
+                    : prev.enabled,
+                }));
+              }}
+              placeholder={t("url.placeholder")}
+            />
+          </Field>
+
+          {!form.enabled && form.url.trim() ? (
+            <Alert tone="warning" className="mt-3">
+              {t("enabledOffWarning")}
+            </Alert>
+          ) : null}
+        </Card>
+
+        <Card padded="lg">
+          <SectionHeader
+            ruled
+            eyebrow={t("position.title")}
+            title={t("buttonText.title")}
+          />
+
+          <div className="mt-4 flex flex-col gap-4">
+            <Field label={t("position.title")}>
+              <SegmentedControl
+                label={t("position.title")}
+                value={form.position}
+                onChange={(position) =>
+                  setForm((prev) => ({ ...prev, position }))
+                }
+                options={GOOGLE_REVIEWS_POSITIONS.map((position) => ({
+                  value: position,
+                  label: t(`position.${position}`),
+                }))}
               />
-            </div>
+            </Field>
 
-            {!form.enabled && form.url.trim() ? (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-800/50 dark:bg-amber-900/20 dark:text-amber-100">
-                {t("enabledOffWarning")}
-              </div>
-            ) : null}
-
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => openUrl(form.url)}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
-              >
-                <FiExternalLink />
-                {t("url.preview")}
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-3 border-t border-slate-100 pt-5 dark:border-slate-700">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-              {t("position.title")}
-            </h2>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {GOOGLE_REVIEWS_POSITIONS.map((position) => (
-                <label
-                  key={position}
-                  className={`flex cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3 transition ${
-                    form.position === position
-                      ? "border-primary bg-primary/5 dark:bg-primary/10"
-                      : "border-slate-200 dark:border-slate-600"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="googleReviewsPosition"
-                    value={position}
-                    checked={form.position === position}
-                    onChange={() => setForm((prev) => ({ ...prev, position }))}
-                    className="accent-(--color-primary,#0f766e)"
-                  />
-                  <span className="text-sm font-medium text-slate-800 dark:text-slate-100">
-                    {t(`position.${position}`)}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-3 border-t border-slate-100 pt-5 dark:border-slate-700">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-              {t("buttonText.title")}
-            </h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  {t("buttonText.ar")}
-                </label>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Field label={t("buttonText.ar")}>
                 <CustomInput
                   type="text"
                   value={form.buttonTextAr}
@@ -354,11 +384,8 @@ export default function GoogleReviewsSettingsPage() {
                   }
                   placeholder={t("buttonText.arPlaceholder")}
                 />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  {t("buttonText.en")}
-                </label>
+              </Field>
+              <Field label={t("buttonText.en")}>
                 <CustomInput
                   type="text"
                   value={form.buttonTextEn}
@@ -371,11 +398,23 @@ export default function GoogleReviewsSettingsPage() {
                   }
                   placeholder={t("buttonText.enPlaceholder")}
                 />
-              </div>
+              </Field>
             </div>
           </div>
+        </Card>
 
-          <div className="space-y-4 border-t border-slate-100 pt-5 dark:border-slate-700">
+        <Card padded="lg">
+          <SectionHeader ruled eyebrow={t("badge")} title={t("showIcon")} />
+          <div className="mt-1">
+            <ToggleRow
+              label={t("enabled")}
+              onLabel={t("enabledOn")}
+              offLabel={t("enabledOff")}
+              checked={form.enabled}
+              onChange={() =>
+                setForm((prev) => ({ ...prev, enabled: !prev.enabled }))
+              }
+            />
             <ToggleRow
               label={t("showIcon")}
               onLabel={t("showIconOn")}
@@ -384,7 +423,6 @@ export default function GoogleReviewsSettingsPage() {
               onChange={() =>
                 setForm((prev) => ({ ...prev, showIcon: !prev.showIcon }))
               }
-              isRTL={isRTL}
             />
             <ToggleRow
               label={t("openInNewTab")}
@@ -397,41 +435,10 @@ export default function GoogleReviewsSettingsPage() {
                   openInNewTab: !prev.openInNewTab,
                 }))
               }
-              isRTL={isRTL}
             />
           </div>
-
-          <div className="space-y-3 border-t border-slate-100 pt-5 dark:border-slate-700">
-            <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-              {t("previewLabel")}
-            </h2>
-            <div
-              className="inline-flex max-w-full items-center gap-2 rounded-full bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm"
-              dir={isRTL ? "rtl" : "ltr"}
-            >
-              {form.showIcon ? (
-                <>
-                  <span aria-hidden>⭐</span>
-                  <FcGoogle className="shrink-0 text-lg" />
-                </>
-              ) : null}
-              <span className="truncate">{previewText}</span>
-            </div>
-          </div>
-        </section>
-
-        <div className="flex justify-end">
-          <Button
-            type="button"
-            onClick={() => void handleSave()}
-            disabled={saving}
-            loading={saving}
-            startIcon={<FiSave className="text-lg" />}
-          >
-            {t("buttons.save")}
-          </Button>
-        </div>
-      </div>
-    </div>
+        </Card>
+      </PageColumns>
+    </PageShell>
   );
 }

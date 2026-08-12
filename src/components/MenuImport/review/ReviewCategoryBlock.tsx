@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import type { ImportCategory } from "@/types/menuImport";
 import type { PexelsPhoto } from "@/types/pexels";
@@ -22,6 +22,7 @@ import {
   IoAddCircleOutline,
   IoImageOutline,
   IoCloseOutline,
+  IoEllipsisHorizontal,
 } from "react-icons/io5";
 import { cn } from "@/lib/cn";
 import {
@@ -30,12 +31,17 @@ import {
   ConfirmDialog,
   EmptyState,
   Input,
+  Menu as DropdownMenu,
+  MenuItem,
+  MenuSeparator,
   Spinner,
   focusRing,
 } from "@/components/ui";
 
 interface ReviewCategoryBlockProps {
   category: ImportCategory;
+  /** Position in the parse. Shown on the header as the section's ordinal. */
+  index: number;
   currency: string;
   locale: string;
   scrollTargetRefId?: string | null;
@@ -62,8 +68,20 @@ interface ReviewCategoryBlockProps {
   ) => void;
 }
 
+/**
+ * One parsed category, as a section of the review ledger.
+ *
+ * It carries no border or radius of its own any more: `ReviewStep` rules the
+ * categories against each other, so this is a header row and a list of item
+ * rows inside a shared panel rather than another floating card. The header used
+ * to hold four equal-weight controls — collapse, photo, clear photo, delete —
+ * next to two text fields; the rare and destructive ones now sit behind one
+ * overflow menu, which leaves the header saying what the category is instead of
+ * offering four things to do to it.
+ */
 export default function ReviewCategoryBlock({
   category,
+  index,
   currency,
   locale,
   scrollTargetRefId,
@@ -80,7 +98,6 @@ export default function ReviewCategoryBlock({
 }: ReviewCategoryBlockProps) {
   const t = useTranslations("MenuImport");
   const tCommon = useTranslations("common");
-  const uiLocale = useLocale();
   const fileRef = useRef<HTMLInputElement>(null);
   const [collapsed, setCollapsed] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -174,18 +191,24 @@ export default function ReviewCategoryBlock({
     !displayImageUrl!.startsWith("data:") &&
     !displayImageUrl!.startsWith("blob:");
 
+  const categoryLabel =
+    category.nameEn || category.nameAr || t("categoryMenuLabel");
+
+  const handleAddItem = () => {
+    setCollapsed(false);
+    onAddItem();
+  };
+
   return (
     <>
       <section
         id={importRefDomId(category.id)}
-        className="scroll-mt-24 overflow-hidden rounded-xl border border-line bg-surface"
+        className={cn(
+          "scroll-mt-24 first:rounded-t-xl",
+          hasMissingName && "bg-warning-soft/40",
+        )}
       >
-        <div
-          className={cn(
-            "flex items-start gap-3 border-b border-line px-4 py-4 sm:px-5",
-            hasMissingName && "bg-warning-soft/50",
-          )}
-        >
+        <div className="flex items-start gap-2 px-3 py-3 sm:px-4">
           <Button
             variant="ghost"
             size="sm"
@@ -193,104 +216,86 @@ export default function ReviewCategoryBlock({
             onClick={() => setCollapsed((v) => !v)}
             aria-expanded={!collapsed}
             aria-label={collapsed ? tCommon("showMore") : tCommon("showLess")}
-            className="mt-1"
           >
             {collapsed ? (
-              <IoChevronDownOutline className="text-xl" />
+              <IoChevronDownOutline className="text-lg" />
             ) : (
-              <IoChevronUpOutline className="text-xl" />
+              <IoChevronUpOutline className="text-lg" />
             )}
           </Button>
 
-          <div className="flex shrink-0 items-start gap-2">
-            <button
-              type="button"
-              disabled={isImageBusy}
-              onClick={() => setPexelsModalOpen(true)}
-              aria-label={displayImageUrl ? t("replaceImage") : t("addImage")}
-              className={cn(
-                "relative flex size-[4.5rem] shrink-0 flex-col items-center justify-center overflow-hidden rounded-xl",
-                "transition-colors duration-150 disabled:pointer-events-none disabled:opacity-80",
-                focusRing,
-                displayImageUrl
-                  ? "border border-line bg-surface-2 hover:border-brand"
-                  : "border border-dashed border-brand-line bg-brand-soft/50 hover:border-brand hover:bg-brand-soft",
-              )}
-            >
-              {displayImageUrl ? (
-                showResizedThumb ? (
-                  <LoadImage
-                    src={displayImageUrl}
-                    alt=""
-                    width={CATEGORY_THUMB_SIZE}
-                    height={CATEGORY_THUMB_SIZE}
-                    cover
-                    disableLazy
-                    className="h-full w-full object-cover"
-                    wrapperClassName="!block h-full w-full"
-                  />
-                ) : (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={displayImageUrl}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                )
+          <button
+            type="button"
+            disabled={isImageBusy}
+            onClick={() => setPexelsModalOpen(true)}
+            aria-label={displayImageUrl ? t("replaceImage") : t("addImage")}
+            className={cn(
+              "relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-sm",
+              "transition-[border-color] duration-(--dur-fast) ease-(--ease-settle) disabled:pointer-events-none",
+              focusRing,
+              displayImageUrl
+                ? "border border-line bg-surface-2 hover:border-fg-subtle"
+                : "border border-dashed border-line-strong bg-surface-2 hover:border-fg-subtle",
+            )}
+          >
+            {displayImageUrl ? (
+              showResizedThumb ? (
+                <LoadImage
+                  src={displayImageUrl}
+                  alt=""
+                  width={CATEGORY_THUMB_SIZE}
+                  height={CATEGORY_THUMB_SIZE}
+                  cover
+                  disableLazy
+                  className="h-full w-full object-cover"
+                  wrapperClassName="!block h-full w-full"
+                />
               ) : (
-                <>
-                  <IoImageOutline
-                    className="text-lg text-brand-soft-fg"
-                    aria-hidden
-                  />
-                  <span className="mt-0.5 text-[9px] font-semibold leading-none text-brand-soft-fg">
-                    {t("addImage")}
-                  </span>
-                </>
-              )}
-              {isImageLoading && (
-                <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/55">
-                  <Spinner size="md" className="text-white" />
-                  <span className="px-1 text-center text-[8px] font-semibold leading-none text-white">
-                    {t("uploadingImage")}
-                  </span>
-                </span>
-              )}
-            </button>
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
-              className="hidden"
-              disabled={isImageBusy}
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) void uploadImageFile(f);
-                e.target.value = "";
-              }}
-            />
-            {displayImageUrl && !isImageBusy && (
-              <Button
-                variant="ghost"
-                size="xs"
-                iconOnly
-                aria-label={t("removeImage")}
-                onClick={() => {
-                  setLocalPreview(null);
-                  onUpdateCategory({ imageUrl: undefined });
-                }}
-              >
-                <IoCloseOutline />
-              </Button>
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={displayImageUrl}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              )
+            ) : (
+              <IoImageOutline className="text-lg text-fg-subtle" aria-hidden />
             )}
-          </div>
+            {isImageLoading && (
+              <span className="absolute inset-0 flex items-center justify-center bg-surface/85">
+                <Spinner size="sm" className="text-fg-muted" />
+                <span className="sr-only">{t("uploadingImage")}</span>
+              </span>
+            )}
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
+            className="hidden"
+            disabled={isImageBusy}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) void uploadImageFile(f);
+              e.target.value = "";
+            }}
+          />
 
-          <div className="flex min-w-0 flex-1 flex-col gap-2">
-            {category.matchedCategoryId && (
-              <Badge tone="success" className="self-start">
-                {t("categoryReusedExisting")}
-              </Badge>
-            )}
+          <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+              <span className="ui-figure text-[11px] text-fg-subtle">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <span className="ui-label">
+                {t("itemsInCategory", { count: category.items.length })}
+              </span>
+              {category.matchedCategoryId && (
+                <Badge tone="success" dot>
+                  {t("categoryReusedExisting")}
+                </Badge>
+              )}
+            </div>
+
             <div className="grid gap-2 sm:grid-cols-2">
               <Input
                 inputSize="sm"
@@ -313,57 +318,91 @@ export default function ReviewCategoryBlock({
             </div>
           </div>
 
-          <Button
-            variant="dangerGhost"
-            size="sm"
-            iconOnly
-            onClick={() => setConfirmDelete(true)}
-            aria-label={t("deleteCategory")}
-            title={t("deleteCategory")}
-            className="mt-1"
+          <DropdownMenu
+            label={categoryLabel}
+            trigger={(props) => (
+              <Button
+                {...props}
+                type="button"
+                variant="ghost"
+                size="sm"
+                iconOnly
+                aria-label={categoryLabel}
+              >
+                <IoEllipsisHorizontal className="size-4" />
+              </Button>
+            )}
           >
-            <IoTrashOutline className="text-lg" />
-          </Button>
+            <MenuItem icon={<IoAddCircleOutline />} onClick={handleAddItem}>
+              {t("addItem")}
+            </MenuItem>
+            <MenuItem
+              icon={<IoImageOutline />}
+              onClick={() => setPexelsModalOpen(true)}
+              disabled={isImageBusy}
+            >
+              {displayImageUrl ? t("replaceImage") : t("addImage")}
+            </MenuItem>
+            {displayImageUrl && !isImageBusy ? (
+              <MenuItem
+                icon={<IoCloseOutline />}
+                onClick={() => {
+                  setLocalPreview(null);
+                  onUpdateCategory({ imageUrl: undefined });
+                }}
+              >
+                {t("removeImage")}
+              </MenuItem>
+            ) : null}
+            <MenuSeparator />
+            <MenuItem
+              icon={<IoTrashOutline />}
+              tone="danger"
+              onClick={() => setConfirmDelete(true)}
+            >
+              {t("deleteCategory")}
+            </MenuItem>
+          </DropdownMenu>
         </div>
 
         {!collapsed && (
-          <div>
-            {category.items.map((item) => (
-              <div
-                key={item.id}
-                className="border-b border-line last:border-b-0"
-              >
-                <ReviewItemRow
-                  item={item}
-                  currency={currency}
-                  locale={locale}
-                  uiLocale={uiLocale}
-                  onUpdate={(patch) => onUpdateItem(item.id, patch)}
-                  onUpdateVariant={(variantId, patch) =>
-                    onUpdateVariant(item.id, variantId, patch)
-                  }
-                  onDelete={() => onDeleteItem(item.id)}
-                  onAddVariant={() => onAddVariant(item.id)}
-                  onRemoveVariant={(variantId) =>
-                    onRemoveVariant(item.id, variantId)
-                  }
-                  onImageChange={(url) => onItemImage(item.id, url)}
-                  onResolveDuplicate={(resolution, variantId) =>
-                    onResolveDuplicate(item.id, resolution, variantId)
-                  }
-                />
-              </div>
-            ))}
-            {category.items.length === 0 && (
-              <div className="px-4 py-4 sm:px-5">
+          <div className="border-t border-line">
+            {category.items.length === 0 ? (
+              <div className="px-3 py-3 sm:px-4">
                 <EmptyState size="sm" title={t("emptyCategory")} />
               </div>
+            ) : (
+              <ul className="divide-y divide-line">
+                {category.items.map((item) => (
+                  <li key={item.id}>
+                    <ReviewItemRow
+                      item={item}
+                      currency={currency}
+                      locale={locale}
+                      onUpdate={(patch) => onUpdateItem(item.id, patch)}
+                      onUpdateVariant={(variantId, patch) =>
+                        onUpdateVariant(item.id, variantId, patch)
+                      }
+                      onDelete={() => onDeleteItem(item.id)}
+                      onAddVariant={() => onAddVariant(item.id)}
+                      onRemoveVariant={(variantId) =>
+                        onRemoveVariant(item.id, variantId)
+                      }
+                      onImageChange={(url) => onItemImage(item.id, url)}
+                      onResolveDuplicate={(resolution, variantId) =>
+                        onResolveDuplicate(item.id, resolution, variantId)
+                      }
+                    />
+                  </li>
+                ))}
+              </ul>
             )}
-            <div className="px-4 py-3 sm:px-5">
+
+            <div className="border-t border-line bg-surface-2/40 px-3 py-1.5 sm:px-4">
               <Button
                 variant="link"
                 size="sm"
-                onClick={onAddItem}
+                onClick={handleAddItem}
                 startIcon={<IoAddCircleOutline className="text-base" />}
               >
                 {t("addItem")}

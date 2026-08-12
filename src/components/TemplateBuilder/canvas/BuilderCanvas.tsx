@@ -15,7 +15,6 @@ export function BuilderCanvas() {
   const breakpoint = useBuilderStore((s) => s.breakpoint);
   const selectedId = useBuilderStore((s) => s.selectedId);
   const select = useBuilderStore((s) => s.select);
-  const uiDark = useBuilderStore((s) => s.uiDark);
   const previewLocale = useBuilderStore((s) => s.previewLocale);
 
   const { setNodeRef, isOver } = useDroppable({
@@ -26,20 +25,25 @@ export function BuilderCanvas() {
   if (!document) return null;
   const frame = PREVIEW[breakpoint];
 
+  /* The gutter takes the page ground rather than the panel surface, so the
+     artboard is the brightest thing between the two rails (§14.3). */
   return (
     <div
-      className={`flex-1 overflow-auto p-4 md:p-6 ${uiDark ? "bg-slate-900" : "bg-slate-200"}`}
+      className="flex-1 overflow-auto bg-app p-4 md:p-6"
       onClick={() => select(document.root.id)}
     >
       <div
         ref={setNodeRef}
         className={`mx-auto shadow-2xl rounded-2xl overflow-hidden bg-white min-h-[70vh] transition-all ${
-          isOver ? "ring-2 ring-violet-500" : ""
+          isOver ? "ring-2 ring-accent" : ""
         }`}
         style={{
           width: frame.width,
           maxWidth: frame.maxWidth,
           direction: previewLocale === "ar" ? "rtl" : "ltr",
+          /* The frame is a picture of the customer's bright menu (§14.1), so it
+             opts out of the builder's dark scheme for native controls. */
+          colorScheme: "light",
         }}
         onClick={(e) => e.stopPropagation()}
       >

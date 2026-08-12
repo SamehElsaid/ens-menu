@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { FiSave } from "react-icons/fi";
+import type { IconType } from "react-icons";
 import {
   HiOutlineShare,
   HiOutlineMail,
@@ -16,13 +17,27 @@ import {
   FaWhatsapp,
 } from "react-icons/fa";
 import CustomInput from "@/components/Custom/CustomInput";
-import { Button, Checkbox, Field, Input, Switch } from "@/components/ui";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  CardDivider,
+  Checkbox,
+  Field,
+  Input,
+  PageShell,
+  SectionHeader,
+  Switch,
+} from "@/components/ui";
+import { cn } from "@/lib/cn";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { axiosPatch } from "@/shared/axiosCall";
 import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
 import { toast } from "react-toastify";
 import type { Menu } from "@/types/Menu";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
+import { menuDashboardPath } from "@/lib/menuDashboardPath";
 import { normalizeExternalUrl } from "@/lib/normalizeExternalUrl";
 
 function timeStringToDate(s: string): Date | null {
@@ -100,23 +115,50 @@ function normalizeWorkHours(raw: unknown): WorkHours {
   ) as WorkHours;
 }
 
-const SocialIcons: Record<SocialKey, React.ElementType> = {
+const SocialIcons: Record<SocialKey, IconType> = {
   facebook: FaFacebookF,
   instagram: FaInstagram,
   twitter: FaTwitter,
   whatsapp: FaWhatsapp,
 };
 
+/**
+ * Platform hues are kept because they identify a third-party service rather
+ * than signalling state — the one exception to the product's single-accent
+ * rule. The tinted tiles they used to sit in are gone: four coloured squares
+ * down the inline start of a form read as four different kinds of field.
+ */
 const socialIconColors: Record<SocialKey, string> = {
-  facebook: "text-[#1877F2] bg-[#1877F2]/10",
-  instagram: "text-pink-500 bg-pink-500/10",
-  twitter: "text-[#1DA1F2] bg-[#1DA1F2]/10",
-  whatsapp: "text-[#25D366] bg-[#25D366]/10",
+  facebook: "text-[#1877F2]",
+  instagram: "text-[#E1306C]",
+  twitter: "text-[#1DA1F2]",
+  whatsapp: "text-[#25D366]",
 };
+
+/** Ruled row grid: day, open, close, closed. */
+const HOURS_ROW = "sm:grid-cols-[7rem_1fr_1fr_auto]";
+
+/** Section title with a neutral glyph — the icon names the region, it does not
+ *  colour-code it. */
+function SectionTitle({
+  icon,
+  children,
+}: {
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span className="text-fg-subtle" aria-hidden>
+        {icon}
+      </span>
+      {children}
+    </span>
+  );
+}
 
 export default function MediaPage() {
   const locale = useLocale();
-  const isRTL = locale === "ar";
   const t = useTranslations("settingsMediaPage");
 
   const [socialLinks, setSocialLinks] =
@@ -233,186 +275,180 @@ export default function MediaPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-160px)]">
-      <header
-        id="onboarding-media-header"
-        className={isRTL ? "text-right space-y-1" : "text-left space-y-1 mb-8"}
-      >
-        <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 dark:bg-primary/20 text-primary px-3 py-1.5 text-xs font-semibold">
-          <HiOutlineShare className="text-sm" />
-          <span>{t("badge")}</span>
+    <PageShell
+      kind="detail"
+      header={
+        <PageTitleWithHelp
+          id="onboarding-media-header"
+          eyebrow={t("badge")}
+          title={t("title")}
+          description={t("description")}
+          breadcrumbs={[
+            {
+              label: t("breadcrumbs.settings"),
+              href: menuDashboardPath(menu, "settings"),
+            },
+            { label: t("title") },
+          ]}
+          breadcrumbsLabel={t("breadcrumbs.label")}
+        />
+      }
+      /* Four sections ending in a seven-row week table: the save button has to
+         stay reachable from the last field, not scroll away at the top. */
+      footerSticky
+      footer={
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            onClick={handleSave}
+            loading={isSaving}
+            startIcon={<FiSave className="size-3.5" />}
+          >
+            {t("buttons.save")}
+          </Button>
         </div>
-        <PageTitleWithHelp className="my-4">
-          <h1 className="text-2xl md:text-3xl font-bold text-fg">
-            {t("title")}
-          </h1>
-        </PageTitleWithHelp>
-      </header>
+      }
+    >
+      <Card as="section" id="onboarding-media-social">
+        <SectionHeader
+          ruled
+          eyebrow={t("sections.social")}
+          title={
+            <SectionTitle icon={<HiOutlineShare className="size-4" />}>
+              {t("socialLinks.title")}
+            </SectionTitle>
+          }
+        />
 
-      <div className="space-y-6">
-        {/* Social media links */}
-        <section
-          id="onboarding-media-social"
-          className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6 space-y-4"
-        >
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center">
-              <HiOutlineShare className="text-lg text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <h2 className="text-base font-semibold text-fg">
-                {t("socialLinks.title")}
-              </h2>
-            </div>
-          </div>
+        <div className="mt-3.5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {socialLinks.map((row) => {
+            const Icon = SocialIcons[row.id];
+            const labelKey = `socialLinks.${row.id}` as const;
+            return (
+              <Field key={row.id} label={t(labelKey)}>
+                {row.id === "whatsapp" ? (
+                  <CustomInput
+                    type="tel"
+                    value={row.value}
+                    onChange={(val) =>
+                      updateSocial(
+                        row.id,
+                        (val as unknown as string | undefined) ?? "",
+                      )
+                    }
+                    placeholder="123-456-7890"
+                  />
+                ) : (
+                  <Input
+                    type="text"
+                    value={row.value}
+                    onChange={(e) => updateSocial(row.id, e.target.value)}
+                    onBlur={() => {
+                      const trimmed = row.value.trim();
+                      if (!trimmed) return;
+                      updateSocial(row.id, normalizeExternalUrl(trimmed));
+                    }}
+                    placeholder={SOCIAL_URL_PLACEHOLDERS[row.id]}
+                    startIcon={
+                      <Icon
+                        className={cn("size-3.5", socialIconColors[row.id])}
+                      />
+                    }
+                  />
+                )}
+              </Field>
+            );
+          })}
+        </div>
 
-          <div className="space-y-3">
-            {socialLinks.map((row) => {
-              const Icon = SocialIcons[row.id];
-              const colorClass = socialIconColors[row.id];
-              const labelKey = `socialLinks.${row.id}` as const;
-              return (
-                <div key={row.id} className="flex items-center gap-3 flex-wrap">
-                  <div
-                    className={`h-10 w-10 min-w-10 rounded-lg flex items-center justify-center shrink-0 ${colorClass}`}
-                  >
-                    <Icon className="text-lg" />
-                  </div>
-                  <div className="flex-1 min-w-[180px]">
-                    <Field label={t(labelKey)}>
-                      {row.id === "whatsapp" ? (
-                        <CustomInput
-                          type="tel"
-                          value={row.value}
-                          onChange={(val) =>
-                            updateSocial(
-                              row.id,
-                              (val as unknown as string | undefined) ?? "",
-                            )
-                          }
-                          placeholder="123-456-7890"
-                        />
-                      ) : (
-                        <Input
-                          type="text"
-                          value={row.value}
-                          onChange={(e) => updateSocial(row.id, e.target.value)}
-                          onBlur={() => {
-                            const trimmed = row.value.trim();
-                            if (!trimmed) return;
-                            updateSocial(row.id, normalizeExternalUrl(trimmed));
-                          }}
-                          placeholder={SOCIAL_URL_PLACEHOLDERS[row.id]}
-                        />
-                      )}
-                    </Field>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+        <CardDivider />
 
-          <div className="rounded-lg flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800/50 p-3">
-            <span className="text-blue-600 dark:text-blue-400 shrink-0 mt-0.5">
-              ℹ
-            </span>
-            <p className="text-xs text-blue-800 dark:text-blue-200">
-              {t("socialLinks.note")}
-            </p>
-          </div>
-        </section>
+        <Alert tone="info">{t("socialLinks.note")}</Alert>
+      </Card>
 
-        {/* Contact information */}
-        <section
-          id="onboarding-media-contact"
-          className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6 space-y-4"
-        >
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
-              <HiOutlineMail className="text-lg text-primary" />
-            </div>
-            <div>
-              <h2 className="text-base font-semibold text-fg">
-                {t("contact.title")}
-              </h2>
-            </div>
-          </div>
+      <Card as="section" id="onboarding-media-contact">
+        <SectionHeader
+          ruled
+          eyebrow={t("sections.contact")}
+          title={
+            <SectionTitle icon={<HiOutlineMail className="size-4" />}>
+              {t("contact.title")}
+            </SectionTitle>
+          }
+        />
 
-          <div className="grid gap-4 sm:grid-cols-1">
-            <Field label={t("contact.addressAr")}>
-              <Input
-                type="text"
-                value={contact.addressAr}
-                onChange={(e) =>
-                  setContact((c) => ({ ...c, addressAr: e.target.value }))
-                }
-                placeholder={t("addressArPlaceholder")}
-              />
-            </Field>
-            <Field label={t("contact.addressEn")}>
-              <Input
-                type="text"
-                value={contact.addressEn}
-                onChange={(e) =>
-                  setContact((c) => ({ ...c, addressEn: e.target.value }))
-                }
-                placeholder={t("addressEnPlaceholder")}
-              />
-            </Field>
-            <Field label={t("contact.phone")}>
-              <CustomInput
-                type="tel"
-                value={contact.phone}
-                onChange={(val) =>
-                  setContact((c) => ({
-                    ...c,
-                    phone: (val as unknown as string | undefined) ?? "",
-                  }))
-                }
-                placeholder={t("contact.phonePlaceholder")}
-              />
-            </Field>
-          </div>
-        </section>
+        <div className="mt-3.5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Field label={t("contact.addressAr")}>
+            <Input
+              type="text"
+              value={contact.addressAr}
+              onChange={(e) =>
+                setContact((c) => ({ ...c, addressAr: e.target.value }))
+              }
+              placeholder={t("addressArPlaceholder")}
+            />
+          </Field>
+          <Field label={t("contact.addressEn")}>
+            <Input
+              type="text"
+              value={contact.addressEn}
+              onChange={(e) =>
+                setContact((c) => ({ ...c, addressEn: e.target.value }))
+              }
+              placeholder={t("addressEnPlaceholder")}
+            />
+          </Field>
+          <Field label={t("contact.phone")}>
+            <CustomInput
+              type="tel"
+              value={contact.phone}
+              onChange={(val) =>
+                setContact((c) => ({
+                  ...c,
+                  phone: (val as unknown as string | undefined) ?? "",
+                }))
+              }
+              placeholder={t("contact.phonePlaceholder")}
+            />
+          </Field>
+        </div>
+      </Card>
 
-        {/* Wi‑Fi (optional) */}
-        <section
-          id="onboarding-media-wifi"
-          className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6 space-y-4"
-        >
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
-                <HiOutlineWifi className="text-lg text-primary" />
-              </div>
-              <div>
-                <h2 className="text-base font-semibold text-fg">
-                  {t("wifi.title")}
-                </h2>
-                <p className="text-xs text-fg-muted mt-0.5">
-                  {t("wifi.description")}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 shrink-0">
-              <span className="text-xs font-medium text-fg-muted">
-                {wifi.wifiEnabled ? t("wifi.enabledOn") : t("wifi.enabledOff")}
-              </span>
-              <Switch
-                checked={wifi.wifiEnabled}
-                onChange={(e) =>
-                  setWifi((prev) => ({
-                    ...prev,
-                    wifiEnabled: e.target.checked,
-                  }))
-                }
-                aria-label={t("wifi.enabled")}
-              />
-            </div>
-          </div>
+      <Card as="section" id="onboarding-media-wifi">
+        <SectionHeader
+          ruled
+          eyebrow={t("sections.wifi")}
+          title={
+            <SectionTitle icon={<HiOutlineWifi className="size-4" />}>
+              {t("wifi.title")}
+            </SectionTitle>
+          }
+          actions={
+            <Badge tone={wifi.wifiEnabled ? "accent" : "neutral"} dot>
+              {wifi.wifiEnabled ? t("wifi.enabledOn") : t("wifi.enabledOff")}
+            </Badge>
+          }
+        />
 
-          {wifi.wifiEnabled && (
-            <div className="grid gap-4 sm:grid-cols-1">
+        <div className="mt-3.5">
+          <Switch
+            align="between"
+            label={t("wifi.enabled")}
+            hint={t("wifi.description")}
+            checked={wifi.wifiEnabled}
+            onChange={(e) =>
+              setWifi((prev) => ({
+                ...prev,
+                wifiEnabled: e.target.checked,
+              }))
+            }
+          />
+        </div>
+
+        {wifi.wifiEnabled ? (
+          <>
+            <CardDivider />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Field label={t("wifi.name")}>
                 <Input
                   type="text"
@@ -440,106 +476,117 @@ export default function MediaPage() {
                 />
               </Field>
             </div>
-          )}
-        </section>
+          </>
+        ) : null}
+      </Card>
 
-        {/* Business hours */}
-        <section
-          id="onboarding-media-hours"
-          className="bg-raised rounded-lg border border-line shadow-sm p-5 md:p-6 space-y-4"
-        >
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
-              <HiOutlineClock className="text-lg text-primary" />
-            </div>
-            <div>
-              <h2 className="text-base font-semibold text-fg">
-                {t("businessHours.title")}
-              </h2>
-            </div>
+      <Card as="section" id="onboarding-media-hours">
+        <SectionHeader
+          ruled
+          eyebrow={t("sections.hours")}
+          title={
+            <SectionTitle icon={<HiOutlineClock className="size-4" />}>
+              {t("businessHours.title")}
+            </SectionTitle>
+          }
+        />
+
+        {/* The week is a ruled list with mono column headers from `sm`, so the
+            per-field labels only need to be visible while the row is stacked. */}
+        <div className="mt-3.5 overflow-hidden rounded-lg border border-line">
+          <div
+            className={cn(
+              "hidden bg-surface-2 px-3 py-2 sm:grid sm:items-center sm:gap-3",
+              HOURS_ROW,
+            )}
+          >
+            <p className="ui-label">{t("businessHours.day")}</p>
+            <p className="ui-label">{t("businessHours.open")}</p>
+            <p className="ui-label">{t("businessHours.close")}</p>
+            <span />
           </div>
 
-          <div className="space-y-3">
+          <ul className="divide-y divide-line">
             {DAY_KEYS.map((day) => {
               const row = workHours[day] ?? INITIAL_WORK_HOURS[day];
               const isClosed = row.closed;
+              const openId = `work-hours-${day}-open`;
+              const closeId = `work-hours-${day}-close`;
               return (
-                <div
+                <li
                   key={day}
-                  className={`flex flex-wrap items-center gap-2 sm:gap-3 ${isClosed ? "opacity-75" : ""}`}
+                  className={cn(
+                    "grid grid-cols-1 gap-2.5 px-3 py-3 sm:items-center sm:gap-3 sm:py-2.5",
+                    HOURS_ROW,
+                    isClosed && "bg-surface-2/50",
+                  )}
                 >
-                  <span className="text-sm font-medium text-fg-muted w-24 shrink-0">
+                  <span className="text-[13px] font-medium text-fg">
                     {t(`businessHours.days.${day}`)}
                   </span>
-                  <div className="flex items-center gap-2 flex-1 min-w-[200px]">
-                    <div className="flex-1 min-w-0">
-                      <CustomInput
-                        type="time"
-                        value={timeStringToDate(row.open)}
-                        onChange={(val) =>
-                          updateWorkHour(
-                            day,
-                            "open",
-                            val instanceof Date ? dateToTimeString(val) : "",
-                          )
-                        }
-                        placeholder="--:--"
-                        disabled={isClosed}
-                      />
-                    </div>
-                    <span className="text-fg-muted text-sm shrink-0">
-                      {t("businessHours.to")}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <CustomInput
-                        type="time"
-                        value={timeStringToDate(row.close)}
-                        onChange={(val) =>
-                          updateWorkHour(
-                            day,
-                            "close",
-                            val instanceof Date ? dateToTimeString(val) : "",
-                          )
-                        }
-                        placeholder="--:--"
-                        disabled={isClosed}
-                      />
-                    </div>
-                  </div>
+
+                  <Field
+                    label={t("businessHours.open")}
+                    labelClassName="sm:sr-only"
+                    htmlFor={openId}
+                  >
+                    <CustomInput
+                      id={openId}
+                      type="time"
+                      size="small"
+                      className="tabular-nums"
+                      value={timeStringToDate(row.open)}
+                      onChange={(val) =>
+                        updateWorkHour(
+                          day,
+                          "open",
+                          val instanceof Date ? dateToTimeString(val) : "",
+                        )
+                      }
+                      placeholder="--:--"
+                      disabled={isClosed}
+                    />
+                  </Field>
+
+                  <Field
+                    label={t("businessHours.close")}
+                    labelClassName="sm:sr-only"
+                    htmlFor={closeId}
+                  >
+                    <CustomInput
+                      id={closeId}
+                      type="time"
+                      size="small"
+                      className="tabular-nums"
+                      value={timeStringToDate(row.close)}
+                      onChange={(val) =>
+                        updateWorkHour(
+                          day,
+                          "close",
+                          val instanceof Date ? dateToTimeString(val) : "",
+                        )
+                      }
+                      placeholder="--:--"
+                      disabled={isClosed}
+                    />
+                  </Field>
+
                   <Checkbox
                     checked={isClosed}
                     onChange={(e) => setDayClosed(day, e.target.checked)}
                     label={t("businessHours.closed")}
+                    wrapperClassName="sm:ps-1"
                   />
-                </div>
+                </li>
               );
             })}
-          </div>
-
-          <div className="rounded-lg flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800/50 p-3">
-            <span className="text-blue-600 dark:text-blue-400 shrink-0 mt-0.5">
-              ℹ
-            </span>
-            <p className="text-xs text-blue-800 dark:text-blue-200">
-              {t("businessHours.note")}
-            </p>
-          </div>
-        </section>
-
-        {/* Footer actions */}
-        <div className="flex flex-wrap justify-end gap-3 pt-2 pb-6">
-          <Button
-            onClick={handleSave}
-            loading={isSaving}
-            disabled={isSaving}
-            size="lg"
-            className="w-auto! min-w-[160px]"
-            startIcon={<FiSave className="text-base" />}
-          >
-            {t("buttons.save")}
-          </Button>
+          </ul>
         </div>
-      </div>
-    </div>
+
+        <CardDivider />
+
+        <Alert tone="info">{t("businessHours.note")}</Alert>
+      </Card>
+    </PageShell>
   );
 }

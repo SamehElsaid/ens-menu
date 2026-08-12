@@ -2,12 +2,9 @@
 
 import { useTranslations } from "next-intl";
 import { Category } from "@/types/Menu";
+import { Badge, Button } from "@/components/ui";
 import ItemMobileThumbnail from "./ItemMobileThumbnail";
-import {
-  IoCreateOutline,
-  IoEllipseSharp,
-  IoTrashOutline,
-} from "react-icons/io5";
+import { IoCreateOutline, IoTrashOutline } from "react-icons/io5";
 
 interface CategoryMobileCardProps {
   category: Category;
@@ -18,6 +15,14 @@ interface CategoryMobileCardProps {
   onDelete: (category: Category) => void;
 }
 
+/**
+ * One category, as a ticket row.
+ *
+ * Same shape as `ItemMobileCard` on purpose — the two lists sit one tap apart
+ * in the sidebar, so a category row that looked like a different kind of object
+ * would cost the reader a second look. A category has no price, so the name
+ * carries the row and the state moves down into the action strip.
+ */
 export default function CategoryMobileCard({
   category,
   name,
@@ -30,57 +35,48 @@ export default function CategoryMobileCard({
   const active = category.isActive;
 
   return (
-    <article className="dashboard-item-card flex gap-3 rounded-lg border border-line/90 bg-white p-3 shadow-[0_1px_8px_rgba(15,23,42,0.06)] transition-all duration-200 active:scale-[0.99] dark:border-line/80 dark:shadow-[0_1px_12px_rgba(0,0,0,0.25)]">
-      <ItemMobileThumbnail
-        src={imageUrl}
-        alt={name}
-        uploadLabel={t("addModal.uploadImage")}
-        onUploadClick={() => onEdit(category)}
-      />
+    <article className="dashboard-item-card flex flex-col">
+      <div className="flex items-center gap-3 p-3">
+        <ItemMobileThumbnail
+          src={imageUrl}
+          alt={name}
+          uploadLabel={t("addModal.uploadImage")}
+          onUploadClick={() => onEdit(category)}
+        />
 
-      <div className="flex min-w-0 flex-1 flex-col justify-between gap-1.5">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h3
-            className="truncate text-[15px] font-bold leading-tight text-fg"
+            className="truncate text-sm leading-tight font-semibold text-fg capitalize"
             dir={locale === "ar" ? "rtl" : "ltr"}
             title={name}
           >
             {name}
           </h3>
         </div>
+      </div>
 
-        <div className="flex items-center justify-between gap-2">
-          <span
-            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-              active
-                ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/25 dark:text-emerald-300"
-                : "bg-amber-50 text-amber-700 dark:bg-amber-900/25 dark:text-amber-300"
-            }`}
+      <div className="flex items-center justify-between gap-2 border-t border-line bg-surface-2/40 px-3 py-1.5">
+        <Badge tone={active ? "success" : "warning"} dot>
+          {active ? t("active") : t("inactive")}
+        </Badge>
+
+        <div className="flex items-center gap-1.5">
+          <Button
+            variant="secondary"
+            onClick={() => onEdit(category)}
+            startIcon={<IoCreateOutline />}
           >
-            <IoEllipseSharp
-              className={`text-[6px] ${active ? "text-emerald-500" : "text-amber-500"}`}
-            />
-            {active ? t("active") : t("inactive")}
-          </span>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => onEdit(category)}
-              aria-label={t("edit")}
-              className="inline-flex size-9 items-center justify-center rounded-lg border border-line bg-slate-50 text-fg-muted transition-colors active:scale-95"
-            >
-              <IoCreateOutline className="text-[17px]" aria-hidden />
-            </button>
-            <button
-              type="button"
-              onClick={() => onDelete(category)}
-              aria-label={t("delete")}
-              className="inline-flex size-9 items-center justify-center rounded-lg border border-red-200/80 bg-red-50 text-red-600 transition-colors active:scale-95 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300"
-            >
-              <IoTrashOutline className="text-[17px]" aria-hidden />
-            </button>
-          </div>
+            {t("edit")}
+          </Button>
+          <Button
+            variant="dangerGhost"
+            iconOnly
+            onClick={() => onDelete(category)}
+            aria-label={t("delete")}
+            title={t("delete")}
+          >
+            <IoTrashOutline />
+          </Button>
         </div>
       </div>
     </article>

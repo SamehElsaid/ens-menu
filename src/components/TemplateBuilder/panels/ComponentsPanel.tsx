@@ -9,6 +9,7 @@ import {
 } from "@/lib/template-builder/library/registry";
 import { useBuilderStore } from "../store/useBuilderStore";
 import { useComponentLabel } from "../i18n";
+import { focusRing, settle } from "@/components/ui";
 
 function Item({
   type,
@@ -32,7 +33,7 @@ function Item({
       {...listeners}
       {...attributes}
       onDoubleClick={onAdd}
-      className={`flex w-full items-center gap-2 rounded-md border border-slate-700/80 bg-slate-800/80 px-2.5 py-2 text-left text-xs text-slate-200 hover:border-violet-500 ${
+      className={`flex w-full items-center gap-2 rounded-md border border-line bg-surface-2 px-2.5 py-2 text-start text-xs text-fg ${settle} ${focusRing} hover:border-accent ${
         isDragging ? "opacity-40" : ""
       }`}
     >
@@ -61,16 +62,16 @@ export function ComponentsPanel() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex flex-wrap gap-1 border-b border-slate-700 p-2">
+      <div className="flex flex-wrap gap-1 border-b border-line p-2">
         {cats.map((c) => (
           <button
             key={c.id}
             type="button"
             onClick={() => setCat(c.id)}
-            className={`rounded px-2 py-0.5 text-[10px] uppercase ${
+            className={`rounded-md px-2 py-0.5 text-[11px] ${settle} ${focusRing} ${
               cat === c.id
-                ? "bg-violet-600 text-white"
-                : "bg-slate-800 text-slate-400"
+                ? "bg-accent font-medium text-on-accent"
+                : "bg-surface-2 text-fg-muted hover:bg-surface-3 hover:text-fg"
             }`}
           >
             {c.label}
@@ -88,7 +89,7 @@ export function ComponentsPanel() {
           />
         ))}
       </div>
-      <p className="border-t border-slate-700 p-2 text-[10px] text-slate-500">
+      <p className="border-t border-line p-2 text-[10px] text-fg-subtle">
         {t("dragHint")}
       </p>
     </div>

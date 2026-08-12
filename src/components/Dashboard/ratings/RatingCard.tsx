@@ -1,13 +1,9 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import {
-  IoMailOutline,
-  IoCallOutline,
-  IoChatbubbleEllipsesOutline,
-  IoPersonOutline,
-} from "react-icons/io5";
+import { IoMailOutline, IoCallOutline } from "react-icons/io5";
 import type { MenuRating } from "@/types/menuRating";
+import { Card, CardFooter } from "@/components/ui";
 import RatingStars from "./RatingStars";
 
 type RatingCardProps = {
@@ -23,14 +19,31 @@ function formatDate(value: string, locale: string) {
   }).format(date);
 }
 
-const starTone: Record<number, string> = {
-  5: "from-emerald-500 to-emerald-600 shadow-emerald-500/25",
-  4: "from-amber-400 to-amber-500 shadow-amber-500/25",
-  3: "from-orange-400 to-orange-500 shadow-orange-500/25",
-  2: "from-rose-400 to-rose-500 shadow-rose-500/25",
-  1: "from-rose-500 to-rose-600 shadow-rose-500/25",
+/**
+ * Score → edge colour.
+ *
+ * The score is printed as a figure on every card, so this is a second reading
+ * of the same fact rather than the only one, and it is spent on a 2px inline
+ * edge instead of a tinted header: a column of twenty cards can be triaged by
+ * running down the left margin, and nothing competes with the comment text.
+ */
+const scoreEdge: Record<number, string> = {
+  5: "before:bg-success",
+  4: "before:bg-success",
+  3: "before:bg-warning",
+  2: "before:bg-danger",
+  1: "before:bg-danger",
 };
 
+/**
+ * One review.
+ *
+ * The previous card gave a gradient header, a ring-shadowed avatar and a
+ * gradient pill more visual weight than the customer's actual words. Here the
+ * comment is the content and gets the largest type; the score, name and date
+ * are the ticket header above it, and contact details sit in the footer where
+ * they read as actions rather than as more metadata.
+ */
 export default function RatingCard({ rating }: RatingCardProps) {
   const t = useTranslations("Ratings");
   const locale = useLocale();
@@ -39,78 +52,61 @@ export default function RatingCard({ rating }: RatingCardProps) {
   const phone = rating.customerPhone?.trim();
   const email = rating.customerEmail?.trim();
   const stars = Math.min(5, Math.max(1, Math.round(Number(rating.stars) || 0)));
-  const tone = starTone[stars] ?? starTone[3];
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-lg border border-line/90 bg-white shadow-[0_1px_8px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:border-amber-300/60 hover:shadow-[0_10px_28px_rgba(245,158,11,0.12)] dark:border-line/80 dark:shadow-[0_1px_12px_rgba(0,0,0,0.25)] dark:hover:border-amber-700/45 dark:hover:shadow-[0_10px_28px_rgba(0,0,0,0.35)]">
-      <div className="relative bg-linear-to-br from-amber-500/12 via-orange-50/80 to-yellow-50/50 px-4 pb-5 pt-4 dark:from-amber-500/15 dark:via-slate-900 dark:to-amber-950/35">
-        <div className="absolute end-3 top-3">
-          <span
-            className={`inline-flex items-center gap-1 rounded-full bg-linear-to-r px-2.5 py-1 text-xs font-bold text-white shadow-md ${tone}`}
-          >
-            {rating.stars}/5
-          </span>
+    <Card
+      as="article"
+      padded="md"
+      className={`flex h-full flex-col before:absolute before:inset-y-0 before:start-0 before:w-0.5 before:rounded-s-xl before:content-[''] ${scoreEdge[stars] ?? scoreEdge[3]}`}
+    >
+      <header className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="truncate text-[13px] font-semibold text-fg">{name}</h3>
+          <p className="ui-label mt-1 text-fg-subtle">
+            {formatDate(rating.createdAt, locale)}
+          </p>
         </div>
-
-        <div className="flex items-center gap-3 pe-16">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-600 ring-2 ring-white dark:text-amber-400 dark:ring-slate-800">
-            <IoPersonOutline className="text-xl" aria-hidden />
-          </span>
-          <div className="min-w-0">
-            <h3 className="truncate text-sm font-bold text-fg">{name}</h3>
-            <p className="mt-0.5 text-xs text-fg-muted">
-              {formatDate(rating.createdAt, locale)}
-            </p>
-          </div>
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <p className="ui-figure text-[15px] leading-none text-fg" lang="en">
+            {stars}
+            <span className="text-fg-subtle">/5</span>
+          </p>
+          <RatingStars stars={rating.stars} sizeClassName="h-3 w-3" />
         </div>
+      </header>
 
-        <div className="mt-3">
-          <RatingStars stars={rating.stars} sizeClassName="h-4 w-4" />
-        </div>
-      </div>
+      {comment ? (
+        <blockquote className="mt-3 text-[13px] leading-relaxed whitespace-pre-wrap wrap-break-word text-fg">
+          {comment}
+        </blockquote>
+      ) : (
+        <p className="mt-3 text-[13px] text-fg-subtle">{t("noComment")}</p>
+      )}
 
-      <div className="flex flex-1 flex-col gap-3 px-4 py-4">
-        {comment ? (
-          <div className="rounded-lg border border-line bg-slate-50/80 px-3 py-2.5 dark:border-line/70">
-            <p className="flex gap-2 text-sm leading-relaxed text-fg-muted">
-              <IoChatbubbleEllipsesOutline
-                className="mt-0.5 shrink-0 text-amber-500/80"
-                aria-hidden
-              />
-              <span className="whitespace-pre-wrap wrap-break-word">
-                {comment}
-              </span>
-            </p>
-          </div>
-        ) : (
-          <p className="text-sm italic text-fg-subtle">{t("noComment")}</p>
-        )}
-
-        {(phone || email) && (
-          <div className="mt-auto flex flex-wrap gap-2 border-t border-line pt-3 dark:border-line">
-            {phone ? (
-              <a
-                href={`tel:${phone}`}
-                dir="ltr"
-                className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-line/80 bg-white px-2.5 py-1.5 text-xs font-medium text-fg-muted transition-colors hover:border-primary/30 hover:text-primary dark:hover:text-primary"
-              >
-                <IoCallOutline className="shrink-0 text-sm" aria-hidden />
-                <span className="truncate">{phone}</span>
-              </a>
-            ) : null}
-            {email ? (
-              <a
-                href={`mailto:${email}`}
-                dir="ltr"
-                className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-line/80 bg-white px-2.5 py-1.5 text-xs font-medium text-fg-muted transition-colors hover:border-primary/30 hover:text-primary dark:hover:text-primary"
-              >
-                <IoMailOutline className="shrink-0 text-sm" aria-hidden />
-                <span className="truncate">{email}</span>
-              </a>
-            ) : null}
-          </div>
-        )}
-      </div>
-    </article>
+      {phone || email ? (
+        <CardFooter className="mt-auto flex-wrap gap-x-3 gap-y-1">
+          {phone ? (
+            <a
+              href={`tel:${phone}`}
+              dir="ltr"
+              className="inline-flex min-w-0 items-center gap-1.5 text-[11px] text-fg-muted transition-colors hover:text-brand"
+            >
+              <IoCallOutline className="size-3.5 shrink-0" aria-hidden />
+              <span className="truncate">{phone}</span>
+            </a>
+          ) : null}
+          {email ? (
+            <a
+              href={`mailto:${email}`}
+              dir="ltr"
+              className="inline-flex min-w-0 items-center gap-1.5 text-[11px] text-fg-muted transition-colors hover:text-brand"
+            >
+              <IoMailOutline className="size-3.5 shrink-0" aria-hidden />
+              <span className="truncate">{email}</span>
+            </a>
+          ) : null}
+        </CardFooter>
+      ) : null}
+    </Card>
   );
 }

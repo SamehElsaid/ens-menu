@@ -23,10 +23,12 @@ export default function PageTitleWithHelp({
   dir,
   title,
   description,
+  eyebrow,
   breadcrumbs,
   breadcrumbsLabel,
   actions,
   meta,
+  bare,
 }: PageTitleWithHelpProps) {
   if (title != null) {
     return (
@@ -34,10 +36,12 @@ export default function PageTitleWithHelp({
         <PageHeader
           title={title}
           description={description}
+          eyebrow={eyebrow}
           breadcrumbs={breadcrumbs}
           breadcrumbsLabel={breadcrumbsLabel}
           actions={actions}
           meta={meta}
+          bare={bare}
         />
       </div>
     );

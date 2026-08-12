@@ -96,10 +96,10 @@ export function Pagination({
               aria-label={labels.page(entry)}
               aria-current={entry === page ? "page" : undefined}
               className={cn(
-                "inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-[13px] font-medium tabular-nums row-settle sm:h-7 sm:min-w-7",
+                "inline-flex h-9 min-w-9 items-center justify-center rounded-lg px-2 text-[13px] font-medium tabular-nums row-settle sm:h-8 sm:min-w-8",
                 focusRing,
                 entry === page
-                  ? "bg-surface-3 font-semibold text-fg"
+                  ? "bg-brand font-semibold text-on-brand shadow-brand"
                   : "text-fg-muted hover:bg-surface-2 hover:text-fg",
                 disabled && "pointer-events-none opacity-50",
               )}

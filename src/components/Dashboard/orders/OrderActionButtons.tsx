@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import { postTableOrderAction } from "@/lib/tableOrderActions";
 import { useAuthorization } from "@/hooks/useAuthorization";
+import { Button, type ButtonVariant } from "@/components/ui";
 import type {
   CallEntry,
   OrderActionResult,
@@ -40,9 +41,18 @@ type ActionConfig = {
     | "markPrepared"
     | "markDelivered"
     | "finish";
-  className: string;
+  variant: ButtonVariant;
 };
 
+/**
+ * Moving the order along is always the primary button — DESIGN.md §3, the solid
+ * brand fill is where the light lands and there is one of it per row. The one
+ * exception is re-accepting a guest addition, which takes the accent tint
+ * precisely because it is the state saying the order changed under the kitchen
+ * and needs looking at again. Rejecting is the only destructive path and
+ * carries the danger tone as a ghost rather than a solid red fill, so it never
+ * outweighs the action that moves the order forward.
+ */
 function actionsForStatus(
   status: OrderStatus,
   variant: "table" | "delivery",
@@ -58,8 +68,7 @@ function actionsForStatus(
         {
           action: "TABLE_CALL_CONFIRMED",
           labelKey: "acceptAddition",
-          className:
-            "bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-400",
+          variant: "accent",
         },
       ];
     }
@@ -69,14 +78,12 @@ function actionsForStatus(
           {
             action: "TABLE_CALL_CONFIRMED",
             labelKey: pendingGuestAddition ? "acceptAddition" : "accept",
-            className:
-              "bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500",
+            variant: "primary",
           },
           {
             action: "TABLE_CALL_CANCELLED",
             labelKey: "reject",
-            className:
-              "border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-800/50 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-900/40",
+            variant: "dangerGhost",
           },
         ];
       case "confirmed":
@@ -85,8 +92,7 @@ function actionsForStatus(
           {
             action: "TABLE_CALL_COMPLETED",
             labelKey: "finish",
-            className:
-              "bg-brand text-on-brand hover:bg-brand-hover active:bg-brand-active",
+            variant: "primary",
           },
         ];
       default:
@@ -100,14 +106,12 @@ function actionsForStatus(
         {
           action: "TABLE_CALL_CONFIRMED",
           labelKey: "accept",
-          className:
-            "bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500",
+          variant: "primary",
         },
         {
           action: "TABLE_CALL_CANCELLED",
           labelKey: "reject",
-          className:
-            "border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-800/50 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-900/40",
+          variant: "dangerGhost",
         },
       ];
     case "confirmed":
@@ -115,8 +119,7 @@ function actionsForStatus(
         {
           action: "TABLE_CALL_PREPARED",
           labelKey: "markPrepared",
-          className:
-            "bg-sky-600 text-white hover:bg-sky-700 dark:bg-sky-600 dark:hover:bg-sky-500",
+          variant: "primary",
         },
       ];
     case "prepared":
@@ -124,8 +127,7 @@ function actionsForStatus(
         {
           action: "TABLE_CALL_DELIVERED",
           labelKey: "markDelivered",
-          className:
-            "bg-brand text-on-brand hover:bg-brand-hover active:bg-brand-active",
+          variant: "primary",
         },
       ];
     default:
@@ -145,7 +147,9 @@ export default function OrderActionButtons({
   const t = useTranslations(translationNs);
   const locale = useLocale();
   const { can } = useAuthorization();
-  const [localActing, setLocalActing] = useState(false);
+  const [actingAction, setActingAction] = useState<OrderActionType | null>(
+    null,
+  );
   const pendingGuestAddition = entry.pendingGuestAddition === true;
   const actions = actionsForStatus(
     status,
@@ -155,11 +159,11 @@ export default function OrderActionButtons({
 
   if (actions.length === 0) return null;
 
-  const isBusy = localActing;
+  const isBusy = actingAction !== null;
 
   const handleAction = async (action: OrderActionType) => {
     if (isBusy) return;
-    setLocalActing(true);
+    setActingAction(action);
     try {
       const nextStatus = await postTableOrderAction(
         menuId,
@@ -185,24 +189,33 @@ export default function OrderActionButtons({
     } catch {
       toast.error(t("actionError"));
     } finally {
-      setLocalActing(false);
+      setActingAction(null);
     }
   };
 
   return (
     <div
-      className={`flex gap-2 ${compact ? "w-full flex-col" : "flex-wrap justify-end"}`}
+      className={`flex gap-1.5 ${compact ? "w-full flex-col" : "flex-wrap justify-end"}`}
     >
       {actions.map((cfg) => (
-        <button
+        <Button
           key={`${cfg.action}-${cfg.labelKey}`}
           type="button"
-          disabled={isBusy}
+          size="sm"
+          variant={cfg.variant}
+          fullWidth={compact}
+          disabled={isBusy && actingAction !== cfg.action}
+          loading={actingAction === cfg.action}
           onClick={() => void handleAction(cfg.action)}
-          className={`inline-flex items-center justify-center rounded-lg px-3 py-2 text-xs font-semibold transition-colors disabled:opacity-60 ${compact ? "w-full" : "flex-1 sm:flex-none sm:min-w-28"} ${cfg.className}`}
+          className={[
+            cfg.variant === "dangerGhost" ? "border-danger-line" : "",
+            compact ? "" : "flex-1 sm:min-w-28 sm:flex-none",
+          ]
+            .filter(Boolean)
+            .join(" ")}
         >
           {t(cfg.labelKey)}
-        </button>
+        </Button>
       ))}
     </div>
   );

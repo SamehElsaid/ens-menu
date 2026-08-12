@@ -10,6 +10,15 @@ import {
 } from "react-icons/io5";
 import { axiosPost } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
+import {
+  Badge,
+  Button,
+  Card,
+  Field,
+  Input,
+  SectionHeader,
+  SegmentedControl,
+} from "@/components/ui";
 import { pickFailedRequestMessage } from "@/lib/subscriptionPayment";
 import type {
   VoucherBillingCycle,
@@ -18,7 +27,6 @@ import type {
 
 type VoucherSectionProps = {
   locale: string;
-  isRTL?: boolean;
   billingCycle: "monthly" | "yearly";
   onBillingChange?: (cycle: "monthly" | "yearly") => void;
   showBillingChoice?: boolean;
@@ -64,7 +72,6 @@ function formatBillingRestriction(
 
 export default function SubscriptionVoucherSection({
   locale,
-  isRTL = false,
   billingCycle,
   onBillingChange,
   showBillingChoice = false,
@@ -138,158 +145,116 @@ export default function SubscriptionVoucherSection({
     ? t("voucherSectionDescPro")
     : t("voucherSectionDesc");
 
-  return (
-    <div
-      id="subscription-voucher-section"
-      className={
-        embedded
-          ? "rounded-lg border border-line/80 bg-slate-50/80 p-4 dark:border-line/80 dark:bg-slate-950/50"
-          : "rounded-[28px] border border-primary/20 bg-gradient-to-br from-primary/[0.04] via-white to-violet-50/50 p-5 shadow-sm dark:border-primary/25 dark:from-primary/10 dark:via-slate-900 dark:to-slate-950 md:p-6"
-      }
-    >
-      <div
-        className={`${embedded ? "mb-3" : "mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"} ${!embedded && isRTL ? "sm:flex-row-reverse" : ""}`}
-      >
-        <div className={isRTL ? "text-right" : "text-left"}>
-          <div
-            className={`${embedded ? "mb-1" : "mb-2"} flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
-          >
-            {!embedded && (
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary">
-                <IoTicketOutline className="text-xl" />
-              </span>
-            )}
-            <h2
-              className={
-                embedded
-                  ? "text-sm font-semibold text-fg"
-                  : "text-lg font-bold text-fg"
-              }
-            >
-              {t("voucherSectionTitle")}
-            </h2>
-          </div>
-          {!embedded && (
-            <p className="text-sm text-fg-muted">{sectionDescription}</p>
-          )}
-        </div>
-
-        {showBillingChoice && onBillingChange && (
-          <div className={`shrink-0 ${isRTL ? "text-right" : "text-left"}`}>
-            <p className="mb-1.5 text-xs font-medium text-fg-muted">
-              {t("voucherBillingForDiscount")}
-            </p>
-            <div
-              className={`inline-flex rounded-lg border border-line bg-white p-1   ${isRTL ? "flex-row-reverse" : ""}`}
-              role="group"
-              aria-label={t("selectBillingCycle")}
-            >
-              {(["monthly", "yearly"] as const).map((cycle) => (
-                <button
-                  key={cycle}
-                  type="button"
-                  disabled={disabled || checking || redeemLoading}
-                  onClick={() => onBillingChange(cycle)}
-                  className={`rounded-lg px-3 py-2 text-xs font-semibold transition-colors sm:px-4 sm:text-sm ${
-                    billingCycle === cycle
-                      ? "bg-brand text-on-brand shadow-sm"
-                      : "text-fg-muted hover:bg-slate-50  dark:hover:bg-slate-800"
-                  }`}
-                >
-                  {cycle === "monthly"
-                    ? t("voucherBillingMonthly")
-                    : t("voucherBillingYearly")}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+  const billingSelector =
+    showBillingChoice && onBillingChange ? (
+      <div className="min-w-0">
+        <p className="ui-label mb-1">{t("voucherBillingForDiscount")}</p>
+        <SegmentedControl
+          label={t("selectBillingCycle")}
+          value={billingCycle}
+          onChange={onBillingChange}
+          options={[
+            { value: "monthly", label: t("voucherBillingMonthly") },
+            { value: "yearly", label: t("voucherBillingYearly") },
+          ]}
+        />
       </div>
+    ) : null;
 
-      {appliedCode && validation ? (
-        <div className="space-y-3">
-          <div
-            className={`flex items-start justify-between gap-3 rounded-lg border border-primary/20 bg-white p-4 dark:border-primary/30  ${isRTL ? "flex-row-reverse" : ""}`}
-          >
-            <div
-              className={`flex-1 space-y-2 ${isRTL ? "text-right" : "text-left"}`}
-            >
-              <div
-                className={`flex flex-wrap items-center gap-2 ${isRTL ? "flex-row-reverse justify-end" : ""}`}
-              >
-                <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-primary">
-                  {isDuration ? (
-                    <>
-                      <IoTimeOutline className="h-3.5 w-3.5" />
-                      {t("voucherTypeDuration")}
-                    </>
+  /**
+   * The applied voucher is drawn as a stub: the card's brand inline edge marks
+   * it as live, and the code itself is the largest thing in the block because
+   * it is the one value the operator needs to read back to support.
+   */
+  const stub =
+    appliedCode && validation ? (
+      <div className="flex flex-col gap-2.5">
+        <Card active padded="sm" className="flex items-start gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Badge
+                tone="accent"
+                icon={
+                  isDuration ? (
+                    <IoTimeOutline aria-hidden />
                   ) : (
-                    <>
-                      <IoPricetagOutline className="h-3.5 w-3.5" />
-                      {t("voucherTypeDiscount")}
-                    </>
-                  )}
-                </span>
-                {billingRestriction && (
-                  <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-medium text-amber-700 dark:text-amber-400">
-                    {billingRestriction}
-                  </span>
-                )}
-              </div>
-              <p className="font-mono text-lg font-bold tracking-wide text-primary">
-                {appliedCode}
-              </p>
-              {isDiscount &&
-              validation.discountAmount != null &&
-              validation.discountedPrice != null ? (
-                <p className="text-sm text-fg-muted">
-                  {t("voucherAppliedDiscount", {
-                    amount: validation.discountAmount,
-                    price: validation.discountedPrice,
-                    currency: currencyLabel,
-                  })}
-                </p>
-              ) : isDuration ? (
-                <p className="text-sm text-fg-muted">
-                  {t("voucherAppliedDuration", {
-                    value: formatDurationValue(validation, locale),
-                  })}
-                </p>
+                    <IoPricetagOutline aria-hidden />
+                  )
+                }
+              >
+                {isDuration
+                  ? t("voucherTypeDuration")
+                  : t("voucherTypeDiscount")}
+              </Badge>
+              {billingRestriction ? (
+                <Badge tone="warning">{billingRestriction}</Badge>
               ) : null}
-              {isDiscount && canUpgradeToPro && (
-                <p className="text-xs text-fg-subtle">
-                  {t("voucherDiscountPayHint")}
-                </p>
-              )}
             </div>
-            <button
-              type="button"
-              onClick={handleClear}
-              disabled={disabled || redeemLoading}
-              className="rounded-lg p-2 text-fg-subtle transition-colors hover:bg-surface-2"
-              aria-label={t("voucherClear")}
-            >
-              <IoCloseOutline className="text-xl" />
-            </button>
+
+            <p className="ui-figure mt-1.5 text-base font-semibold tracking-[0.08em] text-fg uppercase">
+              {appliedCode}
+            </p>
+
+            {isDiscount &&
+            validation.discountAmount != null &&
+            validation.discountedPrice != null ? (
+              <p className="mt-1 text-xs leading-relaxed text-fg-muted">
+                {t("voucherAppliedDiscount", {
+                  amount: validation.discountAmount,
+                  price: validation.discountedPrice,
+                  currency: currencyLabel,
+                })}
+              </p>
+            ) : isDuration ? (
+              <p className="mt-1 text-xs leading-relaxed text-fg-muted">
+                {t("voucherAppliedDuration", {
+                  value: formatDurationValue(validation, locale),
+                })}
+              </p>
+            ) : null}
+
+            {isDiscount && canUpgradeToPro ? (
+              <p className="mt-1 text-xs text-fg-subtle">
+                {t("voucherDiscountPayHint")}
+              </p>
+            ) : null}
           </div>
 
-          {isDuration && onRedeemDuration && !suppressDurationRedeem && (
-            <button
-              type="button"
-              onClick={() => void onRedeemDuration()}
-              disabled={disabled || redeemLoading}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3.5 text-sm font-semibold text-white shadow-md shadow-primary/20 hover:bg-primary/90 disabled:opacity-60"
-            >
-              <IoTimeOutline className="h-5 w-5" />
-              {redeemLoading
-                ? t("voucherRedeeming")
-                : t("voucherRedeemDuration")}
-            </button>
-          )}
-        </div>
-      ) : (
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <input
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            iconOnly
+            onClick={handleClear}
+            disabled={disabled || redeemLoading}
+            aria-label={t("voucherClear")}
+          >
+            <IoCloseOutline className="size-4" />
+          </Button>
+        </Card>
+
+        {isDuration && onRedeemDuration && !suppressDurationRedeem ? (
+          <Button
+            type="button"
+            fullWidth
+            onClick={() => void onRedeemDuration()}
+            loading={redeemLoading}
+            disabled={disabled}
+            startIcon={<IoTimeOutline aria-hidden />}
+          >
+            {redeemLoading ? t("voucherRedeeming") : t("voucherRedeemDuration")}
+          </Button>
+        ) : null}
+      </div>
+    ) : (
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+        <Field
+          label={t("voucherSectionTitle")}
+          labelClassName="sr-only"
+          htmlFor="subscription-voucher-code"
+          className="min-w-0 flex-1"
+        >
+          <Input
             id="subscription-voucher-code"
             type="text"
             value={codeInput}
@@ -299,18 +264,57 @@ export default function SubscriptionVoucherSection({
             }}
             placeholder={t("voucherCodePlaceholder")}
             disabled={disabled || checking}
-            className={`flex-1 rounded-lg border border-line bg-white px-4 py-3 text-sm uppercase tracking-wide   ${isRTL ? "text-right" : "text-left"}`}
+            autoComplete="off"
+            spellCheck={false}
+            className="ui-figure tracking-[0.08em] uppercase"
           />
-          <button
-            type="button"
-            onClick={() => void handleApply()}
-            disabled={disabled || checking || !codeInput.trim()}
-            className="rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 disabled:opacity-60 sm:min-w-[7rem]"
-          >
-            {checking ? t("voucherApplying") : t("voucherApply")}
-          </button>
-        </div>
-      )}
-    </div>
+        </Field>
+        <Button
+          type="button"
+          onClick={() => void handleApply()}
+          loading={checking}
+          disabled={disabled || !codeInput.trim()}
+          className="sm:min-w-28"
+        >
+          {checking ? t("voucherApplying") : t("voucherApply")}
+        </Button>
+      </div>
+    );
+
+  /* Embedded, the section is a labelled band inside the checkout panel that
+     owns the surface; standalone it needs its own ruled panel. */
+  if (embedded) {
+    return (
+      <div id="subscription-voucher-section" className="flex flex-col gap-2.5">
+        <SectionHeader
+          ruled
+          title={
+            <span className="inline-flex items-center gap-2">
+              <IoTicketOutline className="size-4 text-fg-subtle" aria-hidden />
+              {t("voucherSectionTitle")}
+            </span>
+          }
+          actions={billingSelector}
+        />
+        {stub}
+      </div>
+    );
+  }
+
+  return (
+    <Card as="section" id="subscription-voucher-section">
+      <SectionHeader
+        ruled
+        title={
+          <span className="inline-flex items-center gap-2">
+            <IoTicketOutline className="size-4 text-fg-subtle" aria-hidden />
+            {t("voucherSectionTitle")}
+          </span>
+        }
+        description={sectionDescription}
+        actions={billingSelector}
+      />
+      <div className="mt-3.5">{stub}</div>
+    </Card>
   );
 }

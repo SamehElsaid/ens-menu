@@ -18,6 +18,10 @@ import {
   IoImageOutline,
   IoAddCircleOutline,
   IoCloseOutline,
+  IoCopyOutline,
+  IoChevronDownOutline,
+  IoChevronUpOutline,
+  IoEllipsisHorizontal,
 } from "react-icons/io5";
 import { cn } from "@/lib/cn";
 import {
@@ -25,6 +29,9 @@ import {
   Badge,
   Button,
   Input,
+  Menu as DropdownMenu,
+  MenuItem,
+  MenuSeparator,
   Spinner,
   Textarea,
   focusRing,
@@ -54,7 +61,6 @@ interface ReviewItemRowProps {
   item: ImportItem;
   currency: string;
   locale: string;
-  uiLocale: string;
   onUpdate: (patch: Partial<ImportItem>) => void;
   onUpdateVariant: (
     variantId: string,
@@ -70,11 +76,21 @@ interface ReviewItemRowProps {
   ) => void;
 }
 
+/**
+ * One parsed dish, as an editable ticket line.
+ *
+ * The row used to open with six controls and four text areas all at the same
+ * weight, which made a category of twelve dishes a wall of boxes. It now leads
+ * with what identifies the line — the photo, the two names and the price — and
+ * everything else steps back: the descriptions fold away unless they already
+ * hold text, and the photo, variant and delete actions sit behind a single
+ * overflow menu. The price keeps the ticket face because it is the figure the
+ * row exists to get right.
+ */
 export default function ReviewItemRow({
   item,
   currency,
   locale,
-  uiLocale,
   onUpdate,
   onUpdateVariant,
   onDelete,
@@ -88,6 +104,9 @@ export default function ReviewItemRow({
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
   const [pexelsModalOpen, setPexelsModalOpen] = useState(false);
+  const [showDescriptions, setShowDescriptions] = useState(
+    Boolean(item.descriptionAr?.trim() || item.descriptionEn?.trim()),
+  );
 
   const IMAGE_VALID_TYPES = [
     "image/png",
@@ -181,6 +200,10 @@ export default function ReviewItemRow({
     !displayImageUrl!.startsWith("data:") &&
     !displayImageUrl!.startsWith("blob:");
 
+  const itemLabel = item.nameEn || item.nameAr || t("itemMenuLabel");
+
+  const currencySuffix = <span className="ui-label">{currency}</span>;
+
   const resolutionButton = (
     resolution: "skip" | "update_price",
     label: string,
@@ -196,11 +219,15 @@ export default function ReviewItemRow({
     </Button>
   );
 
+  const handleAddVariant = () => {
+    onAddVariant();
+  };
+
   return (
     <div
       id={importRefDomId(item.id)}
       className={cn(
-        "flex scroll-mt-24 flex-col gap-3 px-4 py-4 sm:px-5",
+        "flex scroll-mt-24 flex-col gap-2 px-3 py-2.5 sm:px-4",
         hasMissingPrice || hasMissingName || hasPriceConflict
           ? "bg-warning-soft/40"
           : hasDuplicate && "bg-surface-2",
@@ -208,7 +235,9 @@ export default function ReviewItemRow({
     >
       {item.variants.length === 0 &&
         item.duplicateMeta?.status === "exact_duplicate" && (
-          <Badge className="self-start">{t("duplicateExactSkip")}</Badge>
+          <Badge className="self-start" icon={<IoCopyOutline aria-hidden />}>
+            {t("duplicateExactSkip")}
+          </Badge>
         )}
 
       {item.variants.length === 0 &&
@@ -246,20 +275,20 @@ export default function ReviewItemRow({
           </Alert>
         )}
 
-      <div className="flex flex-col gap-3 lg:flex-row">
-        <div className="flex shrink-0 items-start gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+        <div className="flex min-w-0 flex-1 items-start gap-2.5">
           <button
             type="button"
             disabled={isImageBusy}
             onClick={() => setPexelsModalOpen(true)}
             aria-label={displayImageUrl ? t("replaceImage") : t("addImage")}
             className={cn(
-              "relative flex size-[4.5rem] shrink-0 flex-col items-center justify-center overflow-hidden rounded-xl",
-              "transition-colors duration-150 disabled:pointer-events-none disabled:opacity-80",
+              "relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-sm",
+              "transition-[border-color] duration-(--dur-fast) ease-(--ease-settle) disabled:pointer-events-none",
               focusRing,
               displayImageUrl
-                ? "border border-line bg-surface-2 hover:border-brand"
-                : "border border-dashed border-brand-line bg-brand-soft/50 hover:border-brand hover:bg-brand-soft",
+                ? "border border-line bg-surface-2 hover:border-fg-subtle"
+                : "border border-dashed border-line-strong bg-surface-2 hover:border-fg-subtle",
             )}
           >
             {displayImageUrl ? (
@@ -283,22 +312,12 @@ export default function ReviewItemRow({
                 />
               )
             ) : (
-              <>
-                <IoImageOutline
-                  className="text-lg text-brand-soft-fg"
-                  aria-hidden
-                />
-                <span className="mt-0.5 text-[9px] font-semibold leading-none text-brand-soft-fg">
-                  {t("addImage")}
-                </span>
-              </>
+              <IoImageOutline className="text-lg text-fg-subtle" aria-hidden />
             )}
             {showLoadingOverlay && (
-              <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/55">
-                <Spinner size="md" className="text-white" />
-                <span className="px-1 text-center text-[8px] font-semibold leading-none text-white">
-                  {t("uploadingImage")}
-                </span>
+              <span className="absolute inset-0 flex items-center justify-center bg-surface/85">
+                <Spinner size="sm" className="text-fg-muted" />
+                <span className="sr-only">{t("uploadingImage")}</span>
               </span>
             )}
           </button>
@@ -314,191 +333,243 @@ export default function ReviewItemRow({
               e.target.value = "";
             }}
           />
-          {displayImageUrl && !isImageBusy && (
-            <Button
-              variant="ghost"
-              size="xs"
-              iconOnly
-              aria-label={t("removeImage")}
-              onClick={() => {
-                setLocalPreview(null);
-                onImageChange(undefined);
-              }}
-            >
-              <IoCloseOutline />
-            </Button>
-          )}
-        </div>
 
-        <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-2">
-          <Input
-            inputSize="sm"
-            value={item.nameAr}
-            onChange={(e) => onUpdate({ nameAr: e.target.value })}
-            placeholder={t("nameAr")}
-            aria-label={t("nameAr")}
-            aria-invalid={missingNameAr || undefined}
-            dir="rtl"
-          />
-          <Input
-            inputSize="sm"
-            value={item.nameEn}
-            onChange={(e) => onUpdate({ nameEn: e.target.value })}
-            placeholder={t("nameEn")}
-            aria-label={t("nameEn")}
-            aria-invalid={missingNameEn || undefined}
-            dir="ltr"
-          />
-          <Textarea
-            value={item.descriptionAr ?? ""}
-            onChange={(e) => onUpdate({ descriptionAr: e.target.value })}
-            placeholder={t("descriptionAr")}
-            aria-label={t("descriptionAr")}
-            rows={2}
-            className="min-h-[4.5rem]"
-            dir="rtl"
-          />
-          <Textarea
-            value={item.descriptionEn ?? ""}
-            onChange={(e) => onUpdate({ descriptionEn: e.target.value })}
-            placeholder={t("descriptionEn")}
-            aria-label={t("descriptionEn")}
-            rows={2}
-            className="min-h-[4.5rem]"
-            dir="ltr"
-          />
-        </div>
-
-        {item.variants.length === 0 && (
-          <div className="flex shrink-0 items-center gap-2">
-            <div className="w-28">
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
+            <div className="grid gap-2 sm:grid-cols-2">
               <Input
                 inputSize="sm"
-                type="number"
-                min={0}
-                step="0.01"
-                value={
-                  item.duplicateMeta?.resolution === "skip" &&
-                  item.duplicateMeta.existingPrice != null
-                    ? item.duplicateMeta.existingPrice
-                    : (item.price ?? "")
-                }
-                disabled={item.duplicateMeta?.resolution === "skip"}
-                onChange={(e) =>
-                  onUpdate({
-                    price:
-                      e.target.value === ""
-                        ? null
-                        : Number.parseFloat(e.target.value),
-                  })
-                }
-                placeholder={t("price")}
-                aria-label={t("price")}
-                aria-invalid={item.price === null || undefined}
-                className="tabular-nums"
+                value={item.nameAr}
+                onChange={(e) => onUpdate({ nameAr: e.target.value })}
+                placeholder={t("nameAr")}
+                aria-label={t("nameAr")}
+                aria-invalid={missingNameAr || undefined}
+                dir="rtl"
+              />
+              <Input
+                inputSize="sm"
+                value={item.nameEn}
+                onChange={(e) => onUpdate({ nameEn: e.target.value })}
+                placeholder={t("nameEn")}
+                aria-label={t("nameEn")}
+                aria-invalid={missingNameEn || undefined}
+                dir="ltr"
               />
             </div>
-            <span className="text-xs text-fg-muted">{currency}</span>
-          </div>
-        )}
 
-        <Button
-          variant="dangerGhost"
-          size="sm"
-          iconOnly
-          onClick={onDelete}
-          aria-label={t("deleteItem")}
-          title={t("deleteItem")}
-          className="self-start"
-        >
-          <IoTrashOutline className="text-lg" />
-        </Button>
+            {/* Descriptions are optional copy, so they fold away unless the
+                parse already found some — a category of twelve dishes should
+                not open as twenty-four text areas. */}
+            <Button
+              variant="link"
+              size="xs"
+              onClick={() => setShowDescriptions((v) => !v)}
+              aria-expanded={showDescriptions}
+              endIcon={
+                showDescriptions ? (
+                  <IoChevronUpOutline />
+                ) : (
+                  <IoChevronDownOutline />
+                )
+              }
+              className="self-start"
+            >
+              {t("itemDescriptions")}
+            </Button>
+
+            {showDescriptions ? (
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Textarea
+                  value={item.descriptionAr ?? ""}
+                  onChange={(e) => onUpdate({ descriptionAr: e.target.value })}
+                  placeholder={t("descriptionAr")}
+                  aria-label={t("descriptionAr")}
+                  rows={2}
+                  dir="rtl"
+                />
+                <Textarea
+                  value={item.descriptionEn ?? ""}
+                  onChange={(e) => onUpdate({ descriptionEn: e.target.value })}
+                  placeholder={t("descriptionEn")}
+                  aria-label={t("descriptionEn")}
+                  rows={2}
+                  dir="ltr"
+                />
+              </div>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="flex items-start gap-2 ps-14 sm:shrink-0 sm:ps-0">
+          {item.variants.length === 0 && (
+            <Input
+              inputSize="sm"
+              type="number"
+              min={0}
+              step="0.01"
+              value={
+                item.duplicateMeta?.resolution === "skip" &&
+                item.duplicateMeta.existingPrice != null
+                  ? item.duplicateMeta.existingPrice
+                  : (item.price ?? "")
+              }
+              disabled={item.duplicateMeta?.resolution === "skip"}
+              onChange={(e) =>
+                onUpdate({
+                  price:
+                    e.target.value === ""
+                      ? null
+                      : Number.parseFloat(e.target.value),
+                })
+              }
+              placeholder={t("price")}
+              aria-label={t("price")}
+              aria-invalid={item.price === null || undefined}
+              endIcon={currencySuffix}
+              className="ui-figure"
+              wrapperClassName="w-full sm:w-36"
+            />
+          )}
+
+          <DropdownMenu
+            label={itemLabel}
+            trigger={(props) => (
+              <Button
+                {...props}
+                type="button"
+                variant="ghost"
+                size="sm"
+                iconOnly
+                aria-label={itemLabel}
+              >
+                <IoEllipsisHorizontal className="size-4" />
+              </Button>
+            )}
+          >
+            <MenuItem icon={<IoAddCircleOutline />} onClick={handleAddVariant}>
+              {t("addVariant")}
+            </MenuItem>
+            <MenuItem
+              icon={<IoImageOutline />}
+              onClick={() => setPexelsModalOpen(true)}
+              disabled={isImageBusy}
+            >
+              {displayImageUrl ? t("replaceImage") : t("addImage")}
+            </MenuItem>
+            {displayImageUrl && !isImageBusy ? (
+              <MenuItem
+                icon={<IoCloseOutline />}
+                onClick={() => {
+                  setLocalPreview(null);
+                  onImageChange(undefined);
+                }}
+              >
+                {t("removeImage")}
+              </MenuItem>
+            ) : null}
+            <MenuSeparator />
+            <MenuItem
+              icon={<IoTrashOutline />}
+              tone="danger"
+              onClick={onDelete}
+            >
+              {t("deleteItem")}
+            </MenuItem>
+          </DropdownMenu>
+        </div>
       </div>
 
       {item.variants.length > 0 && (
-        <div className="flex flex-col gap-2 border-s-2 border-line ps-2">
-          {item.variants.map((variant) => (
-            <div
-              key={variant.id}
-              id={importRefDomId(variant.id)}
-              className="flex scroll-mt-24 flex-col gap-2"
-            >
-              {variant.duplicateMeta?.status === "exact_duplicate" && (
-                <p className="text-xs text-fg-muted">
-                  {t("duplicateExactSkip")}
-                </p>
-              )}
-              {variant.flags.includes("price_conflict") &&
-                variant.duplicateMeta && (
-                  <Alert tone="warning">
-                    <div className="flex flex-col gap-2">
-                      <p>
-                        {t("duplicatePriceConflict", {
-                          existing: variant.duplicateMeta.existingPrice ?? 0,
-                          newPrice: variant.price ?? 0,
-                          currency,
-                        })}
-                      </p>
-                      {variant.duplicateMeta.resolution && (
-                        <p className="font-medium text-success">
-                          {variant.duplicateMeta.resolution === "update_price"
-                            ? t("duplicateResolutionUpdate")
-                            : t("duplicateResolutionSkip")}
-                        </p>
-                      )}
-                      <div className="flex flex-wrap gap-2">
-                        {resolutionButton(
-                          "update_price",
-                          t("duplicateUpdatePrice"),
-                          variant.duplicateMeta.resolution === "update_price",
-                          variant.id,
-                        )}
-                        {resolutionButton(
-                          "skip",
-                          t("duplicateSkip"),
-                          variant.duplicateMeta.resolution === "skip",
-                          variant.id,
-                        )}
-                      </div>
-                    </div>
-                  </Alert>
+        /* Variants are a sub-ledger indented to the item's own text column, so
+           three sizes of one dish read as three lines of one ticket rather
+           than as three more dishes. */
+        <div className="sm:ps-14">
+          <p className="ui-label">{t("variantLabel")}</p>
+          <ul className="mt-1 divide-y divide-line border-y border-line">
+            {item.variants.map((variant) => (
+              <li
+                key={variant.id}
+                id={importRefDomId(variant.id)}
+                className="flex scroll-mt-24 flex-col gap-2 py-2"
+              >
+                {variant.duplicateMeta?.status === "exact_duplicate" && (
+                  <p className="text-xs text-fg-muted">
+                    {t("duplicateExactSkip")}
+                  </p>
                 )}
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="grid min-w-[200px] flex-1 grid-cols-2 gap-2">
-                  <Input
-                    inputSize="sm"
-                    value={getVariantLabelAr(variant)}
-                    onChange={(e) =>
-                      onUpdateVariant(
-                        variant.id,
-                        syncVariantLabel(variant, { labelAr: e.target.value }),
-                      )
-                    }
-                    placeholder={t("nameAr")}
-                    aria-label={t("nameAr")}
-                    aria-invalid={
-                      variant.flags.includes("missing_name_ar") || undefined
-                    }
-                    dir="rtl"
-                  />
-                  <Input
-                    inputSize="sm"
-                    value={getVariantLabelEn(variant)}
-                    onChange={(e) =>
-                      onUpdateVariant(
-                        variant.id,
-                        syncVariantLabel(variant, { labelEn: e.target.value }),
-                      )
-                    }
-                    placeholder={t("nameEn")}
-                    aria-label={t("nameEn")}
-                    aria-invalid={
-                      variant.flags.includes("missing_name_en") || undefined
-                    }
-                    dir="ltr"
-                  />
-                </div>
-                <div className="w-24">
+                {variant.flags.includes("price_conflict") &&
+                  variant.duplicateMeta && (
+                    <Alert tone="warning">
+                      <div className="flex flex-col gap-2">
+                        <p>
+                          {t("duplicatePriceConflict", {
+                            existing: variant.duplicateMeta.existingPrice ?? 0,
+                            newPrice: variant.price ?? 0,
+                            currency,
+                          })}
+                        </p>
+                        {variant.duplicateMeta.resolution && (
+                          <p className="font-medium text-success">
+                            {variant.duplicateMeta.resolution === "update_price"
+                              ? t("duplicateResolutionUpdate")
+                              : t("duplicateResolutionSkip")}
+                          </p>
+                        )}
+                        <div className="flex flex-wrap gap-2">
+                          {resolutionButton(
+                            "update_price",
+                            t("duplicateUpdatePrice"),
+                            variant.duplicateMeta.resolution === "update_price",
+                            variant.id,
+                          )}
+                          {resolutionButton(
+                            "skip",
+                            t("duplicateSkip"),
+                            variant.duplicateMeta.resolution === "skip",
+                            variant.id,
+                          )}
+                        </div>
+                      </div>
+                    </Alert>
+                  )}
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="grid min-w-[200px] flex-1 grid-cols-2 gap-2">
+                    <Input
+                      inputSize="sm"
+                      value={getVariantLabelAr(variant)}
+                      onChange={(e) =>
+                        onUpdateVariant(
+                          variant.id,
+                          syncVariantLabel(variant, {
+                            labelAr: e.target.value,
+                          }),
+                        )
+                      }
+                      placeholder={t("nameAr")}
+                      aria-label={t("nameAr")}
+                      aria-invalid={
+                        variant.flags.includes("missing_name_ar") || undefined
+                      }
+                      dir="rtl"
+                    />
+                    <Input
+                      inputSize="sm"
+                      value={getVariantLabelEn(variant)}
+                      onChange={(e) =>
+                        onUpdateVariant(
+                          variant.id,
+                          syncVariantLabel(variant, {
+                            labelEn: e.target.value,
+                          }),
+                        )
+                      }
+                      placeholder={t("nameEn")}
+                      aria-label={t("nameEn")}
+                      aria-invalid={
+                        variant.flags.includes("missing_name_en") || undefined
+                      }
+                      dir="ltr"
+                    />
+                  </div>
                   <Input
                     inputSize="sm"
                     type="number"
@@ -522,45 +593,34 @@ export default function ReviewItemRow({
                     placeholder={t("price")}
                     aria-label={t("price")}
                     aria-invalid={variant.price === null || undefined}
-                    className="tabular-nums"
+                    endIcon={currencySuffix}
+                    className="ui-figure"
+                    wrapperClassName="w-32"
                   />
+                  <Button
+                    variant="dangerGhost"
+                    size="sm"
+                    iconOnly
+                    aria-label={t("delete")}
+                    title={t("delete")}
+                    onClick={() => onRemoveVariant(variant.id)}
+                  >
+                    <IoCloseOutline />
+                  </Button>
                 </div>
-                <span className="text-xs text-fg-muted">{currency}</span>
-                <Button
-                  variant="dangerGhost"
-                  size="xs"
-                  iconOnly
-                  aria-label={t("delete")}
-                  title={t("delete")}
-                  onClick={() => onRemoveVariant(variant.id)}
-                >
-                  <IoCloseOutline />
-                </Button>
-              </div>
-            </div>
-          ))}
+              </li>
+            ))}
+          </ul>
           <Button
             variant="link"
             size="xs"
-            onClick={onAddVariant}
+            onClick={handleAddVariant}
             startIcon={<IoAddCircleOutline />}
-            className="self-start"
+            className="mt-1.5 self-start"
           >
             {t("addVariant")}
           </Button>
         </div>
-      )}
-
-      {item.variants.length === 0 && (
-        <Button
-          variant="ghost"
-          size="xs"
-          onClick={onAddVariant}
-          startIcon={<IoAddCircleOutline />}
-          className="self-start"
-        >
-          {t("addVariant")}
-        </Button>
       )}
 
       <PexelsImagePickerModal

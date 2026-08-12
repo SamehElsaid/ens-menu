@@ -4,31 +4,39 @@ import { useTranslations } from "next-intl";
 import { Advertisement } from "@/types/Menu";
 import AdCard from "./AdCard";
 import MobileListPagination from "@/components/Dashboard/mobile/MobileListPagination";
+import { Card, Skeleton, SkeletonRegion } from "@/components/ui";
 
-function AdCardSkeleton() {
+/** Shared by both branches so the grid does not reflow when the data lands. */
+const adsGridClass =
+  "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6";
+
+/** Mirrors `AdCard`: media, ruled body, ruled ticket row, ruled action strip.
+ *  Exported so the mobile list stands in for the same card with the same
+ *  geometry instead of keeping a second copy that drifts. */
+export function AdCardSkeleton() {
   return (
-    <div
-      className="overflow-hidden rounded-lg border border-line bg-white"
-      aria-hidden
-    >
-      <div className="dashboard-mobile-shimmer aspect-video w-full bg-surface-3" />
-      <div className="space-y-3 p-4">
-        <div className="dashboard-mobile-shimmer h-6 w-2/3 rounded-md bg-surface-3" />
-        <div className="dashboard-mobile-shimmer h-4 w-full rounded-md bg-surface-3" />
-        <div className="grid grid-cols-3 gap-1.5">
+    <Card padded="none" className="overflow-hidden">
+      <div className="aspect-video border-b border-line">
+        <Skeleton className="h-full w-full" rounded="sm" />
+      </div>
+      <div className="p-3">
+        <Skeleton className="h-3.5 w-2/3" rounded="sm" />
+        <Skeleton className="mt-2 h-3 w-full" rounded="sm" />
+        <div className="mt-3 grid grid-cols-3 gap-px overflow-hidden rounded-lg border border-line bg-line">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="dashboard-mobile-shimmer h-12 rounded-lg bg-surface-3"
-            />
+            <div key={i} className="bg-surface px-2 py-1.5">
+              <Skeleton className="h-2.5 w-3/4" rounded="sm" />
+              <Skeleton className="mt-1 h-3.5 w-1/2" rounded="sm" />
+            </div>
           ))}
         </div>
-        <div className="flex gap-2 border-t border-line pt-3 dark:border-line">
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-3" />
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-3" />
-        </div>
       </div>
-    </div>
+      <div className="flex items-center gap-1.5 border-t border-line bg-surface-2/40 px-3 py-2">
+        <Skeleton className="h-8 w-20" rounded="sm" />
+        <Skeleton className="ms-auto size-8" rounded="sm" />
+        <Skeleton className="size-8" rounded="sm" />
+      </div>
+    </Card>
   );
 }
 
@@ -65,22 +73,19 @@ export default function AdsCardGrid({
 
   if (loading) {
     return (
-      <div
-        id="onboarding-advertisements-table"
-        className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6"
-        aria-busy="true"
-        aria-label={t("loading")}
-      >
-        {Array.from({ length: 8 }).map((_, i) => (
-          <AdCardSkeleton key={i} />
-        ))}
+      <div id="onboarding-advertisements-table">
+        <SkeletonRegion label={t("loading")} className={adsGridClass}>
+          {Array.from({ length: 8 }).map((_, i) => (
+            <AdCardSkeleton key={i} />
+          ))}
+        </SkeletonRegion>
       </div>
     );
   }
 
   return (
     <div id="onboarding-advertisements-table" className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6 items-stretch">
+      <div className={`${adsGridClass} items-stretch`}>
         {ads.map((ad) => (
           <AdCard
             key={ad.id ?? `${getTitle(ad)}-${ad.createdAt}`}

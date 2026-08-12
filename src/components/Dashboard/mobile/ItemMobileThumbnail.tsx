@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { IoCameraOutline } from "react-icons/io5";
 import LoadImage from "@/components/ImageLoad";
+import { cn } from "@/lib/cn";
+import { focusRing, Skeleton } from "@/components/ui";
 
 interface ItemMobileThumbnailProps {
   src: string;
@@ -25,10 +27,15 @@ export default function ItemMobileThumbnail({
         type="button"
         onClick={onUploadClick}
         aria-label={uploadLabel}
-        className="dashboard-item-thumb dashboard-item-thumb--empty group flex size-18 shrink-0 flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-primary/30 bg-linear-to-br from-primary/[0.07] to-slate-50 transition-all active:scale-[0.96] dark:from-primary/10 dark:to-slate-800/80"
+        className={cn(
+          "dashboard-item-thumb dashboard-item-thumb--empty flex size-18 shrink-0 flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-line-strong bg-surface-2 text-fg-muted",
+          "transition-[color,background-color,border-color] duration-(--dur-fast) ease-(--ease-settle)",
+          "hover:bg-surface-3 hover:text-fg active:bg-surface-3",
+          focusRing,
+        )}
       >
-        <IoCameraOutline className="text-xl text-primary" aria-hidden />
-        <span className="text-[10px] font-semibold leading-none text-primary">
+        <IoCameraOutline className="text-xl" aria-hidden />
+        <span className="text-[10px] font-semibold leading-none">
           {uploadLabel}
         </span>
       </button>
@@ -36,9 +43,9 @@ export default function ItemMobileThumbnail({
   }
 
   return (
-    <div className="dashboard-item-thumb relative size-18 shrink-0 overflow-hidden rounded-lg bg-slate-100 ring-1 ring-slate-200/80 dark:ring-slate-700">
+    <div className="dashboard-item-thumb relative size-18 shrink-0 overflow-hidden rounded-lg bg-surface-2 ring-1 ring-line">
       {!loaded && (
-        <div className="dashboard-mobile-shimmer absolute inset-0 bg-surface-3" />
+        <Skeleton className="absolute inset-0 size-full" rounded="lg" />
       )}
       <LoadImage
         src={src}
@@ -54,9 +61,12 @@ export default function ItemMobileThumbnail({
         type="button"
         onClick={onUploadClick}
         aria-label={uploadLabel}
-        className="absolute inset-0 flex items-end justify-end p-1"
+        className={cn(
+          "absolute inset-0 flex items-end justify-end p-1",
+          focusRing,
+        )}
       >
-        <span className="flex size-7 items-center justify-center rounded-lg bg-black/55 text-white backdrop-blur-sm transition-transform active:scale-95">
+        <span className="flex size-7 items-center justify-center rounded-lg border border-line bg-surface/85 text-fg backdrop-blur-sm">
           <IoCameraOutline className="text-sm" aria-hidden />
         </span>
       </button>

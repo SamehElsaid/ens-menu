@@ -5,6 +5,7 @@ import Select, { type SingleValue } from "react-select";
 import { useLocale, useTranslations } from "next-intl";
 import { IoSearchOutline } from "react-icons/io5";
 import { axiosGet } from "@/shared/axiosCall";
+import { Spinner } from "@/components/ui";
 import type { Category } from "@/types/Menu";
 
 export type CategoryOption = {
@@ -151,18 +152,11 @@ export default function CategorySearchSelect({
 
   return (
     <div className="relative">
-      <div
-        className={`absolute top-1/2 -translate-y-1/2 z-10 flex items-center justify-center pointer-events-none ${
-          locale === "ar" ? "right-3" : "left-3"
-        }`}
-      >
+      <div className="pointer-events-none absolute start-3 top-1/2 z-10 flex -translate-y-1/2 items-center justify-center text-fg-subtle">
         {!isFilter && isBusy ? (
-          <div
-            className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"
-            aria-hidden
-          />
+          <Spinner size="sm" className="text-brand" />
         ) : (
-          <IoSearchOutline className="text-fg-subtle text-xl" />
+          <IoSearchOutline className="size-4" />
         )}
       </div>
       <Select<CategoryOption>
@@ -208,7 +202,6 @@ export default function CategorySearchSelect({
                   ...base,
                   minHeight: "2.75rem",
                   height: "2.75rem",
-                  borderRadius: "0.75rem",
                   paddingInlineStart: "2.5rem",
                   boxShadow: "none",
                 }),
@@ -224,7 +217,6 @@ export default function CategorySearchSelect({
                 menu: (base) => ({
                   ...base,
                   zIndex: 1000,
-                  borderRadius: "0.75rem",
                   overflow: "hidden",
                 }),
               }
@@ -232,7 +224,6 @@ export default function CategorySearchSelect({
                 control: (base) => ({
                   ...base,
                   minHeight: `${minHeight}px`,
-                  borderRadius: "1rem",
                   paddingInlineStart: "2.25rem",
                 }),
               }

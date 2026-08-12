@@ -4,6 +4,7 @@ import {
   FiAlertTriangle,
   FiCheckCircle,
   FiInfo,
+  FiZap,
 } from "react-icons/fi";
 import { cn } from "@/lib/cn";
 import { statusTone, type StatusTone } from "./styles";
@@ -11,6 +12,7 @@ import { statusTone, type StatusTone } from "./styles";
 const defaultIcon: Record<StatusTone, ReactNode> = {
   neutral: <FiInfo />,
   brand: <FiInfo />,
+  accent: <FiZap />,
   info: <FiInfo />,
   success: <FiCheckCircle />,
   warning: <FiAlertTriangle />,
@@ -47,13 +49,15 @@ export function Alert({
     <div
       role={isUrgent ? "alert" : "status"}
       className={cn(
-        "flex items-start gap-2.5 rounded-lg border px-3 py-2.5",
+        "flex items-start gap-3 rounded-xl border px-3.5 py-3",
         statusTone[tone].soft,
         className,
       )}
     >
+      {/* Always rendered: the tint alone is hue, and `info` sits only 49° from
+          the brand — the glyph is what keeps the two distinguishable. */}
       <span
-        className={cn("mt-px shrink-0 text-[15px]", statusTone[tone].fg)}
+        className={cn("mt-px shrink-0 text-base", statusTone[tone].fg)}
         aria-hidden
       >
         {icon ?? defaultIcon[tone]}

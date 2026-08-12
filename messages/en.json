@@ -522,9 +522,11 @@
     "back": "Back",
     "edit": "Edit",
     "delete": "Delete",
+    "remove": "Remove",
     "close": "Close",
     "cancel": "Cancel",
     "openMenu": "Open menu",
+    "breadcrumb": "Breadcrumb",
     "useDarkTheme": "Switch to dark theme",
     "useLightTheme": "Switch to light theme",
     "search": "Search...",
@@ -548,6 +550,8 @@
     "clearFilters": "Clear filters",
     "noResultsTitle": "No matches",
     "noResultsDescription": "Try a different search term or clear your filters.",
+    "emptyTitle": "Nothing here yet",
+    "emptyDescription": "This list will fill in as records are created.",
     "errorTitle": "Something went wrong",
     "errorDescription": "We couldn't load this. Check your connection and try again."
   },
@@ -721,18 +725,24 @@
     "resendVerification": "Resend verification email",
     "resendVerificationSuccess": "Verification email sent. Check your inbox.",
     "recaptchaLabel": "Verify you're human",
-    "recaptchaHint": "Tap here to complete the security check",
+    "recaptchaHint": "Complete the check below to continue",
     "recaptchaVerified": "Verification complete",
     "recaptchaVerifiedHint": "You're cleared to continue",
     "recaptchaVerifying": "Verifying...",
     "recaptchaVerifyingHint": "Please wait while we confirm you're human",
     "recaptchaRejected": "Verification failed",
-    "recaptchaRejectedHint": "Tap to try again",
+    "recaptchaRejectedHint": "That check didn't go through. Run it again to continue.",
     "recaptchaBoot": "Loading security check...",
     "recaptchaOnSubmit": "Quick security check when you tap Create account",
     "recaptchaModalTitle": "Quick security check",
     "recaptchaModalSubtitle": "One step to protect your account — then we'll finish signup.",
     "recaptchaModalClose": "Close",
+    "recaptchaTicketLabel": "Security check",
+    "recaptchaRetry": "Try again",
+    "recaptchaStatusPending": "Pending",
+    "recaptchaStatusChecking": "Checking",
+    "recaptchaStatusPassed": "Passed",
+    "recaptchaStatusFailed": "Failed",
     "showPassword": "Show password",
     "hidePassword": "Hide password"
   },
@@ -1752,6 +1762,8 @@
       "noSetupRequired": "No setup required • Works instantly",
       "noBrowser": "Built for staff on the floor",
       "videoAlt": "App Preview",
+      "videoPause": "Pause the app preview",
+      "videoPlay": "Play the app preview",
       "features": {
         "liveAlerts": "Real-time order alerts",
         "tables": "Live table map",
@@ -2042,6 +2054,8 @@
       "whatsappLabel": "WhatsApp support",
       "whatsappDescription": "Fast replies, menu setup help, and direct support from the ENSmenu team.",
       "detailsTitle": "Contact information",
+      "channelsTitle": "Reach us now",
+      "numbersTitle": "Every line, and who answers it",
       "socialTitle": "Follow us on social media",
       "whatsappCta": "Message us on WhatsApp",
       "whatsappResponseTime": "Average response time: under 5 minutes",
@@ -2732,6 +2746,8 @@
     "totalTablesLabel": "Total tables",
     "noTables": "No tables yet",
     "noTablesDescription": "Add your first table to generate a QR code for each one.",
+    "proOnlyTitle": "Tables and QR links are on Pro",
+    "proOnlyDescription": "Upgrade your plan to give every table its own QR code and let guests call a waiter from it.",
     "noMenuUrl": "Set a menu slug in settings to generate links",
     "deleteConfirmTitle": "Delete table",
     "deleteConfirm": "Are you sure you want to delete table « {name} »? This cannot be undone.",
@@ -2770,6 +2786,7 @@
     "backToOverview": "Back to main page",
     "search": "Search",
     "clearFilter": "Clear filter",
+    "refresh": "Refresh",
     "searchPlaceholder": "Search by name, phone, email, or note",
     "metricsTitle": "Ratings summary",
     "totalLabel": "Total ratings",
@@ -2874,6 +2891,7 @@
   },
   "Roles": {
     "subtitle": "Create roles and choose their permissions",
+    "loading": "Loading roles",
     "addRole": "Add role",
     "edit": "Edit",
     "delete": "Delete",
@@ -3104,6 +3122,7 @@
     "moveUp": "Move earlier",
     "moveDown": "Move later",
     "availableNow": "Available now",
+    "unavailable": "Hidden",
     "dragHandle": "Drag",
     "dropPlaceholder": "Drop here",
     "unsavedChanges": "You have unsaved changes"
@@ -3434,6 +3453,62 @@
     "navSectionAccount": "Account",
     "navSectionImport": "Import",
     "navSectionAdmin": "Administration",
+    "navSectionCustomers": "Customers",
+    "navSectionRevenue": "Revenue",
+    "navSectionContent": "Content",
+    "navSectionPlatform": "Platform",
+    "navZoneVenue": "This menu",
+    "navZoneAccount": "Account",
+    "navAdminConsole": "Admin console",
+    "navAllVenues": "All menus",
+    "navChooseVenue": "Choose a menu",
+    "navChooseVenueHint": "Pick a menu to edit its items and settings",
+    "adminActivityLog": "Activity log",
+    "railCollapse": "Collapse sidebar",
+    "railExpand": "Expand sidebar",
+    "skipToContent": "Skip to content",
+    "commandOpen": "Search or jump to…",
+    "commandPlaceholder": "Search pages, menus and actions",
+    "commandNoResults": "Nothing matches that",
+    "commandNoResultsHint": "Try a page name, a menu name, or an action.",
+    "commandGroupRecent": "Recent",
+    "commandGroupGoTo": "Go to",
+    "commandGroupVenues": "Switch menu",
+    "commandGroupActions": "Actions",
+    "commandGroupHelp": "Help articles",
+    "attentionTitle": "Needs attention",
+    "attentionAdminDescription": "Accounts in a state someone has to act on",
+    "attentionVenueDescription": "Things waiting on you across your menus",
+    "attentionAllClear": "Nothing needs attention",
+    "attentionAllClearAdminHint": "No suspended accounts, expiring trials or idle sign-ups right now.",
+    "attentionAllClearVenueHint": "No unseen orders and nothing expiring soon.",
+    "attentionUnseenOrders": "Unseen table orders",
+    "attentionUnseenDelivery": "Unseen online orders",
+    "attentionEmptyMenus": "Menus with no items",
+    "attentionEmptyMenusHint": "A published menu with nothing on it turns customers away",
+    "kpiActiveMenus": "{count} live",
+    "kpiUnseenHint": "Unseen",
+    "kpiItems": "Items",
+    "kpiItemsHint": "Across all menus",
+    "tableColumns": "Columns",
+    "tableDensity": "Density",
+    "tableDensityComfortable": "Comfortable",
+    "tableDensityCompact": "Compact",
+    "tableSelectAll": "Select all rows",
+    "tableSelectRow": "Select row",
+    "tableClearSelection": "Clear",
+    "tableSelectedCount": "{count, plural, one {# selected} other {# selected}}",
+    "commandHintNavigate": "to navigate",
+    "commandHintSelect": "to open",
+    "commandHintClose": "to close",
+    "commandScopeVenue": "Menu",
+    "commandScopeAccount": "Account",
+    "commandScopeAdmin": "Admin",
+    "actionNewItem": "Add a menu item",
+    "actionNewCategory": "Add a category",
+    "actionInviteStaff": "Invite a staff member",
+    "actionNewVoucher": "Create a voucher",
+    "actionViewLiveMenu": "Open the live menu",
     "badgeSoon": "Soon",
     "menuImport": "AI Menu Import",
     "Menu Import": "Menu Import",
@@ -3536,6 +3611,8 @@
     "itemsSaveSuccess": "Items saved",
     "itemsSaveError": "Could not save items",
     "removeItem": "Remove item",
+    "qtyDecrease": "Decrease quantity",
+    "qtyIncrease": "Increase quantity",
     "addProduct": "Add product",
     "addProductSearch": "Search products…",
     "addProductLoading": "Loading products…",
@@ -3627,6 +3704,8 @@
     "itemsSaveSuccess": "Items saved",
     "itemsSaveError": "Could not save items",
     "removeItem": "Remove item",
+    "qtyDecrease": "Decrease quantity",
+    "qtyIncrease": "Increase quantity",
     "addProduct": "Add product",
     "addProductSearch": "Search products…",
     "addProductLoading": "Loading products…",
@@ -3651,6 +3730,10 @@
   },
   "menuActivityLog": {
     "title": "Activity log",
+    "eyebrow": "Audit",
+    "breadcrumbs": {
+      "dashboard": "Dashboard"
+    },
     "subtitle": "Tracks create, update, and delete actions on categories, products, staff, tables, ads, and settings.",
     "searchPlaceholder": "Search by name or action…",
     "empty": "No activity yet.",
@@ -3818,6 +3901,7 @@
     "demoDataBanner": "Demo data for preview — will be replaced automatically when the backend is connected."
   },
   "adminFollowUps": {
+    "eyebrow": "Sales",
     "title": "Customer follow-ups",
     "subtitle": "Call queue, log outcomes, and track next follow-up dates for ENSmenu customers.",
     "backToAdmin": "Back to admin",
@@ -3826,6 +3910,8 @@
     "queueTitle": "Call queue",
     "queueSearchPlaceholder": "Search by name or phone number…",
     "queueNoResults": "No results match your search.",
+    "queueEmpty": "No one is due for a call",
+    "queueEmptyDescription": "Customers appear here when a follow-up falls due.",
     "logCallTitle": "Log phone call",
     "logCall": "Log call",
     "viewCalls": "Call history",
@@ -3917,6 +4003,7 @@
       "actions": "Actions"
     },
     "report": {
+      "title": "Call activity",
       "callsToday": "Calls today",
       "callsWeek": "Calls this week",
       "overdue": "Overdue follow-ups",
@@ -3956,6 +4043,7 @@
     }
   },
   "adminPayments": {
+    "eyebrow": "Billing",
     "title": "Pro subscription history",
     "subtitle": "Full Pro subscription log — dates, status, and activation source (EasyKash or admin).",
     "backToAdmin": "Back to admin",
@@ -4039,6 +4127,7 @@
     "amountFree": "—"
   },
   "adminAnalytics": {
+    "eyebrow": "Analytics",
     "title": "Platform analytics",
     "subtitle": "Full overview of ensmenu performance",
     "back": "Back",
@@ -4094,6 +4183,7 @@
     "demoDataBanner": "Demo data for preview — will be replaced automatically when the backend is connected."
   },
   "adminBroadcast": {
+    "eyebrow": "Outreach",
     "title": "Customer emails",
     "subtitle": "Send an email to all customers, a segment, or hand-picked users.",
     "backToAdmin": "Back to admin",
@@ -4216,6 +4306,13 @@
       "title": "User Details",
       "subtitle": "View detailed user information",
       "back": "Back",
+      "tabs": {
+        "label": "Customer record sections",
+        "overview": "Overview",
+        "menus": "Menus",
+        "commerce": "Orders & billing",
+        "relationship": "Relationship"
+      },
       "analytics": {
         "title": "User analytics",
         "menusCount": "Menus",
@@ -4507,6 +4604,7 @@
     }
   },
   "adminAds": {
+    "eyebrow": "Advertising",
     "title": "Ad Management",
     "subtitle": "View and manage advertisements displayed for free users",
     "back": "Back",
@@ -4518,6 +4616,10 @@
     "addNewAd": "Add New Advertisement",
     "advertisement": "advertisement",
     "advertisements": "advertisements",
+    "filterAll": "All",
+    "columns": {
+      "status": "Status"
+    },
     "noAds": "No advertisements yet",
     "noAdsTitle": "No Advertisements",
     "noAdsDescription": "Start by creating your first advertisement to display to free users",
@@ -4612,6 +4714,7 @@
     }
   },
   "adminActivityLog": {
+    "eyebrow": "Audit",
     "title": "Admin Activity Log",
     "subtitle": "Track who promoted, deleted, or modified administrators and users",
     "back": "Back to administrators",
@@ -4651,11 +4754,15 @@
     }
   },
   "adminAppVersion": {
+    "eyebrow": "Releases",
     "title": "App Version",
     "subtitle": "View the latest release and add a new app version",
     "back": "Back",
     "currentVersion": "Current version",
     "addNew": "Add new version",
+    "groupRelease": "Release",
+    "groupNotes": "Release notes",
+    "forceUpdateHint": "Blocks the app until the customer installs this version.",
     "noVersion": "No version recorded yet",
     "loadError": "Failed to load version settings",
     "saveSuccess": "New version added successfully",
@@ -4676,6 +4783,7 @@
     }
   },
   "adminPlans": {
+    "eyebrow": "Pricing",
     "title": "Plans Management",
     "subtitle": "View and edit subscription plans",
     "back": "Back",
@@ -4702,6 +4810,10 @@
     },
     "editModal": {
       "title": "Edit Plan",
+      "groupPricing": "Pricing",
+      "groupLimits": "Limits",
+      "groupFlags": "Availability",
+      "groupCapabilities": "What the plan unlocks",
       "name": "Name",
       "priceMonthly": "Monthly price (EGP)",
       "priceYearly": "Yearly price (EGP)",
@@ -4755,6 +4867,9 @@
     "emptyMenuTitle": "Your menu is empty — get started in minutes",
     "emptyMenuDescription": "Upload a photo of your paper menu and we'll organize it",
     "backToOverview": "Back to dashboard",
+    "breadcrumbs": {
+      "dashboard": "Dashboard"
+    },
     "stepUpload": "Upload",
     "stepProcessing": "Analysis",
     "stepReview": "Review",
@@ -4774,6 +4889,7 @@
     "tip1": "Use a clear photo with good lighting",
     "tip2": "Avoid shadows and glare",
     "tip3": "Shoot from above when possible",
+    "tipsTitle": "Photo tips",
     "startAnalysis": "Start analysis",
     "skipOnboarding": "Skip for now",
     "processingTitle": "Analyzing your menu...",
@@ -4788,6 +4904,11 @@
     "statCategories": "{count} categories",
     "statItems": "{count} items",
     "statExpandedItems": "{count} items to save",
+    "statLabelCategories": "Categories",
+    "statLabelItems": "Items",
+    "statLabelToSave": "To save",
+    "statLabelDuplicates": "Duplicates",
+    "statLabelPriceConflicts": "Price conflicts",
     "statMissingPrices": "{count} items without price",
     "statMissingNames": "{count} entries without name",
     "statWarnings": "{count} warnings",
@@ -4795,6 +4916,7 @@
     "missingNameBlock": "{count} entries missing Arabic or English name — complete names before continuing",
     "missingPriceBlockHint": "Click here to go to the item with the issue",
     "missingNameBlockHint": "Click here to go to the item with the issue",
+    "goToIssue": "Go to issue",
     "blockingHint": "Complete required fields before continuing",
     "parseErrorsNotice": "Could not parse {count} elements from the response",
     "itemsInCategory": "{count} items",
@@ -4804,6 +4926,9 @@
     "nameEn": "Name (English)",
     "descriptionAr": "Description (Arabic)",
     "descriptionEn": "Description (English)",
+    "itemDescriptions": "Descriptions",
+    "itemMenuLabel": "Item actions",
+    "categoryMenuLabel": "Category actions",
     "price": "Price",
     "variantLabel": "Size / type",
     "addItem": "Add item",
@@ -4888,7 +5013,10 @@
     "freeLimitReachedDescription": "You have completed your free package. Please subscribe to continue importing menus using AI.",
     "freePlanLimitTitle": "Free plan product limit",
     "freePlanLimitDescription": "The free plan allows up to {max} products per menu. You currently have {current} products.",
-    "freePlanLimitImport": "This import will add {import} products (total {total}).",
+    "freePlanLimitLedgerCurrent": "Current products",
+    "freePlanLimitLedgerImport": "Adding in this import",
+    "freePlanLimitLedgerTotal": "Total after import",
+    "freePlanLimitLedgerMax": "Free plan limit",
     "freePlanLimitExceeded": "You exceeded the limit — remove some items from review or upgrade to Pro.",
     "freePlanLimitUpgrade": "Upgrade to Pro",
     "freePlanLimitContinue": "Continue to confirm",
@@ -4902,6 +5030,7 @@
     "savePartialDetail": "Some items saved, some failed — see report below",
     "saveFailDetail": "Save could not complete — see reasons below",
     "saveAllSkippedTitle": "All items already exist",
+    "reportTitle": "Import report",
     "reportCategoriesAdded": "Categories added",
     "reportCategoriesReused": "Categories reused",
     "reportItemsAdded": "Items added",
@@ -5047,8 +5176,17 @@
   },
   "settingsDesignPage": {
     "title": "Menu design",
+    "eyebrow": "Design",
     "subtitle": "Choose the template that best fits how you want your menu to look. You can change it at any time.",
     "onboardingComplete": "Great! Your menu setup tour is complete. Your menu is ready to share.",
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "settings": "Settings"
+    },
+    "gallery": {
+      "eyebrow": "Templates",
+      "title": "Pick a template"
+    },
     "badges": {
       "activeNow": "Active now",
       "currentTemplate": "Current template",
@@ -5066,7 +5204,9 @@
       "buttonUpgrade": "Upgrade to Pro",
       "preview": "Preview",
       "customize": "Customize",
-      "templateNotActive": "This template is not active. Please activate it to customize it."
+      "templateNotActive": "This template is not active. Please activate it to customize it.",
+      "noMenuSelected": "No menu selected.",
+      "activateFailed": "Could not activate the template. Please try again."
     },
     "tips": {
       "title": "Helpful tips",
@@ -5080,12 +5220,13 @@
     "title": "Customize template {name}",
     "description": "Fine-tune this template’s colors and hero texts so your digital menu perfectly matches your restaurant’s visual identity.",
     "descriptionColorsOnly": "Fine-tune this template’s colors so your digital menu matches your restaurant’s visual identity.",
+    "noMenuSelected": "No menu selected to save customization.",
     "notEditable": {
       "title": "This template cannot be customized",
       "description": "You can go back to the design page and choose another template that supports advanced customization."
     },
     "preview": {
-      "livePreview": "LIVE PREVIEW",
+      "livePreview": "Live preview",
       "previewMenu": "Preview menu",
       "currentColorsTitle": "Current brand colors",
       "currentColorsDescription": "These colors are applied to key buttons, gradients, and highlight elements across your menu.",
@@ -5107,7 +5248,8 @@
         "description": "Set your main brand and accent colors. They’ll be used for gradients, CTAs, and important UI elements.",
         "primaryLabel": "Primary color",
         "accentLabel": "Accent color",
-        "pickerLabel": "Use the color picker to choose an exact shade."
+        "pickerLabel": "Use the color picker to choose an exact shade.",
+        "openPicker": "Open the color picker for {label}"
       },
       "texts": {
         "pill": "Texts",
@@ -5143,6 +5285,17 @@
   "settingsMediaPage": {
     "title": "Media Settings",
     "badge": "Media & contact",
+    "description": "Social links, contact details, guest Wi‑Fi and opening hours shown on your public menu.",
+    "breadcrumbs": {
+      "label": "Media settings",
+      "settings": "Settings"
+    },
+    "sections": {
+      "social": "Social",
+      "contact": "Contact",
+      "wifi": "Wi‑Fi",
+      "hours": "Hours"
+    },
     "socialLinks": {
       "title": "Social media links",
       "facebook": "Facebook",
@@ -5172,6 +5325,9 @@
     "businessHours": {
       "title": "Business hours",
       "to": "to",
+      "day": "Day",
+      "open": "Opens",
+      "close": "Closes",
       "closed": "Closed",
       "note": "Set your business hours. Check «Closed» if the store is closed on that day.",
       "days": {
@@ -5196,6 +5352,9 @@
   "settingsGoogleReviewsPage": {
     "title": "Google Reviews",
     "badge": "Google Reviews",
+    "breadcrumbs": {
+      "settings": "Settings"
+    },
     "description": "Add your Google review link and control how the review button appears on your public menu. Guests leave reviews on Google, not inside ENSmenu.",
     "enabled": "Show review button on menu",
     "enabledOn": "Enabled",
@@ -5273,7 +5432,10 @@
     "deniedDescription": "Notifications are blocked in your browser. Please update your browser settings to allow them.",
     "openSettings": "Open browser settings",
     "tryAgain": "Try again",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "statusOff": "Off",
+    "statusOn": "On",
+    "statusBlocked": "Blocked"
   },
   "menuSettingsPage": {
     "generalSettings": "General settings",
@@ -5284,6 +5446,8 @@
     "dangerZone": "Danger zone",
     "deleteThisMenu": "Delete this menu",
     "saveChanges": "Save changes",
+    "unsavedChanges": "You have unsaved changes",
+    "noMenuSelected": "No menu selected.",
     "namePlaceholder": "The Palm Cafe",
     "descriptionPlaceholder": "Fresh pasta, grilled burgers, pizzas & signature drinks...",
     "chatbotEnabled": "AI Chatbot",
@@ -5338,6 +5502,7 @@
     "close": "Close search"
   },
   "adminKnowledge": {
+    "eyebrow": "Content",
     "title": "Knowledge Management",
     "subtitle": "Create and manage search information entries",
     "back": "Back",
@@ -5382,6 +5547,7 @@
     }
   },
   "adminPromo": {
+    "eyebrow": "Outreach",
     "title": "Promo Banner",
     "subtitle": "Manage the promotional banner displayed to users",
     "back": "Back",
@@ -5395,6 +5561,9 @@
     "textPlaceholderAr": "Enter promotional text in Arabic...",
     "textPlaceholderEn": "Enter promotional text in English...",
     "jsonPreview": "Payload Preview",
+    "previewTitle": "How it will look",
+    "previewEmpty": "Nothing to show yet — write the banner copy below.",
+    "previewHiddenNote": "Saved, but hidden from customers while the banner is off.",
     "enableLabel": "Enable Banner",
     "enableDescription": "Show or hide the promotional banner for all users",
     "save": "Save Changes",
@@ -5817,6 +5986,20 @@
   "settingsDeliveryPage": {
     "title": "Delivery Settings",
     "badge": "Delivery",
+    "description": "Turn delivery on, choose where orders arrive, and set the areas and prices you deliver to.",
+    "loading": "Loading delivery settings...",
+    "proBadge": "Pro",
+    "breadcrumbs": {
+      "label": "Delivery settings",
+      "settings": "Settings"
+    },
+    "sections": {
+      "status": "Status",
+      "channel": "Channel",
+      "zoneMethod": "Zone method",
+      "zones": "Zones",
+      "location": "Location"
+    },
     "savedSuccess": "Delivery settings saved",
     "linkedReadOnlyTitle": "Managed from primary menu",
     "linkedReadOnlyDescription": "This menu is linked for delivery. Edit delivery settings from the primary menu only.",
@@ -5827,7 +6010,9 @@
       "subtitle": "Enable or disable delivery orders for your menu",
       "label": "Delivery enabled",
       "enabledHint": "Customers can place delivery orders",
-      "disabledHint": "Delivery is currently disabled"
+      "disabledHint": "Delivery is currently disabled",
+      "badgeOn": "Live",
+      "badgeOff": "Off"
     },
     "contactNumbers": {
       "title": "Receive orders on",
@@ -5842,7 +6027,8 @@
       "whatsappOrdersOnHint": "Receive orders directly on WhatsApp, with a copy saved to your dashboard",
       "whatsappOrdersOffHint": "Receive and manage all orders directly through your control panel only",
       "whatsappDashboardOnlyHint": "WhatsApp is off — new orders appear in Delivery orders in the dashboard",
-      "phonePlaceholder": "e.g. +201012345678"
+      "phonePlaceholder": "e.g. +201012345678",
+      "phoneRequired": "A WhatsApp number is required to receive orders on WhatsApp"
     },
     "deliveryMode": {
       "title": "Delivery zone method",
@@ -5905,6 +6091,11 @@
       "searchPlaceholder": "Search Google for city or governorate...",
       "searching": "Searching...",
       "noResults": "No results — try a different search term",
+      "regionRequired": "Pick a region from the search results so we can save its coordinates",
+      "required": "Required",
+      "priceInvalid": "Enter a price greater than 0",
+      "addSuccess": "Delivery zone added",
+      "updateSuccess": "Delivery zone updated",
       "nameAr": "Arabic name",
       "nameArPlaceholder": "e.g. القاهرة",
       "nameEn": "English name",
@@ -6049,6 +6240,7 @@
     }
   },
   "adminDomainTransfers": {
+    "eyebrow": "Infrastructure",
     "title": "Domain transfer requests",
     "description": "Manage customer domain transfer and connection requests.",
     "refresh": "Refresh",
@@ -6057,6 +6249,7 @@
     "colStatus": "Status",
     "colDate": "Date",
     "colActions": "Actions",
+    "filterAll": "All",
     "view": "View",
     "detailTitle": "Request details",
     "email": "Email",
@@ -6103,6 +6296,7 @@
     }
   },
   "adminMetadata": {
+    "eyebrow": "SEO",
     "title": "Metadata Management",
     "subtitle": "Manage page titles, descriptions, and keywords for SEO",
     "back": "Back",
@@ -6133,6 +6327,7 @@
       "editTitle": "Edit Metadata",
       "createTitle": "Add New Metadata",
       "pageName": "Page Name",
+      "localeGroup": "Content",
       "title": "Title",
       "description": "Description",
       "keywords": "Keywords",

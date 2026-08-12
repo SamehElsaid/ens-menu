@@ -12,16 +12,27 @@ import {
   IoShieldCheckmarkOutline,
   IoCloseCircleOutline,
 } from "react-icons/io5";
-import CardDashBoard from "@/components/Card/CardDashBoard";
-import DomainTransferHistory from "@/components/Dashboard/DomainTransferHistory";
-import Loader from "@/components/Global/Loader";
 import {
-  DOMAIN_TRANSFER_SYSTEM_KEYS,
-  getLatestDnsConfigMessage,
-  isSystemMessageKey,
-} from "@/lib/domainTransfer";
+  Alert,
+  Badge,
+  Button,
+  Card,
+  CardFooter,
+  ConfirmDialog,
+  Field,
+  Input,
+  LoadingBlock,
+  PageShell,
+  SectionHeader,
+  Spinner,
+} from "@/components/ui";
+import DomainTransferHistory from "@/components/Dashboard/DomainTransferHistory";
+import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
+import { getLatestDnsConfigMessage } from "@/lib/domainTransfer";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import type { DomainTransferRequest } from "@/types/DomainTransfer";
+import type { StatusTone } from "@/components/ui";
+import { cn } from "@/lib/cn";
 import { toast } from "react-toastify";
 
 const ANALYSIS_MS = 2800;
@@ -69,71 +80,88 @@ function getStepStates(
   ];
 }
 
-function TimelineStep({
+const STATUS_TONE: Record<DomainTransferRequest["status"], StatusTone> = {
+  pending: "neutral",
+  awaiting_user: "warning",
+  user_confirmed: "info",
+  completed: "success",
+  cancelled: "danger",
+};
+
+/**
+ * One stage of the connection, as a ruled ticket row.
+ *
+ * The mono ordinal is what makes the flow legible: a five-step process drawn as
+ * circles joined by a line reads as decoration, while `01`…`05` down the inline
+ * start says how far along you are and how much is left. State is carried by the
+ * glyph as well as the tone, so a done step is not distinguished from a pending
+ * one by colour alone.
+ */
+function StepRow({
+  index,
   title,
   description,
   state,
   icon: Icon,
-  isLast,
 }: {
+  index: number;
   title: string;
   description?: string;
   state: StepState;
   icon: React.ComponentType<{ className?: string }>;
-  isLast?: boolean;
 }) {
   return (
-    <div className="flex gap-4">
-      <div className="flex flex-col items-center">
-        <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-500 ${
-            state === "done"
-              ? "border-emerald-500 bg-emerald-500 text-white"
-              : state === "active"
-                ? "border-brand bg-brand-soft text-brand motion-safe:animate-pulse"
-                : "border-line bg-slate-50 text-slate-400  "
-          }`}
-        >
-          {state === "done" ? (
-            <IoCheckmarkCircle className="text-xl" />
-          ) : (
-            <Icon className="text-lg" />
-          )}
-        </div>
-        {!isLast && (
-          <div
-            className={`mt-1 w-0.5 flex-1 min-h-[2rem] transition-colors duration-500 ${
-              state === "done" ? "bg-emerald-500" : "bg-surface-3"
-            }`}
-          />
+    <li
+      className={cn(
+        "relative flex gap-3 px-3 py-2.5",
+        state === "active" &&
+          "before:absolute before:inset-y-0 before:start-0 before:w-0.5 before:bg-accent before:content-['']",
+      )}
+      aria-current={state === "active" ? "step" : undefined}
+    >
+      <span className="ui-figure w-5 shrink-0 pt-px text-[11px] text-fg-subtle">
+        {String(index).padStart(2, "0")}
+      </span>
+
+      <span
+        className={cn(
+          "flex size-6 shrink-0 items-center justify-center rounded-lg border",
+          state === "done" &&
+            "border-success-line bg-success-soft text-success",
+          state === "active" && "border-accent-line bg-accent-soft text-accent",
+          state === "pending" && "border-line bg-surface-2 text-fg-subtle",
         )}
-      </div>
-      <div className={`pb-8 ${isLast ? "pb-0" : ""}`}>
+        aria-hidden
+      >
+        {state === "done" ? (
+          <IoCheckmarkCircle className="size-3.5" />
+        ) : (
+          <Icon className="size-3.5" />
+        )}
+      </span>
+
+      <div className="min-w-0 flex-1">
         <p
-          className={`font-semibold transition-colors ${
-            state === "pending" ? "text-fg-subtle" : "text-fg"
-          }`}
+          className={cn(
+            "text-[13px] font-semibold",
+            state === "pending" ? "text-fg-subtle" : "text-fg",
+          )}
         >
           {title}
         </p>
-        {description && (
-          <p
-            className={`mt-1 text-sm leading-relaxed ${
-              state === "active" ? "text-fg-muted" : "text-fg-muted"
-            }`}
-          >
+        {description ? (
+          <p className="mt-0.5 text-xs leading-relaxed text-fg-muted">
             {description}
           </p>
-        )}
+        ) : null}
       </div>
-    </div>
+    </li>
   );
 }
 
 export default function DomainTransferPageContent() {
   const locale = useLocale();
   const t = useTranslations("domainTransfer");
-  const textDir = locale === "ar" ? "rtl" : "ltr";
 
   const [request, setRequest] = useState<DomainTransferRequest | null>(null);
   const [history, setHistory] = useState<DomainTransferRequest[]>([]);
@@ -269,11 +297,7 @@ export default function DomainTransferPageContent() {
   };
 
   if (loading) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <Loader />
-      </div>
-    );
+    return <LoadingBlock className="min-h-[40vh]" />;
   }
 
   const dnsConfigMessage = request ? getLatestDnsConfigMessage(request) : null;
@@ -292,221 +316,233 @@ export default function DomainTransferPageContent() {
     request?.status === "pending" && analysisDone && !dnsConfigMessage;
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6" dir={textDir}>
-      <div>
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-fg">
-          <IoGlobeOutline className="text-primary" />
-          {t("title")}
-        </h1>
-        <p className="mt-2 text-sm text-fg-muted">{t("description")}</p>
-      </div>
-
+    /* A single request at a time, five status steps and one input: this is a
+       form-measure page, and past requests are supporting material rather than
+       part of the flow. */
+    <PageShell
+      kind="form"
+      header={
+        <PageTitleWithHelp
+          eyebrow={t("automatedProcess")}
+          title={t("title")}
+          description={t("description")}
+          meta={
+            request ? (
+              <Badge tone={STATUS_TONE[request.status]} dot>
+                {t(`status.${request.status}`)}
+              </Badge>
+            ) : undefined
+          }
+        />
+      }
+      aside={<DomainTransferHistory history={history} />}
+    >
       {!request ? (
-        <CardDashBoard>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label
-                htmlFor="domainUrl"
-                className="mb-2 block text-sm font-medium text-fg-muted"
-              >
-                {t("domainLabel")}
-              </label>
-              <input
+        <Card as="form" onSubmit={handleSubmit}>
+          <SectionHeader ruled title={t("domainLabel")} />
+
+          <div className="mt-3.5 max-w-md">
+            <Field
+              label={t("domainLabel")}
+              hint={t("domainHint")}
+              htmlFor="domainUrl"
+            >
+              <Input
                 id="domainUrl"
                 type="text"
                 value={domainUrl}
                 onChange={(e) => setDomainUrl(e.target.value)}
                 placeholder={t("domainPlaceholder")}
-                className="w-full rounded-lg border border-line bg-white px-4 py-3 text-sm text-fg outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:text-white"
                 dir="ltr"
+                startIcon={<IoGlobeOutline className="size-4" />}
               />
-              <p className="mt-2 text-xs text-fg-muted">{t("domainHint")}</p>
-            </div>
-            <button
+            </Field>
+          </div>
+
+          <CardFooter className="justify-end">
+            <Button
               type="submit"
-              disabled={submitting || !domainUrl.trim()}
-              className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+              loading={submitting}
+              disabled={!domainUrl.trim()}
             >
               {submitting ? t("submitting") : t("submit")}
-            </button>
-          </form>
-        </CardDashBoard>
+            </Button>
+          </CardFooter>
+        </Card>
       ) : (
-        <div className="space-y-4">
-          <CardDashBoard>
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4 dark:border-line">
-              <div>
-                <p className="text-xs text-fg-muted">{t("domainLabel")}</p>
-                <p className="font-mono font-semibold text-fg" dir="ltr">
+        <>
+          <Card as="section">
+            {/* The domain is the subject of this whole page, so it is the one
+                figure on it — mono, LTR, and larger than its own caption. */}
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="ui-label">{t("domainLabel")}</p>
+                <p
+                  className="ui-figure mt-0.5 truncate text-[15px] text-fg"
+                  dir="ltr"
+                >
                   {request.domainUrl}
                 </p>
               </div>
-              <span
-                className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                  request.status === "completed"
-                    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                    : request.status === "user_confirmed"
-                      ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                      : request.status === "awaiting_user"
-                        ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-                        : "bg-slate-100 text-slate-700  "
-                }`}
-              >
+              <Badge tone={STATUS_TONE[request.status]} dot>
                 {t(`status.${request.status}`)}
-              </span>
+              </Badge>
             </div>
 
-            <div className="mb-2 flex items-center gap-2 text-xs text-fg-subtle">
-              <IoHardwareChipOutline />
-              <span>{t("automatedProcess")}</span>
-              <span>·</span>
-              <span>
+            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-line pt-2.5">
+              <span className="ui-label inline-flex items-center gap-1.5">
+                <IoHardwareChipOutline className="size-3.5" aria-hidden />
+                {t("automatedProcess")}
+              </span>
+              <span className="ui-figure text-[11px] text-fg-muted">
                 {t("submittedAt", {
                   date: formatDateTime(request.createdAt, locale),
                 })}
               </span>
             </div>
 
-            <TimelineStep
-              title={t("steps.received.title")}
-              description={t("steps.received.description")}
-              state={stepStates[0]}
-              icon={IoCheckmarkCircleOutline}
-            />
-            <TimelineStep
-              title={t("steps.analyzing.title")}
-              description={
-                analyzing
-                  ? t("steps.analyzing.active")
-                  : t("steps.analyzing.description")
-              }
-              state={stepStates[1]}
-              icon={IoRefreshOutline}
-            />
-            <TimelineStep
-              title={t("steps.dns.title")}
-              description={
-                waitingForDns
-                  ? t("steps.dns.waiting")
-                  : showDnsBlock
-                    ? t("steps.dns.description")
-                    : t("steps.dns.pending")
-              }
-              state={stepStates[2]}
-              icon={IoLinkOutline}
-            />
-            <TimelineStep
-              title={t("steps.verify.title")}
-              description={
-                request.status === "user_confirmed"
-                  ? t("steps.verify.active")
-                  : t("steps.verify.description")
-              }
-              state={stepStates[3]}
-              icon={IoShieldCheckmarkOutline}
-            />
-            <TimelineStep
-              title={t("steps.complete.title")}
-              description={
-                request.status === "completed"
-                  ? t("steps.complete.active")
-                  : t("steps.complete.description")
-              }
-              state={stepStates[4]}
-              icon={IoGlobeOutline}
-              isLast
-            />
-          </CardDashBoard>
+            <CardFooter>
+              <Button
+                variant="dangerGhost"
+                size="sm"
+                onClick={() => setShowCancelConfirm(true)}
+                startIcon={<IoCloseCircleOutline className="size-4" />}
+              >
+                {t("cancelRequest")}
+              </Button>
+            </CardFooter>
+          </Card>
+
+          <Card as="section" padded="none">
+            <div className="p-3 sm:p-4">
+              <SectionHeader title={t("statusLabel")} />
+            </div>
+            {/* `aria-live` on the ledger rather than each row: the flow polls
+                every few seconds and only the changed step should be spoken. */}
+            <ol
+              className="divide-y divide-line border-t border-line"
+              aria-live="polite"
+            >
+              <StepRow
+                index={1}
+                title={t("steps.received.title")}
+                description={t("steps.received.description")}
+                state={stepStates[0]}
+                icon={IoCheckmarkCircleOutline}
+              />
+              <StepRow
+                index={2}
+                title={t("steps.analyzing.title")}
+                description={
+                  analyzing
+                    ? t("steps.analyzing.active")
+                    : t("steps.analyzing.description")
+                }
+                state={stepStates[1]}
+                icon={IoRefreshOutline}
+              />
+              <StepRow
+                index={3}
+                title={t("steps.dns.title")}
+                description={
+                  waitingForDns
+                    ? t("steps.dns.waiting")
+                    : showDnsBlock
+                      ? t("steps.dns.description")
+                      : t("steps.dns.pending")
+                }
+                state={stepStates[2]}
+                icon={IoLinkOutline}
+              />
+              <StepRow
+                index={4}
+                title={t("steps.verify.title")}
+                description={
+                  request.status === "user_confirmed"
+                    ? t("steps.verify.active")
+                    : t("steps.verify.description")
+                }
+                state={stepStates[3]}
+                icon={IoShieldCheckmarkOutline}
+              />
+              <StepRow
+                index={5}
+                title={t("steps.complete.title")}
+                description={
+                  request.status === "completed"
+                    ? t("steps.complete.active")
+                    : t("steps.complete.description")
+                }
+                state={stepStates[4]}
+                icon={IoGlobeOutline}
+              />
+            </ol>
+          </Card>
 
           {waitingForDns && (
-            <CardDashBoard>
-              <div className="flex items-center gap-3 py-2">
-                <IoRefreshOutline className="animate-spin text-xl text-primary" />
-                <p className="text-sm text-fg-muted">{t("waitingForDns")}</p>
-              </div>
-            </CardDashBoard>
+            <Alert
+              tone="info"
+              icon={<Spinner size="sm" />}
+              title={t("waitingForDns")}
+            />
           )}
 
           {showDnsBlock && dnsConfigMessage && (
-            <CardDashBoard className="border-primary/20 bg-primary/[0.02]">
-              <div className="mb-3 flex items-center gap-2">
-                <IoHardwareChipOutline className="text-primary" />
-                <h2 className="text-sm font-semibold text-fg">
-                  {t("dnsConfigTitle")}
-                </h2>
-              </div>
-              <div className="rounded-lg bg-white/80 p-4 text-sm leading-relaxed whitespace-pre-wrap text-slate-700">
+            <Card as="section">
+              <SectionHeader ruled eyebrow="03" title={t("dnsConfigTitle")} />
+
+              {/* The DNS record is transcribed by hand into a registrar panel,
+                  so it is set in mono on a sunken surface and never wrapped. */}
+              <pre className="ui-figure mt-3.5 overflow-x-auto rounded-lg border border-line bg-surface-2 p-3 text-xs leading-relaxed whitespace-pre-wrap text-fg">
                 {dnsConfigMessage.message}
-              </div>
-              <p className="mt-3 text-xs text-fg-muted">{t("dnsNote")}</p>
+              </pre>
+              <p className="mt-2 text-xs leading-relaxed text-fg-muted">
+                {t("dnsNote")}
+              </p>
 
               {request.status === "awaiting_user" && (
-                <div className="mt-5 border-t border-line pt-5 dark:border-line">
-                  <p className="mb-4 text-sm text-fg-muted">
+                <>
+                  <p className="mt-3 border-t border-line pt-3 text-[13px] leading-relaxed text-fg-muted">
                     {t("confirmPrompt")}
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => void handleConfirm()}
-                    disabled={confirming}
-                    className="rounded-lg bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
-                  >
-                    {confirming ? t("confirming") : t("confirmDone")}
-                  </button>
-                </div>
+                  <CardFooter className="justify-end">
+                    <Button
+                      type="button"
+                      onClick={() => void handleConfirm()}
+                      loading={confirming}
+                      startIcon={
+                        <IoShieldCheckmarkOutline className="size-4" />
+                      }
+                    >
+                      {confirming ? t("confirming") : t("confirmDone")}
+                    </Button>
+                  </CardFooter>
+                </>
               )}
-            </CardDashBoard>
+            </Card>
           )}
 
           {request.status === "completed" && (
-            <CardDashBoard>
-              <div className="flex flex-col items-center gap-3 py-2 text-center">
-                <IoCheckmarkCircleOutline className="text-5xl text-emerald-500" />
-                <p className="text-lg font-medium text-emerald-700 dark:text-emerald-400">
-                  {t("completedMessage", { domain: request.domainUrl })}
-                </p>
-              </div>
-            </CardDashBoard>
+            <Alert
+              tone="success"
+              icon={<IoCheckmarkCircleOutline className="size-4" />}
+              title={t("completedMessage", { domain: request.domainUrl })}
+            />
           )}
-
-          <CardDashBoard className="border-red-100 dark:border-red-900/30">
-            {!showCancelConfirm ? (
-              <button
-                type="button"
-                onClick={() => setShowCancelConfirm(true)}
-                className="flex items-center gap-2 text-sm font-medium text-red-600 transition hover:text-red-700 dark:text-red-400"
-              >
-                <IoCloseCircleOutline className="text-lg" />
-                {t("cancelRequest")}
-              </button>
-            ) : (
-              <div className="space-y-3">
-                <p className="text-sm text-fg-muted">{t("cancelConfirm")}</p>
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={() => void handleCancel()}
-                    disabled={cancelling}
-                    className="rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
-                  >
-                    {cancelling ? t("cancelling") : t("confirmCancel")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowCancelConfirm(false)}
-                    disabled={cancelling}
-                    className="rounded-lg border border-line px-5 py-2.5 text-sm font-medium text-fg-muted hover:bg-slate-50 dark:hover:bg-slate-800"
-                  >
-                    {t("cancelDismiss")}
-                  </button>
-                </div>
-              </div>
-            )}
-          </CardDashBoard>
-        </div>
+        </>
       )}
 
-      <DomainTransferHistory history={history} />
-    </div>
+      <ConfirmDialog
+        open={showCancelConfirm}
+        onClose={() => setShowCancelConfirm(false)}
+        onConfirm={handleCancel}
+        title={t("cancelRequest")}
+        description={t("cancelConfirm")}
+        confirmLabel={t("confirmCancel")}
+        cancelLabel={t("cancelDismiss")}
+        loading={cancelling}
+        icon={<IoCloseCircleOutline className="size-4.5" />}
+      />
+    </PageShell>
   );
 }

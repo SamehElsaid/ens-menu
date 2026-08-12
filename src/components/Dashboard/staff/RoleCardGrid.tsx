@@ -4,31 +4,43 @@ import { useTranslations } from "next-intl";
 import type { MenuStaffRole } from "@/types/Menu";
 import RoleCard from "./RoleCard";
 import { IoAddCircleOutline, IoShieldOutline } from "react-icons/io5";
-import { Button, EmptyState } from "@/components/ui";
+import {
+  Button,
+  Card,
+  EmptyState,
+  Skeleton,
+  SkeletonRegion,
+} from "@/components/ui";
+
+const GRID_CLASS =
+  "grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3 md:gap-6";
 
 function RoleCardSkeleton() {
   return (
-    <div
-      className="overflow-hidden rounded-lg border border-line bg-surface"
-      aria-hidden
-    >
-      <div className="dashboard-mobile-shimmer h-24 bg-brand-soft" />
-      <div className="space-y-3 px-4 pb-4 pt-3">
-        <div className="dashboard-mobile-shimmer h-4 w-1/3 rounded bg-surface-2" />
-        <div className="flex flex-wrap gap-1.5">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              className="dashboard-mobile-shimmer h-5 w-16 rounded-md bg-surface-2"
-            />
+    <Card className="flex h-full flex-col">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="mt-1.5 h-3 w-20" />
+        </div>
+        <Skeleton className="h-5 w-16" />
+      </div>
+
+      <div className="mt-3">
+        <Skeleton className="mb-1.5 h-3 w-24" />
+        <div className="flex flex-wrap gap-1">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-5 w-16" />
           ))}
         </div>
-        <div className="flex gap-2 border-t border-line pt-3">
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-2" />
-          <div className="dashboard-mobile-shimmer h-10 flex-1 rounded-lg bg-surface-2" />
-        </div>
       </div>
-    </div>
+
+      <div className="mt-auto flex items-center gap-1.5 border-t border-line pt-2.5">
+        <Skeleton className="h-8 flex-1" />
+        <Skeleton className="h-8 w-8" />
+        <Skeleton className="h-8 flex-1" />
+      </div>
+    </Card>
   );
 }
 
@@ -55,11 +67,11 @@ export default function RoleCardGrid({
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3 md:gap-6">
+      <SkeletonRegion label={t("loading")} className={GRID_CLASS}>
         {Array.from({ length: 3 }).map((_, i) => (
           <RoleCardSkeleton key={i} />
         ))}
-      </div>
+      </SkeletonRegion>
     );
   }
 
@@ -82,7 +94,7 @@ export default function RoleCardGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3 md:gap-6">
+    <div className={GRID_CLASS}>
       {roles.map((role) => (
         <RoleCard
           key={role.id}

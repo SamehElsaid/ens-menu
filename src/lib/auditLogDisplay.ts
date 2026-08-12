@@ -30,7 +30,6 @@ export type AuditActionCategory =
 type AuditVisual = {
   icon: IconType;
   category: AuditActionCategory;
-  badgeClass: string;
 };
 
 const ENTITY_TYPE_CATEGORY: Record<string, AuditActionCategory> = {
@@ -51,137 +50,45 @@ const ENTITY_TYPE_CATEGORY: Record<string, AuditActionCategory> = {
   login: "auth",
 };
 
-const ACTION_VISUALS: Record<string, AuditVisual> = {
-  CATEGORY_CREATED: {
-    icon: BiCategory,
-    category: "category",
-    badgeClass:
-      "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
-  },
-  CATEGORY_UPDATED: {
-    icon: BiCategory,
-    category: "category",
-    badgeClass:
-      "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
-  },
-  CATEGORY_DELETED: {
-    icon: BiCategory,
-    category: "category",
-    badgeClass:
-      "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
-  },
-  ITEM_CREATED: {
-    icon: MdOutlineFastfood,
-    category: "item",
-    badgeClass:
-      "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
-  },
-  ITEM_UPDATED: {
-    icon: MdOutlineFastfood,
-    category: "item",
-    badgeClass:
-      "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
-  },
-  ITEM_DELETED: {
-    icon: MdOutlineFastfood,
-    category: "item",
-    badgeClass:
-      "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
-  },
-  STAFF_CREATED: {
-    icon: MdPeopleOutline,
-    category: "staff",
-    badgeClass:
-      "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300",
-  },
-  STAFF_UPDATED: {
-    icon: MdPeopleOutline,
-    category: "staff",
-    badgeClass:
-      "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300",
-  },
-  STAFF_DELETED: {
-    icon: MdPeopleOutline,
-    category: "staff",
-    badgeClass:
-      "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300",
-  },
-  TABLE_CREATED: {
-    icon: MdOutlineTableBar,
-    category: "table",
-    badgeClass:
-      "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300",
-  },
-  TABLE_UPDATED: {
-    icon: MdOutlineTableBar,
-    category: "table",
-    badgeClass:
-      "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300",
-  },
-  TABLE_DELETED: {
-    icon: MdOutlineTableBar,
-    category: "table",
-    badgeClass:
-      "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300",
-  },
-  QR_DOWNLOADED: {
-    icon: IoQrCodeOutline,
-    category: "qr",
-    badgeClass:
-      "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/30 dark:text-fuchsia-300",
-  },
-  AD_CREATED: {
-    icon: HiSpeakerphone,
-    category: "ad",
-    badgeClass:
-      "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300",
-  },
-  AD_UPDATED: {
-    icon: HiSpeakerphone,
-    category: "ad",
-    badgeClass:
-      "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300",
-  },
-  AD_DELETED: {
-    icon: HiSpeakerphone,
-    category: "ad",
-    badgeClass:
-      "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300",
-  },
-  SETTINGS_UPDATED: {
-    icon: IoSettingsOutline,
-    category: "settings",
-    badgeClass:
-      "bg-slate-200 text-slate-700 dark:bg-slate-700/50 dark:text-slate-200",
-  },
-  MENU_IMPORTED: {
-    icon: IoSparklesOutline,
-    category: "import",
-    badgeClass:
-      "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300",
-  },
-  LOGIN: {
-    icon: IoLogInOutline,
-    category: "auth",
-    badgeClass:
-      "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
-  },
-  USER_LOGIN: {
-    icon: IoLogInOutline,
-    category: "auth",
-    badgeClass:
-      "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
-  },
+const CATEGORY_VISUALS: Record<AuditActionCategory, AuditVisual> = {
+  category: { icon: BiCategory, category: "category" },
+  item: { icon: MdOutlineFastfood, category: "item" },
+  staff: { icon: MdPeopleOutline, category: "staff" },
+  table: { icon: MdOutlineTableBar, category: "table" },
+  settings: { icon: IoSettingsOutline, category: "settings" },
+  ad: { icon: HiSpeakerphone, category: "ad" },
+  import: { icon: IoSparklesOutline, category: "import" },
+  qr: { icon: IoQrCodeOutline, category: "qr" },
+  auth: { icon: IoLogInOutline, category: "auth" },
+  other: { icon: IoTimeOutline, category: "other" },
 };
 
-const DEFAULT_VISUAL: AuditVisual = {
-  icon: IoTimeOutline,
-  category: "other",
-  badgeClass:
-    "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
+const ACTION_CATEGORY: Record<string, AuditActionCategory> = {
+  CATEGORY_CREATED: "category",
+  CATEGORY_UPDATED: "category",
+  CATEGORY_DELETED: "category",
+  ITEM_CREATED: "item",
+  ITEM_UPDATED: "item",
+  ITEM_DELETED: "item",
+  STAFF_CREATED: "staff",
+  STAFF_UPDATED: "staff",
+  STAFF_DELETED: "staff",
+  TABLE_CREATED: "table",
+  TABLE_UPDATED: "table",
+  TABLE_DELETED: "table",
+  QR_DOWNLOADED: "qr",
+  AD_CREATED: "ad",
+  AD_UPDATED: "ad",
+  AD_DELETED: "ad",
+  SETTINGS_UPDATED: "settings",
+  MENU_IMPORTED: "import",
+  LOGIN: "auth",
+  USER_LOGIN: "auth",
 };
 
-function categoryFromEntityType(entityType?: string | null): AuditActionCategory | null {
+function categoryFromEntityType(
+  entityType?: string | null,
+): AuditActionCategory | null {
   if (!entityType?.trim()) return null;
   return ENTITY_TYPE_CATEGORY[entityType.trim().toLowerCase()] ?? null;
 }
@@ -190,18 +97,11 @@ export function getAuditVisual(
   actionType: string,
   entityType?: string | null,
 ): AuditVisual {
-  const fromAction = ACTION_VISUALS[actionType];
-  if (fromAction) return fromAction;
-
-  const fromEntity = categoryFromEntityType(entityType);
-  if (fromEntity) {
-    const match = Object.values(ACTION_VISUALS).find(
-      (visual) => visual.category === fromEntity,
-    );
-    if (match) return match;
-  }
-
-  return DEFAULT_VISUAL;
+  const category =
+    ACTION_CATEGORY[actionType] ??
+    categoryFromEntityType(entityType) ??
+    "other";
+  return CATEGORY_VISUALS[category];
 }
 
 export function resolveAuditTitle(entry: MenuAuditLogEntry): string {

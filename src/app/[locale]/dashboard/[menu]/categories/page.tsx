@@ -9,7 +9,7 @@ import AddCategoryModal from "@/components/Dashboard/AddCategoryModal";
 import DeleteCategoryConfirm from "@/components/Dashboard/DeleteCategoryConfirm";
 import CategoriesCardGrid from "@/components/Dashboard/CategoriesCardGrid";
 import MobileFloatingAddButton from "@/components/Dashboard/mobile/MobileFloatingAddButton";
-import { Button, Card, SearchInput, Toolbar } from "@/components/ui";
+import { Button, PageShell, SearchInput, Toolbar } from "@/components/ui";
 import { Category } from "@/types/Menu";
 import { IoAddCircleOutline, IoRefreshOutline } from "react-icons/io5";
 
@@ -100,52 +100,55 @@ export default function CategoriesPage() {
   }, []);
 
   return (
-    <>
-      <PageTitleWithHelp
-        id="onboarding-categories-header"
-        className="mb-3"
-        title={t("title")}
-        description={t("subtitle")}
-        actions={
-          <Button
-            id="onboarding-categories-actions"
-            onClick={openAddModal}
-            className="hidden md:inline-flex"
-            startIcon={<IoAddCircleOutline className="size-4" />}
-          >
-            {t("addCategory")}
-          </Button>
-        }
-      />
-
-      <Card id="onboarding-categories-filters" padded="sm" className="mb-3">
-        <Toolbar
-          search={
-            <SearchInput
-              value={appliedSearch}
-              onChange={(value) => {
-                setAppliedSearch(value);
-                setPage(1);
-              }}
-              placeholder={t("searchByName")}
-              label={t("search")}
-            />
-          }
-          filters={
-            appliedSearch.trim() ? (
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={handleReset}
-                startIcon={<IoRefreshOutline className="size-3.5" />}
-              >
-                {t("reset")}
-              </Button>
-            ) : null
+    <PageShell
+      kind="wide"
+      header={
+        <PageTitleWithHelp
+          id="onboarding-categories-header"
+          title={t("title")}
+          description={t("subtitle")}
+          actions={
+            <Button
+              id="onboarding-categories-actions"
+              onClick={openAddModal}
+              className="hidden md:inline-flex"
+              startIcon={<IoAddCircleOutline className="size-4" />}
+            >
+              {t("addCategory")}
+            </Button>
           }
         />
-      </Card>
-
+      }
+      toolbar={
+        <div id="onboarding-categories-filters">
+          <Toolbar
+            search={
+              <SearchInput
+                value={appliedSearch}
+                onChange={(value) => {
+                  setAppliedSearch(value);
+                  setPage(1);
+                }}
+                placeholder={t("searchByName")}
+                label={t("search")}
+              />
+            }
+            filters={
+              appliedSearch.trim() ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleReset}
+                  startIcon={<IoRefreshOutline className="size-3.5" />}
+                >
+                  {t("reset")}
+                </Button>
+              ) : null
+            }
+          />
+        </div>
+      }
+    >
       <div id="onboarding-categories-table">
         <CategoriesCardGrid
           categories={categories}
@@ -185,7 +188,6 @@ export default function CategoriesPage() {
           onDeleted={refreshList}
         />
       )}
-      <div className="pb-10"></div>
-    </>
+    </PageShell>
   );
 }

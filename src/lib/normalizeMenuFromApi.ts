@@ -1,4 +1,5 @@
 import type { Menu } from "@/types/Menu";
+import { ACCOUNT_SEGMENTS } from "@/lib/consoleNav";
 
 /** Normalize menu payloads from POST/GET (flat or nested under `menu`). */
 export function normalizeMenuFromApi(data: unknown): Menu | null {
@@ -79,13 +80,18 @@ export function menuMatchesRouteKey(
   );
 }
 
-/** Account-level routes under `/dashboard` that are not menu identifiers. */
+/**
+ * Account-level routes under `/dashboard` that are not menu identifiers.
+ *
+ * Read from the account nav rather than hand-maintained — this list and the one
+ * in `DashboardClientLayout` had already drifted apart, which is how
+ * `/dashboard/domain-transfer` ended up being fetched as a menu.
+ */
 const NON_MENU_DASHBOARD_SEGMENTS = new Set([
+  ...ACCOUNT_SEGMENTS,
   "subscription",
   "advertisements",
-  "orders",
-  "delivery-orders",
-  "staff",
+  "domain-transfer",
 ]);
 
 export function extractDashboardMenuRouteKey(pathname: string): string | null {

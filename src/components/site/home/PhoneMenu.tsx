@@ -77,7 +77,7 @@ export function PhoneMenu({
                 className={cn(
                   "shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold",
                   i === 0
-                    ? "bg-site-brand text-white"
+                    ? "bg-site-brand text-site-bg-ink"
                     : "bg-site-tint text-site-muted",
                 )}
               >
@@ -87,10 +87,14 @@ export function PhoneMenu({
           )}
         </div>
 
-        <ul className="flex-1 space-y-2.5 overflow-hidden px-4 pb-4">
+        {/* `s-enter-rows` staggers these into place on load, transform-only so
+            the first row's priority image is painted immediately. The phone
+            already clips, so the travel is contained by its own screen. */}
+        <ul className="s-enter-rows flex-1 space-y-2.5 overflow-hidden px-4 pb-4">
           {ITEMS.map((id, index) => (
             <li
               key={id}
+              data-home="dish-row"
               className="flex items-center gap-3 rounded-2xl border border-site-line bg-site-bg p-2 shadow-site-sm"
             >
               <Image
@@ -113,7 +117,7 @@ export function PhoneMenu({
               </div>
               <span
                 aria-hidden
-                className="flex size-7 shrink-0 items-center justify-center rounded-full bg-site-brand text-[15px] leading-none font-bold text-white"
+                className="flex size-7 shrink-0 items-center justify-center rounded-full bg-site-brand text-[15px] leading-none font-bold text-site-bg-ink"
               >
                 +
               </span>
