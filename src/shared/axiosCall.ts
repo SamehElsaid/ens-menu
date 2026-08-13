@@ -275,9 +275,10 @@ export const axiosPatch = async <T, U>(
 
 //!  DELETE request API
 // Function to make a DELETE request
-export const axiosDelete = async <T>(
+export const axiosDelete = async <T, D = unknown>(
   url: string,
   locale: string,
+  data?: D,
 ): Promise<ApiResponse<T>> => {
   const authToken = Cookies.get("sub") ?? "";
   const tokenDecrypted = decryptData(authToken) as DecryptedToken;
@@ -294,6 +295,7 @@ export const axiosDelete = async <T>(
     const fetchData = await axios.delete<T>(
       `${process.env.NEXT_PUBLIC_BASE_URL}${url}`,
       {
+        data,
         headers: {
           Authorization: `Bearer ${tokenDecrypted?.token}`,
           "Accept-Language": locale,
@@ -304,6 +306,12 @@ export const axiosDelete = async <T>(
 
     return { data: fetchData.data, status: true };
   } catch (err) {
+    if ((err as AxiosError).response?.status === 405) {
+      const newToken = await getRefreshTokenPromise();
+      if (newToken) {
+        return axiosDelete<T, D>(url, locale, data);
+      }
+    }
     return {
       data: (err as AxiosError)?.response?.data as T,
       status: false,

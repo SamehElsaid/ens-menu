@@ -1,7 +1,8 @@
-"use client";
+import { redirect } from "@/i18n/navigation";
 
-import PersonalProfile from "@/components/Dashboard/PersonalProfile";
+type Props = { params: Promise<{ locale: string }> };
 
-export default function PersonalProfilePage() {
-    return <PersonalProfile backLink="" />;
+export default async function LegacyPersonalProfilePage({ params }: Props) {
+  const { locale } = await params;
+  redirect({ href: "/dashboard/personal", locale });
 }
