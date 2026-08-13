@@ -778,7 +778,7 @@ function OwnerMenusPage() {
                 {t("cancel")}
               </button>
               <LinkTo
-                href={menuDashboardPath(switchMenuTarget, "personal")}
+                href="/dashboard/subscription"
                 className="order-1 flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-amber-500 to-orange-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-amber-600 hover:to-orange-600 hover:shadow-lg sm:order-2 sm:w-auto"
               >
                 <IoRocketOutline className="text-lg" />

@@ -16,12 +16,9 @@ import {
   HiOutlineArrowRight,
   HiOutlineCamera,
   HiOutlineX,
+  HiOutlineTrash,
 } from "react-icons/hi";
 import LinkTo from "@/components/Global/LinkTo";
-import {
-  getMenuDashboardRef,
-  menuDashboardPath,
-} from "@/lib/menuDashboardPath";
 import CustomInput from "@/components/Custom/CustomInput";
 import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
 import { _resizeImage } from "@/shared/_shared";
@@ -38,6 +35,7 @@ import Cookies from "js-cookie";
 import type { Subscription, SubscriptionResponse } from "@/types/Subscription";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import CurrentPlanSummary from "@/components/Dashboard/CurrentPlanSummary";
+import DeleteAccountModal from "@/components/Dashboard/DeleteAccountModal";
 
 const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 const AVATAR_ACCEPT = "image/png,image/jpeg,image/jpg,image/gif";
@@ -45,6 +43,7 @@ const AVATAR_ACCEPT = "image/png,image/jpeg,image/jpg,image/gif";
 type GenderOption = { label: string; value: string };
 
 type AuthUser = {
+  hasPassword?: boolean;
   name?: string;
   email?: string;
   phoneNumber?: string;
@@ -58,6 +57,7 @@ type AuthUser = {
   isActive?: boolean;
   role?: string;
   user?: {
+    hasPassword?: boolean;
     subscription?: {
       planName?: string;
       status?: string;
@@ -92,8 +92,6 @@ export default function PersonalProfile({
   const authData = useAppSelector((state) => state.auth.data) as unknown as {
     user: AuthUser;
   };
-  const menu = useAppSelector((state) => state.menuData.menu);
-  const menuRef = getMenuDashboardRef(menu);
   const user = authData ?? ({} as AuthUser);
   const profile = user?.user ?? ({} as AuthUser);
 
@@ -136,6 +134,7 @@ export default function PersonalProfile({
   const [saveLoading, setSaveLoading] = useState(false);
   const [changePasswordLoading, setChangePasswordLoading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
 
@@ -373,7 +372,7 @@ export default function PersonalProfile({
     }
   };
 
-  const defaultBackLink = backLink ?? menuDashboardPath(menu, "settings");
+  const defaultBackLink = backLink ?? "/dashboard";
   const defaultBackLinkText = backLinkText ?? t("backToProfile");
 
   const currentPlanNameResolved =
@@ -761,21 +760,47 @@ export default function PersonalProfile({
               currentPlanName={currentPlanNameResolved}
               className="mb-5"
             />
-            {menuRef && (
-              <LinkTo
-                id="onboarding-personal-subscription-link"
-                href={menuDashboardPath(menu, "subscription")}
-                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary/90 dark:hover:bg-primary/80 transition-colors shadow-sm"
-              >
-                {t("manageSubscriptionAndPricing")}
-                <HiOutlineArrowRight
-                  className={`text-lg ${isRTL ? "rotate-180" : ""}`}
-                />
-              </LinkTo>
-            )}
+            <LinkTo
+              id="onboarding-personal-subscription-link"
+              href="/dashboard/subscription"
+              className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary/90 dark:hover:bg-primary/80 transition-colors shadow-sm"
+            >
+              {t("manageSubscriptionAndPricing")}
+              <HiOutlineArrowRight
+                className={`text-lg ${isRTL ? "rotate-180" : ""}`}
+              />
+            </LinkTo>
+          </section>
+        )}
+
+        {!isAdmin && (
+          <section className="rounded-lg border border-danger-line bg-danger-soft/40 p-5 shadow-sm md:p-6">
+            <h3 className="text-base font-semibold text-danger-fg">
+              {t("dangerZone")}
+            </h3>
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-fg-muted">
+              {t("deleteAccountDescription")}
+            </p>
+            <button
+              type="button"
+              className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-700"
+              onClick={() => setDeleteAccountOpen(true)}
+            >
+              <HiOutlineTrash className="text-lg" />
+              {t("deleteAccount")}
+            </button>
           </section>
         )}
       </div>
+
+      {deleteAccountOpen && !isAdmin ? (
+        <DeleteAccountModal
+          hasPassword={Boolean(
+            profile?.hasPassword ?? authData?.user?.hasPassword,
+          )}
+          onClose={() => setDeleteAccountOpen(false)}
+        />
+      ) : null}
     </div>
   );
 }

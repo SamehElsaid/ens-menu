@@ -90,13 +90,6 @@ export const navSections: NavSection[] = [
     id: "account",
     items: [
       {
-        label: "Personal",
-        icon: FaUserAlt,
-        key: "personal",
-        link: "personal",
-        ownerOnly: true,
-      },
-      {
         label: "Subscription",
         icon: FaCreditCard,
         key: "subscription",
@@ -279,6 +272,13 @@ export const accountNavSections: NavSection[] = [
   {
     id: "accountSettings",
     items: [
+      {
+        label: "Personal",
+        icon: FaUserAlt,
+        key: "personal",
+        link: "personal",
+        ownerOnly: true,
+      },
       {
         label: "Subscription",
         icon: FaCreditCard,

@@ -47,6 +47,7 @@ interface MenusResponse {
  * the layout would try to load `/menus/orders` and bounce to /unauthorized.
  */
 const TOP_LEVEL_SEGMENTS = new Set([
+  "personal",
   "subscription",
   "advertisements",
   "orders",
@@ -74,6 +75,7 @@ export default function DashboardClientLayout({
 
   const routeMenuKey = useMemo(() => {
     const fromPath = extractDashboardMenuRouteKey(pathname);
+    if (segment && TOP_LEVEL_SEGMENTS.has(segment)) return null;
     if (isMenuRouteSegment(segment)) return segment;
     return fromPath;
   }, [pathname, segment]);
@@ -84,17 +86,15 @@ export default function DashboardClientLayout({
     };
 
     if (!routeMenuKey) {
-      if (segment === "subscription") setHasMenu(true);
-      else setHasMenu(false);
       return;
     }
 
     if (menuMatchesRouteKey(menuFromStore, routeMenuKey)) {
-      setHasMenu(true);
+      queueMicrotask(() => setHasMenu(true));
       return;
     }
 
-    setHasMenu(false);
+    queueMicrotask(() => setHasMenu(false));
     dispatch(SET_LOADING());
 
     let cancelled = false;
