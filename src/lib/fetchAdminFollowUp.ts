@@ -1,4 +1,4 @@
-import { axiosDelete, axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
+import { axiosDelete, axiosGet, axiosPut, axiosPost } from "@/shared/axiosCall";
 import {
   buildMockQueueFromUsers,
   createMockFollowUpCall,
@@ -168,7 +168,7 @@ export async function updateFollowUpCall(
   callId: string,
   payload: UpdateFollowUpCallPayload,
 ): Promise<{ call: FollowUpCall; isDemo: boolean } | null> {
-  const result = await axiosPatch<
+  const result = await axiosPut<
     UpdateFollowUpCallPayload,
     { call?: FollowUpCall }
   >(`/admin/follow-ups/calls/${callId}`, locale, payload);

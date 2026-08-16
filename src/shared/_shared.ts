@@ -43,8 +43,9 @@ export const convetDateToTimeString = (date: Date) => {
 export const _resizeImage = async (
   file: File,
   maxBytes: number = 2 * 1024 * 1024,
-  thresholdBytes: number = 2 * 1024 * 1024,
+  _thresholdBytes: number = 2 * 1024 * 1024,
 ): Promise<File> => {
+  void _thresholdBytes;
   if (typeof window === "undefined") return file;
 
   // Skip tiny files — they're already good

@@ -1,318 +1,102 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  useParams,
-  usePathname,
-  useRouter,
-  useSearchParams,
-} from "next/navigation";
-import { useLocale } from "next-intl";
+import { useMemo } from "react";
+import { useParams } from "next/navigation";
 import { axiosGet } from "@/shared/axiosCall";
 import { useAppSelector } from "@/store/hooks";
 import { isFreePlanUser } from "@/lib/subscription";
 import { useCurrentPlanCapabilities } from "@/hooks/useCurrentPlanCapabilities";
 import { useMenuActivitySocket } from "@/hooks/useMenuActivitySocket";
-import { playNewOrderNotificationSound } from "@/lib/orderNotificationSound";
-import type { OrderStatusFilter } from "@/components/Dashboard/orders/OrdersFilters";
 import {
-  applyLocalEntryStatusUpdate,
-  countPendingOrders,
   mergeOrderEntries,
   type ActivityCallsPayload,
-  type CallEntry,
   type CallEntryDetail,
-  type CallItem,
-  type OrderActionResult,
-  type OrderStatus,
 } from "@/lib/tableOrders";
-
-const PAGE_SIZE = 12;
+import { orderEndpoints } from "@/api/endpoints/orders";
+import {
+  useOrdersPageCore,
+  type OrdersPageCoreStrategy,
+} from "@/hooks/useOrdersPageCore";
 
 export type MenuOrdersChannel = "table" | "delivery";
+type MenuOrderDetailPayload =
+  | { entry: CallEntryDetail }
+  | CallEntryDetail;
 
 export function useMenuOrdersPage(channel: MenuOrdersChannel) {
-  const locale = useLocale();
   const params = useParams();
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
   const menuId =
     typeof params.menu === "string"
       ? params.menu
       : ((params.menu as string[])?.[0] ?? "");
-
-  const [entries, setEntries] = useState<CallEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [searchInput, setSearchInput] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
-  const [statusFilter, setStatusFilter] = useState<OrderStatusFilter>("all");
-  const [modalEntry, setModalEntry] = useState<CallEntryDetail | null>(null);
-  const [modalLoading, setModalLoading] = useState(false);
-
-  const userData = useAppSelector((s) => s.auth.data);
-  const isFreePlan = isFreePlanUser(userData);
   const capabilities = useCurrentPlanCapabilities();
   const tableOrderingEnabled = capabilities.tableOrderingQr;
-  const pendingCount = useMemo(() => countPendingOrders(entries), [entries]);
-  const isFiltered =
-    debouncedSearch.length > 0 ||
-    dateFrom.length > 0 ||
-    dateTo.length > 0 ||
-    statusFilter !== "all";
-  const entryParam = searchParams.get("entry");
-
-  const openModal = useCallback(
-    (id: string) => {
-      const sp = new URLSearchParams(Array.from(searchParams.entries()));
-      sp.set("entry", id);
-      router.replace(`${pathname}?${sp.toString()}`, { scroll: false });
-    },
-    [router, pathname, searchParams],
-  );
-
-  const closeModal = useCallback(() => {
-    const sp = new URLSearchParams(Array.from(searchParams.entries()));
-    sp.delete("entry");
-    const qs = sp.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-    setModalEntry(null);
-  }, [router, pathname, searchParams]);
-
-  useEffect(() => {
-    const id = setTimeout(() => setDebouncedSearch(searchInput.trim()), 300);
-    return () => clearTimeout(id);
-  }, [searchInput]);
-
-  const searchBaseline = useRef<string | null>(null);
-  useEffect(() => {
-    if (searchBaseline.current === null) {
-      searchBaseline.current = debouncedSearch;
-      return;
-    }
-    if (searchBaseline.current !== debouncedSearch) {
-      searchBaseline.current = debouncedSearch;
-      setPage(1);
-    }
-  }, [debouncedSearch]);
-
-  const filterBaseline = useRef<string | null>(null);
-  const filterSignature = `${dateFrom}|${dateTo}|${statusFilter}`;
-  useEffect(() => {
-    if (filterBaseline.current === null) {
-      filterBaseline.current = filterSignature;
-      return;
-    }
-    if (filterBaseline.current !== filterSignature) {
-      filterBaseline.current = filterSignature;
-      setPage(1);
-    }
-  }, [filterSignature]);
-
-  const fetchLogs = useCallback(
-    async (silent = false) => {
-      if (!menuId || (channel === "table" && !tableOrderingEnabled)) {
-        setLoading(false);
-        return;
-      }
-      try {
-        if (!silent) setLoading(true);
-        const paramsQ: Record<string, unknown> = {
-          page,
-          limit: PAGE_SIZE,
-          channel,
-        };
-        if (debouncedSearch.length > 0) paramsQ.q = debouncedSearch;
-        if (dateFrom) paramsQ.dateFrom = dateFrom;
-        if (dateTo) paramsQ.dateTo = dateTo;
-        if (statusFilter !== "all") paramsQ.status = statusFilter;
-
-        const result = await axiosGet<ActivityCallsPayload>(
-          `/menus/${menuId}/activity-logs`,
+  const enabled =
+    Boolean(menuId) && (channel !== "table" || tableOrderingEnabled);
+  const strategy = useMemo<
+    OrdersPageCoreStrategy<ActivityCallsPayload, MenuOrderDetailPayload>
+  >(
+    () => ({
+      scope: "menu",
+      enabled,
+      augmentListParams: (query) => {
+        query.channel = channel;
+      },
+      requestList: (locale, query) =>
+        axiosGet(
+          orderEndpoints.menu.list(menuId),
           locale,
           undefined,
-          paramsQ,
-        );
-
-        if (result.status && result.data) {
-          const p = result.data;
-          const fresh = p.entries ?? p.calls ?? [];
-          setEntries((prev) =>
-            silent ? mergeOrderEntries(prev, fresh) : fresh,
-          );
-          setTotalPages(Math.max(1, p.totalPages ?? 1));
-        } else if (!silent) {
-          setEntries([]);
-          setTotalPages(1);
-        }
-      } finally {
-        if (!silent) setLoading(false);
-      }
-    },
-    [menuId, locale, page, debouncedSearch, dateFrom, dateTo, statusFilter, tableOrderingEnabled, channel],
-  );
-
-  useEffect(() => {
-    void fetchLogs(false);
-  }, [fetchLogs]);
-
-  const handleSocketUpdate = useCallback(() => {
-    void fetchLogs(true);
-  }, [fetchLogs]);
-
-  useMenuActivitySocket(
-    channel === "table" && !tableOrderingEnabled ? "" : menuId,
-    handleSocketUpdate,
-  );
-
-  const handleActionComplete = useCallback((result: OrderActionResult) => {
-    setEntries((prev) =>
-      prev.map((entry) =>
-        entry.id === result.entryId
-          ? applyLocalEntryStatusUpdate(entry, result.status, {
-              clearPendingGuestAddition: result.clearPendingGuestAddition,
-            })
-          : entry,
-      ),
-    );
-    setModalEntry((prev) => {
-      if (!prev || String(prev.id) !== result.entryId) return prev;
-      const now = new Date().toISOString();
-      const clearBill =
-        result.status === "delivered" || result.status === "cancelled";
-      return {
-        ...prev,
-        ...(result.clearPendingGuestAddition
-          ? { pendingGuestAddition: false }
-          : {}),
-        ...(clearBill ? { pendingBillRequest: false } : {}),
-        order: prev.order
-          ? {
-              ...prev.order,
-              status: result.status,
-              ...(result.clearPendingGuestAddition
-                ? { pendingGuestAddition: false }
-                : {}),
-              ...(clearBill ? { pendingBillRequest: false } : {}),
-            }
-          : prev.order,
-        actions: [
-          ...(prev.actions ?? []),
-          { status: result.status, time: now },
-        ],
-      };
-    });
-  }, []);
-
-  const handleItemsUpdated = useCallback(
-    (
-      entryId: string,
-      items: CallItem[],
-      orderTotal: number,
-      status: OrderStatus,
-    ) => {
-      setEntries((prev) =>
-        prev.map((entry) =>
-          entry.id === entryId
-            ? { ...entry, items, totalPrice: orderTotal }
-            : entry,
+          query,
         ),
-      );
-      setModalEntry((prev) => {
-        if (!prev || String(prev.id) !== entryId) return prev;
+      parseList: (payload, previous, silent) => {
+        const fresh = payload.entries ?? payload.calls ?? [];
         return {
-          ...prev,
-          items,
-          totalPrice: orderTotal,
-          order: prev.order
-            ? { ...prev.order, items, orderTotal, status }
-            : prev.order,
+          entries: silent ? mergeOrderEntries(previous, fresh) : fresh,
+          totalPages: payload.totalPages ?? 1,
         };
-      });
-    },
-    [],
+      },
+      requestDetail: (locale, entryId) =>
+        axiosGet(orderEndpoints.menu.detail(menuId, entryId), locale),
+      parseDetail: (payload) => {
+        const raw = payload as Record<string, unknown>;
+        return (raw.entry ?? raw) as CallEntryDetail;
+      },
+      useUpdates: ({ onUpdate }) => {
+        useMenuActivitySocket(enabled ? menuId : "", onUpdate);
+      },
+    }),
+    [channel, enabled, menuId],
   );
-
-  useEffect(() => {
-    if (!entryParam || !menuId) {
-      setModalEntry(null);
-      return;
-    }
-
-    let cancelled = false;
-    setModalLoading(true);
-
-    axiosGet<{ entry: CallEntryDetail } | CallEntryDetail>(
-      `/menus/${menuId}/activity-logs/${entryParam}`,
-      locale,
-    )
-      .then((result) => {
-        if (cancelled) return;
-        if (result.status && result.data) {
-          const raw = result.data as Record<string, unknown>;
-          const resolved = (raw.entry ?? raw) as CallEntryDetail;
-          setModalEntry(resolved);
-        }
-        setModalLoading(false);
-      })
-      .catch(() => {
-        if (!cancelled) setModalLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [entryParam, menuId, locale]);
-
-  useEffect(() => {
-    const onEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && entryParam) closeModal();
-    };
-    window.addEventListener("keydown", onEsc);
-    return () => window.removeEventListener("keydown", onEsc);
-  }, [entryParam, closeModal]);
-
-  const showModal =
-    Boolean(entryParam) && (modalLoading || Boolean(modalEntry));
-
-  const clearFilters = useCallback(() => {
-    setDateFrom("");
-    setDateTo("");
-    setStatusFilter("all");
-    setSearchInput("");
-  }, []);
+  const core = useOrdersPageCore(strategy);
+  const userData = useAppSelector((state) => state.auth.data);
 
   return {
     menuId,
-    isFreePlan,
+    isFreePlan: isFreePlanUser(userData),
     tableOrderingEnabled,
-    entries,
-    loading,
-    page,
-    setPage,
-    totalPages,
-    searchInput,
-    setSearchInput,
-    dateFrom,
-    setDateFrom,
-    dateTo,
-    setDateTo,
-    statusFilter,
-    setStatusFilter,
-    clearFilters,
-    pendingCount,
-    isFiltered,
-    openModal,
-    closeModal,
-    showModal,
-    modalEntry,
-    modalLoading,
-    handleActionComplete,
-    handleItemsUpdated,
+    entries: core.entries,
+    loading: core.loading,
+    page: core.page,
+    setPage: core.setPage,
+    totalPages: core.totalPages,
+    searchInput: core.searchInput,
+    setSearchInput: core.setSearchInput,
+    dateFrom: core.dateFrom,
+    setDateFrom: core.setDateFrom,
+    dateTo: core.dateTo,
+    setDateTo: core.setDateTo,
+    statusFilter: core.statusFilter,
+    setStatusFilter: core.setStatusFilter,
+    clearFilters: core.clearFilters,
+    pendingCount: core.pendingCount,
+    isFiltered: core.isFiltered,
+    openModal: core.openModal,
+    closeModal: core.closeModal,
+    showModal: core.showModal,
+    modalEntry: core.modalEntry,
+    modalLoading: core.modalLoading,
+    handleActionComplete: core.handleActionComplete,
+    handleItemsUpdated: core.handleItemsUpdated,
   };
 }

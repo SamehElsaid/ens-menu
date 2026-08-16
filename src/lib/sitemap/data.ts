@@ -328,6 +328,7 @@ export function buildLocaleSitemapIndex(
   /** @deprecated Ignored — menus stay off the www index. Kept for call-site compat. */
   _menuPageCount?: number,
 ): { loc: string; lastmod?: string }[] {
+  void _menuPageCount;
   return [
     {
       loc: absoluteSitemapUrl(siteOrigin, locale, "/sitemap-main"),

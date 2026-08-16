@@ -17,6 +17,10 @@ import { AdsBlock } from "./AdsBlock";
 import type { HeaderStyleId } from "@/lib/template-builder/library/stylePresets";
 import type { CategoryLayoutId } from "@/lib/template-builder/library/stylePresets";
 import type { AdStyleId } from "@/lib/template-builder/library/stylePresets";
+import {
+  sanitizeBuilderHtml,
+  sanitizeBuilderImageSrc,
+} from "@/lib/template-builder/sanitizeContent";
 
 export type RenderCtx = {
   doc: TemplateDocument;
@@ -490,7 +494,7 @@ export function BuilderNodeView({
         <Shell node={node} style={style} ctx={ctx}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={String(p.src || "/ENSd.png")}
+            src={sanitizeBuilderImageSrc(p.src) || "/ENSd.png"}
             alt={t(locale, p.alt, p.altAr)}
             style={{ width: "100%", display: "block", borderRadius: "inherit" }}
           />
@@ -501,7 +505,7 @@ export function BuilderNodeView({
     case "html":
       return (
         <Shell node={node} style={style} ctx={ctx}>
-          <div dangerouslySetInnerHTML={{ __html: String(p.html ?? "") }} />
+          <div dangerouslySetInnerHTML={{ __html: sanitizeBuilderHtml(p.html) }} />
         </Shell>
       );
     case "cta":

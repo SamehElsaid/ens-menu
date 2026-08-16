@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
   IoCheckmarkCircleOutline,
@@ -36,17 +36,14 @@ import { cn } from "@/lib/cn";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import type { AdminDomainTransferRequest } from "@/types/DomainTransfer";
 import { toast } from "react-toastify";
+import { resolveApiErrorMessage } from "@/api/apiError";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { useApiMutation } from "@/hooks/useApiMutation";
+import { formatMediumDateTime } from "@/lib/formatDateTime";
 
 const PAGE_SIZE = 20;
 
 type TransferStatus = AdminDomainTransferRequest["status"];
-
-function formatDateTime(value: string, locale: string): string {
-  return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
-}
 
 const STATUS_TONE: Record<TransferStatus, StatusTone> = {
   pending: "neutral",
@@ -80,7 +77,6 @@ export default function AdminDomainTransfersPage() {
   const tableLabels = useDataTableLabels();
 
   const [requests, setRequests] = useState<AdminDomainTransferRequest[]>([]);
-  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<TransferStatus | "all">(
     "all",
@@ -89,46 +85,52 @@ export default function AdminDomainTransfersPage() {
   const [selected, setSelected] = useState<AdminDomainTransferRequest | null>(
     null,
   );
-  const [detailLoading, setDetailLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [completing, setCompleting] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
-  const loadRequests = useCallback(async () => {
-    setLoading(true);
-    const result = await axiosGet<{ requests: AdminDomainTransferRequest[] }>(
-      "/admin/domain-transfers",
-      locale,
-    );
-    if (result.status && result.data) {
-      setRequests(result.data.requests);
-    }
-    setLoading(false);
-  }, [locale]);
+  const requestTransfers = useCallback(
+    () =>
+      axiosGet<{ requests: AdminDomainTransferRequest[] }>(
+        "/admin/domain-transfers",
+        locale,
+      ),
+    [locale],
+  );
+  const transfersQuery = useApiQuery({
+    request: requestTransfers,
+    onSuccess: (data) => setRequests(data.requests),
+  });
+  const loading = transfersQuery.loading;
+  const loadRequests = transfersQuery.refetch;
 
-  useEffect(() => {
-    void loadRequests();
-  }, [loadRequests]);
+  const requestTransferDetail = useCallback(
+    (requestId: number) =>
+      axiosGet<{ request: AdminDomainTransferRequest }>(
+        `/admin/domain-transfers/${requestId}`,
+        locale,
+      ),
+    [locale],
+  );
+  const detailQuery = useApiMutation({
+    request: requestTransferDetail,
+    errorToast: t("loadDetailError"),
+    onSuccess: (data) => {
+      if (!data) return;
+      setSelected(data.request);
+      setMessage("");
+      setShowCancelConfirm(false);
+    },
+  });
+  const detailLoading = detailQuery.loading;
 
   const openDetail = useCallback(
     async (requestId: number) => {
-      setDetailLoading(true);
-      const result = await axiosGet<{ request: AdminDomainTransferRequest }>(
-        `/admin/domain-transfers/${requestId}`,
-        locale,
-      );
-      setDetailLoading(false);
-      if (result.status && result.data) {
-        setSelected(result.data.request);
-        setMessage("");
-        setShowCancelConfirm(false);
-      } else {
-        toast.error(t("loadDetailError"));
-      }
+      await detailQuery.mutate(requestId);
     },
-    [locale, t],
+    [detailQuery],
   );
 
   const handleSendMessage = async () => {
@@ -150,7 +152,7 @@ export default function AdminDomainTransfersPage() {
       toast.success(t("messageSent"));
     } else {
       toast.error(
-        (result.data as { message?: string })?.message || t("messageError"),
+        resolveApiErrorMessage(result.data, locale, t("messageError")),
       );
     }
   };
@@ -171,7 +173,7 @@ export default function AdminDomainTransfersPage() {
       toast.success(t("completeSuccess"));
     } else {
       toast.error(
-        (result.data as { message?: string })?.message || t("completeError"),
+        resolveApiErrorMessage(result.data, locale, t("completeError")),
       );
     }
   };
@@ -193,7 +195,7 @@ export default function AdminDomainTransfersPage() {
       toast.success(t("cancelSuccess"));
     } else {
       toast.error(
-        (result.data as { message?: string })?.message || t("cancelError"),
+        resolveApiErrorMessage(result.data, locale, t("cancelError")),
       );
     }
   };
@@ -272,7 +274,7 @@ export default function AdminDomainTransfersPage() {
         numeric: true,
         cell: (row) => (
           <span className="ui-figure text-[12px] text-fg-muted" lang="en">
-            {row.createdAt ? formatDateTime(row.createdAt, locale) : "—"}
+            {row.createdAt ? formatMediumDateTime(row.createdAt, locale) : "—"}
           </span>
         ),
       },
@@ -535,7 +537,7 @@ export default function AdminDomainTransfersPage() {
                               : msg.adminName || t("admin")}
                         </span>
                         <span className="ui-figure text-[11px] text-fg-subtle">
-                          {formatDateTime(msg.createdAt, locale)}
+                          {formatMediumDateTime(msg.createdAt, locale)}
                         </span>
                       </div>
                       <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-fg">
@@ -556,7 +558,7 @@ export default function AdminDomainTransfersPage() {
                     selected.cancelledBy === "user"
                       ? t("cancelledByUser")
                       : t("cancelledByAdmin"),
-                  date: formatDateTime(selected.cancelledAt, locale),
+                  date: formatMediumDateTime(selected.cancelledAt, locale),
                 })}
               </Alert>
             )}
@@ -657,7 +659,7 @@ export default function AdminDomainTransfersPage() {
                 {t("completedBy", {
                   name: selected.completedByAdminName || t("admin"),
                   date: selected.completedAt
-                    ? formatDateTime(selected.completedAt, locale)
+                    ? formatMediumDateTime(selected.completedAt, locale)
                     : "",
                 })}
               </Alert>

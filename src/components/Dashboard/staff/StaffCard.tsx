@@ -6,8 +6,6 @@ import { getStaffInitials } from "@/lib/staffDisplay";
 import {
   IoCreateOutline,
   IoMailOutline,
-  IoPauseOutline,
-  IoPlayOutline,
   IoTrashOutline,
 } from "react-icons/io5";
 import { Badge, Button, Card } from "@/components/ui";
@@ -26,15 +24,12 @@ interface StaffCardProps {
 export default function StaffCard({
   staff,
   locale,
-  togglingId,
   menuNames,
   onEdit,
-  onToggleActive,
   onDelete,
 }: StaffCardProps) {
   const t = useTranslations("Staff");
   const active = staff.isActive;
-  const isToggling = togglingId === staff.id;
   const isRTL = locale === "ar";
   const initials = getStaffInitials(staff.name);
   const email = staff.email?.trim() || t("emptyCell");

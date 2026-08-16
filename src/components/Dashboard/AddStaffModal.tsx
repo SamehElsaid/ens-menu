@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useLocale, useTranslations } from "next-intl";
-import { axiosPost, axiosPatch } from "@/shared/axiosCall";
-import { toast } from "react-toastify";
+import { axiosPost, axiosPut } from "@/shared/axiosCall";
 import { MenuStaff } from "@/types/Menu";
 import { useAccountStaffRoles } from "@/hooks/useAccountStaffRoles";
 import {
@@ -33,6 +32,7 @@ import {
   focusRing,
 } from "@/components/ui";
 import { cn } from "@/lib/cn";
+import { useApiAction } from "@/hooks/useApiAction";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -78,6 +78,7 @@ export default function AddStaffModal({
   const locale = useLocale();
   const isEdit = Boolean(staff?.id);
   const [isSaving, setIsSaving] = useState(false);
+  const { runApiAction } = useApiAction();
   const { roles, loading: rolesLoading } = useAccountStaffRoles();
   const { menus, loading: menusLoading } = useDashboardMenus();
 
@@ -131,33 +132,27 @@ export default function AddStaffModal({
       setIsSaving(true);
       const payload = buildStaffPayload(data);
 
-      if (isEdit && staff) {
-        const result = await axiosPatch<
-          Record<string, unknown>,
-          { message?: string }
-        >(`/dashboard/staff/${staff.id}`, locale, payload);
-        if (result.status) {
-          toast.success(t("editSuccess"));
-          onClose();
-          onRefresh?.();
-        } else {
-          toast.error(t("editError"));
-        }
-      } else {
-        const result = await axiosPost<
-          Record<string, unknown>,
-          { message?: string; staff?: MenuStaff }
-        >("/dashboard/staff", locale, payload);
-        if (result.status) {
-          toast.success(t("createSuccess"));
-          onClose();
-          onRefresh?.();
-        } else {
-          toast.error(t("createError"));
-        }
-      }
-    } catch {
-      toast.error(isEdit ? t("editError") : t("createError"));
+      await runApiAction(
+        () =>
+          isEdit && staff
+            ? axiosPut<Record<string, unknown>, { message?: string }>(
+                `/dashboard/staff/${staff.id}`,
+                locale,
+                payload,
+              )
+            : axiosPost<
+                Record<string, unknown>,
+                { message?: string; staff?: MenuStaff }
+              >("/dashboard/staff", locale, payload),
+        {
+          successToast: isEdit ? t("editSuccess") : t("createSuccess"),
+          errorToast: isEdit ? t("editError") : t("createError"),
+          onSuccess: () => {
+            onClose();
+            onRefresh?.();
+          },
+        },
+      );
     } finally {
       setIsSaving(false);
     }

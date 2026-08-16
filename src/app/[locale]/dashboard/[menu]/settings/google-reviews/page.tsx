@@ -18,8 +18,8 @@ import {
   Switch,
 } from "@/components/ui";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { axiosPatch } from "@/shared/axiosCall";
-import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
+import { axiosPut } from "@/shared/axiosCall";
+import { SET_ACTIVE_MENU_CACHE } from "@/store/authSlice/menuDataSlice";
 import { toast } from "react-toastify";
 import type { Menu } from "@/types/Menu";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
@@ -33,6 +33,7 @@ import {
   normalizeGoogleReviewsUrl,
   type GoogleReviewsPosition,
 } from "@/lib/googleReviewsUrl";
+import { useApiAction } from "@/hooks/useApiAction";
 
 type FormState = {
   enabled: boolean;
@@ -104,6 +105,7 @@ export default function GoogleReviewsSettingsPage() {
   const { menu } = useAppSelector((state) => state.menuData);
   const [form, setForm] = useState<FormState>(INITIAL);
   const [saving, setSaving] = useState(false);
+  const { runApiAction } = useApiAction();
 
   useEffect(() => {
     if (!menu) return;
@@ -179,26 +181,20 @@ export default function GoogleReviewsSettingsPage() {
 
     setSaving(true);
     try {
-      const result = await axiosPatch<typeof payload, Menu>(
-        `/menus/${menu.id}`,
-        locale,
-        payload,
+      await runApiAction(
+        () =>
+          axiosPut<typeof payload, Menu>(
+            `/menus/${menu.id}`,
+            locale,
+            payload,
+          ),
+        {
+          successToast: t("savedSuccess"),
+          errorToast: ({ error }) => error || t("url.invalid"),
+          onSuccess: () =>
+            dispatch(SET_ACTIVE_MENU_CACHE({ ...menu, ...payload } as Menu)),
+        },
       );
-      if (result.status) {
-        dispatch(SET_ACTIVE_USER({ ...menu, ...payload } as Menu));
-        toast.success(t("savedSuccess"));
-      } else {
-        const errData = result.data as {
-          error?: string;
-          errorAr?: string;
-          errorEn?: string;
-        };
-        toast.error(
-          (isRTL ? errData?.errorAr : errData?.errorEn) ||
-            errData?.error ||
-            t("url.invalid"),
-        );
-      }
     } finally {
       setSaving(false);
     }

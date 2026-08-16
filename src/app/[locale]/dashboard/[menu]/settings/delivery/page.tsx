@@ -18,7 +18,7 @@ import { FaWhatsapp, FaCrown } from "react-icons/fa";
 import {
   axiosGet,
   axiosPost,
-  axiosPatch,
+  axiosPut,
   axiosDelete,
 } from "@/shared/axiosCall";
 import CustomInput from "@/components/Custom/CustomInput";
@@ -48,6 +48,7 @@ import BranchLocationPicker, {
   getDefaultBranchFormCoords,
   isValidBranchCoordinate,
 } from "@/components/Dashboard/delivery/BranchLocationPicker";
+import type { DeliveryBranch } from "@/types/Delivery";
 import ProUpgradeModal from "@/components/Dashboard/ProUpgradeModal";
 import { useAppSelector } from "@/store/hooks";
 import { menuDashboardPath } from "@/lib/menuDashboardPath";
@@ -88,18 +89,6 @@ interface GovFormState {
   lat: string;
   lan: string;
   price: string;
-}
-
-interface Branch {
-  id: number;
-  nameAr?: string | null;
-  nameEn?: string | null;
-  name?: string | null;
-  latitude: number | string | null;
-  longitude: number | string | null;
-  deliveryBasePrice?: number | string | null;
-  deliveryPricePerKm?: number | string | null;
-  maxDeliveryRadiusKm?: number | string | null;
 }
 
 function branchNumber(value: unknown, fallback = 0): number {
@@ -258,15 +247,19 @@ export default function DeliverySettingsPage() {
   const loadBranchSettings = async (silent = false) => {
     if (!branchesApiBase) return;
     if (!silent) setIsLoadingBranch(true);
-    const res = await axiosGet<Branch | Branch[] | { branches: Branch[] }>(
+    const res = await axiosGet<
+      DeliveryBranch | DeliveryBranch[] | { branches: DeliveryBranch[] }
+    >(
       branchesApiBase,
       locale,
     );
     if (res.status && res.data) {
       const list = Array.isArray(res.data)
         ? res.data
-        : ((res.data as { branches?: Branch[] }).branches ??
-          ((res.data as Branch).id != null ? [res.data as Branch] : []));
+        : ((res.data as { branches?: DeliveryBranch[] }).branches ??
+          ((res.data as DeliveryBranch).id != null
+            ? [res.data as DeliveryBranch]
+            : []));
       const branch = list[0];
       if (branch) {
         setBranchId(branch.id);
@@ -373,7 +366,7 @@ export default function DeliverySettingsPage() {
           ? { deliveryPhone: settings.phoneNumber.trim() }
           : {}),
       };
-      const res = await axiosPatch<typeof payload, DeliverySettings>(
+      const res = await axiosPut<typeof payload, DeliverySettings>(
         `${deliveryApiBase}/settings`,
         locale,
         payload,
@@ -393,12 +386,12 @@ export default function DeliverySettingsPage() {
 
         const branchRes =
           branchId !== null
-            ? await axiosPatch<typeof branchPayload, Branch>(
+            ? await axiosPut<typeof branchPayload, DeliveryBranch>(
                 `${branchesApiBase}/${branchId}`,
                 locale,
                 branchPayload,
               )
-            : await axiosPost<typeof branchPayload, Branch>(
+            : await axiosPost<typeof branchPayload, DeliveryBranch>(
                 branchesApiBase,
                 locale,
                 branchPayload,
@@ -427,7 +420,7 @@ export default function DeliverySettingsPage() {
 
     setIsSavingDeliveryMode(true);
     try {
-      const res = await axiosPatch<
+      const res = await axiosPut<
         { deliveryMode: DeliveryMode },
         DeliverySettings
       >(`${deliveryApiBase}/settings`, locale, { deliveryMode: mode });
@@ -520,7 +513,7 @@ export default function DeliverySettingsPage() {
       };
 
       if (editingId !== null) {
-        const res = await axiosPatch<typeof payload, Governorate>(
+        const res = await axiosPut<typeof payload, Governorate>(
           `${deliveryApiBase}/governorates/${editingId}`,
           locale,
           payload,

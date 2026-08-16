@@ -16,6 +16,7 @@ export function usePendingOrdersCount(
   const [count, setCount] = useState(0);
 
   const refresh = useCallback(async () => {
+    await Promise.resolve();
     if (!menuId || !enabled) {
       setCount(0);
       return;
@@ -45,7 +46,8 @@ export function usePendingOrdersCount(
   }, [menuId, locale, enabled, channel]);
 
   useEffect(() => {
-    void refresh();
+    const timer = window.setTimeout(() => void refresh(), 0);
+    return () => window.clearTimeout(timer);
   }, [refresh]);
 
   useMenuActivitySocket(enabled ? (menuId ?? "") : "", refresh);

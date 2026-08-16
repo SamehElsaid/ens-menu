@@ -10,25 +10,22 @@ interface ViewTimeProps {
 }
 
 function ViewTime({ data }: ViewTimeProps) {
-  const [time, setTime] = useState<string>("");
+  const [tick, setTick] = useState(0);
   const locale = useLocale();
 
   useEffect(() => {
-    if (!data) {
-      setTime("");
+    if (!data || !shouldRefreshRelativeActivityTime(data)) {
       return;
     }
 
-    const update = () => setTime(formatRelativeActivityTime(data, locale));
-    update();
-
-    if (!shouldRefreshRelativeActivityTime(data)) {
-      return;
-    }
-
-    const intervalId = setInterval(update, 60000);
+    const intervalId = setInterval(() => {
+      setTick((value) => value + 1);
+    }, 60000);
     return () => clearInterval(intervalId);
-  }, [data, locale]);
+  }, [data]);
+
+  const time = data ? formatRelativeActivityTime(data, locale) : "";
+  void tick;
 
   return <span className="block">{time}</span>;
 }

@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import Cookies from "js-cookie";
 import { io } from "socket.io-client";
-import { decryptData } from "@/shared/encryption";
 import { dashboardSocketOrigin } from "@/lib/tableOrders";
 import { useAppSelector } from "@/store/hooks";
 
@@ -38,8 +36,11 @@ export function useMenusActivitySocket(
 ): void {
   const onUpdateRef = useRef(onUpdate);
   const onNewOrderRef = useRef(options?.onNewOrder);
-  onUpdateRef.current = onUpdate;
-  onNewOrderRef.current = options?.onNewOrder;
+
+  useEffect(() => {
+    onUpdateRef.current = onUpdate;
+    onNewOrderRef.current = options?.onNewOrder;
+  }, [onUpdate, options?.onNewOrder]);
 
   // Stable key so a new array identity per render does not resubscribe.
   const idsKey = useMemo(
@@ -58,19 +59,11 @@ export function useMenusActivitySocket(
     const origin = dashboardSocketOrigin();
     if (!origin) return;
 
-    const authToken = Cookies.get("sub") ?? "";
-    let token: string | undefined;
-    try {
-      token = (decryptData(authToken) as { token?: string })?.token;
-    } catch {
-      return;
-    }
-    if (!token) return;
-
     const subscribed = new Set(ids);
     const socket = io(origin, {
       path: "/socket.io/",
       transports: ["websocket", "polling"],
+      withCredentials: true,
     });
 
     const handleMenuEvent = (payload: { menuId?: number }) => {
@@ -91,11 +84,7 @@ export function useMenusActivitySocket(
     };
 
     for (const menuId of ids) {
-      socket.emit(
-        "dashboard:menu_subscribe",
-        { token: `Bearer ${token}`, menuId },
-        () => {},
-      );
+      socket.emit("dashboard:menu_subscribe", { menuId }, () => {});
     }
 
     socket.on("menu:activity_updated", handleMenuEvent);

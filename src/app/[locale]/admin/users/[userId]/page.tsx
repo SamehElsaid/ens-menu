@@ -29,7 +29,7 @@ import {
   Textarea,
 } from "@/components/ui";
 import type { StatusTone, TabItem } from "@/components/ui";
-import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
+import { axiosGet, axiosPut, axiosPost } from "@/shared/axiosCall";
 import { safeAdminUsersListReturnPath } from "@/lib/adminUsersListUrl";
 import { toast } from "react-toastify";
 import UserFollowUpTimeline from "@/components/Admin/UserFollowUpTimeline";
@@ -42,75 +42,14 @@ import CustomerSupportSection from "@/components/Admin/CustomerSupportSection";
 import AdminUserMenusSection from "@/components/Admin/AdminUserMenusSection";
 import PhoneDisplay from "@/components/Global/PhoneDisplay";
 import type { AccountStatus, UserOrder } from "@/types/AdminCustomer";
-
-interface Plan {
-  id: number;
-  name: string;
-  priceMonthly?: number;
-  priceYearly?: number;
-}
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  phoneNumber: string | null;
-  country: string | null;
-  dateOfBirth: string | null;
-  gender: string | null;
-  address: string | null;
-  restaurantName?: string | null;
-  profileImage: string | null;
-  createdAt: string;
-  lastLoginAt: string | null;
-  isSuspended: boolean;
-  suspendedAt: string | null;
-  suspendedReason: string | null;
-  isBlocked?: boolean;
-  blockedAt?: string | null;
-  blockedReason?: string | null;
-  deletedAt?: string | null;
-  updatedAt?: string | null;
-  isEmailVerified?: boolean;
-  emailVerifiedAt?: string | null;
-  accountStatus?: AccountStatus;
-  planName: string;
-  maxMenus?: number;
-  extraMenus?: number;
-  effectiveMaxMenus?: number;
-  subscriptionId?: number | null;
-  subscriptionStatus: string;
-  startDate: string;
-  endDate: string | null;
-  billingCycle: string;
-  amount: number;
-}
-
-interface Subscription {
-  id: number;
-  billingCycle: string;
-  startDate: string;
-  endDate: string | null;
-  status: string;
-  amount: number;
-  paymentStatus: string;
-  paidAt: string | null;
-  planName: string;
-  maxMenus?: number;
-  extraMenus?: number;
-}
-
-interface Menu {
-  id: number;
-  name?: string;
-  nameAr?: string;
-  nameEn?: string;
-  slug: string;
-  isActive: boolean;
-  itemsCount?: number;
-  activeItemsCount?: number;
-  createdAt: string;
-}
+import type {
+  AdminUserDetail,
+  AdminUserMenuSummary,
+} from "@/types/User";
+import type { PlanSummary } from "@/types/Plan";
+import type { AdminSubscription } from "@/types/Subscription";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { useApiAction } from "@/hooks/useApiAction";
 
 /**
  * The record was one 14-section scroll: subscription, usage, follow-ups, the
@@ -122,9 +61,9 @@ interface Menu {
 type CustomerTab = "overview" | "menus" | "commerce" | "relationship";
 
 interface UserDetailsResponse {
-  user: User;
-  menus: Menu[];
-  subscriptions: Subscription[];
+  user: AdminUserDetail;
+  menus: AdminUserMenuSummary[];
+  subscriptions: AdminSubscription[];
   featuredOnHomepage?: boolean;
   featuredMenuId?: number | null;
 }
@@ -147,10 +86,8 @@ export default function UserDetailsPage() {
       : ((params.userId as string[])?.[0] ?? "");
 
   const [userData, setUserData] = useState<UserDetailsResponse | null>(null);
-  const [loading, setLoading] = useState(true);
   const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [plansLoading, setPlansLoading] = useState(false);
+  const [plans, setPlans] = useState<PlanSummary[]>([]);
   const [subscriptionForm, setSubscriptionForm] = useState<{
     planId: number;
     billingCycle: string;
@@ -188,39 +125,64 @@ export default function UserDetailsPage() {
   const [resetLinkLoading, setResetLinkLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<UserOrder | null>(null);
   const [activeTab, setActiveTab] = useState<CustomerTab>("overview");
+  const { runApiAction } = useApiAction();
 
-  const fetchUserDetails = useCallback(async () => {
-    try {
-      setLoading(true);
-      const result = await axiosGet<UserDetailsResponse>(
-        `/admin/users/${userId}`,
-        locale,
-      );
-
-      if (result.status && result.data) {
-        setUserData({
-          ...result.data,
+  const requestUserDetails = useCallback(
+    () => axiosGet<UserDetailsResponse>(`/admin/users/${userId}`, locale),
+    [userId, locale],
+  );
+  const userDetailsQuery = useApiQuery({
+    request: requestUserDetails,
+    enabled: Boolean(userId),
+    errorToast: t("error"),
+    onSuccess: (data) =>
+      setUserData({
+          ...data,
           user: {
-            ...result.data.user,
-            isEmailVerified: Boolean(result.data.user.isEmailVerified),
+            ...data.user,
+            isEmailVerified: Boolean(data.user.isEmailVerified),
           },
-        });
-      } else {
-        toast.error(t("error"));
-      }
-    } catch (err) {
-      console.error("Error fetching user details:", err);
-      toast.error(t("error"));
-    } finally {
-      setLoading(false);
-    }
-  }, [userId, locale, t]);
+        }),
+  });
+  const loading = userDetailsQuery.loading;
+  const fetchUserDetails = userDetailsQuery.refetch;
 
-  useEffect(() => {
-    if (userId) {
-      fetchUserDetails();
-    }
-  }, [userId, fetchUserDetails]);
+  const requestSubscriptionPlans = useCallback(
+    () =>
+      axiosGet<{ plans: PlanSummary[] }>(
+        "/admin/plans/subscription",
+        locale,
+      ),
+    [locale],
+  );
+  const plansQuery = useApiQuery({
+    request: requestSubscriptionPlans,
+    enabled: false,
+    errorToast: t("subscriptionInfo.plansLoadError"),
+    onSuccess: (data) => {
+      if (!data.plans?.length) return;
+      setPlans(data.plans);
+      const freePlan = data.plans.find(
+        (plan) => plan.name?.toLowerCase() === "free",
+      );
+      const proPlan = data.plans.find(
+        (plan) => plan.name?.toLowerCase() === "pro",
+      );
+      const currentPlanName = userData?.user?.planName?.toLowerCase();
+      const defaultPlan =
+        currentPlanName === "pro" && proPlan
+          ? proPlan
+          : freePlan || data.plans[0];
+      setSubscriptionForm({
+        planId: defaultPlan?.id ?? data.plans[0].id,
+        billingCycle:
+          defaultPlan?.name?.toLowerCase() === "free" ? "free" : "yearly",
+        startDate: new Date().toISOString().slice(0, 10),
+        endDate: "",
+      });
+    },
+  });
+  const plansLoading = plansQuery.loading;
 
   useEffect(() => {
     if (!userData?.user) return;
@@ -290,25 +252,25 @@ export default function UserDetailsPage() {
     }
     setPasswordSubmitting(true);
     try {
-      const result = await axiosPatch<
-        { newPassword: string },
-        { message?: string }
-      >(`/admin/users/${userId}/password`, locale, { newPassword });
-      if (result.status) {
-        toast.success(tAccount("passwordSuccess"));
-        setPasswordModalOpen(false);
-        setNewPassword("");
-        setConfirmPassword("");
-      } else {
-        toast.error(tAccount("passwordError"));
-      }
-    } catch (err) {
-      console.error("Error setting user password:", err);
-      toast.error(tAccount("passwordError"));
+      await runApiAction(
+        () =>
+          axiosPut(`/admin/users/${userId}/password`, locale, {
+            newPassword,
+          }),
+        {
+          successToast: tAccount("passwordSuccess"),
+          errorToast: tAccount("passwordError"),
+          onSuccess: () => {
+            setPasswordModalOpen(false);
+            setNewPassword("");
+            setConfirmPassword("");
+          },
+        },
+      );
     } finally {
       setPasswordSubmitting(false);
     }
-  }, [newPassword, confirmPassword, userId, locale, tAccount]);
+  }, [newPassword, confirmPassword, userId, locale, tAccount, runApiAction]);
 
   const handleSuspendUser = useCallback(async () => {
     setSuspendSubmitting(true);
@@ -319,47 +281,51 @@ export default function UserDetailsPage() {
       if (suspendReason.trim()) {
         payload.reason = suspendReason.trim();
       }
-      const result = await axiosPatch<
-        typeof payload,
-        { isSuspended: boolean; message?: string }
-      >(`/admin/users/${userId}/suspend`, locale, payload);
-      if (result.status) {
-        toast.success(tAccount("suspendSuccess"));
-        setSuspendModalOpen(false);
-        setSuspendReason("");
-        fetchUserDetails();
-      } else {
-        toast.error(tAccount("suspendError"));
-      }
-    } catch (err) {
-      console.error("Error suspending user:", err);
-      toast.error(tAccount("suspendError"));
+      await runApiAction(
+        () => axiosPut(`/admin/users/${userId}/suspend`, locale, payload),
+        {
+          successToast: tAccount("suspendSuccess"),
+          errorToast: tAccount("suspendError"),
+          onSuccess: () => {
+            setSuspendModalOpen(false);
+            setSuspendReason("");
+            void fetchUserDetails();
+          },
+        },
+      );
     } finally {
       setSuspendSubmitting(false);
     }
-  }, [userId, locale, suspendReason, tAccount, fetchUserDetails]);
+  }, [
+    userId,
+    locale,
+    suspendReason,
+    tAccount,
+    fetchUserDetails,
+    runApiAction,
+  ]);
 
   const handleReactivateUser = useCallback(async () => {
     setAccountActionLoading(true);
     try {
-      const result = await axiosPatch<
-        { isSuspended: boolean },
-        { isSuspended: boolean; message?: string }
-      >(`/admin/users/${userId}/suspend`, locale, { isSuspended: false });
-      if (result.status) {
-        toast.success(tAccount("reactivateSuccess"));
-        setReactivateConfirmOpen(false);
-        fetchUserDetails();
-      } else {
-        toast.error(tAccount("reactivateError"));
-      }
-    } catch (err) {
-      console.error("Error reactivating user:", err);
-      toast.error(tAccount("reactivateError"));
+      await runApiAction(
+        () =>
+          axiosPut(`/admin/users/${userId}/suspend`, locale, {
+            isSuspended: false,
+          }),
+        {
+          successToast: tAccount("reactivateSuccess"),
+          errorToast: tAccount("reactivateError"),
+          onSuccess: () => {
+            setReactivateConfirmOpen(false);
+            void fetchUserDetails();
+          },
+        },
+      );
     } finally {
       setAccountActionLoading(false);
     }
-  }, [userId, locale, tAccount, fetchUserDetails]);
+  }, [userId, locale, tAccount, fetchUserDetails, runApiAction]);
 
   const openEditProfile = useCallback(() => {
     if (!userData?.user) return;
@@ -376,48 +342,56 @@ export default function UserDetailsPage() {
   const handleSaveProfile = useCallback(async () => {
     setProfileSubmitting(true);
     try {
-      const result = await axiosPatch<
-        typeof profileForm,
-        { success?: boolean }
-      >(`/admin/users/${userId}/profile`, locale, profileForm);
-      if (result.status) {
-        toast.success(tCustomer("profile.saveSuccess"));
-        setEditProfileOpen(false);
-        fetchUserDetails();
-      } else {
-        toast.error(tCustomer("profile.saveError"));
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error(tCustomer("profile.saveError"));
+      await runApiAction(
+        () =>
+          axiosPut(
+            `/admin/users/${userId}/profile`,
+            locale,
+            profileForm,
+          ),
+        {
+          successToast: tCustomer("profile.saveSuccess"),
+          errorToast: tCustomer("profile.saveError"),
+          onSuccess: () => {
+            setEditProfileOpen(false);
+            void fetchUserDetails();
+          },
+        },
+      );
     } finally {
       setProfileSubmitting(false);
     }
-  }, [profileForm, userId, locale, tCustomer, fetchUserDetails]);
+  }, [
+    profileForm,
+    userId,
+    locale,
+    tCustomer,
+    fetchUserDetails,
+    runApiAction,
+  ]);
 
   const handleToggleBlock = useCallback(async () => {
     const isBlocked = !userData?.user?.isBlocked;
     setBlockSubmitting(true);
     try {
-      const result = await axiosPatch<
-        { isBlocked: boolean; reason?: string },
-        { success?: boolean }
-      >(`/admin/users/${userId}/block`, locale, {
-        isBlocked,
-        reason: blockReason.trim() || undefined,
-      });
-      if (result.status) {
-        toast.success(
-          isBlocked
+      await runApiAction(
+        () =>
+          axiosPut(`/admin/users/${userId}/block`, locale, {
+            isBlocked,
+            reason: blockReason.trim() || undefined,
+          }),
+        {
+          successToast: isBlocked
             ? tCustomer("block.blockSuccess")
             : tCustomer("block.unblockSuccess"),
-        );
-        setBlockModalOpen(false);
-        setBlockReason("");
-        fetchUserDetails();
-      } else {
-        toast.error(tCustomer("block.error"));
-      }
+          errorToast: tCustomer("block.error"),
+          onSuccess: () => {
+            setBlockModalOpen(false);
+            setBlockReason("");
+            void fetchUserDetails();
+          },
+        },
+      );
     } finally {
       setBlockSubmitting(false);
     }
@@ -428,62 +402,61 @@ export default function UserDetailsPage() {
     blockReason,
     tCustomer,
     fetchUserDetails,
+    runApiAction,
   ]);
 
   const handleSoftDelete = useCallback(async () => {
     setSoftDeleteLoading(true);
     try {
-      const result = await axiosPost<
-        Record<string, never>,
-        { success?: boolean }
-      >(`/admin/users/${userId}/soft-delete`, locale, {});
-      if (result.status) {
-        toast.success(tCustomer("softDelete.success"));
-        setSoftDeleteConfirmOpen(false);
-        fetchUserDetails();
-      } else {
-        toast.error(tCustomer("softDelete.error"));
-      }
+      await runApiAction(
+        () => axiosPost(`/admin/users/${userId}/soft-delete`, locale, {}),
+        {
+          successToast: tCustomer("softDelete.success"),
+          errorToast: tCustomer("softDelete.error"),
+          onSuccess: () => {
+            setSoftDeleteConfirmOpen(false);
+            void fetchUserDetails();
+          },
+        },
+      );
     } finally {
       setSoftDeleteLoading(false);
     }
-  }, [userId, locale, tCustomer, fetchUserDetails]);
+  }, [userId, locale, tCustomer, fetchUserDetails, runApiAction]);
 
   const handleRestoreUser = useCallback(async () => {
     setAccountActionLoading(true);
     try {
-      const result = await axiosPost<
-        Record<string, never>,
-        { success?: boolean }
-      >(`/admin/users/${userId}/restore`, locale, {});
-      if (result.status) {
-        toast.success(tCustomer("restore.success"));
-        fetchUserDetails();
-      } else {
-        toast.error(tCustomer("restore.error"));
-      }
+      await runApiAction(
+        () => axiosPost(`/admin/users/${userId}/restore`, locale, {}),
+        {
+          successToast: tCustomer("restore.success"),
+          errorToast: tCustomer("restore.error"),
+          onSuccess: () => void fetchUserDetails(),
+        },
+      );
     } finally {
       setAccountActionLoading(false);
     }
-  }, [userId, locale, tCustomer, fetchUserDetails]);
+  }, [userId, locale, tCustomer, fetchUserDetails, runApiAction]);
 
   const handleSendResetLink = useCallback(async () => {
     setResetLinkLoading(true);
     try {
-      const result = await axiosPost<{ locale: string }, { success?: boolean }>(
-        `/admin/users/${userId}/send-reset-password`,
-        locale,
-        { locale },
+      await runApiAction(
+        () =>
+          axiosPost(`/admin/users/${userId}/send-reset-password`, locale, {
+            locale,
+          }),
+        {
+          successToast: tCustomer("resetLink.success"),
+          errorToast: tCustomer("resetLink.error"),
+        },
       );
-      if (result.status) {
-        toast.success(tCustomer("resetLink.success"));
-      } else {
-        toast.error(tCustomer("resetLink.error"));
-      }
     } finally {
       setResetLinkLoading(false);
     }
-  }, [userId, locale, tCustomer]);
+  }, [userId, locale, tCustomer, runApiAction]);
 
   const getAccountStatusLabel = (status?: AccountStatus) => {
     if (!status) return t("status.active");
@@ -512,41 +485,8 @@ export default function UserDetailsPage() {
 
   const openSubscriptionModal = useCallback(async () => {
     setSubscriptionModalOpen(true);
-    setPlansLoading(true);
-    try {
-      const result = await axiosGet<{ plans: Plan[] }>(
-        "/admin/plans/subscription",
-        locale,
-      );
-      if (result.status && result.data?.plans?.length) {
-        setPlans(result.data.plans);
-        const freePlan = result.data.plans.find(
-          (p) => p.name?.toLowerCase() === "free",
-        );
-        const proPlan = result.data.plans.find(
-          (p) => p.name?.toLowerCase() === "pro",
-        );
-        const currentPlanName = userData?.user?.planName?.toLowerCase();
-        const defaultPlan =
-          currentPlanName === "pro" && proPlan
-            ? proPlan
-            : freePlan || result.data.plans[0];
-        const today = new Date().toISOString().slice(0, 10);
-        setSubscriptionForm({
-          planId: defaultPlan?.id ?? result.data.plans[0].id,
-          billingCycle:
-            defaultPlan?.name?.toLowerCase() === "free" ? "free" : "yearly",
-          startDate: today,
-          endDate: "",
-        });
-      }
-    } catch (err) {
-      console.error("Error fetching plans:", err);
-      toast.error(t("subscriptionInfo.plansLoadError"));
-    } finally {
-      setPlansLoading(false);
-    }
-  }, [locale, userData?.user?.planName, t]);
+    await plansQuery.refetch();
+  }, [plansQuery]);
 
   const handleChangeSubscription = useCallback(async () => {
     if (!subscriptionForm.planId) {
@@ -571,24 +511,34 @@ export default function UserDetailsPage() {
         endDate: subscriptionForm.endDate || undefined,
         status: "active",
       };
-      const result = await axiosPatch<
-        typeof payload,
-        { message: string; subscription: unknown }
-      >(`/admin/users/${userId}/subscription`, locale, payload);
-      if (result.status) {
-        toast.success(t("subscriptionInfo.changeSuccess"));
-        setSubscriptionModalOpen(false);
-        fetchUserDetails();
-      } else {
-        toast.error(t("subscriptionInfo.changeError"));
-      }
-    } catch (err) {
-      console.error("Error updating subscription:", err);
-      toast.error(t("subscriptionInfo.changeError"));
+      await runApiAction(
+        () =>
+          axiosPut(
+            `/admin/users/${userId}/subscription`,
+            locale,
+            payload,
+          ),
+        {
+          successToast: t("subscriptionInfo.changeSuccess"),
+          errorToast: t("subscriptionInfo.changeError"),
+          onSuccess: () => {
+            setSubscriptionModalOpen(false);
+            void fetchUserDetails();
+          },
+        },
+      );
     } finally {
       setSubscriptionSubmitting(false);
     }
-  }, [subscriptionForm, plans, userId, locale, t, fetchUserDetails]);
+  }, [
+    subscriptionForm,
+    plans,
+    userId,
+    locale,
+    t,
+    fetchUserDetails,
+    runApiAction,
+  ]);
 
   const handleSaveExtraMenus = useCallback(async () => {
     const parsed = parseInt(extraMenusInput, 10);
@@ -598,47 +548,48 @@ export default function UserDetailsPage() {
     }
     setExtraMenusSaving(true);
     try {
-      const result = await axiosPatch<
-        { extraMenus: number },
-        { message?: string; effectiveMaxMenus?: number }
-      >(`/admin/users/${userId}/extra-menus`, locale, {
-        extraMenus: parsed,
-      });
-      if (result.status) {
-        toast.success(t("subscriptionInfo.extraMenusSuccess"));
-        await fetchUserDetails();
-      } else {
-        toast.error(t("subscriptionInfo.extraMenusError"));
-      }
-    } catch (err) {
-      console.error("Error updating extra menus:", err);
-      toast.error(t("subscriptionInfo.extraMenusError"));
+      await runApiAction(
+        () =>
+          axiosPut(`/admin/users/${userId}/extra-menus`, locale, {
+            extraMenus: parsed,
+          }),
+        {
+          successToast: t("subscriptionInfo.extraMenusSuccess"),
+          errorToast: t("subscriptionInfo.extraMenusError"),
+          onSuccess: () => void fetchUserDetails(),
+        },
+      );
     } finally {
       setExtraMenusSaving(false);
     }
-  }, [extraMenusInput, userId, locale, t, fetchUserDetails]);
+  }, [
+    extraMenusInput,
+    userId,
+    locale,
+    t,
+    fetchUserDetails,
+    runApiAction,
+  ]);
 
   const handleApplyFreeLimits = useCallback(async () => {
     setApplyFreeLoading(true);
     try {
-      const result = await axiosPost<
-        Record<string, never>,
-        { message: string }
-      >(`/admin/users/${userId}/apply-free-limits`, locale, {});
-      if (result.status) {
-        toast.success(t("subscriptionInfo.applyFreeSuccess"));
-        setApplyFreeConfirmOpen(false);
-        fetchUserDetails();
-      } else {
-        toast.error(t("subscriptionInfo.applyFreeError"));
-      }
-    } catch (err) {
-      console.error("Error applying free limits:", err);
-      toast.error(t("subscriptionInfo.applyFreeError"));
+      await runApiAction(
+        () =>
+          axiosPost(`/admin/users/${userId}/apply-free-limits`, locale, {}),
+        {
+          successToast: t("subscriptionInfo.applyFreeSuccess"),
+          errorToast: t("subscriptionInfo.applyFreeError"),
+          onSuccess: () => {
+            setApplyFreeConfirmOpen(false);
+            void fetchUserDetails();
+          },
+        },
+      );
     } finally {
       setApplyFreeLoading(false);
     }
-  }, [userId, locale, t, fetchUserDetails]);
+  }, [userId, locale, t, fetchUserDetails, runApiAction]);
 
   const tabItems: TabItem[] = [
     { id: "overview", label: t("tabs.overview") },

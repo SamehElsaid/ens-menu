@@ -1,4 +1,5 @@
 import type { Item, ItemVariantOption } from "@/types/Menu";
+import { persistentOptionIdForLegacy } from "@/lib/optionIds";
 
 function parseVariantsField(raw: unknown): ItemVariantOption[] {
   if (raw === null || raw === undefined || raw === "") return [];
@@ -18,7 +19,12 @@ function parseVariantsField(raw: unknown): ItemVariantOption[] {
     .map((entry) => {
       const row = entry as Record<string, unknown>;
       const price = Number(row.price);
+      const id = persistentOptionIdForLegacy(
+        row.id,
+        `variant:${String(row.labelAr ?? row.label_ar ?? row.label ?? "")}:${price}`,
+      );
       return {
+        id,
         labelAr: String(row.labelAr ?? row.label_ar ?? row.label ?? "").trim(),
         labelEn: String(row.labelEn ?? row.label_en ?? row.label ?? "").trim(),
         price,

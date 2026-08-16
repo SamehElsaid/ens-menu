@@ -8,6 +8,7 @@ export function getImportProductLimitInfo(
   currentItemCount: number,
   _maxProductsPerMenu: number = FREE_PLAN_DEFAULT_MAX_PRODUCTS,
 ) {
+  void _maxProductsPerMenu;
   const importCount = countBulkSaveStats(draft).itemsInPayload;
   const totalAfter = currentItemCount + importCount;
 

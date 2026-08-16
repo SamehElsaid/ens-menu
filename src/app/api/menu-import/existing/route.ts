@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { encryptDataApi } from "@/shared/encryption";
-import { refreshServerAccessToken } from "@/lib/server/refreshAccessToken";
 import { fetchMenuSnapshot } from "@/lib/menuImport/menuSnapshot";
-import { getBearerToken } from "@/lib/menuImport/executeMenuImportSave";
+import { guardExternalServiceRoute } from "@/lib/server/externalRouteGuard";
 
 function buildServerApiKey(): string {
   const secretKey = process.env.NEXT_PUBLIC_SECRET_KEY as string;
@@ -12,9 +10,9 @@ function buildServerApiKey(): string {
   return encryptDataApi(apiKey, secretKey);
 }
 
-function buildHeaders(token: string, locale: string) {
+function buildHeaders(cookieHeader: string, locale: string) {
   return {
-    Authorization: `Bearer ${token}`,
+    Cookie: cookieHeader,
     "X-API-KEY": buildServerApiKey(),
     "Accept-Language": locale,
     "Content-Type": "application/json",
@@ -34,43 +32,37 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "menuId is required" }, { status: 400 });
     }
 
-    const cookieStore = await cookies();
-    const sub = cookieStore.get("sub")?.value;
-    const token = getBearerToken(sub);
-
-    if (!token) {
-      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    const guard = await guardExternalServiceRoute(request, {
+      routeKey: "menu-import-existing",
+      menuId,
+      maxRequests: 60,
+      windowMs: 5 * 60_000,
+    });
+    if (!guard.ok) {
+      return NextResponse.json(
+        { error: guard.error, ...(guard.code ? { code: guard.code } : {}) },
+        {
+          status: guard.status,
+          headers: guard.retryAfter
+            ? { "Retry-After": String(guard.retryAfter) }
+            : undefined,
+        },
+      );
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL as string;
-    let currentToken = token;
-    let refreshedSub: string | undefined;
 
     const authorizedFetch = async (url: string, init?: RequestInit) => {
-      const doFetch = () =>
-        fetch(url, {
-          ...init,
-          headers: buildHeaders(currentToken, locale),
-        });
-      let response = await doFetch();
-      if (response.status === 405 && sub) {
-        const refreshed = await refreshServerAccessToken(sub);
-        if (refreshed) {
-          currentToken = refreshed.accessToken;
-          refreshedSub = refreshed.encryptedSub;
-          response = await doFetch();
-        }
-      }
-      return response;
+      return fetch(url, {
+        ...init,
+        headers: buildHeaders(guard.cookieHeader, locale),
+        signal: AbortSignal.timeout(15_000),
+      });
     };
 
     const snapshot = await fetchMenuSnapshot(menuId, baseUrl, authorizedFetch);
 
-    const response = NextResponse.json(snapshot, { status: 200 });
-    if (refreshedSub) {
-      response.cookies.set("sub", refreshedSub, { path: "/" });
-    }
-    return response;
+    return NextResponse.json(snapshot, { status: 200 });
   } catch (error) {
     console.error("[menu-import-existing] error:", error);
     return NextResponse.json({ error: "internal_error" }, { status: 500 });

@@ -364,8 +364,9 @@ export const useBuilderStore = create<State>((set, get) => ({
         : doc;
       const saved = await templateApi.saveTemplate(toSave);
       set({ document: saved, dirty: false, saving: false });
-    } catch {
+    } catch (error) {
       set({ saving: false });
+      throw error;
     }
   },
 }));

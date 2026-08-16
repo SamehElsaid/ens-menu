@@ -5,7 +5,6 @@ import { Controller, Resolver, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLocale, useTranslations } from "next-intl";
 import { axiosPost } from "@/shared/axiosCall";
-import { toast } from "react-toastify";
 import { IoPersonOutline } from "react-icons/io5";
 import { FaUserShield } from "react-icons/fa";
 import { Button, Field, Input, Modal } from "@/components/ui";
@@ -15,13 +14,10 @@ import {
 } from "@/schemas/administratorSchema";
 import AdminPermissionsEditor from "@/components/Admin/AdminPermissionsEditor";
 import {
-  setAdminPermissionsByEmail,
-  removeAdminPermissionsByEmail,
-} from "@/lib/adminPermissions";
-import {
   ADMIN_PERMISSION_KEYS,
   type AdminPermissionKey,
 } from "@/types/AdminPermission";
+import { useApiAction } from "@/hooks/useApiAction";
 
 type AddAdministratorFormData = AdministratorFormSchema;
 
@@ -44,6 +40,7 @@ export default function AddAdministratorModal({
   const [permissions, setPermissions] = useState<AdminPermissionKey[]>([
     ...ADMIN_PERMISSION_KEYS,
   ]);
+  const { runApiAction } = useApiAction();
 
   const {
     control,
@@ -76,22 +73,22 @@ export default function AddAdministratorModal({
             : permissions,
       };
 
-      const result = await axiosPost<
-        typeof payload,
-        { id: number; name: string; email: string }
-      >("/admin/admins", locale, payload);
-
-      if (result.status && result.data) {
-        if (permissions.length >= ADMIN_PERMISSION_KEYS.length) {
-          removeAdminPermissionsByEmail(data.email.trim());
-        } else {
-          setAdminPermissionsByEmail(data.email.trim(), permissions);
-        }
-        toast.success(t("createSuccess"));
-        reset();
-        onClose();
-        onRefresh?.();
-      }
+      await runApiAction(
+        () =>
+          axiosPost<
+            typeof payload,
+            { id: number; name: string; email: string }
+          >("/admin/admins", locale, payload),
+        {
+          successToast: t("createSuccess"),
+          errorToast: ({ error }) => error,
+          onSuccess: () => {
+            reset();
+            onClose();
+            onRefresh?.();
+          },
+        },
+      );
     } finally {
       setIsSubmitting(false);
     }

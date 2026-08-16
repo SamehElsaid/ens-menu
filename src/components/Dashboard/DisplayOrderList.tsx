@@ -192,8 +192,9 @@ export function DisplayOrderCategoryStrip({
   } | null>(null);
   const itemRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
 
-  rowsRef.current = rows;
-  draggingIdRef.current = draggingId;
+  useEffect(() => {
+    rowsRef.current = rows;
+  }, [rows]);
 
   const endDrag = useCallback(() => {
     pendingRef.current = null;
@@ -621,9 +622,10 @@ export function DisplayOrderProductGrid({
   } | null>(null);
   const itemRefs = useRef<Map<number, HTMLElement>>(new Map());
 
-  rowsRef.current = rows;
-  categoryOrderRef.current = categoryOrder;
-  draggingIdRef.current = draggingId;
+  useEffect(() => {
+    rowsRef.current = rows;
+    categoryOrderRef.current = categoryOrder;
+  }, [rows, categoryOrder]);
 
   const groups = useMemo((): CategoryGroup[] => {
     if (!groupByCategory) {

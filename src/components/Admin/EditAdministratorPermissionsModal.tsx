@@ -1,26 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { FaUserShield } from "react-icons/fa";
 import { Button, Modal } from "@/components/ui";
 import AdminPermissionsEditor from "@/components/Admin/AdminPermissionsEditor";
 import {
-  getAdminPermissionsByEmail,
-  removeAdminPermissionsByEmail,
-  setAdminPermissionsByEmail,
-} from "@/lib/adminPermissions";
-import {
   ADMIN_PERMISSION_KEYS,
   type AdminPermissionKey,
 } from "@/types/AdminPermission";
-import { toast } from "react-toastify";
+import { axiosPatch } from "@/shared/axiosCall";
+import { useApiAction } from "@/hooks/useApiAction";
 
 type EditAdministratorPermissionsModalProps = {
   open: boolean;
   onClose: () => void;
-  admin: { id: number; name: string; email: string } | null;
+  admin: {
+    id: number;
+    name: string;
+    email: string;
+    permissions?: AdminPermissionKey[] | null;
+  } | null;
   isCurrentUser?: boolean;
+  onSaved?: () => void;
 };
 
 export default function EditAdministratorPermissionsModal({
@@ -28,8 +30,11 @@ export default function EditAdministratorPermissionsModal({
   onClose,
   admin,
   isCurrentUser = false,
+  onSaved,
 }: EditAdministratorPermissionsModalProps) {
+  const locale = useLocale();
   const t = useTranslations("adminAdministrators.permissions");
+  const { runApiAction } = useApiAction();
   const [permissions, setPermissions] = useState<AdminPermissionKey[]>([
     ...ADMIN_PERMISSION_KEYS,
   ]);
@@ -37,25 +42,39 @@ export default function EditAdministratorPermissionsModal({
 
   useEffect(() => {
     if (!open || !admin) return;
-    const stored = getAdminPermissionsByEmail(admin.email);
-    setPermissions(stored ?? [...ADMIN_PERMISSION_KEYS]);
+    setPermissions(admin.permissions ?? [...ADMIN_PERMISSION_KEYS]);
   }, [open, admin]);
 
   if (!admin) return null;
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setSaving(true);
     try {
-      if (permissions.length >= ADMIN_PERMISSION_KEYS.length) {
-        removeAdminPermissionsByEmail(admin.email);
-      } else {
-        setAdminPermissionsByEmail(admin.email, permissions);
-      }
-      toast.success(t("saveSuccess"));
-      onClose();
-      if (isCurrentUser) {
-        window.location.reload();
-      }
+      const payload = {
+        permissions:
+          permissions.length >= ADMIN_PERMISSION_KEYS.length
+            ? null
+            : permissions,
+      };
+      await runApiAction(
+        () =>
+          axiosPatch<typeof payload, { id: number }>(
+            `/admin/admins/${admin.id}/permissions`,
+            locale,
+            payload,
+          ),
+        {
+          successToast: t("saveSuccess"),
+          errorToast: ({ error }) => error,
+          onSuccess: () => {
+            onClose();
+            onSaved?.();
+            if (isCurrentUser) {
+              window.location.reload();
+            }
+          },
+        },
+      );
     } finally {
       setSaving(false);
     }
@@ -79,7 +98,7 @@ export default function EditAdministratorPermissionsModal({
           </Button>
           <Button
             variant="primary"
-            onClick={handleSave}
+            onClick={() => void handleSave()}
             loading={saving}
             disabled={permissions.length === 0}
           >

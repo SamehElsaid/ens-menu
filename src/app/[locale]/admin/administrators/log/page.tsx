@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Badge,
   DataTable,
@@ -16,7 +16,6 @@ import {
 } from "@/components/ui";
 import { useDataTableLabels } from "@/hooks/useDataTableLabels";
 import { axiosGet } from "@/shared/axiosCall";
-import { toast } from "react-toastify";
 import { formatAdminDate } from "@/lib/fetchAdminAnalytics";
 import type {
   AdminActivityAction,
@@ -24,6 +23,7 @@ import type {
   AdminActivityLogResponse,
   AdminActivityTargetType,
 } from "@/types/AdminActivityLog";
+import { useApiQuery } from "@/hooks/useApiQuery";
 
 const ACTION_FILTER_OPTIONS: Array<AdminActivityAction | "all"> = [
   "all",
@@ -56,7 +56,6 @@ export default function AdminActivityLogPage() {
   const tableLabels = useDataTableLabels();
 
   const [entries, setEntries] = useState<AdminActivityLogEntry[]>([]);
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
@@ -67,48 +66,33 @@ export default function AdminActivityLogPage() {
     AdminActivityTargetType | "all"
   >("all");
 
-  const fetchLog = useCallback(
-    async (pageNum: number) => {
-      try {
-        setLoading(true);
-        const params: Record<string, unknown> = {
-          page: pageNum,
+  const requestLog = useCallback(
+    () => {
+      const params: Record<string, unknown> = {
+          page,
           limit: 20,
         };
-        if (actionFilter !== "all") params.action = actionFilter;
-        if (targetFilter !== "all") params.targetType = targetFilter;
-
-        const result = await axiosGet<AdminActivityLogResponse>(
+      if (actionFilter !== "all") params.action = actionFilter;
+      if (targetFilter !== "all") params.targetType = targetFilter;
+      return axiosGet<AdminActivityLogResponse>(
           "/admin/activity-log",
           locale,
           undefined,
           params,
         );
-
-        if (result.status && result.data) {
-          setEntries(result.data.entries ?? []);
-          setTotalPages(result.data.pagination?.totalPages ?? 1);
-          setItemsPerPage(result.data.pagination?.itemsPerPage ?? 20);
-        } else {
-          toast.error(t("error"));
-        }
-      } catch (err) {
-        console.error("Error fetching admin activity log:", err);
-        toast.error(t("error"));
-      } finally {
-        setLoading(false);
-      }
     },
-    [locale, t, actionFilter, targetFilter],
+    [locale, page, actionFilter, targetFilter],
   );
-
-  useEffect(() => {
-    fetchLog(page);
-  }, [page, fetchLog]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [actionFilter, targetFilter]);
+  const logQuery = useApiQuery({
+    request: requestLog,
+    errorToast: t("error"),
+    onSuccess: (data) => {
+      setEntries(data.entries ?? []);
+      setTotalPages(data.pagination?.totalPages ?? 1);
+      setItemsPerPage(data.pagination?.itemsPerPage ?? 20);
+    },
+  });
+  const loading = logQuery.loading;
 
   const actionLabel = useCallback(
     (action: string) => {
@@ -255,9 +239,10 @@ export default function AdminActivityLogPage() {
                 inputSize="sm"
                 aria-label={t("filters.action")}
                 value={actionFilter}
-                onChange={(e) =>
-                  setActionFilter(e.target.value as AdminActivityAction | "all")
-                }
+                onChange={(e) => {
+                  setActionFilter(e.target.value as AdminActivityAction | "all");
+                  setPage(1);
+                }}
                 wrapperClassName="w-full sm:w-56"
               >
                 {ACTION_FILTER_OPTIONS.map((option) => (
@@ -272,11 +257,12 @@ export default function AdminActivityLogPage() {
                 inputSize="sm"
                 aria-label={t("filters.targetType")}
                 value={targetFilter}
-                onChange={(e) =>
+                onChange={(e) => {
                   setTargetFilter(
                     e.target.value as AdminActivityTargetType | "all",
-                  )
-                }
+                  );
+                  setPage(1);
+                }}
                 wrapperClassName="w-full sm:w-44"
               >
                 <option value="all">{t("filters.allTargets")}</option>

@@ -12,27 +12,18 @@ import {
   EmptyState,
   SectionHeader,
 } from "@/components/ui";
-import { axiosDelete, axiosPatch, axiosPost } from "@/shared/axiosCall";
+import { axiosDelete, axiosPut, axiosPost } from "@/shared/axiosCall";
 import { publicMenuLinkUrl } from "@/lib/publicMenuUrl";
 import { toast } from "react-toastify";
-
-export interface AdminUserMenu {
-  id: number;
-  name?: string;
-  nameAr?: string;
-  nameEn?: string;
-  slug: string;
-  isActive: boolean;
-  itemsCount?: number;
-  activeItemsCount?: number;
-  createdAt: string;
-}
+import { useApiAction } from "@/hooks/useApiAction";
+import type { AdminUserMenuSummary } from "@/types/User";
+import { formatAppDate } from "@/lib/formatDateTime";
 
 type AdminUserMenusSectionProps = {
   userId: string;
-  menus: AdminUserMenu[];
+  menus: AdminUserMenuSummary[];
   featuredOnHomepage?: boolean;
-  onMenusChange: (menus: AdminUserMenu[]) => void;
+  onMenusChange: (menus: AdminUserMenuSummary[]) => void;
   onRefresh: () => void;
 };
 
@@ -47,22 +38,13 @@ export default function AdminUserMenusSection({
   const t = useTranslations("adminUsers.userDetails");
   const isRTL = locale === "ar";
 
-  const [confirmingMenu, setConfirmingMenu] = useState<AdminUserMenu | null>(
+  const [confirmingMenu, setConfirmingMenu] = useState<AdminUserMenuSummary | null>(
     null,
   );
   const [updatingMenuId, setUpdatingMenuId] = useState<number | null>(null);
   const [featureOnHomepageLoading, setFeatureOnHomepageLoading] =
     useState(false);
-
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "-";
-    const date = new Date(dateString);
-    return date.toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
+  const { runApiAction } = useApiAction();
 
   const handleFeatureOnHomepage = useCallback(async () => {
     setFeatureOnHomepageLoading(true);
@@ -99,52 +81,49 @@ export default function AdminUserMenusSection({
   const handleRemoveFromHomepage = useCallback(async () => {
     setFeatureOnHomepageLoading(true);
     try {
-      const result = await axiosDelete<{ success?: boolean }>(
-        `/admin/users/${userId}/feature-on-homepage`,
-        locale,
+      await runApiAction(
+        () =>
+          axiosDelete(
+            `/admin/users/${userId}/feature-on-homepage`,
+            locale,
+          ),
+        {
+          successToast: t("lists.removeFromHomepageSuccess"),
+          errorToast: t("lists.removeFromHomepageError"),
+          onSuccess: onRefresh,
+        },
       );
-
-      if (result.status) {
-        toast.success(t("lists.removeFromHomepageSuccess"));
-        onRefresh();
-        return;
-      }
-
-      toast.error(t("lists.removeFromHomepageError"));
-    } catch (err) {
-      console.error("Error removing user from homepage:", err);
-      toast.error(t("lists.removeFromHomepageError"));
     } finally {
       setFeatureOnHomepageLoading(false);
     }
-  }, [userId, locale, t, onRefresh]);
+  }, [userId, locale, t, onRefresh, runApiAction]);
 
-  const handleToggleMenuStatus = async (menu: AdminUserMenu) => {
+  const handleToggleMenuStatus = async (menu: AdminUserMenuSummary) => {
     try {
       setUpdatingMenuId(menu.id);
       const newStatus = !menu.isActive;
-      const result = await axiosPatch<{ isActive: boolean }, AdminUserMenu>(
-        `/menus/${menu.id}/status`,
-        locale,
-        { isActive: newStatus },
-      );
-
-      if (result.status && result.data) {
-        onMenusChange(
-          menus.map((m) =>
-            m.id === menu.id ? { ...m, isActive: newStatus } : m,
+      await runApiAction(
+        () =>
+          axiosPut<{ isActive: boolean }, AdminUserMenuSummary>(
+            `/menus/${menu.id}/status`,
+            locale,
+            { isActive: newStatus },
           ),
-        );
-        toast.success(
-          newStatus ? t("lists.activateSuccess") : t("lists.deactivateSuccess"),
-        );
-        setConfirmingMenu(null);
-      } else {
-        toast.error(t("lists.updateError"));
-      }
-    } catch (error) {
-      console.error("Error updating menu status:", error);
-      toast.error(t("lists.updateError"));
+        {
+          successToast: newStatus
+            ? t("lists.activateSuccess")
+            : t("lists.deactivateSuccess"),
+          errorToast: t("lists.updateError"),
+          onSuccess: () => {
+            onMenusChange(
+              menus.map((item) =>
+                item.id === menu.id ? { ...item, isActive: newStatus } : item,
+              ),
+            );
+            setConfirmingMenu(null);
+          },
+        },
+      );
     } finally {
       setUpdatingMenuId(null);
     }
@@ -227,7 +206,7 @@ export default function AdminUserMenusSection({
                     <div className="flex items-center gap-1.5">
                       <dt className="ui-label">{t("lists.date")}</dt>
                       <dd className="ui-figure" lang="en">
-                        {formatDate(menu.createdAt)}
+                      {formatAppDate(menu.createdAt, locale, "-")}
                       </dd>
                     </div>
                   </dl>

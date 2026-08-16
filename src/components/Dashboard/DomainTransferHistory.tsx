@@ -4,13 +4,7 @@ import CardDashBoard from "@/components/Card/CardDashBoard";
 import { Badge, EmptyState, SectionHeader } from "@/components/ui";
 import type { StatusTone } from "@/components/ui";
 import type { DomainTransferRequest } from "@/types/DomainTransfer";
-
-function formatDateTime(value: string, locale: string): string {
-  return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
-}
+import { formatMediumDateTime } from "@/lib/formatDateTime";
 
 function historyOutcomeTone(item: DomainTransferRequest): StatusTone {
   return item.status === "completed" ? "success" : "danger";
@@ -75,13 +69,13 @@ export default function DomainTransferHistory({
                   </p>
                   <p className="ui-label mt-1">
                     {t("submitted", {
-                      date: formatDateTime(item.createdAt, locale),
+                      date: formatMediumDateTime(item.createdAt, locale),
                     })}
                     {resolvedAt && (
                       <>
                         {" · "}
                         {t("resolved", {
-                          date: formatDateTime(resolvedAt, locale),
+                          date: formatMediumDateTime(resolvedAt, locale),
                         })}
                       </>
                     )}

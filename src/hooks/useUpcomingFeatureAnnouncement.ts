@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { dismissUpcomingFeature } from "@/lib/upcomingFeatureDismiss";
 import {
   findUpcomingFeatureForPath,
@@ -8,26 +8,22 @@ import {
 } from "@/lib/upcomingFeatures";
 
 export function useUpcomingFeatureAnnouncement(pathname: string) {
-  const [feature, setFeature] = useState<UpcomingFeatureConfig | null>(null);
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    const match = findUpcomingFeatureForPath(pathname);
-    if (match) {
-      setFeature(match);
-      setOpen(true);
-      return;
-    }
-
-    setFeature(null);
-    setOpen(false);
-  }, [pathname]);
+  const feature: UpcomingFeatureConfig | null =
+    findUpcomingFeatureForPath(pathname);
+  const [announcement, setAnnouncement] = useState({
+    pathname,
+    open: Boolean(feature),
+  });
+  if (announcement.pathname !== pathname) {
+    setAnnouncement({ pathname, open: Boolean(feature) });
+  }
+  const open = announcement.pathname === pathname && announcement.open;
 
   const dismiss = useCallback(() => {
     if (feature) {
       dismissUpcomingFeature(feature.id);
     }
-    setOpen(false);
+    setAnnouncement((current) => ({ ...current, open: false }));
   }, [feature]);
 
   return { feature, open, dismiss };

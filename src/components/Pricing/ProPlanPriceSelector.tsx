@@ -3,6 +3,9 @@
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/cn";
 import { focusRingInset } from "@/components/ui";
+import { formatEgpPrice } from "@/lib/formatNumber";
+
+export { formatEgpPrice } from "@/lib/formatNumber";
 
 export type ProBillingChoice = "monthly" | "yearly";
 
@@ -24,10 +27,6 @@ type ProPlanPriceSelectorProps = {
   voucherOriginalPrice?: number | null;
   voucherDiscountedPrice?: number | null;
 };
-
-export function formatEgpPrice(value: number): string {
-  return value.toLocaleString("en-US");
-}
 
 /**
  * Billing cycle and the price it produces, inside the dashboard's plan cards.

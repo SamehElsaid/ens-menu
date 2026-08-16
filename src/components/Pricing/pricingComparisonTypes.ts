@@ -1,5 +1,3 @@
-import type { ReactNode } from "react";
-
 export type CellVal = boolean | string | number;
 
 export type ComparisonRow = {

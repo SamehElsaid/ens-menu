@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { MenuStaff } from "@/types/Menu";
 import { Card, Skeleton } from "@/components/ui";
 import StaffCard from "./StaffCard";
@@ -57,11 +57,16 @@ export default function StaffCardGrid({
   onDelete,
   onAdd,
 }: StaffCardGridProps) {
-  const [page, setPage] = useState(1);
-
-  useEffect(() => {
-    setPage(1);
-  }, [staffList.length]);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    itemCount: staffList.length,
+  });
+  if (pagination.itemCount !== staffList.length) {
+    setPagination({ page: 1, itemCount: staffList.length });
+  }
+  const page = pagination.page;
+  const setPage = (nextPage: number) =>
+    setPagination({ page: nextPage, itemCount: staffList.length });
 
   const totalPages = Math.max(1, Math.ceil(staffList.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);

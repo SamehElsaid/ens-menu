@@ -1,12 +1,8 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-
-type UserProfile = {
-  email?: string;
-  [key: string]: unknown;
-};
+import type { AuthSessionCache } from "@/types/User";
 
 type AuthState = {
-  data: UserProfile | null;
+  data: AuthSessionCache | null;
   loading: boolean | string;
   reload: boolean;
 };
@@ -21,20 +17,27 @@ const auth = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    SET_ACTIVE_USER: (state, action: PayloadAction<UserProfile>) => {
+    cacheAuthoritativeSession: (
+      state,
+      action: PayloadAction<AuthSessionCache>,
+    ) => {
       state.data = action.payload;
       state.loading = "yes";
     },
-    REMOVE_USER: (state) => {
+    clearSessionCache: (state) => {
       state.data = null;
       state.loading = "no";
     },
-    RELOAD_USER: (state) => {
+    requestSessionReload: (state) => {
       state.reload = true;
     },
   },
 });
 
-export const { SET_ACTIVE_USER, REMOVE_USER, RELOAD_USER } = auth.actions;
+export const {
+  cacheAuthoritativeSession: SET_AUTH_SESSION_CACHE,
+  clearSessionCache: CLEAR_AUTH_SESSION_CACHE,
+  requestSessionReload: REQUEST_AUTH_SESSION_RELOAD,
+} = auth.actions;
 
 export default auth.reducer;

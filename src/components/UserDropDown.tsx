@@ -1,22 +1,15 @@
 import { FiLogOut } from "react-icons/fi";
 import LinkTo from "./Global/LinkTo";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useAppSelector } from "@/store/hooks";
 import { useMemo, useState, type ReactNode } from "react";
-import Cookies from "js-cookie";
 import Loader from "./Global/Loader";
-import { decryptData } from "@/shared/encryption";
-import { REMOVE_USER } from "@/store/authSlice/authSlice";
 import { MdOutlineDashboard } from "react-icons/md";
-import { usePathname, useRouter } from "@/i18n/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { usePathname } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import LoadImage from "./ImageLoad";
 import { IoRestaurantOutline } from "react-icons/io5";
 import { useDashboardSession } from "@/hooks/useDashboardSession";
-import { axiosPost } from "@/shared/axiosCall";
-import {
-  finalizeFcmLogout,
-  resolveFcmTokenForLogout,
-} from "@/shared/syncFcmToken";
+import { performAuthLogout } from "@/shared/authLogout";
 import { publicMenuLinkUrl } from "@/lib/publicMenuUrl";
 import {
   Menu,
@@ -47,9 +40,6 @@ import { cn } from "@/lib/cn";
  * the primitive so they are identical to the rows that do not.
  */
 function UserDropDown() {
-  const dispatch = useAppDispatch();
-  const router = useRouter();
-  const locale = useLocale();
   const pathname = usePathname();
   const session = useDashboardSession();
   const menu = useAppSelector((s) => s.menuData.menu);
@@ -109,26 +99,7 @@ function UserDropDown() {
   const handleLogout = async () => {
     setIsLoggingOut(true);
     setIsProfileMenuOpen(false);
-    const sub = Cookies.get("sub");
-    if (sub) {
-      try {
-        const decrypted = decryptData(sub) as { refreshToken?: string };
-        const fcmToken = await resolveFcmTokenForLogout();
-        await axiosPost("/auth/logout", locale, {
-          refreshToken: decrypted?.refreshToken ?? "",
-          ...(fcmToken ? { fcmToken } : {}),
-        });
-        await finalizeFcmLogout(locale, fcmToken);
-      } catch {
-        // logout locally even if the API call fails
-        await finalizeFcmLogout(locale, null);
-      }
-    } else {
-      await finalizeFcmLogout(locale, null);
-    }
-    Cookies.remove("sub");
-    dispatch(REMOVE_USER());
-    router.push("/");
+    await performAuthLogout();
   };
 
   const avatar = (box: string) =>

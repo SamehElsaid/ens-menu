@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { axiosPost } from "@/shared/axiosCall";
 import { _resizeImage } from "@/shared/_shared";
 import SunEditor from "suneditor-react";
 import { Skeleton, Spinner } from "@/components/ui";
+import { sanitizeBuilderHtml } from "@/lib/template-builder/sanitizeContent";
 
 interface ImageUploadResult {
   result: Array<{ url: string; name: string; size: number }>;
@@ -16,7 +17,6 @@ interface EditorProps {
   type: string;
   setValue: (field: string, value: string) => void;
   trigger: (field: string) => void;
-  refresh?: unknown;
   loadingSave?: boolean;
   setLoadingSave?: (loading: boolean) => void;
   setShowDescription?: () => void;
@@ -28,22 +28,17 @@ const Editor = ({
   type,
   setValue,
   trigger,
-  refresh,
-  loadingSave,
   setLoadingSave,
 }: EditorProps) => {
   const locale = useLocale();
-  const [templateName, setTemplateName] = useState(initialTemplateName);
   const [loading, setLoading] = useState(true);
-  const ref = useRef("");
   const t = useTranslations("common");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    setTemplateName(initialTemplateName);
-    setLoading(true);
-    setTimeout(() => setLoading(false), 0);
-  }, [refresh]);
+    const timer = setTimeout(() => setLoading(false), 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   if (loading) {
     return <Skeleton className="h-100 w-full rounded-lg" />;
@@ -63,10 +58,8 @@ const Editor = ({
 
       <SunEditor
         onChange={(e) => {
-          setTemplateName(e);
-          setValue(type, e);
+          setValue(type, sanitizeBuilderHtml(e));
           trigger(type);
-          ref.current = e;
           setLoadingSave?.(false);
           setIsLoading(false);
         }}
@@ -74,7 +67,7 @@ const Editor = ({
           setLoadingSave?.(true);
           setIsLoading(true);
         }}
-        defaultValue={templateName}
+        defaultValue={initialTemplateName}
         onImageUploadBefore={(files, _info, uploadHandler) => {
           _resizeImage(files[0])
             .then((resized) => {
@@ -86,7 +79,6 @@ const Editor = ({
                 formData,
               ).then((res) => {
                 if (res.status && res.data) {
-                  console.log(res.data);
                   const result: ImageUploadResult = {
                     result: [
                       {

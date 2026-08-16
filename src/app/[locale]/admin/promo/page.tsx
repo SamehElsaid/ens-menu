@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { IoMegaphoneOutline } from "react-icons/io5";
 import { FaSave } from "react-icons/fa";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
@@ -20,6 +20,8 @@ import {
   Textarea,
 } from "@/components/ui";
 import { cn } from "@/lib/cn";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { useApiAction } from "@/hooks/useApiAction";
 
 interface PromoTextLocalized {
   ar: string;
@@ -55,34 +57,27 @@ export default function AdminPromoPage() {
   const tAdmin = useTranslations("adminDashboard");
   const isRTL = locale === "ar";
 
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [textAr, setTextAr] = useState("");
   const [textEn, setTextEn] = useState("");
   const [promoEnabled, setPromoEnabled] = useState(false);
+  const { runApiAction } = useApiAction();
 
-  const fetchPromo = useCallback(async () => {
-    try {
-      setLoading(true);
-      const result = await axiosGet<PromoResponse>("/promo", locale);
-      if (result.status && result.data) {
-        const localized = parsePromoText(result.data.text ?? "");
-        setTextAr(localized.ar);
-        setTextEn(localized.en);
-        setPromoEnabled(result.data.boolean ?? false);
-      } else {
-        toast.error(t("fetchError"));
-      }
-    } catch {
-      toast.error(t("fetchError"));
-    } finally {
-      setLoading(false);
-    }
-  }, [locale, t]);
-
-  useEffect(() => {
-    fetchPromo();
-  }, [fetchPromo]);
+  const requestPromo = useCallback(
+    () => axiosGet<PromoResponse>("/promo", locale),
+    [locale],
+  );
+  const promoQuery = useApiQuery({
+    request: requestPromo,
+    errorToast: t("fetchError"),
+    onSuccess: (data) => {
+      const localized = parsePromoText(data.text ?? "");
+      setTextAr(localized.ar);
+      setTextEn(localized.en);
+      setPromoEnabled(data.boolean ?? false);
+    },
+  });
+  const loading = promoQuery.loading;
 
   const handleSave = async () => {
     if (!textAr.trim() && !textEn.trim()) {
@@ -99,18 +94,13 @@ export default function AdminPromoPage() {
         }),
         boolean: promoEnabled,
       };
-      const result = await axiosPost<typeof payload, PromoResponse>(
-        "/promo",
-        locale,
-        payload,
+      await runApiAction(
+        () => axiosPost<typeof payload, PromoResponse>("/promo", locale, payload),
+        {
+          successToast: t("saveSuccess"),
+          errorToast: t("saveError"),
+        },
       );
-      if (result.status) {
-        toast.success(t("saveSuccess"));
-      } else {
-        toast.error(t("saveError"));
-      }
-    } catch {
-      toast.error(t("saveError"));
     } finally {
       setSaving(false);
     }

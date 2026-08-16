@@ -3,8 +3,7 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useLocale, useTranslations } from "next-intl";
-import { axiosPost, axiosPatch } from "@/shared/axiosCall";
-import { toast } from "react-toastify";
+import { axiosPost, axiosPut } from "@/shared/axiosCall";
 import { MenuTable } from "@/types/Menu";
 import {
   IoEllipseSharp,
@@ -15,6 +14,7 @@ import {
 import { MdOutlineTableBar } from "react-icons/md";
 import { Button, Field, Input, Modal, focusRing } from "@/components/ui";
 import { cn } from "@/lib/cn";
+import { useApiAction } from "@/hooks/useApiAction";
 
 const TABLE_NUMBER_MAX = 50;
 const TABLE_NUMBER_PATTERN =
@@ -26,16 +26,6 @@ function sanitizeTableNumberInput(raw: string): string {
     .replace(/[\u064B-\u065F\u0670\u0640]/g, "")
     .replace(/[^a-zA-Z0-9\u0600-\u06FF\s\-_]/g, "")
     .slice(0, TABLE_NUMBER_MAX);
-}
-
-function getApiErrorMessage(data: unknown, locale: string): string | null {
-  if (!data || typeof data !== "object") return null;
-  const row = data as Record<string, unknown>;
-  if (typeof row.error === "string" && row.error.trim()) return row.error;
-  if (locale === "ar" && typeof row.errorAr === "string") return row.errorAr;
-  if (typeof row.errorEn === "string") return row.errorEn;
-  if (typeof row.message === "string") return row.message;
-  return null;
 }
 
 export interface AddTableFormData {
@@ -61,6 +51,7 @@ export default function AddTableModal({
   const locale = useLocale();
   const isEdit = Boolean(table?.id);
   const [isSaving, setIsSaving] = useState(false);
+  const { runApiAction } = useApiAction();
 
   const {
     control,
@@ -95,38 +86,28 @@ export default function AddTableModal({
         isActive: data.isActive,
       };
 
-      if (isEdit && table) {
-        const result = await axiosPatch<typeof payload, { message?: string }>(
-          `/menus/${menuId}/tables/${table.id}`,
-          locale,
-          payload,
-        );
-        if (result.status) {
-          toast.success(t("editSuccess"));
-          onClose();
-          onRefresh?.();
-        } else {
-          toast.error(
-            getApiErrorMessage(result.data, locale) ?? t("editError"),
-          );
-        }
-      } else {
-        const result = await axiosPost<
-          typeof payload,
-          { message?: string; table?: MenuTable }
-        >(`/menus/${menuId}/tables`, locale, payload);
-        if (result.status) {
-          toast.success(t("createSuccess"));
-          onClose();
-          onRefresh?.();
-        } else {
-          toast.error(
-            getApiErrorMessage(result.data, locale) ?? t("createError"),
-          );
-        }
-      }
-    } catch {
-      toast.error(isEdit ? t("editError") : t("createError"));
+      await runApiAction(
+        () =>
+          isEdit && table
+            ? axiosPut<typeof payload, { message?: string }>(
+                `/menus/${menuId}/tables/${table.id}`,
+                locale,
+                payload,
+              )
+            : axiosPost<
+                typeof payload,
+                { message?: string; table?: MenuTable }
+              >(`/menus/${menuId}/tables`, locale, payload),
+        {
+          successToast: isEdit ? t("editSuccess") : t("createSuccess"),
+          errorToast: ({ error }) =>
+            error || (isEdit ? t("editError") : t("createError")),
+          onSuccess: () => {
+            onClose();
+            onRefresh?.();
+          },
+        },
+      );
     } finally {
       setIsSaving(false);
     }

@@ -1,6 +1,7 @@
 import { LENA_SYSTEM_HINTS } from "@/lib/lena/assistantConfig";
 import { extractTextFromN8n } from "@/lib/lena/parseN8nChatResponse";
 import { NextRequest, NextResponse } from "next/server";
+import { guardExternalServiceRoute } from "@/lib/server/externalRouteGuard";
 
 const WEBHOOK_URL =
   process.env.N8N_CHAT_WEBHOOK ??
@@ -9,6 +10,22 @@ const WEBHOOK_URL =
 
 export async function POST(request: NextRequest) {
   try {
+    const guard = await guardExternalServiceRoute(request, {
+      routeKey: "chat",
+      maxRequests: 20,
+    });
+    if (!guard.ok) {
+      return NextResponse.json(
+        { error: guard.error, ...(guard.code ? { code: guard.code } : {}) },
+        {
+          status: guard.status,
+          headers: guard.retryAfter
+            ? { "Retry-After": String(guard.retryAfter) }
+            : undefined,
+        },
+      );
+    }
+
     const body = (await request.json()) as {
       message?: string;
       sessionId?: string;
@@ -23,6 +40,9 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
+    if (message.length > 4_000 || sessionId.length > 128) {
+      return NextResponse.json({ error: "invalid_input" }, { status: 400 });
+    }
 
     const upstream = await fetch(WEBHOOK_URL, {
       method: "POST",
@@ -33,14 +53,15 @@ export async function POST(request: NextRequest) {
         hints: LENA_SYSTEM_HINTS,
       }),
       cache: "no-store",
+      signal: AbortSignal.timeout(20_000),
     });
 
     const raw = await upstream.text();
 
     if (!upstream.ok) {
       return NextResponse.json(
-        { error: "Webhook request failed", detail: raw },
-        { status: upstream.status },
+        { error: "webhook_request_failed" },
+        { status: 502 },
       );
     }
 

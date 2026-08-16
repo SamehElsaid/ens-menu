@@ -80,7 +80,7 @@ export default function DashboardMenuPage() {
       ? resolveMenuItemImageSrc(menu.logo)
       : undefined;
 
-  const isAuthHydrating = !userData && Boolean(Cookies.get("sub"));
+  const isAuthHydrating = !userData && Boolean(Cookies.get("ens_ui"));
 
   useEffect(() => {
     if (!menuSlugOrId || isAuthHydrating) return;

@@ -42,7 +42,7 @@ import { useDataTableLabels } from "@/hooks/useDataTableLabels";
 import { useRowFlash } from "@/hooks/useRowFlash";
 import {
   axiosGet,
-  axiosPatch,
+  axiosPut,
   axiosDelete,
   axiosPost,
 } from "@/shared/axiosCall";
@@ -56,32 +56,14 @@ import {
 } from "@/lib/adminUsersListUrl";
 import { toast } from "react-toastify";
 import LinkTo from "@/components/Global/LinkTo";
+import type { AdminUserListItem } from "@/types/User";
+import { useApiMutation } from "@/hooks/useApiMutation";
+import { useApiAction } from "@/hooks/useApiAction";
 
 type UserFilter = AdminUsersListFilter;
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  phoneNumber: string | null;
-  country: string | null;
-  profileImage: string | null;
-  createdAt: string;
-  lastLoginAt: string | null;
-  isSuspended: boolean;
-  suspendedAt: string | null;
-  suspendedReason: string | null;
-  planName: string;
-  subscriptionStatus: string;
-  startDate: string;
-  endDate: string | null;
-  billingCycle: string;
-  menusCount: number;
-  featuredOnHomepage?: boolean | number;
-}
-
 interface UsersResponse {
-  users: User[];
+  users: AdminUserListItem[];
   pagination: {
     currentPage: number;
     totalPages: number;
@@ -119,8 +101,7 @@ export default function UsersPage() {
 
   const [planFilter, setPlanFilter] = useState<UserFilter>(initialFilter);
 
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState<AdminUserListItem[]>([]);
   const [page, setPage] = useState(initialPage);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
@@ -134,17 +115,18 @@ export default function UsersPage() {
   const [usersOnHomepage, setUsersOnHomepage] = useState(0);
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [loadingUserId, setLoadingUserId] = useState<number | null>(null);
+  const { runApiAction } = useApiAction();
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
-    user: User | null;
+    user: AdminUserListItem | null;
   }>({ isOpen: false, user: null });
   const [suspendModal, setSuspendModal] = useState<{
     isOpen: boolean;
-    user: User | null;
+    user: AdminUserListItem | null;
   }>({ isOpen: false, user: null });
   const [reactivateModal, setReactivateModal] = useState<{
     isOpen: boolean;
-    user: User | null;
+    user: AdminUserListItem | null;
   }>({ isOpen: false, user: null });
   const [suspendReason, setSuspendReason] = useState("");
 
@@ -172,14 +154,16 @@ export default function UsersPage() {
     [page, planFilter, router, searchQuery],
   );
 
-  const fetchUsers = useCallback(
-    async (
-      pageNum: number = 1,
-      search: string = "",
-      filter: UserFilter = "all",
-    ) => {
-      try {
-        setLoading(true);
+  const requestUsers = useCallback(
+    ({
+      pageNum,
+      search,
+      filter,
+    }: {
+      pageNum: number;
+      search: string;
+      filter: UserFilter;
+    }) => {
         const params: Record<string, unknown> = {
           page: pageNum,
           limit: 10,
@@ -191,36 +175,41 @@ export default function UsersPage() {
           params.filter = filter;
         }
 
-        const result = await axiosGet<UsersResponse>(
+        return axiosGet<UsersResponse>(
           "/admin/users",
           locale,
           undefined,
           params,
         );
-
-        if (result.status && result.data) {
-          setUsers(result.data.users || []);
-          setTotal(result.data.pagination?.totalItems || 0);
-          setTotalUsersCount(result.data.stats?.totalUsers || 0);
-          setTotalPages(result.data.pagination?.totalPages || 1);
-          setItemsPerPage(result.data.pagination?.itemsPerPage || 10);
-          setSuspended(result.data.stats?.suspendedUsers || 0);
-          setActive(result.data.stats?.activeUsers || 0);
-          setFreeUsers(result.data.stats?.freeUsers ?? 0);
-          setProUsers(result.data.stats?.proUsers ?? 0);
-          setUsersWithoutMenu(result.data.stats?.usersWithoutMenu ?? 0);
-          setUsersOnHomepage(result.data.stats?.usersOnHomepage ?? 0);
-        } else {
-          toast.error(t("error"));
-        }
-      } catch (err) {
-        console.error("Error fetching users:", err);
-        toast.error(t("error"));
-      } finally {
-        setLoading(false);
-      }
     },
-    [locale, t],
+    [locale],
+  );
+  const usersQuery = useApiMutation({
+    request: requestUsers,
+    errorToast: t("error"),
+    onSuccess: (data) => {
+      if (!data) return;
+      setUsers(data.users || []);
+      setTotal(data.pagination?.totalItems || 0);
+      setTotalUsersCount(data.stats?.totalUsers || 0);
+      setTotalPages(data.pagination?.totalPages || 1);
+      setItemsPerPage(data.pagination?.itemsPerPage || 10);
+      setSuspended(data.stats?.suspendedUsers || 0);
+      setActive(data.stats?.activeUsers || 0);
+      setFreeUsers(data.stats?.freeUsers ?? 0);
+      setProUsers(data.stats?.proUsers ?? 0);
+      setUsersWithoutMenu(data.stats?.usersWithoutMenu ?? 0);
+      setUsersOnHomepage(data.stats?.usersOnHomepage ?? 0);
+    },
+  });
+  const { mutate: executeUsersQuery, loading } = usersQuery;
+  const fetchUsers = useCallback(
+    (
+      pageNum: number = 1,
+      search: string = "",
+      filter: UserFilter = "all",
+    ) => executeUsersQuery({ pageNum, search, filter }),
+    [executeUsersQuery],
   );
 
   useEffect(() => {
@@ -253,25 +242,15 @@ export default function UsersPage() {
     const userId = deleteModal.user.id;
     setLoadingUserId(userId);
     try {
-      const result = await axiosDelete<{ message?: string }>(
-        `/admin/users/${userId}`,
-        locale,
-      );
-
-      if (result.status) {
-        toast.success(t("deleteSuccess"));
-        setDeleteModal({ isOpen: false, user: null });
-        if (users.length === 1 && page > 1) {
-          setPage(page - 1);
-        } else {
-          fetchUsers(page, searchQuery, planFilter);
-        }
-      } else {
-        toast.error(t("deleteError"));
-      }
-    } catch (err) {
-      console.error("Error deleting user:", err);
-      toast.error(t("deleteError"));
+      await runApiAction(() => axiosDelete(`/admin/users/${userId}`, locale), {
+        successToast: t("deleteSuccess"),
+        errorToast: t("deleteError"),
+        onSuccess: () => {
+          setDeleteModal({ isOpen: false, user: null });
+          if (users.length === 1 && page > 1) setPage(page - 1);
+          else void fetchUsers(page, searchQuery, planFilter);
+        },
+      });
     } finally {
       setLoadingUserId(null);
     }
@@ -284,6 +263,7 @@ export default function UsersPage() {
     page,
     searchQuery,
     planFilter,
+    runApiAction,
   ]);
 
   const filterOptions: UserFilter[] = [
@@ -298,41 +278,55 @@ export default function UsersPage() {
     "on-homepage",
   ];
 
-  const isFeaturedOnHomepage = (user: User) =>
+  const isFeaturedOnHomepage = (user: AdminUserListItem) =>
     user.featuredOnHomepage === true || user.featuredOnHomepage === 1;
 
   const handleRemoveFromHomepage = useCallback(
-    async (user: User) => {
+    async (user: AdminUserListItem) => {
       setLoadingUserId(user.id);
       try {
-        const result = await axiosDelete<{ success?: boolean }>(
-          `/admin/users/${user.id}/feature-on-homepage`,
-          locale,
+        await runApiAction(
+          () =>
+            axiosDelete(
+              `/admin/users/${user.id}/feature-on-homepage`,
+              locale,
+            ),
+          {
+            successToast: t("removeFromHomepageSuccess"),
+            errorToast: t("removeFromHomepageError"),
+            onSuccess: () => {
+              flashRow(user.id);
+              if (
+                planFilter === "on-homepage" &&
+                users.length === 1 &&
+                page > 1
+              ) {
+                setPage(page - 1);
+              } else {
+                void fetchUsers(page, searchQuery, planFilter);
+              }
+            },
+          },
         );
-
-        if (result.status) {
-          toast.success(t("removeFromHomepageSuccess"));
-          flashRow(user.id);
-          if (planFilter === "on-homepage" && users.length === 1 && page > 1) {
-            setPage(page - 1);
-          } else {
-            fetchUsers(page, searchQuery, planFilter);
-          }
-        } else {
-          toast.error(t("removeFromHomepageError"));
-        }
-      } catch (err) {
-        console.error("Error removing user from homepage:", err);
-        toast.error(t("removeFromHomepageError"));
       } finally {
         setLoadingUserId(null);
       }
     },
-    [locale, t, fetchUsers, page, searchQuery, planFilter, users.length, flashRow],
+    [
+      locale,
+      t,
+      fetchUsers,
+      page,
+      searchQuery,
+      planFilter,
+      users.length,
+      flashRow,
+      runApiAction,
+    ],
   );
 
   const handleAddToHomepage = useCallback(
-    async (user: User) => {
+    async (user: AdminUserListItem) => {
       setLoadingUserId(user.id);
       try {
         const result = await axiosPost<
@@ -379,37 +373,44 @@ export default function UsersPage() {
       if (suspendReason.trim()) {
         payload.reason = suspendReason.trim();
       }
-      const result = await axiosPatch<typeof payload, User>(
-        `/admin/users/${userIdNum}/suspend`,
-        locale,
-        payload,
-      );
-
-      if (result.status && result.data) {
-        const reason = suspendReason.trim() || null;
-        setUsers((prevUsers) =>
-          prevUsers.map((user) =>
-            user.id === userIdNum
-              ? { ...user, isSuspended: true, suspendedReason: reason }
-              : user,
+      await runApiAction(
+        () =>
+          axiosPut(
+            `/admin/users/${userIdNum}/suspend`,
+            locale,
+            payload,
           ),
-        );
-        setSuspended((prev) => prev + 1);
-        setActive((prev) => Math.max(0, prev - 1));
-        toast.success(t("suspendSuccess"));
-        flashRow(userIdNum);
-        setSuspendModal({ isOpen: false, user: null });
-        setSuspendReason("");
-      } else {
-        toast.error(t("suspendError"));
-      }
-    } catch (err) {
-      console.error("Error suspending user:", err);
-      toast.error(t("suspendError"));
+        {
+          successToast: t("suspendSuccess"),
+          errorToast: t("suspendError"),
+          onSuccess: () => {
+            const reason = suspendReason.trim() || null;
+            setUsers((current) =>
+              current.map((user) =>
+                user.id === userIdNum
+                  ? { ...user, isSuspended: true, suspendedReason: reason }
+                  : user,
+              ),
+            );
+            setSuspended((current) => current + 1);
+            setActive((current) => Math.max(0, current - 1));
+            flashRow(userIdNum);
+            setSuspendModal({ isOpen: false, user: null });
+            setSuspendReason("");
+          },
+        },
+      );
     } finally {
       setLoadingUserId(null);
     }
-  }, [suspendModal.user, suspendReason, t, locale, flashRow]);
+  }, [
+    suspendModal.user,
+    suspendReason,
+    t,
+    locale,
+    flashRow,
+    runApiAction,
+  ]);
 
   const closeSuspendModal = useCallback(() => {
     if (loadingUserId === suspendModal.user?.id) return;
@@ -424,47 +425,47 @@ export default function UsersPage() {
     setLoadingUserId(userIdNum);
     try {
       const payload = { isSuspended: false };
-      const result = await axiosPatch<typeof payload, User>(
-        `/admin/users/${userIdNum}/suspend`,
-        locale,
-        payload,
-      );
-
-      if (result.status && result.data) {
-        setUsers((prevUsers) =>
-          prevUsers.map((user) =>
-            user.id === userIdNum
-              ? {
-                  ...user,
-                  isSuspended: false,
-                  suspendedReason: null,
-                  suspendedAt: null,
-                }
-              : user,
+      await runApiAction(
+        () =>
+          axiosPut(
+            `/admin/users/${userIdNum}/suspend`,
+            locale,
+            payload,
           ),
-        );
-        setActive((prev) => prev + 1);
-        setSuspended((prev) => Math.max(0, prev - 1));
-        toast.success(t("activateSuccess"));
-        flashRow(userIdNum);
-        setReactivateModal({ isOpen: false, user: null });
-      } else {
-        toast.error(t("activateError"));
-      }
-    } catch (err) {
-      console.error("Error activating user:", err);
-      toast.error(t("activateError"));
+        {
+          successToast: t("activateSuccess"),
+          errorToast: t("activateError"),
+          onSuccess: () => {
+            setUsers((current) =>
+              current.map((user) =>
+                user.id === userIdNum
+                  ? {
+                      ...user,
+                      isSuspended: false,
+                      suspendedReason: null,
+                      suspendedAt: null,
+                    }
+                  : user,
+              ),
+            );
+            setActive((current) => current + 1);
+            setSuspended((current) => Math.max(0, current - 1));
+            flashRow(userIdNum);
+            setReactivateModal({ isOpen: false, user: null });
+          },
+        },
+      );
     } finally {
       setLoadingUserId(null);
     }
-  }, [reactivateModal.user, t, locale, flashRow]);
+  }, [reactivateModal.user, t, locale, flashRow, runApiAction]);
 
   const closeReactivateModal = useCallback(() => {
     if (loadingUserId === reactivateModal.user?.id) return;
     setReactivateModal({ isOpen: false, user: null });
   }, [loadingUserId, reactivateModal.user?.id]);
 
-  const columns: DataColumn<User>[] = useMemo(
+  const columns: DataColumn<AdminUserListItem>[] = useMemo(
     () => [
       {
         id: "name",
@@ -553,7 +554,7 @@ export default function UsersPage() {
   );
 
   const renderRowActions = useCallback(
-    (user: User) => {
+    (user: AdminUserListItem) => {
       const isActive = !user.isSuspended;
       const isLoading = loadingUserId === user.id;
       const featured = isFeaturedOnHomepage(user);
@@ -801,7 +802,7 @@ export default function UsersPage() {
         />
       }
     >
-      <DataTable<User>
+      <DataTable<AdminUserListItem>
         columns={columns}
         rows={users}
         getRowKey={(user) => String(user.id)}

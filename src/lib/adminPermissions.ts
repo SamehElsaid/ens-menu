@@ -1,63 +1,4 @@
-import type {
-  AdminPermissionKey,
-  AdminPermissionsMap,
-} from "@/types/AdminPermission";
-
-const STORAGE_KEY = "ensmenu_admin_permissions";
-
-function readMap(): AdminPermissionsMap {
-  if (typeof window === "undefined") return {};
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return {};
-    return JSON.parse(raw) as AdminPermissionsMap;
-  } catch {
-    return {};
-  }
-}
-
-function writeMap(map: AdminPermissionsMap): void {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
-}
-
-function normalizeEmail(email: string): string {
-  return email.trim().toLowerCase();
-}
-
-/** No stored record = full access (existing supervisors). */
-export function getAdminPermissionsByEmail(
-  email: string | null | undefined,
-): AdminPermissionKey[] | null {
-  if (!email?.trim()) return null;
-  const map = readMap();
-  const key = normalizeEmail(email);
-  return map[key] ?? null;
-}
-
-export function hasAdminPermission(
-  email: string | null | undefined,
-  permission: AdminPermissionKey,
-): boolean {
-  const list = getAdminPermissionsByEmail(email);
-  if (!list) return true;
-  return list.includes(permission);
-}
-
-export function setAdminPermissionsByEmail(
-  email: string,
-  permissions: AdminPermissionKey[],
-): void {
-  const map = readMap();
-  map[normalizeEmail(email)] = permissions;
-  writeMap(map);
-}
-
-export function removeAdminPermissionsByEmail(email: string): void {
-  const map = readMap();
-  delete map[normalizeEmail(email)];
-  writeMap(map);
-}
+import type { AdminPermissionKey } from "@/types/AdminPermission";
 
 /** Map admin route segment to permission key */
 export function adminRouteToPermission(
@@ -111,11 +52,25 @@ export function adminRouteToPermission(
     : null;
 }
 
+/**
+ * Server-issued grant list.
+ * `null` = unrestricted supervisor.
+ * `undefined` = not loaded yet — fail closed.
+ */
+export function hasAdminPermission(
+  granted: AdminPermissionKey[] | null | undefined,
+  permission: AdminPermissionKey,
+): boolean {
+  if (granted === undefined) return false;
+  if (granted === null) return true;
+  return granted.includes(permission);
+}
+
 export function canAccessAdminPath(
-  email: string | null | undefined,
+  granted: AdminPermissionKey[] | null | undefined,
   pathname: string,
 ): boolean {
   const permission = adminRouteToPermission(pathname);
   if (!permission) return true;
-  return hasAdminPermission(email, permission);
+  return hasAdminPermission(granted, permission);
 }

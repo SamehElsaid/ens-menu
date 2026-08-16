@@ -65,6 +65,7 @@ export default function AdminAnalyticsPage() {
   );
 
   const load = useCallback(async () => {
+    await Promise.resolve();
     setLoading(true);
     const data = await fetchAdminAnalytics(locale, period);
     setAnalytics(data);
@@ -72,7 +73,8 @@ export default function AdminAnalyticsPage() {
   }, [locale, period]);
 
   useEffect(() => {
-    void load();
+    const timer = window.setTimeout(() => void load(), 0);
+    return () => window.clearTimeout(timer);
   }, [load]);
 
   const num = useCallback((value: number) => value.toLocaleString("en-US"), []);

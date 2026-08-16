@@ -1,6 +1,7 @@
 export interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
+  accessToken?: string;
+  refreshToken?: string;
+  csrfToken?: string;
   isNew?: boolean;
   user?: {
     email: string;

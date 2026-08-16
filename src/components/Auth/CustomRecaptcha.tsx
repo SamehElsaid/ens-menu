@@ -10,6 +10,7 @@ import {
   useImperativeHandle,
   useRef,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
@@ -118,29 +119,23 @@ const CustomRecaptcha = forwardRef<RecaptchaGateHandle, CustomRecaptchaProps>(
     const headingId = useId();
     const descriptionId = useId();
 
-    const [status, setStatus] = useState<RecaptchaStatus>("boot");
-    const [loading, setLoading] = useState(false);
-    const [modalOpen, setModalOpen] = useState(false);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [mounted, setMounted] = useState(false);
-    const [widgetScale, setWidgetScale] = useState(1);
-
     const isDev =
       process.env.NEXT_PUBLIC_DEV === "dev" ||
       process.env.NEXT_PUBLIC_DEV === "true";
+    const [status, setStatus] = useState<RecaptchaStatus>(() =>
+      isDev ? "verified" : "boot",
+    );
+    const [loading, setLoading] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [widgetScale, setWidgetScale] = useState(1);
+    const mounted = useSyncExternalStore(
+      () => () => undefined,
+      () => true,
+      () => false,
+    );
 
     useBodyScrollLock(mode === "on-demand" && modalOpen);
-
-    useEffect(() => {
-      setMounted(true);
-    }, []);
-
-    useEffect(() => {
-      if (isDev) {
-        onVerifiedChange(true);
-        setStatus("verified");
-      }
-    }, [isDev, onVerifiedChange]);
 
     const clearRejectTimeout = useCallback(() => {
       if (rejectTimeoutRef.current !== null) {

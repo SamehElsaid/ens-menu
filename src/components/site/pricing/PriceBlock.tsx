@@ -4,12 +4,11 @@ import { useTranslations } from "next-intl";
 import type { CSSProperties } from "react";
 import { Odometer } from "@/motion/Odometer";
 import { cn } from "@/lib/cn";
+import { formatEgpPrice } from "@/lib/formatNumber";
+
+export { formatEgpPrice } from "@/lib/formatNumber";
 
 export type BillingCycle = "monthly" | "yearly";
-
-export function formatEgpPrice(value: number): string {
-  return value.toLocaleString("en-US");
-}
 
 /**
  * Billing switch for the public pricing page.

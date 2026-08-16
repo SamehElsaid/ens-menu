@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useAppSelector } from "@/store/hooks";
 import { parseFollowUpPurpose } from "@/lib/fetchAdminFollowUp";
@@ -48,7 +48,18 @@ const PURPOSES: FollowUpPurpose[] = [
   "other",
 ];
 
-export default function LogFollowUpCallModal({
+export default function LogFollowUpCallModal(
+  props: LogFollowUpCallModalProps,
+) {
+  return (
+    <LogFollowUpCallForm
+      key={`${props.open}-${props.editingCall?.id ?? "new"}`}
+      {...props}
+    />
+  );
+}
+
+function LogFollowUpCallForm({
   open,
   onClose,
   userId,
@@ -66,42 +77,29 @@ export default function LogFollowUpCallModal({
 
   const isEditing = Boolean(editingCall);
 
-  const [outcome, setOutcome] = useState<FollowUpOutcome>("answered");
-  const [purpose, setPurpose] = useState<FollowUpPurpose>("onboarding");
-  const [agentName, setAgentName] = useState("");
-  const [notes, setNotes] = useState("");
-  const [nextFollowUpAt, setNextFollowUpAt] = useState("");
-  const [customerName, setCustomerName] = useState("");
-  const [governorate, setGovernorate] = useState("");
-  const [cafeName, setCafeName] = useState("");
-  const [otherContactNumbers, setOtherContactNumbers] = useState("");
-
-  useEffect(() => {
-    if (!open) return;
-
-    if (editingCall) {
-      setOutcome(editingCall.outcome);
-      setPurpose(parseFollowUpPurpose(editingCall.purpose));
-      setAgentName(editingCall.adminName ?? authData?.name ?? "");
-      setNotes(editingCall.notes ?? "");
-      setNextFollowUpAt(editingCall.nextFollowUpAt?.slice(0, 10) ?? "");
-      setCustomerName(editingCall.customerName ?? "");
-      setGovernorate(editingCall.governorate ?? "");
-      setCafeName(editingCall.cafeName ?? "");
-      setOtherContactNumbers(editingCall.otherContactNumbers ?? "");
-      return;
-    }
-
-    setOutcome("answered");
-    setPurpose("onboarding");
-    setAgentName(authData?.name ?? "");
-    setNotes("");
-    setNextFollowUpAt("");
-    setCustomerName("");
-    setGovernorate("");
-    setCafeName("");
-    setOtherContactNumbers("");
-  }, [open, editingCall, authData?.name]);
+  const [outcome, setOutcome] = useState<FollowUpOutcome>(
+    editingCall?.outcome ?? "answered",
+  );
+  const [purpose, setPurpose] = useState<FollowUpPurpose>(() =>
+    editingCall ? parseFollowUpPurpose(editingCall.purpose) : "onboarding",
+  );
+  const [agentName, setAgentName] = useState(
+    editingCall?.adminName ?? authData?.name ?? "",
+  );
+  const [notes, setNotes] = useState(editingCall?.notes ?? "");
+  const [nextFollowUpAt, setNextFollowUpAt] = useState(
+    editingCall?.nextFollowUpAt?.slice(0, 10) ?? "",
+  );
+  const [customerName, setCustomerName] = useState(
+    editingCall?.customerName ?? "",
+  );
+  const [governorate, setGovernorate] = useState(
+    editingCall?.governorate ?? "",
+  );
+  const [cafeName, setCafeName] = useState(editingCall?.cafeName ?? "");
+  const [otherContactNumbers, setOtherContactNumbers] = useState(
+    editingCall?.otherContactNumbers ?? "",
+  );
 
   const resetForm = () => {
     setNotes("");

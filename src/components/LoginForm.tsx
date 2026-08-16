@@ -5,16 +5,14 @@ import { FiMail } from "react-icons/fi";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLocale, useTranslations } from "next-intl";
 import { loginSchema, LoginSchema } from "@/schemas/loginSchema";
-import { encryptData } from "@/shared/encryption";
-import Cookies from "js-cookie";
 import { useSearchParams } from "next/navigation";
 import { resolvePostLoginPath } from "@/lib/authRedirect";
 import { getMenuDashboardRef } from "@/lib/menuDashboardPath";
 import LinkTo from "./Global/LinkTo";
-import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
+import { SET_AUTH_SESSION_CACHE } from "@/store/authSlice/authSlice";
 import { useAppDispatch } from "@/store/hooks";
 import { axiosPost } from "@/shared/axiosCall";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent } from "react";
 import { LoginResponse } from "@/types/LoginResponse";
 import AuthSocialButtons from "@/components/Auth/AuthSocialButtons";
 import { syncFcmToken } from "@/shared/syncFcmToken";
@@ -29,8 +27,24 @@ import {
   PasswordInput,
 } from "@/components/site/Form";
 import { SiteButton } from "@/components/site/Button";
+import { writeAuthUiCookie } from "@/shared/authUiCookie";
+import { storeCsrfTokenFromPayload } from "@/shared/csrfToken";
 
 const REMEMBER_EMAIL_KEY = "ensmenu_remember_email";
+
+function readRememberedEmail(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    return localStorage.getItem(REMEMBER_EMAIL_KEY) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function subscribeRememberedEmail(onStoreChange: () => void): () => void {
+  window.addEventListener("storage", onStoreChange);
+  return () => window.removeEventListener("storage", onStoreChange);
+}
 
 export default function LoginForm() {
   const t = useTranslations("");
@@ -61,7 +75,15 @@ export default function LoginForm() {
   const redirectParam = searchParams.get("redirect");
   const [loading, setLoading] = useState(false);
   const [recaptchaVerified, setRecaptchaVerified] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+  const savedEmail = useSyncExternalStore(
+    subscribeRememberedEmail,
+    readRememberedEmail,
+    () => "",
+  );
+  const [rememberOverride, setRememberOverride] = useState<boolean | null>(
+    null,
+  );
+  const rememberMe = rememberOverride ?? Boolean(savedEmail);
   const [apiError, setApiError] = useState<string | null>(null);
   const [emailVerificationRequired, setEmailVerificationRequired] =
     useState(false);
@@ -69,16 +91,10 @@ export default function LoginForm() {
   const recaptchaRef = useRef<RecaptchaGateHandle>(null);
 
   useEffect(() => {
-    try {
-      const savedEmail = localStorage.getItem(REMEMBER_EMAIL_KEY);
-      if (savedEmail) {
-        setValue("email", savedEmail);
-        setRememberMe(true);
-      }
-    } catch {
-      // localStorage unavailable
+    if (savedEmail) {
+      setValue("email", savedEmail);
     }
-  }, [setValue]);
+  }, [savedEmail, setValue]);
 
   const onSubmit = async (data: LoginSchema) => {
     if (!recaptchaVerified) {
@@ -106,7 +122,7 @@ export default function LoginForm() {
     >("/auth/login", locale, data, false, true);
 
     if (response.status && response.data) {
-      const { accessToken, refreshToken, user } = response.data;
+      const { user } = response.data;
       const data = response.data as LoginResponse & {
         permissions?: unknown;
         menu?: { id?: number; uuid?: string };
@@ -119,10 +135,8 @@ export default function LoginForm() {
       // (permissions/role) the proxy guard expects.
       const isStaff = user?.role === "staff";
 
-      const saveTokens = isStaff
+      const uiHints = isStaff
         ? {
-            token: accessToken ?? "",
-            refreshToken: refreshToken ?? "",
             role: "staff",
             permissions: Array.isArray(data.permissions)
               ? data.permissions.filter(
@@ -134,33 +148,23 @@ export default function LoginForm() {
             menuUuid: getMenuDashboardRef(data.menu ?? {}),
           }
         : {
-            token: accessToken ?? "",
-            refreshToken: refreshToken ?? "",
             role: user?.role ?? "",
           };
 
-      const encryptedData = encryptData(saveTokens);
-
-      Cookies.set("sub", encryptedData, {
-        expires: rememberMe ? 14 : 3,
-        sameSite: "Lax",
-        secure: true,
-        path: "/",
-      });
+      writeAuthUiCookie(uiHints, { expires: rememberMe ? 14 : 3 });
+      storeCsrfTokenFromPayload(response.data);
 
       void syncFcmToken(locale);
 
       if (user) {
-        dispatch(SET_ACTIVE_USER({ user }));
+        dispatch(SET_AUTH_SESSION_CACHE({ user }));
       }
 
       // Staff land on the account dashboard like owners do: orders and staff
       // are account-level now, and the menu list there is already filtered to
       // whatever their grants and role allow.
-      window.location.href = resolvePostLoginPath(
-        locale,
-        user?.role,
-        redirectParam,
+      window.location.assign(
+        resolvePostLoginPath(locale, user?.role, redirectParam),
       );
     } else {
       const payload = response.data as {
@@ -202,7 +206,12 @@ export default function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate>
+    <form
+      onSubmit={(event: FormEvent<HTMLFormElement>) => {
+        void handleSubmit(onSubmit)(event);
+      }}
+      noValidate
+    >
       {apiError ? (
         <Alert className="mb-5">
           <p>{apiError}</p>
@@ -277,7 +286,7 @@ export default function LoginForm() {
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <Checkbox
           checked={rememberMe}
-          onChange={(e) => setRememberMe(e.target.checked)}
+          onChange={(e) => setRememberOverride(e.target.checked)}
           label={t("auth.rememberMe")}
         />
         <LinkTo

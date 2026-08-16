@@ -1,6 +1,6 @@
 import type { AppDispatch } from "@/store/store";
-import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
-import { axiosPatch } from "@/shared/axiosCall";
+import { SET_AUTH_SESSION_CACHE } from "@/store/authSlice/authSlice";
+import { axiosPut } from "@/shared/axiosCall";
 
 export type AuthSliceUser = {
   onboardingCompleted?: boolean;
@@ -40,7 +40,7 @@ export async function markAiImportOnboardingComplete(
   const currentUser = getAuthSliceUser(authData);
   if (currentUser?.onboardingCompleted === true) return true;
 
-  const res = await axiosPatch<
+  const res = await axiosPut<
     { onboardingCompleted: boolean },
     { user?: AuthSliceUser }
   >("/user/profile", locale, { onboardingCompleted: true });
@@ -55,7 +55,7 @@ export async function markAiImportOnboardingComplete(
   };
 
   dispatch(
-    SET_ACTIVE_USER({
+    SET_AUTH_SESSION_CACHE({
       ...(typeof authData === "object" && authData !== null ? authData : {}),
       user: nextUser,
     }),

@@ -3,13 +3,14 @@
 import Layout from "@/components/Dashboard/Layout";
 import { axiosGet } from "@/shared/axiosCall";
 import { Menu } from "@/types/Menu";
-import { localizeHref } from "@/i18n/routing";
 import { useLocale } from "next-intl";
-import { redirect, useSelectedLayoutSegment } from "next/navigation";
+import { useSelectedLayoutSegment } from "next/navigation";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { SET_ACTIVE_USER, SET_LOADING } from "@/store/authSlice/menuDataSlice";
+import {
+  SET_ACTIVE_MENU_CACHE,
+  SET_MENU_CACHE_LOADING,
+} from "@/store/authSlice/menuDataSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { AuthUserHydrate } from "@/components/Dashboard/AuthUserHydrate";
 import { FcmTokenSync } from "@/components/Dashboard/FcmTokenSync";
 import {
   SuspendedAccountScreen,
@@ -23,7 +24,7 @@ import { DashboardTitleProvider } from "@/components/Dashboard/DashboardTitlePro
 import { LoadingBlock } from "@/components/ui";
 import UpcomingFeaturesAnnouncement from "@/components/Dashboard/UpcomingFeaturesAnnouncement";
 import { PendingOrdersProvider } from "@/components/Dashboard/PendingOrdersProvider";
-import { usePathname } from "@/i18n/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import {
   extractDashboardMenuRouteKey,
   menuMatchesRouteKey,
@@ -73,8 +74,9 @@ export default function DashboardClientLayout({
   const pathname = usePathname();
   const dispatch = useAppDispatch();
   const locale = useLocale();
+  const router = useRouter();
   const menuFromStore = useAppSelector((state) => state.menuData.menu);
-  const [hasMenu, setHasMenu] = useState(false);
+  const [loadedMenuKey, setLoadedMenuKey] = useState<string | null>(null);
   const accountGateStatus = useAccountGateStatus();
   const profileGateStatus = useProfileGateStatus();
 
@@ -84,24 +86,21 @@ export default function DashboardClientLayout({
     return fromPath;
   }, [pathname, segment]);
 
+  const storeMatchesRoute = Boolean(
+    routeMenuKey && menuMatchesRouteKey(menuFromStore, routeMenuKey),
+  );
+  const hasMenu = storeMatchesRoute || loadedMenuKey === routeMenuKey;
+
   useEffect(() => {
+    if (!routeMenuKey || storeMatchesRoute) {
+      return;
+    }
+
     const redirectToUnauthorized = () => {
-      redirect(localizeHref("/unauthorized", locale));
+      router.replace("/unauthorized");
     };
 
-    if (!routeMenuKey) {
-      if (segment === "subscription") setHasMenu(true);
-      else setHasMenu(false);
-      return;
-    }
-
-    if (menuMatchesRouteKey(menuFromStore, routeMenuKey)) {
-      setHasMenu(true);
-      return;
-    }
-
-    setHasMenu(false);
-    dispatch(SET_LOADING());
+    dispatch(SET_MENU_CACHE_LOADING());
 
     let cancelled = false;
 
@@ -115,7 +114,7 @@ export default function DashboardClientLayout({
 
           if (normalized) {
             dispatch(
-              SET_ACTIVE_USER({
+              SET_ACTIVE_MENU_CACHE({
                 ...normalized,
                 activeItemsCount:
                   payload.activeItemsCount ?? normalized.activeItemsCount,
@@ -130,7 +129,7 @@ export default function DashboardClientLayout({
                 menuTables: payload.menuTables as Menu["menuTables"],
               }),
             );
-            setHasMenu(true);
+            setLoadedMenuKey(routeMenuKey);
             return;
           }
         }
@@ -142,14 +141,7 @@ export default function DashboardClientLayout({
     return () => {
       cancelled = true;
     };
-  }, [
-    routeMenuKey,
-    locale,
-    dispatch,
-    menuFromStore?.id,
-    menuFromStore?.slug,
-    segment,
-  ]);
+  }, [routeMenuKey, locale, dispatch, storeMatchesRoute, router]);
 
   const isMenuRoute = Boolean(routeMenuKey);
 
@@ -174,7 +166,6 @@ export default function DashboardClientLayout({
   return (
     <DashboardTitleProvider>
       <PendingOrdersProvider>
-        <AuthUserHydrate />
         <FcmTokenSync />
         <UpcomingFeaturesAnnouncement />
         {isAppLoading ? null : accountGateStatus === "suspended" ? (

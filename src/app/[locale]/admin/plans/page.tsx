@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { IoCreateOutline } from "react-icons/io5";
 import PlanCapabilitiesFields from "@/components/Admin/PlanCapabilitiesFields";
 import {
@@ -22,8 +22,7 @@ import {
   type DataColumn,
 } from "@/components/ui";
 import { useDataTableLabels } from "@/hooks/useDataTableLabels";
-import { axiosGet, axiosPatch } from "@/shared/axiosCall";
-import { toast } from "react-toastify";
+import { axiosGet, axiosPut } from "@/shared/axiosCall";
 import {
   DEFAULT_CUSTOM_CAPABILITIES,
   DEFAULT_FREE_CAPABILITIES,
@@ -31,24 +30,14 @@ import {
   normalizePlanCapabilities,
   type PlanCapabilities,
 } from "@/types/PlanCapabilities";
-
-export interface Plan {
-  id: number;
-  name: string;
-  priceMonthly?: number;
-  priceYearly: number;
-  extraMenuPrice?: number | null;
-  maxMenus: number;
-  maxProductsPerMenu: number;
-  allowCustomDomain?: boolean;
-  hasAds: boolean;
-  isActive: boolean;
-  activeSubscriptions?: number;
-  capabilities?: PlanCapabilities;
-}
+import type { AdminPlan } from "@/types/Plan";
+import { formatEgpAmount } from "@/lib/formatNumber";
+import { planEndpoints } from "@/api/endpoints/plans";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { useApiMutation } from "@/hooks/useApiMutation";
 
 interface PlansResponse {
-  plans: Plan[];
+  plans: AdminPlan[];
 }
 
 interface CustomDisplayResponse {
@@ -75,16 +64,6 @@ function isFreePlanName(name: string): boolean {
   return String(name).trim().toLowerCase() === "free";
 }
 
-function formatEgp(value: unknown): string {
-  if (value == null || value === "") return "—";
-  const n = Number(value);
-  if (!Number.isFinite(n)) return "—";
-  return `${n.toLocaleString("en-US", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  })} EGP`;
-}
-
 export default function PlansPage() {
   const locale = useLocale();
   const t = useTranslations("adminPlans");
@@ -92,11 +71,9 @@ export default function PlansPage() {
   const tAdmin = useTranslations("adminDashboard");
   const tableLabels = useDataTableLabels();
 
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [loading, setLoading] = useState(true);
   const [editModal, setEditModal] = useState<{
     isOpen: boolean;
-    plan: Plan | null;
+    plan: AdminPlan | null;
   }>({
     isOpen: false,
     plan: null,
@@ -104,61 +81,68 @@ export default function PlansPage() {
   const [form, setForm] =
     useState<Record<string, string | number | boolean>>(defaultForm);
   const [caps, setCaps] = useState<PlanCapabilities>(DEFAULT_FREE_CAPABILITIES);
-  const [saving, setSaving] = useState(false);
 
   const [customCaps, setCustomCaps] = useState<PlanCapabilities>(
     DEFAULT_CUSTOM_CAPABILITIES,
   );
-  const [customLoading, setCustomLoading] = useState(true);
-  const [customSaving, setCustomSaving] = useState(false);
+  const requestPlans = useCallback(
+    () => axiosGet<PlansResponse>(planEndpoints.admin.list(), locale),
+    [locale],
+  );
+  const plansQuery = useApiQuery({
+    request: requestPlans,
+    errorToast: t("error"),
+  });
+  const plans = plansQuery.data?.plans ?? [];
+  const loading = plansQuery.loading;
+  const fetchPlans = plansQuery.refetch;
 
-  const fetchPlans = useCallback(async () => {
-    try {
-      setLoading(true);
-      const result = await axiosGet<PlansResponse>("/admin/plans", locale);
-
-      if (result.status && result.data?.plans) {
-        setPlans(result.data.plans);
-      } else {
-        toast.error(t("error"));
-      }
-    } catch (err) {
-      console.error("Error fetching plans:", err);
-      toast.error(t("error"));
-    } finally {
-      setLoading(false);
-    }
-  }, [locale, t]);
-
-  const fetchCustomDisplay = useCallback(async () => {
-    try {
-      setCustomLoading(true);
-      const result = await axiosGet<CustomDisplayResponse>(
-        "/admin/plans/custom-display",
+  const requestCustomDisplay = useCallback(
+    () =>
+      axiosGet<CustomDisplayResponse>(
+        planEndpoints.admin.customDisplay(),
         locale,
-      );
-      if (result.status && result.data?.capabilities) {
-        setCustomCaps(
-          normalizePlanCapabilities(
-            result.data.capabilities,
-            DEFAULT_CUSTOM_CAPABILITIES,
-          ),
-        );
-      }
-    } catch (err) {
-      console.error("Error fetching custom display:", err);
-      toast.error(t("customDisplay.error"));
-    } finally {
-      setCustomLoading(false);
-    }
-  }, [locale, t]);
+      ),
+    [locale],
+  );
+  const customDisplayQuery = useApiQuery({
+    request: requestCustomDisplay,
+    errorToast: t("customDisplay.error"),
+    onSuccess: (data) =>
+      setCustomCaps(
+        normalizePlanCapabilities(
+          data.capabilities,
+          DEFAULT_CUSTOM_CAPABILITIES,
+        ),
+      ),
+  });
+  const customLoading = customDisplayQuery.loading;
+  const fetchCustomDisplay = customDisplayQuery.refetch;
 
-  useEffect(() => {
-    fetchPlans();
-    fetchCustomDisplay();
-  }, [fetchPlans, fetchCustomDisplay]);
+  const requestPlanUpdate = useCallback(
+    ({ id, payload }: { id: number; payload: Record<string, unknown> }) =>
+      axiosPut<Record<string, unknown>, { message?: string }>(
+        planEndpoints.admin.detail(id),
+        locale,
+        payload,
+      ),
+    [locale],
+  );
+  const planUpdate = useApiMutation({ request: requestPlanUpdate });
+  const saving = planUpdate.loading;
 
-  const openEdit = useCallback((plan: Plan) => {
+  const requestCustomUpdate = useCallback(
+    (capabilities: PlanCapabilities) =>
+      axiosPut<
+        { capabilities: PlanCapabilities },
+        { message?: string }
+      >(planEndpoints.admin.customDisplay(), locale, { capabilities }),
+    [locale],
+  );
+  const customUpdate = useApiMutation({ request: requestCustomUpdate });
+  const customSaving = customUpdate.loading;
+
+  const openEdit = useCallback((plan: AdminPlan) => {
     setEditModal({ isOpen: true, plan });
     setForm({
       name: plan.name,
@@ -186,67 +170,44 @@ export default function PlansPage() {
   const handleSave = useCallback(async () => {
     if (!editModal.plan) return;
 
-    setSaving(true);
-    try {
-      const payload: Record<string, unknown> = {
-        name: String(form.name).trim(),
-        priceMonthly: Number(form.priceMonthly),
-        priceYearly: Number(form.priceYearly),
-        maxMenus: Number(form.maxMenus),
-        maxProductsPerMenu: Number(form.maxProducts),
-        hasAds: Boolean(form.hasAds),
-        isActive: Boolean(form.isActive),
-        allowCustomDomain: Boolean(form.allowFullDesignControl),
-        capabilities: caps,
-      };
+    const payload: Record<string, unknown> = {
+      name: String(form.name).trim(),
+      priceMonthly: Number(form.priceMonthly),
+      priceYearly: Number(form.priceYearly),
+      maxMenus: Number(form.maxMenus),
+      maxProductsPerMenu: Number(form.maxProducts),
+      hasAds: Boolean(form.hasAds),
+      isActive: Boolean(form.isActive),
+      allowCustomDomain: Boolean(form.allowFullDesignControl),
+      capabilities: caps,
+    };
 
-      if (isProPlanName(String(form.name))) {
-        payload.extraMenuPrice = Number(form.extraMenuPrice);
-      }
-
-      const result = await axiosPatch<typeof payload, { message?: string }>(
-        `/admin/plans/${editModal.plan.id}`,
-        locale,
-        payload,
-      );
-
-      if (result.status) {
-        toast.success(t("updateSuccess"));
-        closeEdit();
-        fetchPlans();
-      } else {
-        toast.error(t("updateError"));
-      }
-    } catch (err) {
-      console.error("Error updating plan:", err);
-      toast.error(t("updateError"));
-    } finally {
-      setSaving(false);
+    if (isProPlanName(String(form.name))) {
+      payload.extraMenuPrice = Number(form.extraMenuPrice);
     }
-  }, [editModal.plan, form, caps, locale, t, closeEdit, fetchPlans]);
+
+    await planUpdate.mutate(
+      { id: editModal.plan.id, payload },
+      {
+        successToast: t("updateSuccess"),
+        errorToast: t("updateError"),
+        onSuccess: () => {
+          closeEdit();
+          void fetchPlans();
+        },
+      },
+    );
+  }, [editModal.plan, form, caps, planUpdate, t, closeEdit, fetchPlans]);
 
   const handleSaveCustom = useCallback(async () => {
-    setCustomSaving(true);
-    try {
-      const result = await axiosPatch<
-        { capabilities: PlanCapabilities },
-        { message?: string }
-      >("/admin/plans/custom-display", locale, { capabilities: customCaps });
-      if (result.status) {
-        toast.success(t("customDisplay.saveSuccess"));
-        fetchCustomDisplay();
-      } else {
-        toast.error(t("customDisplay.saveError"));
-      }
-    } catch (err) {
-      console.error("Error updating custom display:", err);
-      toast.error(t("customDisplay.saveError"));
-    } finally {
-      setCustomSaving(false);
-    }
-  }, [customCaps, locale, t, fetchCustomDisplay]);
+    await customUpdate.mutate(customCaps, {
+      successToast: t("customDisplay.saveSuccess"),
+      errorToast: t("customDisplay.saveError"),
+      onSuccess: () => void fetchCustomDisplay(),
+    });
+  }, [customCaps, customUpdate, t, fetchCustomDisplay]);
 
-  const columns = useMemo<DataColumn<Plan>[]>(
+  const columns = useMemo<DataColumn<AdminPlan>[]>(
     () => [
       {
         id: "name",
@@ -268,7 +229,7 @@ export default function PlansPage() {
         align: "end",
         cell: (plan) => (
           <span className="ui-figure text-[12px]" lang="en">
-            {formatEgp(plan.priceMonthly)}
+            {formatEgpAmount(plan.priceMonthly)}
           </span>
         ),
       },
@@ -279,7 +240,7 @@ export default function PlansPage() {
         align: "end",
         cell: (plan) => (
           <span className="ui-figure text-[12px]" lang="en">
-            {formatEgp(plan.priceYearly)}
+            {formatEgpAmount(plan.priceYearly)}
           </span>
         ),
       },
@@ -291,7 +252,9 @@ export default function PlansPage() {
         hideOnMobile: true,
         cell: (plan) => (
           <span className="ui-figure text-[12px]" lang="en">
-            {isProPlanName(plan.name) ? formatEgp(plan.extraMenuPrice) : "—"}
+            {isProPlanName(plan.name)
+              ? formatEgpAmount(plan.extraMenuPrice)
+              : "—"}
           </span>
         ),
       },
@@ -407,7 +370,7 @@ export default function PlansPage() {
         </Card>
       }
     >
-      <DataTable<Plan>
+      <DataTable<AdminPlan>
         columns={columns}
         rows={plans}
         getRowKey={(plan) => String(plan.id)}

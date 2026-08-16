@@ -15,6 +15,7 @@ import {
   IoCloseCircle,
   IoOptionsOutline,
 } from "react-icons/io5";
+import { useApiAction } from "@/hooks/useApiAction";
 
 type CopyMenuModalProps = {
   menu: Menu;
@@ -84,6 +85,7 @@ export default function CopyMenuModal({
   const [slug, setSlug] = useState("");
   const [slugError, setSlugError] = useState<string | null>(null);
   const [isCopying, setIsCopying] = useState(false);
+  const { runApiAction } = useApiAction();
   const [options, setOptions] = useState<CopyOptions>({
     copyProducts: false,
     copySettings: true,
@@ -180,34 +182,35 @@ export default function CopyMenuModal({
         slug: normalizedSlug,
         ...options,
       };
-      const result = await axiosPost<CopyMenuPayload, Menu>(
-        `/menus/${menu.id}/copy`,
-        locale,
-        payload,
+      await runApiAction(
+        () =>
+          axiosPost<CopyMenuPayload, Menu>(
+            `/menus/${menu.id}/copy`,
+            locale,
+            payload,
+          ),
+        {
+          errorToast: t("copyError"),
+          onSuccess: (data) => {
+            const apiPayload = data as Record<string, unknown>;
+            const createdMenu = normalizeMenuFromApi({
+              ...payload,
+              ...apiPayload,
+              id: apiPayload.menuId ?? apiPayload.id,
+              slug: apiPayload.slug ?? normalizedSlug,
+            });
+
+            if (!createdMenu) {
+              toast.error(t("copyError"));
+              return;
+            }
+
+            toast.success(t("copySuccess"));
+            onCopied(createdMenu);
+            onClose();
+          },
+        },
       );
-
-      if (result.status && result.data) {
-        const apiPayload = result.data as Record<string, unknown>;
-        const createdMenu = normalizeMenuFromApi({
-          ...payload,
-          ...apiPayload,
-          id: apiPayload.menuId ?? apiPayload.id,
-          slug: apiPayload.slug ?? normalizedSlug,
-        });
-
-        if (!createdMenu) {
-          toast.error(t("copyError"));
-          return;
-        }
-
-        toast.success(t("copySuccess"));
-        onCopied(createdMenu);
-        onClose();
-      } else {
-        toast.error(t("copyError"));
-      }
-    } catch {
-      toast.error(t("copyError"));
     } finally {
       setIsCopying(false);
     }

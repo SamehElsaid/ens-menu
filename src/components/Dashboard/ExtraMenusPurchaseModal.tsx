@@ -19,6 +19,7 @@ import type { Subscription } from "@/types/Subscription";
 import { IoWarningOutline } from "react-icons/io5";
 import { FiMinus, FiPlus } from "react-icons/fi";
 import { Alert, Button, Field, Input, Modal } from "@/components/ui";
+import { getPaymentAttemptKey } from "@/lib/paymentIdempotency";
 
 type AuthUser = {
   name?: string;
@@ -68,6 +69,17 @@ export default function ExtraMenusPurchaseModal({
       return;
     }
 
+    const payload = {
+      name: nameToSend,
+      email: profile?.email?.trim() || undefined,
+      mobile: phoneToSend,
+      quantity,
+      currency: "EGP",
+    };
+    const idempotencyKey = getPaymentAttemptKey(
+      "extra-menus",
+      JSON.stringify(payload),
+    );
     setLoading(true);
     const res = await axiosPost<
       {
@@ -86,28 +98,28 @@ export default function ExtraMenusPurchaseModal({
           currency?: string;
         };
       }
-    >("/payment/subscription/extra-menus/initiate", locale, {
-      name: nameToSend,
-      email: profile?.email?.trim() || undefined,
-      mobile: phoneToSend,
-      quantity,
-      currency: "EGP",
-    });
+    >(
+      "/payment/subscription/extra-menus/initiate",
+      locale,
+      payload,
+      undefined,
+      undefined,
+      { headers: { "Idempotency-Key": idempotencyKey } },
+    );
     setLoading(false);
 
     if (res?.status && res.data?.data?.redirectUrl) {
       const amount = Number(res.data.data.amount);
       const currency = res.data.data.currency || "EGP";
-      if (Number.isFinite(amount) && amount > 0) {
-        sessionStorage.setItem(
-          "gtm_pending_purchase",
-          JSON.stringify({
-            value: amount,
-            currency,
-            orderId: res.data.data.order_id,
-          }),
-        );
-      }
+      sessionStorage.setItem(
+        "gtm_pending_purchase",
+        JSON.stringify({
+          ...(Number.isFinite(amount) && amount > 0 ? { value: amount } : {}),
+          currency,
+          orderId: res.data.data.order_id,
+          scope: "extra-menus",
+        }),
+      );
       toast.info(t("extraMenusPaying"));
       window.location.href = res.data.data.redirectUrl;
       return;

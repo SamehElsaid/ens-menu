@@ -1,10 +1,10 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useState, useCallback, useEffect, useId } from "react";
+import { useState, useCallback, useId } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
-import { axiosGet, axiosPost, axiosPatch } from "@/shared/axiosCall";
+import { axiosGet, axiosPost, axiosPut } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import Editor from "@/components/Custom/Editor";
 import {
@@ -18,6 +18,8 @@ import {
   Skeleton,
   SkeletonRegion,
 } from "@/components/ui";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { useApiAction } from "@/hooks/useApiAction";
 
 const defaultForm = {
   titleAr: "",
@@ -55,35 +57,36 @@ export default function KnowledgeManagementAddPage() {
   const [form, setForm] = useState(defaultForm);
   const [saving, setSaving] = useState(false);
   const [editorLoading, setEditorLoading] = useState(false);
-  const [fetchingItem, setFetchingItem] = useState(isEditMode);
-  const [refreshKey, setRefreshKey] = useState({});
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { runApiAction } = useApiAction();
 
-  useEffect(() => {
-    if (!editId) return;
-
-    setFetchingItem(true);
-    axiosGet<KnowledgeItemResponse>(`/searchInformation/${editId}`, locale)
-      .then((res) => {
-        if (res.status && res.data?.data) {
-          const item = res.data.data;
-          setForm({
-            titleAr: item.titleAr ?? "",
-            titleEn: item.titleEn ?? "",
-            descriptionAr: item.descriptionAr ?? "",
-            descriptionEn: item.descriptionEn ?? "",
-          });
-          setRefreshKey({});
-        } else {
-          toast.error(t("error"));
-          router.push("/admin/knowledge-management");
-        }
-      })
-      .catch(() => {
-        toast.error(t("error"));
+  const requestItem = useCallback(
+    () =>
+      axiosGet<KnowledgeItemResponse>(
+        `/searchInformation/${editId ?? ""}`,
+        locale,
+      ),
+    [editId, locale],
+  );
+  const itemQuery = useApiQuery({
+    request: requestItem,
+    enabled: Boolean(editId),
+    errorToast: t("error"),
+    onSuccess: (data) => {
+      const item = data.data;
+      setForm({
+        titleAr: item.titleAr ?? "",
+        titleEn: item.titleEn ?? "",
+        descriptionAr: item.descriptionAr ?? "",
+        descriptionEn: item.descriptionEn ?? "",
+      });
+      setRefreshKey((key) => key + 1);
+    },
+    onError: () => {
         router.push("/admin/knowledge-management");
-      })
-      .finally(() => setFetchingItem(false));
-  }, [editId, locale, t, router]);
+    },
+  });
+  const fetchingItem = itemQuery.loading;
 
   const handleSetValue = useCallback((field: string, val: string) => {
     const fieldMap: Record<string, keyof typeof defaultForm> = {
@@ -94,7 +97,7 @@ export default function KnowledgeManagementAddPage() {
     if (key) setForm((f) => ({ ...f, [key]: val }));
   }, []);
 
-  const handleTrigger = useCallback((_field: string) => {}, []);
+  const handleTrigger = useCallback(() => {}, []);
 
   const handleSave = useCallback(async () => {
     if (!form.titleAr.trim() || !form.titleEn.trim()) {
@@ -115,30 +118,29 @@ export default function KnowledgeManagementAddPage() {
         descriptionEn: form.descriptionEn.trim(),
       };
 
-      const result = isEditMode
-        ? await axiosPatch<typeof payload, { message?: string }>(
-            `/searchInformation/${editId}`,
-            locale,
-            payload,
-          )
-        : await axiosPost<typeof payload, { message?: string }>(
-            "/searchInformation",
-            locale,
-            payload,
-          );
-
-      if (result.status) {
-        toast.success(isEditMode ? t("editSuccess") : t("createSuccess"));
-        router.push("/admin/knowledge-management");
-      } else {
-        toast.error(isEditMode ? t("editError") : t("createError"));
-      }
-    } catch {
-      toast.error(isEditMode ? t("editError") : t("createError"));
+      await runApiAction(
+        () =>
+          isEditMode
+            ? axiosPut<typeof payload, { message?: string }>(
+                `/searchInformation/${editId}`,
+                locale,
+                payload,
+              )
+            : axiosPost<typeof payload, { message?: string }>(
+                "/searchInformation",
+                locale,
+                payload,
+              ),
+        {
+          successToast: isEditMode ? t("editSuccess") : t("createSuccess"),
+          errorToast: isEditMode ? t("editError") : t("createError"),
+          onSuccess: () => router.push("/admin/knowledge-management"),
+        },
+      );
     } finally {
       setSaving(false);
     }
-  }, [form, isEditMode, editId, locale, t, router]);
+  }, [form, isEditMode, editId, locale, t, router, runApiAction]);
 
   const heading = isEditMode ? t("editTitle") : t("addTitle");
 
@@ -247,13 +249,13 @@ export default function KnowledgeManagementAddPage() {
             {t("descriptionEn")}
           </Label>
           <Editor
+            key={`description-en-${refreshKey}`}
             initialTemplateName={form.descriptionEn}
             setValue={handleSetValue}
             trigger={handleTrigger}
             type={"description_en"}
             setShowDescription={() => {}}
             to={"description_ar"}
-            refresh={refreshKey}
             loadingSave={editorLoading}
             setLoadingSave={setEditorLoading}
           />
@@ -268,13 +270,13 @@ export default function KnowledgeManagementAddPage() {
             {t("descriptionAr")}
           </Label>
           <Editor
+            key={`description-ar-${refreshKey}`}
             initialTemplateName={form.descriptionAr}
             setValue={handleSetValue}
             trigger={handleTrigger}
             type={"description_ar"}
             setShowDescription={() => {}}
             to={"description_en"}
-            refresh={refreshKey}
             loadingSave={editorLoading}
             setLoadingSave={setEditorLoading}
           />

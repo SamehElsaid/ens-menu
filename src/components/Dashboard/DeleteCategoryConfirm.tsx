@@ -2,9 +2,9 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { axiosDelete } from "@/shared/axiosCall";
-import { toast } from "react-toastify";
 import { Category } from "@/types/Menu";
 import DeleteEntityConfirmModal from "./DeleteEntityConfirmModal";
+import { useApiAction } from "@/hooks/useApiAction";
 
 interface DeleteCategoryConfirmProps {
   menuId: string;
@@ -23,26 +23,34 @@ export default function DeleteCategoryConfirm({
 }: DeleteCategoryConfirmProps) {
   const t = useTranslations("Categories");
   const locale = useLocale();
+  const { runApiAction } = useApiAction();
   const labelText = localeName.trim();
   const itemsCount = Number(category.itemsCount ?? 0);
 
   const handleDelete = async () => {
-    const result = await axiosDelete<{ deletedItemsCount?: number }>(
-      `/menus/${menuId}/categories/${category.id}`,
-      locale,
+    await runApiAction(
+      () =>
+        axiosDelete<{ deletedItemsCount?: number }>(
+          `/menus/${menuId}/categories/${category.id}`,
+          locale,
+        ),
+      {
+        successToast: ({ data }) => {
+          const deletedCount = Number(
+            (data as { deletedItemsCount?: number } | undefined)
+              ?.deletedItemsCount ?? itemsCount,
+          );
+          return deletedCount > 0
+            ? t("deleteSuccessWithItems", { count: deletedCount })
+            : t("deleteSuccess");
+        },
+        errorToast: t("deleteError"),
+        onSuccess: () => {
+          onDeleted?.();
+          onClose();
+        },
+      },
     );
-    if (result.status) {
-      const deletedCount = Number(result.data?.deletedItemsCount ?? itemsCount);
-      toast.success(
-        deletedCount > 0
-          ? t("deleteSuccessWithItems", { count: deletedCount })
-          : t("deleteSuccess"),
-      );
-      onDeleted?.();
-      onClose();
-    } else {
-      toast.error(t("deleteError"));
-    }
   };
 
   const message =

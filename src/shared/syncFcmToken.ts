@@ -1,4 +1,4 @@
-import { axiosPost, axiosPatch } from "@/shared/axiosCall";
+import { axiosPost, axiosPut } from "@/shared/axiosCall";
 import { isCurrentPublicHome } from "@/shared/isPublicHomePath";
 
 interface FcmMatchResponse {
@@ -54,7 +54,7 @@ export async function finalizeFcmLogout(
   _synced = false;
   _pendingSync = null;
   if (!sentToken && hadSyncedThisSession) {
-    await axiosPatch("/user/profile", locale, { fcmToken: "" });
+    await axiosPut("/user/profile", locale, { fcmToken: "" });
   }
 }
 
@@ -87,7 +87,7 @@ export function syncFcmToken(locale: string): Promise<void> {
       if (!matchRes.status) return;
 
       if (matchRes.data?.matches === false) {
-        const updateRes = await axiosPatch("/user/profile", locale, {
+        const updateRes = await axiosPut("/user/profile", locale, {
           fcmToken,
         });
         if (!updateRes.status) return;

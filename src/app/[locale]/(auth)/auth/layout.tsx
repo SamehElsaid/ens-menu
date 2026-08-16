@@ -2,7 +2,10 @@ import GoogleAuthProvider from "@/components/Global/GoogleAuthProvider";
 import NoBfcache from "@/components/Global/NoBfcache";
 import { localizeHref } from "@/i18n/routing";
 import { DecryptedToken } from "@/proxy";
-import { decryptData } from "@/shared/encryption";
+import {
+  AUTH_UI_COOKIE_NAME,
+  decodeAuthUiCookieValue,
+} from "@/shared/authUiCookie";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -24,9 +27,9 @@ export default async function AuthLayout({
   const cookieStore = await cookies();
   const { locale } = await params;
 
-  const token = cookieStore.get("sub");
-  const tokenDecrypted = token
-    ? (decryptData(token.value) as DecryptedToken)
+  const uiCookie = cookieStore.get(AUTH_UI_COOKIE_NAME);
+  const tokenDecrypted = uiCookie
+    ? (decodeAuthUiCookieValue(uiCookie.value) as DecryptedToken | null)
     : null;
 
   if (tokenDecrypted) {

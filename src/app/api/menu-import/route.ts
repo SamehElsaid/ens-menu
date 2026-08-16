@@ -4,23 +4,51 @@ import {
   MENU_IMPORT_ACCEPTED_TYPES,
   MENU_IMPORT_COMPRESSED_TARGET_BYTES,
   MENU_IMPORT_COMPRESS_THRESHOLD_BYTES,
+  MENU_IMPORT_MAX_FILE_SIZE_MB,
 } from "@/lib/menuImport/constants";
 import { formatImageSizeLog } from "@/lib/menuImport/formatImageSize";
 import { resizeImageBufferToMaxSize } from "@/lib/menuImport/resizeImageBuffer";
+import { guardExternalServiceRoute } from "@/lib/server/externalRouteGuard";
+import { resolveMenuImportWebhook } from "@/lib/server/menuImportWebhook";
 
 const TIMEOUT_MS = 90_000;
 
-function resolveWebhookUrl(): string {
-  return (
-    process.env.N8N_MENU_IMPORT_WEBHOOK ??
-    process.env.NEXT_PUBLIC_N8N_MENU_IMPORT_WEBHOOK ??
-    "https://ensbot.net/webhook-test/menu-image-test"
-  );
-}
-
 export async function POST(request: NextRequest) {
-  const webhookUrl = resolveWebhookUrl();
+  const webhook = resolveMenuImportWebhook(
+    process.env.N8N_MENU_IMPORT_WEBHOOK,
+    process.env.NODE_ENV,
+  );
+  if (!webhook.ok) {
+    return NextResponse.json(
+      { error: webhook.error },
+      {
+        status: 503,
+        headers: { "Cache-Control": "no-store" },
+      },
+    );
+  }
+
   try {
+    const sessionGuard = await guardExternalServiceRoute(request, {
+      routeKey: "menu-import",
+      maxRequests: 5,
+      windowMs: 5 * 60_000,
+    });
+    if (!sessionGuard.ok) {
+      return NextResponse.json(
+        {
+          error: sessionGuard.error,
+          ...(sessionGuard.code ? { code: sessionGuard.code } : {}),
+        },
+        {
+          status: sessionGuard.status,
+          headers: sessionGuard.retryAfter
+            ? { "Retry-After": String(sessionGuard.retryAfter) }
+            : undefined,
+        },
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get("file");
     const menuId = String(formData.get("menuId") ?? "").trim();
@@ -37,12 +65,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const guard = await guardExternalServiceRoute(request, {
+      routeKey: "menu-import-menu-access",
+      menuId,
+      maxRequests: 100,
+      windowMs: 5 * 60_000,
+    });
+    if (!guard.ok) {
+      return NextResponse.json(
+        { error: guard.error, ...(guard.code ? { code: guard.code } : {}) },
+        {
+          status: guard.status,
+          headers: guard.retryAfter
+            ? { "Retry-After": String(guard.retryAfter) }
+            : undefined,
+        },
+      );
+    }
+
     if (
       !MENU_IMPORT_ACCEPTED_TYPES.includes(
         file.type as (typeof MENU_IMPORT_ACCEPTED_TYPES)[number],
       )
     ) {
       return NextResponse.json({ error: "invalid_file_type" }, { status: 400 });
+    }
+    if (file.size > MENU_IMPORT_MAX_FILE_SIZE_MB * 1024 * 1024) {
+      return NextResponse.json({ error: "file_too_large" }, { status: 413 });
     }
 
     const originalSize = file.size;
@@ -97,7 +146,7 @@ export async function POST(request: NextRequest) {
 
     let upstream: Response;
     try {
-      upstream = await fetch(webhookUrl, {
+      upstream = await fetch(webhook.url, {
         method: "POST",
         body: upstreamForm,
         signal: controller.signal,

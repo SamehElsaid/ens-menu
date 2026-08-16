@@ -4,14 +4,10 @@ import { useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { IoReceiptOutline } from "react-icons/io5";
 import { NotificationPermissionCard } from "@/components/Global/NotificationPermissionCard";
-import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import {
-  Badge,
   ButtonLink,
   EmptyState,
   PageShell,
-  SearchInput,
-  Toolbar,
 } from "@/components/ui";
 import {
   useDashboardMenus,
@@ -22,6 +18,10 @@ import type { OrderMenuBadges } from "@/lib/tableOrders";
 import OrderDetailsModal from "./OrderDetailsModal";
 import OrdersCardGrid from "./OrdersCardGrid";
 import OrdersFilters from "./OrdersFilters";
+import {
+  OrdersPageHeader,
+  OrdersSearchToolbar,
+} from "./OrdersPageChrome";
 
 /** Table orders across every menu of the account, filterable by menu. */
 export default function AccountTableOrdersView() {
@@ -115,31 +115,19 @@ export default function AccountTableOrdersView() {
          its own icon tile, which made the orders below look like a secondary
          region of the page they are the entire point of. */
       header={
-        <PageTitleWithHelp
-          title={t("title")}
-          description={t("subtitle")}
-          meta={
-            pendingCount > 0 ? (
-              <Badge tone="warning">
-                {t("pendingBadge", { count: pendingCount })}
-              </Badge>
-            ) : undefined
-          }
+        <OrdersPageHeader
+          translationNs="tableOrders"
+          pendingCount={pendingCount}
         />
       }
       /* Only the search field is pinned. The date range and status row is tall
          enough that sticking it would cost a third of the viewport on every
          scroll, and it is set once per session rather than typed into. */
       toolbar={
-        <Toolbar
-          search={
-            <SearchInput
-              value={searchInput}
-              onChange={setSearchInput}
-              placeholder={t("searchPlaceholder")}
-              label={t("searchPlaceholder")}
-            />
-          }
+        <OrdersSearchToolbar
+          translationNs="tableOrders"
+          value={searchInput}
+          onChange={setSearchInput}
         />
       }
     >

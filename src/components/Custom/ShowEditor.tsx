@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui";
 import type SunEditorCore from "suneditor/src/lib/core";
 import SunEditor from "suneditor-react";
+import { sanitizeBuilderHtml } from "@/lib/template-builder/sanitizeContent";
 
 interface ShowEditorProps {
   initialTemplateName: string;
@@ -25,8 +26,8 @@ const ShowEditor = ({
 
     try {
       const content = showMoreState
-        ? initialTemplateName.slice(0, 600)
-        : initialTemplateName;
+        ? sanitizeBuilderHtml(initialTemplateName).slice(0, 600)
+        : sanitizeBuilderHtml(initialTemplateName);
       editorInstance.current.setContents(content);
     } catch {
       // setContents may fail before the editor is fully mounted
@@ -57,7 +58,7 @@ const ShowEditor = ({
           resizingBar: false,
         }}
         width="100%"
-        defaultValue={initialTemplateName}
+        defaultValue={sanitizeBuilderHtml(initialTemplateName)}
       />
       {showMore && initialTemplateName.length > 600 && (
         <Button

@@ -8,6 +8,7 @@ import { BiSupport } from "react-icons/bi";
 import { useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
+import { useIsClient } from "@/components/ui/useDialog";
 import {
   CONTACT_FAB_TELEGRAM_URL,
   CONTACT_FAB_WHATSAPP_URL,
@@ -32,16 +33,12 @@ import {
  */
 export default function ContactFab() {
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useIsClient();
   const wrapRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const t = useTranslations("contactFab");
   const isAdminRoute = pathname.startsWith("/admin");
   const isDashboardRoute = pathname.startsWith("/dashboard");
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     if (!open) return;

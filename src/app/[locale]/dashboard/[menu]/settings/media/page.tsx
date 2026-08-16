@@ -32,13 +32,17 @@ import {
 } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { axiosPatch } from "@/shared/axiosCall";
-import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
+import { axiosPut } from "@/shared/axiosCall";
+import { SET_ACTIVE_MENU_CACHE } from "@/store/authSlice/menuDataSlice";
 import { toast } from "react-toastify";
 import type { Menu } from "@/types/Menu";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import { menuDashboardPath } from "@/lib/menuDashboardPath";
-import { normalizeExternalUrl } from "@/lib/normalizeExternalUrl";
+import { useApiAction } from "@/hooks/useApiAction";
+import {
+  normalizeSocialLink,
+  normalizeSocialLinks,
+} from "@/lib/socialLinks";
 
 function timeStringToDate(s: string): Date | null {
   if (!s || !/^\d{2}:\d{2}$/.test(s)) return null;
@@ -175,6 +179,7 @@ export default function MediaPage() {
   });
   const [workHours, setWorkHours] = useState<WorkHours>(INITIAL_WORK_HOURS);
   const [isSaving, setIsSaving] = useState(false);
+  const { runApiAction } = useApiAction();
 
   const dispatch = useAppDispatch();
   const { menu } = useAppSelector((state) => state.menuData);
@@ -236,14 +241,11 @@ export default function MediaPage() {
       toast.error(t("noMenuSelected"));
       return;
     }
-    const socialByKey = Object.fromEntries(
-      socialLinks.map((row) => {
-        const trimmed = row.value.trim();
-        if (!trimmed) return [row.id, ""];
-        if (row.id === "whatsapp") return [row.id, trimmed];
-        return [row.id, normalizeExternalUrl(trimmed)];
-      }),
-    ) as Record<SocialKey, string>;
+    const socialByKey = normalizeSocialLinks(socialLinks);
+    if (!socialByKey) {
+      toast.error(t("socialLinks.invalid"));
+      return;
+    }
     const payload = {
       socialFacebook: socialByKey.facebook,
       socialInstagram: socialByKey.instagram,
@@ -259,16 +261,22 @@ export default function MediaPage() {
     };
     setIsSaving(true);
     try {
-      const result = await axiosPatch<typeof payload, Menu>(
-        `/menus/${menu.id}`,
-        locale,
-        payload,
+      await runApiAction(
+        () =>
+          axiosPut<typeof payload, Menu>(
+            `/menus/${menu.id}`,
+            locale,
+            payload,
+          ),
+        {
+          successToast: t("savedSuccess"),
+          errorToast: ({ error }) => error,
+          onSuccess: () => {
+            const updatedMenu = { ...menu, ...payload };
+            dispatch(SET_ACTIVE_MENU_CACHE(updatedMenu as Menu));
+          },
+        },
       );
-      if (result.status) {
-        const updatedMenu = { ...menu, ...payload };
-        dispatch(SET_ACTIVE_USER(updatedMenu as Menu));
-        toast.success(t("savedSuccess"));
-      }
     } finally {
       setIsSaving(false);
     }
@@ -346,7 +354,12 @@ export default function MediaPage() {
                     onBlur={() => {
                       const trimmed = row.value.trim();
                       if (!trimmed) return;
-                      updateSocial(row.id, normalizeExternalUrl(trimmed));
+                      const normalized = normalizeSocialLink(row.id, trimmed);
+                      if (normalized === null) {
+                        toast.error(t("socialLinks.invalid"));
+                        return;
+                      }
+                      updateSocial(row.id, normalized);
                     }}
                     placeholder={SOCIAL_URL_PLACEHOLDERS[row.id]}
                     startIcon={

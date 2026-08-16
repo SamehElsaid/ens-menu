@@ -12,18 +12,18 @@ import { generateImportId } from "./generateImportId";
 const VARIANT_NAME_SEP = " - ";
 
 export function expandItemForSave(item: ImportItem): ExpandedSaveItem[] {
-  if (item.variants.length > 0) {
-    return item.variants.map((variant) => ({
-      refId: variant.id,
+  if ((item.sizes?.length ?? 0) > 0) {
+    return item.sizes!.map((size) => ({
+      refId: size.id,
       sourceItemRefId: item.id,
-      nameAr: joinName(item.nameAr, variant.labelAr ?? variant.label),
-      nameEn: joinName(item.nameEn, variant.labelEn ?? variant.label),
+      nameAr: joinName(item.nameAr, size.labelAr ?? size.label),
+      nameEn: joinName(item.nameEn, size.labelEn ?? size.label),
       descriptionAr: item.descriptionAr,
       descriptionEn: item.descriptionEn,
-      price: variant.price as number,
+      price: size.price as number,
       isAvailable: item.isAvailable,
       imageUrl: item.imageUrl,
-      duplicateMeta: variant.duplicateMeta ?? item.duplicateMeta,
+      duplicateMeta: size.duplicateMeta ?? item.duplicateMeta,
     }));
   }
 
@@ -57,14 +57,15 @@ export function collectBlockingPriceErrors(
 
   for (const category of draft.categories) {
     for (const item of category.items) {
-      if (item.variants.length > 0) {
-        for (const variant of item.variants) {
-          if (variant.price === null || !Number.isFinite(variant.price)) {
+      const sizes = item.sizes ?? [];
+      if (sizes.length > 0) {
+        for (const size of sizes) {
+          if (size.price === null || !Number.isFinite(size.price)) {
             errors.push({
-              refId: variant.id,
+              refId: size.id,
               type: "variant",
-              nameAr: joinName(item.nameAr, variant.labelAr ?? variant.label),
-              nameEn: joinName(item.nameEn, variant.labelEn ?? variant.label),
+              nameAr: joinName(item.nameAr, size.labelAr ?? size.label),
+              nameEn: joinName(item.nameEn, size.labelEn ?? size.label),
               reason: "missing_price",
             });
           }
@@ -77,6 +78,17 @@ export function collectBlockingPriceErrors(
           nameEn: item.nameEn,
           reason: "missing_price",
         });
+      }
+      for (const variant of item.variants) {
+        if (variant.price === null || !Number.isFinite(variant.price)) {
+          errors.push({
+            refId: variant.id,
+            type: "variant",
+            nameAr: joinName(item.nameAr, variant.labelAr ?? variant.label),
+            nameEn: joinName(item.nameEn, variant.labelEn ?? variant.label),
+            reason: "missing_price",
+          });
+        }
       }
     }
   }
@@ -144,7 +156,7 @@ export function collectBlockingNameErrors(
         );
       }
 
-      for (const variant of item.variants) {
+      for (const variant of [...(item.sizes ?? []), ...item.variants]) {
         const vAr = variant.labelAr ?? variant.label;
         const vEn = variant.labelEn ?? variant.label;
         if (!vAr.trim()) {
@@ -206,13 +218,14 @@ export function recomputeDraftStats(draft: ImportDraft): ImportDraftStats {
 
     for (const item of category.items) {
       itemCount++;
-      variantCount += item.variants.length;
+      const options = [...(item.sizes ?? []), ...item.variants];
+      variantCount += options.length;
       const flags = refreshItemFlags(item);
       item.flags = flags;
       warningCount += flags.length;
       missingNameCount += countNameFlags(flags);
 
-      for (const variant of item.variants) {
+      for (const variant of options) {
         const vFlags = refreshVariantFlags(variant);
         variant.flags = vFlags;
         warningCount += vFlags.length;
@@ -268,7 +281,7 @@ function refreshItemFlags(item: ImportItem): ImportItem["flags"] {
     (f) =>
       !["missing_price", "missing_name_ar", "missing_name_en", "needs_review"].includes(f),
   );
-  if (item.variants.length === 0 && (item.price === null || item.price < 0)) {
+  if ((item.sizes?.length ?? 0) === 0 && (item.price === null || item.price < 0)) {
     flags.push("missing_price");
   }
   if (!item.nameAr.trim() && !item.nameEn.trim()) {
@@ -310,6 +323,13 @@ export function draftToSavePayload(draft: ImportDraft) {
           descriptionAr: item.descriptionAr,
           descriptionEn: item.descriptionEn,
           price: item.price,
+          sizes: (item.sizes ?? []).map((v) => ({
+            refId: v.id,
+            label: v.label,
+            labelAr: v.labelAr,
+            labelEn: v.labelEn,
+            price: v.price,
+          })),
           variants: item.variants.map((v) => ({
             refId: v.id,
             label: v.label,
@@ -330,6 +350,7 @@ export function createEmptyItem(): ImportItem {
     nameAr: "",
     nameEn: "",
     price: null,
+    sizes: [],
     variants: [],
     isAvailable: true,
     flags: ["needs_review", "missing_price", "missing_name_ar", "missing_name_en"],

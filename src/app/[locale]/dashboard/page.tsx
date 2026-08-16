@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { axiosGet, axiosDelete, axiosPatch } from "@/shared/axiosCall";
+import { axiosGet, axiosDelete, axiosPut } from "@/shared/axiosCall";
 import LinkTo from "@/components/Global/LinkTo";
 import CreateMenuModal from "@/components/Dashboard/CreateMenuModal";
 import CopyMenuModal from "@/components/Dashboard/CopyMenuModal";
@@ -68,6 +68,8 @@ import {
   getEffectiveMaxMenus,
   isProSubscription,
 } from "@/lib/subscriptionMenus";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { useApiAction } from "@/hooks/useApiAction";
 
 export default function DashboardPage() {
   const { isStaff, isResolved } = useAuthorization();
@@ -92,7 +94,6 @@ function OwnerMenusPage() {
   const { unseenTableCount, unseenDeliveryCount } = usePendingOrders();
   const authData = useAppSelector((state) => state.auth.data);
   const [menus, setMenus] = useState<Menu[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
   const [addToGroupTarget, setAddToGroupTarget] = useState<Menu | null>(null);
@@ -101,7 +102,6 @@ function OwnerMenusPage() {
   const [manageGroupTarget, setManageGroupTarget] =
     useState<MenuGroupSummary | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [subscriptionLoading, setSubscriptionLoading] = useState(true);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showExtraMenusModal, setShowExtraMenusModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Menu | null>(null);
@@ -109,79 +109,57 @@ function OwnerMenusPage() {
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [togglingId, setTogglingId] = useState<number | null>(null);
-  const [refreshing, setRefreshing] = useState(0);
   const [switchMenuTarget, setSwitchMenuTarget] = useState<Menu | null>(null);
   const [isSwitchingMenu, setIsSwitchingMenu] = useState(false);
+  const { runApiAction } = useApiAction();
 
-  const fetchMenus = useCallback(async () => {
-    try {
-      setLoading(true);
-      const result = await axiosGet<MenusResponse | Menu[]>(
+  const requestMenus = useCallback(
+    () =>
+      axiosGet<MenusResponse | Menu[]>(
         "/menus",
         locale,
         undefined,
         { locale },
+      ),
+    [locale],
+  );
+  const menusQuery = useApiQuery({
+    request: requestMenus,
+    onSuccess: (data) => {
+      const menusList = Array.isArray(data) ? data : (data.menus ?? []);
+      setMenus(
+        menusList
+          .map((item) => normalizeMenuFromApi(item))
+          .filter((item): item is Menu => item != null),
       );
+    },
+  });
+  const loading = menusQuery.loading;
+  const fetchMenus = menusQuery.refetch;
 
-      if (result.status && result.data) {
-        const menusList = Array.isArray(result.data)
-          ? result.data
-          : (result.data.menus ?? []);
-        setMenus(
-          menusList
-            .map((item) => normalizeMenuFromApi(item))
-            .filter((item): item is Menu => item != null),
-        );
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [locale]);
-
-  const fetchSubscription = useCallback(async () => {
-    try {
-      setSubscriptionLoading(true);
-      const result = await axiosGet<SubscriptionResponse>(
-        "/user/subscription",
-        locale,
-      );
-      if (result.status && result.data?.subscription) {
-        setSubscription(result.data.subscription);
-      }
-    } catch (error) {
-      console.error("Error fetching subscription:", error);
-    } finally {
-      setSubscriptionLoading(false);
-    }
-  }, [locale]);
+  const requestSubscription = useCallback(
+    () => axiosGet<SubscriptionResponse>("/user/subscription", locale),
+    [locale],
+  );
+  const subscriptionQuery = useApiQuery({
+    request: requestSubscription,
+    onSuccess: (data) => {
+      if (data.subscription) setSubscription(data.subscription);
+    },
+  });
+  const subscriptionLoading = subscriptionQuery.loading;
 
   const resolveSubscription =
     useCallback(async (): Promise<Subscription | null> => {
       if (subscription != null || !subscriptionLoading) {
         return subscription;
       }
-      try {
-        const result = await axiosGet<SubscriptionResponse>(
-          "/user/subscription",
-          locale,
-        );
-        if (result.status && result.data?.subscription) {
-          setSubscription(result.data.subscription);
-          return result.data.subscription;
-        }
-      } catch (error) {
-        console.error("Error fetching subscription:", error);
+      const result = await subscriptionQuery.refetch();
+      if (result?.data?.subscription) {
+        return result.data.subscription;
       }
       return subscription;
-    }, [subscription, subscriptionLoading, locale]);
-
-  useEffect(() => {
-    fetchMenus();
-  }, [fetchMenus, refreshing]);
-
-  useEffect(() => {
-    fetchSubscription();
-  }, [fetchSubscription]);
+    }, [subscription, subscriptionLoading, subscriptionQuery]);
 
   useEffect(() => {
     if (!deleteTarget) setDeleteConfirmText("");
@@ -246,20 +224,17 @@ function OwnerMenusPage() {
 
     try {
       setIsDeleting(true);
-      const result = await axiosDelete<{ message?: string }>(
-        `/menus/${deleteTarget.id}`,
-        locale,
+      await runApiAction(
+        () => axiosDelete(`/menus/${deleteTarget.id}`, locale),
+        {
+          successToast: t("deleteSuccess"),
+          errorToast: t("deleteError"),
+          onSuccess: () =>
+            setMenus((current) =>
+              current.filter((menu) => menu.id !== deleteTarget.id),
+            ),
+        },
       );
-
-      if (result.status) {
-        toast.success(t("deleteSuccess"));
-        setMenus((prev) => prev.filter((m) => m.id !== deleteTarget.id));
-      } else {
-        toast.error(t("deleteError"));
-      }
-    } catch (error) {
-      console.error("Error deleting menu:", error);
-      toast.error(t("deleteError"));
     } finally {
       setIsDeleting(false);
       setDeleteTarget(null);
@@ -382,7 +357,9 @@ function OwnerMenusPage() {
     setRemoveFromGroupTarget(menu);
   };
 
-  const refreshMenus = () => setRefreshing((n) => n + 1);
+  const refreshMenus = () => {
+    void fetchMenus();
+  };
 
   const cardLabels = useMemo(
     () => ({
@@ -423,24 +400,24 @@ function OwnerMenusPage() {
 
     try {
       setTogglingId(menu.id);
-      const result = await axiosPatch<{ isActive: boolean }, Menu>(
-        `/menus/${menu.id}`,
-        locale,
-        { isActive: !menu.isActive as boolean },
+      await runApiAction(
+        () =>
+          axiosPut(`/menus/${menu.id}`, locale, {
+            isActive: !menu.isActive,
+          }),
+        {
+          successToast: t("toggleSuccess"),
+          errorToast: t("toggleError"),
+          onSuccess: () =>
+            setMenus((current) =>
+              current.map((item) =>
+                item.id === menu.id
+                  ? { ...item, isActive: !item.isActive }
+                  : item,
+              ),
+            ),
+        },
       );
-      if (result.status && result.data) {
-        setMenus((prev) =>
-          prev.map((m) =>
-            m.id === menu.id ? { ...m, isActive: !m.isActive } : m,
-          ),
-        );
-        toast.success(t("toggleSuccess"));
-      } else {
-        toast.error(t("toggleError"));
-      }
-    } catch (error) {
-      console.error("Error toggling menu:", error);
-      toast.error(t("toggleError"));
     } finally {
       setTogglingId(null);
     }
@@ -454,13 +431,13 @@ function OwnerMenusPage() {
     try {
       setIsSwitchingMenu(true);
       for (const m of otherActive) {
-        await axiosPatch<{ isActive: boolean }, { message?: string }>(
+        await axiosPut<{ isActive: boolean }, { message?: string }>(
           `/menus/${m.id}`,
           locale,
           { isActive: false },
         );
       }
-      const result = await axiosPatch<{ isActive: boolean }, Menu>(
+      const result = await axiosPut<{ isActive: boolean }, Menu>(
         `/menus/${switchMenuTarget.id}`,
         locale,
         { isActive: true },
@@ -530,7 +507,7 @@ function OwnerMenusPage() {
           <CreateMenuModal
             onClose={() => setShowCreateModal(false)}
             onMenuCreated={handleMenuCreated}
-            onRefresh={() => setRefreshing(refreshing + 1)}
+            onRefresh={refreshMenus}
           />
         )}
 
@@ -727,7 +704,7 @@ function OwnerMenusPage() {
         <CreateMenuModal
           onClose={() => setShowCreateModal(false)}
           onMenuCreated={handleMenuCreated}
-          onRefresh={() => setRefreshing(refreshing + 1)}
+          onRefresh={refreshMenus}
         />
       )}
 

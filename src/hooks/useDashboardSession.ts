@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
-import { decryptData } from "@/shared/encryption";
+import { useSyncExternalStore } from "react";
+import { readAuthUiCookie } from "@/shared/authUiCookie";
 
 export type DashboardSession = {
   role: string;
@@ -16,8 +15,31 @@ export type DashboardSession = {
   menuUuid?: string;
 } | null;
 
+function subscribeAuthUi(onStoreChange: () => void): () => void {
+  const onChange = () => onStoreChange();
+  window.addEventListener("focus", onChange);
+  document.addEventListener("visibilitychange", onChange);
+  return () => {
+    window.removeEventListener("focus", onChange);
+    document.removeEventListener("visibilitychange", onChange);
+  };
+}
+
+function getAuthUiSnapshot(): DashboardSession {
+  return readAuthUiCookie();
+}
+
+function getServerAuthUiSnapshot(): DashboardSession {
+  return null;
+}
+
+function subscribeClientReady(onStoreChange: () => void): () => void {
+  void onStoreChange;
+  return () => undefined;
+}
+
 /**
- * Reads encrypted `sub` cookie (role + RBAC permissions for staff tokens).
+ * Reads the token-free `ens_ui` cookie (role + RBAC display hints).
  *
  * The cookie is only readable after mount, so `resolved` tells callers whether
  * `session` is a real answer or just the pre-read default. Anything that would
@@ -28,45 +50,16 @@ export function useDashboardSessionState(): {
   session: DashboardSession;
   resolved: boolean;
 } {
-  const [session, setSession] = useState<DashboardSession>(null);
-  const [resolved, setResolved] = useState(false);
-
-  useEffect(() => {
-    const sub = Cookies.get("sub");
-    if (!sub) {
-      setSession(null);
-      setResolved(true);
-      return;
-    }
-    try {
-      const d = decryptData(sub) as {
-        role?: string;
-        permissions?: unknown;
-        staffRoleId?: unknown;
-        roleName?: unknown;
-        menuUuid?: string;
-      };
-      const menuUuid =
-        typeof d.menuUuid === "string" && d.menuUuid.length > 0
-          ? d.menuUuid
-          : undefined;
-      const permissions = Array.isArray(d.permissions)
-        ? d.permissions.filter((p): p is string => typeof p === "string")
-        : undefined;
-      setSession({
-        role: String(d.role ?? ""),
-        permissions,
-        staffRoleId:
-          typeof d.staffRoleId === "number" ? d.staffRoleId : undefined,
-        roleName: typeof d.roleName === "string" ? d.roleName : undefined,
-        menuUuid,
-      });
-    } catch {
-      setSession(null);
-    } finally {
-      setResolved(true);
-    }
-  }, []);
+  const session = useSyncExternalStore(
+    subscribeAuthUi,
+    getAuthUiSnapshot,
+    getServerAuthUiSnapshot,
+  );
+  const resolved = useSyncExternalStore(
+    subscribeClientReady,
+    () => true,
+    () => false,
+  );
 
   return { session, resolved };
 }

@@ -54,12 +54,7 @@ export function useStaffPermissionsCatalog(): UseStaffPermissionsCatalog {
 
   useEffect(() => {
     let active = true;
-    if (cachedCatalog) {
-      setCatalog(cachedCatalog);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
+    if (cachedCatalog) return;
     loadCatalog(locale).then((value) => {
       if (!active) return;
       setCatalog(value);

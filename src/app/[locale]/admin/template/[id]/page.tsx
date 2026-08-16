@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { FiAlertTriangle } from "react-icons/fi";
@@ -16,25 +16,40 @@ export default function TemplateEditorPage() {
   const t = useTranslations("templateBuilder");
   const id = String(params?.id ?? "");
   const loadDocument = useBuilderStore((s) => s.loadDocument);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<"not-found" | "storage" | null>(null);
   const [ready, setReady] = useState(false);
+  const loadRequestId = useRef(0);
+
+  const load = useCallback(() => {
+    const requestId = ++loadRequestId.current;
+    setError(null);
+    setReady(false);
+    void templateApi
+      .getTemplate(id)
+      .then((doc) => {
+        if (loadRequestId.current !== requestId) return;
+        if (!doc) {
+          setError("not-found");
+          return;
+        }
+        loadDocument(doc);
+        setReady(true);
+      })
+      .catch(() => {
+        if (loadRequestId.current === requestId) setError("storage");
+      });
+  }, [id, loadDocument]);
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      const doc = await templateApi.getTemplate(id);
-      if (cancelled) return;
-      if (!doc) {
-        setError(true);
-        return;
-      }
-      loadDocument(doc);
-      setReady(true);
-    })();
+    queueMicrotask(() => {
+      if (!cancelled) load();
+    });
     return () => {
       cancelled = true;
+      loadRequestId.current += 1;
     };
-  }, [id, loadDocument]);
+  }, [load]);
 
   /* The dark ground here is DESIGN.md §14.3 — these two states sit inside the
      builder's own permanently dark shell rather than on the product's light
@@ -54,16 +69,18 @@ export default function TemplateEditorPage() {
         </span>
         <div>
           <p className="text-sm font-semibold text-danger-fg">
-            {t("notFound")}
+            {error === "storage" ? t("storageError") : t("notFound")}
           </p>
           <p className="ui-label mt-1 text-fg-muted">{id}</p>
         </div>
         <Button
           variant="secondary"
           size="sm"
-          onClick={() => router.push("/admin/template")}
+          onClick={() =>
+            error === "storage" ? load() : router.push("/admin/template")
+          }
         >
-          {t("backToList")}
+          {error === "storage" ? t("retry") : t("backToList")}
         </Button>
       </div>
     );

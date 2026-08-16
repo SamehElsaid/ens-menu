@@ -25,3 +25,17 @@ export interface Subscription {
 export interface SubscriptionResponse {
   subscription?: Subscription;
 }
+
+export interface AdminSubscription
+  extends Required<
+    Pick<
+      Subscription,
+      "billingCycle" | "startDate" | "endDate" | "status" | "maxMenus" | "extraMenus"
+    >
+  > {
+  id: number;
+  amount: number;
+  paymentStatus: string;
+  paidAt: string | null;
+  planName: string;
+}

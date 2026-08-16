@@ -4,16 +4,16 @@ import { useLocale, useTranslations } from "next-intl";
 import { useGoogleLogin } from "@react-oauth/google";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import Cookies from "js-cookie";
 import { useAppDispatch } from "@/store/hooks";
-import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
+import { SET_AUTH_SESSION_CACHE } from "@/store/authSlice/authSlice";
 import { withNewUserOnboardingFlag } from "@/lib/aiImportOnboarding";
 import { axiosPost } from "@/shared/axiosCall";
 import { pushSignUpEvent } from "@/shared/gtmEvents";
-import { encryptData } from "@/shared/encryption";
 import { LoginResponse } from "@/types/LoginResponse";
 import { resolvePostLoginPath } from "@/lib/authRedirect";
 import { SiteButton } from "@/components/site/Button";
+import { writeAuthUiCookie } from "@/shared/authUiCookie";
+import { storeCsrfTokenFromPayload } from "@/shared/csrfToken";
 
 const hasGoogleClientId = !!(
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
@@ -84,22 +84,12 @@ export default function GoogleSignInButton({
         true,
       );
       if (response.status && response.data) {
-        const { accessToken, refreshToken, user, isNew } = response.data;
+        const { user, isNew } = response.data;
         if (isNew) {
           pushSignUpEvent("google");
         }
-        const saveTokens = {
-          token: accessToken ?? "",
-          refreshToken: refreshToken ?? "",
-          role: user?.role ?? "",
-        };
-        const encryptedData = encryptData(saveTokens);
-        Cookies.set("sub", encryptedData, {
-          expires: 3,
-          sameSite: "Lax",
-          secure: true,
-          path: "/",
-        });
+        writeAuthUiCookie({ role: user?.role ?? "" });
+        storeCsrfTokenFromPayload(response.data);
         window.location.href = resolvePostLoginPath(
           locale,
           user?.role,
@@ -107,7 +97,7 @@ export default function GoogleSignInButton({
         );
         if (user) {
           const nextUser = isNew ? withNewUserOnboardingFlag(user) : user;
-          dispatch(SET_ACTIVE_USER({ user: nextUser }));
+          dispatch(SET_AUTH_SESSION_CACHE({ user: nextUser }));
         }
       } else {
         const errMsg = (response.data as { error?: string })?.error;

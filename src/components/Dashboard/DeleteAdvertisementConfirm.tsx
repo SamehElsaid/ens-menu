@@ -2,9 +2,9 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { axiosDelete } from "@/shared/axiosCall";
-import { toast } from "react-toastify";
 import { Advertisement } from "@/types/Menu";
 import DeleteEntityConfirmModal from "./DeleteEntityConfirmModal";
+import { useApiAction } from "@/hooks/useApiAction";
 
 interface DeleteAdvertisementConfirmProps {
   ad: Advertisement;
@@ -21,15 +21,18 @@ export default function DeleteAdvertisementConfirm({
 }: DeleteAdvertisementConfirmProps) {
   const t = useTranslations("Advertisements");
   const locale = useLocale();
+  const { runApiAction } = useApiAction();
   const labelText = localeTitle.trim();
 
   const handleDelete = async () => {
-    const result = await axiosDelete<unknown>(`/ads/${ad.id}`, locale);
-    if (result.status) {
-      toast.success(t("deleteSuccess"));
-      onDeleted?.();
-      onClose();
-    }
+    await runApiAction(() => axiosDelete(`/ads/${ad.id}`, locale), {
+      successToast: t("deleteSuccess"),
+      errorToast: ({ error }) => error,
+      onSuccess: () => {
+        onDeleted?.();
+        onClose();
+      },
+    });
   };
 
   return (

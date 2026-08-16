@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { axiosGet, axiosPatch } from "@/shared/axiosCall";
+import { axiosGet, axiosPut } from "@/shared/axiosCall";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import AddStaffModal from "@/components/Dashboard/AddStaffModal";
 import DeleteStaffConfirm from "@/components/Dashboard/DeleteStaffConfirm";
@@ -31,7 +31,8 @@ import {
 } from "react-icons/io5";
 import { useAppSelector } from "@/store/hooks";
 import { isFreePlanUser } from "@/lib/subscription";
-import { toast } from "react-toastify";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { useApiAction } from "@/hooks/useApiAction";
 
 type StaffTab = "staff" | "roles";
 
@@ -50,12 +51,10 @@ export default function AccountStaffPage() {
   const [activeTab, setActiveTab] = useState<StaffTab>("staff");
 
   const [staffList, setStaffList] = useState<MenuStaff[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingStaff, setEditingStaff] = useState<MenuStaff | null>(null);
   const [deletingStaff, setDeletingStaff] = useState<MenuStaff | null>(null);
   const [togglingId, setTogglingId] = useState<number | null>(null);
-  const [refreshing, setRefreshing] = useState(0);
 
   const { menus } = useDashboardMenus();
   const menuNameById = useMemo(() => {
@@ -75,27 +74,24 @@ export default function AccountStaffPage() {
     null,
   );
   const [deletingRole, setDeletingRole] = useState<MenuStaffRole | null>(null);
+  const { runApiAction } = useApiAction();
 
-  const fetchStaff = useCallback(async () => {
-    if (isFreePlan) {
-      setLoading(false);
-      return;
-    }
-    try {
-      setLoading(true);
-      const result = await axiosGet<{ staff?: MenuStaff[] }>(
+  const requestStaff = useCallback(
+    () =>
+      axiosGet<{ staff?: MenuStaff[] }>(
         "/dashboard/staff",
         locale,
-      );
-      setStaffList(result.status ? (result.data?.staff ?? []) : []);
-    } finally {
-      setLoading(false);
-    }
-  }, [locale, isFreePlan]);
-
-  useEffect(() => {
-    fetchStaff();
-  }, [fetchStaff, refreshing]);
+      ),
+    [locale],
+  );
+  const staffQuery = useApiQuery({
+    request: requestStaff,
+    enabled: !isFreePlan,
+    onSuccess: (data) => setStaffList(data.staff ?? []),
+    onError: () => setStaffList([]),
+  });
+  const loading = staffQuery.loading;
+  const refetchStaff = staffQuery.refetch;
 
   const handleEdit = useCallback((row: MenuStaff) => {
     setEditingStaff(row);
@@ -106,8 +102,8 @@ export default function AccountStaffPage() {
   }, []);
 
   const refreshList = useCallback(() => {
-    setRefreshing((r) => r + 1);
-  }, []);
+    void refetchStaff();
+  }, [refetchStaff]);
 
   const closeAddModal = useCallback(() => {
     setShowAddModal(false);
@@ -154,27 +150,24 @@ export default function AccountStaffPage() {
       if (togglingId !== null) return;
       setTogglingId(staff.id);
       try {
-        const result = await axiosPatch<
-          { isActive: boolean },
-          { message?: string }
-        >(`/dashboard/staff/${staff.id}`, locale, {
-          isActive: !staff.isActive,
-        });
-        if (result.status) {
-          toast.success(
-            staff.isActive ? t("disableSuccess") : t("enableSuccess"),
-          );
-          refreshList();
-        } else {
-          toast.error(t("toggleError"));
-        }
-      } catch {
-        toast.error(t("toggleError"));
+        await runApiAction(
+          () =>
+            axiosPut(`/dashboard/staff/${staff.id}`, locale, {
+              isActive: !staff.isActive,
+            }),
+          {
+            successToast: staff.isActive
+              ? t("disableSuccess")
+              : t("enableSuccess"),
+            errorToast: t("toggleError"),
+            onSuccess: refreshList,
+          },
+        );
       } finally {
         setTogglingId(null);
       }
     },
-    [locale, togglingId, t, refreshList],
+    [locale, togglingId, t, refreshList, runApiAction],
   );
 
   if (isFreePlan) {

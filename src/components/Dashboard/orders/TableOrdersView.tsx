@@ -3,19 +3,19 @@
 import { useLocale, useTranslations } from "next-intl";
 import { IoReceiptOutline } from "react-icons/io5";
 import { NotificationPermissionCard } from "@/components/Global/NotificationPermissionCard";
-import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import {
-  Badge,
   ButtonLink,
   EmptyState,
-  SearchInput,
-  Toolbar,
 } from "@/components/ui";
 import { useAppSelector } from "@/store/hooks";
 import { useMenuOrdersPage } from "@/hooks/useMenuOrdersPage";
 import OrderDetailsModal from "./OrderDetailsModal";
 import OrdersCardGrid from "./OrdersCardGrid";
 import OrdersFilters from "./OrdersFilters";
+import {
+  OrdersPageHeader,
+  OrdersSearchToolbar,
+} from "./OrdersPageChrome";
 
 export default function TableOrdersView() {
   const t = useTranslations("tableOrders");
@@ -71,29 +71,17 @@ export default function TableOrdersView() {
     <div className="flex flex-col gap-4">
       <NotificationPermissionCard />
 
-      <PageTitleWithHelp
+      <OrdersPageHeader
         id="onboarding-orders-header"
-        title={t("title")}
-        description={t("subtitle")}
-        meta={
-          pendingCount > 0 ? (
-            <Badge tone="warning">
-              {t("pendingBadge", { count: pendingCount })}
-            </Badge>
-          ) : undefined
-        }
+        translationNs="tableOrders"
+        pendingCount={pendingCount}
       />
 
       <div id="onboarding-orders-search">
-        <Toolbar
-          search={
-            <SearchInput
-              value={searchInput}
-              onChange={setSearchInput}
-              placeholder={t("searchPlaceholder")}
-              label={t("searchPlaceholder")}
-            />
-          }
+        <OrdersSearchToolbar
+          translationNs="tableOrders"
+          value={searchInput}
+          onChange={setSearchInput}
         />
       </div>
 

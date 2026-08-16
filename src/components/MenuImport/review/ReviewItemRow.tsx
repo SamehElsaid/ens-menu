@@ -107,6 +107,8 @@ export default function ReviewItemRow({
   const [showDescriptions, setShowDescriptions] = useState(
     Boolean(item.descriptionAr?.trim() || item.descriptionEn?.trim()),
   );
+  const sizeOptions = item.sizes ?? [];
+  const allOptions = [...sizeOptions, ...item.variants];
 
   const IMAGE_VALID_TYPES = [
     "image/png",
@@ -117,12 +119,12 @@ export default function ReviewItemRow({
 
   const hasMissingPrice =
     item.flags.includes("missing_price") ||
-    item.variants.some((v) => v.flags.includes("missing_price"));
+    allOptions.some((v) => v.flags.includes("missing_price"));
   const hasMissingName =
     item.flags.includes("missing_name_ar") ||
     item.flags.includes("missing_name_en") ||
     item.flags.includes("needs_review") ||
-    item.variants.some(
+    allOptions.some(
       (v) =>
         v.flags.includes("missing_name_ar") ||
         v.flags.includes("missing_name_en"),
@@ -130,10 +132,10 @@ export default function ReviewItemRow({
 
   const hasDuplicate =
     item.flags.includes("duplicate") ||
-    item.variants.some((v) => v.flags.includes("duplicate"));
+    allOptions.some((v) => v.flags.includes("duplicate"));
   const hasPriceConflict =
     item.flags.includes("price_conflict") ||
-    item.variants.some((v) => v.flags.includes("price_conflict"));
+    allOptions.some((v) => v.flags.includes("price_conflict"));
 
   const missingNameAr =
     !item.nameAr.trim() &&
@@ -233,14 +235,14 @@ export default function ReviewItemRow({
           : hasDuplicate && "bg-surface-2",
       )}
     >
-      {item.variants.length === 0 &&
+      {sizeOptions.length === 0 &&
         item.duplicateMeta?.status === "exact_duplicate" && (
           <Badge className="self-start" icon={<IoCopyOutline aria-hidden />}>
             {t("duplicateExactSkip")}
           </Badge>
         )}
 
-      {item.variants.length === 0 &&
+      {sizeOptions.length === 0 &&
         item.flags.includes("price_conflict") &&
         item.duplicateMeta && (
           <Alert tone="warning">
@@ -400,7 +402,7 @@ export default function ReviewItemRow({
         </div>
 
         <div className="flex items-start gap-2 ps-14 sm:shrink-0 sm:ps-0">
-          {item.variants.length === 0 && (
+          {sizeOptions.length === 0 && (
             <Input
               inputSize="sm"
               type="number"
@@ -478,14 +480,14 @@ export default function ReviewItemRow({
         </div>
       </div>
 
-      {item.variants.length > 0 && (
+      {allOptions.length > 0 && (
         /* Variants are a sub-ledger indented to the item's own text column, so
            three sizes of one dish read as three lines of one ticket rather
            than as three more dishes. */
         <div className="sm:ps-14">
           <p className="ui-label">{t("variantLabel")}</p>
           <ul className="mt-1 divide-y divide-line border-y border-line">
-            {item.variants.map((variant) => (
+            {allOptions.map((variant) => (
               <li
                 key={variant.id}
                 id={importRefDomId(variant.id)}

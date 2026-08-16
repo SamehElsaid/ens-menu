@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLocale, useTranslations } from "next-intl";
-import { axiosPost, axiosPatch } from "@/shared/axiosCall";
+import { axiosPost, axiosPut } from "@/shared/axiosCall";
 import { _resizeImage } from "@/shared/_shared";
 import { toast } from "react-toastify";
 import { Advertisement, UploadResponse } from "@/types/Menu";
@@ -29,6 +29,8 @@ import {
   type AdvertisementFormSchema,
 } from "@/schemas/advertisementSchema";
 import { UnmountClosed } from "react-collapse";
+import { useApiAction } from "@/hooks/useApiAction";
+import { toSafeExternalUrl } from "@/lib/normalizeExternalUrl";
 
 type AddAdvertisementFormData = AdvertisementFormSchema;
 
@@ -60,6 +62,7 @@ export default function AddAdvertisementModal({
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const { runApiAction } = useApiAction();
 
   const {
     control,
@@ -220,7 +223,9 @@ export default function AddAdvertisementModal({
         titleAr: data.titleAr.trim(),
         content: data.content.trim(),
         contentAr: data.contentAr.trim(),
-        linkUrl: data.linkUrl ?? undefined,
+        linkUrl: data.linkUrl
+          ? (toSafeExternalUrl(data.linkUrl) ?? undefined)
+          : undefined,
         imageUrl,
         image: imageUrl,
         ...(isEdit
@@ -231,39 +236,30 @@ export default function AddAdvertisementModal({
           : { position: "banner" }),
       };
 
-      if (isEdit && ad?.id != null) {
-        const updateUrl = adminMode ? `/admin/ads/${ad.id}` : `/ads/${ad.id}`;
-        const result = await axiosPatch<typeof payload, Advertisement>(
-          updateUrl,
-          locale,
-          payload,
-        );
-        if (result.status && result.data) {
-          toast.success(t("editSuccess"));
+      const request =
+        isEdit && ad?.id != null
+          ? () =>
+              axiosPut<typeof payload, Advertisement>(
+                adminMode ? `/admin/ads/${ad.id}` : `/ads/${ad.id}`,
+                locale,
+                payload,
+              )
+          : () =>
+              axiosPost<typeof payload, Advertisement>(
+                adminMode
+                  ? "/admin/ads"
+                  : `/menus/${menuId as string}/ads`,
+                locale,
+                payload,
+              );
+      await runApiAction(request, {
+        successToast: isEdit ? t("editSuccess") : t("createSuccess"),
+        errorToast: isEdit ? t("editError") : t("createError"),
+        onSuccess: () => {
           onClose();
           onRefresh?.();
-        } else {
-          toast.error(t("editError"));
-        }
-      } else {
-        const createUrl = adminMode
-          ? `/admin/ads`
-          : `/menus/${menuId as string}/ads`;
-        const result = await axiosPost<typeof payload, Advertisement>(
-          createUrl,
-          locale,
-          payload,
-        );
-        if (result.status && result.data) {
-          toast.success(t("createSuccess"));
-          onClose();
-          onRefresh?.();
-        } else {
-          toast.error(t("createError"));
-        }
-      }
-    } catch {
-      toast.error(isEdit ? t("editError") : t("createError"));
+        },
+      });
     } finally {
       setIsSubmitting(false);
     }

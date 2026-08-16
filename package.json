@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.mts",
+    "test:e2e": "playwright test",
     "check:contrast": "node scripts/check-contrast.mjs",
     "check:i18n": "node scripts/check-message-parity.mjs"
   },
@@ -28,6 +32,7 @@
     "@react-three/drei": "^10.7.8",
     "@react-three/fiber": "^9.7.0",
     "@reduxjs/toolkit": "^2.10.1",
+    "@sentry/nextjs": "^10.70.0",
     "@uiw/react-color": "^2.9.5",
     "ag-grid-community": "^34.3.1",
     "ag-grid-react": "^34.3.1",
@@ -40,9 +45,10 @@
     "gsap": "^3.15.0",
     "holy-loader": "^2.3.14",
     "idb-keyval": "^6.3.0",
+    "isomorphic-dompurify": "^3.22.0",
     "js-cookie": "^3.0.5",
     "motion": "^13.1.0",
-    "next": "16.0.10",
+    "next": "^16.3.1",
     "next-intl": "^4.5.3",
     "qr-code-styling": "^1.9.2",
     "react": "19.2.0",
@@ -59,7 +65,7 @@
     "react-to-print": "^3.3.0",
     "react-toastify": "^11.0.5",
     "react-tooltip": "^5.30.0",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.3",
     "socket.io-client": "^4.8.3",
     "suneditor-react": "^3.6.1",
     "three": "^0.185.1",
@@ -67,6 +73,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/crypto-js": "^4.2.2",
     "@types/js-cookie": "^3.0.6",
@@ -79,9 +86,14 @@
     "@types/three": "^0.185.4",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
-    "eslint-config-next": "16.0.3",
+    "eslint-config-next": "^16.3.1",
     "playwright": "^1.62.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
+  },
+  "overrides": {
+    "yaml": "2.9.0",
+    "dompurify": "3.4.13"
   }
 }

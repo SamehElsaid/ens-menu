@@ -61,6 +61,18 @@ export function formatAppDateTime(
   }
 }
 
+export function formatMediumDateTime(
+  value: string | Date,
+  locale: string,
+): string {
+  const date = toDate(value);
+  if (!date) return "";
+  return new Intl.DateTimeFormat(intlDateLocale(locale), {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}
+
 /** Chart axis label — weekday + day number */
 export function formatAppChartDay(
   dateStr: string,

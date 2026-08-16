@@ -1,6 +1,9 @@
-import { encryptDataApi, decryptData } from "@/shared/encryption";
+import { encryptDataApi } from "@/shared/encryption";
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import {
+  backendCookieFetch,
+  forwardSetCookieHeaders,
+} from "@/lib/server/backendCookieRequest";
 
 function buildApiKey() {
   const secretKey = process.env.NEXT_PUBLIC_SECRET_KEY!;
@@ -9,12 +12,11 @@ function buildApiKey() {
   return encryptDataApi(apiKey, secretKey);
 }
 
-async function getAuthToken(): Promise<string | null> {
-  const cookieStore = await cookies();
-  const sub = cookieStore.get("sub")?.value;
-  if (!sub) return null;
-  const decoded = decryptData(sub) as { token?: string };
-  return decoded?.token ?? null;
+async function forwardResponse(upstream: Response): Promise<NextResponse> {
+  const data = await upstream.json().catch(() => null);
+  const response = NextResponse.json(data, { status: upstream.status });
+  forwardSetCookieHeaders(upstream, response);
+  return response;
 }
 
 export async function GET(
@@ -51,24 +53,20 @@ export async function PATCH(
 ) {
   const { pageName } = await params;
   try {
-    const token = await getAuthToken();
     const body = await request.json();
 
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/metaData/${pageName}`,
+    const res = await backendCookieFetch(
+      request,
+      `/metaData/${encodeURIComponent(pageName)}`,
       {
         method: "PATCH",
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-          "X-API-KEY": buildApiKey(),
         },
         body: JSON.stringify(body),
       },
     );
-
-    const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
+    return forwardResponse(res);
   } catch (err) {
     console.error(`[PATCH /api/metaData/${pageName}]`, err);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -81,24 +79,20 @@ export async function PUT(
 ) {
   const { pageName } = await params;
   try {
-    const token = await getAuthToken();
     const body = await request.json();
 
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/metaData/${pageName}`,
+    const res = await backendCookieFetch(
+      request,
+      `/metaData/${encodeURIComponent(pageName)}`,
       {
         method: "PUT",
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-          "X-API-KEY": buildApiKey(),
         },
         body: JSON.stringify(body),
       },
     );
-
-    const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
+    return forwardResponse(res);
   } catch (err) {
     console.error(`[PUT /api/metaData/${pageName}]`, err);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -106,26 +100,19 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ pageName: string }> },
 ) {
   const { pageName } = await params;
   try {
-    const token = await getAuthToken();
-
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/metaData/${pageName}`,
+    const res = await backendCookieFetch(
+      request,
+      `/metaData/${encodeURIComponent(pageName)}`,
       {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "X-API-KEY": buildApiKey(),
-        },
       },
     );
-
-    const data = await res.json().catch(() => null);
-    return NextResponse.json(data, { status: res.status });
+    return forwardResponse(res);
   } catch (err) {
     console.error(`[DELETE /api/metaData/${pageName}]`, err);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

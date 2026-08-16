@@ -1,9 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { toast } from "react-toastify";
-import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
+import { axiosGet, axiosPut, axiosPost } from "@/shared/axiosCall";
 import { formatAdminDate } from "@/lib/fetchAdminAnalytics";
 import {
   Button,
@@ -19,6 +18,8 @@ import {
   Textarea,
 } from "@/components/ui";
 import type { SupportCase } from "@/types/AdminCustomer";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { useApiAction } from "@/hooks/useApiAction";
 
 interface Props {
   userId: number;
@@ -36,70 +37,70 @@ export default function CustomerSupportSection({ userId }: Props) {
   );
   const tCommon = useTranslations("common");
   const [cases, setCases] = useState<SupportCase[]>([]);
-  const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [ticketRef, setTicketRef] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const { runApiAction } = useApiAction();
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const result = await axiosGet<{ cases: SupportCase[] }>(
+  const requestCases = useCallback(
+    () =>
+      axiosGet<{ cases: SupportCase[] }>(
         `/admin/users/${userId}/support`,
         locale,
-      );
-      if (result.status && result.data) {
-        setCases(result.data.cases);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [userId, locale]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+      ),
+    [userId, locale],
+  );
+  const casesQuery = useApiQuery({
+    request: requestCases,
+    errorToast: ({ error }) => error,
+    onSuccess: (data) => setCases(data.cases),
+  });
+  const loading = casesQuery.loading;
+  const load = casesQuery.refetch;
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!subject.trim() || !message.trim()) return;
     setSubmitting(true);
     try {
-      const result = await axiosPost<
-        { subject: string; message: string; ticketRef?: string },
-        unknown
-      >(`/admin/users/${userId}/support`, locale, {
-        subject,
-        message,
-        ticketRef: ticketRef || undefined,
-      });
-      if (result.status) {
-        toast.success(t("createSuccess"));
-        setFormOpen(false);
-        setSubject("");
-        setMessage("");
-        setTicketRef("");
-        load();
-      } else {
-        toast.error(t("createError"));
-      }
+      await runApiAction(
+        () =>
+          axiosPost(`/admin/users/${userId}/support`, locale, {
+            subject,
+            message,
+            ticketRef: ticketRef || undefined,
+          }),
+        {
+          successToast: t("createSuccess"),
+          errorToast: t("createError"),
+          onSuccess: () => {
+            setFormOpen(false);
+            setSubject("");
+            setMessage("");
+            setTicketRef("");
+            void load();
+          },
+        },
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
   const updateStatus = async (caseId: number, status: string) => {
-    const result = await axiosPatch<{ status: string }, unknown>(
-      `/admin/users/${userId}/support/${caseId}`,
-      locale,
-      { status },
+    await runApiAction(
+      () =>
+        axiosPut(`/admin/users/${userId}/support/${caseId}`, locale, {
+          status,
+        }),
+      {
+        successToast: t("statusSuccess"),
+        errorToast: ({ error }) => error,
+        onSuccess: () => void load(),
+      },
     );
-    if (result.status) {
-      toast.success(t("statusSuccess"));
-      load();
-    }
   };
 
   return (

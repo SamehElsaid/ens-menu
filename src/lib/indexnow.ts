@@ -31,6 +31,7 @@ export async function pingIndexNow(urls: string[]): Promise<boolean> {
         keyLocation: `${siteOrigin}/${INDEXNOW_KEY}.txt`,
         urlList,
       }),
+      signal: AbortSignal.timeout(10_000),
     });
     return res.ok;
   } catch {

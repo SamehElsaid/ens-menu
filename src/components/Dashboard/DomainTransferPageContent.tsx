@@ -34,16 +34,11 @@ import type { DomainTransferRequest } from "@/types/DomainTransfer";
 import type { StatusTone } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import { toast } from "react-toastify";
+import { resolveApiErrorMessage } from "@/api/apiError";
+import { formatMediumDateTime } from "@/lib/formatDateTime";
 
 const ANALYSIS_MS = 2800;
 const POLL_MS = 5000;
-
-function formatDateTime(value: string, locale: string): string {
-  return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
-}
 
 type StepState = "done" | "active" | "pending";
 
@@ -175,27 +170,6 @@ export default function DomainTransferPageContent() {
   const [analysisDone, setAnalysisDone] = useState(false);
   const analysisStartedRef = useRef<number | null>(null);
 
-  const loadRequest = useCallback(async () => {
-    const result = await axiosGet<{
-      request: DomainTransferRequest | null;
-      history: DomainTransferRequest[];
-    }>("/user/domain-transfer", locale);
-    if (result.status && result.data) {
-      setRequest(result.data.request);
-      setHistory(result.data.history ?? []);
-      if (result.data.request?.status !== "pending") {
-        setAnalysisDone(true);
-        setAnalyzing(false);
-      }
-    }
-    setLoading(false);
-    return result.data?.request ?? null;
-  }, [locale]);
-
-  useEffect(() => {
-    void loadRequest();
-  }, [loadRequest]);
-
   const runAnalysisAnimation = useCallback((requestId: number) => {
     if (analysisStartedRef.current === requestId) return;
     analysisStartedRef.current = requestId;
@@ -208,11 +182,32 @@ export default function DomainTransferPageContent() {
     }, ANALYSIS_MS);
   }, []);
 
-  useEffect(() => {
-    if (request?.status === "pending" && request.id) {
-      runAnalysisAnimation(request.id);
+  const loadRequest = useCallback(async () => {
+    const result = await axiosGet<{
+      request: DomainTransferRequest | null;
+      history: DomainTransferRequest[];
+    }>("/user/domain-transfer", locale);
+    if (result.status && result.data) {
+      setRequest(result.data.request);
+      setHistory(result.data.history ?? []);
+      if (
+        result.data.request?.status === "pending" &&
+        result.data.request.id
+      ) {
+        runAnalysisAnimation(result.data.request.id);
+      } else {
+        setAnalysisDone(true);
+        setAnalyzing(false);
+      }
     }
-  }, [request?.id, request?.status, runAnalysisAnimation]);
+    setLoading(false);
+    return result.data?.request ?? null;
+  }, [locale, runAnalysisAnimation]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => void loadRequest(), 0);
+    return () => window.clearTimeout(timer);
+  }, [loadRequest]);
 
   useEffect(() => {
     if (!request) return;
@@ -245,7 +240,7 @@ export default function DomainTransferPageContent() {
       runAnalysisAnimation(result.data.request.id);
     } else {
       toast.error(
-        (result.data as { message?: string })?.message || t("submitError"),
+        resolveApiErrorMessage(result.data, locale, t("submitError")),
       );
     }
   };
@@ -265,7 +260,7 @@ export default function DomainTransferPageContent() {
       toast.success(t("confirmSuccess"));
     } else {
       toast.error(
-        (result.data as { message?: string })?.message || t("confirmError"),
+        resolveApiErrorMessage(result.data, locale, t("confirmError")),
       );
     }
   };
@@ -291,7 +286,7 @@ export default function DomainTransferPageContent() {
       toast.success(t("cancelSuccess"));
     } else {
       toast.error(
-        (result.data as { message?: string })?.message || t("cancelError"),
+        resolveApiErrorMessage(result.data, locale, t("cancelError")),
       );
     }
   };
@@ -396,7 +391,7 @@ export default function DomainTransferPageContent() {
               </span>
               <span className="ui-figure text-[11px] text-fg-muted">
                 {t("submittedAt", {
-                  date: formatDateTime(request.createdAt, locale),
+                  date: formatMediumDateTime(request.createdAt, locale),
                 })}
               </span>
             </div>

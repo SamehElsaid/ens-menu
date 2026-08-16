@@ -14,13 +14,18 @@ export default function AdminAccessGuard({
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations("adminAdministrators.permissions");
-  const { canAccessPath } = useAdminPermissions();
+  const { canAccessPath, loaded } = useAdminPermissions();
 
   useEffect(() => {
+    if (!loaded) return;
     if (canAccessPath(pathname)) return;
     toast.error(t("accessDenied"));
     router.replace("/admin");
-  }, [canAccessPath, pathname, router, t]);
+  }, [canAccessPath, loaded, pathname, router, t]);
+
+  if (!loaded) {
+    return null;
+  }
 
   if (!canAccessPath(pathname)) {
     return null;

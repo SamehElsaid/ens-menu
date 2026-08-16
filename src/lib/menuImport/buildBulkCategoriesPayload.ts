@@ -3,6 +3,7 @@ import type {
   BulkImportItem,
   BulkImportPayload,
   BulkImportSize,
+  BulkImportVariant,
   ImportDraft,
   ImportItem,
   ImportVariant,
@@ -13,6 +14,7 @@ import {
   collectAllBlockingErrors,
   countExpandedItems,
 } from "./draftSaveUtils";
+import { persistentOptionIdForLegacy } from "@/lib/optionIds";
 
 function shouldIncludeVariant(variant: ImportVariant): boolean {
   const meta = variant.duplicateMeta;
@@ -28,12 +30,12 @@ function shouldIncludeVariant(variant: ImportVariant): boolean {
 }
 
 function shouldIncludeItem(item: ImportItem): boolean {
-  if (item.variants.length > 0) {
-    return item.variants.some(
-      (variant) =>
-        variant.price !== null &&
-        Number.isFinite(variant.price) &&
-        shouldIncludeVariant(variant),
+  if ((item.sizes?.length ?? 0) > 0) {
+    return item.sizes!.some(
+      (size) =>
+        size.price !== null &&
+        Number.isFinite(size.price) &&
+        shouldIncludeVariant(size),
     );
   }
 
@@ -49,13 +51,42 @@ function shouldIncludeItem(item: ImportItem): boolean {
   return true;
 }
 
-function toBulkSize(variant: ImportVariant): BulkImportSize {
+function validIncludedOptions(options: ImportVariant[]): ImportVariant[] {
+  return options.filter(
+    (option) =>
+      option.price !== null &&
+      Number.isFinite(option.price) &&
+      shouldIncludeVariant(option),
+  );
+}
+
+function toBulkSize(
+  variant: ImportVariant,
+  namespace: string,
+): BulkImportSize {
   const nameAr = (variant.labelAr ?? variant.label).trim();
   const nameEn = (variant.labelEn ?? variant.label).trim();
   return {
+    id: persistentOptionIdForLegacy(variant.id, namespace),
     nameAr: nameAr || nameEn,
     nameEn: nameEn || nameAr,
     price: variant.price as number,
+  };
+}
+
+function toBulkVariant(
+  variant: ImportVariant,
+  namespace: string,
+): BulkImportVariant {
+  const labelAr = (variant.labelAr ?? variant.label).trim();
+  const labelEn = (variant.labelEn ?? variant.label).trim();
+  return {
+    id: persistentOptionIdForLegacy(variant.id, namespace),
+    label: labelAr || labelEn,
+    labelAr: labelAr || labelEn,
+    labelEn: labelEn || labelAr,
+    price: variant.price as number,
+    flags: variant.flags,
   };
 }
 
@@ -80,22 +111,28 @@ function toBulkItem(item: ImportItem, sortOrder: number): BulkImportItem | null 
       : {}),
   };
 
-  if (item.variants.length > 0) {
-    const sizes = item.variants
-      .filter(
-        (variant) =>
-          variant.price !== null &&
-          Number.isFinite(variant.price) &&
-          shouldIncludeVariant(variant),
-      )
-      .map(toBulkSize);
+  const sizes = validIncludedOptions(item.sizes ?? []).map((size, index) =>
+    toBulkSize(size, `size:${item.id}:${index}`),
+  );
+  const variants = validIncludedOptions(item.variants).map((variant, index) =>
+    toBulkVariant(variant, `variant:${item.id}:${index}`),
+  );
 
+  if ((item.sizes?.length ?? 0) > 0) {
     if (sizes.length === 0) return null;
-
-    return { ...bulkItem, price: 0, sizes };
+    return {
+      ...bulkItem,
+      price: item.price ?? 0,
+      sizes,
+      ...(variants.length > 0 ? { variants } : {}),
+    };
   }
 
-  return { ...bulkItem, price: item.price as number };
+  return {
+    ...bulkItem,
+    price: item.price as number,
+    ...(variants.length > 0 ? { variants } : {}),
+  };
 }
 
 export function buildBulkCategoriesPayload(
@@ -147,36 +184,13 @@ export function countBulkSaveStats(draft: ImportDraft) {
 
   for (const category of draft.categories) {
     for (const item of category.items) {
-      if (item.variants.length > 0) {
-        for (const variant of item.variants) {
-          if (variant.price === null || !Number.isFinite(variant.price)) {
-            continue;
-          }
-
-          if (!shouldIncludeVariant(variant)) {
-            itemsSkippedDuplicate++;
-            continue;
-          }
-
-          saveUnitsInPayload++;
-
-          if (variant.duplicateMeta?.resolution === "update_price") {
-            itemsUpdated++;
-          }
-        }
-      } else {
-        if (item.price === null || !Number.isFinite(item.price)) continue;
-
-        if (!shouldIncludeItem(item)) {
-          itemsSkippedDuplicate++;
-          continue;
-        }
-
-        saveUnitsInPayload++;
-
-        if (item.duplicateMeta?.resolution === "update_price") {
-          itemsUpdated++;
-        }
+      if (!shouldIncludeItem(item)) {
+        itemsSkippedDuplicate++;
+        continue;
+      }
+      saveUnitsInPayload++;
+      if (item.duplicateMeta?.resolution === "update_price") {
+        itemsUpdated++;
       }
     }
   }

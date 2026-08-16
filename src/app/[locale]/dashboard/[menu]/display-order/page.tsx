@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import { useAppSelector } from "@/store/hooks";
-import { axiosPatch, axiosPost } from "@/shared/axiosCall";
+import { axiosPut, axiosPost } from "@/shared/axiosCall";
 import { fetchAllMenuPages } from "@/lib/fetchAllMenuPages";
 import { useDisplayOrderItemsPagination } from "@/hooks/useDisplayOrderItemsPagination";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
@@ -202,7 +202,7 @@ export default function DisplayOrderPage() {
       if (categoriesDirty) {
         const results = await Promise.all(
           toPayload(categoryRows).map((entry) =>
-            axiosPatch<{ sortOrder: number }, unknown>(
+            axiosPut<{ sortOrder: number }, unknown>(
               `/menus/${menuId}/categories/${entry.id}`,
               locale,
               { sortOrder: entry.sortOrder },

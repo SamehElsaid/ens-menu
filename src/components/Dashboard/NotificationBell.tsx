@@ -6,10 +6,8 @@ import {
   IoNotificationsOutline,
   IoCloseOutline,
   IoCarOutline,
-  IoCheckmarkCircleOutline,
   IoArrowForwardOutline,
   IoSparklesOutline,
-  IoCameraOutline,
   IoTimeOutline,
   IoAlertCircleOutline,
 } from "react-icons/io5";
@@ -152,7 +150,11 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
   }, [locale]);
 
   useEffect(() => {
-    void fetchAccountNotifications();
+    const timer = window.setTimeout(
+      () => void fetchAccountNotifications(),
+      0,
+    );
+    return () => window.clearTimeout(timer);
   }, [fetchAccountNotifications]);
 
   // Build plan tasks dynamically — only include when NOT yet done
@@ -221,24 +223,30 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
   const [seenTasksHydrated, setSeenTasksHydrated] = useState(false);
 
   useEffect(() => {
-    setSeenTaskKeys(readSeenTaskKeys());
-    setSeenTasksHydrated(true);
+    const timer = window.setTimeout(() => {
+      setSeenTaskKeys(readSeenTaskKeys());
+      setSeenTasksHydrated(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   // Drop keys of tasks the user has since completed, so the badge speaks up
   // again if the same task ever comes back.
   useEffect(() => {
     if (!seenTasksHydrated || !tracksTasks) return;
-    const stillPending = new Set(
-      taskKeysJoined ? taskKeysJoined.split("|") : [],
-    );
-    const prefix = `${menu?.id ?? ""}:`;
-    setSeenTaskKeys((prev) => {
-      const kept = prev.filter(
-        (key) => !key.startsWith(prefix) || stillPending.has(key),
+    const timer = window.setTimeout(() => {
+      const stillPending = new Set(
+        taskKeysJoined ? taskKeysJoined.split("|") : [],
       );
-      return kept.length === prev.length ? prev : kept;
-    });
+      const prefix = `${menu?.id ?? ""}:`;
+      setSeenTaskKeys((prev) => {
+        const kept = prev.filter(
+          (key) => !key.startsWith(prefix) || stillPending.has(key),
+        );
+        return kept.length === prev.length ? prev : kept;
+      });
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [seenTasksHydrated, tracksTasks, taskKeysJoined, menu?.id]);
 
   useEffect(() => {
@@ -367,14 +375,6 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
     if (res.status) setUnreadAccountCount(0);
   }, [locale]);
 
-  // Opening the panel means the user has seen everything in it, so the bell
-  // badge drops to zero until something new arrives.
-  useEffect(() => {
-    if (!isOpen) return;
-    markOrdersSeen();
-    markTasksSeen();
-  }, [isOpen, markOrdersSeen, markTasksSeen]);
-
   // Read-all runs after the refetch so the response cannot revive the counter.
   useEffect(() => {
     if (!isOpen) return;
@@ -404,8 +404,10 @@ export default function NotificationBell({ segment }: NotificationBellProps) {
 
   const open = useCallback(() => {
     setDropdownStyle(computeDropdownStyle());
+    markOrdersSeen();
+    markTasksSeen();
     setIsOpen(true);
-  }, [computeDropdownStyle]);
+  }, [computeDropdownStyle, markOrdersSeen, markTasksSeen]);
 
   useEffect(() => {
     if (!isOpen) return;

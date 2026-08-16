@@ -28,9 +28,10 @@ import {
   Textarea,
 } from "@/components/ui";
 import { cn } from "@/lib/cn";
-import { axiosGet, axiosPatch } from "@/shared/axiosCall";
+import { axiosGet, axiosPut } from "@/shared/axiosCall";
 import Loader from "@/components/Global/Loader";
 import { useRouter } from "@/i18n/navigation";
+import { useApiAction } from "@/hooks/useApiAction";
 
 /** Tile chrome shared by the ready palettes and the custom tile. */
 const tileBase = cn(
@@ -198,6 +199,7 @@ export default function TemplateDesignCustomizePanel({
   const [showColorPicker, setShowColorPicker] = useState<string | null>(null);
   const [texts, setTexts] = useState<TextsState>({ ...INITIAL_TEXTS });
   const [isSaving, setIsSaving] = useState(false);
+  const { runApiAction } = useApiAction();
 
   const activePalette =
     readyPalettes.find((p) => p.id === selectedPaletteId) ?? readyPalettes[0];
@@ -343,38 +345,28 @@ export default function TemplateDesignCustomizePanel({
 
     setIsSaving(true);
     try {
-      const result = await axiosPatch<typeof payload, unknown>(
-        `/menus/${menuApiRef}/customizations`,
-        locale,
-        payload,
+      await runApiAction(
+        () =>
+          axiosPut(
+            `/menus/${menuApiRef}/customizations`,
+            locale,
+            payload,
+          ),
+        {
+          successToast:
+            locale === "ar"
+              ? "تم حفظ إعدادات التخصيص بنجاح."
+              : "Customization settings saved successfully.",
+          errorToast:
+            locale === "ar"
+              ? "فشل في حفظ إعدادات التخصيص."
+              : "Failed to save customization settings.",
+          onSuccess: () => {
+            if (embedded && onClose) onClose();
+            else router.push(designListPath);
+          },
+        },
       );
-
-      if (result.status) {
-        toast.success(
-          locale === "ar"
-            ? "تم حفظ إعدادات التخصيص بنجاح."
-            : "Customization settings saved successfully.",
-        );
-        if (embedded && onClose) {
-          onClose();
-        } else {
-          router.push(designListPath);
-        }
-      } else {
-        toast.error(
-          locale === "ar"
-            ? "فشل في حفظ إعدادات التخصيص."
-            : "Failed to save customization settings.",
-        );
-        console.error("Save customization error:", result.data);
-      }
-    } catch (error) {
-      toast.error(
-        locale === "ar"
-          ? "حدث خطأ غير متوقع أثناء الحفظ."
-          : "An unexpected error occurred while saving.",
-      );
-      console.error("Save customization exception:", error);
     } finally {
       setIsSaving(false);
     }

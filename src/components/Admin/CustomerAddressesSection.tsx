@@ -1,13 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { FaPlus, FaTrash, FaEdit, FaStar } from "react-icons/fa";
-import { toast } from "react-toastify";
 import {
   axiosDelete,
   axiosGet,
-  axiosPatch,
+  axiosPut,
   axiosPost,
 } from "@/shared/axiosCall";
 import { FiAlertTriangle } from "react-icons/fi";
@@ -25,6 +24,8 @@ import {
   SectionHeader,
 } from "@/components/ui";
 import type { UserAddress } from "@/types/AdminCustomer";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { useApiAction } from "@/hooks/useApiAction";
 
 interface Props {
   userId: number;
@@ -49,31 +50,28 @@ export default function CustomerAddressesSection({ userId }: Props) {
   );
   const tCommon = useTranslations("common");
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
-  const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const { runApiAction } = useApiAction();
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const result = await axiosGet<{ addresses: UserAddress[] }>(
+  const requestAddresses = useCallback(
+    () =>
+      axiosGet<{ addresses: UserAddress[] }>(
         `/admin/users/${userId}/addresses`,
         locale,
-      );
-      if (result.status && result.data) {
-        setAddresses(result.data.addresses);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [userId, locale]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+      ),
+    [userId, locale],
+  );
+  const addressesQuery = useApiQuery({
+    request: requestAddresses,
+    errorToast: ({ error }) => error,
+    onSuccess: (data) => setAddresses(data.addresses),
+  });
+  const loading = addressesQuery.loading;
+  const load = addressesQuery.refetch;
 
   const openCreate = () => {
     setEditingId(null);
@@ -101,24 +99,28 @@ export default function CustomerAddressesSection({ userId }: Props) {
     setSubmitting(true);
     try {
       const payload = { ...form };
-      const result = editingId
-        ? await axiosPatch<typeof payload, { address: UserAddress }>(
-            `/admin/users/${userId}/addresses/${editingId}`,
-            locale,
-            payload,
-          )
-        : await axiosPost<typeof payload, { address: UserAddress }>(
-            `/admin/users/${userId}/addresses`,
-            locale,
-            payload,
-          );
-      if (result.status) {
-        toast.success(editingId ? t("updateSuccess") : t("createSuccess"));
-        setFormOpen(false);
-        load();
-      } else {
-        toast.error(t("saveError"));
-      }
+      await runApiAction(
+        () =>
+          editingId
+            ? axiosPut<typeof payload, { address: UserAddress }>(
+                `/admin/users/${userId}/addresses/${editingId}`,
+                locale,
+                payload,
+              )
+            : axiosPost<typeof payload, { address: UserAddress }>(
+                `/admin/users/${userId}/addresses`,
+                locale,
+                payload,
+              ),
+        {
+          successToast: editingId ? t("updateSuccess") : t("createSuccess"),
+          errorToast: t("saveError"),
+          onSuccess: () => {
+            setFormOpen(false);
+            void load();
+          },
+        },
+      );
     } finally {
       setSubmitting(false);
     }
@@ -126,29 +128,32 @@ export default function CustomerAddressesSection({ userId }: Props) {
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    const result = await axiosDelete(
-      `/admin/users/${userId}/addresses/${deleteId}`,
-      locale,
+    await runApiAction(
+      () =>
+        axiosDelete(`/admin/users/${userId}/addresses/${deleteId}`, locale),
+      {
+        successToast: t("deleteSuccess"),
+        errorToast: t("deleteError"),
+        onSuccess: () => {
+          setDeleteId(null);
+          void load();
+        },
+      },
     );
-    if (result.status) {
-      toast.success(t("deleteSuccess"));
-      setDeleteId(null);
-      load();
-    } else {
-      toast.error(t("deleteError"));
-    }
   };
 
   const setDefault = async (addr: UserAddress) => {
-    const result = await axiosPatch<{ isDefault: boolean }, unknown>(
-      `/admin/users/${userId}/addresses/${addr.id}`,
-      locale,
-      { isDefault: true },
+    await runApiAction(
+      () =>
+        axiosPut(`/admin/users/${userId}/addresses/${addr.id}`, locale, {
+          isDefault: true,
+        }),
+      {
+        successToast: t("defaultSuccess"),
+        errorToast: ({ error }) => error,
+        onSuccess: () => void load(),
+      },
     );
-    if (result.status) {
-      toast.success(t("defaultSuccess"));
-      load();
-    }
   };
 
   return (

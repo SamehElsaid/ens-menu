@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { generateToken } from "../../../firebase/firebase-confing";
 import { syncFcmToken } from "@/shared/syncFcmToken";
@@ -16,6 +16,13 @@ import { cn } from "@/lib/cn";
 import { Badge, Button, ButtonLink, Card, CardFooter } from "@/components/ui";
 
 type PermissionState = "default" | "granted" | "denied";
+
+const subscribeToPermission = () => () => {};
+
+function getBrowserPermission(): PermissionState | null {
+  if (typeof window === "undefined" || !("Notification" in window)) return null;
+  return Notification.permission as PermissionState;
+}
 
 /**
  * Prompt for the browser notification permission, above an orders list.
@@ -34,20 +41,22 @@ type PermissionState = "default" | "granted" | "denied";
 export function NotificationPermissionCard() {
   const t = useTranslations("notificationPermission");
   const locale = useLocale();
-  const [permission, setPermission] = useState<PermissionState | null>(null);
+  const browserPermission = useSyncExternalStore(
+    subscribeToPermission,
+    getBrowserPermission,
+    () => null,
+  );
+  const [requestedPermission, setRequestedPermission] =
+    useState<PermissionState | null>(null);
+  const permission = requestedPermission ?? browserPermission;
   const [dismissed, setDismissed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [justGranted, setJustGranted] = useState(false);
 
-  useEffect(() => {
-    if (typeof window === "undefined" || !("Notification" in window)) return;
-    setPermission(Notification.permission as PermissionState);
-  }, []);
-
   const handleAllow = async () => {
     setLoading(true);
     const result = await Notification.requestPermission();
-    setPermission(result as PermissionState);
+    setRequestedPermission(result as PermissionState);
     if (result === "granted") {
       setJustGranted(true);
       await generateToken();

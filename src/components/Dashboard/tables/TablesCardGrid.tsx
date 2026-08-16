@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { MenuTable } from "@/types/Menu";
 import TableCard from "./TableCard";
@@ -61,11 +61,16 @@ export default function TablesCardGrid({
   onAdd,
 }: TablesCardGridProps) {
   const t = useTranslations("auth");
-  const [page, setPage] = useState(1);
-
-  useEffect(() => {
-    setPage(1);
-  }, [tables.length]);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    itemCount: tables.length,
+  });
+  if (pagination.itemCount !== tables.length) {
+    setPagination({ page: 1, itemCount: tables.length });
+  }
+  const page = pagination.page;
+  const setPage = (nextPage: number) =>
+    setPagination({ page: nextPage, itemCount: tables.length });
 
   const totalPages = Math.max(1, Math.ceil(tables.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);

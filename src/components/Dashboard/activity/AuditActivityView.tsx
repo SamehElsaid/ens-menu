@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { IoTimeOutline } from "react-icons/io5";
@@ -40,21 +40,15 @@ export default function AuditActivityView() {
   const includeProSources = Boolean(userData) && !isFreePlanUser(userData);
 
   useEffect(() => {
-    const id = setTimeout(() => setDebouncedSearch(searchInput.trim()), 200);
+    const id = setTimeout(() => {
+      const nextSearch = searchInput.trim();
+      if (nextSearch !== debouncedSearch) {
+        setDebouncedSearch(nextSearch);
+        setPage(1);
+      }
+    }, 200);
     return () => clearTimeout(id);
-  }, [searchInput]);
-
-  const searchBaseline = useRef<string | null>(null);
-  useEffect(() => {
-    if (searchBaseline.current === null) {
-      searchBaseline.current = debouncedSearch;
-      return;
-    }
-    if (searchBaseline.current !== debouncedSearch) {
-      searchBaseline.current = debouncedSearch;
-      setPage(1);
-    }
-  }, [debouncedSearch]);
+  }, [searchInput, debouncedSearch]);
 
   const { entries, loading, totalPages } = useMenuActivityLog(menuId, {
     page,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FiArrowUpLeft } from "react-icons/fi";
 import { cn } from "@/lib/cn";
 import { focusRing, Spinner } from "@/components/ui";
@@ -16,24 +16,28 @@ export default function ChatSuggestions({
   onSelect,
   messageKey,
 }: Props) {
-  const [sending, setSending] = useState<string | null>(null);
-
   const uniqueSuggestions = suggestions.filter(
     (item, index, arr) =>
       arr.findIndex(
         (s) => s.trim().toLowerCase() === item.trim().toLowerCase(),
       ) === index,
   );
-
-  useEffect(() => {
-    setSending(null);
-  }, [messageKey, uniqueSuggestions.join("|")]);
+  const signature = `${messageKey ?? ""}|${uniqueSuggestions.join("|")}`;
+  const [selection, setSelection] = useState<{
+    signature: string;
+    sending: string | null;
+  }>({ signature, sending: null });
+  if (selection.signature !== signature) {
+    setSelection({ signature, sending: null });
+  }
+  const sending =
+    selection.signature === signature ? selection.sending : null;
 
   if (uniqueSuggestions.length === 0) return null;
 
   const handleSelect = (suggestion: string) => {
     if (sending) return;
-    setSending(suggestion);
+    setSelection({ signature, sending: suggestion });
     onSelect(suggestion);
   };
 

@@ -41,6 +41,7 @@ import {
   publicMenuHostDisplay,
   sanitizeMenuSlugInput,
 } from "@/lib/publicMenuUrl";
+import { useApiAction } from "@/hooks/useApiAction";
 
 interface CreateMenuModalProps {
   onClose: () => void;
@@ -123,6 +124,7 @@ export default function CreateMenuModal({
   });
   const [isCreating, setIsCreating] = useState(false);
   const [logoError, setLogoError] = useState<string | null>(null);
+  const { runApiAction } = useApiAction();
 
   // Debounced slug check
   useEffect(() => {
@@ -202,42 +204,35 @@ export default function CreateMenuModal({
         logo: logoUrl,
       };
 
-      const result = await axiosPost<typeof menuData, Menu>(
-        "/menus",
-        locale,
-        menuData,
+      await runApiAction(
+        () => axiosPost<typeof menuData, Menu>("/menus", locale, menuData),
+        {
+          errorToast: t("createError"),
+          onSuccess: (data) => {
+            const apiPayload = data as Record<string, unknown>;
+            const createdMenu = normalizeMenuFromApi({
+              ...menuData,
+              ...apiPayload,
+              id: apiPayload.menuId ?? apiPayload.id,
+              logo: logoUrl,
+            });
+            if (!createdMenu) {
+              console.error("Failed to normalize menu from API:", data);
+              toast.error(t("createError"));
+              return;
+            }
+            pushMenuCreatedEvent(
+              typeof createdMenu.uuid === "string"
+                ? createdMenu.uuid
+                : undefined,
+            );
+            toast.success(t("createSuccess"));
+            onMenuCreated?.(createdMenu);
+            onRefresh?.();
+            onClose();
+          },
+        },
       );
-
-      if (result.status && result.data) {
-        const apiPayload = result.data as Record<string, unknown>;
-        const createdMenu = normalizeMenuFromApi({
-          ...menuData,
-          ...apiPayload,
-          id: apiPayload.menuId ?? apiPayload.id,
-          logo: logoUrl,
-        });
-
-        if (!createdMenu) {
-          console.error("Failed to normalize menu from API:", result.data);
-          toast.error(t("createError"));
-          return;
-        }
-
-        pushMenuCreatedEvent(
-          typeof createdMenu.uuid === "string" ? createdMenu.uuid : undefined,
-        );
-        toast.success(t("createSuccess"));
-
-        onMenuCreated?.(createdMenu);
-
-        if (onRefresh) {
-          onRefresh();
-        }
-
-        onClose();
-      } else {
-        toast.error(t("createError"));
-      }
     } finally {
       setIsCreating(false);
     }

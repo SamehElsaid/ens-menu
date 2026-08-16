@@ -1,8 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { toast } from "react-toastify";
 import { axiosDelete, axiosGet, axiosPost } from "@/shared/axiosCall";
 import { formatAdminDate } from "@/lib/fetchAdminAnalytics";
 import {
@@ -15,6 +14,8 @@ import {
   SectionHeader,
 } from "@/components/ui";
 import type { UserVouchersResponse } from "@/types/AdminCustomer";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { useApiAction } from "@/hooks/useApiAction";
 
 interface Props {
   userId: number;
@@ -24,72 +25,79 @@ export default function CustomerVouchersSection({ userId }: Props) {
   const locale = useLocale();
   const t = useTranslations("adminUsers.userDetails.customerSections.vouchers");
   const [data, setData] = useState<UserVouchersResponse | null>(null);
-  const [loading, setLoading] = useState(true);
   const [code, setCode] = useState("");
   const [assigning, setAssigning] = useState(false);
+  const { runApiAction } = useApiAction();
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const result = await axiosGet<UserVouchersResponse>(
+  const requestVouchers = useCallback(
+    () =>
+      axiosGet<UserVouchersResponse>(
         `/admin/users/${userId}/vouchers`,
         locale,
-      );
-      if (result.status && result.data) {
-        setData(result.data);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [userId, locale]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+      ),
+    [userId, locale],
+  );
+  const vouchersQuery = useApiQuery({
+    request: requestVouchers,
+    errorToast: ({ error }) => error,
+    onSuccess: setData,
+  });
+  const loading = vouchersQuery.loading;
+  const load = vouchersQuery.refetch;
 
   const handleAssign = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!code.trim()) return;
     setAssigning(true);
     try {
-      const result = await axiosPost<{ code: string }, unknown>(
-        `/admin/users/${userId}/vouchers/assign`,
-        locale,
-        { code: code.trim() },
+      await runApiAction(
+        () =>
+          axiosPost(`/admin/users/${userId}/vouchers/assign`, locale, {
+            code: code.trim(),
+          }),
+        {
+          successToast: t("assignSuccess"),
+          errorToast: t("assignError"),
+          onSuccess: () => {
+            setCode("");
+            void load();
+          },
+        },
       );
-      if (result.status) {
-        toast.success(t("assignSuccess"));
-        setCode("");
-        load();
-      } else {
-        toast.error(t("assignError"));
-      }
     } finally {
       setAssigning(false);
     }
   };
 
   const handleBlock = async (voucherId: number) => {
-    const result = await axiosPost(
-      `/admin/users/${userId}/vouchers/${voucherId}/block`,
-      locale,
-      {},
+    await runApiAction(
+      () =>
+        axiosPost(
+          `/admin/users/${userId}/vouchers/${voucherId}/block`,
+          locale,
+          {},
+        ),
+      {
+        successToast: t("blockSuccess"),
+        errorToast: ({ error }) => error,
+        onSuccess: () => void load(),
+      },
     );
-    if (result.status) {
-      toast.success(t("blockSuccess"));
-      load();
-    }
   };
 
   const handleUnblock = async (voucherId: number) => {
-    const result = await axiosDelete(
-      `/admin/users/${userId}/vouchers/${voucherId}/block`,
-      locale,
+    await runApiAction(
+      () =>
+        axiosDelete(
+          `/admin/users/${userId}/vouchers/${voucherId}/block`,
+          locale,
+        ),
+      {
+        successToast: t("unblockSuccess"),
+        errorToast: ({ error }) => error,
+        onSuccess: () => void load(),
+      },
     );
-    if (result.status) {
-      toast.success(t("unblockSuccess"));
-      load();
-    }
   };
 
   return (

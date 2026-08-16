@@ -57,7 +57,8 @@ export function findMatchingItemInCategory(
 }
 
 function clearItemDuplicateMeta(item: ImportItem): ImportItem {
-  const { duplicateMeta: _removed, ...rest } = item;
+  const rest = { ...item };
+  delete rest.duplicateMeta;
   return {
     ...rest,
     flags: item.flags.filter(
@@ -67,7 +68,8 @@ function clearItemDuplicateMeta(item: ImportItem): ImportItem {
 }
 
 function clearVariantDuplicateMeta(variant: ImportVariant): ImportVariant {
-  const { duplicateMeta: _removed, ...rest } = variant;
+  const rest = { ...variant };
+  delete rest.duplicateMeta;
   return {
     ...rest,
     flags: variant.flags.filter(
@@ -147,8 +149,8 @@ export function annotateDraftWithSnapshot(
     );
 
     const items = category.items.map((item) => {
-      if (item.variants.length > 0) {
-        const variants = item.variants.map((variant) => {
+      if ((item.sizes?.length ?? 0) > 0) {
+        const sizes = item.sizes!.map((variant) => {
           if (matchedCategoryId === null) {
             return clearVariantDuplicateMeta(variant);
           }
@@ -174,28 +176,29 @@ export function annotateDraftWithSnapshot(
           return applyVariantDuplicateMeta(variant, match);
         });
 
-        const hasPriceConflict = variants.some((v) =>
+        const hasPriceConflict = sizes.some((v) =>
           v.flags.includes("price_conflict"),
         );
         const allExact =
-          variants.length > 0 &&
-          variants.every(
+          sizes.length > 0 &&
+          sizes.every(
             (v) =>
               v.duplicateMeta?.status === "exact_duplicate" || !v.duplicateMeta,
           );
 
         const itemFlags: ImportFlag[] = hasPriceConflict
           ? [...item.flags.filter((f) => f !== "duplicate"), "price_conflict"]
-          : allExact && variants.some((v) => v.flags.includes("duplicate"))
+          : allExact && sizes.some((v) => v.flags.includes("duplicate"))
             ? [...item.flags.filter((f) => f !== "price_conflict"), "duplicate"]
             : item.flags.filter(
                 (f) => f !== "duplicate" && f !== "price_conflict",
               );
 
-        const { duplicateMeta: _removed, ...itemRest } = item;
+        const itemRest = { ...item };
+        delete itemRest.duplicateMeta;
         return {
           ...itemRest,
-          variants,
+          sizes,
           flags: itemFlags,
         };
       }
@@ -281,8 +284,8 @@ export function collectUnresolvedPriceConflicts(
 
   for (const category of draft.categories) {
     for (const item of category.items) {
-      if (item.variants.length > 0) {
-        for (const variant of item.variants) {
+      if ((item.sizes?.length ?? 0) > 0) {
+        for (const variant of item.sizes!) {
           if (
             variant.flags.includes("price_conflict") &&
             !variant.duplicateMeta?.resolution
@@ -315,8 +318,8 @@ export function collectPriceConflictRefIds(draft: ImportDraft): string[] {
 
   for (const category of draft.categories) {
     for (const item of category.items) {
-      if (item.variants.length > 0) {
-        for (const variant of item.variants) {
+      if ((item.sizes?.length ?? 0) > 0) {
+        for (const variant of item.sizes!) {
           if (variant.flags.includes("price_conflict")) {
             refIds.push(variant.id);
           }
@@ -335,8 +338,8 @@ export function collectExactDuplicateRefIds(draft: ImportDraft): string[] {
 
   for (const category of draft.categories) {
     for (const item of category.items) {
-      if (item.variants.length > 0) {
-        for (const variant of item.variants) {
+      if ((item.sizes?.length ?? 0) > 0) {
+        for (const variant of item.sizes!) {
           if (variant.duplicateMeta?.status === "exact_duplicate") {
             refIds.push(variant.id);
           }
@@ -359,8 +362,8 @@ export function countDuplicateStats(draft: ImportDraft) {
   for (const category of draft.categories) {
     if (category.matchedCategoryId) reusedCategories++;
     for (const item of category.items) {
-      if (item.variants.length > 0) {
-        for (const variant of item.variants) {
+      if ((item.sizes?.length ?? 0) > 0) {
+        for (const variant of item.sizes!) {
           if (variant.duplicateMeta?.status === "exact_duplicate") {
             exactDuplicates++;
           }

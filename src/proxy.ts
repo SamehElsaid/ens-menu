@@ -2,7 +2,6 @@ import createMiddleware from "next-intl/middleware";
 import { localePathPrefix, routing } from "./i18n/routing";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { decryptData } from "./shared/encryption";
 import { isSafeInternalRedirect } from "./lib/authRedirect";
 import {
   OWNER_ONLY,
@@ -10,6 +9,10 @@ import {
   permissionForDashboardSubpath,
 } from "./lib/navPermissions";
 import { isNonGatingPermission } from "./types/StaffPermission";
+import {
+  AUTH_UI_COOKIE_NAME,
+  decodeAuthUiCookieValue,
+} from "./shared/authUiCookie";
 
 export interface DecryptedToken {
   role: string;
@@ -26,13 +29,15 @@ function resolveRequestLocale(pathname: string): string {
 export default function proxy(request: NextRequest) {
   const url = request.nextUrl.clone();
 
-  const token = request.cookies.get("sub");
+  const uiCookie = request.cookies.get(AUTH_UI_COOKIE_NAME);
   const pathname = url.pathname.replace(/^\/(ar|en)/, "");
   const locale = resolveRequestLocale(request.nextUrl.pathname);
   const prefix = localePathPrefix(locale);
 
-  const tokenDecrypted = token
-    ? (decryptData(token?.value ?? "") as DecryptedToken)
+  // These values only shape navigation. Backend cookie authentication remains
+  // authoritative for every protected API operation.
+  const tokenDecrypted = uiCookie
+    ? (decodeAuthUiCookieValue(uiCookie.value) as DecryptedToken | null)
     : null;
 
 

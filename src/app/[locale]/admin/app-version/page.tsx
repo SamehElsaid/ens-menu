@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { axiosGet, axiosPost } from "@/shared/axiosCall";
 import { toast } from "react-toastify";
 import {
@@ -20,6 +20,8 @@ import {
   SectionHeader,
   Textarea,
 } from "@/components/ui";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { useApiAction } from "@/hooks/useApiAction";
 
 interface AppVersionData {
   latestVersion: string;
@@ -61,7 +63,6 @@ export default function AppVersionPage() {
   const tCommon = useTranslations("common");
   const tAdmin = useTranslations("adminDashboard");
 
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [currentVersion, setCurrentVersion] = useState<AppVersionData | null>(
     null,
@@ -76,6 +77,7 @@ export default function AppVersionPage() {
   const [releaseNotesEn, setReleaseNotesEn] = useState(
     emptyForm.releaseNotesEn,
   );
+  const { runApiAction } = useApiAction();
 
   const resetForm = () => {
     setLatestVersion(emptyForm.latestVersion);
@@ -85,35 +87,23 @@ export default function AppVersionPage() {
     setReleaseNotesEn(emptyForm.releaseNotesEn);
   };
 
-  const fetchLatestVersion = useCallback(async () => {
-    try {
-      setLoading(true);
-      const result = await axiosGet<AppVersionGetResponse>(
+  const requestLatestVersion = useCallback(
+    () =>
+      axiosGet<AppVersionGetResponse>(
         "/public/app-version",
         locale,
         undefined,
         undefined,
         true,
-      );
-
-      if (result.status && result.data?.version) {
-        setCurrentVersion(result.data.version);
-      } else if (result.status) {
-        setCurrentVersion(null);
-      } else {
-        toast.error(t("loadError"));
-      }
-    } catch (err) {
-      console.error("Error fetching app version:", err);
-      toast.error(t("loadError"));
-    } finally {
-      setLoading(false);
-    }
-  }, [locale, t]);
-
-  useEffect(() => {
-    fetchLatestVersion();
-  }, [fetchLatestVersion]);
+      ),
+    [locale],
+  );
+  const versionQuery = useApiQuery({
+    request: requestLatestVersion,
+    errorToast: t("loadError"),
+    onSuccess: (data) => setCurrentVersion(data.version ?? null),
+  });
+  const loading = versionQuery.loading;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,21 +128,22 @@ export default function AppVersionPage() {
         releaseNotes_en: releaseNotesEn.trim(),
       };
 
-      const result = await axiosPost<
-        AppVersionPayload,
-        AppVersionCreateResponse
-      >("/admin/app-version", locale, payload);
-
-      if (result.status) {
-        toast.success(t("saveSuccess"));
-        resetForm();
-        await fetchLatestVersion();
-      } else {
-        toast.error(t("saveError"));
-      }
-    } catch (err) {
-      console.error("Error creating app version:", err);
-      toast.error(t("saveError"));
+      await runApiAction(
+        () =>
+          axiosPost<AppVersionPayload, AppVersionCreateResponse>(
+            "/admin/app-version",
+            locale,
+            payload,
+          ),
+        {
+          successToast: t("saveSuccess"),
+          errorToast: t("saveError"),
+          onSuccess: () => {
+            resetForm();
+            void versionQuery.refetch();
+          },
+        },
+      );
     } finally {
       setSaving(false);
     }

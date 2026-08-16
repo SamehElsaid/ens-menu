@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { axiosPost, axiosPatch } from "@/shared/axiosCall";
-import { toast } from "react-toastify";
+import { axiosPost, axiosPut } from "@/shared/axiosCall";
 import { Button, Field, Input, Modal } from "@/components/ui";
 import StaffPermissionsEditor from "./StaffPermissionsEditor";
 import type { MenuStaffRole } from "@/types/Menu";
 import { roleDisplayName } from "@/shared/roleDisplayName";
 import { IoShieldCheckmarkOutline, IoAddCircleOutline } from "react-icons/io5";
+import { useApiAction } from "@/hooks/useApiAction";
 
 interface AddRoleModalProps {
   role?: MenuStaffRole | null;
@@ -53,6 +53,7 @@ export default function AddRoleModal({
   );
   const [nameError, setNameError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState(false);
+  const { runApiAction } = useApiAction();
 
   const onSubmit = async () => {
     const trimmed = name.trim();
@@ -68,32 +69,29 @@ export default function AddRoleModal({
         nameEn: nameEn.trim(),
         permissions,
       };
-      const result = isEdit
-        ? await axiosPatch<typeof payload, RoleErrorBody>(
-            `/dashboard/staff-roles/${role!.id}`,
-            locale,
-            payload,
-          )
-        : await axiosPost<typeof payload, RoleErrorBody>(
-            "/dashboard/staff-roles",
-            locale,
-            payload,
-          );
-
-      if (result.status) {
-        toast.success(isEdit ? t("editSuccess") : t("createSuccess"));
-        onSaved?.();
-        onClose();
-      } else {
-        const body = result.data;
-        const msg =
-          (locale === "ar" ? body?.errorAr : body?.errorEn) ??
-          body?.error ??
-          body?.message;
-        toast.error(msg || (isEdit ? t("editError") : t("createError")));
-      }
-    } catch {
-      toast.error(isEdit ? t("editError") : t("createError"));
+      await runApiAction(
+        () =>
+          isEdit
+            ? axiosPut<typeof payload, RoleErrorBody>(
+                `/dashboard/staff-roles/${role!.id}`,
+                locale,
+                payload,
+              )
+            : axiosPost<typeof payload, RoleErrorBody>(
+                "/dashboard/staff-roles",
+                locale,
+                payload,
+              ),
+        {
+          successToast: isEdit ? t("editSuccess") : t("createSuccess"),
+          errorToast: ({ error }) =>
+            error || (isEdit ? t("editError") : t("createError")),
+          onSuccess: () => {
+            onSaved?.();
+            onClose();
+          },
+        },
+      );
     } finally {
       setIsSaving(false);
     }

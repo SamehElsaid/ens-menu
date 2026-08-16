@@ -1,6 +1,12 @@
 import { encryptDataApi } from "@/shared/encryption";
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
+const NO_STORE_HEADERS = {
+    "Cache-Control": "no-store, max-age=0",
+} as const;
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(_request: NextRequest) {
     try {
@@ -10,7 +16,7 @@ export async function GET(_request: NextRequest) {
             console.error("NEXT_PUBLIC_SECRET_KEY is not configured");
             return NextResponse.json(
                 { error: "Server configuration error" },
-                { status: 500 }
+                { status: 500, headers: NO_STORE_HEADERS }
             );
         }
 
@@ -20,12 +26,15 @@ export async function GET(_request: NextRequest) {
         // Encrypt the timestamp
         const encryptedTimestamp = encryptDataApi(utcTimestamp, secretKey);
         
-        return NextResponse.json({ fx_dyn: encryptedTimestamp });
+        return NextResponse.json(
+            { fx_dyn: encryptedTimestamp },
+            { headers: NO_STORE_HEADERS }
+        );
     } catch (error) {
         console.error("Error in UTC time endpoint:", error);
         return NextResponse.json(
             { error: "Internal Server Error" },
-            { status: 500 }
+            { status: 500, headers: NO_STORE_HEADERS }
         );
     }
 }

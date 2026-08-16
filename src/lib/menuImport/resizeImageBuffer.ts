@@ -18,7 +18,7 @@ async function encodeImage(
   height: number,
   quality: number,
 ): Promise<Buffer> {
-  let pipeline = sharp(input, { failOnError: false }).resize(width, height, {
+  let pipeline = sharp(input, { failOn: "none" }).resize(width, height, {
     fit: "inside",
     withoutEnlargement: true,
     fastShrinkOnLoad: true,
@@ -48,7 +48,7 @@ export async function resizeImageBufferToMaxSize(
   }
 
   const output = resolveOutputFormat(mimeType);
-  const metadata = await sharp(input, { failOnError: false }).metadata();
+  const metadata = await sharp(input, { failOn: "none" }).metadata();
   let width = metadata.width ?? 2048;
   let height = metadata.height ?? 2048;
   let quality = 85;

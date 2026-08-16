@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import {
@@ -25,11 +26,13 @@ import {
 
 export default function TemplateListPage() {
   const locale = useLocale();
+  const router = useRouter();
   const t = useTranslations("templateBuilder");
   const tCommon = useTranslations("common");
   const tAdmin = useTranslations("adminDashboard");
   const [items, setItems] = useState<TemplateListItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [creating, setCreating] = useState(false);
   /** `"<verb>:<id>"`, so a row action only spins the button that was pressed. */
   const [busy, setBusy] = useState<string | null>(null);
@@ -39,8 +42,11 @@ export default function TemplateListPage() {
 
   const refresh = useCallback(async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       setItems(await templateApi.listTemplates());
+    } catch {
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -58,6 +64,8 @@ export default function TemplateListPage() {
       toast.success(t("deleted"));
       setPendingDelete(null);
       await refresh();
+    } catch {
+      toast.error(t("storageError"));
     } finally {
       setBusy(null);
     }
@@ -67,7 +75,7 @@ export default function TemplateListPage() {
     setCreating(true);
     try {
       const doc = await templateApi.createTemplate(t("defaultName"));
-      window.location.href = `/${locale}/admin/template/${doc.id}`;
+      router.push(`/${locale}/admin/template/${doc.id}`);
     } catch {
       toast.error(t("createFailed"));
       setCreating(false);
@@ -106,6 +114,16 @@ export default function TemplateListPage() {
             ))}
           </div>
         </SkeletonRegion>
+      ) : loadError ? (
+        <EmptyState
+          icon={<FiAlertTriangle />}
+          title={t("storageError")}
+          action={
+            <Button variant="secondary" onClick={() => void refresh()}>
+              {t("retry")}
+            </Button>
+          }
+        />
       ) : items.length === 0 ? (
         <EmptyState
           title={t("noTemplates")}
@@ -180,6 +198,8 @@ export default function TemplateListPage() {
                       await templateApi.duplicateTemplate(item.id);
                       toast.success(t("duplicated"));
                       await refresh();
+                    } catch {
+                      toast.error(t("storageError"));
                     } finally {
                       setBusy(null);
                     }
@@ -197,6 +217,8 @@ export default function TemplateListPage() {
                       toast.info(
                         (await templateApi.publishTemplate(item.id)).message,
                       );
+                    } catch {
+                      toast.error(t("storageError"));
                     } finally {
                       setBusy(null);
                     }

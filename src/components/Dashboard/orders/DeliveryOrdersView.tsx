@@ -1,17 +1,18 @@
 "use client";
 
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { NotificationPermissionCard } from "@/components/Global/NotificationPermissionCard";
-import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
-import { Badge, SearchInput, Toolbar } from "@/components/ui";
 import { useAppSelector } from "@/store/hooks";
 import { useMenuOrdersPage } from "@/hooks/useMenuOrdersPage";
 import DeliveryOrderDetailsModal from "./DeliveryOrderDetailsModal";
 import DeliveryOrdersCardGrid from "./DeliveryOrdersCardGrid";
 import OrdersFilters from "./OrdersFilters";
+import {
+  OrdersPageHeader,
+  OrdersSearchToolbar,
+} from "./OrdersPageChrome";
 
 export default function DeliveryOrdersView() {
-  const t = useTranslations("deliveryOrders");
   const locale = useLocale();
   const currency = useAppSelector((s) => s.menuData.menu?.currency ?? "");
 
@@ -46,29 +47,17 @@ export default function DeliveryOrdersView() {
     <div className="flex flex-col gap-4">
       <NotificationPermissionCard />
 
-      <PageTitleWithHelp
+      <OrdersPageHeader
         id="onboarding-delivery-orders-header"
-        title={t("title")}
-        description={t("subtitle")}
-        meta={
-          pendingCount > 0 ? (
-            <Badge tone="warning">
-              {t("pendingBadge", { count: pendingCount })}
-            </Badge>
-          ) : undefined
-        }
+        translationNs="deliveryOrders"
+        pendingCount={pendingCount}
       />
 
       <div id="onboarding-delivery-orders-search">
-        <Toolbar
-          search={
-            <SearchInput
-              value={searchInput}
-              onChange={setSearchInput}
-              placeholder={t("searchPlaceholder")}
-              label={t("searchPlaceholder")}
-            />
-          }
+        <OrdersSearchToolbar
+          translationNs="deliveryOrders"
+          value={searchInput}
+          onChange={setSearchInput}
         />
       </div>
 

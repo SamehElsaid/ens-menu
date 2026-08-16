@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
+import { SET_AUTH_SESSION_CACHE } from "@/store/authSlice/authSlice";
 import { HiOutlineArrowRight } from "react-icons/hi";
 import {
   Badge,
@@ -43,6 +43,10 @@ import {
 } from "@/lib/pricingComparison";
 import type { Subscription, SubscriptionResponse } from "@/types/Subscription";
 import type { VoucherValidationResult } from "@/types/Voucher";
+import {
+  clearPaymentAttempt,
+  getPaymentAttemptKey,
+} from "@/lib/paymentIdempotency";
 
 const WHATSAPP_URL = "https://wa.me/201500800050";
 
@@ -60,6 +64,8 @@ type AuthUser = {
   };
 };
 
+const EMPTY_AUTH_USER: AuthUser = {};
+
 type SubscriptionPlansSectionProps = {
   backLink?: string;
   backLinkText?: string;
@@ -75,11 +81,15 @@ export default function SubscriptionPlansSection({
   const tRoot = useTranslations("");
   const tLandingPricing = useTranslations("Landing.pricing");
   const tPricingPage = useTranslations("PricingPage");
+  const searchParams = useSearchParams();
 
   const authData = useAppSelector((state) => state.auth.data) as {
     user?: AuthUser;
   } | null;
-  const profile = authData?.user ?? ({} as AuthUser);
+  const profile = useMemo(
+    () => authData?.user ?? EMPTY_AUTH_USER,
+    [authData?.user],
+  );
 
   const isAdmin = profile?.role === "admin";
 
@@ -98,7 +108,9 @@ export default function SubscriptionPlansSection({
   const [proPayLoading, setProPayLoading] = useState(false);
   const [downgradeModalOpen, setDowngradeModalOpen] = useState(false);
   const [downgradeLoading, setDowngradeLoading] = useState(false);
-  const [phoneGateOpen, setPhoneGateOpen] = useState(false);
+  const [phoneGateOpen, setPhoneGateOpen] = useState(() =>
+    Boolean(searchParams.get("verifyReference")),
+  );
   const [appliedVoucherCode, setAppliedVoucherCode] = useState<string | null>(
     null,
   );
@@ -108,13 +120,6 @@ export default function SubscriptionPlansSection({
   const [renewExtraMenusCount, setRenewExtraMenusCount] = useState(0);
   const [menusUsed, setMenusUsed] = useState<number | null>(null);
   const dispatch = useAppDispatch();
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    if (searchParams.get("verifyReference")) {
-      setPhoneGateOpen(true);
-    }
-  }, [searchParams]);
 
   useEffect(() => {
     if (!authData?.user || isAdmin) {
@@ -131,7 +136,18 @@ export default function SubscriptionPlansSection({
     void axiosGet<SubscriptionResponse>("/user/subscription", locale)
       .then((res) => {
         if (res.status && res.data?.subscription) {
-          setSubscriptionInfo(res.data.subscription);
+          const nextSubscription = res.data.subscription;
+          setSubscriptionInfo(nextSubscription);
+          const nextExtraMenus = Number(nextSubscription.extraMenus ?? 0);
+          if (Number.isFinite(nextExtraMenus) && nextExtraMenus >= 0) {
+            setRenewExtraMenusCount(nextExtraMenus);
+          }
+          const nextCycle = String(
+            nextSubscription.billingCycle ?? "",
+          ).toLowerCase();
+          if (nextCycle === "monthly" || nextCycle === "yearly") {
+            setProBillingChoice(nextCycle);
+          }
         } else {
           setSubscriptionInfo(null);
         }
@@ -265,30 +281,18 @@ export default function SubscriptionPlansSection({
 
   const canRenewPro = subscriptionInfo?.canRenewPro === true;
 
-  useEffect(() => {
-    const current = Number(subscriptionInfo?.extraMenus ?? 0);
-    if (Number.isFinite(current) && current >= 0) {
-      setRenewExtraMenusCount(current);
-    }
-  }, [subscriptionInfo?.extraMenus]);
-
-  useEffect(() => {
-    if (isProUser && activeSubscriptionBillingCycle) {
-      setProBillingChoice(activeSubscriptionBillingCycle);
-    }
-  }, [isProUser, activeSubscriptionBillingCycle]);
-
-  useEffect(() => {
+  const handleProBillingChange = useCallback((cycle: "monthly" | "yearly") => {
+    setProBillingChoice(cycle);
     setAppliedVoucherCode(null);
     setVoucherValidation(null);
-  }, [proBillingChoice]);
+  }, []);
 
   const handleVoucherApplied = useCallback(
     (code: string, result: VoucherValidationResult | null) => {
       setAppliedVoucherCode(code || null);
       setVoucherValidation(result);
     },
-    [],
+    [setAppliedVoucherCode, setVoucherValidation],
   );
 
   const refreshSubscriptionState = useCallback(async () => {
@@ -297,7 +301,18 @@ export default function SubscriptionPlansSection({
       locale,
     );
     if (subRes.status && subRes.data?.subscription) {
-      setSubscriptionInfo(subRes.data.subscription);
+      const nextSubscription = subRes.data.subscription;
+      setSubscriptionInfo(nextSubscription);
+      const nextExtraMenus = Number(nextSubscription.extraMenus ?? 0);
+      if (Number.isFinite(nextExtraMenus) && nextExtraMenus >= 0) {
+        setRenewExtraMenusCount(nextExtraMenus);
+      }
+      const nextCycle = String(
+        nextSubscription.billingCycle ?? "",
+      ).toLowerCase();
+      if (nextCycle === "monthly" || nextCycle === "yearly") {
+        setProBillingChoice(nextCycle);
+      }
     } else {
       setSubscriptionInfo(null);
     }
@@ -307,9 +322,15 @@ export default function SubscriptionPlansSection({
       return;
     }
     if (meResult.outcome === "user") {
-      dispatch(SET_ACTIVE_USER({ user: meResult.user }));
+      dispatch(SET_AUTH_SESSION_CACHE({ user: meResult.user }));
     }
-  }, [locale, dispatch]);
+  }, [
+    locale,
+    dispatch,
+    setSubscriptionInfo,
+    setRenewExtraMenusCount,
+    setProBillingChoice,
+  ]);
 
   const handleRedeemDurationVoucher = useCallback(async () => {
     if (!appliedVoucherCode) return;
@@ -332,7 +353,15 @@ export default function SubscriptionPlansSection({
     }
     const serverMsg = pickFailedRequestMessage(res?.data as unknown);
     toast.error(serverMsg ?? t("voucherInvalid"));
-  }, [appliedVoucherCode, locale, t, refreshSubscriptionState]);
+  }, [
+    appliedVoucherCode,
+    locale,
+    t,
+    refreshSubscriptionState,
+    setVoucherRedeemLoading,
+    setAppliedVoucherCode,
+    setVoucherValidation,
+  ]);
 
   const handleConfirmDowngrade = useCallback(async () => {
     setDowngradeLoading(true);
@@ -350,7 +379,13 @@ export default function SubscriptionPlansSection({
     }
     const serverMsg = pickFailedRequestMessage(res?.data as unknown);
     toast.error(serverMsg ?? t("downgradeError"));
-  }, [locale, t, refreshSubscriptionState]);
+  }, [
+    locale,
+    t,
+    refreshSubscriptionState,
+    setDowngradeLoading,
+    setDowngradeModalOpen,
+  ]);
 
   const needsPhoneGateForPayment = useCallback(() => {
     const hasPhone = Boolean(profile?.phoneNumber?.trim());
@@ -395,6 +430,25 @@ export default function SubscriptionPlansSection({
         proBillingChoice === "monthly"
           ? "/payment/subscription/pro-monthly/initiate"
           : "/payment/subscription/pro-yearly/initiate";
+      const payload = {
+        name: nameToSend,
+        email: activeUser?.email?.trim() || undefined,
+        mobile: phoneToSend,
+        currency: "EGP",
+        ...(isRenew
+          ? {
+              renew: true,
+              extraMenus: options?.extraMenus ?? renewExtraMenusCount,
+            }
+          : {}),
+        ...(appliedVoucherCode && voucherValidation?.voucher.type === "discount"
+          ? { voucherCode: appliedVoucherCode }
+          : {}),
+      };
+      const idempotencyKey = getPaymentAttemptKey(
+        "subscription",
+        JSON.stringify({ endpoint, ...payload }),
+      );
       setProPayLoading(true);
       const res = await axiosPost<
         {
@@ -416,23 +470,12 @@ export default function SubscriptionPlansSection({
             subscriptionActivated?: boolean;
           };
         }
-      >(endpoint, locale, {
-        name: nameToSend,
-        email: activeUser?.email?.trim() || undefined,
-        mobile: phoneToSend,
-        currency: "EGP",
-        ...(isRenew
-          ? {
-              renew: true,
-              extraMenus: options?.extraMenus ?? renewExtraMenusCount,
-            }
-          : {}),
-        ...(appliedVoucherCode && voucherValidation?.voucher.type === "discount"
-          ? { voucherCode: appliedVoucherCode }
-          : {}),
+      >(endpoint, locale, payload, undefined, undefined, {
+        headers: { "Idempotency-Key": idempotencyKey },
       });
       setProPayLoading(false);
       if (res?.status && res.data?.data?.subscriptionActivated) {
+        clearPaymentAttempt("subscription");
         toast.success(t("voucherRedeemSuccess"));
         setAppliedVoucherCode(null);
         setVoucherValidation(null);
@@ -442,16 +485,15 @@ export default function SubscriptionPlansSection({
       if (res?.status && res.data?.data?.redirectUrl) {
         const amount = Number(res.data.data.amount);
         const currency = res.data.data.currency || "EGP";
-        if (Number.isFinite(amount) && amount > 0) {
-          sessionStorage.setItem(
-            "gtm_pending_purchase",
-            JSON.stringify({
-              value: amount,
-              currency,
-              orderId: res.data.data.order_id,
-            }),
-          );
-        }
+        sessionStorage.setItem(
+          "gtm_pending_purchase",
+          JSON.stringify({
+            ...(Number.isFinite(amount) && amount > 0 ? { value: amount } : {}),
+            currency,
+            orderId: res.data.data.order_id,
+            scope: "subscription",
+          }),
+        );
         toast.info(t("paying"));
         window.location.href = res.data.data.redirectUrl;
         return;
@@ -468,6 +510,10 @@ export default function SubscriptionPlansSection({
       voucherValidation,
       refreshSubscriptionState,
       renewExtraMenusCount,
+      setPhoneGateOpen,
+      setProPayLoading,
+      setAppliedVoucherCode,
+      setVoucherValidation,
     ],
   );
 
@@ -480,7 +526,12 @@ export default function SubscriptionPlansSection({
       renew: true,
       extraMenus: renewExtraMenusCount,
     });
-  }, [needsPhoneGateForPayment, initiateProPayment, renewExtraMenusCount]);
+  }, [
+    needsPhoneGateForPayment,
+    initiateProPayment,
+    renewExtraMenusCount,
+    setPhoneGateOpen,
+  ]);
 
   const handleUpgradeToPro = useCallback(async () => {
     if (hasDurationVoucher) {
@@ -491,7 +542,12 @@ export default function SubscriptionPlansSection({
       return;
     }
     await initiateProPayment();
-  }, [needsPhoneGateForPayment, initiateProPayment, hasDurationVoucher]);
+  }, [
+    needsPhoneGateForPayment,
+    initiateProPayment,
+    hasDurationVoucher,
+    setPhoneGateOpen,
+  ]);
 
   const handlePhoneVerifiedForPayment = useCallback(async () => {
     const meResult = await resolveAuthMeSession(locale);
@@ -504,7 +560,7 @@ export default function SubscriptionPlansSection({
     }
 
     const freshUser = meResult.user as AuthUser;
-    dispatch(SET_ACTIVE_USER({ user: freshUser }));
+    dispatch(SET_AUTH_SESSION_CACHE({ user: freshUser }));
 
     if (freshUser.isPhoneVerified !== true) {
       return;
@@ -519,7 +575,14 @@ export default function SubscriptionPlansSection({
     } else {
       await initiateProPayment(freshUser);
     }
-  }, [locale, dispatch, initiateProPayment, canRenewPro, renewExtraMenusCount]);
+  }, [
+    locale,
+    dispatch,
+    initiateProPayment,
+    canRenewPro,
+    renewExtraMenusCount,
+    setPhoneGateOpen,
+  ]);
 
   if (isAdmin) {
     return null;
@@ -580,7 +643,7 @@ export default function SubscriptionPlansSection({
             canRenewPro={canRenewPro}
             canUpgradeToPro={canUpgradeToPro}
             proBillingChoice={proBillingChoice}
-            onProBillingChange={setProBillingChoice}
+            onProBillingChange={handleProBillingChange}
             renewExtraMenusCount={renewExtraMenusCount}
             onRenewExtraMenusChange={setRenewExtraMenusCount}
             appliedVoucherCode={appliedVoucherCode}
@@ -705,7 +768,7 @@ export default function SubscriptionPlansSection({
                       isFreePlan={isFreePlan}
                       showProBilling={showProBilling}
                       proBillingChoice={proBillingChoice}
-                      onProBillingChange={setProBillingChoice}
+                      onProBillingChange={handleProBillingChange}
                       canUpgrade={showUpgradeOnCard}
                       canDowngrade={canDowngrade}
                       canRenew={canRenewOnCard}

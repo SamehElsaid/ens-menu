@@ -224,15 +224,18 @@ export default function AdminBroadcastPage() {
   }, [audience, locale, selectedIds, testEmails, t]);
 
   useEffect(() => {
-    if (audience === "selected" && selectedIds.length === 0) {
-      setPreview(null);
-      return;
-    }
-    if (audience === "test" && testEmails.length === 0) {
-      setPreview(null);
-      return;
-    }
-    void loadPreview();
+    const timer = window.setTimeout(() => {
+      if (audience === "selected" && selectedIds.length === 0) {
+        setPreview(null);
+        return;
+      }
+      if (audience === "test" && testEmails.length === 0) {
+        setPreview(null);
+        return;
+      }
+      void loadPreview();
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [audience, selectedIds, testEmails, loadPreview]);
 
   useEffect(() => {

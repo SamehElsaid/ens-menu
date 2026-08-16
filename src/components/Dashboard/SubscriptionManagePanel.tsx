@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useAppSelector } from "@/store/hooks";
 import {
   HiOutlineCollection,
@@ -38,6 +38,7 @@ import SubscriptionVoucherSection from "@/components/Dashboard/SubscriptionVouch
 import type { Plan } from "@/types/Plan";
 import type { Subscription } from "@/types/Subscription";
 import type { VoucherValidationResult } from "@/types/Voucher";
+import { getPaymentAttemptKey } from "@/lib/paymentIdempotency";
 
 type AuthUser = {
   name?: string;
@@ -197,6 +198,17 @@ export default function SubscriptionManagePanel({
       return;
     }
 
+    const payload = {
+      name: nameToSend,
+      email: profile?.email?.trim() || undefined,
+      mobile: phoneToSend,
+      quantity: purchaseQty,
+      currency: "EGP",
+    };
+    const idempotencyKey = getPaymentAttemptKey(
+      "extra-menus",
+      JSON.stringify(payload),
+    );
     setPurchaseLoading(true);
     const res = await axiosPost<
       {
@@ -215,28 +227,28 @@ export default function SubscriptionManagePanel({
           currency?: string;
         };
       }
-    >("/payment/subscription/extra-menus/initiate", locale, {
-      name: nameToSend,
-      email: profile?.email?.trim() || undefined,
-      mobile: phoneToSend,
-      quantity: purchaseQty,
-      currency: "EGP",
-    });
+    >(
+      "/payment/subscription/extra-menus/initiate",
+      locale,
+      payload,
+      undefined,
+      undefined,
+      { headers: { "Idempotency-Key": idempotencyKey } },
+    );
     setPurchaseLoading(false);
 
     if (res?.status && res.data?.data?.redirectUrl) {
       const amount = Number(res.data.data.amount);
       const currency = res.data.data.currency || "EGP";
-      if (Number.isFinite(amount) && amount > 0) {
-        sessionStorage.setItem(
-          "gtm_pending_purchase",
-          JSON.stringify({
-            value: amount,
-            currency,
-            orderId: res.data.data.order_id,
-          }),
-        );
-      }
+      sessionStorage.setItem(
+        "gtm_pending_purchase",
+        JSON.stringify({
+          ...(Number.isFinite(amount) && amount > 0 ? { value: amount } : {}),
+          currency,
+          orderId: res.data.data.order_id,
+          scope: "extra-menus",
+        }),
+      );
       toast.info(tMenus("extraMenusPaying"));
       window.location.href = res.data.data.redirectUrl;
       return;
@@ -244,7 +256,14 @@ export default function SubscriptionManagePanel({
 
     const serverMsg = pickFailedRequestMessage(res?.data as unknown);
     toast.error(serverMsg ?? tMenus("extraMenusPayError"));
-  }, [profile, purchaseQty, locale, tMenus, onRequirePhone]);
+  }, [
+    profile,
+    purchaseQty,
+    locale,
+    tMenus,
+    onRequirePhone,
+    setPurchaseLoading,
+  ]);
 
   const isBusy = loading || purchaseLoading || voucherRedeemLoading;
 
@@ -496,6 +515,7 @@ export default function SubscriptionManagePanel({
 
         <div className="border-t border-line pt-3.5">
           <SubscriptionVoucherSection
+            key={appliedVoucherCode ?? ""}
             locale={locale}
             billingCycle={proBillingChoice}
             onBillingChange={onProBillingChange}

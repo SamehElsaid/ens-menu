@@ -4,6 +4,7 @@ import {
 } from "./constants";
 import { resolveBilingualNames } from "./detectLanguage";
 import { generateImportId } from "./generateImportId";
+import { persistentOptionIdForLegacy } from "@/lib/optionIds";
 import type {
   ImportCategory,
   ImportDraft,
@@ -147,8 +148,22 @@ function normalizeItem(node: RawAiRecord, parseErrors: string[]): ImportItem {
     }
   }
 
-  const variantNodes = extractItemNodes(node.variants ?? node.sizes ?? node.options);
-  const variants: ImportVariant[] = variantNodes.map((v) => normalizeVariant(v));
+  const hasTypedOptions =
+    Array.isArray(node.sizes) || Array.isArray(node.variants);
+  const sizeNodes = extractItemNodes(
+    Array.isArray(node.sizes)
+      ? node.sizes
+      : !hasTypedOptions
+        ? node.options
+        : undefined,
+  );
+  const variantNodes = extractItemNodes(node.variants);
+  const sizes: ImportVariant[] = sizeNodes.map((option, index) =>
+    normalizeOption(option, "size", index),
+  );
+  const variants: ImportVariant[] = variantNodes.map((option, index) =>
+    normalizeOption(option, "variant", index),
+  );
 
   let price = pickNumber(node, ["price", "unitPrice", "unit_price"]);
 
@@ -158,13 +173,15 @@ function normalizeItem(node: RawAiRecord, parseErrors: string[]): ImportItem {
     parseErrors.push("item_missing_name");
   }
 
-  if (variants.length > 0) {
+  if (sizes.length > 0) {
     price = null;
-    for (const variant of variants) {
-      if (variant.price === null) variant.flags.push("missing_price");
-    }
   } else if (price === null) {
     flags.push("missing_price");
+  }
+  for (const option of [...sizes, ...variants]) {
+    if (option.price === null && !option.flags.includes("missing_price")) {
+      option.flags.push("missing_price");
+    }
   }
 
   return {
@@ -174,13 +191,18 @@ function normalizeItem(node: RawAiRecord, parseErrors: string[]): ImportItem {
     descriptionAr,
     descriptionEn,
     price,
+    sizes,
     variants,
     isAvailable: true,
     flags,
   };
 }
 
-function normalizeVariant(node: RawAiRecord): ImportVariant {
+function normalizeOption(
+  node: RawAiRecord,
+  kind: "size" | "variant",
+  index: number,
+): ImportVariant {
   const explicitAr =
     pickString(node, ["labelAr", "label_ar", "nameAr", "name_ar"]) ?? "";
   const explicitEn =
@@ -198,7 +220,10 @@ function normalizeVariant(node: RawAiRecord): ImportVariant {
   const label = labelAr || labelEn || fallback.trim();
 
   return {
-    id: generateImportId(),
+    id: persistentOptionIdForLegacy(
+      node.id ?? node.sizeId ?? node.variantId,
+      `${kind}:${index}:${labelAr}:${labelEn}:${String(price ?? "")}`,
+    ),
     label,
     labelAr: labelAr || undefined,
     labelEn: labelEn || undefined,
@@ -259,11 +284,21 @@ function computeStats(categories: ImportCategory[]): ImportDraftStats {
     missingNameCount += countNameFlags(category.flags);
     for (const item of category.items) {
       itemCount++;
-      variantCount += item.variants.length;
+      const options = [...(item.sizes ?? []), ...item.variants];
+      variantCount += options.length;
       warningCount += item.flags.length;
       missingNameCount += countNameFlags(item.flags);
 
-      if (item.variants.length > 0) {
+      if ((item.sizes?.length ?? 0) > 0) {
+        for (const option of options) {
+          warningCount += option.flags.length;
+          missingNameCount += countNameFlags(option.flags);
+          if (option.price === null || !Number.isFinite(option.price)) {
+            missingPriceCount++;
+          }
+        }
+      } else if (item.price === null || !Number.isFinite(item.price)) {
+        missingPriceCount++;
         for (const variant of item.variants) {
           warningCount += variant.flags.length;
           missingNameCount += countNameFlags(variant.flags);
@@ -271,8 +306,14 @@ function computeStats(categories: ImportCategory[]): ImportDraftStats {
             missingPriceCount++;
           }
         }
-      } else if (item.price === null || !Number.isFinite(item.price)) {
-        missingPriceCount++;
+      } else {
+        for (const variant of item.variants) {
+          warningCount += variant.flags.length;
+          missingNameCount += countNameFlags(variant.flags);
+          if (variant.price === null || !Number.isFinite(variant.price)) {
+            missingPriceCount++;
+          }
+        }
       }
     }
   }

@@ -39,7 +39,11 @@ export default function TableCard({
 }: TableCardProps) {
   const t = useTranslations("Tables");
   const active = table.isActive;
-  const url = tablePublicMenuUrl(menuSlug, table.tableNumber);
+  const url = tablePublicMenuUrl(
+    menuSlug,
+    table.tableNumber,
+    table.sessionSecret,
+  );
   const hasUrl = Boolean(url);
 
   const copyLink = () => {

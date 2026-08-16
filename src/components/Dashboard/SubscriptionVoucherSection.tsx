@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   IoTicketOutline,
@@ -75,7 +75,6 @@ export default function SubscriptionVoucherSection({
   billingCycle,
   onBillingChange,
   showBillingChoice = false,
-  showBillingHint = false,
   isProUser = false,
   canUpgradeToPro = false,
   currencyLabel,
@@ -91,10 +90,6 @@ export default function SubscriptionVoucherSection({
   const t = useTranslations("personalProfile");
   const [codeInput, setCodeInput] = useState(appliedCode ?? "");
   const [checking, setChecking] = useState(false);
-
-  useEffect(() => {
-    setCodeInput(appliedCode ?? "");
-  }, [appliedCode]);
 
   const handleApply = useCallback(async () => {
     const code = codeInput.trim();

@@ -1,9 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { PexelsSearchResponse } from "@/types/pexels";
+import { guardExternalServiceRoute } from "@/lib/server/externalRouteGuard";
 
 const PEXELS_SEARCH_URL = "https://api.pexels.com/v1/search";
 
 export async function GET(request: NextRequest) {
+  const guard = await guardExternalServiceRoute(request, {
+    routeKey: "pexels-search",
+    maxRequests: 30,
+  });
+  if (!guard.ok) {
+    return NextResponse.json(
+      { error: guard.error, ...(guard.code ? { code: guard.code } : {}) },
+      {
+        status: guard.status,
+        headers: guard.retryAfter
+          ? { "Retry-After": String(guard.retryAfter) }
+          : undefined,
+      },
+    );
+  }
+
   const apiKey = process.env.PEXELS_API_KEY; 
   if (!apiKey) {
     return NextResponse.json(
@@ -15,6 +32,9 @@ export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get("query")?.trim();
   if (!query) {
     return NextResponse.json({ error: "query_required" }, { status: 400 });
+  }
+  if (query.length > 100) {
+    return NextResponse.json({ error: "query_too_long" }, { status: 400 });
   }
 
   const page = Math.max(
@@ -39,13 +59,14 @@ export async function GET(request: NextRequest) {
     const response = await fetch(url, {
       headers: { Authorization: apiKey },
       cache: "no-store",
+      signal: AbortSignal.timeout(10_000),
     });
 
     if (!response.ok) {
-      const detail = await response.text();
+      await response.body?.cancel();
       return NextResponse.json(
-        { error: "pexels_search_failed", detail: detail.slice(0, 300) },
-        { status: response.status },
+        { error: "pexels_search_failed" },
+        { status: 502 },
       );
     }
 
@@ -55,7 +76,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         error: "pexels_search_failed",
-        detail: error instanceof Error ? error.message : "Unknown error",
+        ...(error instanceof Error ? { detail: error.message } : {}),
       },
       { status: 502 },
     );

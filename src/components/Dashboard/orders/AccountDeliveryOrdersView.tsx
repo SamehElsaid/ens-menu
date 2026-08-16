@@ -1,20 +1,22 @@
 "use client";
 
 import { useMemo } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { NotificationPermissionCard } from "@/components/Global/NotificationPermissionCard";
-import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
-import { Badge, PageShell, SearchInput, Toolbar } from "@/components/ui";
+import { PageShell } from "@/components/ui";
 import { localizedMenuName } from "@/hooks/useDashboardMenus";
 import { useDashboardOrdersPage } from "@/hooks/useDashboardOrdersPage";
 import type { OrderMenuBadges } from "@/lib/tableOrders";
 import DeliveryOrderDetailsModal from "./DeliveryOrderDetailsModal";
 import DeliveryOrdersCardGrid from "./DeliveryOrdersCardGrid";
 import OrdersFilters from "./OrdersFilters";
+import {
+  OrdersPageHeader,
+  OrdersSearchToolbar,
+} from "./OrdersPageChrome";
 
 /** Online (delivery) orders across every menu of the account. */
 export default function AccountDeliveryOrdersView() {
-  const t = useTranslations("deliveryOrders");
   const locale = useLocale();
 
   const {
@@ -80,28 +82,16 @@ export default function AccountDeliveryOrdersView() {
          replaces made them look like two different products, and spent a
          blurred orb and two shadows saying what the sidebar already says. */
       header={
-        <PageTitleWithHelp
-          title={t("title")}
-          description={t("subtitle")}
-          meta={
-            pendingCount > 0 ? (
-              <Badge tone="warning">
-                {t("pendingBadge", { count: pendingCount })}
-              </Badge>
-            ) : undefined
-          }
+        <OrdersPageHeader
+          translationNs="deliveryOrders"
+          pendingCount={pendingCount}
         />
       }
       toolbar={
-        <Toolbar
-          search={
-            <SearchInput
-              value={searchInput}
-              onChange={setSearchInput}
-              placeholder={t("searchPlaceholder")}
-              label={t("searchPlaceholder")}
-            />
-          }
+        <OrdersSearchToolbar
+          translationNs="deliveryOrders"
+          value={searchInput}
+          onChange={setSearchInput}
         />
       }
     >

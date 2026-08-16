@@ -21,9 +21,11 @@ export interface MenuTable {
   id: number;
   menuId: number;
   tableNumber: string;
+  sessionSecret?: string;
   seats?: number;
   isActive: boolean;
   createdAt?: string;
+  [key: string]: unknown;
 }
 
 export interface Menu {
@@ -116,13 +118,17 @@ export interface ItemCategoryRef {
   [key: string]: unknown;
 }
 
+export type ItemOptionId = string;
+
 export interface ItemSizeOption {
+  id: ItemOptionId;
   nameAr: string;
   nameEn: string;
   price: number;
 }
 
 export interface ItemVariantOption {
+  id: ItemOptionId;
   labelAr: string;
   labelEn: string;
   price: number;
@@ -164,16 +170,6 @@ export interface Item {
   [key: string]: unknown;
 }
 
-export interface MenuTable {
-  id: number;
-  menuId: number;
-  tableNumber: string;
-  seats?: number;
-  isActive: boolean;
-  createdAt?: string;
-  [key: string]: unknown;
-}
-
 export interface MenuStaff {
   id: number;
   /** @deprecated legacy anchor menu — access comes from `menuIds` (grants). */
@@ -207,8 +203,7 @@ export interface MenuStaffRole {
   updatedAt?: string;
 }
 
-export interface Advertisement {
-  id?: number;
+export interface AdvertisementBase {
   title?: string;
   titleAr?: string;
   content?: string;
@@ -216,10 +211,33 @@ export interface Advertisement {
   imageUrl?: string;
   linkUrl?: string;
   isActive?: boolean;
-  menuId?: number;
   clickCount?: number;
   impressionCount?: number;
+  displayOrder?: number;
+  position?: string;
+  startDate?: string | null;
+  endDate?: string | null;
   createdAt?: string;
   updatedAt?: string;
   [key: string]: unknown;
+}
+
+export interface Advertisement extends AdvertisementBase {
+  id?: number;
+  menuId?: number;
+}
+
+export interface AdminAdvertisement extends AdvertisementBase {
+  id: number;
+  [key: string]: unknown;
+}
+
+export interface AdminAdvertisementsResponse {
+  ads: AdminAdvertisement[];
+  statistics?: {
+    total?: number;
+    totalActive?: number;
+    totalClicks?: number;
+    totalImpressions?: number;
+  };
 }

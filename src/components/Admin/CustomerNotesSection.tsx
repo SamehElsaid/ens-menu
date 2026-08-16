@@ -1,9 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { FaTrash } from "react-icons/fa";
-import { toast } from "react-toastify";
 import { axiosDelete, axiosGet, axiosPost } from "@/shared/axiosCall";
 import { formatAdminDate } from "@/lib/fetchAdminAnalytics";
 import {
@@ -15,6 +14,8 @@ import {
   SectionHeader,
 } from "@/components/ui";
 import type { UserInternalNote } from "@/types/AdminCustomer";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { useApiAction } from "@/hooks/useApiAction";
 
 interface Props {
   userId: number;
@@ -25,28 +26,25 @@ export default function CustomerNotesSection({ userId }: Props) {
   const t = useTranslations("adminUsers.userDetails.customerSections.notes");
   const tCommon = useTranslations("common");
   const [notes, setNotes] = useState<UserInternalNote[]>([]);
-  const [loading, setLoading] = useState(true);
   const [noteText, setNoteText] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const { runApiAction } = useApiAction();
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const result = await axiosGet<{ notes: UserInternalNote[] }>(
+  const requestNotes = useCallback(
+    () =>
+      axiosGet<{ notes: UserInternalNote[] }>(
         `/admin/users/${userId}/notes`,
         locale,
-      );
-      if (result.status && result.data) {
-        setNotes(result.data.notes);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [userId, locale]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+      ),
+    [userId, locale],
+  );
+  const notesQuery = useApiQuery({
+    request: requestNotes,
+    errorToast: ({ error }) => error,
+    onSuccess: (data) => setNotes(data.notes),
+  });
+  const loading = notesQuery.loading;
+  const load = notesQuery.refetch;
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,32 +52,32 @@ export default function CustomerNotesSection({ userId }: Props) {
     if (!trimmed) return;
     setSubmitting(true);
     try {
-      const result = await axiosPost<{ note: string }, unknown>(
-        `/admin/users/${userId}/notes`,
-        locale,
-        { note: trimmed },
+      await runApiAction(
+        () =>
+          axiosPost(`/admin/users/${userId}/notes`, locale, { note: trimmed }),
+        {
+          successToast: t("addSuccess"),
+          errorToast: t("addError"),
+          onSuccess: () => {
+            setNoteText("");
+            void load();
+          },
+        },
       );
-      if (result.status) {
-        toast.success(t("addSuccess"));
-        setNoteText("");
-        load();
-      } else {
-        toast.error(t("addError"));
-      }
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (noteId: number) => {
-    const result = await axiosDelete(
-      `/admin/users/${userId}/notes/${noteId}`,
-      locale,
+    await runApiAction(
+      () => axiosDelete(`/admin/users/${userId}/notes/${noteId}`, locale),
+      {
+        successToast: t("deleteSuccess"),
+        errorToast: ({ error }) => error,
+        onSuccess: () => void load(),
+      },
     );
-    if (result.status) {
-      toast.success(t("deleteSuccess"));
-      load();
-    }
   };
 
   return (

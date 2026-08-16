@@ -127,6 +127,7 @@ export default function AdminPaymentsPage() {
   const [totalPages, setTotalPages] = useState(1);
 
   const load = useCallback(async () => {
+    await Promise.resolve();
     setLoading(true);
     const data = await fetchAdminPayments(locale, {
       page,
@@ -153,7 +154,8 @@ export default function AdminPaymentsPage() {
   ]);
 
   useEffect(() => {
-    void load();
+    const timer = window.setTimeout(() => void load(), 0);
+    return () => window.clearTimeout(timer);
   }, [load]);
 
   const handleSearch = () => {

@@ -2,6 +2,7 @@ import { get, set, del, keys } from "idb-keyval";
 import type { TemplateDocument, TemplateListItem } from "../schema/types";
 import { createId, isValidDocument } from "../schema/types";
 import { createOneCardStarterDocument } from "../defaults/starter";
+import { sanitizeTemplateDocument } from "../sanitizeContent";
 
 const PREFIX = "ens_tpl_v3_";
 const INDEX_KEY = "ens_tpl_v3_index";
@@ -46,11 +47,14 @@ export const localTemplateDataLayer: TemplateDataLayer = {
 
   async getTemplate(id) {
     const doc = await get<TemplateDocument>(`${PREFIX}${id}`);
-    return doc && isValidDocument(doc) ? doc : null;
+    return doc && isValidDocument(doc) ? sanitizeTemplateDocument(doc) : null;
   },
 
   async saveTemplate(doc) {
-    const next = { ...doc, updatedAt: new Date().toISOString() };
+    const next = sanitizeTemplateDocument({
+      ...doc,
+      updatedAt: new Date().toISOString(),
+    });
     await set(`${PREFIX}${next.id}`, next);
     const index = await readIndex();
     const i = index.findIndex((x) => x.id === next.id);

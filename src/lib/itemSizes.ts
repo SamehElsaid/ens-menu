@@ -1,4 +1,5 @@
 import type { Item, ItemSizeOption } from "@/types/Menu";
+import { persistentOptionIdForLegacy } from "@/lib/optionIds";
 
 function parseSizesField(raw: unknown): ItemSizeOption[] {
   if (raw === null || raw === undefined || raw === "") return [];
@@ -18,7 +19,12 @@ function parseSizesField(raw: unknown): ItemSizeOption[] {
     .map((entry) => {
       const row = entry as Record<string, unknown>;
       const price = Number(row.price);
+      const id = persistentOptionIdForLegacy(
+        row.id,
+        `size:${String(row.nameAr ?? row.name_ar ?? row.label ?? "")}:${price}`,
+      );
       return {
+        id,
         nameAr: String(row.nameAr ?? row.name_ar ?? row.labelAr ?? row.label ?? "").trim(),
         nameEn: String(row.nameEn ?? row.name_en ?? row.labelEn ?? row.label ?? "").trim(),
         price,

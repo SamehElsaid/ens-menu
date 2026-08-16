@@ -39,6 +39,7 @@ export function SaveTemplateModal({ open, onClose }: Props) {
   const [descriptionAr, setDescriptionAr] = useState("");
   const [image, setImage] = useState("");
   const [imageBusy, setImageBusy] = useState(false);
+  const [storageError, setStorageError] = useState(false);
   const [errors, setErrors] = useState<
     Partial<Record<keyof TemplateCatalogMeta, string>>
   >({});
@@ -52,6 +53,7 @@ export function SaveTemplateModal({ open, onClose }: Props) {
     setImage(document.image ?? "");
     setErrors({});
     setImageBusy(false);
+    setStorageError(false);
   }, [open, document]);
 
   if (!open || !document) return null;
@@ -98,9 +100,14 @@ export function SaveTemplateModal({ open, onClose }: Props) {
     e.preventDefault();
     const meta = validate();
     if (!meta) return;
-    await save(meta);
-    onClose();
-    router.push(`/${locale}/admin/template`);
+    setStorageError(false);
+    try {
+      await save(meta);
+      onClose();
+      router.push(`/${locale}/admin/template`);
+    } catch {
+      setStorageError(true);
+    }
   };
 
   /* Local classes rather than the `Field`/`Input`/`Button` primitives: `Modal`
@@ -140,6 +147,11 @@ export function SaveTemplateModal({ open, onClose }: Props) {
 
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4">
           <p className="text-xs text-fg-muted">{t("saveModal.subtitle")}</p>
+          {storageError ? (
+            <p role="alert" className={errorClass}>
+              {t("storageError")} {t("retry")}
+            </p>
+          ) : null}
 
           <div>
             <span className={labelClass}>{t("saveModal.image")}</span>

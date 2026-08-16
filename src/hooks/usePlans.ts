@@ -26,6 +26,7 @@ export function usePlans({ personalized = true }: UsePlansOptions = {}) {
   const [loading, setLoading] = useState(true);
 
   const loadPlans = useCallback(async () => {
+    await Promise.resolve();
     setLoading(true);
     const usePersonalized = personalized && isLoggedIn;
     const endpoint = usePersonalized ? "/user/plans" : "/public/plans";
@@ -51,7 +52,8 @@ export function usePlans({ personalized = true }: UsePlansOptions = {}) {
   }, [locale, isLoggedIn, personalized]);
 
   useEffect(() => {
-    void loadPlans();
+    const timer = window.setTimeout(() => void loadPlans(), 0);
+    return () => window.clearTimeout(timer);
   }, [loadPlans]);
 
   const proPlan = plans.find((p) => p.name?.toLowerCase() === "pro");

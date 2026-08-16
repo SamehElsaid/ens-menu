@@ -1,13 +1,14 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
 import type { PexelsPhoto } from "@/types/pexels";
 import { getPexelsPhotoUrl } from "@/lib/menuImport/pexelsImportImage";
 import PexelsImagePickerModal from "@/components/MenuImport/review/PexelsImagePickerModal";
 import { useLocale, useTranslations } from "next-intl";
-import { axiosPost, axiosPatch } from "@/shared/axiosCall";
+import { axiosPost, axiosPut } from "@/shared/axiosCall";
 import { _resizeImage } from "@/shared/_shared";
 import { toast } from "react-toastify";
 import { Category } from "@/types/Menu";
@@ -31,12 +32,14 @@ import {
   focusRing,
 } from "@/components/ui";
 import { cn } from "@/lib/cn";
+import {
+  createCategorySchema,
+  type AddCategoryFormData,
+} from "@/schemas/categorySchema";
+import { menuEndpoints } from "@/api/endpoints/menus";
+import { useApiAction } from "@/hooks/useApiAction";
 
-export interface AddCategoryFormData {
-  nameAr: string;
-  nameEn: string;
-  isActive: boolean;
-}
+export type { AddCategoryFormData } from "@/schemas/categorySchema";
 
 interface AddCategoryModalProps {
   menuId: string;
@@ -57,6 +60,14 @@ export default function AddCategoryModal({
   const tCommon = useTranslations("common");
   const locale = useLocale();
   const isEdit = Boolean(category?.id);
+  const categorySchema = useMemo(
+    () =>
+      createCategorySchema({
+        nameArRequired: t("nameArRequired"),
+        nameEnRequired: t("nameEnRequired"),
+      }),
+    [t],
+  );
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
@@ -64,6 +75,7 @@ export default function AddCategoryModal({
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [pexelsModalOpen, setPexelsModalOpen] = useState(false);
+  const { runApiAction } = useApiAction();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -73,6 +85,7 @@ export default function AddCategoryModal({
     formState: { errors },
     reset,
   } = useForm<AddCategoryFormData>({
+    resolver: yupResolver(categorySchema),
     defaultValues: {
       nameAr: "",
       nameEn: "",
@@ -139,33 +152,28 @@ export default function AddCategoryModal({
         ...(imageUrl && { imageUrl, image: imageUrl }),
       };
 
-      if (isEdit && category) {
-        const result = await axiosPatch<typeof payload, Category>(
-          `/menus/${menuId}/categories/${category.id}`,
-          locale,
-          payload,
-        );
-        if (result.status && result.data) {
-          toast.success(t("editSuccess"));
-          onClose();
-          onRefresh?.();
-        } else {
-          toast.error(t("editError"));
-        }
-      } else {
-        const result = await axiosPost<typeof payload, Category>(
-          `/menus/${menuId}/categories`,
-          locale,
-          payload,
-        );
-        if (result.status && result.data) {
-          toast.success(t("createSuccess"));
-          onClose();
-          onRefresh?.();
-        } else {
-          toast.error(t("createError"));
-        }
-      }
+      await runApiAction(
+        () =>
+          isEdit && category
+            ? axiosPut<typeof payload, Category>(
+                menuEndpoints.categories.detail(menuId, category.id),
+                locale,
+                payload,
+              )
+            : axiosPost<typeof payload, Category>(
+                menuEndpoints.categories.list(menuId),
+                locale,
+                payload,
+              ),
+        {
+          successToast: isEdit ? t("editSuccess") : t("createSuccess"),
+          errorToast: isEdit ? t("editError") : t("createError"),
+          onSuccess: () => {
+            onClose();
+            onRefresh?.();
+          },
+        },
+      );
     } catch {
       toast.error(isEdit ? t("editError") : t("createError"));
     } finally {
@@ -360,7 +368,6 @@ export default function AddCategoryModal({
                 <Controller
                   name="nameEn"
                   control={control}
-                  rules={{ required: t("nameEnRequired") }}
                   render={({ field }) => (
                     <Input
                       type="text"
@@ -381,7 +388,6 @@ export default function AddCategoryModal({
                 <Controller
                   name="nameAr"
                   control={control}
-                  rules={{ required: t("nameArRequired") }}
                   render={({ field }) => (
                     <Input
                       type="text"

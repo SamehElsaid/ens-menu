@@ -29,8 +29,8 @@ import {
 import { cn } from "@/lib/cn";
 import { toast } from "react-toastify";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
-import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
+import { SET_AUTH_SESSION_CACHE } from "@/store/authSlice/authSlice";
+import { axiosGet, axiosPut, axiosPost } from "@/shared/axiosCall";
 import CustomInput from "@/components/Custom/CustomInput";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
@@ -343,7 +343,7 @@ export function RequirePhone({
 
       toast.success(t("verificationSuccess"));
       dispatch(
-        SET_ACTIVE_USER({
+        SET_AUTH_SESSION_CACHE({
           ...authData,
           user: {
             ...userProfile,
@@ -447,7 +447,7 @@ export function RequirePhone({
       payload.restaurantName ?? userProfile?.restaurantName?.trim();
 
     setSaving(true);
-    const res = await axiosPatch<
+    const res = await axiosPut<
       Record<string, string>,
       { user?: UserProfile }
     >("/user/profile", locale, payload);
@@ -465,7 +465,7 @@ export function RequirePhone({
       setTimeLeft(VERIFICATION_TIMEOUT_SECONDS);
       setStartAttempted(false);
       dispatch(
-        SET_ACTIVE_USER({
+        SET_AUTH_SESSION_CACHE({
           ...authData,
           user: {
             ...userProfile,

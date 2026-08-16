@@ -3,17 +3,17 @@
 import { Controller, useForm } from "react-hook-form";
 import { useLocale, useTranslations } from "next-intl";
 import { axiosPost } from "@/shared/axiosCall";
-import { encryptData } from "@/shared/encryption";
-import Cookies from "js-cookie";
 import { useRouter } from "@/i18n/navigation";
 import { useState } from "react";
 import { useAppDispatch } from "@/store/hooks";
-import { SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
+import { SET_AUTH_SESSION_CACHE } from "@/store/authSlice/authSlice";
 import { FiMail } from "react-icons/fi";
 import { IoRestaurantOutline } from "react-icons/io5";
 import { getMenuDashboardRef } from "@/lib/menuDashboardPath";
 import { Alert, Field, Input, PasswordInput } from "@/components/site/Form";
 import { SiteButton } from "@/components/site/Button";
+import { writeAuthUiCookie } from "@/shared/authUiCookie";
+import { storeCsrfTokenFromPayload } from "@/shared/csrfToken";
 
 type StaffLoginFormValues = {
   menuSlug: string;
@@ -73,7 +73,7 @@ export default function StaffLoginForm() {
       true,
     );
 
-    if (!result.status || !result.data?.accessToken || !result.data?.menu) {
+    if (!result.status || !result.data?.menu) {
       const msg =
         (result.data as { message?: string })?.message || t("staffLoginFailed");
       setApiError(msg);
@@ -81,7 +81,7 @@ export default function StaffLoginForm() {
       return;
     }
 
-    const { accessToken, refreshToken, staff, menu } = result.data;
+    const { staff, menu } = result.data;
     const permissions = Array.isArray(result.data.permissions)
       ? result.data.permissions.filter(
           (p): p is string => typeof p === "string",
@@ -95,9 +95,7 @@ export default function StaffLoginForm() {
 
     const roleName = result.data.role?.name ?? staff?.roleName ?? undefined;
 
-    const saveTokens = {
-      token: accessToken,
-      refreshToken: refreshToken ?? "",
+    const uiHints = {
       role: "staff",
       permissions,
       staffRoleId: result.data.role?.id ?? staff?.roleId ?? undefined,
@@ -105,15 +103,11 @@ export default function StaffLoginForm() {
       menuUuid: menuRef,
     };
 
-    Cookies.set("sub", encryptData(saveTokens), {
-      expires: 3,
-      sameSite: "Strict",
-      secure: true,
-      path: "/",
-    });
+    writeAuthUiCookie(uiHints);
+    storeCsrfTokenFromPayload(result.data);
 
     dispatch(
-      SET_ACTIVE_USER({
+      SET_AUTH_SESSION_CACHE({
         user: {
           email: staff?.email ?? "",
           name: staff?.name ?? "",

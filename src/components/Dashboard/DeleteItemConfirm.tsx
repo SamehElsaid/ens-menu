@@ -2,9 +2,9 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { axiosDelete } from "@/shared/axiosCall";
-import { toast } from "react-toastify";
 import { Item } from "@/types/Menu";
 import DeleteEntityConfirmModal from "./DeleteEntityConfirmModal";
+import { useApiAction } from "@/hooks/useApiAction";
 
 interface DeleteItemConfirmProps {
   menuId: string;
@@ -23,20 +23,21 @@ export default function DeleteItemConfirm({
 }: DeleteItemConfirmProps) {
   const t = useTranslations("Items");
   const locale = useLocale();
+  const { runApiAction } = useApiAction();
   const labelText = localeName.trim();
 
   const handleDelete = async () => {
-    const result = await axiosDelete<unknown>(
-      `/menus/${menuId}/items/${item.id}`,
-      locale,
+    await runApiAction(
+      () => axiosDelete(`/menus/${menuId}/items/${item.id}`, locale),
+      {
+        successToast: t("deleteSuccess"),
+        errorToast: t("deleteError"),
+        onSuccess: () => {
+          onDeleted?.();
+          onClose();
+        },
+      },
     );
-    if (result.status) {
-      toast.success(t("deleteSuccess"));
-      onDeleted?.();
-      onClose();
-    } else {
-      toast.error(t("deleteError"));
-    }
   };
 
   return (

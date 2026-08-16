@@ -6,7 +6,6 @@ import { useRouter } from "@/i18n/navigation";
 import { IoAddOutline, IoLibraryOutline } from "react-icons/io5";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import { axiosGet, axiosDelete } from "@/shared/axiosCall";
-import { toast } from "react-toastify";
 import { FiAlertTriangle } from "react-icons/fi";
 import {
   Button,
@@ -23,6 +22,8 @@ import {
 } from "@/components/ui";
 import { useDataTableLabels } from "@/hooks/useDataTableLabels";
 import ViewTime from "@/shared/ViewTime";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { useApiAction } from "@/hooks/useApiAction";
 
 const PAGE_LIMIT = 10;
 
@@ -64,10 +65,10 @@ export default function KnowledgeManagementPage() {
     totalPages: 1,
   });
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
   const [loadingItemId, setLoadingItemId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const { runApiAction } = useApiAction();
 
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
@@ -80,37 +81,32 @@ export default function KnowledgeManagementPage() {
     [isRTL],
   );
 
-  const fetchItems = useCallback(
-    async (currentPage: number, currentSearch: string) => {
-      try {
-        setLoading(true);
-        const params: Record<string, unknown> = {
-          page: currentPage,
+  const requestItems = useCallback(
+    () => {
+      const params: Record<string, unknown> = {
+          page,
           limit: PAGE_LIMIT,
         };
-        if (currentSearch.trim()) params.search = currentSearch.trim();
-
-        const result = await axiosGet<SearchInformationResponse>(
+      if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
+      return axiosGet<SearchInformationResponse>(
           "/searchInformation",
           locale,
           undefined,
           params,
         );
-
-        if (result.status && result.data) {
-          setItems(result.data.data ?? []);
-          if (result.data.pagination) setPagination(result.data.pagination);
-        } else {
-          toast.error(t("error"));
-        }
-      } catch {
-        toast.error(t("error"));
-      } finally {
-        setLoading(false);
-      }
     },
-    [locale, t],
+    [locale, page, debouncedSearch],
   );
+  const itemsQuery = useApiQuery({
+    request: requestItems,
+    errorToast: t("error"),
+    onSuccess: (data) => {
+      setItems(data.data ?? []);
+      if (data.pagination) setPagination(data.pagination);
+    },
+  });
+  const loading = itemsQuery.loading;
+  const fetchItems = itemsQuery.refetch;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -119,10 +115,6 @@ export default function KnowledgeManagementPage() {
     }, 700);
     return () => clearTimeout(timer);
   }, [search]);
-
-  useEffect(() => {
-    fetchItems(page, debouncedSearch);
-  }, [fetchItems, page, debouncedSearch]);
 
   const openAdd = useCallback(() => {
     router.push("/admin/knowledge-management/add");
@@ -140,23 +132,20 @@ export default function KnowledgeManagementPage() {
 
     setLoadingItemId(deleteModal.item.id);
     try {
-      const result = await axiosDelete<{ message?: string }>(
-        `/searchInformation/${deleteModal.item.id}`,
-        locale,
+      await runApiAction(
+        () =>
+          axiosDelete(`/searchInformation/${deleteModal.item!.id}`, locale),
+        {
+          successToast: t("deleteSuccess"),
+          errorToast: t("deleteError"),
+          onSuccess: () => {
+            setDeleteModal({ isOpen: false, item: null });
+            const nextPage = items.length === 1 && page > 1 ? page - 1 : page;
+            setPage(nextPage);
+            if (nextPage === page) void fetchItems();
+          },
+        },
       );
-
-      if (result.status) {
-        toast.success(t("deleteSuccess"));
-        setDeleteModal({ isOpen: false, item: null });
-        // If we deleted the last item on this page, go back one page
-        const nextPage = items.length === 1 && page > 1 ? page - 1 : page;
-        setPage(nextPage);
-        if (nextPage === page) fetchItems(page, debouncedSearch);
-      } else {
-        toast.error(t("deleteError"));
-      }
-    } catch {
-      toast.error(t("deleteError"));
     } finally {
       setLoadingItemId(null);
     }
@@ -167,7 +156,7 @@ export default function KnowledgeManagementPage() {
     fetchItems,
     items.length,
     page,
-    debouncedSearch,
+    runApiAction,
   ]);
 
   const columns: DataColumn<SearchInformation>[] = [

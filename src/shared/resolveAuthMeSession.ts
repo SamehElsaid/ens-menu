@@ -1,10 +1,6 @@
-import Cookies from "js-cookie";
 import { axiosGet } from "@/shared/axiosCall";
-import {
-  getAuthHintsFromEncryptedSub,
-  isUserNotFoundApiBody,
-} from "@/shared/jwtPayload";
 import { patchSubCookieWithStaffSession } from "@/shared/staffSubCookie";
+import { readAuthUiCookie } from "@/shared/authUiCookie";
 
 type AuthMeResponse = { user?: Record<string, unknown> };
 type StaffMeResponse = {
@@ -69,15 +65,10 @@ async function resolveStaffMe(locale: string): Promise<ResolveAuthMeResult> {
 export async function resolveAuthMeSession(
   locale: string,
 ): Promise<ResolveAuthMeResult> {
-  const sub = Cookies.get("sub");
-  if (!sub) return { outcome: "none" };
+  const hints = readAuthUiCookie();
+  if (!hints) return { outcome: "none" };
 
-  const hints = getAuthHintsFromEncryptedSub(sub);
-  if (!hints) return { outcome: "logout" };
-
-  const { effectiveRole, token: tokenFromCookie } = hints;
-
-  if (effectiveRole === "staff") {
+  if (hints.role === "staff") {
     return resolveStaffMe(locale);
   }
 
@@ -88,9 +79,6 @@ export async function resolveAuthMeSession(
   }
 
   if (res.statusCode === 404) {
-    if (tokenFromCookie && isUserNotFoundApiBody(res.data)) {
-      return resolveStaffMe(locale);
-    }
     return { outcome: "logout" };
   }
 

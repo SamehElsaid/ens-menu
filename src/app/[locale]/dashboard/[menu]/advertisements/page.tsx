@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { axiosGet, axiosPatch } from "@/shared/axiosCall";
+import { axiosGet, axiosPut } from "@/shared/axiosCall";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import AddAdvertisementModal from "@/components/Dashboard/AddAdvertisementModal";
 import DeleteAdvertisementConfirm from "@/components/Dashboard/DeleteAdvertisementConfirm";
@@ -18,7 +18,8 @@ import { fetchMenuAnalytics } from "@/lib/fetchMenuAnalytics";
 import { Advertisement } from "@/types/Menu";
 import { IoAddCircleOutline } from "react-icons/io5";
 import { useCurrentPlanCapabilities } from "@/hooks/useCurrentPlanCapabilities";
-import { toast } from "react-toastify";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { useApiAction } from "@/hooks/useApiAction";
 
 export default function AdvertisementsPage() {
   const locale = useLocale();
@@ -35,53 +36,47 @@ export default function AdvertisementsPage() {
         : "";
 
   const [ads, setAds] = useState<Advertisement[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingAd, setEditingAd] = useState<Advertisement | null>(null);
   const [deletingAd, setDeletingAd] = useState<Advertisement | null>(null);
-  const [refreshing, setRefreshing] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [totalAds, setTotalAds] = useState(0);
   const [togglingId, setTogglingId] = useState<number | null>(null);
   const [adAnalyticsDemo, setAdAnalyticsDemo] = useState(false);
+  const { runApiAction } = useApiAction();
 
   const capabilities = useCurrentPlanCapabilities();
   const maxAdsPerMenu = capabilities.maxAdsPerMenu;
 
-  const fetchAds = useCallback(async () => {
-    if (!menuId) return;
-    try {
-      setLoading(true);
-      const result = await axiosGet<{
+  const requestAds = useCallback(
+    () =>
+      axiosGet<{
         success?: boolean;
         data?: {
           ads?: Advertisement[];
           pagination?: { totalPages?: number; total?: number };
         };
-      }>(`/menus/${menuId}/ads?page=${page}&limit=12`, locale);
-
-      if (result.status && result.data) {
-        const wrapper = result.data;
-        const list = wrapper.data?.ads ?? [];
-        setAds(list);
-
-        const pages = wrapper.data?.pagination?.totalPages ?? 0;
-        setTotalPages(pages);
-        setTotalAds(Number(wrapper.data?.pagination?.total ?? list.length));
-      } else {
-        setAds([]);
-        setTotalPages(0);
-        setTotalAds(0);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [menuId, locale, page]);
-
-  useEffect(() => {
-    fetchAds();
-  }, [fetchAds, refreshing]);
+      }>(`/menus/${menuId}/ads?page=${page}&limit=12`, locale),
+    [menuId, locale, page],
+  );
+  const adsQuery = useApiQuery({
+    request: requestAds,
+    enabled: Boolean(menuId),
+    onSuccess: (wrapper) => {
+      const list = wrapper.data?.ads ?? [];
+      setAds(list);
+      setTotalPages(wrapper.data?.pagination?.totalPages ?? 0);
+      setTotalAds(Number(wrapper.data?.pagination?.total ?? list.length));
+    },
+    onError: () => {
+      setAds([]);
+      setTotalPages(0);
+      setTotalAds(0);
+    },
+  });
+  const loading = adsQuery.loading;
+  const refetchAds = adsQuery.refetch;
 
   useEffect(() => {
     if (!menuId) return;
@@ -127,7 +122,9 @@ export default function AdvertisementsPage() {
     ];
   }, [ads, t]);
 
-  const refreshList = useCallback(() => setRefreshing((v) => v + 1), []);
+  const refreshList = useCallback(() => {
+    void refetchAds();
+  }, [refetchAds]);
 
   const closeModal = useCallback(() => {
     setShowModal(false);
@@ -155,34 +152,29 @@ export default function AdvertisementsPage() {
       const nextActive = !ad.isActive;
       try {
         setTogglingId(ad.id);
-        const result = await axiosPatch<
-          { isActive: boolean },
-          { success?: boolean; message?: string; error?: string }
-        >(`/ads/${ad.id}`, locale, { isActive: nextActive });
-
-        if (result.status) {
-          setAds((prev) =>
-            prev.map((item) =>
-              item.id === ad.id ? { ...item, isActive: nextActive } : item,
-            ),
-          );
-          toast.success(
-            nextActive ? t("toggleActivateSuccess") : t("togglePauseSuccess"),
-          );
-        } else {
-          const apiMessage =
-            (result.data as { error?: string; message?: string } | undefined)
-              ?.error ||
-            (result.data as { message?: string } | undefined)?.message;
-          toast.error(apiMessage || t("toggleError"));
-        }
-      } catch {
-        toast.error(t("toggleError"));
+        await runApiAction(
+          () =>
+            axiosPut(`/ads/${ad.id}`, locale, { isActive: nextActive }),
+          {
+            successToast: nextActive
+              ? t("toggleActivateSuccess")
+              : t("togglePauseSuccess"),
+            errorToast: ({ error }) => error || t("toggleError"),
+            onSuccess: () =>
+              setAds((current) =>
+                current.map((item) =>
+                  item.id === ad.id
+                    ? { ...item, isActive: nextActive }
+                    : item,
+                ),
+              ),
+          },
+        );
       } finally {
         setTogglingId(null);
       }
     },
-    [locale, t],
+    [locale, t, runApiAction],
   );
 
   const getTitle = useCallback(

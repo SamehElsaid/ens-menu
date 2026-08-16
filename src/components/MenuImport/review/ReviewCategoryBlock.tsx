@@ -136,6 +136,7 @@ export default function ReviewCategoryBlock({
       category.items.some(
         (item) =>
           item.id === scrollTargetRefId ||
+          (item.sizes ?? []).some((size) => size.id === scrollTargetRefId) ||
           item.variants.some((variant) => variant.id === scrollTargetRefId),
       );
 

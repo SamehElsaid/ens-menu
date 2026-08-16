@@ -1,10 +1,9 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { IoAddOutline } from "react-icons/io5";
 import { FaHistory } from "react-icons/fa";
-import { toast } from "react-toastify";
 import { FiAlertTriangle } from "react-icons/fi";
 import { axiosGet, axiosDelete } from "@/shared/axiosCall";
 import { useAppSelector } from "@/store/hooks";
@@ -24,12 +23,10 @@ import {
 } from "@/components/ui";
 import AddAdministratorModal from "@/components/Dashboard/AddAdministratorModal";
 import EditAdministratorPermissionsModal from "@/components/Admin/EditAdministratorPermissionsModal";
-import {
-  getAdminPermissionsByEmail,
-  removeAdminPermissionsByEmail,
-} from "@/lib/adminPermissions";
-import { ADMIN_PERMISSION_KEYS } from "@/types/AdminPermission";
+import { ADMIN_PERMISSION_KEYS, type AdminPermissionKey } from "@/types/AdminPermission";
 import { useAdminPermissions } from "@/hooks/useAdminPermissions";
+import { useApiQuery } from "@/hooks/useApiQuery";
+import { useApiAction } from "@/hooks/useApiAction";
 
 interface Administrator {
   id: number;
@@ -38,6 +35,7 @@ interface Administrator {
   createdAt: string;
   lastLoginAt: string | null;
   profileImage: string | null;
+  permissions?: AdminPermissionKey[] | null;
   [key: string]: unknown;
 }
 
@@ -69,7 +67,6 @@ export default function AdministratorsPage() {
   const canManageAdmins = hasAdminPermission("administrators");
 
   const [admins, setAdmins] = useState<Administrator[]>([]);
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -88,52 +85,34 @@ export default function AdministratorsPage() {
     admin: Administrator | null;
   }>({ open: false, admin: null });
   const [loadingAdminId, setLoadingAdminId] = useState<number | null>(null);
+  const { runApiAction } = useApiAction();
 
-  const fetchAdmins = useCallback(
-    async (pageNum: number = 1) => {
-      try {
-        setLoading(true);
-        const params: Record<string, unknown> = {
-          page: pageNum,
-          limit: 10,
-        };
-
-        const result = await axiosGet<AdminsResponse>(
+  const requestAdmins = useCallback(
+    () =>
+      axiosGet<AdminsResponse>(
           "/admin/admins",
           locale,
           undefined,
-          params,
-        );
-
-        if (result.status && result.data) {
-          setAdmins(result.data.admins || []);
-          setTotalItems(result.data.pagination?.totalItems || 0);
-          setTotalPages(result.data.pagination?.totalPages || 1);
-          setItemsPerPage(result.data.pagination?.itemsPerPage || 10);
-          setStats({
-            total:
-              result.data.statistics?.totalAdmins ||
-              result.data.admins?.length ||
-              0,
-            lastLogin: result.data.statistics?.lastLoginOfAdmin || null,
-          });
-        } else {
-          toast.error(t("error"));
-        }
-      } catch (err) {
-        console.error("Error fetching administrators:", err);
-        toast.error(t("error"));
-      } finally {
-        setLoading(false);
-      }
-    },
-    [locale, t],
+          { page, limit: 10 },
+        ),
+    [locale, page],
   );
-
-  useEffect(() => {
-    fetchAdmins(page);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, locale]);
+  const adminsQuery = useApiQuery({
+    request: requestAdmins,
+    errorToast: t("error"),
+    onSuccess: (data) => {
+      setAdmins(data.admins || []);
+      setTotalItems(data.pagination?.totalItems || 0);
+      setTotalPages(data.pagination?.totalPages || 1);
+      setItemsPerPage(data.pagination?.itemsPerPage || 10);
+      setStats({
+        total: data.statistics?.totalAdmins || data.admins?.length || 0,
+        lastLogin: data.statistics?.lastLoginOfAdmin || null,
+      });
+    },
+  });
+  const loading = adminsQuery.loading;
+  const fetchAdmins = adminsQuery.refetch;
 
   const handlePageChange = useCallback((newPage: number) => {
     setPage(newPage);
@@ -145,31 +124,30 @@ export default function AdministratorsPage() {
     const adminId = deleteModal.admin.id;
     setLoadingAdminId(adminId);
     try {
-      const result = await axiosDelete<{ message?: string }>(
-        `/admin/admins/${adminId}`,
-        locale,
+      await runApiAction(
+        () => axiosDelete(`/admin/admins/${adminId}`, locale),
+        {
+          successToast: t("deleteSuccess"),
+          errorToast: t("deleteError"),
+          onSuccess: () => {
+            setDeleteModal({ isOpen: false, admin: null });
+            if (admins.length === 1 && page > 1) setPage(page - 1);
+            else void fetchAdmins();
+          },
+        },
       );
-
-      if (result.status) {
-        removeAdminPermissionsByEmail(deleteModal.admin.email);
-        toast.success(t("deleteSuccess"));
-        setDeleteModal({ isOpen: false, admin: null });
-        // If current page will be empty after deletion, go to previous page
-        if (admins.length === 1 && page > 1) {
-          setPage(page - 1);
-        } else {
-          fetchAdmins(page);
-        }
-      } else {
-        toast.error(t("deleteError"));
-      }
-    } catch (err) {
-      console.error("Error deleting administrator:", err);
-      toast.error(t("deleteError"));
     } finally {
       setLoadingAdminId(null);
     }
-  }, [deleteModal.admin, locale, t, fetchAdmins, admins.length, page]);
+  }, [
+    deleteModal.admin,
+    locale,
+    t,
+    fetchAdmins,
+    admins.length,
+    page,
+    runApiAction,
+  ]);
 
   const formatDate = useCallback(
     (dateString?: string | null) => {
@@ -250,9 +228,9 @@ export default function AdministratorsPage() {
         id: "permissions",
         header: t("columns.permissions"),
         cell: (row) => {
-          const stored = getAdminPermissionsByEmail(row.email);
+          const stored = row.permissions;
           const isFull =
-            !stored || stored.length >= ADMIN_PERMISSION_KEYS.length;
+            stored == null || stored.length >= ADMIN_PERMISSION_KEYS.length;
           return (
             <Badge tone={isFull ? "brand" : "neutral"} dot>
               {isFull
@@ -415,7 +393,7 @@ export default function AdministratorsPage() {
       {showAddModal && (
         <AddAdministratorModal
           onClose={() => setShowAddModal(false)}
-          onRefresh={() => fetchAdmins(page)}
+          onRefresh={() => void fetchAdmins()}
         />
       )}
 
@@ -439,6 +417,7 @@ export default function AdministratorsPage() {
         admin={permissionsModal.admin}
         isCurrentUser={permissionsModal.admin?.email === currentUserEmail}
         onClose={() => setPermissionsModal({ open: false, admin: null })}
+        onSaved={() => void fetchAdmins()}
       />
     </PageShell>
   );

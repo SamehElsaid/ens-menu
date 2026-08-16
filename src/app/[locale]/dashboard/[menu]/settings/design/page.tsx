@@ -5,14 +5,14 @@ import { useLocale, useTranslations } from "next-intl";
 import { useParams, useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import LoadImage from "@/components/ImageLoad";
+import dynamic from "next/dynamic";
 import { templatesInfo } from "@/modules/TemplateShow/data";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import TemplateDesignCustomizePanel from "@/components/Settings/TemplateDesignCustomizePanel";
 import { FiEye, FiSettings, FiChevronDown, FiTool } from "react-icons/fi";
 import { HiOutlineHand, HiOutlineColorSwatch } from "react-icons/hi";
-import { axiosPatch } from "@/shared/axiosCall";
+import { axiosPut } from "@/shared/axiosCall";
 import type { Menu } from "@/types/Menu";
-import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
+import { SET_ACTIVE_MENU_CACHE } from "@/store/authSlice/menuDataSlice";
 import { FaCheck, FaCrown } from "react-icons/fa";
 import { toast } from "react-toastify";
 import {
@@ -33,6 +33,11 @@ import {
   SectionHeader,
 } from "@/components/ui";
 import { cn } from "@/lib/cn";
+
+const TemplateDesignCustomizePanel = dynamic(
+  () => import("@/components/Settings/TemplateDesignCustomizePanel"),
+  { ssr: false },
+);
 
 export default function DesignPage() {
   const locale = useLocale();
@@ -102,7 +107,7 @@ export default function DesignPage() {
     }
     try {
       const payload = { theme: templateId };
-      const result = await axiosPatch<typeof payload, Menu>(
+      const result = await axiosPut<typeof payload, Menu>(
         `/menus/${resolvedMenuId}`,
         locale,
         payload,
@@ -112,7 +117,7 @@ export default function DesignPage() {
         setActiveTemplateId(templateId);
         if (menu) {
           dispatch(
-            SET_ACTIVE_USER({
+            SET_ACTIVE_MENU_CACHE({
               ...menu,
               theme: templateId,
             }),
@@ -124,7 +129,7 @@ export default function DesignPage() {
           const defaultColors = newTemplate?.defaultColors ??
             newTemplate?.colors ?? ["#9333EA", "#7C3AED"];
           const [primaryColor, secondaryColor] = defaultColors;
-          await axiosPatch(`/menus/${resolvedMenuId}/customizations`, locale, {
+          await axiosPut(`/menus/${resolvedMenuId}/customizations`, locale, {
             primaryColor: primaryColor ?? "#9333EA",
             secondaryColor: secondaryColor ?? primaryColor ?? "#7C3AED",
             backgroundColor: "#ffffff",
@@ -419,7 +424,11 @@ export default function DesignPage() {
                         fullWidth
                         onClick={(e) => {
                           e.stopPropagation();
-                          window.open(linkView, "_blank");
+                          window.open(
+                            linkView,
+                            "_blank",
+                            "noopener,noreferrer",
+                          );
                         }}
                         startIcon={<FiEye aria-hidden />}
                       >

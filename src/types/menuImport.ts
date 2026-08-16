@@ -43,6 +43,9 @@ export interface ImportItem {
   descriptionAr?: string;
   descriptionEn?: string;
   price: number | null;
+  /** Base-price choices. Kept separate from optional add-on variants. */
+  sizes?: ImportVariant[];
+  /** Optional add-ons; never serialized as sizes. */
   variants: ImportVariant[];
   isAvailable: boolean;
   imageUrl?: string;
@@ -165,6 +168,7 @@ export interface ExpandedSaveItem {
 }
 
 export interface BulkImportSize {
+  id: string;
   nameAr: string;
   nameEn: string;
   price: number;

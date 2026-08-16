@@ -1,8 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
 import type { PexelsPhoto } from "@/types/pexels";
 import { getPexelsPhotoUrl } from "@/lib/menuImport/pexelsImportImage";
 import PexelsImagePickerModal from "@/components/MenuImport/review/PexelsImagePickerModal";
@@ -10,7 +11,7 @@ import CategorySearchSelect, {
   type CategoryOption,
 } from "@/components/Dashboard/CategorySearchSelect";
 import { useLocale, useTranslations } from "next-intl";
-import { axiosPost, axiosPatch } from "@/shared/axiosCall";
+import { axiosPost, axiosPut } from "@/shared/axiosCall";
 import { _resizeImage } from "@/shared/_shared";
 import { toast } from "react-toastify";
 import { Item, Category, UploadResponse } from "@/types/Menu";
@@ -35,116 +36,30 @@ import {
 } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import { MdOutlineFastfood } from "react-icons/md";
+import {
+  createItemSchema,
+  type AddItemFormData,
+} from "@/schemas/itemSchema";
+import { menuEndpoints } from "@/api/endpoints/menus";
+import { resolveApiErrorMessage } from "@/api/apiError";
+import { useApiAction } from "@/hooks/useApiAction";
+import {
+  createItemSizeRow,
+  createItemVariantRow,
+  parseEditableItemSizes,
+  parseEditableItemVariants,
+  serializeItemSizes,
+  serializeItemVariants,
+  type EditableItemSize,
+  type EditableItemVariant,
+} from "@/lib/itemOptionPersistence";
+
+export type { AddItemFormData } from "@/schemas/itemSchema";
 
 type PriceMode = "single" | "multiple";
 
-interface ItemSizeRow {
-  id: string;
-  nameAr: string;
-  nameEn: string;
-  price: string;
-}
-
-interface ItemVariantRow {
-  id: string;
-  labelAr: string;
-  labelEn: string;
-  price: string;
-}
-
 type SizeFieldKey = "nameAr" | "nameEn" | "price";
 type VariantFieldKey = "labelAr" | "labelEn" | "price";
-
-export interface AddItemFormData {
-  nameAr: string;
-  nameEn: string;
-  descriptionAr: string;
-  descriptionEn: string;
-  categoryId: string;
-  price: string;
-  discountPercent: string;
-  isAvailable: boolean;
-}
-
-function createSizeRow(): ItemSizeRow {
-  return {
-    id: crypto.randomUUID(),
-    nameAr: "",
-    nameEn: "",
-    price: "",
-  };
-}
-
-function createVariantRow(): ItemVariantRow {
-  return {
-    id: crypto.randomUUID(),
-    labelAr: "",
-    labelEn: "",
-    price: "",
-  };
-}
-
-function getApiErrorMessage(data: unknown, locale: string): string | null {
-  if (!data || typeof data !== "object") return null;
-  const row = data as Record<string, unknown>;
-  if (typeof row.error === "string" && row.error.trim()) return row.error;
-  if (locale === "ar" && typeof row.errorAr === "string") return row.errorAr;
-  if (typeof row.errorEn === "string") return row.errorEn;
-  if (typeof row.message === "string") return row.message;
-  return null;
-}
-
-function parseItemSizes(item: Item): ItemSizeRow[] {
-  let list: unknown = item.sizes;
-
-  if (typeof list === "string") {
-    try {
-      list = JSON.parse(list) as unknown;
-    } catch {
-      return [];
-    }
-  }
-
-  if (!Array.isArray(list) || list.length === 0) return [];
-
-  return list.map((size) => {
-    const row = size as Record<string, unknown>;
-    return {
-      id: crypto.randomUUID(),
-      nameAr: String(
-        row.nameAr ?? row.name_ar ?? row.labelAr ?? row.label ?? "",
-      ),
-      nameEn: String(
-        row.nameEn ?? row.name_en ?? row.labelEn ?? row.label ?? "",
-      ),
-      price: row.price != null ? String(row.price) : "",
-    };
-  });
-}
-
-function parseItemVariants(item: Item): ItemVariantRow[] {
-  let list: unknown = item.variants;
-
-  if (typeof list === "string") {
-    try {
-      list = JSON.parse(list) as unknown;
-    } catch {
-      return [];
-    }
-  }
-
-  if (!Array.isArray(list) || list.length === 0) return [];
-
-  return list.map((variant) => {
-    const row = variant as Record<string, unknown>;
-    return {
-      id: crypto.randomUUID(),
-      labelAr: String(row.labelAr ?? row.label_ar ?? row.label ?? ""),
-      labelEn: String(row.labelEn ?? row.label_en ?? row.label ?? ""),
-      price: row.price != null ? String(row.price) : "",
-    };
-  });
-}
 
 interface AddItemModalProps {
   menuId: string;
@@ -161,7 +76,6 @@ const ITEM_FORM_ID = "add-item-form";
 export default function AddItemModal({
   menuId,
   item = null,
-  categories: _categoriesProp,
   onClose,
   onRefresh,
   isItemLoading = false,
@@ -177,15 +91,31 @@ export default function AddItemModal({
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [pexelsModalOpen, setPexelsModalOpen] = useState(false);
+  const { runApiAction } = useApiAction();
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryOption | null>(null);
   const [priceMode, setPriceMode] = useState<PriceMode>("single");
-  const [sizes, setSizes] = useState<ItemSizeRow[]>([]);
+  const itemSchema = useMemo(
+    () =>
+      createItemSchema(
+        {
+          nameArRequired: t("nameArRequired"),
+          nameEnRequired: t("nameEnRequired"),
+          categoryRequired: t("categoryRequired"),
+          priceRequired: t("priceRequired"),
+          discountMinError: t("discountMinError"),
+          discountMaxError: t("discountMaxError"),
+        },
+        priceMode,
+      ),
+    [priceMode, t],
+  );
+  const [sizes, setSizes] = useState<EditableItemSize[]>([]);
   const [sizesError, setSizesError] = useState<string | null>(null);
   const [sizeFieldErrors, setSizeFieldErrors] = useState<
     Record<string, Partial<Record<SizeFieldKey, string>>>
   >({});
-  const [variants, setVariants] = useState<ItemVariantRow[]>([]);
+  const [variants, setVariants] = useState<EditableItemVariant[]>([]);
   const [variantFieldErrors, setVariantFieldErrors] = useState<
     Record<string, Partial<Record<VariantFieldKey, string>>>
   >({});
@@ -200,6 +130,7 @@ export default function AddItemModal({
     formState: { errors },
     reset,
   } = useForm<AddItemFormData>({
+    resolver: yupResolver(itemSchema),
     defaultValues: {
       nameAr: "",
       nameEn: "",
@@ -224,8 +155,8 @@ export default function AddItemModal({
       };
 
       const fallbackName = item.name ?? snake.name_en ?? snake.name_ar ?? "";
-      const parsedSizes = parseItemSizes(item);
-      const parsedVariants = parseItemVariants(item);
+      const parsedSizes = parseEditableItemSizes(item);
+      const parsedVariants = parseEditableItemVariants(item);
       const categoryId = String(
         item.categoryId ??
           (typeof item.category === "object" && item.category?.id != null
@@ -416,19 +347,8 @@ export default function AddItemModal({
       }
 
       const normalizedSizes =
-        priceMode === "multiple"
-          ? sizes.map((size) => ({
-              nameAr: size.nameAr.trim(),
-              nameEn: size.nameEn.trim(),
-              price: Number(size.price),
-            }))
-          : [];
-
-      const normalizedVariants = variants.map((variant) => ({
-        labelAr: variant.labelAr.trim(),
-        labelEn: variant.labelEn.trim(),
-        price: Number(variant.price),
-      }));
+        priceMode === "multiple" ? serializeItemSizes(sizes) : [];
+      const normalizedVariants = serializeItemVariants(variants);
 
       const payload = {
         nameAr: data.nameAr,
@@ -449,37 +369,33 @@ export default function AddItemModal({
         ...(imageUrl && { imageUrl, image: imageUrl }),
       };
 
-      if (isEdit && item) {
-        const result = await axiosPatch<typeof payload, Item>(
-          `/menus/${menuId}/items/${item.id}`,
-          locale,
-          payload,
-        );
-        if (result.status && result.data) {
-          toast.success(t("editSuccess"));
-          onClose();
-          onRefresh?.();
-        } else {
-          toast.error(
-            getApiErrorMessage(result.data, locale) ?? t("editError"),
-          );
-        }
-      } else {
-        const result = await axiosPost<typeof payload, Item>(
-          `/menus/${menuId}/items`,
-          locale,
-          payload,
-        );
-        if (result.status && result.data) {
-          toast.success(t("createSuccess"));
-          onClose();
-          onRefresh?.();
-        } else {
-          toast.error(
-            getApiErrorMessage(result.data, locale) ?? t("createError"),
-          );
-        }
-      }
+      await runApiAction(
+        () =>
+          isEdit && item
+            ? axiosPut<typeof payload, Item>(
+                menuEndpoints.items.detail(menuId, item.id),
+                locale,
+                payload,
+              )
+            : axiosPost<typeof payload, Item>(
+                menuEndpoints.items.list(menuId),
+                locale,
+                payload,
+              ),
+        {
+          successToast: isEdit ? t("editSuccess") : t("createSuccess"),
+          errorToast: ({ error }) =>
+            resolveApiErrorMessage(
+              { error },
+              locale,
+              isEdit ? t("editError") : t("createError"),
+            ),
+          onSuccess: () => {
+            onClose();
+            onRefresh?.();
+          },
+        },
+      );
     } catch {
       toast.error(isEdit ? t("editError") : t("createError"));
     } finally {
@@ -546,11 +462,14 @@ export default function AddItemModal({
   const handleDragLeave = () => setIsDragOver(false);
 
   const addSizeRow = () => {
-    setSizes((prev) => [...prev, createSizeRow()]);
+    setSizes((prev) => [...prev, createItemSizeRow()]);
     setSizesError(null);
   };
 
-  const updateSizeRow = (id: string, patch: Partial<ItemSizeRow>) => {
+  const updateSizeRow = (
+    id: EditableItemSize["id"],
+    patch: Partial<EditableItemSize>,
+  ) => {
     setSizes((prev) =>
       prev.map((row) => (row.id === id ? { ...row, ...patch } : row)),
     );
@@ -562,21 +481,23 @@ export default function AddItemModal({
       if (patch.nameEn !== undefined) delete next.nameEn;
       if (patch.price !== undefined) delete next.price;
       if (Object.keys(next).length === 0) {
-        const { [id]: _removed, ...rest } = prev;
+        const rest = { ...prev };
+        delete rest[id];
         return rest;
       }
       return { ...prev, [id]: next };
     });
   };
 
-  const removeSizeRow = (id: string) => {
+  const removeSizeRow = (id: EditableItemSize["id"]) => {
     setSizes((prev) => {
       const next = prev.filter((row) => row.id !== id);
-      return next.length === 0 ? [createSizeRow()] : next;
+      return next.length === 0 ? [createItemSizeRow()] : next;
     });
     setSizesError(null);
     setSizeFieldErrors((prev) => {
-      const { [id]: _removed, ...rest } = prev;
+      const rest = { ...prev };
+      delete rest[id];
       return rest;
     });
   };
@@ -588,16 +509,19 @@ export default function AddItemModal({
     if (mode === "single") {
       setSizes([]);
     } else {
-      setSizes([createSizeRow()]);
+      setSizes([createItemSizeRow()]);
     }
   };
 
   const addVariantRow = () => {
-    setVariants((prev) => [...prev, createVariantRow()]);
+    setVariants((prev) => [...prev, createItemVariantRow()]);
     setVariantFieldErrors({});
   };
 
-  const updateVariantRow = (id: string, patch: Partial<ItemVariantRow>) => {
+  const updateVariantRow = (
+    id: EditableItemVariant["id"],
+    patch: Partial<EditableItemVariant>,
+  ) => {
     setVariants((prev) =>
       prev.map((row) => (row.id === id ? { ...row, ...patch } : row)),
     );
@@ -608,17 +532,19 @@ export default function AddItemModal({
       if (patch.labelEn !== undefined) delete next.labelEn;
       if (patch.price !== undefined) delete next.price;
       if (Object.keys(next).length === 0) {
-        const { [id]: _removed, ...rest } = prev;
+        const rest = { ...prev };
+        delete rest[id];
         return rest;
       }
       return { ...prev, [id]: next };
     });
   };
 
-  const removeVariantRow = (id: string) => {
+  const removeVariantRow = (id: EditableItemVariant["id"]) => {
     setVariants((prev) => prev.filter((row) => row.id !== id));
     setVariantFieldErrors((prev) => {
-      const { [id]: _removed, ...rest } = prev;
+      const rest = { ...prev };
+      delete rest[id];
       return rest;
     });
   };
@@ -764,7 +690,6 @@ export default function AddItemModal({
                   <Controller
                     name="nameEn"
                     control={control}
-                    rules={{ required: t("nameEnRequired") }}
                     render={({ field }) => (
                       <Input
                         type="text"
@@ -785,7 +710,6 @@ export default function AddItemModal({
                   <Controller
                     name="nameAr"
                     control={control}
-                    rules={{ required: t("nameArRequired") }}
                     render={({ field }) => (
                       <Input
                         type="text"
@@ -855,7 +779,6 @@ export default function AddItemModal({
                 <Controller
                   name="categoryId"
                   control={control}
-                  rules={{ required: t("categoryRequired") }}
                   render={({ field }) => (
                     <CategorySearchSelect
                       menuId={menuId}
@@ -919,12 +842,6 @@ export default function AddItemModal({
                   <Controller
                     name="price"
                     control={control}
-                    rules={{
-                      validate: (value) =>
-                        priceMode !== "single" || value.trim()
-                          ? true
-                          : t("priceRequired"),
-                    }}
                     render={({ field }) => (
                       <Input
                         type="number"
@@ -1030,10 +947,6 @@ export default function AddItemModal({
                 <Controller
                   name="discountPercent"
                   control={control}
-                  rules={{
-                    min: { value: 0, message: t("discountMinError") },
-                    max: { value: 100, message: t("discountMaxError") },
-                  }}
                   render={({ field }) => (
                     <Input
                       type="number"

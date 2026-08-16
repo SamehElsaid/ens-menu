@@ -19,7 +19,7 @@ import {
 } from "@/services/menuImportApi";
 import { annotateDraftWithSnapshot, collectUnresolvedPriceConflicts } from "@/lib/menuImport/duplicateMatch";
 import { buildMenuImportSaveResponse } from "@/lib/menuImport/buildBulkCategoriesPayload";
-import { generateImportId } from "@/lib/menuImport/generateImportId";
+import { createPersistentOptionId } from "@/lib/optionIds";
 import type { MenuSnapshot } from "@/lib/menuImport/menuSnapshot";
 import type {
   ImportCategory,
@@ -256,10 +256,6 @@ export function useMenuImportFlow({
     dispatch({ type: "GO_TO_UPLOAD" });
   }, []);
 
-  const updateDraft = useCallback((draft: ImportDraft) => {
-    dispatch({ type: "SET_DRAFT", draft: withUpdatedDraftStats(draft) });
-  }, []);
-
   const patchDraft = useCallback(
     (updater: (draft: ImportDraft) => ImportDraft) => {
       dispatch({ type: "PATCH_DRAFT", updater });
@@ -303,7 +299,8 @@ export function useMenuImportFlow({
                     affectsDuplicateMatch &&
                     next.duplicateMeta?.resolution
                   ) {
-                    const { resolution: _cleared, ...meta } = next.duplicateMeta;
+                    const meta = { ...next.duplicateMeta };
+                    delete meta.resolution;
                     next.duplicateMeta = meta;
                   }
                   return next;
@@ -339,6 +336,19 @@ export function useMenuImportFlow({
                   item.id === itemId
                     ? {
                         ...item,
+                        sizes: (item.sizes ?? []).map((v) => {
+                          if (v.id !== variantId) return v;
+                          const next: ImportVariant = { ...v, ...patch };
+                          if (
+                            affectsDuplicateMatch &&
+                            next.duplicateMeta?.resolution
+                          ) {
+                            const meta = { ...next.duplicateMeta };
+                            delete meta.resolution;
+                            next.duplicateMeta = meta;
+                          }
+                          return next;
+                        }),
                         variants: item.variants.map((v) => {
                           if (v.id !== variantId) return v;
                           const next: ImportVariant = { ...v, ...patch };
@@ -346,10 +356,8 @@ export function useMenuImportFlow({
                             affectsDuplicateMatch &&
                             next.duplicateMeta?.resolution
                           ) {
-                            const {
-                              resolution: _cleared,
-                              ...meta
-                            } = next.duplicateMeta;
+                            const meta = { ...next.duplicateMeta };
+                            delete meta.resolution;
                             next.duplicateMeta = meta;
                           }
                           return next;
@@ -422,11 +430,10 @@ export function useMenuImportFlow({
                   item.id === itemId
                     ? {
                         ...item,
-                        price: null,
                         variants: [
                           ...item.variants,
                           {
-                            id: generateImportId(),
+                            id: createPersistentOptionId(),
                             label: "",
                             labelAr: "",
                             labelEn: "",
@@ -457,6 +464,9 @@ export function useMenuImportFlow({
                   item.id === itemId
                     ? {
                         ...item,
+                        sizes: (item.sizes ?? []).filter(
+                          (v) => v.id !== variantId,
+                        ),
                         variants: item.variants.filter(
                           (v) => v.id !== variantId,
                         ),
@@ -487,7 +497,7 @@ export function useMenuImportFlow({
                 items: c.items.map((item) => {
                   if (item.id !== itemId) return item;
                   if (variantId) {
-                    const variants = item.variants.map((v) =>
+                    const updateOption = (v: ImportVariant) =>
                       v.id === variantId
                         ? {
                             ...v,
@@ -500,13 +510,15 @@ export function useMenuImportFlow({
                               (f) => f !== "price_conflict",
                             ),
                           }
-                        : v,
-                    );
-                    const stillConflict = variants.some((v) =>
+                        : v;
+                    const sizes = (item.sizes ?? []).map(updateOption);
+                    const variants = item.variants.map(updateOption);
+                    const stillConflict = [...sizes, ...variants].some((v) =>
                       v.flags.includes("price_conflict"),
                     );
                     return {
                       ...item,
+                      sizes,
                       variants,
                       flags: stillConflict
                         ? item.flags

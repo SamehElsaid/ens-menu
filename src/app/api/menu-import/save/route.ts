@@ -1,13 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import type { ImportDraft, SaveMenuImportRequest } from "@/types/menuImport";
-import {
-  executeMenuImportSave,
-  getBearerToken,
-} from "@/lib/menuImport/executeMenuImportSave";
+import { executeMenuImportSave } from "@/lib/menuImport/executeMenuImportSave";
+import { guardExternalServiceRoute } from "@/lib/server/externalRouteGuard";
 
 export async function POST(request: NextRequest) {
   try {
+    const guard = await guardExternalServiceRoute(request, {
+      routeKey: "menu-import-save",
+      maxRequests: 20,
+      windowMs: 5 * 60_000,
+    });
+    if (!guard.ok) {
+      return NextResponse.json(
+        { error: guard.error, ...(guard.code ? { code: guard.code } : {}) },
+        {
+          status: guard.status,
+          headers: guard.retryAfter
+            ? { "Retry-After": String(guard.retryAfter) }
+            : undefined,
+        },
+      );
+    }
+
     const body = (await request.json()) as SaveMenuImportRequest;
     const menuId = String(body.menuId ?? "").trim();
     const locale = String(body.locale ?? "ar").trim();
@@ -20,43 +34,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const cookieStore = await cookies();
-    const sub = cookieStore.get("sub")?.value;
-    const token = getBearerToken(sub);
-
-    const result = await executeMenuImportSave(draft, menuId, locale, token, sub);
+    const result = await executeMenuImportSave(
+      draft,
+      menuId,
+      locale,
+      guard.cookieHeader,
+      request.headers.get("x-csrf-token"),
+      request.headers.get("origin"),
+    );
 
     if (result.blockingErrors && result.blockingErrors.length > 0) {
       return NextResponse.json(result, { status: 400 });
     }
 
-    if (!token) {
-      return NextResponse.json(result, { status: 401 });
-    }
-
-    const { refreshedSub, ...saveResult } = result;
+    const saveResult = result;
 
     if (result.ok) {
-      const response = NextResponse.json(saveResult, { status: 201 });
-      if (refreshedSub) {
-        response.cookies.set("sub", refreshedSub, { path: "/" });
-      }
-      return response;
+      return NextResponse.json(saveResult, { status: 201 });
     }
 
     if (result.partial) {
-      const response = NextResponse.json(saveResult, { status: 207 });
-      if (refreshedSub) {
-        response.cookies.set("sub", refreshedSub, { path: "/" });
-      }
-      return response;
+      return NextResponse.json(saveResult, { status: 207 });
     }
 
-    const response = NextResponse.json(saveResult, { status: 422 });
-    if (refreshedSub) {
-      response.cookies.set("sub", refreshedSub, { path: "/" });
-    }
-    return response;
+    return NextResponse.json(saveResult, { status: 422 });
   } catch (error) {
     console.error("[menu-import-save] error:", error);
     return NextResponse.json({ error: "internal_error" }, { status: 500 });

@@ -26,9 +26,9 @@ import { IoCloudUploadOutline, IoCloseOutline } from "react-icons/io5";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
+import { axiosGet, axiosPut, axiosPost } from "@/shared/axiosCall";
 import { _resizeImage } from "@/shared/_shared";
-import { SET_ACTIVE_USER } from "@/store/authSlice/menuDataSlice";
+import { SET_ACTIVE_MENU_CACHE } from "@/store/authSlice/menuDataSlice";
 import { toast } from "react-toastify";
 import type { Menu, MenusResponse, UploadResponse } from "@/types/Menu";
 import { useParams, useRouter } from "next/navigation";
@@ -357,14 +357,14 @@ export default function SettingsPage() {
             : Number(values.servicePercent),
         logo: logoUrl ?? menu?.logo ?? null,
       };
-      const result = await axiosPatch<typeof payload, Menu>(
+      const result = await axiosPut<typeof payload, Menu>(
         `/menus/${menuId}`,
         locale,
         payload,
       );
 
       if (result.status && result.data) {
-        dispatch(SET_ACTIVE_USER(payload as unknown as Menu));
+        dispatch(SET_ACTIVE_MENU_CACHE(payload as unknown as Menu));
         toast.success(
           locale === "ar"
             ? "تم تحديث إعدادات القائمة"

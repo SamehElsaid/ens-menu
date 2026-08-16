@@ -27,7 +27,7 @@ import {
 import {
   axiosGet,
   axiosPost,
-  axiosPatch,
+  axiosPut,
   axiosDelete,
 } from "@/shared/axiosCall";
 import { useDataTableLabels } from "@/hooks/useDataTableLabels";
@@ -211,7 +211,7 @@ export default function AdminMetadataPage() {
       const pageName = form.pageName.trim().toLowerCase();
       const payload = { ...form, pageName };
       const res = isEdit
-        ? await axiosPatch<MetaForm, { message?: string }>(
+        ? await axiosPut<MetaForm, { message?: string }>(
             `/metaData/${pageName}`,
             locale,
             payload,

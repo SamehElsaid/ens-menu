@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import LoadImage from "@/components/ImageLoad";
 import { Advertisement } from "@/types/Menu";
 import { adRowMetrics } from "@/lib/adMetrics";
-import { normalizeExternalUrl } from "@/lib/normalizeExternalUrl";
+import { toSafeExternalUrl } from "@/lib/normalizeExternalUrl";
 import { Badge, Button, Card } from "@/components/ui";
 import {
   IoCreateOutline,
@@ -53,9 +53,7 @@ export default function AdCard({
   const isActive = Boolean(ad.isActive);
   const isToggling = togglingId != null && togglingId === ad.id;
   const imageSrc = ad.imageUrl ?? (ad as { image?: string }).image ?? "";
-  const link = ad.linkUrl?.trim()
-    ? normalizeExternalUrl(ad.linkUrl.trim())
-    : undefined;
+  const link = ad.linkUrl ? (toSafeExternalUrl(ad.linkUrl) ?? undefined) : undefined;
 
   const figures = [
     {

@@ -33,10 +33,13 @@ import {
   buttonClasses,
 } from "@/components/ui";
 import { cn } from "@/lib/cn";
-import { axiosGet, axiosPatch, axiosPost } from "@/shared/axiosCall";
+import { axiosGet, axiosPut, axiosPost } from "@/shared/axiosCall";
 import { _resizeImage } from "@/shared/_shared";
 import { useAppDispatch } from "@/store/hooks";
-import { REMOVE_USER, SET_ACTIVE_USER } from "@/store/authSlice/authSlice";
+import {
+  CLEAR_AUTH_SESSION_CACHE,
+  SET_AUTH_SESSION_CACHE,
+} from "@/store/authSlice/authSlice";
 import { toast } from "react-toastify";
 import type { SingleValue } from "react-select";
 import {
@@ -44,10 +47,11 @@ import {
   type ChangePasswordSchema,
 } from "@/schemas/changePasswordSchema";
 import { useRouter } from "@/i18n/navigation";
-import Cookies from "js-cookie";
 import type { Subscription, SubscriptionResponse } from "@/types/Subscription";
 import PageTitleWithHelp from "@/components/Dashboard/PageTitleWithHelp";
 import CurrentPlanSummary from "@/components/Dashboard/CurrentPlanSummary";
+import { clearAuthUiCookie } from "@/shared/authUiCookie";
+import { clearStoredCsrfToken } from "@/shared/csrfToken";
 
 const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 const AVATAR_ACCEPT = "image/png,image/jpeg,image/jpg,image/gif";
@@ -299,7 +303,7 @@ export default function PersonalProfile({
       if (dateOfBirth) form.append("dateOfBirth", dateOfBirth.toISOString());
       form.append("profileImage", profileImageFile);
 
-      res = await axiosPatch<FormData, { user?: AuthUser }>(
+      res = await axiosPut<FormData, { user?: AuthUser }>(
         "/user/profile",
         locale,
         form,
@@ -321,7 +325,7 @@ export default function PersonalProfile({
       };
       if (profileImageUrl) payload.profileImage = profileImageUrl;
 
-      res = await axiosPatch<ProfilePayload, { user?: AuthUser }>(
+      res = await axiosPut<ProfilePayload, { user?: AuthUser }>(
         "/user/profile",
         locale,
         payload,
@@ -335,7 +339,7 @@ export default function PersonalProfile({
       const updatedUser = (res.data as { user?: AuthUser })?.user;
       if (updatedUser && authData) {
         dispatch(
-          SET_ACTIVE_USER({
+          SET_AUTH_SESSION_CACHE({
             ...authData,
             user: {
               ...authData.user,
@@ -345,7 +349,7 @@ export default function PersonalProfile({
                 authData.user?.profileImage ??
                 null,
             },
-          } as unknown as Parameters<typeof SET_ACTIVE_USER>[0]),
+          } as unknown as Parameters<typeof SET_AUTH_SESSION_CACHE>[0]),
         );
       }
       if (profileImage?.startsWith("blob:")) {
@@ -369,8 +373,9 @@ export default function PersonalProfile({
     });
     setChangePasswordLoading(false);
     if (res?.status) {
-      dispatch(REMOVE_USER());
-      Cookies.remove("sub", { path: "/" });
+      dispatch(CLEAR_AUTH_SESSION_CACHE());
+      clearAuthUiCookie();
+      clearStoredCsrfToken();
 
       router.push("/auth/login");
       resetPasswordForm();

@@ -18,18 +18,16 @@ interface UseAccountStaffRoles {
 export function useAccountStaffRoles(enabled = true): UseAccountStaffRoles {
   const locale = useLocale();
   const [roles, setRoles] = useState<MenuStaffRole[]>([]);
-  const [loading, setLoading] = useState(enabled);
+  const [resolvedRequest, setResolvedRequest] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
+  const requestKey = `${locale}:${tick}`;
+  const loading = enabled && resolvedRequest !== requestKey;
 
   const refresh = useCallback(() => setTick((n) => n + 1), []);
 
   useEffect(() => {
-    if (!enabled) {
-      setLoading(false);
-      return;
-    }
+    if (!enabled) return;
     let active = true;
-    setLoading(true);
     axiosGet<{ roles: MenuStaffRole[] }>("/dashboard/staff-roles", locale).then(
       (result) => {
         if (!active) return;
@@ -38,13 +36,13 @@ export function useAccountStaffRoles(enabled = true): UseAccountStaffRoles {
             ? result.data.roles
             : [],
         );
-        setLoading(false);
+        setResolvedRequest(requestKey);
       },
     );
     return () => {
       active = false;
     };
-  }, [locale, enabled, tick]);
+  }, [locale, enabled, requestKey]);
 
   return { roles, loading, refresh };
 }
